@@ -176,6 +176,7 @@ use_initd()  { (
 	fi
       fi
     done
+    cd $SCRIPT_DIRECTORY
 
     echo   "INITDSCRIPTS=\"$INSTALLED_INIDSCRIPTS\"" >> $MODULE_CONFIG
   fi
