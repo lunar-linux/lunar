@@ -205,6 +205,9 @@ lin_module()  {
   satisfy_depends             &&
   show_downloading            &&
 
+  # last minute source code presence check:
+  download_module $MODULE     &&
+
   # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
     echo $$ > $linING  &&
