@@ -126,7 +126,7 @@ main() {
       # pass 3 : compile/install
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
-        if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+        if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
           if ! module_held $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
@@ -181,13 +181,22 @@ main() {
     if [ -z "$DEPS_ONLY" ] ; then
       if ! module_held $MODULE ; then
         if [ -n "$PROBE" ] ; then
+	  # --probe install
           if ! module_installed $MODULE ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
               exit 1
             fi
+	  elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
+	    # probe install where module is expired
+	    verbose_msg "module \"$MODULE\" needs to be updated"
+	    if ! lin_module $MODULE ; then
+	      temp_destroy $TEMP_PREPAREDDEPS
+	      exit 1
+	    fi	    
           fi
         else
+	  # normal install - not probed
           if ! lin_module $MODULE ; then
             temp_destroy $TEMP_PREPAREDDEPS
             exit 1
