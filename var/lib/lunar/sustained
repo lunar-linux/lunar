@@ -2,7 +2,6 @@ bash
 binutils
 bzip2
 coreutils
-cpio
 cracklib
 dialog
 e2fsprogs
@@ -15,7 +14,6 @@ grep
 gzip
 installwatch
 less
-lilo
 lunar
 mailx
 make
@@ -25,12 +23,10 @@ ncurses
 net-tools
 patch
 readline
-rpmunpack
 sed
 shadow
 tar
 theedge
-unzip
 util-linux
 util-linux-crypto
 wget
