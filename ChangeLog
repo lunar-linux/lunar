@@ -162,9 +162,3 @@
 	  lines: empty line between images and use human-readable output
 	  abit.
 
-2004-11-18 14:10  sofar
-
-	* var/lib/lunar/functions/locking.lunar: The color needs to be
-	  closed off at the end... otherwise all subsequent lines will be
-	  colored too
-
