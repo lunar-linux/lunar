@@ -249,6 +249,8 @@ default_post_build() {
     message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
   fi
 
+  invoke_installwatch
+
   {
     gather_docs
 
