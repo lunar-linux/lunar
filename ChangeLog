@@ -1,3 +1,23 @@
+2003-02-05 18:05  sofar
+
+	* sbin/lrm: Rolling back lrm to assure people can avoid lrm(2) issues for now.
+	
+2003-02-05 14:17  sofar
+
+	* var/lib/lunar/excluded: and more
+	
+2003-02-05 13:23  sofar
+
+	* var/lib/lunar/excluded: Adding some more in here
+	
+2003-02-04 01:00  csm
+
+	* var/lib/lunar/excluded: adding some more additions
+	
+2003-02-03 22:19  csm
+
+	* var/lib/lunar/excluded: adding critical postfix files
+	
 2003-02-01 23:32  sofar
 
 	* sbin/: lrm, lrm2: Lrm2 will replace lrm forever into eternity!
@@ -59,10 +79,4 @@
 2003-01-29 10:28  sofar
 
 	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view the logfile easier: 'lvu activity'
-	
-2003-01-24 21:56  sofar
-
-	* bin/lvu, etc/lunar/config, sbin/lget, sbin/lin, sbin/lunar,
-	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/menu/mirrors.menu: Merging theedge into lunar! =^D
 	
