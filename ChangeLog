@@ -1,3 +1,22 @@
+2003-02-19 23:42  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: Major rewrite: strickter
+	var handling, better constricted code. Hope this kills the errors!
+
+2003-02-19 21:19  tchan
+
+	* var/lib/lunar/excluded: Removed /devices.  It is no longer needed
+	and should not be on any Lunar boxes anymore.
+
+2003-02-19 20:57  sofar
+
+	* var/lib/lunar/functions/sources.lunar: eep! run_details should
+	ALWAYS be between ()'s
+
+2003-02-19 20:25  sofar
+
+	* bin/lvu: yeah yeah this is quick.
+
 2003-02-18 15:16  sofar
 
 	* bin/lvu: Sheez what a mess.
