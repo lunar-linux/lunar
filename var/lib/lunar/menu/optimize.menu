@@ -341,7 +341,7 @@ spd_options() {
              "Cprop"     "-fno-cprop-registers"      $( echo ${SPD[@]} | grep -q "Cprop" && echo "on" || echo "off" )     "$Cprop_HELP"
 	     "Float"     "-ffloat-store"             $( echo ${SPD[@]} | grep -q "Float" && echo "on" || echo "off" )     "$Float_HELP"
              "Address"   "-fforce-addr"              $( echo ${SPD[@]} | grep -q "Address" && echo "on" || echo "off" )   "$Address_HELP"
-             "Align"     "-ffalign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
+             "Align"     "-falign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
              "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
              "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP"
              "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP" ) 
