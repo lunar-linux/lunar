@@ -33,7 +33,7 @@ backup_mods_krnl()
 
   if [ -f /boot/${BKUP_KRNL}.old ]; then
     verbose_msg "moving old kernel backup"
-    mv -f /boot/${BKUP_KRNL}.old /boot/${BKUP_krnl}.old_2
+    mv -f /boot/${BKUP_KRNL}.old /boot/${BKUP_KRNL}.old_2
   fi
 
   if [ -f /boot/${BKUP_KRNL} ]; then
