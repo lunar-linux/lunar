@@ -1,3 +1,14 @@
+2005-04-01 10:17  sofar
+
+	* var/lib/lunar/functions/messages.lunar: Extended debugging
+	  support: use -dd -ddd -dddd or even -ddddd to increase debug
+	  level
+
+2005-04-01 07:21  sofar
+
+	* var/lib/lunar/plugins/unpack-generic.plugin: Fix by....
+	  KONGAR!!!! =^D
+
 2005-03-31 13:09  sofar
 
 	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
