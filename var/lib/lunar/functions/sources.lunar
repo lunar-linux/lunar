@@ -289,7 +289,12 @@ rm_source_dir() {
 mk_source_dir() {
   debug_msg "mk_source_dir ($@)"
 
-  cd $BUILD_DIRECTORY
+  # yes this sounds weird but it might happen: no dir $BUILD_DIRECTORY on
+  # clean boxes!
+  if [ ! -e "$BUILD_DIRECTORY" ] ; then
+    mkdir -p "$BUILD_DIRECTORY"
+  fi
+  cd "$BUILD_DIRECTORY"
   NEW_DIR=$1
   NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
 
