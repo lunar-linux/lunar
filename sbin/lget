@@ -70,9 +70,7 @@ use_cvs() {(
       tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
     fi
     if [[ -d $CVS_MODULE/CVS ]]; then
-      cd $CVS_MODULE
-      cvs -qz3 up -PAd && GOT_CVS="yes" 
-      cd ..
+      cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
     elif ! [[ -d CVS ]]; then
       cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
     fi
@@ -80,7 +78,7 @@ use_cvs() {(
       message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
       tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
     fi
-    rm_source_dir
+    rm_source_dir $CVS_MODULE
   fi
 )}
 
