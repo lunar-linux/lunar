@@ -47,6 +47,7 @@ leafs                      display installed modules that have no explicit
 orphans                    display installed modules that are missing
                                dependancies
 held                       display held modules
+exiled                     display exiled modules
 
 search      "phrase"       searches module's long descriptions for phrase.
 service     port|acronym   displays module's that provide that service
