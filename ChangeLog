@@ -1,3 +1,8 @@
+2004-03-05 20:46  tchan
+
+	* var/lib/lunar/functions/depends.lunar: Added the suggested speed
+	fix from Erie Sorenson.  INCLUDED=$INCLUDED$'\n'$MOD
+
 2004-03-03 21:51  sofar
 
 	* sbin/lin, var/lib/lunar/functions/build.lunar,
@@ -194,13 +199,4 @@
 	update_aboot.  Keeps the POST_INSTALL on alphas from failing.  Will
 	complete the function ASAP.  Added this now after tchan's
 	prompting.
-
-2004-01-05 05:13  tchan
-
-	* usr/share/doc/lunar/CREDITS: Corrected r0dzilla's real name.
-
-2004-01-05 05:00  tchan
-
-	* usr/share/doc/lunar/CREDITS: Rewrote some of the language.  Made
-	a section for the current Lunar Devs.  More typos corrected.
 
