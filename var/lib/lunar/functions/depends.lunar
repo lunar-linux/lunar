@@ -277,8 +277,7 @@ rework_module() {
                                                                                 
   if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE &> /dev/null
 ) ; then
-    echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed
-depends:${DEFAULT_COLOR}"
+    echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed depends:${DEFAULT_COLOR}"
     CHANGED_MODULES="$CHANGED_MODULES $MODULE"
     LIST=$(cat $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE | cut -d: -f2 | sort | uniq )
     for DEP in $LIST; do

@@ -45,12 +45,7 @@ END
 exit 1
 }
 
-display_version()
-{
-   echo "lrm 1.0RC1"
-   echo "Copyright 2002, Kagan Kongar <kongar@tsrsb.org.tr> under GPL2"   
-   exit
-}
+
 exit_proc()
 {
    [ "$DEBUG" == "on" ] && echo "Clearing temporary files.. "
@@ -61,66 +56,52 @@ exit_proc()
    exit
 }
 
+
 trap_proc()
 {
    verbose_msg "Trapped a signal! "
    exit_proc
 
 }
+
+
 handle_config_files()
 {
-   TARGET="$1"
-   dirname "$TARGET" | grep -q "^/etc"  && {
-      [ "$DEBUG" == "on" ] && {
-         echo "      $TARGET is a config file." 
-         echo -n "        calculating MD5SUM for $TARGET... " 
-      }
+  TARGET="$1"
+  if dirname "$TARGET" | grep -q "^/etc" ; then
+    verbose_msg "Examining config file \"$TARGET\""
 
-   TARGET_MD5=`md5sum "$TARGET" 2>/dev/null | cut -d " " -f 1-1`
-   OLD_MD5=`grep -w "$TARGET\$" $MD5_LOG | cut -d " " -f 1-1`
-   [ "$DEBUG" == "on" ] && echo "DONE!" 
+    TARGET_MD5=$(md5sum "$TARGET" | cut -d " " -f 1-1)
+    OLD_MD5=$(grep -w "$TARGET\$" $MD5_LOG | cut -d " " -f 1-1)
 
-   if [ -z "$TARGET_MD5" ]
-   then
-     [ "$DEBUG" == "on" ] && 
-     echo "          Problem calculating checksum of $TARGET" 
-     continue
-   fi
-
-   if [ -z "$OLD_MD5" ]
-   then
-      [ "$DEBUG" == "on" ] && 
-      echo "          No previous checksum! Preserving $TARGET" 
+    if [ -z "$TARGET_MD5" ] ; then
+      verbose_msg "Skipping removal of \"$TARGET\" due to problem with md5sum"
       continue
-   fi
+    fi
 
-   if [ "$TARGET_MD5" == "$OLD_MD5" ]
-   then
-      [ "$DEBUG" == "on" ] && 
-      echo "          MD5 checksums matched! Deleting $TARGET" 
-      [ "$TEST" == "on" ] || rm -f $TARGET
+    if [ -z "$OLD_MD5" ] ; then
+      verbose_msg "Skipping removal of \"$TARGET\" due to missing original md5sum"
       continue
-   fi
+    fi
 
-   if [ "$TARGET_MD5" != "$OLD_MD5" ]
-   then
-      [ "$DEBUG" == "on" ] && 
-      echo "          MD5 checksums mismatched!"
-      if [ "$PRESERVE" == "on" ]
-      then
-         [ "$DEBUG" == "on" ] &&
-         echo "          PRESERVE=on, keeping $TARGET" 
+    if [ "$TARGET_MD5" == "$OLD_MD5" ] ; then
+      verbose_msg "Removing \"$TARGET\""
+      rm -f $TARGET
+      continue
+    fi
+
+    if [ "$TARGET_MD5" != "$OLD_MD5" ] ; then
+      verbose_msg "Skipping removal of \"$TARGET\" due to md5sum mismatch"
+      if [ "$PRESERVE" == "on" ] ; then
+         verbose_msg "PRESERVE=on, keeping \"$TARGET\""
          continue
       else
-         [ "$DEBUG" == "on" ] &&
-         echo "          PRESERVE=off, moving"
-         echo "            $TARGET to $TARGET.`date +%Y%m%d%H%M`"
-         [ "$TEST" == "on" ] ||
+         verbose_msg "PRESERVE=off, archiving \"$TARGET\""
          mv $TARGET $TARGET.`date +%Y%m%d%H%M`
          continue
       fi
-   fi
-  }
+    fi
+  fi
 }
 
 remove_something()
@@ -240,32 +221,24 @@ process_lrm_queue()
 
       run_module_file PRE_REMOVE 
 
-      while read TARGET
-      do
-         [ "$DEBUG" == "on" ] && echo -n "    checking $TARGET.. "
-         if ! [ -e "$TARGET" ]
-         then
-            [ "$DEBUG" == "on" ] && echo "Not found!"
+      while read TARGET ; do
+         if ! [ -e "$TARGET" ] ; then
             continue
          fi
 
-         [ "$DEBUG" == "on" ] && echo "Found!"
-
-         grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED && {
+         if grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED ; then
             verbose_msg "\"$TARGET\" is protected or excluded!!"
             continue
-         }
+         fi
 
-         [ -d "$TARGET" ] && {
-            [ "$DEBUG" == "on" ] &&
-            echo -e "      $TARGET will be processed later !!" 
+         if [ -d "$TARGET" ] ; then
             echo "$TARGET" >> $TEMP_FILE
             continue
-         }
-
-         remove_something $TARGET
+         fi
 
          handle_config_files $TARGET
+
+         remove_something $TARGET
 
       done < $INST_LOG
 
@@ -277,9 +250,7 @@ process_lrm_queue()
         verbose_msg "skipping removal of dependancy listing and configs"
       else
         verbose_msg "removing module from dependency listing and configs"
-	if [ "$TEST" != "on" ] ; then
-          remove_depends  $MODULE
-	fi
+        remove_depends  $MODULE
       fi
 
       verbose_msg "removing module from installed list.. "
@@ -451,7 +422,7 @@ create_lrm_queue()
 [ "$#" == "0" ] && help
 
 LRM_OPT=`getopt -q -o d:ehstvVk \
-         --long debug,downgrade:,exile,help,nosustain,version,test,keepconfig \
+         --long debug,downgrade:,exile,help,nosustain,test,keepconfig \
          -n lrm -- "$@"`
 
 [ "$?" == "0" ] || help
@@ -471,7 +442,6 @@ while true ; do
       -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
       -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
       -t|--test       ) export TEST=on;        shift ;;
-      -V|--version    ) display_version;;
       --debug         ) export DEBUG=on; shift;;
       --) shift; break ;;
        *) help;  break ;;
