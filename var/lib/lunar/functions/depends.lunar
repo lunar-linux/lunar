@@ -246,7 +246,7 @@ satisfy_depends()  {
       OPTS="$OPTS $DEP_OFF"
     elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
         ! module_held $DEP_MODULE ; then
-      if lin $DEPS_ONLY $SILENT $COMPILE $DEP_MODULE ; then
+      if SINGLE_MODULE=1 lin $DEPS_ONLY $SILENT $COMPILE $DEP_MODULE ; then
         OPTS="$OPTS $DEP_ON"
       else
         exit 1
@@ -290,10 +290,10 @@ build_module_depends() {
   debug_msg "build_module_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then
     run_details $1 &&
+    run_configure &&
     run_depends
   else
     run_details $1 &&
-    run_configure &&
     run_depends &&
     satisfy_depends
   fi

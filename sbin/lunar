@@ -387,7 +387,7 @@ set_email()  {
                 "Please enter the email address of the person or role account that should receive reports from this box."  \
                 0 0  "$ADMIN"`
   then
-    write_config "ADMIN=" "    ADMIN=$ADMIN"
+    set_local_config "ADMIN" "$ADMIN"
   fi
 }
 
@@ -398,7 +398,7 @@ set_delay()  {
                              "Please enter the time in seconds to wait for a response when prompted with a question."  \
                               0 0  "$PROMPT_DELAY"`
   then
-    write_config "PROMPT_DELAY=" "PROMPT_DELAY=$PROMPT_DELAY"
+    set_local_config "PROMPT_DELAY" "$PROMPT_DELAY"
   fi
 }
 
