@@ -468,11 +468,8 @@ module_is_expired() {
     if [ -z "$MODULE" ] ; then
       MODULE=$1
     fi
-    LINE=$(grep "^$MODULE:" $MODULE_STATUS | grep -v "^moonbase")
-    MODULE=$(echo "$LINE" | cut -d: -f1)
-    IDATE=$(echo "$LINE" | cut -d: -f2)
-    STATUS=$(echo "$LINE" | cut -d: -f3)
-    IVERSION=$(echo "$LINE" | cut -d: -f4)
+    LINE=$(grep "^$MODULE:" $MODULE_STATUS | grep -v "^moonbase" | awk -F: '{print "IDATE="$2" STATUS="$3" IVERSION="$4}')
+    eval $LINE
     if run_details $MODULE &> /dev/null ; then
       if [ "$STATUS" == "installed" ] ; then
         if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] ||
