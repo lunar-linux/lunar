@@ -1,4 +1,4 @@
-export            PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export            PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11/bin
 
 export        DIALOGRC=/etc/lunar/dialogrc
 
