@@ -16,6 +16,7 @@
 #                                                          #
 ############################################################
 
+set -x
 help()
 {
 cat << END
@@ -25,6 +26,7 @@ usage: lrm [options] [module ...]
    -d  --downgrade   [module] [version] downgrades a module
    -e  --exile       exiles modules
    -s  --nosustain   removes module(s) even if they are sustained
+   -k  --keepconfig  remove module(s) but keep dependancies and config
    -t  --test        test only, do not actually do anything
    -v  --verbose     verbose operation
    -V  --version     display version information and exit
@@ -90,8 +92,7 @@ handle_config_files()
    if [ -z "$OLD_MD5" ]
    then
       [ "$DEBUG" == "on" ] && 
-      echo "          No previous checksum! Deleting $TARGET" 
-      [ "$TEST" == "on" ] || rm -f $TARGET 
+      echo "          No previous checksum! Preserving $TARGET" 
       continue
    fi
 
@@ -212,7 +213,7 @@ process_lrm_queue()
       [ "$VERBOSE" == "on" ] && echo -e "\n${TEMP}Removing $MODULE"
       [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
 
-      run_details $MODULE || continue
+      run_details $MODULE &> /dev/null
 
       if ! module_installed $MODULE
       then
@@ -272,20 +273,24 @@ process_lrm_queue()
 
          handle_config_files $TARGET
 
-      done < $INST_LOG   
+      done < $INST_LOG
 
       process_directories $TEMP_FILE $TEMP2_FILE
 
       run_module_file POST_REMOVE
 
       [ "$VERBOSE" == "on" ] &&
-      echo -n "  Removing module from dependencly listing.. "
-      [ "$TEST" != "on" ]     && 
-      remove_depends  $MODULE &&
-      [ "$VERBOSE" == "on" ]  && 
-      echo "removed"          || {
-         [ "$VERBOSE" == "on" ]  && 
-         echo "NOT removed!"
+      [ "$KEEPCONFIG" == "on" ] &&
+      echo "  Skipping removal of dependancy listing and configs.. " || {
+        [ "$VERBOSE" == "on" ] &&
+        echo -n "  Removing module from dependency listing and configs.. "
+        [ "$TEST" != "on" ]     && 
+        remove_depends  $MODULE &&
+        [ "$VERBOSE" == "on" ]  && 
+        echo "removed"          || {
+           [ "$VERBOSE" == "on" ]  && 
+           echo "NOT removed!"
+        }
       }
 
       [ "$VERBOSE" == "on" ] &&
@@ -360,7 +365,7 @@ downgrade()
    fi
 
    [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
-   run_details $MODULE || return 1
+   run_details $MODULE &> /dev/null || return 1
 
    [ -z "$1" ] && {
       echo "No version is entered. The below is the list of available files."
@@ -466,7 +471,6 @@ create_lrm_queue()
    MODULE_LIST="$@"
    for MODULE in $MODULE_LIST
    do
-      run_details  $MODULE  || continue
       check_status $MODULE  || continue
       add_queue $LRM_QUEUE $MODULE
    done      
@@ -477,8 +481,8 @@ create_lrm_queue()
 
 [ "$#" == "0" ] && help
 
-LRM_OPT=`getopt -q -o d:ehstvV \
-         --long debug,downgrade:,exile,help,nosustain,verbose,version,test \
+LRM_OPT=`getopt -q -o d:ehstvVk \
+         --long debug,downgrade:,exile,help,nosustain,verbose,version,test,keepconfig \
          -n lrm -- "$@"`
 
 [ "$?" == "0" ] || help
@@ -487,19 +491,20 @@ eval set -- "$LRM_OPT"
 
 while true ; do
    case "$1" in
-      -d|--downgrade) export DOWNGRADE=on; 
-                      export MODULE="$2"
-                      shift 3
-                      downgrade "${@#-}"
-                      exit
-                      break;;
-      -e|--exile    ) export EXILE=on;     shift ;;
-      -h|--help     ) help  ;;
-      -s|--nosustain) export NOSUSTAIN=on; shift ;;
-      -t|--test     ) export TEST=on;      shift ;;
-      -V|--version  ) display_version;;
-      -v|--verbose  ) export VERBOSE=on;   shift;;
-      --debug       ) export VERBOSE=on; export DEBUG=on; shift;;
+      -d|--downgrade  ) export DOWNGRADE=on; 
+                        export MODULE="$2"
+                        shift 3
+                        downgrade "${@#-}"
+                        exit
+                        break;;
+      -e|--exile      ) export EXILE=on;       shift ;;
+      -h|--help       ) help  ;;
+      -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
+      -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
+      -t|--test       ) export TEST=on;        shift ;;
+      -V|--version    ) display_version;;
+      -v|--verbose    ) export VERBOSE=on;     shift;;
+      --debug         ) export VERBOSE=on; export DEBUG=on; shift;;
       --) shift; break ;;
        *) help;  break ;;
    esac
