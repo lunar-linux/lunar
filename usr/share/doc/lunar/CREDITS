@@ -3,15 +3,15 @@ Lunar Credits:
 
  -- Introduction
 
-Hundreds of people have contributed to Lunar-Linux and made what it currently
-is. It would go to far to keep a list for every single contribution that has
-been made, but even without those small contributions, Lunar-Linux is what it
-is now, and we are grateful for them.
+Hundreds of people have contributed to Lunar-Linux and have made it what it is
+today. It would be impossible to keep a list of every single contribution that
+has been made, but without those small contributions, Lunar-Linux would not be
+what it is now, and we are grateful for them.
 
 Our eternal gratitude goes to Kyle Sallee, the original author of Sorcerer
 GNU Linux, who made it possible for us to work on this great concept and
-especially in the way we want to work on it -cooperating in a team effort, 
-together as a group-. Since that moment Lunar-Linux has grown faster than
+especially in the way we want to work on it -- cooperating in a team effort, 
+together as a group. Since that moment Lunar-Linux has grown faster than
 ever.
 
 
@@ -32,6 +32,30 @@ Rick Altherr		kc8apf@kc8apf.net		kc8apf
 Jason Jackson		jacksonje@health.missouri.edu	houkan
 Timo Kosig		timo.kosig@gmx.de		tiomo
 
+
+Your current Lunar Development team is:
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
+Jan Eidtmann		cmak@lunar-linux.org		cmak
+Chuck Mead		csm@lunar-linux.org             csm
+Drew Swayze             drew@lunar-linux.org            evildrew
+Florin Braescu          florin@lunar-linux.org          florin
+Steven Michalske        hardkrash@lunar-linux.org       hardkrash
+Jasper Huijsmans        jazman@lunar-linux.org          jazman
+Jeff Hodges             jmhodges@lunar-linux.org        jmhodges
+Joel Vennin     	jol@lunar-linux.org     	jol
+Gerrit Germis           lurch@lunar-linux.org           lurch
+Moritz Heiber           moe@lunar-linux.org             Moe
+Jaime Buffery 		nestu@lunar-linux.org 		nestu
+Nick Hudson		nhudson@lunar-linux.org		nhudson
+Niki Guldbrand          niki@lunar-linux.org            niki
+Stefan Wold             ratler@lunar-linux.org          Ratler
+Auke Kok		sofar@lunar-linux.org		sofar
+RodZilla		rodzilla@lunar-linux.org 	rodzilla
+Terry Chan		tchan@lunar-linux.org           tchan
+Aaron Watry             watryac04@lunar-linux.org       Veerappan
+Jason Johnson		xoritor@lunar-linux.org         xoritor
 
  -- Others
 
@@ -58,8 +82,6 @@ Chris			cwrobel@dccnet.com		chris
 Christoph Steckelberg	heffer@mailberlin.net		christoph
 Christopher Church	cchurch@cc.gatech.edu		christopher
 Chuck Busby		scarecrow.143@attbi.com		chuck
-Jan Eidtmann		cmak@lunar-linux.org		cmak
-Chuck Mead		csm@moongroup.com		csm
 Daniel			dcmccal@clemson.edu		daniel
 darookee		darookee@darookee.net		darookee
 David Chan  		davidchan@rcn.com		david
@@ -67,29 +89,23 @@ Milosz Tanski           mtanksi@wideopenwest.com        dem
 Daniel Nielsen		djn@daimi.au.dk			dnielsen
 doubletwist		doubletwist@spack.nu		doubletwist
 Eric Sandall		sandalle@mail.wsu.edu		eric
-Drew Swayze             drew@lunar-linux.org            evildrew
 Vincent Vandeweijer	v_vandeweijer@zonnet.nl		evo_
 fasa           		tremon_r@epita.fr		fasa
-Florin Braescu          florin@lunar-linux.org          florin
 ST LEE			ftbee@hotmail.com		ftbee
 Gareth Clay		g.clay@warwick.ac.uk		gareth
 Gerall Kahla		gerall@chromebob.com		gerall
 Charles Ballowe 	hangman@steelballs.org		hangman
-Steven Michalske        hardkrash@lunar-linux.org       hardkrash
 Harley J Pig		harleypig@harleypig.com		harley
 Hendrik Visage		hvisage@is.co.za		hendrik
 Ladislav Hagara		hgr@vabo.cz			hgr
 Jan Sabbe		jan.sabbe@student.kuleuven.ac.be	jan
 Jason Overholt		j.over@verizon.net		jason
-Jasper Huijsmans        jazman@lunar-linux.org          jazman
 j cr			jcrowso@hotmail.com		jcr
 Jean-Michel Smith	jean@kcco.com			jean-michel
 Jeff Schmidt		jschmidt@fnal.gov		jeff
 Jim Phillips		jphillips@ergonet-ent.com	jim
-Jeff Hodges             jmhodges@lunar-linux.org        jmhodges
 Johan Warlander		johan@warlander.com		johan
 Joel Mayes              joel_mayes@dingoblue.net.au     joel
-Joel Vennin     	jol@lunar-linux.org     	jol
 Jon Svendsen		jon-sven@frisurf.no		jon
 Jonathan Evraire	evraire@tuwg.com		jonathan
 Joshua Books		jbooks@real.com			joshua
@@ -103,32 +119,24 @@ Manolis Tzanidakis      mtzanidakis@lycos.co.uk		manolis
 Marc Greene		eru@subdimension.com		marc
 Mark Rushing		mark@orbislumen.net		mark
 Mike Dinitz		mdinitz@Princeton.edu		mike
-Moritz Heibe            moe@lunar-linux.org             Moe
 Nazadus			nazadus@swbell.net		nazadus
-Jaime Buffery 		nestu@lunar-linux.org 		nestu
 Chris Newton		baron@shutdown.com		newton
-Nick Hudson		nhudson@lunar-linux.org		nhudson
-Niki Guldbrand          niki@lunar-linux.org            niki
 Nils Hjärpe		nisse@aol.fi			nils
 Paul Laws		paul@moway.co.uk		paul
 Paulo Almeida		pamma@netcabo.pt		paulo
 Philippe Namias		pn@novadeck.net			philippe
 P. Martin		pmartin@pe.net			pmartin
-Röka hasch på Venus     ratler@lunar-linux.org          Ratler
 Richard Snow		richardsnow@mcc4u.com		richard
 Rober Amble		robert_amble@yahoo.com		robert
 Robin Cook		rcook@wyrms.net			robin
-RodZilla		rodzill@lunar-linux.org 	rodzilla
 Russel Ingarm		ringram@gargoylecc.com		russel
 Sasha Andric		sasha@goldnet.ca		sasha
 Seppo Tamminen		setammi@uusikaupunki.fi		seppo
 Shawn			shawn@digilliance.net		shawn
 steve			sja8rd@mizzou.edu		sja8rd
-Auke Kok		sofar@lunar-linux.org		sofar
 Steve Pinkham		spinkham@bigfoot.com		steve
 Sven Oliver Moll	svolli@svolli.de		svolli
 Target			target@targ.dyndns.org		target
-Terry Chan		tchan@lunar-linux.org           tchan
 Thmoas Stewart		thomas@stewarts.org.uk		thomas
 Toby Oxborrow		oxborrow@oxborrow.net		toby
 Tom                     thomas@stewarts.org.uk		tom
@@ -136,13 +144,11 @@ Torgeir Ulvedal Nes	torgeir@nes.ac			torgeir
 trick			gerry@c64.org			trick
 Väinö Järvelä		vaino.jarvela@pp.inet.fi	vaino
 Wes Warner		wes@lppcs.com			wes
-Jason Johnson		jason@xorit.net			xoritor
-
 
  -- Epilogue
 
-Last, there are those whose names we have forgotten, and we are ashamed of
-not knowing exactly who have helped us in the past.
+Lastly, there are those whose names we have forgotten, and we are ashamed of
+not knowing exactly who has helped us in the past.
 
 If you feel that this list is incomplete or needs adjustment in any way, feel
 free to inform us at <maintainer@lunar-linux.org>.
