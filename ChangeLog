@@ -1,3 +1,11 @@
+2003-07-17 04:21  csm
+
+	* usr/share/man/man8/: lin.8, lunar.8: another coupld of updates
+
+2003-07-17 04:00  csm
+
+	* usr/share/man/man8/lunar.8: updating the lunar man page
+
 2003-07-14 22:38  sofar
 
 	* bin/lvu, sbin/lin, sbin/lrm, sbin/lunar,
