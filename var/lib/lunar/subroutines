@@ -95,11 +95,7 @@ dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
 # purpose  : sed edit a file;  example  : sedit "s/TEST/TSET/" filename
 sedit()  {
   message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${2}${DEFAULT_COLOR}"
-  TMP_FILE="/tmp/`basename  $2`.`uuidgen`"
-  rm    -rf    $TMP_FILE
-  cp    $2     $TMP_FILE
-  sed   "$1"   $TMP_FILE  >  $2
-  rm    -rf    $TMP_FILE
+  sed -i~ "$1" "$2" 
 }
 
 
