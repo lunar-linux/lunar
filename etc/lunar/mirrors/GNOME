@@ -1,4 +1,5 @@
-"Master Site"			ftp://ftp.gnome.org/pub/GNOME
+Master Site FTP			ftp://ftp.gnome.org/pub/GNOME
+Master Site HTTP                http://ftp.gnome.org/pub/GNOME
 "Custom Mirror"			Custom
 US or Canada			http://ftp.rpmfind.net/linux/gnome.org
 New York			ftp://ftp.cse.buffalo.edu/pub/Gnome
