@@ -48,6 +48,7 @@ leafs                      display installed modules that have no explicit
                                dependencies on them
 orphans                    display installed modules that are missing
                                dependancies
+held                       display held modules
 
 search      "phrase"       searches module's long descriptions for phrase.
 service     port|acronym   displays module's that provide that service
@@ -331,10 +332,10 @@ older()  {
 
 maintainer()  {
   run_details $1
-  if  [  -n  "$MAINTAINER"  ];  then  
-    echo  $MAINTAINER
+  if  [ -n "$MAINTAINER" ] ; then  
+    echo $MAINTAINER
   else
-    echo  maintainer@lunar-linux.org
+    echo maintainer@lunar-linux.org
   fi
 }
 
@@ -613,154 +614,298 @@ function show_tree() {
 
 
 parse()  {
-  MODULE=$2
-  SECTION=$2
-  VERSION=`installed_version  $MODULE`
+  case $1 in
+    html)
+      lvu_catalog_html
+      ;;
+      
+    export)
+      export_snapshot
+      ;;
+      
+    import)
+      import_snapshot $2
+      ;;
+      
+    section)
+      if [ -n "$SECTION" ] ; then
+        list_modules $SECTION
+      elif [ -z "$SECTION" ] ; then
+	list_sections
+      fi
+      ;;
+      
+    alien)
+      alien
+      ;;
 
-  case  $1  in
-            html)  lvu_catalog_html                       ;;
-          export)  export_snapshot                        ;;
-          import)  import_snapshot  $2                    ;;
-         section)  [ -n "$SECTION" ]       &&
-                   list_modules  $SECTION 
-                   [ -z "$SECTION" ]       &&
-                   list_sections                          ;;
-           alien)  alien                                  ;;
-            from)  show_from   $2                         ;;
-           newer)  newer       $2                         ;;
-           older)  older       $2                         ;;
-         sources)  sources     $MODULE                    ;;
-      maintainer)  maintainer  $MODULE                    ;;
-        moonbase)  lvu_catalog  |  view_file              ;;
-         DETAILS)  show_module_component $1 $2            ;;
-         DEPENDS)  show_module_component $1 $2            ;;
-       CONFIGURE)  show_module_component $1 $2            ;;
-       CONFLICTS)  show_module_component $1 $2            ;;
-       PRE_BUILD)  show_module_component $1 $2            ;;
-           BUILD)  show_module_component $1 $2            ;;
-      POST_BUILD)  show_module_component $1 $2            ;;
-    POST_INSTALL)  show_module_component $1 $2            ;;
-      PRE_REMOVE)  show_module_component $1 $2            ;;
-     POST_REMOVE)  show_module_component $1 $2            ;;
-          search)  long_search   "$2"                     ;;
-         service)  service       "$2"                     ;;
-         depends)  show_depends  "$2"  |  sort  |  uniq   ;;
-           leafs)  show_leafs          |  sort  |  uniq   ;;
-	 orphans)  show_orphans        |  sort  |  uniq   ;;
-         website)  show_website  "$2"                     ;;
-         version)  show_version  "$2"                     ;;
-            size)  show_size     "$2"                     ;;
-            tree)  show_tree     "$2"                     ;;
-            eert)  REVERSE="on"; show_tree "$2"           ;;
+    from)
+      show_from $2
+      ;;
+      
+    newer)
+      newer $2
+      ;;
+      
+    older)
+      older $2
+      ;;
+      
+    moonbase)
+      lvu_catalog | view_file
+      ;;
 
-    updatelog)  if [ -e /var/log/lunar/update ]; then
-                  view_file /var/log/lunar/update
-                else
-                  echo "No update log available."
-                fi
-                ;;
+    leafs)
+      show_leafs | sort | uniq
+      ;;
+      
+    orphans)
+      show_orphans | sort | uniq
+      ;;
+      
+    updatelog)
+      if [ -e /var/log/lunar/update ]; then
+        view_file /var/log/lunar/update
+      else
+        echo "No update log available."
+      fi
+      ;;
 
-    activity)  if [ -e $ACTIVITY_LOG ]; then
-                 view_file $ACTIVITY_LOG
-	       else
-	         echo "No update log available."
-	      fi
-	      ;;
+    activity)
+      if [ -e $ACTIVITY_LOG ]; then
+        view_file $ACTIVITY_LOG
+      else
+        echo "No update log available."
+      fi
+      ;;
 
-    compile)  run_details 
-              if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
-	        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2
-	      else
-                VERSION=$(installed_version $MODULE)
-                view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
-                "Compile log for $MODULE does not exist"
-              fi
-	      ;;
-	      
-    install)  view_file  $INSTALL_LOGS/$MODULE-$VERSION   \
-              "Install log for $MODULE does not exist"
-              ;;
-
-    compiler) [ -z "$MODULE" ] && return 1
-              [ -e $INSTALL_LOGS/$MODULE-$VERSION ]         || {
-              echo "Install log for $MODULE does not exist" 
-              return 1
-              } && {
-              cat $INSTALL_LOGS/$MODULE-$VERSION |
-              while read LINE
-              do
-                    file $LINE | grep -q "ELF " && {
-                    echo -n "$LINE "
-                    strings -a $LINE | grep GCC: | sort -r | head -n 1
-                    }
-              done
-              }
-              ;;
-
-   links)     [ -z "$MODULE" ] && return 1
-              for FILE in $(lvu install $MODULE) ; do
-                TYPE=$(file $FILE | cut -d' ' -f2)
-                if [[ "$TYPE" == "ELF" ]] ; then
-                  BINARIES="$BINARIES $FILE"
-                  verbose_msg "found binary: \"$FILE\""
-                fi
-              done
-
-              for BINARY in $BINARIES ; do
-                LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
-              done
-
-              for LINK in $LINKSTO ; do
-                lvu from $LINK | cut -d: -f1
-              done | sort | uniq
-              ;;
-
-    installed)  if    [  -z  "$MODULE"    ]
-                then  view_file   $MODULE_STATUS
-                elif  [  -n  "$VERSION"  ]
-                then  echo   "$VERSION"
-                else  message  "$MODULE is not installed";  false
-                fi
-                ;;
+    installed)
+      if [ -z "$MODULE" ] ; then
+        view_file $MODULE_STATUS
+      elif [ -n "$VERSION" ] ; then
+        echo "$VERSION"
+      else
+        message "$MODULE is not installed"
+	false
+      fi
+      ;;
 
     held)
       grep ":held:" $MODULE_STATUS | cut -d: -f1
       ;;
 		
-    sum)  [  -n  "$MODULE"  ]                         &&
-          checksum  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
+    sum)
+      if [ -n "$MODULE" ] ; then
+        if ! checksum  "$INSTALL_LOGS/$MODULE-$VERSION" ; then
           checksum  "$INSTALL_LOGS/*"
-          ;;
+	fi
+      fi
+      ;;
 	  
-    md5sum)  [  -n  "$MODULE"  ]                             &&
-             md5sum_files  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
-             md5sum_files  "$INSTALL_LOGS/*"
-             ;;
-	     
-    what)  SECTION=`find_section  $MODULE`             &&
-           DETAILS=$MOONBASE/$SECTION/$MODULE/DETAILS  &&
-           [  -x  $DETAILS  ]                           &&
-               .  $DETAILS                              ||
-           message  "Details for $MODULE not found"
-           ;;
-	   
-    where)  SECTION=`find_section  $MODULE`  &&
-            echo     "$SECTION"             ||
-            message  "$MODULE not found"
-            ;;
+    md5sum)
+      if [ -n "$MODULE" ] ; then
+        if ! md5sum_files "$INSTALL_LOGS/$MODULE-$VERSION" ; then
+	  md5sum_files  "$INSTALL_LOGS/*"
+        fi
+      fi
+      ;;
 
-       cd) [ -z "$MODULE" ] && return 1
-           SECTION=`find_section $MODULE`
-           [ -z "$SECTION" ] &&  exit
-           cd $MOONBASE/$SECTION/$MODULE && $SHELL
-           ;;
+   voyeur)
+     shift 1
+     activate_voyeur $@
+     ;;
 
-   voyeur)  shift  1;  activate_voyeur  $@  ;;
-
-      pam)  find_pam_aware  ;;
-
-        *)  help  ;;
+   pam)
+     find_pam_aware
+     ;;
+     
   esac
+
+  if [ -z "$2" ] ; then
+    help
+  fi
+ 
+    #
+    # stuff that takes a MODULE as $2
+    #
+
+  MODULE=$2
+  ( if run_details $2 ; then
+
+   case $1 in
+
+    sources)
+      sources $2
+      ;;
+      
+    maintainer)
+      maintainer $2
+      ;;
+      
+    DETAILS)
+      show_module_component $1 $2
+      ;;
+      
+    DEPENDS)
+      show_module_component $1 $2
+      ;;
+      
+    CONFIGURE)
+      show_module_component $1 $2
+      ;;
+      
+    CONFLICTS)
+      show_module_component $1 $2
+      ;;
+      
+    PRE_BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    POST_BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    POST_INSTALL)
+      show_module_component $1 $2
+      ;;
+      
+    PRE_REMOVE)
+      show_module_component $1 $2
+      ;;
+      
+    POST_REMOVE)
+      show_module_component $1 $2
+      ;;
+      
+    search)
+      long_search "$2"
+      ;;
+      
+    service)
+      service "$2"
+      ;;
+      
+    depends)
+      show_depends "$2" | sort | uniq
+      ;;
+      
+    website)
+      show_website "$2"
+      ;;
+      
+    version)
+      show_version "$2"
+      ;;
+      
+    size)
+      show_size "$2"
+      ;;
+      
+    tree)
+      show_tree "$2"
+      ;;
+      
+    eert)
+      REVERSE="on"
+      show_tree "$2"
+      ;;
+
+    compile)
+      run_details 
+      if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
+        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2
+      else
+        VERSION=$(installed_version $MODULE)
+        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
+            "Compile log for $MODULE does not exist"
+      fi
+      ;;
+	      
+    install)
+      view_file $INSTALL_LOGS/$MODULE-$VERSION \
+          "Install log for $MODULE does not exist"
+      ;;
+
+    compiler)
+      if [ -z "$MODULE" ] ; then
+        return 1
+      else
+        if [ ! -e $INSTALL_LOGS/$MODULE-$VERSION ] ; then 
+          echo "Install log for $MODULE does not exist" 
+          return 1
+	else
+          cat $INSTALL_LOGS/$MODULE-$VERSION | while read LINE ; do
+            if file $LINE | grep -q "ELF " ; then
+              echo -n "$LINE "
+              strings -a $LINE | grep GCC: | sort -r | head -n 1
+            fi  
+          done
+        fi
+      fi
+      ;;
+
+   links)
+     if [ -z "$MODULE" ] ; then
+       return 1
+     else
+       for FILE in $(lvu install $MODULE) ; do
+         TYPE=$(file $FILE | cut -d' ' -f2)
+         if [[ "$TYPE" == "ELF" ]] ; then
+           BINARIES="$BINARIES $FILE"
+           verbose_msg "found binary: \"$FILE\""
+         fi
+       done
+       for BINARY in $BINARIES ; do
+         LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
+       done
+       for LINK in $LINKSTO ; do
+         lvu from $LINK | cut -d: -f1
+       done | sort | uniq
+     fi
+     ;;
+     
+    what)
+      if [ ! -z "$MODULE" ] ; then
+        (
+        if run_details && SECTION=$(find_section $MODULE) ; then
+	  . $MOONBASE/$SECTION/$MODULE/DETAILS
+	fi
+	)
+      fi
+      ;;
+	   
+    where)
+      if SECTION=`find_section $MODULE` ; then
+        echo "$SECTION"
+      else
+        message "$MODULE not found"
+      fi
+      ;;
+
+     cd)
+       if [ -z "$MODULE" ] ; then
+         return 1
+       else
+         if SECTION=`find_section $MODULE` ; then
+           cd $MOONBASE/$SECTION/$MODULE
+	   $SHELL
+	 else
+           return 1
+	 fi
+       fi
+       ;;
+
+    *)
+      help
+      ;;
+
+   esac
+  fi )
 }
 
 
