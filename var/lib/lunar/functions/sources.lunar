@@ -108,7 +108,7 @@ sha1_verify_source() {
 erase()  {
   debug_msg "erase ($@)"
   if [ "$PARTIAL" == "off" ]; then
-    verbose_msg "erase: deleting \"$(guess_filename $1)\""
+    debug_msg "erase: deleting \"$(guess_filename $1)\""
     rm -f $(guess_filename $1)
   fi
 }
