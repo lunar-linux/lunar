@@ -1,3 +1,8 @@
+2004-06-25 11:33  sofar
+
+	* var/lib/lunar/functions/tracking.lunar: Explicitly do not track
+	$SOURCE_DIRECTORY
+
 2004-06-23 13:24  prox
 
 	* var/lib/lunar/menu/optimize.menu: display one row on multi cpu
