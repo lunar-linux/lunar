@@ -14,10 +14,3 @@
 	clarify function, indicate whether the quried package is already
 	present and split to 2 lines
 
-2003-10-26 14:16  sofar
-
-	* sbin/lin, var/lib/lunar/functions/main.lunar,
-	var/lib/lunar/functions/moonbase.lunar: I was under the impression
-	that I had committed these fixes already before I was AFK. But
-	anyway, here's a proposed fix for when a moonbase lin crashes...
-
