@@ -112,7 +112,3 @@
 	removed subroutines, moving stuff around to .lunar function files,
 	updating all core programs, uniformizing them as well.
 
-2003-04-26 22:53  sofar
-
-	* sbin/lin: 10 points for tchan
-
