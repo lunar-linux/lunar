@@ -1,3 +1,36 @@
+2002-12-30 22:24  hardkrash
+
+	* sbin/lget: added ability to use tun devices for internet
+	connection -- Hardkrash
+
+2002-12-29 23:42  sofar
+
+	* etc/lunar/config: Added PATCH_URL to config, the new repository
+	for patches.
+
+2002-12-24 18:19  tchan
+
+	* var/lib/lunar/functions/updatelog.lunar: Synched a change from
+	lunar version of updatelog.lunar back into theedge.
+
+2002-12-24 18:00  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed MAKES and PSAFE
+	issues.
+
+2002-12-23 01:10  sofar
+
+	* sbin/lin: okay this works now without CVS bullocking it.
+
+2002-12-23 01:07  sofar
+
+	* sbin/lin: leave out the * to omit subdirs in case of CVS.
+
+2002-12-23 01:00  sofar
+
+	* usr/share/doc/lunar/module-example/patch/example.patch: Adding
+	some descriptive text.
+
 2002-12-23 00:49  sofar
 
 	* sbin/lin: Added auto-patching: scan for subdir 'patch' and apply
@@ -224,69 +257,4 @@
 	blacklisted module is encountered.  I realize this could cause
 	issues, and I am looking for a better solution... feel free to post
 	ideas.
-
-2002-10-01 17:34  sofar
-
-	* var/lib/lunar/subroutines: lin moonbase now explicitly rebuilds
-	the module.index
-
-2002-09-29 20:10  sofar
-
-	* var/lib/lunar/subroutines: Adding prune code for compile, install
-	and md5sum logsfiles
-
-2002-09-28 03:37  tchan
-
-	* var/state/lunar/gcc.x86: Removed cdrdao from the list.  It builds
-	just fine for me with gcc-3.2.
-
-2002-09-27 18:42  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed formatting errors.
-
-2002-09-25 22:01  sofar
-
-	* sbin/lin: REALLY fixing linewrap errors
-
-2002-09-25 18:32  sofar
-
-	* sbin/lin: re-adding wrappers to normal installation
-
-2002-09-25 18:04  sofar
-
-	* var/lib/lunar/subroutines: Adding message when a .rc file is
-	installed!
-
-2002-09-25 17:35  sofar
-
-	* var/lib/lunar/subroutines: Fix for CVS moonbases
-
-2002-09-24 20:49  xoritor
-
-	* sbin/lin: Fixing linewrap/editor errors... thx niki :-)
-
-2002-09-24 16:59  xoritor
-
-	* sbin/lin: Updating lin to not set PATH, other than to add for the
-	wrappers.  Added an echo to say wether a module is blacklisted or
-	not, but does not do anything but echo.  This is a placeholder for
-	future code that will allow a blacklist for gcc 2x or optimization
-	unfriendly modules to be easily identified.
-
-2002-09-24 16:52  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Adding PSAFE to
-	optimize_make().    PSAFE=no can be added to a DETAILS file to set
-	MAKES=1 so that multiple makes do not occur
-
-2002-09-24 02:51  tchan
-
-	* var/state/lunar/gcc.x86: unrar now compiles with gcc-3.2 or
-	greater.
-
-2002-09-23 23:59  sofar
-
-	* sbin/lin, usr/share/man/man8/lin.8, var/lib/lunar/subroutines:
-	Adding proper fix for lin --fix: lin --fixdepends will ONLY rebuild
-	your depends database, without recompiling modules!
 
