@@ -1,3 +1,15 @@
+2003-10-02 04:58  niki
+
+	* bin/lvu: Elaine forgot to change 3 occations of mv_edit to
+	mod_v_safe_edit
+
+2003-10-01 16:28  elaine
+
+	* var/lib/lunar/functions/: check.lunar, edit.lunar, install.lunar,
+	modules.lunar, sizes.lunar, temp.lunar, tracking.lunar:
+	install.lunar: fixed failure to correctly remove depends/module
+	file rename mv_edit() routine mod_v_safe_edit()
+
 2003-09-24 12:13  nhudson
 
 	* var/lib/lunar/excluded: 
@@ -287,9 +299,4 @@
 
 	* var/lib/lunar/functions/install.lunar: Removed
 	devoke_installwatch from before run_post_build
-
-2003-08-02 22:16  elaine
-
-	* var/lib/lunar/functions/tracking.lunar: Added chmod 644 after
-	temp_create to make install logs readable
 
