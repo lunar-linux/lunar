@@ -1,3 +1,23 @@
+2003-06-08 19:34  sofar
+
+	* var/lib/lunar/menu/optimize.menu: Adding tracer optimization
+
+2003-06-08 19:33  sofar
+
+	* sbin/lin: more commits: all subroutines moved to functions!
+
+2003-06-08 19:30  sofar
+
+	* var/lib/lunar/functions/: depends.lunar, download.lunar,
+	init.lunar, install.lunar, modules.lunar, optimize.lunar,
+	prune.lunar, sources.lunar: More merges that were left out
+	somehow...
+
+2003-06-08 19:17  sofar
+
+	* var/lib/lunar/functions/temp.lunar: Adding this, I'll integrate
+	this later
+
 2003-06-05 07:44  kc8apf
 
 	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC: Update
