@@ -525,6 +525,7 @@ feature_menu()  {
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
   W_HELP="Verbose display of compilation process?"
+  X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
 
          ARCHIVE=${ARCHIVE:=on}
@@ -572,7 +573,8 @@ feature_menu()  {
       "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
       "TMPFS"            "Toggle"  "$TMPFS"         "$D_HELP"   \
       "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
-      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP"`
+      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
+      "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"`
 
   then
   
@@ -594,6 +596,7 @@ feature_menu()  {
            TMPFS=off
 	 VERBOSE=off
 ZLOCAL_OVERRIDES=off
+   PROBE_EXPIRED=off
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -615,6 +618,7 @@ ZLOCAL_OVERRIDES=off
                TMPFS)         TMPFS=on  ;;
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
+       PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
       esac
     done
 
@@ -635,6 +639,7 @@ ZLOCAL_OVERRIDES=off
     set_local_config "TMPFS" "$TMPFS"
     set_local_config "VERBOSE" "$VERBOSE"
     set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
+    set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
     set_local_config "COLOR" "$COLOR"
 
   fi
