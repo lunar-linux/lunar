@@ -1,3 +1,10 @@
+2003-09-24 12:11  nhudson
+
+	* var/lib/lunar/excluded: 
+	Adding /etc/bonobo-activation and its file to excluded because for
+	some reason it gets deleted when you remove evolution which is bad!
+	bad! bad!
+
 2003-09-19 21:26  sofar
 
 	* var/lib/lunar/functions/install.lunar: Fix for the double DL bug:
