@@ -727,31 +727,64 @@ lin_module()  { (
       optimize_platform $GCCVER &&
       use_wrappers
     fi                          &&
-    start_logging               &&
-    run_pre_build               &&
-    run_build                   &&
-    run_post_build              &&
-    stop_logging                &&
-    boost                       &&
-    run_post_install            &&
-    if [[ $KEEP_SOURCE != "on" ]]; then 
-      rm_source_dir               
-    fi                          &&
+    start_logging
+
+    if ! run_pre_build ; then
+      LIN_ERROR="PRE_BUILD"
+    else
+      if ! run_build ; then
+        LIN_ERROR="BUILD"
+      else
+        if ! run_post_build ; then
+          LIN_ERROR="POST_BUILD"
+	fi
+      fi
+    fi
+
+    devoke_installwatch
+    stop_logging
+    
+    if [ -n "$LIN_ERROR" ] ; then
+      [ -f /tmp/$MODULE.iw ] && rm /tmp/$MODULE.iw
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi  
+
+    if ! boost ; then
+      LIN_ERROR="boost"
+      [ -f /tmp/$MODULE.iw ] && rm /tmp/$MODULE.iw
+    else
+      if ! run_post_install ; then
+        LIN_ERROR="POST_INSTALL"
+      fi
+    fi
+
+    if [ -n "$LIN_ERROR" ] ; then
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi
+
+    rm_source_dir               &&
     report_install              &&
     rm  -f  $linING             &&
     sound  SUCCESS              &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
 
     if  [  "$?"  !=  0  ];  then
-      devoke_installwatch
-      stop_logging
-      rm /tmp/$MODULE.iw
       sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem Detected !${DEFAULT_COLOR}"
+      message  "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
       rm  -f  $linING
       view_compile_log
-      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors"
-      false
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
+      return 1
     fi
   fi
 ) }

@@ -175,7 +175,7 @@ message()    {  [  -n  "$SILENT"  ]  ||  echo  -e  "$*";  }
 
 report() {
 
-  if  [  ! -f  $1  ];  then  return;  fi
+  if  [  ! -f  "$1"  ];  then  return;  fi
 
   if  [  "$VIEW_REPORTS"  ==  "on"  ];  then
 
@@ -363,6 +363,8 @@ prepare_install() {
 
 
 rm_source_dir() {
+
+  [ "$KEEP_SOURCE" == "on" ] && return 0
 
   cd  $BUILD_DIRECTORY
 
