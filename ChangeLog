@@ -153,32 +153,3 @@
 	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Needed cos some
 	developers insist on passing spaces around within #defines.
 
-2003-08-14 21:27  sofar
-
-	* var/lib/lunar/functions/: build.lunar, postbuild.lunar: yeah I
-	know... looks like nothing... somehow this fixes all those init.d
-	scripts hanging since a tee traces the fork to the daemon and waits
-	before it exits... this should fix all 3 bugs on
-	bugs.lunar-linux.org related to init.d scripts (I hope)
-
-2003-08-14 20:25  sofar
-
-	* var/lib/lunar/functions/install.lunar: re-enabling reports for
-	succesfull resurrects, perhaps this needs a more elaborate rewrite,
-	but it works for now. broken resurrects are not reported (as tchan
-	says they werent in the past anyways).
-
-2003-08-14 19:57  sofar
-
-	* var/lib/lunar/functions/check.lunar: Disabling recompiles after
-	"lunar fixdepends"
-
-2003-08-14 19:41  sofar
-
-	* var/lib/lunar/: compilers/c++, compilers/cc, compilers/g++,
-	compilers/gcc, functions/download.lunar, functions/optimize.lunar:
-	this one fixes the appearing '1' file and also re-enables distcc
-	(MAKES wasn't being set correctly due to this bug.) I'm also
-	enabling DEBUG output in the wrapper scripts so you can see -pipe
-	DOES WORK, you just don't see it ;^).
-
