@@ -1,0 +1,39 @@
+####################################################################
+#                                                                  #
+# temp.lunar - lunar temp code handling                            #
+#                                                                  #
+####################################################################
+#                                                                  #
+# Copyright 2003 - Auke Kok under GPLv2                            #
+#                                                                  #
+####################################################################
+#                                                                  #
+# temp.lunar contains uniform temporary file name creation and     #
+# tracking. All lunar tools MUST use these functions if they wish  #
+# to perform temporary file operations                             #
+#                                                                  #
+# functions: temp_create, temp_destroy                             #
+#                                                                  #
+####################################################################
+
+
+temp_create() {
+  TMPDIR=${TMPDIR:-/var/tmp}
+ 
+  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$1.XXXXXXXXXX ) ; then
+    echo $TMPFILE
+  else
+    message "${PROBLEM_COLOR}ERROR:${NORMAL_COLOR}${DEFAULT_COLOR}" \
+            "Cannot create temp file${NORMAL_COLOR}"
+    exit 1
+  fi  
+}
+
+
+temp_destroy() {
+  if [ -e "$1" ] ; then
+    rm -f "$1"
+  fi
+}
+
+
