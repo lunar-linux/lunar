@@ -1,3 +1,24 @@
+2003-07-20 17:18  sofar
+
+	* sbin/lunar: fixing hold menu.
+
+2003-07-20 16:52  sofar
+
+	* var/lib/lunar/functions/download.lunar: Fixes for the SVN urls,
+	symplifying svn and cvs ups.
+
+2003-07-20 15:35  sofar
+
+	* var/lib/lunar/functions/connect.lunar: since these 2 are a royal
+	pain in the ass I decided to kick them into their own
+	forget-me-file.
+
+2003-07-20 15:34  sofar
+
+	* bin/lvu, var/lib/lunar/functions/download.lunar: Fixing lvu
+	search bug, adding full support for svn:// urls, see moonbase/zbeta
+	dor 2 example modules that use svn:// URL's.
+
 2003-07-18 03:08  tchan
 
 	* var/lib/lunar/functions/optimize.lunar: Again, fixed the typo of
