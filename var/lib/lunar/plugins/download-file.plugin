@@ -1,0 +1,24 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# download-file.plugin - plugin that downloads file:// urls #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_source_download_file()  {
+  # check if we can handle this type of URL:
+  if [ ${1:0:7} != "file://" ]; then
+    return 2
+  fi
+  debug_msg "plugin_source_download_file ($@)"
+
+  cp $(echo $1 | sed 's/file:\/\///') $2
+}
+
+
+plugin_register SOURCE_DOWNLOAD plugin_source_download_file

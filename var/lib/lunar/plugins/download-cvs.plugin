@@ -1,0 +1,138 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# CVS downloading plugin - download-cvs.plugin             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2005 by Auke Kok under GPLv2                   #
+#                                                          #
+############################################################
+
+
+plugin_source_download_cvs() {
+  # check if we can handle this URL format
+  if [ "${1:0:6}" != "cvs://" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_download_cvs($@)"
+
+  if ! module_installed cvs ; then
+    # full stop: we need to make sure the user sees this error:
+		
+    message "${PROBLEM_COLOR}! Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  [ -f ~/.cvspass ] || touch ~/.cvspass
+  CVSURL=$(echo $1 | sed "s:^cvs\://::")
+  CVSARGS=$(echo $CVSURL | cut -d@ -f1)
+  CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
+  CVSSPATH=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f2)
+  CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
+  CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
+  CVSOPTIONS=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f5)
+
+  if [ ! -z "$CVSRELEASE" ]; then
+    CVSRELEASE="-r $CVSRELEASE"
+  fi
+
+  CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
+
+  message  "${MESSAGE_COLOR}Downloading CVS module"                      \
+           "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
+ 	   "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+  mk_source_dir $TMPDIR/$MODULE-$VERSION
+  cd $TMPDIR/$MODULE-$VERSION
+  
+  if [ -f "$2" ] ; then
+    verbose_msg "Extracting local CVS copy"
+    # unpacking in last component dir of $CVSMODULE
+    CD=$(pwd -P)
+    debug_msg "get_cvs: PWD=$PWD mkdir -p $(dirname $CVSMODULE)"
+    mkdir -p $(dirname $CVSMODULE)
+    cd $(dirname $CVSMODULE)
+    debug_msg "get_cvs: PWD=$PWD tar xjf $2"
+    if ! tar xjf $2 ; then
+      message "${PROBLEM_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
+      
+      rm_source_dir $TMPDIR/$MODULE-$VERSION
+      mk_source_dir $TMPDIR/$MODULE-$VERSION
+      cd $TMPDIR/$MODULE-$VERSION
+    else
+      cd $TMPDIR/$MODULE-$VERSION/$CVSMODULE
+    fi
+  fi
+
+  verbose_msg "CVSROOT=\"$CVSROOT\""
+
+  NUM_RETRY=${NUM_RETRY:-5}
+  if [ "$NUM_RETRY" -eq 0 ]; then
+    NUM_RETRY=1000
+  fi
+
+  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
+    if [ -d CVS ] ; then
+      verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
+      cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
+    else 
+      verbose_msg "[${TRY}] cvs -d $CVSROOT -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE"
+      cvs -d $CVSROOT -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
+    fi
+
+    if [ "$?" == "0" ] ; then
+      break
+    fi
+
+    sleep 2
+  done
+  
+  if [ "$GOT_CVS" == "yes" ] ; then
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
+    # pack in last component dir of $CVSMODULE
+    cd $TMPDIR/$MODULE-$VERSION/$(dirname $CVSMODULE)
+    tar cjf $2 $(basename $CVSMODULE)
+    cd $CD
+  else
+    activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
+  fi
+
+  cd $TMPDIR
+  rm_source_dir $TMPDIR/$MODULE-$VERSION
+
+}
+
+
+plugin_source_needrefresh_cvs() {
+  # check if we can handle this URL format
+  if [ "${1:0:6}" != "cvs://" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_needrefresh_cvs($@)"
+
+  if [ ! -f $2 ]; then
+    return 0
+  fi
+
+  CVS_THRESHOLD=${CVS_THRESHOLD:-10}
+  if (( "CVS_THRESHOLD" > 0 )) ; then
+	if [ "$(find $2 -amin +$CVS_THRESHOLD)" == "$2" ] ; then
+      # it is older:
+	  return 0
+	else
+      verbose_msg "CVS update not required for \"$2\" (less than $CVS_THRESHOLD mins old)"
+      # now we can send a FAIL so the next plugins are skipped:
+	  return 1
+    fi
+  else
+    # always return true if threshhold is zero
+    return 0
+  fi
+}
+
+
+plugin_register SOURCE_DOWNLOAD plugin_source_download_cvs
+plugin_register SOURCE_NEEDREFRESH plugin_source_needrefresh_cvs
+
+

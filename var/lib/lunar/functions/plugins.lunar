@@ -1,0 +1,62 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# plugins.lunar - Lunar plugin code                        #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2005 by Auke Kok under GPLv2                   #
+#                                                          #
+############################################################
+
+#
+# plugin handler return status convention:
+#
+# when a handler is called, it should use the following return codes
+#
+# 0 - executed OK, do not process other plugins
+# 1 - failed to run, stop executing plugins and report an error
+# 2 - failed to run but try other plugins
+#
+
+plugin_register() {
+	# first arg: plugin type
+	# second arg: function hook name
+	# Defined plugin types:
+	# 1 - SOURCE_DOWNLOAD - download some source code
+	# 2 - SOURCE_NEEDREFRESH - source exists but needs refresh
+	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
+	((LUNAR_PLUGIN_COUNT++))
+}
+
+
+plugin_call() {
+	debug_msg "plugin_call($@)"
+	# scan available plugins for plugin_type $1 and pass args to it
+	REQUESTED_TYPE=$1
+	shift
+	for ((COUNT=0; COUNT < $LUNAR_PLUGIN_COUNT; COUNT++)); do
+		THIS_TYPE=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f1)
+		THIS_HANDLER=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f2-)
+		if [ "$REQUESTED_TYPE" == "$THIS_TYPE" ]; then
+			# we have identified a valid plugin for this type
+			$THIS_HANDLER $@
+			RETVAL=$?
+			if [ $RETVAL -eq 2 ]; then
+				continue
+			else
+				return $RETVAL
+			fi
+		fi
+	done
+	debug_msg "Could not find a suitable plugin for type \"$1\""
+	return 2
+}
+
+# source the plugins now:
+PLUGINS=/var/lib/lunar/plugins
+for LUNAR_PLUGIN in $PLUGINS/*.plugin; do
+	. $LUNAR_PLUGIN
+done
+
+

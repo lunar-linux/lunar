@@ -1,0 +1,123 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# download-svn.plugin - download SVN urls                  #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2005 by Auke Kok under GPLv2                   #
+#                                                          #
+############################################################
+
+# valid SVN urls are:
+# svn://
+# svn+http:// (will be transformed to http://)
+
+
+plugin_source_download_svn() {
+  # check if we can handle this URL format
+  if [ "${1:0:6}" != "svn://" -a "${1:0:11}" != "svn+http://" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_needrefresh_svn($@)"
+
+  if ! module_installed subversion ; then
+    # full stop: we need to make sure the user sees this error:
+    message "${PROBLEM_COLOR}! Cannot fetch SVN sources without \"subversion\" installed${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  SVN_URL=$(echo $1 | cut -d: -f1-2)
+  SVN_DIR=$(echo $1 | cut -d: -f3)
+  # translate svn+http urls:
+  if [ "${SVN_URL:0:11}" == "svn+http://" ]; then
+    SVN_URL="http://${SVN_URL:11}"
+  fi
+
+  message  "${MESSAGE_COLOR}Downloading SVN module for" \
+ 	   "module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+  mk_source_dir $TMPDIR/$MODULE-$VERSION
+  cd $TMPDIR/$MODULE-$VERSION
+
+  if [ -f "$2" ] ; then
+    verbose_msg "Extracting local SVN copy"
+    # unpacking in last component dir of $SVN_DIR
+    CD=$(pwd -P)
+    if ! tar xjf $2 ; then
+      message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
+      
+      rm_source_dir $TMPDIR/$MODULE-$VERSION
+      mk_source_dir $TMPDIR/$MODULE-$VERSION
+    fi
+    cd $CD
+  fi
+
+  NUM_RETRY=${NUM_RETRY:-5}
+  if [ "$NUM_RETRY" -eq 0 ]; then
+      NUM_RETRY=1000
+  fi
+
+  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
+    if [ -d "${SVN_DIR}/.svn" ] ; then
+      cd ${SVN_DIR}
+      verbose_msg "[${TRY}] svn up"
+      svn up && GOT_SVN="yes" 
+      cd ${CD}
+    else
+      verbose_msg "[${TRY}] svn co $SVN_URL $SVN_DIR"
+      svn co $SVN_URL $SVN_DIR && GOT_SVN="yes"
+    fi
+
+    if [ "$?" == "0" ] ; then
+      break
+    fi
+
+    sleep 2
+  done
+  
+  if [ "$GOT_SVN" == "yes" ] ; then
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$2${DEFAULT_COLOR}"
+    # pack in last component dir of $SVN_DIR
+    tar cjf $2 $SVN_DIR
+  else
+    activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $1"
+  fi
+
+  cd $TMPDIR
+  rm_source_dir $TMPDIR/$MODULE-$VERSION
+
+}
+
+
+plugin_source_needrefresh_svn() {
+  # check if we can handle this URL format
+  if [ "${1:0:6}" != "svn://" -a "${1:0:11}" != "svn+http://" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_needrefresh_svn($@)"
+
+  if [ ! -f $2 ]; then
+    return 0
+  fi
+
+  SVN_THRESHOLD=${SVN_THRESHOLD:-10}
+  if (( "SVN_THRESHOLD" > 0 )) ; then
+	if [ "$(find $2 -amin +$SVN_THRESHOLD)" == "$2" ] ; then
+      # it is older:
+	  return 0
+	else
+      verbose_msg "SVN update not required for \"$2\" (less than $SVN_THRESHOLD mins old)"
+      # now we can send a FAIL so the next plugins are skipped:
+	  return 1
+    fi
+  else
+    # always return true if threshhold is zero
+    return 0
+  fi
+}
+
+
+plugin_register SOURCE_DOWNLOAD plugin_source_download_svn
+plugin_register SOURCE_NEEDREFRESH plugin_source_needrefresh_svn
+
