@@ -340,14 +340,16 @@ get_url() {
 
 lget_lock()  {
   debug_msg "lget_lock ($@)"
-  echo $$ > /var/lock/lgetting.$1
+  mod_v_safe_edit $1
+  echo $$ > /var/lock/lgetting.$MOD_V_SNAME
 }
 
 
 lget_locked()  {
   debug_msg "lget_locked ($@)"
-  if [ -f "/var/lock/lgetting.$1" ] &&
-        ps `cat /var/lock/lgetting.$1` | grep  -q  "lget" ; then
+  mod_v_safe_edit $1
+  if [ -f "/var/lock/lgetting.$MOD_V_SNAME" ] &&
+        ps `cat /var/lock/lgetting.$MOD_V_SNAME` | grep  -q  "lget" ; then
     true
   else
     false
@@ -357,7 +359,8 @@ lget_locked()  {
 
 lget_unlock()  {
   debug_msg "lget_unlock ($@)"
-  rm -f /var/lock/lgetting.$1 &> /dev/null
+  mod_v_safe_edit $1
+  rm -f /var/lock/lgetting.$MOD_V_SNAME &> /dev/null
 }
 
 
