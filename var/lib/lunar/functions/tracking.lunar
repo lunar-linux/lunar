@@ -71,6 +71,7 @@ create_install_log() {
   debug_msg "create_install_log ($@)"
 
   TMP_INST_LOG=$(temp_create "install-log")
+  chmod 644 $TMP_INST_LOG
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
   rm -f $INST_LOG &> /dev/null
 
