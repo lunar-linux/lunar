@@ -16,17 +16,20 @@ optimize() {
   else
      echo -e GCCVER=$COMPILER >> /etc/lunar/local/config
   fi
-  echo -e PLATFORM=$PLATFORM    '\n'    \
-          BUILD=$BUILD          '\n'    \
-	  MAKES=$MAKES          '\n'    \
-          COPT=$COPT            '\n'    \
-          CCOPT=$CCOPT          '\n'    \
-          BOPT=$BOPT            '\n'    \
-          CPU=$CPU              '\n'    \
-          SPD=( ${SPD[@]} )     '\n'    \
-          XTRA=( ${XTRA[@]} )   '\n'    \
-          FPM=$FPM              '\n'    \
-          LDF=( ${LDF[@]} )     '\n'    \
+  echo -e PLATFORM=$PLATFORM            '\n'\
+          BUILD=$BUILD                  '\n'\
+	  MAKES=$MAKES                  '\n'\
+          COPT=$COPT                    '\n'\
+          CCOPT=$CCOPT                  '\n'\
+          BOPT=$BOPT                    '\n'\
+          CPU=$CPU                      '\n'\
+          SPD=( ${SPD[@]} )             '\n'\
+	  STACK=$STACK                  '\n'\
+          XTRA=( ${XTRA[@]} )           '\n'\
+          FPM=$FPM                      '\n'\
+	  CC_WARN=( ${CC_WARN[@]} )     '\n'\
+	  CCC_WARN=( ${CCC_WARN[@]} )   '\n'\
+          LDF=( ${LDF[@]} )             '\n'\
           ADDON=( ${ADDON[@]} ) > /etc/lunar/local/optimizations
 }
 
@@ -163,13 +166,15 @@ help() {
         Risky_HELP="Optimize to increase performance ... by violating ANSI and IEEE FP rules"
      Pointers_HELP="Optimize by omiting frame pointers"
      Siblings_HELP="Optimize sibling calls"
-    Profiling_HELP="Generate profiles"
-    Branching_HELP="Predict branching"
+    Profiling_HELP="Generate profiles (For later use with Branching)"
+    Branching_HELP="Predict branching (For using profiled sources)"
      Aliasing_HELP="Enable strict aliasing (enabled by default -O1 and above)"
         Cprop_HELP="Reduce scheduling dependancies and remove copies"
         Float_HELP="Enable float store"
       Address_HELP="Force memory address"
         Align_HELP="Align functions, loops, and jumps"
+    Expensive_HELP="Perform expensive optimizations"
+      Doubles_HELP="Align double, long double, and long long on two word boundries"
                ;;
 
    # Help for extra options
@@ -193,12 +198,13 @@ help() {
                ;;
    # Warn help
   cc_warn_help)
-          MENU="Enable/Disable C compiler warnings"
+           MENU="Enable/Disable C compiler warnings"
+Deprecated_HELP="Disable warnings of deprecated..."
+
               ;;
               
  ccc_warn_help)
           MENU="Enable/Disable C++ compiler warnings"
-     None_HELP="Do not change any C++ compiler warnings from default."
      Deprecated_HELP="Disable warnings of deprecated..."
               ;;
           
@@ -342,7 +348,10 @@ spd_options() {
              "Cprop"     "-fno-cprop-registers"      $( echo ${SPD[@]} | grep -q "Cprop" && echo "on" || echo "off" )     "$Cprop_HELP"
 	     "Float"     "-ffloat-store"             $( echo ${SPD[@]} | grep -q "Float" && echo "on" || echo "off" )     "$Float_HELP"
              "Address"   "-fforce-addr"              $( echo ${SPD[@]} | grep -q "Address" && echo "on" || echo "off" )   "$Address_HELP"
-             "Align"     "-ffalign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" )
+             "Align"     "-ffalign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
+             "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
+             "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP" )
+
 }
 
 xtra_options() {
@@ -361,14 +370,12 @@ fpm_options() {
              "Altivec"   ""   $([ "$FPM" == "Altivec" ] && echo "on" || echo "off" )  "$Altivec_HELP" )
 }
 
-cc_warn_options() { 
-  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
-            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" ) 
+cc_warn() { 
+  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
 }
 
-ccc_warn_options() { 
-  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
-            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" )
+ccc_warn() { 
+  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CCC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
 }
 
 ldf_options() {

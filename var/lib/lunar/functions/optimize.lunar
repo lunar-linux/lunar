@@ -31,8 +31,11 @@ else
           BOPT=-O0                '\n'    \
           CPU=i386                '\n'    \
           SPD=( )                 '\n'    \
+	  STACK=                  '\n'    \
           XTRA=( )                '\n'    \
           FPM=                    '\n'    \
+	  CC_WARN=( )             '\n'    \
+	  CCC_WARN=( )            '\n'    \
           LDF=( )                 '\n'    \
           ADDON=( ) > /etc/lunar/local/optimizations
 fi
@@ -41,7 +44,7 @@ optimize_make() {
   if [[ $PSAFE == "no" ]]; then
     MAKES=1
   fi
-  if module_installed linux-mosix; then
+  if module_installed linux-openmosix; then
     alias make="mosrun -h make"
     if [[ $MAKES > 1 ]]; then
       alias make="mosrun -h make -j$MAKES"
@@ -345,6 +348,8 @@ optimize_cpu()  {
 
 
 
+
+
 # Begin Alpha options
       ev4)     CFLAGS="$CFLAGS -mcpu=ev4"
                CXXFLAGS="$CXXFLAGS -mcpu=ev4"
@@ -490,12 +495,18 @@ optimize_speed() {
         Profiling) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
+		     if ! [[ `grep KEEP_SOURCE=yes /etc/lunar/local/config` ]]; then
+		       echo "KEEP_SOURCE=yes" >> /etc/lunar/local/config
+		     fi
                    else
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
         Branching) if [[ $GCCVER == "3" ]] ; then
+	             if [[ `grep KEEP_SOURCE=yes /etc/lunar/local/config` ]]; then
+		       sedit "s/KEEP_SOURCE=yes/KEEP_SOURCE=no/" /etc/lunar/local/config
+		     fi
                      CFLAGS="$CFLAGS -fbranch-probabilities"
                      CXXFLAGS="$CXXFLAGS -fbranch-probabilities"
                    else
@@ -543,8 +554,36 @@ optimize_speed() {
                      CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
+        Expensive) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fexpensive-optimizations"
+                     CXXFLAGS="$CXXFLAGS -fexpensive-optimizations"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+          Doubles) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -malign-double"
+                     CXXFLAGS="$CXXFLAGS -malign-double"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+
       esac
    done
+}
+
+optimize_stack() {
+  if [[ $STACK > 0 ]]; then
+    if [[ $PLATFORM == "x86" ]]; then
+      STACK="-mpreferred-stack-boundary=$STACK" 
+    fi
+      CFLAGS="$CFLAGS $STACK"
+      CXXFLAGS="$CXXFLAGS $STACK"
+      CPPFLAGS="$CPPFLAGS $STACK"
+  fi
 }
 
 optimize_extra() {
@@ -661,18 +700,42 @@ optimize_addon() {
   done
 }
 
+optimize_cc_warn() {
+  for W in ${CC_WARN[@]}; do
+    case $W in
+    Deprecated)
+      CFLAGS="$CFLAGS -Wno-deprecated"
+      ;;
+    esac
+  done
+}
+
+optimize_ccc_warn() {
+  for W in ${CCC_WARN[@]}; do
+    case $W in
+    Deprecated)
+      CXXFLAGS="$CXXFLAGS -Wno-deprecated"
+      CPPFLAGS="$CPPFLAGS -Wno-deprecated"
+      ;;
+    esac
+  done
+}
+
 optimize_platform() {
    unset CFLAGS CXXFLAGS LDFLAGS
    GCCVER="$1"
 
    case $PLATFORM in
-      x86)      optimize_make  $MAKES     &&
-                optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra ${XTRA[@]} &&
-                optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}  &&
+      x86)      optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+		optimize_stack               &&
+                optimize_fp       $FPM       &&
+		optimize_cc_warn             &&
+		optimize_ccc_warn            &&
+                optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
       Alpha)    optimize_make  $MAKES     &&
@@ -681,6 +744,8 @@ optimize_platform() {
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
+		optimize_cc_warn             &&
+		optimize_ccc_warn            &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
                 ;;
@@ -690,6 +755,8 @@ optimize_platform() {
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
+		optimize_cc_warn             &&
+		optimize_ccc_warn            &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
                 ;;
@@ -699,6 +766,8 @@ optimize_platform() {
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
+		optimize_cc_warn             &&
+		optimize_ccc_warn            &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
                 ;;
@@ -709,7 +778,7 @@ export CXX_EXT
 export CFLAGS
 export COPT
 export CCOPT
-export CXXFLAGS="$CXXFLAGS -Wno-deprecated"
+export CXXFLAGS
 export LDFLAGS
 
 }
@@ -779,6 +848,16 @@ optimize_architecture()  {
   menu radiolist              &&
   FPM=$RESULT
 
+  help cc_warn_help           &&
+  cc_warn             &&
+  menu checklist              &&
+  CC_WARN=$RESULT
+
+  help ccc_warn_help          &&
+  ccc_warn            &&
+  menu checklist              &&
+  CCC_WARN=$RESULT  
+
   help ldf_help               &&
   ldf_options                 &&
   menu checklist              &&
@@ -795,6 +874,13 @@ optimize_architecture()  {
 		--inputbox                       \
 		"Enter the number of concurrent makes ( >= 1 ). Hint: how many CPU's do you have?"  \
 		0 55 $MAKES`
+
+  STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
+                --nocancel                       \
+		--stdout                         \
+		--inputbox                       \
+		"Enter the number to set the stack to, leave empty for default."  \
+		0 55 $STACK`
 
   optimize
 }
