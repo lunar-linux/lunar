@@ -9,7 +9,7 @@ alien|leafs|orphans|prune|pam
 what|where|website|sources|maintainer <module>
 .PP 
 .B lvu
-compile|install|sum|md5sum <module>
+compile|compiler|install|sum|md5sum <module>
 .PP 
 .B lvu
 export|import [snapshot]
@@ -37,13 +37,13 @@ voyeur [delay or module]
 .PP 
 .B lvu
 depends <module>
-.PP
+.PP 
 .B lvu
 tree <module>
-.PP
+.PP 
 .B lvu
 eert <module>
-.PP
+.PP 
 .B lvu
 $MODULE_SCRIPT <module>
 .PP 
@@ -64,11 +64,11 @@ find and display all files which are not currently tracked by the lunar package 
 .B leafs
 .IP 
 displays installed modules that have no explicit dependencies on them
-.PP
+.PP 
 .B orphans
-.IP
+.IP 
 displays installed modules that are missing required dependancies
-.PP
+.PP 
 .B prune
 .IP 
 removes all old source code and old backups. Otherwise the source code from previous versions is kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date, but not installed.
@@ -106,6 +106,11 @@ display the email address of the person currently responsible for maintaining a 
 module
 .IP 
 show the compiler output generated when the module was built
+.PP 
+.B compiler
+module
+.IP 
+display the version of compiler used for creating the ELF files in modules
 .PP 
 .B install
 module
@@ -187,19 +192,19 @@ start looking at what lin is compiling at the moment and outputs it. A module ca
 .PP 
 .B depends
 <module>
-.IP
+.IP 
 displays the modules that explicitly or recursively depend on this module.
-.PP
+.PP 
 .B tree
 <module>
-.IP
+.IP 
 displays a tree of the module's dependencies.
-.PP
+.PP 
 .B eert
 <module>
-.IP
+.IP 
 displays a tree of the module's reverse dependencies.
-.PP
+.PP 
 .B $MODULE_SCRIPT
 module
 .IP 
