@@ -61,8 +61,8 @@ orphans                    display installed modules that are missing
 held                       display held modules
 exiled                     display exiled modules
 
-search      "phrase"       searches module's long descriptions for phrase.
-service     port|acronym   displays module's that provide that service
+search      "phrase"       searches all modules long descriptions for phrase.
+service     port|acronym   displays modules that provide that service
 
 website     module         display a module's website
 install     module         display an install log
