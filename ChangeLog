@@ -1,3 +1,8 @@
+2003-04-22 21:37  sofar
+
+	* var/lib/lunar/subroutines: Prevent moonbase to be tagged for
+	removal on a lunar update.
+
 2003-04-22 15:32  sofar
 
 	* var/lib/lunar/functions/moonbase.lunar: Atomizing get_moonbase,
@@ -140,15 +145,4 @@
 2003-03-24 00:13  sofar
 
 	* var/lib/lunar/functions/download.lunar: muuuuuch better
-
-2003-03-23 23:43  sofar
-
-	* sbin/lget, sbin/lin, var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/postbuild.lunar: deprecated use_cvs and the
-	CVS_MODULE scheme, CVS is now 100% transparent. Hope to merge these
-	changes into lunar soon.
-
-2003-03-23 14:28  sofar
-
-	* sbin/lin: typo
 
