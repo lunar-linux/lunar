@@ -104,10 +104,6 @@ main() {
       temp_destroy $TEMP_PREPAREDDEPS
       verbose_msg "Unexpected errors, bailing out!"
       exit 1
-    elif [ -n "$DEPS_ONLY" ] ; then
-      temp_destroy $TEMP_DOWNLOADLOG
-      temp_destroy $TEMP_PREPAREDDEPS
-      exit 0
     fi
 
     # pass 2 : hit the download manager button and grab a beer
@@ -166,37 +162,28 @@ main() {
       fi
     fi
 
-    if [ -z "$TEMP_PREPAREDDEPS" ] ; then
-      FLAG_PREPAREDDEPS_SET=on
-      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
-    fi
+    run_details $MODULE &&
+    run_configure $MODULE &&
+    run_depends $MODULE
 
-    if ! module_held $MODULE ; then
-      if [ -n "$PROBE" ] ; then
-        if ! module_installed $MODULE ; then
-          build_depends $MODULE &&
-          if [ ! -n "$DEPS_ONLY" ] ; then
+    if [ -z "$DEPS_ONLY" ] ; then
+      if ! module_held $MODULE ; then
+        if [ -n "$PROBE" ] ; then
+          if ! module_installed $MODULE ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
               exit 1
             fi
           fi
-        fi
-      else
-        build_depends $MODULE &&
-        if [ ! -n "$DEPS_ONLY" ] ; then
+        else
           if ! lin_module $MODULE ; then
             temp_destroy $TEMP_PREPAREDDEPS
             exit 1
           fi
         fi
+      else
+        verbose_msg "Skipping held module \"$MODULE\""
       fi
-    else
-      verbose_msg "Skipping held module \"$MODULE\""
-    fi
-    if [ -n "$FLAG_PREPAREDDEPS_SET" ] ; then
-      temp_destroy $TEMP_PREPAREDDEPS
-      unset FLAG_PREPAREDDEPS_SET
     fi
   fi
   

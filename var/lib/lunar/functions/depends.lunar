@@ -258,7 +258,7 @@ satisfy_depends()  {
       OPTS="$OPTS $DEP_OFF"
     elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
         ! module_held $DEP_MODULE ; then
-      if lin $SILENT $COMPILE $DEP_MODULE ; then
+      if lin $DEPS_ONLY $SILENT $COMPILE $DEP_MODULE ; then
         OPTS="$OPTS $DEP_ON"
       else
         exit 1

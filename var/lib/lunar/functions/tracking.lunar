@@ -70,7 +70,7 @@ parse_iw() {
 create_install_log() {
 
   debug_msg "create_install_log ($@)"
- mod_v_safe_edit $MODULE
+  mod_v_safe_edit $MODULE
 
   TMP_INST_LOG=$(temp_create "install-log")
   INST_LOG="$INSTALL_LOGS/$MOD_V_SNAME-$VERSION"

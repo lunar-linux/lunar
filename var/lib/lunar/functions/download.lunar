@@ -305,7 +305,9 @@ get_url() {
       fi
     elif [ "${1:0:7}" == "cpan://" ] ; then
       # skip CPAN modules here...
-      :
+      URL="$CPAN_URL/${1:7}"
+      FILE=$(basename $URL)
+      get_url $URL $2
     elif [ "${1:0:5}" == "file:" ] ; then
       # adding this since wget is a bitch and will not fetch this... sigh
       # this will copy file to $2... so you may use it as you like
@@ -401,7 +403,8 @@ download_module() {
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SOURCE_CACHE/$SRC
 	elif [ "${URL:0:6}" == "cpan://" ] ; then
-	  verbose_msg "skipping CPAN downloads!!!"
+	  verbose_msg "trying to download \"$URL\""
+	  get_url $URL $SOURCE_CACHE/$SRC
 	else
 	  verbose_msg "Skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
 	  continue 2

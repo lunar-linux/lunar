@@ -219,6 +219,11 @@ default_cvs_build() {
 default_cpan_pre_build() {
   debug_msg "default_cpan_pre_build ($@)"
   mk_source_dir $SOURCE_DIRECTORY
+  cd $SOURCE_DIRECTORY
+  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
+  CPAN_SOURCE_BRANCH=$(dirname $CPAN_MODULE)
+  mkdir -p authors/id/${CPAN_SOURCE_BRANCH}
+  install -m 444 $SOURCE_CACHE/$SOURCE authors/id/${CPAN_SOURCE_BRANCH}
 }
 
 
@@ -231,29 +236,14 @@ default_cpan_build() {
   fi
   
   CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  echo "o conf cpan_root /var/state/lunar
+  echo "o conf cpan_root $STATE_DIRECTORY
         o conf build_dir $SOURCE_DIRECTORY
-        o conf keep_source_where $SOURCE_CACHE/cpan
+        o conf keep_source_where $SOURCE_DIRECTORY
 	install $CPAN_MODULE
-	quit" | /usr/bin/cpan
+	quit" | /usr/bin/cpan || exit 1
   RESULT=$?
   rm_source_dir $SOURCE_DIRECTORY
 
-  # some crude checking is done here:
-  debug_msg "verifying installed version of \"$MODULE\""
-  CHECK=$(echo "o conf cpan_root /var/state/lunar 
-  m $CPAN_MODULE" | cpan | grep INST_VERSION | awk '{print $2}')
-  if [ -z "$CHECK" ] ; then
-    message "${PROBLEM_COLOR}Error: nothing was installed!${DEFAULT_COLOR}"
-    return 1
-  elif [ "$CHECK" == "$VERSION" ] ; then
-    message "${MESSAGE_COLOR}CPAN module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${VERSION_COLOR}$VERSION${DEFAULT_COLOR}${MESSAGE_COLOR} installed OK${DEFAULT_COLOR}"
-    return 0
-  else 
-    message "${PROBLEM_COLOR}Warning: ${DEFAULT_COLOR}${MESSAGE_COLOR}Wrong version ${DEFAULT_COLOR}${VERSION_COLOR}$CHECK${DEFAULT_COLOR}${MESSAGE_COLOR}, expected ${DEFAULT_COLOR}${VERSION_COLOR}$VERSION${DEFAULT_COLOR}${MESSAGE_COLOR} for CPAN module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
-    return 0
-  fi
-  
 } > $C_FIFO 2>&1
 
 
