@@ -1,3 +1,11 @@
+2005-03-18 22:50  sofar
+
+	* sbin/lrm: oops!
+
+2005-03-18 14:48  sofar
+
+	* var/lib/lunar/functions/download.lunar: Yikes!!!
+
 2005-03-18 11:01  sofar
 
 	* bin/lvu, var/lib/lunar/unset.sh,
