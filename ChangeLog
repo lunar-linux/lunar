@@ -473,8 +473,3 @@
 	client id, sent to lunar-linux.org with a null wget cmd unique id
 	by hashing the MAC addrs of the primary interface
 
-2003-06-13 03:56  tchan
-
-	* var/lib/lunar/functions/optimize.lunar: Corrected a typo in the
-	beginning of the bash code -- changed "PLATFOM" to "PLATFORM"
-
