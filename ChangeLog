@@ -1,4 +1,5 @@
-2004-08-26 14:11  sofar
+2004-11-11 02:26  v3rt1g0
 
-	* etc/lunar/mirrors/LRESORT: badly needed update
+	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC: memtest86+
+	  is not non-x86 friendly
 
