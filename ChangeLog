@@ -1,3 +1,14 @@
+2004-04-24 19:08  sofar
+
+	* var/lib/lunar/functions/main.lunar: Env var pollution pro bono,
+	get your env var pollution!!!
+
+2004-04-24 15:45  sofar
+
+	* var/lib/lunar/functions/main.lunar: Moe: I really don't like the
+	workaround you used for the download procedure .. theedge is
+	lget'ed twice f.e. [FIXED]
+
 2004-04-17 16:33  sofar
 
 	* sbin/lin: thx for spotting this nick
