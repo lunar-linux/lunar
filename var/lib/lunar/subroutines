@@ -499,7 +499,7 @@ install_xinetd_confs()  { (
 
     if  [  -n  "$SERVICES"  ];  then
       devoke_installwatch
-      /etc/init.d/xinetd  restart
+      [ ! -x /etc/init.d/xinetd ] || /etc/init.d/xinetd  restart
       invoke_installwatch
     fi
   fi
