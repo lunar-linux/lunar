@@ -79,7 +79,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
               KDE_URL=ftp://ftp.kde.org/pub/kde
             GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
            KERNEL_URL=ftp://ftp.kernel.org
-           SFORGE_URL=http://telia.dl.sourceforge.net/sourceforge
+           SFORGE_URL=http://osdn.dl.sourceforge.net/sourceforge
           XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
           LRESORT_URL=http://www.lunar-linux.org/lunar/cache
 
