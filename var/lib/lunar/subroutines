@@ -1787,7 +1787,10 @@ fix_depends () {
     if (( $(cat $INSTALL_QUEUE | wc -l) > 1 )) ; then
       lock_file $DEPENDS_STATUS
       cp $DEPENDS_STATUS $TMP/depends
-      cat $TMP/depends.new-* | sort | uniq > $DEPENDS_STATUS
+      while read LINE ; do
+        grep -v $(echo $LINE | cut -d: -f1) $TMP/depends > $DEPENDS_STATUS
+      done < $TMP/depends
+      cat $TMP/depends.new-* | sort | uniq >> $DEPENDS_STATUS
       cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       sort_install_queue
       cat $TMP/depends > $DEPENDS_STATUS
