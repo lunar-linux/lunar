@@ -95,7 +95,7 @@ JUNK="]]]]]]"
 
 # Handy
 pgrep () {
-	/bin/pgrep -P 1 $PROCESS_BASE >& /dev/null && return 0 || return -1
+	/bin/pgrep -P 1 ^$PROCESS_BASE >& /dev/null && return 0 || return -1
 }
 pkill () {
 	[ -e $PIDFILE ] || return -1
