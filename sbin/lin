@@ -265,9 +265,8 @@ run_build()  {
 
   invoke_installwatch
 
-  echo -n installing in dir: 
-  echo `pwd`
-  echo $MODULE   $VERSION
+  [ "$VERBOSE" == "on" ] && 
+     echo "+ building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
   if [ -x ./configure ] || [ -x ./src/configure ] ; then
     if [ -f /var/lib/lunar/localsaconfig ]; then
