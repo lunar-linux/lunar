@@ -1,3 +1,7 @@
+2005-02-22 12:50  moe
+
+	* etc/lunar/config: Adding the X11 path to the static lunar PATH
+
 2005-02-14 13:01  nestu
 
 	* var/lib/lunar/functions/kernel.lunar: * get rid of the annoying
