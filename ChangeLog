@@ -1,3 +1,11 @@
+2003-10-19 04:36  tchan
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	Updated the SPARC sections of optimize.lunar and optimize.menu. 
+	Still needs some work in the CPU hint section as "cat
+	/proc/cpuinfo" does NOT return a "model type" string -- instead it
+	returns a "type" string and a "cpu" string.
+
 2003-10-17 10:23  jasper
 
 	* sbin/lget, usr/share/man/man8/lget.8: Updating lget and manpage
@@ -142,9 +150,4 @@
 	drop the number of downloads from dbguin. Small fix for calls to
 	LRESORT downloads, and starting to rephrase numeric statements to
 	something that is unmistakenly numeric (( ... )).
-
-2003-08-19 20:06  sofar
-
-	* var/lib/lunar/excluded: Adding /root/.distcc and resorting it
-	alphabetically.
 
