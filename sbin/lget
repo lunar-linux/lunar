@@ -36,11 +36,9 @@ Lget downloads single or multiple module source files.
 Example : lget  nano hdparm sudo
 Usage   : lget  [parameters] [modules]
 
-Typing lget with no modules causes lget to download 
-every available source specified in the moonbase.
-
 Optional Parameters:
 
+   -a | --all			Download all sources available in moonbase
    -d | --debug                 Enables debug messages
    -f | --from  directory       Specify an alternate for $SOURCE_CACHE
    -h | --help                  Displays this help text
