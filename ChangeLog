@@ -91,9 +91,3 @@
 	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
 	the logfile easier: 'lvu activity'
 
-2003-01-24 21:56  sofar
-
-	* bin/lvu, etc/lunar/config, sbin/lget, sbin/lin, sbin/lunar,
-	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/menu/mirrors.menu: Merging theedge into lunar! =^D
-
