@@ -70,13 +70,20 @@ function find_depends() {
 sort_by_dependency() {
   debug_msg "sort_by_dependency ($@)"
 
+  included=""
+
   recurse() {
     for MOD in $* ; do
-      LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
-      for DEP in $LIST ; do
-        echo $MOD $DEP
-      done
-      recurse $LIST
+      if echo "$included" | grep -qFx "$MOD" ; then
+        debug_msg "Cutoff: $MOD"
+      else
+        LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
+        for DEP in $LIST ; do
+          echo $MOD $DEP
+        done
+        included=$included$'\n'$MOD
+        recurse $LIST
+      fi
     done
   }
 
