@@ -143,12 +143,18 @@ mk_source_dir() {
   verbose_msg "creating building dir \"$NEW_DIR\""
 
   if [ "$TMPFS" != "off" ]; then 
-    umount  $NEW_DIR  2>/dev/null
-    rmdir   $NEW_DIR  2>/dev/null
+    if [ -d $NEW_DIR ] ; then
+      verbose_msg "Removing old source directory first!"
+      umount  $NEW_DIR  2>/dev/null
+      rmdir   $NEW_DIR  2>/dev/null
+    fi
     mkdir  -p  $NEW_DIR  &&
     mount  -o  size=1g,nr_inodes=1m  -t  tmpfs  tmpfs  $NEW_DIR
   else
-    rm -rf  $NEW_DIR  2>/dev/null
+    if [ -d $NEW_DIR ] ; then
+      verbose_msg "Removing old source directory first!"
+      rm -rf  $NEW_DIR  2>/dev/null
+    fi
     mkdir  -p  $NEW_DIR
   fi
 

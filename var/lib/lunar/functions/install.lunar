@@ -495,10 +495,15 @@ current_locked() {
 build_module_depends() {
 (
   debug_msg "build_module_depends ($@)"
-  run_details $1 &&
-  run_configure &&
-  run_depends &&
-  satisfy_depends
+  if [ -n "$DEPS_ONLY" ] ; then
+    run_details $1 &&
+    run_depends
+  else
+    run_details $1 &&
+    run_configure &&
+    run_depends &&
+    satisfy_depends
+  fi
 )
 }
 

@@ -303,8 +303,12 @@ exile_modules() {
     lock_file $MODULE_STATUS_BACKUP
     lock_file $MODULE_STATUS
     for MODULE in "$@" ; do
-      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
-      grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:exiled:" >> $MODULE_STATUS_BACKUP
+      if $(module_installed $MODULE) ; then
+        grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+        grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:exiled:" >> $MODULE_STATUS_BACKUP
+      else
+        echo "$MODULE::exiled:0.0" >> $MODULE_STATUS_BACKUP
+      fi
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
     done
     unlock_file $MODULE_STATUS

@@ -8,8 +8,7 @@
 # $FUNCTIONS/depends                                       #
 # includes find_depends is_depends in_depends              #
 # remove_depends add_depends run_depends                   #
-# rework_module rework_list                                #
-# fix_depends satisfy_depends                              #
+# satisfy_depends                                          #
 #                                                          #
 # 20020710                                                 #
 #                                                          #

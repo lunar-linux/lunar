@@ -86,7 +86,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lget -o "df:hu:v" -l "debug,from:,help,url:,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:v" -l "all,debug,from:,help,url:,verbose" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -99,15 +99,22 @@ else
   set_priority
   while true ; do
     case "$1" in
+      -a|--all     ) export LGET_ALL=yes ;                      shift   ;;
       -d|--debug   ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
       -f|--from    ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
       -h|--help    ) help ;                                     exit  1 ;;
       -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
       -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
       --) shift ; break ;;
-      *) help ; exit ;;
     esac
   done
 
-  main $@
+  if [ -n "$LGET_ALL" ] ; then
+    main
+  elif [ -z "$@" ] ; then
+    help
+    exit 1
+  else
+    main $@
+  fi
 fi

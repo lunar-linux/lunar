@@ -57,7 +57,7 @@ install    modulename(s)  Install a checklist of modules
 remove     modulename(s)  Remove a checklist of modules
 hold       modulename(s)  Place a hold on a checklist of modules
 unhold     modulename(s)  Remove a hold on a checklist of modules
-exile      modulename(s)  Remove a module and prevent it from being resurrected
+exile      modulename(s)  Remove a module a/o prevent it from being resurrected
 unexile    modulename(s)  Allows a module to be compiled|resurrected again
 EOF
   exit  1
