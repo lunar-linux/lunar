@@ -901,7 +901,7 @@ main()  {
         if module_installed $2 ; then
           find_module_size $2
         else
-          message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
+          message "${PROBLEM_COLOR}$2 is not installed${DEFAULT_COLOR}"
         fi
       fi
       ;;
