@@ -83,7 +83,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
            KERNEL_URL=ftp://ftp.kernel.org
            SFORGE_URL=http://telia.dl.sourceforge.net/sourceforge
           XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
-          LRESORT_URL=http://www.lunar-linux.com/lunar/cache
+          LRESORT_URL=http://www.lunar-linux.org/lunar/cache
 
 	 MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
             PATCH_URL=http://www.lunar-linux.org/lunar/patches
