@@ -3,20 +3,66 @@
 # subroutines - Lunar subroutines                          #
 #                                                          #
 ############################################################
-#
-# kernel.lunar functions for managing kernel installation
-# and bootloaders
-#
+#                                                          #
+# kernel.lunar functions for managing kernel installation  #
+# and bootloaders                                          #
+#                                                          #
 ############################################################
-#
+#                                                          #
+# Parts Copyrighted Niki Guldbrand 2003 under GPLv2        #
+#                                                          #
+############################################################
 
 #
-# function backup_mods_krnl
-#
-# Usage backup_mods_krnl $MODULE-$VERSION-$EXTRAVERSION
-# Return value
-#
+# Description : This function makes backups of the kernels and the kernel
+#               module dirs.
+# Name        : backup_mods_krnl
+# Arg 1       : Filename of the kernel to backup (With or witout full path)
+#               With the format $MODULE_NAME-$VERSION-$EXTRAVERSION
+# Arg 2       : the number of levels we need to backup, minimu a number of 
+#               "2" is required
+backup_mods_krnl()
+{
+  debug_msg "backup_mods_krnl ($@)"
 
-backup_mods_krnl()  {
+  KERNEL_STRING=$(basename $1 | cut -d "-" -f "2-")
+  KERNEL_MODULE=$(basename $1 | cut -d "-" -f "-1")
+  KERNEL_VERSION=$(echo $KERNEL_STRING | cut -d "-" -f "1")
+  KERNEL_EXTRA=$(echo $KERNEL_STRING | cut -d "-" -f "2")
 
+  BACKUP_LEVEL=$2
+
+  if [ -d /lib/modules/${KERNEL_STRING}.old_${I} ]; then
+    verbose_msg "removing old kernel modules backup no. \"$BACKUP_LEVEL\""
+    rm -rf /lib/modules/${KERNEL_STRING}.old_${I}
+  fi
+  if [ -f /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_${I} ]; then
+    verbose_msg "removing old kernel backup no. \"$BACKUP_LEVEL\""
+    rm /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_${I}
+  fi
+
+  for I in $(seq $BACKUP_LEVEL -1 1); do
+    if [ -d /lib/modules/${KERNEL_STRING}.old_$((${I} - 1)) ]; then
+      verbose_msg "moving kernel modules backup from no. \"$((${I} - 1))\" to \"${I}\""
+      mv /lib/modules/${KERNEL_STRING}.old_$((${I} - 1)) \
+         /lib/modules/${KERNEL_STRING}.old_${I}
+    fi
+
+    if [ -f /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_$((${I} - 1 )) ]; then
+      verbose_msg "moving kernel backup from no. \"$((${I} - 1))\" to \"${I}\""
+      mv /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_$((${I} - 1)) \
+         /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_${I}
+    fi
+  done
+
+  if [ -d /lib/modules/${KERNEL_STRING} ]; then
+    verbose_msg "moving current kernel modules to first backup no. \"0\""
+    mv /lib/modules/${KERNEL_STRING}       \
+       /lib/modules/${KERNEL_STRING}.old_0
+  fi
+  if [ -f /boot/${KERNEL_MODULE}-${KERNEL_STRING} ]; then
+    verbose_msg "moving current kernel to first backup no. \"0\""
+    mv /boot/${KERNEL_MODULE}-${KERNEL_STRING}       \
+       /boot/${KERNEL_MODULE}-${KERNEL_STRING}.old_0
+  fi
 }
