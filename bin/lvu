@@ -565,9 +565,15 @@ function show_tree() {
 
 
 show_eert() {
+  if [ -n "$SHORTTREE" ] ; then
+    DEPENDS=$DEPENDS_STATUS
+  else
+    DEPENDS=$DEPENDS_CACHE
+  fi
+
   show_rtree() {
     # we need to do an reverse tree for $1
-    RDEPS=$(grep ":$1:" $DEPENDS_CACHE | cut -d: -f1 | sort | uniq)
+    RDEPS=$(grep ":$1:" $DEPENDS | cut -d: -f1 | sort | uniq)
 
     if module_installed $1 ; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -576,7 +582,7 @@ show_eert() {
     fi
     
     for DEP in $RDEPS ; do
-      REL=$(grep "^$DEP:$1:" $DEPENDS_CACHE)
+      REL=$(grep "^$DEP:$1:" $DEPENDS)
       CUR=$(echo $REL | cut -d: -f1)
       if echo $REL | grep -q :required: ; then
         if module_installed $DEP ; then
