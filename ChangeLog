@@ -1,3 +1,66 @@
+2003-08-08 06:53  tchan
+
+	* usr/share/man/man8/: lin.8, lunar.8: Updated man pages to match
+	sofar's latest revisions.
+
+2003-08-08 05:59  tchan
+
+	* usr/share/man/man8/lunar.8: Updated man page for lunar with
+	sofar's latest version.
+
+2003-08-08 05:39  tchan
+
+	* usr/share/man/man8/lget.8: Updated the man page for lget, upto
+	sofar's latest version.
+
+2003-08-08 05:16  tchan
+
+	* usr/share/man/man8/lfirsttime.8: Added the reference to the man
+	page for lnet.
+
+2003-08-08 05:13  tchan
+
+	* usr/share/man/man8/lcrash.8: Updated lcrash man page.
+
+2003-08-08 05:10  tchan
+
+	* usr/share/man/man8/lrm.8: Updated man page for lrm upto sofar's
+	latest revisions.
+
+2003-08-08 04:44  tchan
+
+	* usr/share/man/man1/moonbase.1: Updated the man page for moonbase.
+
+2003-08-08 04:37  tchan
+
+	* usr/share/man/man1/lvu.1: Updated the lvu man page to reflect
+	sofar's latest changes.
+
+2003-08-08 04:16  tchan
+
+	* bin/lvu: Corrected some more typos in help() function.
+
+2003-08-08 03:59  tchan
+
+	* bin/lvu: Added some fixes to the help() function for lvu. 
+	Brought it upto date with sofar's latest standardized command line
+	options.
+
+2003-08-07 23:52  sofar
+
+	* sbin/lin, var/lib/lunar/functions/install.lunar: fix as of
+	request tchan: $BUILD was unset during resurrect, and hooking up
+	the code in lunar. Both approaches (lin -R or lunar resurrect)
+	tested thorougly.
+
+2003-08-07 18:01  sofar
+
+	* sbin/lin: Muchos gracias a tchan.
+
+2003-08-07 16:12  sofar
+
+	* sbin/lin: Slightly goofed up lin --deps code handling...
+
 2003-08-07 10:29  sofar
 
 	* usr/share/man/man8/lfirsttime.8: small adjustments
@@ -420,24 +483,4 @@
 
 	* var/lib/lunar/functions/modules.lunar: Fixes the disappearing
 	modules.index line (yikes!)
-
-2003-06-08 19:34  sofar
-
-	* var/lib/lunar/menu/optimize.menu: Adding tracer optimization
-
-2003-06-08 19:33  sofar
-
-	* sbin/lin: more commits: all subroutines moved to functions!
-
-2003-06-08 19:30  sofar
-
-	* var/lib/lunar/functions/: depends.lunar, download.lunar,
-	init.lunar, install.lunar, modules.lunar, optimize.lunar,
-	prune.lunar, sources.lunar: More merges that were left out
-	somehow...
-
-2003-06-08 19:17  sofar
-
-	* var/lib/lunar/functions/temp.lunar: Adding this, I'll integrate
-	this later
 
