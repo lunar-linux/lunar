@@ -900,7 +900,7 @@ parse()  {
    what)
      if [ ! -z "$2" ] ; then
        (
-       if run_details && SECTION=$(find_section $2) ; then
+       if run_details $2 && SECTION=$(find_section $2) ; then
          . $MOONBASE/$SECTION/$2/DETAILS
        fi
        )
