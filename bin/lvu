@@ -848,7 +848,7 @@ main()  {
       ;;
       
     search)
-      cat $MODULE_INDEX | grep -v 'MOONBASE_MD5' | while read ENTRY ; do
+      cat $MODULE_INDEX | while read ENTRY ; do
         MOD=$(echo $ENTRY | cut -d: -f1)
 	SEC=$(echo $ENTRY | cut -d: -f2)
         echo $MOONBASE/$SEC/$MOD/DETAILS
@@ -856,7 +856,7 @@ main()  {
       ;;
       
     service)
-      cat $MODULE_INDEX | grep -v 'MOONBASE_MD5' | while read ENTRY ; do
+      cat $MODULE_INDEX | while read ENTRY ; do
         MOD=$(echo $ENTRY | cut -d: -f1)
 	SEC=$(echo $ENTRY | cut -d: -f2)
 	if [ -f $MOONBASE/$SEC/$MOD/services ] ; then

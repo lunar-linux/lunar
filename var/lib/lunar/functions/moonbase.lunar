@@ -88,28 +88,3 @@ get_moonbase () {
 }
 
 
-# function : set_moonbase_md5
-# usage    : set_moonbase_md5
-# purpose  : creates the md5 value of overall moonbase
-set_moonbase_md5() {
-  debug_msg "set_moonbase_md5 ($@)"
-  MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
-  echo $MOONBASE_MD5
-}
-
-
-# function : get_moonbase_md5
-# usage    : get_moonbase_md5
-# purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
-get_moonbase_md5() {
-  debug_msg "get_moonbase_md5 ($@)"
-  MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
-                cut -d : -f 2-2)
-  if [ -z "$MOONBASE_MD5" ] ; then
-    MOONBASE_MD5="0"
-  fi
-  echo "$MOONBASE_MD5"
-}
-
-
-

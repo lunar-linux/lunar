@@ -67,7 +67,7 @@ display_moonbase_changes()  {
   MODULE_CHANGES=$(temp_create "module-changes")
 
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
-    diff -yI MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | sort > $MODULE_CHANGES
+    diff -y $MODULE_INDEX $TMP_MODULE_INDEX | sort > $MODULE_CHANGES
 
     NEW_MODULES=$(grep '<' $MODULE_CHANGES | wc -l)
     DEL_MODULES=$(grep '>' $MODULE_CHANGES | wc -l)

@@ -30,7 +30,7 @@
 list_sections() {
   debug_msg "list_sections ($@)"
   check_module_index
-  grep -v ^MOONBASE_MD5: $MODULE_INDEX | cut -d: -f2 | sort | uniq
+  cut -d: -f2 < $MODULE_INDEX | sort | uniq
   return 0
 }
 
@@ -102,18 +102,16 @@ create_module_index() {
   if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
-    echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
         sed -e 's:/DETAILS$::' -e 's:/var/lib/lunar/moonbase/::' -e 's|/|:|' | \
-	awk -F: '{print $2":"$1}' >> $TMP_INDEX
+	awk -F: '{print $2":"$1}' > $TMP_INDEX
     # we search zlocal locally to make sure they get found:
     find $MOONBASE/zlocal -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
-    find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' > $TMP_INDEX
   fi
   
   # this should be safe enough:
