@@ -321,6 +321,12 @@ run_configure() {
     fi
   fi
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
+
+  # add custom passed OPTS before retreiving them
+  if [ -n "$PASS_OPTS" ] ; then
+    OPTS="$(get_module_config OPTS) $PASS_OPTS"
+    set_module_config OPTS "$OPTS"
+  fi
   run_module_file $MODULE CONFIGURE
 }
 
