@@ -1,3 +1,14 @@
+2003-03-24 00:22  sofar
+
+	* var/lib/lunar/functions/modules.lunar: BIG BIG BIG bugfix: lunar
+	will now better find moved modules (umm, I say better, but I mean
+	actually that lunar now actually finds them. I dunno what is better
+	than that, so yeah, better).
+
+2003-03-24 00:13  sofar
+
+	* var/lib/lunar/functions/download.lunar: muuuuuch better
+
 2003-03-23 23:43  sofar
 
 	* sbin/lget, sbin/lin, var/lib/lunar/functions/download.lunar,
