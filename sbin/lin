@@ -128,23 +128,18 @@ main() {
       for MODULE in $MODULES ; do
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
           if ! module_held $MODULE ; then
-	   (
-	    run_details $MODULE
             linING="/var/lock/installing.$MODULE"
-            if [ -n "$COMPILE" ] || [ -n "$RECONFIGURE" ] || module_installed $MODULE || [ "$AUTORESURRECT" == "off" ] || resurrect $MODULE ) ; then
-              verbose_msg "starting lin \"$MODULE\""
-              if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
-                if [ -e "$TMP_LIN_FAIL" ] ; then
-                  echo "$MODULE" >> $TMP_LIN_FAIL
-                fi
-                lin_EXIT_STATUS=1;  
-              else
-                if [ -e "$TMP_LIN_SUCCESS" ] ; then
-                  echo "$MODULE" >> $TMP_LIN_SUCCESS
-                fi
+            verbose_msg "starting lin \"$MODULE\""
+            if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
+              if [ -e "$TMP_LIN_FAIL" ] ; then
+                echo "$MODULE" >> $TMP_LIN_FAIL
+              fi
+              lin_EXIT_STATUS=1;  
+            else
+              if [ -e "$TMP_LIN_SUCCESS" ] ; then
+                echo "$MODULE" >> $TMP_LIN_SUCCESS
               fi
             fi
-	   )
           else
             verbose_msg "Skipping compile and install for held module \"$MODULE\""
           fi
