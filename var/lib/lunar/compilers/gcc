@@ -3,7 +3,7 @@
 export PATH=${PATH/\/var\/lib\/lunar\/compilers:/}
 
 if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ $CXX_EXT gcc $COPT \"$@\"" > /dev/stderr
+  echo "++ $CC_EXT gcc $COPT \"$@\"" > /dev/stderr
 fi
   
 $CC_EXT gcc $COPT "$@"
