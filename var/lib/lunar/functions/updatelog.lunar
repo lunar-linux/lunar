@@ -25,7 +25,6 @@ display_update_log() {
     if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then 
       display_success_info
     fi
-    display_moonbase_changes
   } | tee /var/log/lunar/update 
 }
 
@@ -62,29 +61,21 @@ display_success_info() {
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
 display_moonbase_changes()  {  
-
-  MODULE_INDEX_BACKUP=/tmp/`basename $MODULE_INDEX`
-  
-  if [ -e "$MODULE_INDEX" ] && [ -e "$MODULE_INDEX_BACKUP" ]; then
-
-    NEW_MODULES=`diff -I MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | wc -l`
-    DEL_MODULES=`diff -I MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | wc -l`
+  if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
+    NEW_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '<' | wc -l)
+    DEL_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '>' | wc -l)
   
     if [ "$NEW_MODULES" != "0" ]; then
       message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
-      diff -I "MOONBASE_MD5:" $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | cut -d \  -f 2 -
+      diff -I "MOONBASE_MD5:" $MODULE_INDEX $TMP_MODULE_INDEX | grep '<' | cut -d \  -f 2 -
       message
     fi
 
     if [ "$DEL_MODULES" != "0" ]; then
       message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
-      diff -I "MOONBASE_MD5:" $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
+      diff -I "MOONBASE_MD5:" $MODULE_INDEX $TMP_MODULE_INDEX | grep '>' | cut -d \  -f 2 -
       message
     fi
-
-    rm -f $MODULE_INDEX_BACKUP
-
   fi
-  
 }
 

@@ -39,27 +39,27 @@ verbose_msg() {
 }
 
 
+# function : report FILE [description] MODULE VERSION
 report() {
-  if  [  ! -f  "$1"  ]; then
+  if [ ! -f "$1" ] ; then
     return
   fi
 
-  if  [  "$VIEW_REPORTS"  ==  "on"  ];  then
-    VIEW_PROMPT="View $2 for ${MODULE_COLOR}${MODULE}-${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}?"
-    sound  REPORT
-    if  query  "$VIEW_PROMPT" n; then
+  if [ "$VIEW_REPORTS" == "on" ] ; then
+    sound REPORT
+    if query "View $2 for ${MODULE_COLOR}${3}-${VERSION_COLOR}${4}${DEFAULT_COLOR}${QUERY_COLOR} ?" n ; then
       view_file $1
     fi
   fi
 
-  if  [  "$MAIL_REPORTS"  ==  "on"  ];  then
-    MAILTEMP="/tmp/lunar.mail.`uuidgen`" 
-    date  -u  > $MAILTEMP
-    echo     >> $MAILTEMP
-    cat $1   >> $MAILTEMP
-    mail  -s  "Lunar Report from $HOSTNAME : $2 for $MODULE-$VERSION"  \
-              $ADMIN  < $MAILTEMP  2>/dev/null
-    rm -f $MAILTEMP 2>/dev/null
+  if [ "$MAIL_REPORTS" == "on" ] ; then
+    TMP_MAIL=$(temp_create "mailreport")
+    date -u > $TMP_MAIL
+    echo >> $TMP_MAIL
+    view_file $1 >> $TMP_MAIL
+    mail -s "Lunar Report from $HOSTNAME : $2 for $3-$4"  \
+              $ADMIN < $TMP_MAIL 2>/dev/null
+    temp_destroy $TMP_MAIL
   fi
 
   true

@@ -128,27 +128,22 @@ file_menu() {
 
 
 show_installed_modules()  {
-  for  LINE  in  `sort  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"    |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"    |  cut  -d : -f3`
-    VERSION=`echo  "$LINE"    |  cut  -d : -f4`
-       SIZE=`echo  "$LINE"    |  cut  -d : -f5`
+  for LINE in $(sort  $MODULE_STATUS_BACKUP) ; do
+  (
+     MODULE=`echo "$LINE" | cut -d : -f1`
+     STATUS=`echo "$LINE" | cut -d : -f3`
+    VERSION=`echo "$LINE" | cut -d : -f4`
+       SIZE=`echo "$LINE" | cut -d : -f5`
 	
-    if  [  "$STATUS"  ==  "installed"  ]  ||
-        [  "$STATUS"  ==  "held"       ];  then
-		
-       [ -n "$SIZE" ] && SIZE=", $SIZE"
-
-        SHORT="Short Description Unavailable"
-      SECTION=`find_section  $MODULE`
-
-      [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-           . $MOONBASE/$SECTION/$MODULE/DETAILS  >  /dev/null
-
-      echo  "$MODULE"
-      echo  "$VERSION$SIZE"
-      echo  "$SHORT"
+    # TODO THIS IS BROKEN
+    if module_installed $MODULE ; then
+      SHORT="Short Description Unavailable"
+      run_module_file $MODULE DETAILS &> /dev/null
+      echo -e "$MODULE\n"
+      echo -e "$VERSION,$SIZE\n"
+      echo -e "\"$SHORT\"\n"
     fi
+  )
   done
 }
 
@@ -157,10 +152,10 @@ remove_pkgs()	{
   while
     if  [  -z  "$INSTALLED_MODULES"  ];  then
       echo  "Discovering installed modules..."
-      INSTALLED_MODULES=`show_installed_modules`
+      INSTALLED_MODULES=$(show_installed_modules)
     fi
 
-    MODULE=`$DIALOG  --title "Select module to remove please."  \
+    MODULE=`$DIALOG --title "Select module to remove please." \
                     --item-help                               \
                     --ok-label      "Select"                  \
                     --cancel-label  "Exit"                    \
@@ -168,10 +163,7 @@ remove_pkgs()	{
                     $INSTALLED_MODULES`
   do
     DESCRIPTION="Description unavailable"
-    SECTION=`find_section  $MODULE`  &&
-    if  [  -x      $MOONBASE/$SECTION/$MODULE/DETAILS  ];  then
-      DESCRIPTION=`$MOONBASE/$SECTION/$MODULE/DETAILS`
-    fi
+    run_module_file $MODULE DETAILS
 
     if  $DIALOG  --title      "Removal $MODULE"  \
                  --yesno      "$DESCRIPTION"    \
@@ -258,7 +250,7 @@ make_hold_checklist()  {
 
       if  SECTION=`find_section  $MODULE`;  then
         SHORT="Short Description Unavailable"
-        .  $MOONBASE/$SECTION/$MODULE/DETAILS  >  /dev/null
+	run_module_file $MODULE DETAILS &> /dev/null
 
         echo  $MODULE
         echo  $VERSION
@@ -795,7 +787,7 @@ Lunar Module Management Utility
 
 #lets load the menu code
 if [ -n "$MENUS" ]; then
-  for FILE in `echo $MENUS/*.menu` ; do
+  for FILE in $(echo $MENUS/*.menu) ; do
     [ -s "$FILE" ] && . "$FILE"
   done
 fi

@@ -8,7 +8,6 @@
 # $FUNCTIONS/modules                                       #
 # includes create_module_index, find_section               #
 #          list_sections, list_modules, list_installed     #
-#          get_moonbase_md5, set_moonbase_md5,             #
 #          check_module_index, run_details                 #
 #          module_installed, module_held, module_exiled    #
 #          hold_modules, unhold_modules                    #
@@ -84,28 +83,6 @@ list_installed() {
 }
 
 
-# function : set_moonbase_md5
-# usage    : set_moonbase_md5
-# purpose  : creates the md5 value of overall moonbase
-set_moonbase_md5() {
-  MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
-  echo $MOONBASE_MD5
-}
-
-
-# function : get_moonbase_md5
-# usage    : get_moonbase_md5
-# purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
-get_moonbase_md5() {
-  MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
-                cut -d : -f 2-2)
-  if [ -z "$MOONBASE_MD5" ] ; then
-    MOONBASE_MD5="0"
-  fi
-  echo "$MOONBASE_MD5"
-}
-
-
 # function: create_module_index
 # usage   : create_module_index
 # purpose : created an index file of module:section pair list
@@ -122,15 +99,13 @@ create_module_index() {
 
   lock_file $MODULE_INDEX || return 1
 
-  if [ -f "$MODULE_INDEX" ] ; then
-    cp $MODULE_INDEX /tmp
-    rm -f $MODULE_INDEX 2>/dev/null
-  fi
+  rm -f $MODULE_INDEX 2>/dev/null
 
   echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
   for SECTION in $(list_sections) ; do
     list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
   done
+
   unlock_file $MODULE_INDEX
 }  
 
@@ -204,7 +179,7 @@ run_details() {
     fi
    
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
-    . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
+    run_module_file $1 DETAILS &> /dev/null &&
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
     MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$1}
 
@@ -214,13 +189,17 @@ run_details() {
 
 
 # function : run_module_file
-# usage    : run_module_file <script_name> SCRIPT_DIRECTORY MUST be predefined
+# usage    : run_module_file $MODULE $SCRIPTNAME 
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
-  [ -z "$SCRIPT_DIRECTORY" ]  && return 1
-  [ -s "$SCRIPT_DIRECTORY/$1" ] || return 1
-  verbose_msg "running \"$MODULE\" \"$1\" file"
-  [ "$TEST" != "on" ] && . $SCRIPT_DIRECTORY/$1 > /dev/null
+  if [ -z "$SCRIPT_DIRECTORY" ] ; then
+    if ! run_details $1 &> /dev/null ; then
+      return 1
+    fi
+  fi
+  if [ -x "$SCRIPT_DIRECTORY/$2" ] ; then
+    . $SCRIPT_DIRECTORY/$2
+  fi    
 }
 
 

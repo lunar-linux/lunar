@@ -237,8 +237,7 @@ lvu_catalog_html()  {
     echo  "<tr><th colspan=5><font color="maroon">$SECTION</font></th></tr>"
     for  MODULE  in  `list_modules $SECTION`;  do
       (
-        [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-             . $MOONBASE/$SECTION/$MODULE/DETAILS  1>/dev/null
+        run_module_file $MODULE DETAILS &> /dev/null
         echo  "<tr>"
         if  [  "$MODULE"  ==  "linux"  ]   ||
             [  "$MODULE"  ==  "glibc"  ];  then
@@ -347,10 +346,8 @@ show_module_component()  {
 long_search()  {
   for  SECTION  in  `list_sections`;  do
     for  MODULE  in  `list_modules  $SECTION`;  do
-      (   
-          SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE   &&
-          [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-               . $MOONBASE/$SECTION/$MODULE/DETAILS     |
+      (
+        run_module_file $MODULE DETAILS      |
           grep  -q  -i  "$1"                 &&
           echo  "$SECTION/$MODULE"
       )
@@ -876,9 +873,7 @@ parse()  {
    what)
      if [ ! -z "$2" ] ; then
        (
-       if run_details $2 && SECTION=$(find_section $2) ; then
-         . $MOONBASE/$SECTION/$2/DETAILS
-       fi
+         run_module_file $2 DETAILS
        )
      fi
      ;;

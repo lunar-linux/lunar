@@ -49,7 +49,7 @@ function find_depends() {
   }
   
   export FOUND_DEPENDS="$FOUND_DEPENDS $1"
-  if ! run_details $1 ; then
+  if ! run_details $1 &> /dev/null ; then
     exit 1
   fi
 
@@ -57,9 +57,7 @@ function find_depends() {
     . "$MODULE_CONFIG"
   fi
 
-  if [ -x "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
-    . "$SCRIPT_DIRECTORY/DEPENDS"
-  fi
+  run_module_file $MODULE DEPENDS
 
 }
 
@@ -167,11 +165,11 @@ run_depends() {
                                                                                 
   prepare_depends_status
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
-  if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
+  if [ -s $SCRIPT_DIRECTORY/DEPENDS ] ; then
     message  "${CHECK_COLOR}Checking dependencies for"  \
              "${MODULE_COLOR}${MODULE}"                   \
              "${DEFAULT_COLOR}"
-    . $SCRIPT_DIRECTORY/DEPENDS
+    run_module_file $MODULE DEPENDS
   fi
 }
 
@@ -210,9 +208,9 @@ rework_module() {
     add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
   }
   run_depends() {
-    if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
+    if [ -s $SCRIPT_DIRECTORY/DEPENDS ] ; then
       show_fancy_progress "Processing: $MODULE"
-      . $SCRIPT_DIRECTORY/DEPENDS
+      run_module_file $MODULE DEPENDS
     fi
   }
                                                                                 

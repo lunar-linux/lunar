@@ -345,8 +345,6 @@ push_remove_queue() {
 # usage    : sort_install_queue
 # purpose  : sorts the install queue according to the dependencies
 sort_install_queue() {
-
-
    for MODULE in $@; do
      QUEUE="$QUEUE $MODULE"
      show_fancy_progress "Processing: $MODULE"
@@ -389,7 +387,7 @@ list_expired_modules() {
     IDATE=$(echo "$LINE" | cut -d: -f2)
     STATUS=$(echo "$LINE" | cut -d: -f3)
     IVERSION=$(echo "$LINE" | cut -d: -f4)
-    if run_details $MODULE ; then
+    if run_details $MODULE &> /dev/null ; then
       if [ "$STATUS" == "installed" ] ; then
         if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
           (( "$UPDATED" > "$IDATE" )) ; then

@@ -192,7 +192,7 @@ process_lrm_queue()
       INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
        MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
 
-      run_module_file PRE_REMOVE 
+      run_module_file $MODULE PRE_REMOVE 
 
       while read TARGET ; do
          if ! [ -e "$TARGET" ] ; then
@@ -217,7 +217,7 @@ process_lrm_queue()
 
       process_directories $TEMP_FILE $TEMP2_FILE
 
-      run_module_file POST_REMOVE
+      run_module_file $MODULE POST_REMOVE
 
       if [ "$KEEPCONFIG" == "on" ] ; then
         verbose_msg "skipping removal of dependency listing and configs"

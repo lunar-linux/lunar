@@ -60,16 +60,14 @@ check_blacklist() {
 
 
 run_conflicts() {
-    if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
-             . $SCRIPT_DIRECTORY/CONFLICTS
-    fi
+  run_module_file $MODULE CONFLICTS
 }
 
 
 # create the dependency files if they do not exist
 prepare_depends_status()  {
-   [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
-   [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
+  [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
+  [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
 
 
@@ -96,9 +94,7 @@ run_configure() {
     fi
   fi
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
-  if  [  -x  $SCRIPT_DIRECTORY/CONFIGURE  ];  then
-    . $SCRIPT_DIRECTORY/CONFIGURE
-  fi
+  run_module_file $MODULE CONFIGURE
 }
 
 
@@ -108,8 +104,8 @@ run_pre_build() {
   cd $BUILD_DIRECTORY
 
   if verify_sources ; then
-    if [ -x $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
-      . $SCRIPT_DIRECTORY/PRE_BUILD
+    if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
+      run_module_file $MODULE PRE_BUILD
     else
       default_pre_build
     fi
@@ -128,12 +124,6 @@ stop_logging() {
 }
 
 
-view_compile_log()  {
-    sleep  1
-    report $C_LOG "Compile log"
-}
-
-
 start_logging () {
   export C_LOG=$(temp_create "${MODULE}_compilelog")
   export C_FIFO=$(temp_create "${MODULE}_compilefifo")
@@ -141,19 +131,20 @@ start_logging () {
   # just remaking this as FIFO
   rm -f $C_FIFO
   mknod $C_FIFO p
-  echo  "Compile log for  $MODULE  $VERSION  Built on `date  -u`" > $C_LOG
+  echo "Compile log for \"$MODULE\"-\"$VERSION\" Built on \"$(date  -u)\"" > $C_LOG
 
   activate_voyeur
 }
 
 
 activate_voyeur()  {
-  if  [  -z  "$SILENT"  ];  then
-    case  $VOYEUR  in
-      on)  tee  -a  $C_LOG  <  $C_FIFO              &  ;;
-       *)  tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &  ;;
+  if [ -z "$SILENT" ] ; then
+    case $VOYEUR in
+      on) tee -a $C_LOG < $C_FIFO              & ;;
+       *) tee -a $C_LOG < $C_FIFO >/dev/null   & ;;
     esac
-  else     tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &
+  else
+    tee -a $C_LOG < $C_FIFO >/dev/null &
   fi
 }
 
@@ -173,31 +164,16 @@ run_build()  {
         cat /var/cache/config/$MODULE
       fi
 	  
-      if    query  "Do you wish to add -- options to ./configure?"  n ;  then
-        if [ $EDITOR ]; then
-          if    [ $EDITOR == /usr/bin/emacs ] || \
-                [ $EDITOR == /usr/bin/vi ]    || \
-                [ $EDITOR == /usr/bin/jed ]   || \
-                [ $EDITOR == /usr/bin/ed ]    || \
-                [ $EDITOR == /usr/bin/nano ]   ;    then
-             if [ ! -x $EDITOR ]; then
-               EDITOR=/usr/bin/nano
-             fi
-             else
-               EDITOR=/usr/bin/nano
-           fi
-           else
-           EDITOR=/usr/bin/nano
-         fi
-         $EDITOR /var/cache/config/$MODULE
-         OPTS="$OPTS `cat /var/cache/config/$MODULE`"
-         message "${MESSAGE_COLOR} OPTS= ${MODULE_COLOR}$OPTS"
+      if query "Do you wish to add -- options to ./configure?" n ; then
+        edit_file /var/cache/config/$MODULE
+        OPTS="$OPTS $(cat /var/cache/config/$MODULE)"
+        message "${MESSAGE_COLOR} OPTS= ${MODULE_COLOR}$OPTS"
       fi
     fi
   fi
 
-  if  [  -x  $SCRIPT_DIRECTORY/BUILD  ];  then
-          .  $SCRIPT_DIRECTORY/BUILD
+  if [ -s $SCRIPT_DIRECTORY/BUILD ] ; then
+    run_module_file $MODULE BUILD
   else
     default_build
   fi
@@ -206,16 +182,16 @@ run_build()  {
 
 
 run_post_build() {
-  if  [  -x  $SCRIPT_DIRECTORY/POST_BUILD  ];  then
-           . $SCRIPT_DIRECTORY/POST_BUILD
+  if [ -s $SCRIPT_DIRECTORY/POST_BUILD ] ; then
+    run_module_file $MODULE POST_BUILD
   fi
   default_post_build
 }
 
 
 run_post_install() {
-  if  [  -x  $SCRIPT_DIRECTORY/POST_INSTALL  ];  then
-           . $SCRIPT_DIRECTORY/POST_INSTALL
+  if [ -s $SCRIPT_DIRECTORY/POST_INSTALL ] ; then
+    run_module_file $MODULE POST_INSTALL
   fi
 }
 
@@ -246,11 +222,10 @@ show_owner()  {
 
 
 remove_line()  {
-  F_TMP=/tmp/`basename  $I_LOG`.`uuidgen`
-
-  cp         $I_LOG  $F_TMP
-  grep  -v   $ITEM   $F_TMP  >  $I_LOG
-  rm    -f           $F_TMP
+  F_TMP=$(temp_create "remove-line")
+  cp $I_LOG $F_TMP
+  grep -v $ITEM $F_TMP > $I_LOG
+  temp_destroy $F_TMP
 
   message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
            "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
@@ -379,11 +354,9 @@ show_download_progress()  {
     LC=`cat $TEMP_DOWNLOADLOG 2>/dev/null | wc -l | tr -d ' '`
 
     if [ "$LC" != "$LC_OLD" ] ; then
-      verbose_msg "====== download progess:"
       (( LC_OLD++ ))
       sed  -n ${LC_OLD},${LC}p $TEMP_DOWNLOADLOG
       LC_OLD=$LC
-      verbose_msg "====== end download progress"
     fi
   fi
 }
@@ -391,19 +364,16 @@ show_download_progress()  {
 
 show_downloading() {
   if [ -e "$TEMP_DOWNLOADLOG" ] ; then
+    verbose_msg "====== download progess:"
     while ! lget $MODULE >> $TEMP_DOWNLOADLOG 2>&1 ; do
       show_download_progress
       sleep 1
     done
     show_download_progress
+    verbose_msg "====== end download progress"
   fi
 }
 
-
-report_install()  {
-  INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  report  $INST_LOG  "Install log"
-}
 
 
 lin_module()  { (
@@ -471,10 +441,10 @@ lin_module()  { (
       if [ -f "$INSTALLWATCHFILE" ] ; then
         temp_destroy $INSTALLWATCHFILE
       fi
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi  
@@ -492,26 +462,25 @@ lin_module()  { (
     fi
 
     if [ -n "$LIN_ERROR" ] ; then
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
 
-    
     rm_source_dir               &&
-    report_install              &&
+    report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
     rm -f $linING               &&
-    sound  SUCCESS              &&
+    sound SUCCESS               &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
 
-    if  [  "$?"  !=  0  ];  then
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
+    if [ "$?" != 0 ] ; then
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
       return 1
     fi
