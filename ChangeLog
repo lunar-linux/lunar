@@ -148,13 +148,3 @@
 	for lunar, where versions are either version-aware modules or
 	subdirectories of the primary module.
 
-2003-08-31 18:51  sofar
-
-	* etc/lunar/config, etc/lunar/mirrors/LRESORT,
-	var/lib/lunar/functions/download.lunar: Adding nl.lunar-linux.org
-	to the mirror URL's, since it's rsynced hourly and can be used
-	normally like the dk mirror. Also adding it to LRESORT as so we can
-	drop the number of downloads from dbguin. Small fix for calls to
-	LRESORT downloads, and starting to rephrase numeric statements to
-	something that is unmistakenly numeric (( ... )).
-
