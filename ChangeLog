@@ -1,3 +1,20 @@
+2004-05-10 11:46  sofar
+
+	* var/lib/lunar/functions/recovery.lunar: This way recovery even
+	recovers the approximate install date. I've tested this on many
+	boxes now and it's absolutely wonderfull. Considering putting this
+	in the lunar maintenance menu so people can use it (although it's
+	still mopping up after some other part goofs up)
+
+2004-05-09 12:08  sofar
+
+	* var/lib/lunar/functions/: depends.lunar, main.lunar,
+	messages.lunar, modules.lunar, prune.lunar, recovery.lunar: Some
+	bugfixes regarding locking, ordering of locks and return status of
+	locking, some fixes with missing depends (important one), visual
+	adjustment of titlebar display (compile instead of processing,
+	added hostname, $0[$$]).
+
 2004-05-02 09:32  striker
 
 	* var/lib/lunar/functions/: download.lunar, main.lunar,
