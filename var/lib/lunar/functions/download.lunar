@@ -185,7 +185,7 @@ get_cvs() {(
 
 erase()  {
   debug_msg "erase ($@)"
-  if [ "$PARTIAL" = "off" ]; then
+  if [ "$PARTIAL" == "off" ]; then
     verbose_msg "erase: deleting \"$(guess_filename $1)\""
     rm -f $(guess_filename $1)
   fi
@@ -374,7 +374,7 @@ download_module() { (
         if [ ${URL:0:6} == "cvs://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SRC
-	elif [ ${URL:0:6} = "svn://" ] ; then
+	elif [ ${URL:0:6} == "svn://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SRC
 	else
