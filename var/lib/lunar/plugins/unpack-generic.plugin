@@ -31,6 +31,10 @@ plugin_unpack_generic() {
 			cp $1 . || return 1
 			gunzip $1 || return 1
 			;;
+		*.tar)
+			debug_msg "Unpacking tar  file \"$1\""
+			tar xf $1 --no-same-owner --no-same-permissions || return 1
+			;;
 		*)
 			# fallback: we don't know what to do!
 			return 2
