@@ -202,7 +202,3 @@
 	* var/lib/lunar/functions/download.lunar: Fixed /version lget lock
 	bug
 
-2003-12-11 04:06  elaine
-
-	* var/lib/lunar/functions/init.lunar: fix indent'n
-
