@@ -336,6 +336,10 @@ build_depends()  {
 create_depends_cache() {
   debug_msg "create_depends_cache($@)"
 
+  if [ ! -w $DEPENDS_CACHE ] ; then
+    return 1
+  fi
+
   if [ $MODULE_INDEX -nt $DEPENDS_CACHE ] ; then
     verbose_msg "Generating a new depends cache..."
     TMP_DEP_CACHE=$(temp_create "depends.cache")

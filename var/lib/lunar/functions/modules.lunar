@@ -41,7 +41,7 @@ list_sections() {
 list_modules() {
   debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
-    error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
+    error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}"
     exit 1
   fi
 
@@ -80,7 +80,6 @@ list_installed() {
 # purpose : created an index file of module:section pair list
 create_module_index() {
   debug_msg "create_module_index ($@)"
-  verbose_msg "Updating module index file..."
   # make sure it exists before trying to see it's writeable
   # this also assures that depends.cache gets remade
   if [ ! -f $MODULE_INDEX ] ; then
@@ -94,6 +93,7 @@ create_module_index() {
     return 0
   fi
  
+  verbose_msg "Updating module index file..."
   # doing this allows us to ctrl-C the process without breaking the
   # index file
   TMP_INDEX=$(temp_create "module.index")
@@ -101,6 +101,7 @@ create_module_index() {
   # here we have two options: system moonbase or custom:
   if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
     # short way out:
+    debug_msg "Quick generating \$MODULE_INDEX..."
     echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
         sed -e 's:/DETAILS$::' -e 's:/var/lib/lunar/moonbase/::' -e 's|/|:|' | \
@@ -110,6 +111,7 @@ create_module_index() {
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
+    debug_msg "Regenerating \$MODULE_INDEX manually..."
     echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
     find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
   fi
@@ -129,7 +131,7 @@ create_module_index() {
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
   debug_msg "check_module_index ($@)"
-  if [ -n "$(find $MOONBASE -type f -cnewer $MODULE_INDEX)" ] ; then
+  if [ -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
     create_module_index
     create_depends_cache
     return 0
@@ -171,8 +173,12 @@ find_section() {
       return 0
     fi
   fi
+
+  if ! SECTIONS=$(list_sections) ; then
+    return 0
+  fi
            
-  for SECTION in $(list_sections) ; do
+  for SECTION in $SECTIONS ; do
     if [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] ; then
       echo "$SECTION"
       return 0
@@ -194,12 +200,12 @@ run_details() {
   # if this is a problem or not... -sofar
 
   if ! SECTION=$(find_section $1) ; then
-    message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
+    error_message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
              "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
     return 1
   else
     if [ ! -f "$MOONBASE/$SECTION/$1/DETAILS" ] ; then
-      message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
+      error_message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
       return 1
