@@ -1,3 +1,42 @@
+2002-12-30 22:19  hardkrash
+
+	* sbin/lget: Added ability to use tun devices for internet
+	connections. -- Hardkrash
+
+2002-12-29 23:42  sofar
+
+	* etc/lunar/config: Added PATCH_URL to config, the new repository
+	for patches.
+
+2002-12-24 18:20  tchan
+
+	* var/lib/lunar/: subroutines, functions/optimize.lunar,
+	menu/optimize.menu: Synched some more important fixes from theedge
+	back into regular lunar core.
+
+2002-12-23 01:10  sofar
+
+	* sbin/lin: okay this works now without CVS bullocking it.
+
+2002-12-23 01:07  sofar
+
+	* sbin/lin: leave out the * to omit subdirs in case of CVS.
+
+2002-12-23 00:49  sofar
+
+	* sbin/lin: Added auto-patching: scan for subdir 'patch' and apply
+	all regular files in that directory before BUILD/default_build.
+	Note patch order is equal to 'ls'.
+
+2002-12-22 06:38  tchan
+
+	* var/lib/lunar/subroutines: Bringing some of the added
+	functionality from theedge back into lunar core.  Specifically the
+	patch_it function which is appearing in more of moonbase.  Also
+	added the fixes from theedge for the disappearing
+	/usr/share/info/dir file.  Added the timestamp feature in the
+	activity_log from theedge.
+
 2002-11-26 14:49  kc8apf
 
 	* lib/lsb/init-functions: Fix pgrep so it only finds processes that
