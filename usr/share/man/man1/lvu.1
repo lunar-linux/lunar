@@ -3,7 +3,7 @@
 lvu \- query/view lunar package management information
 .SH "SYNOPSIS"
 .B lvu
-alien|leafs|orphans|prune|pam
+alien|leafs|orphans|pam
 .PP 
 .B lvu
 what|where|website|sources|maintainer <module>
@@ -68,10 +68,6 @@ displays installed modules that have no explicit dependencies on them
 .B orphans
 .IP 
 displays installed modules that are missing required dependancies
-.PP 
-.B prune
-.IP 
-removes all old source code and old backups. Otherwise the source code from previous versions is kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date, but not installed.
 .PP 
 .B pam
 .IP 
