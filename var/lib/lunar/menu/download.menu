@@ -109,7 +109,7 @@ download_options() {
 set_download_rate()  {
   PROMPT="Please enter the maximum bytes per second for lgeting. \
 Example: enter 8000 for downloading no faster then \
-8 Kbytes per second"
+8 kBps, 80k for 80 kBps, or 1m for 1mBps"
 
   if  DOWNLOAD_RATE=`$DIALOG  --title "Download Rate" \
                               --ok-label  "Commit"    \
