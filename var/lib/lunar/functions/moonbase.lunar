@@ -11,7 +11,7 @@
 
 get_moonbase () {(
 
-  cd /tmp
+  SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
   # the following overrides run_details:
   run_details() {
@@ -25,36 +25,40 @@ get_moonbase () {(
   }
 
   run_details
+  rm -f /tmp/$SOURCE
 
-  if [ ! -d /var/lib/lunar/moonbase ] ; then
-    mkdir -p /var/lib/lunar/moonbase
+  if [ ! -d $SYSTEM_MOONBASE ] ; then
+    mkdir -p $SYSTEM_MOONBASE
   fi
   
-  if [ ! -d /var/lib/lunar/moonbase/zlocal ] ; then
-    mkdir -p /var/lib/lunar/moonbase/zlocal
+  if [ ! -d $SYSTEM_MOONBASE/zlocal ] ; then
+    mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
 
   if download_module ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
-    mv /var/lib/lunar/moonbase/zlocal/ /var/lib/lunar/.zlocal-backup    &&
-    rm -rf /var/lib/lunar/moonbase                                      &&
-    mkdir /var/lib/lunar/moonbase                                       &&
-    mv /var/lib/lunar/.zlocal-backup /var/lib/lunar/moonbase/zlocal     &&
+    mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
+    rm -rf $SYSTEM_MOONBASE                                      &&
+    mkdir $SYSTEM_MOONBASE                                       &&
+    mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
     echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
-    bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar               &&
+    bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
+          sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
+    echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
     OUTCOME=success || OUTCOME=failed
-    echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-    add_module $MODULE installed $VERSION $(du -hs /var/lib/lunar/moonbase | cut -f1)
-    find /var/lib/lunar/moonbase > $INSTALL_LOGS/$MODULE-$VERSION
-    echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
+
+    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+    add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+    
     if [ -f $MODULE_INDEX ]; then
       rm -f $MODULE_INDEX
     fi
     create_module_index
+    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}${MODULE_INDEX}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
   else
     OUTCOME=failed
     INFO="Could not download a fresh moonbase"
