@@ -1,6 +1,46 @@
 Lunar Credits:
-Realname		email				nick
 
+
+ -- Introduction
+
+Hundreds of people have contributed to Lunar-Linux and made what it currently
+is. It would go to far to keep a list for every single contribution that has
+been made, but even without those small contributions, Lunar-Linux is what it
+is now, and we are grateful for them.
+
+Our eternal gratitude goes to Kyle Sallee, the original author of Sorcerer
+GNU Linux, who made it possible for us to work on this great concept and
+especially in the way we want to work on it -cooperating in a team effort, 
+together as a group-. Since that moment Lunar-Linux has grown faster than
+ever.
+
+
+ -- Developers
+
+A few developers have spent enormous time on Lunar-Linux in the past, but
+are unfortunately not able to do so anymore. We miss their coding skills,
+and the pleasure of working together with these enthusiastic people. We
+hope to see them back in the future, there will allways be a place in
+#lunar reserved for them:
+
+
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
+Kagan Kongar		kongar@tsrsb.org.tr		kongar
+Rick Altherr		kc8apf@kc8apf.net		kc8apf
+Jason Jackson		jacksonje@health.missouri.edu	houkan
+Timo Kosig		timo.kosig@gmx.de		tiomo
+
+
+ -- Others
+
+Of course, there are many module writers, patch submitters, people submitting
+documentation, comments, or otherwise contributing to Lunar-Linux which names
+we have not forgotten:
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
 Alan Mimms		alanm@unforgettable.com		alan
 Alex Chapman		wrunt@hotmail.com		alex
 Anders Bruun Olsen	anders@bruun-olsen.net		anders
@@ -16,7 +56,7 @@ Brian Peterson		brian.peterson@tcinternet.net	brian
 Cal Evans		cal@calevans.com		cal
 Chris			cwrobel@dccnet.com		chris
 Christoph Steckelberg	heffer@mailberlin.net		christoph
-Christopher Thomas Church	cchurch@cc.gatech.edu	christopher
+Christopher Church	cchurch@cc.gatech.edu		christopher
 Chuck Busby		scarecrow.143@attbi.com		chuck
 Chuck Mead		csm@moongroup.com		csm
 Daniel			dcmccal@CLEMSON.EDU		daniel
@@ -41,7 +81,6 @@ j cr			jcrowso@hotmail.com		jcr
 Jean-Michel Smith	jean@kcco.com			jean-michel
 Jeff Schmidt		jschmidt@fnal.gov		jeff
 Jim Phillips		jphillips@ergonet-ent.com	jim
-Jason Jackson        	jacksonje@health.missouri.edu	jjackson
 Joel Mayes		joel_mayes@dingoblue.net.au	joel
 Johan Warlander		johan@warlander.com		johan
 Jason Johnson		jason@xorit.net			johnson
@@ -49,9 +88,7 @@ Jon Svendsen		jon-sven@frisurf.no		jon
 Jonathan Evraire	evraire@tuwg.com		jonathan
 Joshua Books		jbooks@real.com			joshua
 Jyp                     j.y.p@wanadoo.fr		jyp
-Kagan Kongar		kongar@tsrsb.org.tr		kagan
 Kyle Risse		krisse@kylerisse.com		krisse
-Kyle Sallee		cromwell@kublai.com		kyle
 Ladislav Hagara		hgr@vaboo.cz			ladislav
 Lasar Liepins		lasar@liepins.de		lasar
 Bob Johnson		livewire_@ameritech.net		livewire
@@ -88,4 +125,15 @@ Tom                     thomas@stewarts.org.uk		tom
 Torgeir Ulvedal Nes	torgeir@nes.ac			torgeir
 trick			gerry@c64.org			trick
 Väinö Järvelä		vaino.jarvela@pp.inet.fi	vaino
+Vincent Vandeweijer	v_vandeweijer@zonnet.nl		evo_
 Wes Warner		wes@lppcs.com			wes
+
+
+ -- Epilogue
+
+Last, there are those whose names we have forgotten, and we are ashamed of
+not knowing exactly who have helped us in the past.
+
+If you feel that this list is incomplete or needs adjustment in any way, feel
+free to inform us at <maintainer@lunar-linux.org>.
+
