@@ -1,3 +1,8 @@
+2003-03-25 22:25  sofar
+
+	* var/lib/lunar/menu/dmodule.menu: Merging back niki's typo fix
+	reported by Moe.
+
 2003-03-24 20:55  kc8apf
 
 	* var/lib/lunar/menu/optimize.menu: Stupid bug #2
