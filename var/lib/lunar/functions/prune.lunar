@@ -40,18 +40,18 @@ prune() {
 
   verbose_msg "finding stale source files"
   for FILE in $(ls -1 $SOURCE_CACHE); do
-    if ! grep -q $(basename $FILE) $TMP_SPOOL_KEEP ; then
-      message "Removing stale source: $FILE"
-      rm -f $FILE      
+    if ! grep -q $FILE $TMP_SPOOL_KEEP ; then
+      message "Removing stale source: $SOURCE_CACHE/$FILE"
+      rm -f $SOURCE_CACHE/$FILE      
     fi
   done
   temp_destroy $TMP_SPOOL_KEEP
 
   verbose_msg "finding stale install caches"
   for FILE in $(ls -1 $INSTALL_CACHE); do
-    if ! grep -q $(basename $FILE) $TMP_CACHE_KEEP ; then
-      message "Removing stale install cache: $FILE"
-      rm -f $FILE
+    if ! grep -q $FILE $TMP_CACHE_KEEP ; then
+      message "Removing stale install cache: $INSTALL_CACHE/$FILE"
+      rm -f $INSTALL_CACHE/$FILE
     fi
   done
   temp_destroy $TMP_CACHE_KEEP
