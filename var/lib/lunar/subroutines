@@ -40,17 +40,6 @@ fi
   echo "Set your optimization preferences via lunar"
 #
 
-# function : edit_file
-# usage    : edit_file FILENAME
-# purpose  : to edit a file
-edit_file()  {  ${EDITOR:-nano}  $1;  }
-
-
-# function : view_file
-# usage    : view_file FILENAME
-# purpose  : to view a file
-view_file()  {  ${PAGER:-less}  $1;  }
-
 
 # function : directories
 # usage    : VARIABLE=`directories < dirlistfile`

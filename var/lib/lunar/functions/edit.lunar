@@ -11,6 +11,10 @@
 ####################################################################
 
 
+# function : patch_it
+# usage    : patch_it patch_file patch_level
+# purpose  : calls "patch -px < $filename", where filename may be a variety
+#            of formats
 patch_it ()
 { 
     verbose_msg "patch_it \"$1\" \"$2\"";
@@ -38,6 +42,9 @@ patch_it ()
 }
 
 
+# function : sedit
+# usage    : sedit sed-statement file [file [file] ...]
+# purpose  : edit [files] with a sed function
 sedit ()
 { 
     SEDIT=$1;
@@ -47,6 +54,14 @@ sedit ()
         verbose_msg "Editing ${FILE}";
         sed -i "$SEDIT" "$FILE";
     done
+}
+
+
+# function : edit_file
+# usage    : edit_file FILENAME
+# purpose  : to edit a file
+edit_file() {
+  ${EDITOR:-nano}  $1
 }
 
 

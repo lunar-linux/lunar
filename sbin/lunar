@@ -470,6 +470,7 @@ maintenance_menu() {
     F_HELP="lin --fix: Check and fix all modules and internal state of lunar"
     N_HELP="lin --nofix: Check all modules but do not fix the internal state"
     D_HELP="lin --fixdepends: Check and fix the dependancy database of lunar"
+    P_HELP="lunar prune: Prune old sources and install/compile logs"
     
     COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
                       --ok-label      "Select"                           \
@@ -481,12 +482,14 @@ maintenance_menu() {
                       0 40 6                                             \
                       "F"     "Fix everything"                 "$F_HELP" \
                       "N"     "Check everything but don't fix" "$N_HELP" \
-                      "D"     "Fix dependancies"               "$D_HELP"`
+                      "D"     "Fix dependancies"               "$D_HELP" \
+		      "P"     "Prune old sources and logs"     "$P_HELP"`
   do
     case $COMMAND in
      F)  lin --fix        ;;
      N)  lin --nofix      ;;
      D)  lin --fixdepends ;;
+     P)  lunar prune      ;;
     esac
     message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
     read
@@ -808,6 +811,7 @@ main_menu()  {
 
 main() {
   case  $1  in
+      prune)  prune                    ;;
       renew)  update_installed
               upgrade_install_queue    ;;
      update)  update_pkgs  autoupdate  ;;

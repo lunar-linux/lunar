@@ -1,0 +1,24 @@
+####################################################################
+#                                                                  #
+#  display.lunar - functions to view files                         #
+#                                                                  #
+####################################################################
+
+
+# function : view_file
+# usage    : view_file FILENAME
+# purpose  : to view a file
+view_file()  {
+  if [ -n "$1" ] ; then
+    # show a file $1
+    case $(file -b $1 | cut -d' ' -f1) in
+      ASCII) cat $1         | ${PAGER:-less} ;;
+      bzip2) cat $1 | bzcat | ${PAGER:-less} ;;
+       gzip) cat $1 | zcat  | ${PAGER:-less} ;;
+    esac
+  else
+    cat | ${PAGER:-less}
+  fi  
+}  
+
+
