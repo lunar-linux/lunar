@@ -167,18 +167,3 @@
 	to add "lvu held" , "lunar [hold|unhold] xxx", also added shortcuts
 	for "lunar [install|remove] xxxx".
 
-2003-04-12 19:52  sofar
-
-	* usr/share/man/man1/lvu.1: updating this.
-
-2003-04-12 19:44  sofar
-
-	* bin/lvu: adding an option that allows you to look against which
-	modules a binary from another module is linked. Usage: lvu links
-	MODULE
-
-2003-04-12 16:12  sofar
-
-	* sbin/lrm, var/lib/lunar/functions/depends.lunar: lrm fixes,
-	removing TEST slowly, cosmetic fix in the fixdepends code
-
