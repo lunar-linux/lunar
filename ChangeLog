@@ -1,3 +1,124 @@
+2003-02-17 00:55  csm
+
+	*
+	usr/share/doc/lunar/core-documentation/_etc_lunar_local_config.html
+	: more updates adding to the core documentation!
+	
+2003-02-17 00:55  csm
+
+	* usr/share/doc/lunar/core-documentation/:
+	Reference_Directory.html, etc_lunar_config.html: more updates
+	
+2003-02-16 22:47  csm
+
+	* usr/share/doc/lunar/core-documentation/Reference_Directory.html: adding the directory page
+	
+2003-02-16 22:47  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: update
+	
+2003-02-16 22:25  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: more mods
+	
+2003-02-16 22:13  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: beginning to add links and anchors
+	
+2003-02-16 22:08  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: adding links to manpage URL's
+	
+2003-02-16 22:04  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: a tweak
+	
+2003-02-16 22:02  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: adding table headings
+	
+2003-02-16 21:58  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: adding the missing IFS entries
+	
+2003-02-16 21:55  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: removed a couple of references to COLONY
+	
+2003-02-16 21:54  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: an update. all the variable defines are in here now.
+	
+2003-02-16 21:10  csm
+
+	* var/lib/lunar/excluded: updating excluded to eliminate removing fonts.dir from a number of dir's
+	
+2003-02-16 21:04  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: more
+	
+2003-02-16 20:54  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: more
+	
+2003-02-16 20:49  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: still working on it!
+	
+2003-02-16 20:34  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: another update
+	
+2003-02-16 20:27  csm
+
+	* usr/share/doc/lunar/core-documentation/etc_lunar_config.html: updated version
+	
+2003-02-16 20:23  sofar
+
+	* etc/lunar/config, sbin/lunar: There, now it's gone :^P
+	
+2003-02-16 20:06  csm
+
+	* usr/share/doc/lunar/core-documentation/: etc_lunar_config.html,
+	purpose.html: beginning to add core-docs
+	
+2003-02-16 13:27  sofar
+
+	* sbin/lin, var/lib/lunar/subroutines,
+	var/lib/lunar/functions/postbuild.lunar: More cleanups, splitting out all postbuild extensions (xinetd, init.d, pamd etc). Bugfix #248.
+	
+2003-02-15 23:47  sofar
+
+	* sbin/lunar: Fix for #221
+	
+2003-02-15 23:17  sofar
+
+	* sbin/lin, var/lib/lunar/subroutines: verbose pruning and boost problems GONE FOREVER
+	
+2003-02-15 22:38  sofar
+
+	* sbin/lin: wheps
+	
+2003-02-15 21:59  sofar
+
+	* sbin/lsh: Adding this little gadget: lsh, a 'shell' wrapper around the lunar.
+	
+2003-02-15 20:51  sofar
+
+	* sbin/lget: CVS fixed that were needed. let's not spend too much time here.
+	
+2003-02-15 20:09  sofar
+
+	* sbin/lin, sbin/lrm, var/lib/lunar/subroutines,
+	var/lib/lunar/functions/modules.lunar: Fix for (1) tar error on cache, removed --verbose from lrm, cleaned up more code, unified verbose messages.
+	
+	Also, the remove_module which people assumed to be removed incedentally was removed again, since the call is made by lrm (l228,l296). PLEASE LEAVE IT OUT NOW, since doing this belongs in the lrm code.
+	
+2003-02-14 15:52  tchan
+
+	* var/lib/lunar/subroutines: Added back in the "missing" call to remove_modules.  I believe it is still
+	required and was removed by sofar accidentally in his clean up.
+	
 2003-02-14 00:06  sofar
 
 	* sbin/lin, sbin/lunar, var/lib/lunar/excluded,
@@ -22,43 +143,4 @@
 2003-02-08 02:30  csm
 
 	* etc/lunar/config: changing the last resort URL to .org instead of .com
-	
-2003-02-06 10:08  sofar
-
-	* sbin/lrm: heh, got scared?
-	
-2003-02-06 00:00  sofar
-
-	* var/lib/lunar/subroutines: Adding --keepconfig in here to get lunar renew working again, see lrm commit.
-	
-2003-02-05 23:53  sofar
-
-	* sbin/lin: adding --keepconfig so config files stay untouched.
-	
-2003-02-05 23:52  sofar
-
-	* sbin/lrm: First couple of fixes:
-	
-	* no bailout when no DETAILS found (lrm should be possible afterall the install log is there)
-	* add --keepconfig in order prepare_install functions normally
-	* missing md5sum should PRESERVE config files just in case, as we know lunar already makes good md5sums, and in case that feature is off bad things go happen
-	* updated help.
-	
-	TODO:
-	
-	- add regex support for excluded/protected like /etc/.*\.conf
-	- speed profile removal queue processing: it is *SLOW*, consider reimporting old lrm routine which constructs a large grep statement (hazardous: command line chars are expensive and bash can only handle so much)
-	- test
-	
-2003-02-05 14:17  sofar
-
-	* var/lib/lunar/excluded: and more
-	
-2003-02-05 13:23  sofar
-
-	* var/lib/lunar/excluded: Adding some more in here
-	
-2003-02-04 00:59  csm
-
-	* var/lib/lunar/excluded: some more additions
 	
