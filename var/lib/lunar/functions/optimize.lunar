@@ -31,7 +31,7 @@ else
           BOPT=-O0                '\n'    \
           CPU=i386                '\n'    \
           SPD=( )                 '\n'    \
-          XTRA=                   '\n'    \
+          XTRA=( )                '\n'    \
           FPM=                    '\n'    \
           LDF=( )                 '\n'    \
           ADDON=( ) > /etc/lunar/local/optimizations
@@ -657,7 +657,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -666,7 +666,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -675,7 +675,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -684,7 +684,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -759,7 +759,7 @@ optimize_architecture()  {
   help xtra_help              &&
   xtra_options                &&
   menu checklist              &&
-  XTRA=$RESULT
+  XTRA=( $RESULT )
 
   help fpm_help               &&
   fpm_options                 &&
