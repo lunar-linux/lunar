@@ -123,7 +123,6 @@ color()  {
 
 
 sound()  {
-
   case  $SOUND  in
     on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
          if  [  -e  $SOUND_FILE  ];  then
@@ -131,15 +130,13 @@ sound()  {
          fi
     ;;
   esac
-
 }
 
 
 # function : show_fancy_progress
 # usage    : show_fancy_progress <fancy_progress_var_string>
 # purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
-function show_fancy_progress
-{
+show_fancy_progress () {
    echo -en "\r                                                                            \r$1\r"
 }
 

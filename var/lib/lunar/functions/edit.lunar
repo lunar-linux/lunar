@@ -63,7 +63,7 @@ sedit ()
     shift;
     for FILE in $@;
     do
-        verbose_msg "Editing ${FILE}";
+        verbose_msg "Editing \"${FILE}\"";
         sed -i "$SEDIT" "$FILE";
     done
 }

@@ -57,7 +57,7 @@ get_cvs() {(
   cd /tmp/$MODULE-$VERSION
 
   if [[ -f $SOURCE_CACHE/$2 ]]; then
-    verbose_msg "Extracting old CVS source tarball"
+    verbose_msg "Extracting local CVS copy"
     # unpacking in last component dir of $CVSMODULE
     CD=$(pwd)
     mkdir -p $(dirname $CVSMODULE)

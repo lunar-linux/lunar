@@ -29,7 +29,6 @@ gather_docs()  {
   [ "$GARBAGE" == "on" ] || return 0
 
   DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
-  verbose_msg "installing standard documentation into \"$DOC_DIR\" if any"
   mkdir  -p  $DOC_DIR
 
   if [ -d $SOURCE_DIRECTORY ] ; then

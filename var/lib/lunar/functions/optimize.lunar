@@ -23,6 +23,7 @@
 if [[ -s /etc/lunar/local/optimizations ]]; then
    . /etc/lunar/local/optimizations
 else
+  verbose_msg "initializing optimizations with hard-coded defaults"
   echo -e PLATFOM=x86             '\n'    \
           BUILD=i386-pc-linux-gnu '\n'    \
 	  MAKES=                  '\n'    \
@@ -55,6 +56,7 @@ optimize_make() {
   elif [[ $MAKES > 1 ]]; then
     alias make="make -j$MAKES"
   fi
+  verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
 }
  
 optimize_base() {
@@ -675,6 +677,7 @@ optimize_addon() {
               ;;
     esac
   done
+  verbose_msg "CC_EXT=\"$CC_EXT\", CXX_EXT=\"$CXX_EXT\""
 }
 
 optimize_cc_warn() {
@@ -750,13 +753,17 @@ optimize_platform() {
                 ;;
    esac
 
-export CC_EXT
-export CXX_EXT
-export CFLAGS
-export COPT
-export CCOPT
-export CXXFLAGS
-export LDFLAGS
+  export CC_EXT
+  export CXX_EXT
+  export CFLAGS
+  export COPT
+  export CCOPT
+  export CXXFLAGS
+  export LDFLAGS
+
+  verbose_msg "CFLAGS=\"$CFLAGS\""
+  verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
+  verbose_msg "LDFLAGS=\"$LDFLAGS\""
 
 }
 
