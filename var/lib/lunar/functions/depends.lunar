@@ -16,9 +16,7 @@
 #                                                          #
 # Copyrighted Kagan Kongar 2002 under GPLv2                #
 #                                                          #
-############################################################
-#                                                          #
-# Merged in more depends routines - sofar - 20030305       # 
+# Copyright Auke Kok 2004 under GPLv2                      #
 #                                                          #
 ############################################################
 
@@ -29,38 +27,28 @@
 function find_depends() {
   debug_msg "function find_depends ($@)"
 
-  # as always, use private depends() and optional_depends() functions
-  depends () {
-  debug_msg "  depends  ($@)"
-    if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
-      export FOUND_DEPENDS="$FOUND_DEPENDS $1"
-      find_depends $1
-      echo $1
-    fi
-  }
-
-  optional_depends() {
-  debug_msg "  optional_depends ($@)"
-    if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
-      if module_installed $1 ; then
-        export FOUND_DEPENDS="$FOUND_DEPENDS $1"
-        find_depends $1
-        echo $1
+  find_depends_intern() {
+    grep "^$1:" $DEPENDS_CACHE | while read LINE ; do
+      DEP=$(echo $LINE | cut -d: -f2)
+      # this is our shortcut out:
+      if ! grep -qx "$DEP" $TMP_FDEPS ; then
+      debug_msg "$DEP"
+        echo "$DEP" >> $TMP_FDEPS
+        STATE=$(echo $LINE | cut -d: -f3)
+        if [ "$STATE" == "required" ] ; then
+          echo $DEP
+          find_depends_intern $DEP
+        elif module_installed $DEP ; then
+          echo $DEP
+          find_depends_intern $DEP
+        fi
       fi
-    fi
+    done
   }
-  
-  export FOUND_DEPENDS="$FOUND_DEPENDS $1"
-  if ! run_details $1 &> /dev/null ; then
-    exit 1
-  fi
 
-  if [ -e "$MODULE_CONFIG" ] ; then
-    . "$MODULE_CONFIG"
-  fi
-
-  run_module_file $MODULE DEPENDS
-
+  TMP_FDEPS=$(temp_create "found.depends")
+  find_depends_intern $1
+  temp_destroy $TMP_FDEPS
 }
 
 
@@ -70,36 +58,36 @@ function find_depends() {
 sort_by_dependency() {
   debug_msg "sort_by_dependency ($@)"
 
-  unset INCLUDED
+  TMP_LIST=$(temp_create "deptree.in")
+  TMP_ALL=$(temp_create "deptree.all")
 
-  recurse() {
-    for MOD in $* ; do
-      if echo "$INCLUDED" | grep -qFx "$MOD" ; then
-        debug_msg "Cutoff: $MOD"
-      else
-        LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
-        for DEP in $LIST ; do
-          echo $MOD $DEP
-        done
-        INCLUDED=$INCLUDED$'\n'$MOD
-        recurse $LIST
-      fi
-    done
-  }
+  for M in $* ; do
+    echo "$M" >> $TMP_LIST
+  done
 
-  ALL=$(recurse $* | tsort | tac)
-  for DEP in $ALL ; do
-    if echo " $* " | grep -q " $DEP " ; then
-      echo $DEP
+  # tsort the existing dep relations in all of moonbase
+  cat $DEPENDS_CACHE | awk -F: '{print $1" "$2}' | tsort 2> /dev/null | tac > $TMP_ALL
+  # append all modules that do not have a DEPENDS file at all at the end
+  # note that this is logically WRONG, but it actually will help with
+  # unincluded depends, and therefore is *better* behaviour
+  for M in $* ; do
+    if ! grep -q -x $M $TMP_ALL ; then
+      echo $M >> $TMP_ALL
     fi
   done
+
+  # now reverse grep over the files:
+  cat $TMP_ALL | grep -x -f $TMP_LIST
+  
+  temp_destroy $TMP_LIST
+  temp_destroy $TMP_ALL
 }
 
 
 is_depends()  {
   debug_msg "is_depends ($@)"
   # Is $1 a previously selected dependency of any module.
-  return $(cat $DEPENDS_STATUS | cut -d: -f2- | grep -q "^$1:on:")
+  return $(grep -q ":$1:on:" $DEPENDS_STATUS)
 }
                                                                                 
                                                                                 
@@ -327,4 +315,35 @@ build_depends()  {
 }
 
 
+create_depends_cache() {
+  debug_msg "create_depends_cache($@)"
 
+  if [ $MODULE_INDEX -nt $DEPENDS_CACHE ] ; then
+    verbose_msg "Generating a new depends cache..."
+    TMP_DEP_CACHE=$(temp_create "depends.cache")
+
+    # you guessed it: local decls.
+    depends() {
+      echo "$MODULE:$1:required:::"
+    }
+
+    optional_depends() {
+      echo "$MODULE:$1:optional:$2:$3:$4"
+    }
+
+    # yeah, this sucks:
+    message() {
+      :
+    }
+
+    # fast method for re-creating the depends.cache, might take long though
+    for DEPFILE in $(find $MOONBASE -type f -name DEPENDS) ; do
+      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" | cut -d/ -f2-) . $DEPFILE
+    done > $TMP_DEP_CACHE &&
+    install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
+  
+    temp_destroy $TMP_DEP_CACHE
+  else
+    verbose_msg "Skipping depends cache regeneration"
+  fi
+}

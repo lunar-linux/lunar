@@ -14,6 +14,8 @@
 #                                                          #
 # Copyrighted Kagan Kongar 2002 under GPLv2                #
 #                                                          #
+# Copyrighted Auke Kok 2004 under GPLv2                    #
+#                                                          #
 ############################################################
 
 help() {
@@ -161,9 +163,12 @@ process_lrm_queue() {
         continue
       fi
 
-      if grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED ; then
+      if grep -q -x "$TARGET" $PROTECTED $EXCLUDED ; then
         verbose_msg "\"$TARGET\" is protected or excluded!!"
         continue
+      elif grep -q -x "$(dirname $TARGET)" $PROTECTED $EXCLUDED ; then
+        verbose_msg "\"$TARGET\" is in a protected or excluded directory!"
+	continue
       fi
 
       if [ -d "$TARGET" ] ; then

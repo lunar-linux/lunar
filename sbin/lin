@@ -119,7 +119,7 @@ main() {
           linING="/var/lock/installing.$MODULE"
           if [ -n "$COMPILE" ] || [ -n "$RECONFIGURE" ] || module_installed $MODULE || ! resurrect $MODULE ; then
 	    verbose_msg "starting lin \"$MODULE\""
-            if ! SINGLE_MODULE=1 lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
+            if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
@@ -143,6 +143,7 @@ main() {
   else
     # we are only doing one module, drop down to:
     MODULE=$MODULES
+    unset RECONFIGURE
 
     if [ -n "$MOD_VERSION" ] ; then
       if echo $MODULE | grep -q '/' ; then

@@ -30,21 +30,8 @@
 list_sections() {
   debug_msg "list_sections ($@)"
   check_module_index
-  SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
-             cut -d : -f 2-2 | sort | uniq)
-  if [ -n "$SECTIONS" ] ; then
-    echo "$SECTIONS"
-    return 0
-  fi
-
-  SECTIONS=$(ls $MOONBASE | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" \
-            -e "LICENSE" -e "README")
-  if [ -n "$SECTIONS" ] ; then
-    echo "$SECTIONS"
-    return 0
-  fi
-
-  return 1
+  grep -v ^MOONBASE_MD5: $MODULE_INDEX | cut -d: -f2 | sort | uniq
+  return 0
 }
 
 
@@ -58,12 +45,12 @@ list_modules() {
     exit 1
   fi
 
-  if [ ! -d $MOONBASE/$1 ] ; then
+  if ! grep -q ":$1" $MODULE_INDEX ; then
     error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
     exit 1
   fi
 
-  ls -d $MOONBASE/$1/* $MOONBASE/$1/*/[0-9]* 2> /dev/null | sed "s:$MOONBASE/$1/::" | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README"
+  grep ":$1" $MODULE_INDEX | cut -d: -f1
   return 0
 }
 
@@ -93,8 +80,12 @@ list_installed() {
 # purpose : created an index file of module:section pair list
 create_module_index() {
   debug_msg "create_module_index ($@)"
+  verbose_msg "Updating module index file..."
   # make sure it exists before trying to see it's writeable
-  touch $MODULE_INDEX &> /dev/null
+  # this also assures that depends.cache gets remade
+  if [ ! -f $MODULE_INDEX ] ; then
+    touch $MODULE_INDEX &> /dev/null
+  fi
   
   # silently fail if we cannot write to $MODULE_INDEX, it is okay
   # for this to fail in case we are a mere user using lvu's search
@@ -102,17 +93,23 @@ create_module_index() {
   if [ ! -w "$MODULE_INDEX" ] ; then
     return 0
   fi
+ 
+  # doing this allows us to ctrl-C the process without breaking the
+  # index file
+  TMP_INDEX=$(temp_create "module.index")
 
-  lock_file $MODULE_INDEX || return 1
+  # this *really* is the fastest way to do it, no guarantees, we
+  # do have to make sure MOONBASE is coherent and tidy though
+  echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
+  find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
 
-  rm -f $MODULE_INDEX 2>/dev/null
+  # this should be safe enough:
+  lock_file $MODULE_INDEX &&
+  install -m644 $TMP_INDEX $MODULE_INDEX
 
-  echo MOONBASE_MD5:$(set_moonbase_md5) > $MODULE_INDEX
-  for SECTION in $(list_sections) ; do
-    list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
-  done
-
+  # do not forget to do these at any time:
   unlock_file $MODULE_INDEX
+  temp_destroy $TMP_INDEX
 }  
 
 
@@ -121,8 +118,9 @@ create_module_index() {
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
   debug_msg "check_module_index ($@)"
-  if [ $(get_moonbase_md5) != $(set_moonbase_md5) ] ; then
+  if [ -n "$(find $MOONBASE -type f -cnewer $MODULE_INDEX)" ] ; then
     create_module_index
+    create_depends_cache
     return 0
   else
     return 1
