@@ -718,6 +718,7 @@ remove_module() {
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
   [ "$VERBOSE" == "on" ] && echo "+ updating lunar state files after module installation"
+  remove_module  $1
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
   echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
