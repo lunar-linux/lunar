@@ -653,14 +653,12 @@ parse()  {
 	      fi
 	      ;;
 
-    compile)  if  [  -z  "$VERSION"  ];  then
-                SECTION=`find_section  $MODULE`             &&
-                DETAILS=$MOONBASE/$SECTION/$MODULE/DETAILS  &&
-                [  -x  $DETAILS  ]                         &&
-                    .  $DETAILS                               >/dev/null
-              fi
-              display  $COMPILE_LOGS/$MODULE-$VERSION.bz2   \
-                       "Compile log for $MODULE does not exist"
+    compile)  run_details && [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] &&
+                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2  ||
+              VERSION=$(installed_version $MODULE) &&
+                [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] &&
+                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2  \
+                "Compile log for $MODULE does not exist"
               ;;
     install)  display  $INSTALL_LOGS/$MODULE-$VERSION   \
               "Install log for $MODULE does not exist"
