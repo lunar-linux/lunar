@@ -74,24 +74,3 @@
 	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
 	more fixes.
 
-2003-01-29 20:26  sofar
-
-	* sbin/lunar: Fix for that nasty one bug.
-
-2003-01-29 19:35  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated the URLs and added a bit
-	more info.
-
-2003-01-29 13:11  sofar
-
-	* bin/lvu, sbin/lget, sbin/lin, sbin/lrm, sbin/lunar,
-	usr/sbin/colony, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/modules.lunar: Merging view_file and cvs
-	changes into lunar.
-
-2003-01-29 10:28  sofar
-
-	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
-	the logfile easier: 'lvu activity'
-
