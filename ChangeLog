@@ -1,17 +1,17 @@
 2004-08-27 08:51  sofar
 
 	* var/lib/lunar/functions/sources.lunar: foo /me fixes proper
-	comments
+	  comments
 
 2004-08-27 08:18  sofar
 
 	* var/lib/lunar/functions/sources.lunar: Adding sha1: verify syntax
-	code that uses sha1sum, slightly better than md5sum (what is it
-	again, 160 bits against 128 hash size?). The code hooks up
-	seamlessly and as demonstrated the older core doesn't break if it
-	doesn't handle the sha1: syntax. sha1sum is provided by coreutils
-	BTW so must in any case be present on all boxes, I don't expect any
-	box to fail on that.
+	  code that uses sha1sum, slightly better than md5sum (what is it
+	  again, 160 bits against 128 hash size?). The code hooks up
+	  seamlessly and as demonstrated the older core doesn't break if it
+	  doesn't handle the sha1: syntax. sha1sum is provided by coreutils
+	  BTW so must in any case be present on all boxes, I don't expect
+	  any box to fail on that.
 
 2004-08-26 14:10  sofar
 
@@ -20,22 +20,16 @@
 2004-08-22 11:34  perldude
 
 	* etc/lunar/mirrors/SFORGE: added german SF mirror. I'm using it
-	for some time now. No problems.
+	  for some time now. No problems.
 
 2004-08-09 12:11  prox
 
 	* var/lib/lunar/functions/messages.lunar: /dev/stderr isnt
-	standard, >&2 is more common
+	  standard, >&2 is more common
 
 2004-07-09 19:43  sofar
 
 	* var/lib/lunar/functions/optimize.lunar: Slightly modified after
-	ranitha's optimize patch for gcc-3.4.x. This will transform the
-	obsolete -mcpu into -mtune.
-
-2004-07-06 20:21  sofar
-
-	* var/lib/lunar/functions/edit.lunar: Allow patches to be searched
-	in $(PWD) && $SOURCE_CACHE, so you never have to explicitly specify
-	the location. uniform calling as with unpack() now.
+	  ranitha's optimize patch for gcc-3.4.x. This will transform the
+	  obsolete -mcpu into -mtune.
 
