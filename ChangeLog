@@ -322,12 +322,3 @@
 	* var/lib/lunar/excluded: This anoys the f*** out of me everytime
 	it overwritters it
 
-2003-03-06 23:39  sofar
-
-	* var/lib/lunar/excluded: protect the whole dir instead of 4 files.
-
-2003-03-06 22:44  sofar
-
-	* var/lib/lunar/functions/useradd.lunar: this is badly needed,
-	considering adding this to lunar ASAP...
-
