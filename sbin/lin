@@ -520,11 +520,10 @@ lin_module()  { (
   if  !  current_locked       &&
       !     solo_locked
   then
-    echo  $$  >  $linING        &&
+    echo  $$  >  $linING       &&
     if ! [[ $CFLAGS ]]; then
-      optimize $GCCVER &&
-      use_wrappers
-    fi                          &&
+      optimize
+    fi                         &&
     start_logging
 
     if ! run_pre_build ; then

@@ -73,6 +73,7 @@ bad_flags() {
 
 use_wrappers() {
   if [ "$GCCWRAPPERS" == "on" ] ; then
+    verbose_msg "Enabling gcc wrapper scripts to force optimizations"
     export PATH=/var/lib/lunar/compilers:${PATH}
   fi  
 }
@@ -751,7 +752,6 @@ optimize_ccc_warn() {
 
 optimize() {
    unset CFLAGS CXXFLAGS LDFLAGS
-   GCCVER="$1"
 
    case $PLATFORM in
       x86)      optimize_make     $MAKES     &&
@@ -809,6 +809,8 @@ optimize() {
   export CXXFLAGS
   export LDFLAGS
 
+  use_wrappers
+  verbose_msg "GCCVER=\"$GCCVER\""
   verbose_msg "CFLAGS=\"$CFLAGS\""
   verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
   verbose_msg "LDFLAGS=\"$LDFLAGS\""
