@@ -133,32 +133,3 @@
 
 	* var/lib/lunar/subroutines: misc cosmetic fix.
 
-2003-03-16 22:23  sofar
-
-	* var/lib/lunar/functions/download.lunar: bugfix: always write the
-	proper tar file.
-
-2003-03-16 21:47  sofar
-
-	* var/lib/lunar/subroutines: New default_cvs_* functions to call
-	autogen.sh
-
-2003-03-16 20:59  sofar
-
-	* var/lib/lunar/: functions/download.lunar, menu/download.menu:
-	adding fix for bad cvs tarfile, and introducing a cvs ipdate
-	threshold, to make sure you don't hammer a cvs server (defaults to
-	10 minutes)
-
-2003-03-16 20:25  sofar
-
-	* var/lib/lunar/subroutines: This seems needed. I'll keep it in
-	here for a while.
-
-2003-03-16 17:45  sofar
-
-	* bin/lvu, sbin/lunar, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/view.lunar: prune moved to lunar, moved
-	code out of lvu.
-
