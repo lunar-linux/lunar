@@ -164,7 +164,6 @@ main() {
     fi
 
     run_details $MODULE &&
-    run_configure $MODULE &&
     run_depends $MODULE
 
     if [ -z "$DEPS_ONLY" ] ; then
