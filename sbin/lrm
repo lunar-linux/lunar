@@ -21,13 +21,12 @@ help()
 cat << END
 usage: lrm [options] [module ...]
    -h  --help        displays this screen
-       --debug       debug output; implies verbose
+       --debug       debug output
    -d  --downgrade   [module] [version] downgrades a module
    -e  --exile       exiles modules
    -s  --nosustain   removes module(s) even if they are sustained
    -k  --keepconfig  remove module(s) but keep dependancies and config
    -t  --test        test only, do not actually do anything
-   -v  --verbose     verbose operation
    -V  --version     display version information and exit
    
 lrm is a script for removing installed modules.
@@ -64,7 +63,7 @@ exit_proc()
 
 trap_proc()
 {
-   [ "$VERBOSE" == "on" ] && echo "Trapped a signal! "
+   [ "$VERBOSE" == "on" ] && echo "+ Trapped a signal! "
    exit_proc
 
 }
@@ -171,7 +170,7 @@ remove_something()
 
 process_directories()
 {
-   [ "$VERBOSE" == "on" ] && echo "  Processing directories..."
+   [ "$VERBOSE" == "on" ] && echo "+ processing directories..."
 
    if [ -z "$1" ]; then
       [ "$DEBUG" == "on" ] && 
@@ -209,8 +208,8 @@ process_lrm_queue()
    do   
       MODULE=`remove_queue $LRM_QUEUE`
       [ "$TEST" == "on" ] && TEMP="-- TEST MODE -- : "
-      [ "$VERBOSE" == "on" ] && echo -e "\n${TEMP}Removing $MODULE"
-      [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
+      [ "$VERBOSE" == "on" ] && echo -e "+ ${TEST}removing $MODULE"
+      [ "$VERBOSE" == "on" ] && echo "+ running $MODULE DETAILS file"
 
       run_details $MODULE &> /dev/null
 
@@ -228,7 +227,7 @@ process_lrm_queue()
          [ "$TEST" != "on"  ] &&
          remove_module $MODULE
 
-         [ "$VERBOSE" == "on" ] && echo "  Module $MODULE is exiled"
+         [ "$VERBOSE" == "on" ] && echo "+ module $MODULE is exiled"
 
          message  "${LRM_COLOR}Exiled module:"  \
                   "${MODULE_COLOR}${MODULE}"    \
@@ -242,7 +241,7 @@ process_lrm_queue()
 
       run_module_file PRE_REMOVE 
 
-      [ "$VERBOSE" == "on" ] && echo "  Removing files..."
+      [ "$VERBOSE" == "on" ] && echo "+ removing files..."
       while read TARGET
       do
          [ "$DEBUG" == "on" ] && echo -n "    checking $TARGET.. "
@@ -257,7 +256,7 @@ process_lrm_queue()
 
          grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED && {
             [ "$VERBOSE" == "on" ] && 
-            echo "      $TARGET is protected or excluded!!" 
+            echo "+ \"$TARGET\" is protected or excluded!!" 
             continue
          }
 
@@ -280,27 +279,23 @@ process_lrm_queue()
 
       [ "$VERBOSE" == "on" ] &&
       [ "$KEEPCONFIG" == "on" ] &&
-      echo "  Skipping removal of dependancy listing and configs.. " || {
+      echo "+ skipping removal of dependancy listing and configs" || {
         [ "$VERBOSE" == "on" ] &&
-        echo -n "  Removing module from dependency listing and configs.. "
+        echo "+ removing module from dependency listing and configs"
         [ "$TEST" != "on" ]     && 
-        remove_depends  $MODULE &&
-        [ "$VERBOSE" == "on" ]  && 
-        echo "removed"          || {
+        remove_depends  $MODULE || {
            [ "$VERBOSE" == "on" ]  && 
-           echo "NOT removed!"
+           echo "++ skipped!"
         }
       }
 
-      [ "$VERBOSE" == "on" ] &&
-      echo -n "  Removing module from installed list.. "
+      [ "$VERBOSE" == "on" ]  &&
+      echo "+ removing module from installed list.. "
       
       [ "$TEST" != "on" ]     && 
-      remove_module  $MODULE  &&
-      [ "$VERBOSE" == "on" ]  && 
-      echo "removed"          || {
+      remove_module  $MODULE  || {
          [ "$VERBOSE" == "on" ]  && 
-         echo "NOT removed!"
+         echo "++ skipped!"
       }
 
       [ "$EXILE" == "on" ] && EXTEMP=" and exiled"
@@ -316,38 +311,29 @@ process_lrm_queue()
 
 check_status()
 {
-   [ "$VERBOSE" == "on" ] && echo -n "  Checking if $1 is installed.. "
    module_installed $MODULE || {
       message  "${MODULE_COLOR}${MODULE}"  \
       "${PROBLEM_COLOR}is not installed."  \
       "${DEFAULT_COLOR}"
-      [ "$VERBOSE" == "on" ] && echo -n "  Checking if $1 will be exiled.. "
-      [ "$EXILE"   == "on" ] || {
-            [ "$VERBOSE" == "on" ] && echo "NO!"
-            return 1
-         }
+      [ "$EXILE"   == "on" ] || return 1
    } 
-   [ "$VERBOSE" == "on" ] && echo "OK!"
 
    [ "$NOSUSTAIN" == "on" ] && return 0 || {
 
-      [ "$VERBOSE" == "on" ] && echo -en "  Checking if $1 is sustained.. "
+      [ "$VERBOSE" == "on" ] && echo "+ checking if \"$1\" is sustained"
       grep -q -w "$MODULE" "$SUSTAINED" && {
              message  "${MODULE_COLOR}${MODULE}"         \
                       "${PROBLEM_COLOR}is sustained."  \
                       "${DEFAULT_COLOR}"
             return 1 
-      } || {
-         [ "$VERBOSE" == "on" ] && echo  "NO!"
-         return 0
-      }
+      } || return 0 
    }
    true
 }
 
 downgrade()
 {
-# a local function for listing the contents of install cache
+   # a local function for listing the contents of install cache
    list_available_cache()
    {
       ls -1 $INSTALL_CACHE/$MODULE-* |
@@ -357,13 +343,12 @@ downgrade()
       done
       exit 1
    }
-#
    
    if [ "$TEST" != "on" ]; then 
       root_check || exit 1
    fi
 
-   [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
+   [ "$VERBOSE" == "on" ] && echo "+ running \"$MODULE\" DETAILS file"
    run_details $MODULE &> /dev/null || return 1
 
    [ -z "$1" ] && {
@@ -377,12 +362,12 @@ downgrade()
       list_available_cache
    }
 
-   [ "$VERBOSE" == "on" ] && echo "  Checking if  $MODULE is installed"
+   [ "$VERBOSE" == "on" ] && echo "+ checking if \"$MODULE\" is installed"
    local I_VERSION=`installed_version $MODULE`
    [ -n "$I_VERSION" ] && 
    {
       [ "$VERBOSE" == "on" ] &&
-      echo "    $I_VERSION of $MODULE is installed at the moment"
+      echo "+ \"$I_VERSION\" of \"$MODULE\" is installed at the moment"
 
       [ "$DEBUG" == "on" ] && 
          echo -n "  Checking if desired version is the installed version..."
@@ -398,23 +383,23 @@ downgrade()
          [ "$DEBUG" == "on" ] && echo "NO"
       }
 
-      [ "$VERBOSE" == "on" ] && echo "  Removing $MODULE-$I_VERSION"
+      [ "$VERBOSE" == "on" ] && echo "+ removing \"$MODULE-$I_VERSION\""
       [ "$TEST" == "on" ] && lrm2 -ts $MODULE || lrm2 -s $MODULE
 
    } || 
    {
       [ "$VERBOSE" == "on" ] &&
-      echo "    $MODULE is NOT installed at the moment"
+      echo "+ \"$MODULE\" is NOT installed at the moment"
    }
 
-   [ "$VERBOSE" == "on" ] && echo "  Installing $MODULE-$1"
-   [ "$VERBOSE" == "on" ] && echo "    extracting cached install file..."
+   [ "$VERBOSE" == "on" ] && echo "+ installing \"$MODULE-$1\""
+   [ "$VERBOSE" == "on" ] && echo "+ extracting cached install file..."
    [ "$TEST" == "on" ] && 
    {
       [ "$DEBUG" == "on" ] &&
       bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C /  ||
       bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
-      [ "$VERBOSE" == "on" ] && echo "  Adding module to installed list"
+      [ "$VERBOSE" == "on" ] && echo "+ adding module to installed list"
    }
 
    [ "$TEST" != "on" ] && 
@@ -423,7 +408,7 @@ downgrade()
       bzcat $INSTALL_CACHE/$FILENAME | tar -kx $TAR_P -C / ||
       bzcat $INSTALL_CACHE/$FILENAME | 
       tar -kx $TAR_P -C / 2>/dev/null >/dev/null
-      [ "$VERBOSE" == "on" ] && echo "  Adding module to installed list"
+      [ "$VERBOSE" == "on" ] && echo "+ adding module to installed list"
       add_module $MODULE installed  $1
       activity_log  "lrm downgrade"  "$MODULE"  "$1"  "success"
    }
@@ -481,7 +466,7 @@ create_lrm_queue()
 [ "$#" == "0" ] && help
 
 LRM_OPT=`getopt -q -o d:ehstvVk \
-         --long debug,downgrade:,exile,help,nosustain,verbose,version,test,keepconfig \
+         --long debug,downgrade:,exile,help,nosustain,version,test,keepconfig \
          -n lrm -- "$@"`
 
 [ "$?" == "0" ] || help
@@ -502,7 +487,6 @@ while true ; do
       -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
       -t|--test       ) export TEST=on;        shift ;;
       -V|--version    ) display_version;;
-      -v|--verbose    ) export VERBOSE=on;     shift;;
       --debug         ) export VERBOSE=on; export DEBUG=on; shift;;
       --) shift; break ;;
        *) help;  break ;;
@@ -512,7 +496,7 @@ done
 
 [ "$TEST" != "on" ] && {
    trap "" INT QUIT TERM
-   [ "$VERBOSE" == "on" ] && echo "Signals TERM, INT and QUIT are trapped!"
+   [ "$VERBOSE" == "on" ] && echo "+ signals TERM, INT and QUIT are trapped"
 }
 
 [ "$TEST" == "on" ] && trap "trap_proc" INT QUIT TERM

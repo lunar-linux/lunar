@@ -185,16 +185,9 @@ run_details() {
 # purpose  : runs the given script for a pre-defined module
 run_module_file()
 {
-   [ "$VERBOSE" == "on" ] && echo "  Running $MODULE $1 file"
-   [ -z "$SCRIPT_DIRECTORY" ]  && {
-      [ "$VERBOSE" == "on" ] && echo "SCRIPT_DIRECTORY undefined"
-      return 1
-   }
-
-   [ -s "$SCRIPT_DIRECTORY/$1" ] || {
-      [ "$VERBOSE" == "on" ] && echo "    $1 does not exist"
-      return 1
-   }
+   [ -z "$SCRIPT_DIRECTORY" ]  && return 1
+   [ -s "$SCRIPT_DIRECTORY/$1" ] || return 1
+   [ "$VERBOSE" == "on" ] && echo "+ running \"$MODULE\" \"$1\" file"
    [ "$TEST" != "on" ] && . $SCRIPT_DIRECTORY/$1 > /dev/null
 }
 
