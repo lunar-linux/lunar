@@ -91,9 +91,3 @@
 	var/lib/lunar/menu/optimize.menu: Merging theedge with changes from
 	theedge, in order to facilitate lunar-1.3
 
-2003-03-13 05:03  nhudson
-
-	* var/lib/lunar/sustained: 
-	Ok this is a start of adding coreutils to Lunar.  I removed
-	fileutils, sh-utils, and textutils and added in coreutils
-
