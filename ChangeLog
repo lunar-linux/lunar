@@ -324,8 +324,3 @@
 	* var/lib/lunar/functions/modules.lunar: Code cleanups and
 	speedups.
 
-2003-02-08 02:30  csm
-
-	* etc/lunar/config: changing the last resort URL to .org instead of
-	.com
-
