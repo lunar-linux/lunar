@@ -1,3 +1,37 @@
+2004-01-05 05:13  tchan
+
+	* usr/share/doc/lunar/CREDITS: Corrected r0dzilla's real name.
+
+2004-01-05 05:00  tchan
+
+	* usr/share/doc/lunar/CREDITS: Rewrote some of the language.  Made
+	a section for the current Lunar Devs.  More typos corrected.
+
+2004-01-04 20:51  tchan
+
+	* usr/share/doc/lunar/CREDITS: Fixed the old joel and jol again.
+
+2004-01-04 20:15  tchan
+
+	* usr/share/doc/lunar/CREDITS: Added dem's info.
+
+2004-01-04 20:10  tchan
+
+	* usr/share/doc/lunar/CREDITS: Corrected jol's email and nick with
+	info from Florin.
+
+2004-01-04 17:40  tchan
+
+	* usr/share/doc/lunar/CREDITS: Fixed for some obvious omissions. 
+	Corrected some email addresses.  Sorted the list by IRC nickname
+	and noted that fact at the top of the list.
+
+2004-01-04 13:57  sofar
+
+	* usr/share/doc/lunar/CREDITS: Adding some historical information,
+	and readable text around the contributors. I'm considering adding
+	an 'active developer' section too, ideas? Feel free to add/edit.
+
 2004-01-04 09:32  cmak
 
 	* usr/share/doc/lunar/CREDITS: changed mine BEEP to a much nicer
