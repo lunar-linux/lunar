@@ -1,3 +1,14 @@
+2004-11-01 07:56  sofar
+
+	* var/lib/lunar/functions/modules.lunar: this must have slipped
+	  in... weird.
+
+2004-10-31 14:31  sofar
+
+	* sbin/lsh: Allow lsh to be passed lunar functions or whichever
+	  command as a parameter, which will then be evaluated within the
+	  lsh environment. Example: `lsh list_expired_modules`
+
 2004-10-29 14:28  sofar
 
 	* var/lib/lunar/functions/modules.lunar: Extra bluntly running the
