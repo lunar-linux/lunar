@@ -463,7 +463,8 @@ default_pre_build() {
       cd $SOURCE_DIRECTORY &&
       make clean
     else
-      mk_source_dir        $CVS_MODULE &&
+      mk_source_dir        &&
+      cd                   $SOURCE_DIRECTORY &&
       unpack               $MODULE-$VERSION.tar.bz2
     fi
   else
