@@ -1,3 +1,22 @@
+2005-03-15 12:36  sofar
+
+	* bin/lvu: Adding 'info' ... slightly modified by chad's patch.
+
+2005-03-15 11:38  sofar
+
+	* var/lib/lunar/functions/messages.lunar: New query() routine: bad
+	  input now causes a repeated question, and the double newline is
+	  gone.
+
+2005-03-15 10:36  sofar
+
+	* var/lib/lunar/functions/depends.lunar: sanity check: bug #723
+
+2005-03-15 04:05  v3rt1g0
+
+	* etc/lunar/local/README: Fixed a typo and add metion of XOrg for
+	  what its worth
+
 2005-03-13 21:56  sofar
 
 	* var/lib/lunar/functions/connect.lunar: this is much more
