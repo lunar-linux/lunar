@@ -162,9 +162,3 @@
 	install.lunar: fixed failure to correctly remove depends/module
 	file rename mv_edit() routine mod_v_safe_edit()
 
-2003-09-24 12:13  nhudson
-
-	* var/lib/lunar/excluded: 
-	Adding /etc/bonobo-activation and its file to excluded because it
-	gets deleted when you remove evolution which is a very bad! thing!
-
