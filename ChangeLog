@@ -1,3 +1,19 @@
+2005-03-08 07:48  moe
+
+	* usr/share/man/man8/lfirsttime.8: Typo
+
+2005-03-07 23:08  moe
+
+	* usr/share/man/man8/lfirsttime.8: Tweaks and typo fixes. Also
+	  added a hint to the hint section.
+
+2005-03-07 22:03  moe
+
+	* usr/share/man/man8/lfirsttime.8: I finally got to rewriting
+	  lfirsttime. This should be _alot_ better then the manpage we had
+	  until now. Thanks rolling out to Jens, Jasper and Jaime for
+	  typo-hunting. I feel dizzy now.
+
 2005-02-22 12:50  moe
 
 	* etc/lunar/config: Adding the X11 path to the static lunar PATH
