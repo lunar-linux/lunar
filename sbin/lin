@@ -45,6 +45,7 @@ Optional Parameters:
        --deps			Configure modules and determine dependencies, 
 -f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
 -h  |  --help                   Displays this help text
+       --opts '--enable-xxx'    Add custom configure options to the module
 -p  |  --probe                  Only lin if not already installed
 -r  |  --reconfigure		Select new dependencies for modules
 -R  |  --resurrect              Force to be unpacked from /var/cache/lunar
