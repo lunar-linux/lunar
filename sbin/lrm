@@ -231,6 +231,7 @@ downgrade() {
   root_check
 
   verbose_msg "running \"$MODULE\" DETAILS file"
+  optimize
   run_details $MODULE &> /dev/null || return 1
 
   if [ -z "$1" ] ; then
@@ -264,10 +265,10 @@ downgrade() {
   verbose_msg "installing \"$MODULE-$1\""
   verbose_msg "extracting cached install file..."
   
-  bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
+  bzcat $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 | tar -kt $TAR_P -C / >/dev/null
   verbose_msg "adding module to installed list"
 
-  bzcat $INSTALL_CACHE/$FILENAME | 
+  bzcat $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 | 
   tar -kx $TAR_P -C / 2>/dev/null >/dev/null
   verbose_msg "adding module to installed list"
   add_module $MODULE installed  $1
