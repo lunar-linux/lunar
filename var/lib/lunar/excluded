@@ -33,12 +33,7 @@
 /etc/nsswitch.conf
 /etc/passwd
 /etc/passwd-
-/etc/postfix/main.cf
-/etc/postfix/master.cf
-/etc/postfix/aliases
-/etc/postfix/access
-/etc/postfix/virtuals
-/etc/postfix/lists
+/etc/postfix
 /etc/printcap
 /etc/procmailrc
 /etc/proftpd.conf
