@@ -109,22 +109,14 @@ main() {
     # this runs as a background process, so we are off to step #3 right away
     if [ -z "$DEPS_ONLY" ] ; then
       verbose_msg "Spawning download manager"
-      need_source() {
-        for DEP in $(grep ^$1: $DEPENDS_STATUS | grep :on: | cut -d: -f2) ; do
-          if ! module_installed $DEP ; then
-	    need_source $DEP
-	    echo $DEP
-	  fi
-	done
-      }
       for M in $MODULES ; do
-        LIST="$(need_source $M | uniq) $LIST"
+        LIST="$(for D in `find_depends $M`; do if ! module_installed $D ; then echo $D ; fi ; done | uniq) $LIST"
       done
       verbose_msg "download queue: $LIST $MODULES"
       for M in $LIST $MODULES; do
           THIS_TEMP=$(temp_create "$M.download.log")
           rm $THIS_TEMP
-	  SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+          SAFE_M=$(echo $M | md5sum | awk '{print $1}')
           eval TEMP_DOWNLOAD_LOG_$SAFE_M=$THIS_TEMP
       done
       (
