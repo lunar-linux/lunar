@@ -157,14 +157,3 @@
 	* var/lib/lunar/functions/kernel.lunar: Initial import, moving
 	kernel build functions to core
 
-2003-10-04 20:19  sofar
-
-	* sbin/lget, sbin/lin, sbin/lunar,
-	var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/install.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/sources.lunar: Same bugfixes as in lunar
-	core.
-
