@@ -123,9 +123,3 @@
 
 	* sbin/lunar: cleaned up a whee bit too much
 
-2004-11-28 16:38  sofar
-
-	* etc/lunar/config, sbin/lunar,
-	  usr/share/doc/lunar/core-documentation/_etc_lunar_local_config.html,
-	  var/lib/lunar/unset.sh: Deleting COLONY/CABAL support
-
