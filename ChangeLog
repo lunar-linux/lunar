@@ -119,7 +119,3 @@
 	  before a module is compiled ONLY that relevant download info is
 	  displayed.
 
-2004-11-29 06:16  sofar
-
-	* sbin/lunar: cleaned up a whee bit too much
-
