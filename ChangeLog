@@ -24,8 +24,3 @@
 
 	* etc/lunar/config: Telia->unc
 
-2004-06-26 16:41  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Fix a bad bug showing way
-	too many modules for a section
-
