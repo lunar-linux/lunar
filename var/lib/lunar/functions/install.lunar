@@ -352,7 +352,7 @@ lin_module()  {
   fi
 
   # make sure we have the source code
-  download_module $MODULE
+  lget $MODULE
   
   # set the installwatchfile
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
@@ -362,7 +362,7 @@ lin_module()  {
   if [ "$MODULE" == "moonbase" ] ; then
     if ! current_locked && ! solo_locked ; then
       echo $$ > $linING       &&
-      get_moonbase            &&
+      lget moonbase           &&
       rm -f $linING           &&
       return
     else
