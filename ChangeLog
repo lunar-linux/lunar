@@ -1,3 +1,17 @@
+2002-10-08 04:32  tchan
+
+	* var/state/lunar/blacklist.x86: Removed ddd from the blacklist.  It now correctly compiles with gcc-3.2.
+	
+2002-10-05 05:39  tchan
+
+	* var/lib/lunar/subroutines: Fixed a long standing bug on why the /usr/share/info/dir file keeps getting
+	trashed.  prepare_install was not saving /usr/share/info/dir and that file
+	is being tracked by installwatch so it becomes part of the tar.bz2 file.
+	So inside prepare_install, if the module is already installed, it removes
+	the existing module before completing the install.  This would remove
+	the exisiting /usr/share/info/dir and then replace it with a very short
+	version of /usr/share/info/dir.
+	
 2002-10-03 16:51  xoritor
 
 	* sbin/lin: Added the call to check_blacklist() that was left out.
