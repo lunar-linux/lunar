@@ -1,12 +1,12 @@
 bash
 binutils
 bzip2
+coreutils
 cpio
 cracklib
 dialog
 e2fsprogs
 file
-fileutils
 findutils
 gcc
 gettext
@@ -27,10 +27,8 @@ patch
 readline
 rpmunpack
 sed
-sh-utils
 shadow
-tar
-textutils               
+tar               
 theedge
 unzip
 util-linux
