@@ -360,7 +360,3 @@
 	daemons which create these files on thier own.	This allows sshd to
 	be restarted remotely, killing only the server process.
 
-2003-02-02 00:08  sofar
-
-	* var/lib/lunar/menu/optimize.menu: More info for the meek
-
