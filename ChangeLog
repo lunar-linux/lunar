@@ -165,10 +165,3 @@
 	* etc/lunar/mirrors/GNOME: 
 	Updating Gnome mirror locations
 
-2003-09-14 23:16  nhudson
-
-	* var/lib/lunar/excluded: 
-	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to
-	the excluded list because sometimes they get deleted by
-	scrollkeeper or libglade2
-
