@@ -11,8 +11,10 @@
 #          get_moonbase_md5, set_moonbase_md5,             #
 #          check_module_index, run_details                 #
 #          module_installed, module_held, module_exiled    #
+#          hold_modules, unhold_modules                    #
 # 20020528                                                 #
 # 20030113 merging more functions in here - sofar          #
+# 20030417 adding hold routines - sofar                    #
 #                                                          #
 ############################################################
 #                                                          #
@@ -235,10 +237,38 @@ module_exiled()  {
 
 installed_version() {
    if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
-     echo `grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
+     echo $(grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4)
    else  
-     echo `grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
+     echo $(grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4)
    fi
 }
 
 
+hold_modules() {
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:held:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+unhold_modules () {
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:held:installed:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+
+}

@@ -722,6 +722,10 @@ parse()  {
                 else  message  "$MODULE is not installed";  false
                 fi
                 ;;
+
+    held)
+      grep ":held:" $MODULE_STATUS | cut -d: -f1
+      ;;
 		
     sum)  [  -n  "$MODULE"  ]                         &&
           checksum  "$INSTALL_LOGS/$MODULE-$VERSION"  ||

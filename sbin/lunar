@@ -811,13 +811,17 @@ main_menu()  {
 
 main() {
   case  $1  in
-      prune)  prune                    ;;
+      prune)  prune                      ;;
       renew)  update_installed
-              upgrade_install_queue    ;;
-     update)  update_pkgs  autoupdate  ;;
-    rebuild)  rebuild                  ;;
-   optimize)  optimize_architecture    ;;
-          *)  main_menu                ;;
+              upgrade_install_queue      ;;
+     update)  update_pkgs  autoupdate    ;;
+    rebuild)  rebuild                    ;;
+   optimize)  optimize_architecture      ;;
+    install)  shift && lin $@            ;;
+     remove)  shift && lrm $@            ;;
+       hold)  shift && hold_modules $@   ;;
+     unhold)  shift && unhold_modules $@ ;;
+          *)  main_menu                  ;;
   esac
 }
 
