@@ -2,6 +2,8 @@
 #                                                          #
 # subroutines - Lunar subroutines                          #
 #                                                          #
+# Copyright Kyle Sallee 2000, 2001                         #
+#                                                          #
 ############################################################
 #                                                          #
 # kernel.lunar functions for managing kernel installation  #
@@ -9,7 +11,9 @@
 #                                                          #
 ############################################################
 #                                                          #
+# Parts Copyright Terry Chan 2002 GPLv2                    #
 # Parts Copyrighted Niki Guldbrand 2003 under GPLv2        #
+# Parts Copyright FW Systems llc 2003 GPLv2                #
 #                                                          #
 ############################################################
 
@@ -24,6 +28,8 @@
 backup_mods_krnl()
 {
   debug_msg "backup_mods_krnl ($@)"
+
+  devoke_installwatch  
 
   KERNEL_STRING=$(basename $1 | cut -d "_" -f "2-")
   KERNEL_MODULE=$(basename $1 | cut -d "_" -f "-1")
@@ -42,7 +48,7 @@ backup_mods_krnl()
   fi
 
   for I in $(seq $BACKUP_LEVEL -1 1); do
-    if [ -d /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_$((${I} - 1)) ]; then
+     if [ -d /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_$((${I} - 1)) ]; then
       verbose_msg "moving kernel modules backup from no. \"$((${I} - 1))\" to \"${I}\""
       mv /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_$((${I} - 1)) \
          /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_${I}
@@ -65,4 +71,193 @@ backup_mods_krnl()
     mv /boot/${KERNEL_MODULE}_${KERNEL_STRING}       \
        /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_0
   fi
+
+  invoke_installwatch 
+
+}
+
+
+# function update_lilo
+# Description: creates /etc/lilo.conf stanzas
+# usage: update_lilo bootimagename menuname
+#
+
+update_lilo()  {
+
+debug_msg "update_lilo ($@)"
+
+IMAGE_NAME=$1
+BOOT_LABEL=$2
+
+LILO_IMAGE_ENTRY="
+image                   =       /boot/$IMAGE_NAME 
+        label           =       $BOOT_LABEL 
+        read-only
+"
+
+LILO_OLD_IMAGE_ENTRY="
+image                   =       /boot/$IMAGE_NAME.old_1
+        label           =       $BOOT_LABEL.old
+        read-only 
+"
+
+  if  ! ( grep  -q  "$IMAGE_NAME"  /etc/lilo.conf   && 
+          grep  -q  "$IMAGE_NAME.old" /etc/lilo.conf);  then
+
+    IFS_OLD=$IFS
+    export  IFS="
+"
+
+    rm  -rf  /etc/lilo.conf.new
+    cp  /etc/lilo.conf  /etc/lilo.conf.old
+
+    (( IMAGE_COUNT=0  ))
+
+    for  LINE  in  `cat /etc/lilo.conf`;  do
+
+      if   echo  $LINE  |  grep  -q  "image"  ||
+           echo  $LINE  |  grep  -q  "other"  ;  then
+        if  (( IMAGE_COUNT  == 0  ));  then
+          if  !  grep  -q  "$IMAGE_NAME"  /etc/lilo.conf;  then
+            echo  -e  "$LILO_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
+          fi
+          if  !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf;  then
+            echo  -e  "$LILO_OLD_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
+          fi
+        fi
+        ((  IMAGE_COUNT++  ))
+      fi
+
+      if  ((  IMAGE_COUNT == 14  ));  then
+        break
+      fi
+    
+      echo  $LINE  >>  /etc/lilo.conf.new
+
+    done
+
+    if  ((  IMAGE_COUNT ==  0  ));  then
+      if  !  grep  -q  "$IMAGE_NAME"  /etc/lilo.conf;  then
+        echo  -e  "$LILO_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
+      fi
+      if  !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf;  then
+        echo  -e  "$LILO_OLD_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
+      fi
+    fi
+
+    cp  /etc/lilo.conf.new  /etc/lilo.conf
+
+    export  IFS=$IFS_OLD
+
+  fi
+
+  case  $CONFIG_LILO in
+    y|Y|j|J)  ${EDITOR:-nano}  /etc/lilo.conf  ;;
+  esac
+
+  /sbin/lilo
+
+}
+
+# function update_grub
+# Description: creates /etc/lilo.conf stanzas
+# usage: update_grub bootimagename menuname
+#
+
+update_grub()  {
+
+debug_msg "update_grub ($@)"
+
+IMAGE_NAME=$1
+BOOT_LABEL=$2
+
+. $DEPENDS_CONFIG/grub
+
+GRUB_IMAGE_ENTRY="
+title   $BOOT_LABEL
+kernel  $GRUB_BOOT/$IMAGE_NAME
+root    $GRUB_ROOT
+"
+
+GRUB_OLD_IMAGE_ENTRY="
+title   $BOOT_LABEL.old
+kernel  $GRUB_BOOT/$IMAGE_NAME.old
+root    $GRUB_ROOT
+"
+
+if  ! ( grep  -q  "$IMAGE_NAME"     /boot/grub/menu.lst && 
+        grep  -q  "$IMAGE_NAME.old" /boot/grub/menu.lst );  then
+
+    IFS_OLD=$IFS
+    export  IFS="
+"
+
+    rm  -rf  /boot/grub/menu.lst.new
+    cp  /boot/grub/menu.lst  /boot/grub/menu.lst.old
+
+    (( IMAGE_COUNT=0  ))
+
+    for  LINE  in  `cat /boot/grub/menu.lst`;  do
+
+      if   echo  $LINE  |  grep  -q  "title";  then
+        if  (( IMAGE_COUNT  == 0  ));  then
+          if  !  grep  -q  "$IMAGE_NAME"  /boot/grub/menu.lst;  then
+            echo  -e  "$GRUB_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
+          fi
+          if  !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst;  then
+            echo  -e  "$GRUB_OLD_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
+          fi
+        fi
+        ((  IMAGE_COUNT++  ))
+      fi
+
+      if  ((  IMAGE_COUNT == 14  ));  then
+        break
+      fi
+    
+      echo  $LINE  >>  /boot/grub/menu.lst.new
+
+    done
+
+    if  ((  IMAGE_COUNT ==  0  ));  then
+      if  !  grep  -q  "$IMAGE_NAME"  /boot/grub/menu.lst;  then
+        echo  -e  "$GRUB_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
+      fi
+      if  !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst;  then
+        echo  -e  "$GRUB_OLD_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
+      fi
+    fi
+
+    cp  /boot/grub/menu.lst.new  /boot/grub/menu.lst
+
+    export  IFS=$IFS_OLD
+
+  fi
+
+  case  $CONFIG_GRUB in
+
+    y|Y)  if [ -n "$EDITOR" ];             then
+            $EDITOR  /boot/grub/menu.lst;  else
+            nano     /boot/grub/menu.lst
+          fi
+          ;;
+  esac
+
+  message "Install GRUB into MBR of first drive? [y|Y]"
+  read GRUB_FIRST_DRIVE
+  case $GRUB_FIRST_DRIVE in
+    y|Y) GRUB_BOOT_DEVICE="(hd0)" ;; 
+    *  ) 
+         message "Otherwise please specify in GRUB notation the desired drive/partition"
+         message "Using parenthesis and NO spaces!"
+         message "Samples: (hd1)    2nd drive MBR"
+         message "         (hd1,0)  2nd drive with 1st partition"
+         message "         (hd0,2)  1st drive with 3rd partition"
+         echo -n "GRUB_BOOT_DEVICE=(hd#,#):  "
+         read GRUB_BOOT_DEVICE
+  esac
+
+  /usr/sbin/grub-install "$GRUB_BOOT_DEVICE"
+  sleep 4
+
 }
