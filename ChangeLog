@@ -106,20 +106,3 @@
 	  Most likely profile modules now only are a problem but we'll cope
 	  with them a different way.
 
-2004-12-07 14:11  moe
-
-	* var/lib/lunar/functions/download.lunar: We all love eye candy.
-	  This now is _almost_ as fast as the real output ;-)
-
-2004-12-07 13:56  sofar
-
-	* sbin/lin: foo
-
-2004-12-07 12:12  sofar
-
-	* sbin/lin, var/lib/lunar/functions/download.lunar: Implemented
-	  Moe's download idea: separate lget processes and logs for each
-	  downloaded file. The dl manager passes the PID on later and
-	  before a module is compiled ONLY that relevant download info is
-	  displayed.
-
