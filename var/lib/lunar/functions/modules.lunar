@@ -68,6 +68,19 @@ list_modules() {
   return 0
 }
 
+# function : list_moonbase
+# usage    : list_moonbase
+# purpose  : returns the names of all modules in moonbase
+list_moonbase()
+{
+  for  SECTION  in  `list_sections`;  do
+    for  MODULE  in  `list_modules $SECTION`;  do
+      echo $MODULE
+    done
+  done				
+}
+
+
 # function : set_moonbase_md5
 # usage    : set_moonbase_md5
 # purpose  : creates the md5 value of overall moonbase
