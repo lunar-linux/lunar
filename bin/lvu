@@ -39,7 +39,7 @@ Command     Arguments      Description
 
 what        module         print the module's description
 where       module         print the module's section
-cd				module			change directory to module and execs a new shell
+cd          module         change directory to module and execs a new shell
 alien       <empty>        discover untracked files
 from        path/file      discover what installed a file
 leafs       <empty>        Display installed modules that have no explicit dependencies on them.
