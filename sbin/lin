@@ -133,7 +133,7 @@ use_xinetd()  { (
     for  SERVICE  in  $ALL_SERVICES;  do
       if    query  "Invoke $SERVICE via xinetd?"  y
       then  SERVICES="$SERVICE $SERVICES"
-#      else return 1
+      else RETURN=1
       fi
     done
 
@@ -154,7 +154,10 @@ use_xinetd()  { (
     fi
 
     echo  "SERVICES=\"$SERVICES\""  >>  $MODULE_CONFIG
-    return 0
+    if [ $RETURN == 1 ]
+      then return 1
+      else return 0
+    fi
     else
        return 1
   fi
