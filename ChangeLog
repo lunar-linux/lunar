@@ -300,10 +300,3 @@
 	* etc/lunar/: config, mirrors/LRESORT: Adding the 2 new mirrors in
 	the URL list, please use them!
 
-2004-02-04 02:36  tchan
-
-	* usr/share/doc/lunar/CREDITS: Removing sofar's last commit as bkw
-	was already in the list.  He was added after his ibackup module was
-	committed to moonbase.	The CREDITS list is trying to be
-	alphabetical by "nickname".
-
