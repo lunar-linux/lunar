@@ -98,3 +98,6 @@
 /var/state/dhcpd.leases~
 /var/tmp
 /var/yp
+/etc/xml/catalog
+/etc/xml/docbook
+/etc/sgml/catalog 
