@@ -753,7 +753,7 @@ lin_module()  { (
       return
     fi
   fi
-
+  check_blacklist             &&
   run_details                 &&
   run_conflicts               &&
   satisfy_depends             &&
