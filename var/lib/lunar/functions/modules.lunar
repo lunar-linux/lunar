@@ -28,69 +28,67 @@
 # function : list_sections
 # usage    : list_sections
 # purpose  : list the moonbase sections, filter out the specific files
-list_sections() {
-   check_module_index                                        &&
-   SECTIONS=`grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
-             cut -d : -f 2-2                                  | \
-             sort                                             | \
-             uniq`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+list_sections() {(
+  check_module_index
+  SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
+             cut -d : -f 2-2 | sort | uniq)
+  if [ -n "$SECTIONS" ] ; then
+    echo "$SECTIONS"
+    return 0
+  fi
 
-   SECTIONS=`ls  $MOONBASE       | \
-             grep -v "ChangeLog" | \
-             grep -v "CVS"       | \
-             grep -v "COPYING"   | \
-             grep -v "LICENSE"   | \
-             grep -v "README"`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+  SECTIONS=$(ls $MOONBASE | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" \
+            -e "LICENSE" -e "README")
+  if [ -n "$SECTIONS" ] ; then
+    echo "$SECTIONS"
+    return 0
+  fi
 
-   return 1
-}
+  return 1
+)}
 
 
 # function : list_modules
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
-list_modules() {
+list_modules() {(
   if [ -z "$1" ] ; then
     message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
     exit 1
   fi
 
-   for  MODULE  in  `ls $MOONBASE/$1 2>/dev/null | \
-                     grep -v "ChangeLog"               | \
-                     grep -v "CVS"                     | \
-                     grep -v "COPYING"                 | \
-                     grep -v "LICENSE"                 | \
-                     grep -v "README"`
-   do
-      echo "$MODULE" 
-   done
-   return 0
-}
+  for MODULE in $(ls $MOONBASE/$1 2>/dev/null | \
+      grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README")
+  do
+    echo "$MODULE" 
+  done
+  return 0
+)}
+
 
 # function : list_moonbase
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
-list_moonbase() {
+list_moonbase() {(
   for SECTION in $(list_sections) ; do
     list_modules $SECTION
   done				
-}
+)}
 
 
 # function : list_installed
 # usage    : list_installed
 # purpose  : return a list of installed (or held) modules
 list_installed() {
-  grep -e ":installed:" -e ":held:" $MODULE_STATUS
+  grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
 }
+
 
 # function : set_moonbase_md5
 # usage    : set_moonbase_md5
 # purpose  : creates the md5 value of overall moonbase
 set_moonbase_md5() {
-  MOONBASE_MD5=`echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1`
+  MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
   echo $MOONBASE_MD5
 }
 
@@ -99,8 +97,8 @@ set_moonbase_md5() {
 # usage    : get_moonbase_md5
 # purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
 get_moonbase_md5() {
-  MOONBASE_MD5=`grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
-                cut -d : -f 2-2`
+  MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
+                cut -d : -f 2-2)
   if [ -z "$MOONBASE_MD5" ] ; then
     MOONBASE_MD5="0"
   fi
@@ -112,6 +110,12 @@ get_moonbase_md5() {
 # usage   : create_module_index
 # purpose : created an index file of module:section pair list
 create_module_index() {
+  # silently fail if we cannot write to $MODULE_INDEX, it is okay
+  # for this to fail in case we are a mere user using lvu's search
+  # functionality
+  if [ ! -w $MODULE_INDEX ] ; then
+    return 0
+  fi
   lock_file $MODULE_INDEX || return 1
 
   if [ -f "$MODULE_INDEX" ] ; then
@@ -120,7 +124,7 @@ create_module_index() {
   fi
 
   echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
-  for  SECTION  in  $(list_sections) ; do
+  for SECTION in $(list_sections) ; do
     list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
   done
   unlock_file $MODULE_INDEX
@@ -143,9 +147,8 @@ function check_module_index() {
 # function : find_section
 # usage    : find_section "module name"
 # purpose  : finds the section of a given module as parameter
-find_section() {
-  local SECTION
-
+# returns  : (0) on success, (1) on failure, errors on stdout
+find_section() {(
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
     if [ -d $MOONBASE/$SECTION/$1 ] ; then
@@ -172,37 +175,44 @@ find_section() {
   done
 
   return 1
-}
+)}
 
 
 # function : run_details
 # usage    : run_details |module_name| ($MODULE is pre-defined or param)
 # purpose  : runs the DETAILS file of a module
+# returns  : (0) on success, (1) on failure, error messages on stdout
 run_details() {
 
-  [ -z "$MODULE" ] && [ -z "$1" ] && return 1
-  [ -n "$1" ] && MODULE="$1"
+  if [ -z "$MODULE" ] && [ -z "$1" ] ; then
+    return 1
+  elif [ -n "$1" ] ; then
+    MODULE="$1"
+  fi
 
-  local SECTION=$(find_section $MODULE)
-  [ -d "$MOONBASE/$SECTION/$MODULE" ] || {
-     message  "${PROBLEM_COLOR}Unable to find module"    \
-              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-              "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
-     return 1
-  }
+  if SECTION=$(find_section $MODULE) ; then
+    [ -d "$MOONBASE/$SECTION/$MODULE" ] || {
+       message  "${PROBLEM_COLOR}Unable to find module"    \
+                "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
+                "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
+       return 1
+    }
 
-  [ -f "$MOONBASE/$SECTION/$MODULE/DETAILS" ] || {
-     message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${MODULE}" \
-              "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
-              "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
-     return 1
-  }
+    [ -f "$MOONBASE/$SECTION/$MODULE/DETAILS" ] || {
+       message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${MODULE}" \
+                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
+                "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
+       return 1
+    }
    
-  SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-  . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
-  SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$MODULE-$VERSION}
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+    . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
+    SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$MODULE-$VERSION}
 
-  return 0        
+    return 0
+  else
+    return 1
+  fi
 }
 
 
@@ -246,7 +256,7 @@ module_exiled() {
 # usage    : installed_version $MODULE
 # purpose  : return the installed version of $MODULE
 installed_version() {
-  grep "^$1:" $MODULE_STATUS | cut -d: -f4 
+  grep "^$1:" $MODULE_STATUS | cut -d: -f4
 }
 
 
@@ -283,5 +293,13 @@ unhold_modules () {
     unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
   fi
+}
 
+
+module_needs_update () {
+  if [ -n "$1" ] ; then
+    :
+  else
+    return 1
+  fi
 }

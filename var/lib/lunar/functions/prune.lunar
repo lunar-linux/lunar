@@ -31,7 +31,7 @@
 generate_keep_list() {
   for MODULE in $(list_moonbase | sort);  do
     show_fancy_progress "Processing: $MODULE"
-    sources  $MODULE >> $KEEP
+    sources $MODULE >> $KEEP
     VERSION=$(installed_version $MODULE)
     if [ -z "$VERSION" ] ; then
       VERSION=$(run_details ; echo $VERSION)

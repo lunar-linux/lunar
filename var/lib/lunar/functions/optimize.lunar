@@ -589,6 +589,14 @@ optimize_speed() {
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
                    fi
+		 ;;
+	   Tracer) if [[ $GCCVER == "3" ]] ; then
+	             CFLAGS="$CFLAGS -ftracer"
+		     CXXFLAGS="$CXXFLAGS -ftracer"
+		   else
+		     CFLAGS="$CFLAGS"
+		     CXXFLAGS="$CXXFLAGS"
+		   fi
                  ;;
 
       esac

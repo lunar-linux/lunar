@@ -27,8 +27,9 @@
 # function : find_depends 
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
-function find_depends()
-{
+function find_depends() {
+
+  verbose_msg "find_depends $@"
    [ -n "$1" ]                || return 1
    run_details $1             || return 1
    [ -n "$SCRIPT_DIRECTORY" ] || return 1   
@@ -81,32 +82,18 @@ function find_depends()
 
 
 is_depends()  {  (
-  #  Is $1 a previously selected dependency of any module.
-  EXIT_STATUS="false"
-  for  DEP  in  `cut  -d :  -f2-  $DEPENDS_STATUS  |
-                 grep  "^$1:"`
-  do
-    DEP_STATUS=`echo  "$DEP"  |  cut  -d :  -f2`
-    if    [  "$DEP_STATUS"  ==  "on"  ]
-    then  EXIT_STATUS="true"
-          break
-    fi
-  done
-  $EXIT_STATUS
+  # Is $1 a previously selected dependency of any module.
+  return $(cat $DEPENDS_STATUS | cut -d: -f2- | grep -q "^$1:on:")
 )  }
                                                                                 
                                                                                 
 in_depends()  {
-  #  Was $2 presented as a depenency for module $1
-  if    grep  -q  "^$1:$2"  $DEPENDS_STATUS
-  then  true
-  else  false
-  fi
+  # Was $2 presented as a depenency for module $1
+  return $(grep -q "^$1:$2:" $DEPENDS_STATUS)
 }
                                                                                 
                                                                                 
-remove_depends()
-{
+remove_depends() {
   lock_file $DEPENDS_STATUS_BACKUP &&
   lock_file $DEPENDS_STATUS        ||
   return 1
@@ -130,8 +117,7 @@ remove_depends()
 }
                                                                                 
 
-add_depends()
-{
+add_depends() {
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
 	  if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
 		  remove_depends "$1" "$2"
@@ -150,7 +136,6 @@ add_depends()
                                                                                 
                                                                                 
 run_depends() {
-                                                                                
   # local definitions of depends and optional_depends!
   depends()  {
     grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
@@ -176,30 +161,23 @@ run_depends() {
     #              $4 = description of why to use this module.
                                                                                 
     if ! in_depends "$MODULE" "$1" ; then
-                                                                                
+                                                                               
       if module_exiled $1 ; then
-        verbose_msg "\"$MODULE\" optionally depends on \"$1\""
-        add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+        verbose_msg "\"$MODULE\" optionally depends on exiled module \"$1\""
+        add_depends "$MODULE" "$1" "off" "optional" "$2" "$3"
       else
-                                                                                
-        if module_installed $1 || module_held $1 ; then
+        if module_installed $1 ; then
           DEFAULT="y"
 	else
           DEFAULT="n"
         fi
-
-# Removed is_depends call, because with that call, when another module already 
-# depends on your dependency, you can't use optional_depends to add additional 
-# compilation flags -- Jasper
-#
-#        if ! is_depends $1 ; then
-	  if query  "Install optional dependency $1 $4? " $DEFAULT ; then
-            lin  --deps  $1
-            add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-          else
-	    add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-	  fi
-#        fi
+                                                                                
+	if query  "Install optional dependency $1 $4? " $DEFAULT ; then
+          lin  --deps  $1
+          add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+        else
+	  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+	fi
       fi
     fi
   }

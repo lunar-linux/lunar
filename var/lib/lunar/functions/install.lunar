@@ -1,0 +1,654 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# install.lunar - install Lunar modules                    #
+#                                                          #
+############################################################
+# cast is part of the sorcery spell management utility     #
+# Copyright 2001 by Kyle Sallee                            #
+############################################################
+#                                                          #
+# this WAS the cast script of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted Jason Johnston  2002 under GPLv2       #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+check_blacklist() {
+  #Copyrighted Jason Johnston  2002 under GPLv2
+
+  # This checks the /var/state/lunar/gcc.<platform>
+  # file to see if it exists.  If it does exist then
+  # we grep it to see the names of the modules that
+  # DO NOT compile with gcc 3x.  If the module is
+  # on the list, we set the path so that gcc 3x is
+  # NOT used.
+
+  # If you find a module that does not compile with
+  # gcc 3x please email your findings to
+  # maintainer@lunar-linux.org.
+
+  # Usage check_checklist $MODULES
+  if ! [[ $PLATFORM ]]; then
+    PLATFORM=x86
+  fi
+  if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
+    BLKLST=`grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM`
+    if [[ $BLKLST == $MODULE ]]; then
+      message "${PROBLEM_COLOR}" \
+              "Module $MODULE is blacklisted and will not be installed." \
+	      "${DEFAULT_COLOR}"
+      exit 0
+    fi
+  else
+    touch /var/state/lunar/blacklist.$PLATFORM
+  fi
+}
+
+
+run_conflicts() {
+    if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
+             . $SCRIPT_DIRECTORY/CONFLICTS
+    fi
+}
+
+
+# create the dependency files if they do not exist
+prepare_depends_status()  {
+   [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
+   [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
+}
+
+
+prepare_module_config()  {
+  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
+  if  [  !  -x  $MODULE_CONFIG  ];  then
+    touch       $MODULE_CONFIG
+    chmod  a+x  $MODULE_CONFIG
+  fi
+}
+
+
+run_configure() {
+  if  [  -n  "$RECONFIGURE"  ];  then
+    rm  -f  $DEPENDS_CONFIG/$MODULE
+    remove_depends  $MODULE
+  fi
+
+  prepare_module_config
+  use_xinetd || {
+  if  [  -n  "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ;  then
+    use_initd
+  fi
+  }
+
+  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
+
+  if  [  -x  $SCRIPT_DIRECTORY/CONFIGURE  ];  then
+    . $SCRIPT_DIRECTORY/CONFIGURE
+  fi
+}
+
+
+run_pre_build() {
+  if  [  -f  /tmp/$MODULE.iw ] ; then
+    verbose_msg echo "removing \"/tmp/$MODULE.iw\""
+    rm -f /tmp/$MODULE.iw
+  fi
+
+  message  "${MESSAGE_COLOR}Building"  \
+           "${MODULE_COLOR}${MODULE}"    \
+           "${DEFAULT_COLOR}"
+
+  cd  $BUILD_DIRECTORY
+
+  verify_sources  &&
+  if  [  -x  $SCRIPT_DIRECTORY/PRE_BUILD  ];  then
+           . $SCRIPT_DIRECTORY/PRE_BUILD
+  else
+    default_pre_build
+  fi
+}
+
+
+stop_logging() {
+  message  "${MESSAGE_COLOR}Creating"                        \
+           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
+           "${DEFAULT_COLOR}"
+
+  bzip2  -9f  <  $C_LOG  >  $COMPILE_LOGS/$MODULE-$VERSION.bz2
+  rm -f $C_LOG $C_FIFO
+  unset C_LOG C_FIFO
+}
+
+
+view_compile_log()  {
+    sleep   1
+    report              $C_LOG  "Compile log"
+}
+
+
+start_logging () {
+  export C_LOG=/tmp/$MODULE.compile.log
+  export C_FIFO=/tmp/$MODULE.compile.fifo
+
+  rm  -f $C_FIFO
+  mknod  $C_FIFO p
+  rm  -f $C_LOG
+  echo  "Compile log for $MODULE  $VERSION  Built on `date  -u`"  >  $C_LOG
+
+  activate_voyeur
+}
+
+
+activate_voyeur()  {
+  if  [  -z  "$SILENT"  ];  then
+    case  $VOYEUR  in
+      on)  tee  -a  $C_LOG  <  $C_FIFO              &  ;;
+       *)  tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &  ;;
+    esac
+  else     tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &
+  fi
+}
+
+
+run_build()  {
+  [  -d  "$SOURCE_DIRECTORY"  ]  &&
+  cd      $SOURCE_DIRECTORY
+
+  invoke_installwatch
+
+  verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
+  
+  if [ -x ./configure ] || [ -x ./src/configure ] ; then
+    if [ -f /var/lib/lunar/localsaconfig ]; then
+      if [ -f /var/cache/config/$MODULE ] ; then
+        message "${MESSAGE_COLOR}These are your current -- config options for module ${MODULE_COLOR}$MODULE"
+        message "${FILE_COLOR}(/var/cache/config/$MODULE)"
+        cat /var/cache/config/$MODULE
+      fi
+	  
+      if    query  "Do you wish to add -- options to ./configure?"  n ;  then
+        if [ $EDITOR ]; then
+          if    [ $EDITOR == /usr/bin/emacs ] || \
+                [ $EDITOR == /usr/bin/vi ]    || \
+                [ $EDITOR == /usr/bin/jed ]   || \
+                [ $EDITOR == /usr/bin/ed ]    || \
+                [ $EDITOR == /usr/bin/nano ]   ;    then
+             if [ ! -x $EDITOR ]; then
+               EDITOR=/usr/bin/nano
+             fi
+             else
+               EDITOR=/usr/bin/nano
+           fi
+           else
+           EDITOR=/usr/bin/nano
+         fi
+         $EDITOR /var/cache/config/$MODULE
+         OPTS="$OPTS `cat /var/cache/config/$MODULE`"
+         message "${MESSAGE_COLOR} OPTS= ${MODULE_COLOR}$OPTS"
+      fi
+    fi
+  fi
+
+  if  [  -x  $SCRIPT_DIRECTORY/BUILD  ];  then
+          .  $SCRIPT_DIRECTORY/BUILD
+  else
+    default_build
+  fi
+
+}
+
+
+run_post_build() {
+  if  [  -x  $SCRIPT_DIRECTORY/POST_BUILD  ];  then
+           . $SCRIPT_DIRECTORY/POST_BUILD
+  fi
+  default_post_build
+}
+
+
+run_post_install() {
+  if  [  -x  $SCRIPT_DIRECTORY/POST_INSTALL  ];  then
+           . $SCRIPT_DIRECTORY/POST_INSTALL
+  fi
+}
+
+
+export_ld()  {
+  for  DIRECTORY  in  $*;  do
+    if  file  -b  $DIRECTORY/*.so*  |
+        grep  -q  "shared object"
+    then
+      if  [  -z  "$LD_LIBRARY_PATH"  ]
+      then  export  LD_LIBRARY_PATH="$DIRECTORY"
+      else  export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIRECTORY"
+      fi
+    fi
+  done
+}
+
+
+
+show_owner()  {
+  OWNER=`grep  $TARGET  $INSTALL_LOGS/*  |
+         cut  -d :  -f1                  |
+         sed  -n  1p`
+  if  [  -n  "$OWNER"  ];  then  echo  "`basename  $OWNER`"
+                           else  echo  "nobody"
+  fi
+}
+
+
+remove_line()  {
+  F_TMP=/tmp/`basename  $I_LOG`.`uuidgen`
+
+  cp         $I_LOG  $F_TMP
+  grep  -v   $ITEM   $F_TMP  >  $I_LOG
+  rm    -f           $F_TMP
+
+  message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
+           "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+  message  "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
+  message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by `show_owner`"
+  message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
+}
+
+
+run_fix()  { (
+  MODULES=$*
+
+  if  [  -z  "$MODULES"  ];  then
+    MODULES=$(cat $MODULE_STATUS_BACKUP | cut  -d: -f1 | sort)
+  fi
+
+  PASSED=":"
+
+  [ -n "$EXPORT_LD_PATH" ] ||
+    export EXPORT_LD_PATH=$(find /usr/lib -type d ! -empty)
+  if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
+    LD_LIBRARY_PATH_OLD="$LD_LIBRARY_PATH"
+    export_ld $EXPORT_LD_PATH
+  fi
+
+  until  [  "$FIXED"     ==  "yes"  ]   ||
+         [  "$HOPELESS"  ==  "yes"  ];  do
+
+       FIXED="yes"
+    HOPELESS="no"
+
+    for  MODULE  in  $MODULES;  do
+
+      fix_depends $MODULE
+
+      # if we were called with --fixdepends then we may skip the rest
+      if [ -n "$FIXDEPENDS" ] ; then
+        continue
+      fi        
+
+      if module_installed $MODULE                      &&
+          [  "$MODULE"  !=  "lunar"  ]                 &&
+          [  "$MODULE"  !=  "j2sdk"    ]               &&
+	  module_held $MODULE                          &&
+          !  echo  $PASSED  |  grep  -q  ":$MODULE:";  then
+
+        if    run_checks     $MODULE  ||
+              [  -n  "$NOFIX"  ]
+        then
+          PASSED="$PASSED$MODULE:"
+        else
+          FIXED="no"
+          (  run_details
+             satisfy_depends
+             unset  FIX
+             satisfy_depends
+          )
+
+          if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
+            export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
+            export_ld $EXPORT_LD_PATH
+          fi
+
+          if    run_checks     $MODULE  ||
+                [  -n  "$NOFIX"  ]
+          then
+
+            PASSED="$PASSED$MODULE:"
+            if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
+              export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
+              export_ld $EXPORT_LD_PATH 
+            fi
+
+          else
+            unset  FIX
+            if    !  lin  --compile  $MODULE;  then  HOPELESS="yes"
+            elif  !  run_checks      $MODULE;  then  HOPELESS="yes"
+            fi
+            export  FIX="--fix"
+          fi
+        fi
+      fi
+    done
+  done
+  rm  -f  /tmp/LD_LIBRARY_PATH_FILE
+) }
+
+
+process_parameters()  {
+  while  [  -n  "$1"  ];  do
+    if  echo  "" $1  |  grep  -q  "^ -";  then
+      case  $1  in
+                  --deps)  export  DEPS_ONLY="$1";      shift 1  ;;
+        -r|--reconfigure)  RECONFIGURE="$1";            shift 1  ;;
+            -c|--compile)  COMPILE="$1";                shift 1  ;;
+	      -p|--probe)  PROBE="yes";                 shift 1  ;;
+                  --from)  export  SOURCE_CACHE=$2;     shift 2  ;;
+                --silent)  SILENT="$1";                 shift 1  ;;
+                -f|--fix)  export  FIX="$1";            shift 1  ;;
+              -n|--nofix)  export  FIX="--fix"
+                           export  NOFIX="$1";          shift 1  ;;
+	 -d|--fixdepends)  export  FIXDEPENDS="$1";
+	 		   export  FIX="$1";            shift 1  ;;
+                      -s)  SEPARATE="$1";               shift 1  ;;
+                   --url)  export  BASE_URL="$2";       shift 2  ;;
+                   --pam)  lin  -c  `find_pam_aware`;   shift 1  ;;
+                       *)  help                                  ;;
+      esac
+    else
+      shift
+   fi
+  done
+}
+
+
+strip_parameters()  {
+  while  [  -n  "$1"  ];  do
+    if  echo  "" $1  |  grep  -q  "^ -";  then
+      case  $1  in
+                  --deps)  shift 1  ;;
+        -r|--reconfigure)  shift 1  ;;
+                  --from)  shift 2  ;;
+                --silent)  shift 1  ;;
+                -f|--fix)  shift 1  ;;
+              -n|--nofix)  shift 1  ;;
+         -d|--fixdepends)  shift 1  ;;
+            -c|--compile)  shift 1  ;;
+	      -p|--probe)  shift 1  ;;
+                      -s)  shift 1  ;;
+                   --url)  shift 2  ;;
+                   --pam)  shift 1  ;;
+                       *)  shift 1  ;;
+      esac
+    else
+      echo  $1
+      shift
+   fi
+  done
+}
+
+
+resurrect()  {  (  
+  run_details      &&
+  run_conflicts    &&
+  satisfy_depends  &&
+
+  STATUS=installed
+
+  if  module_held  $MODULE;  then
+    VERSION=`installed_version  $MODULE`
+     STATUS=held
+     lrm --keepconfig $MODULE
+  fi
+
+  CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
+
+  if  [      -f   $CACHE_BZ  ]  &&
+      bzip2  -tf  $CACHE_BZ;    then
+
+    bzip2         -cd   $CACHE_BZ  |  tar  -Pkx  1>/dev/null  2>&1
+    add_module     $MODULE  $STATUS  $VERSION
+    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
+    message  "${RESURRECT_COLOR}Resurrected module:"  \
+             "${MODULE_COLOR}${MODULE}"                \
+             "${DEFAULT_COLOR}"                      \
+             "version"                               \
+             "${VERSION_COLOR}${VERSION}"            \
+             "${DEFAULT_COLOR}"
+    lin  --fix  $SILENT  $MODULE
+  else
+    false
+  fi
+)  }
+
+
+show_download_progress()  {
+  if  [  -f  "$D_LOG"  ];  then
+    if  [  -z  "$LC_OLD"  ];  then
+      LC_OLD=0
+    fi
+
+    LC=`cat  $D_LOG  2>/dev/null  |  wc  -l  |  tr  -d ' '`
+
+    if  [  "$LC"  !=  "$LC_OLD"  ];  then
+      ((  LC_OLD++  ))
+      sed  -n ${LC_OLD},${LC}p  $D_LOG
+      LC_OLD=$LC
+    fi
+  fi
+}
+
+
+show_downloading()  {
+  while  !  lget  $MODULE;  do
+    show_download_progress
+    sleep 1
+  done
+    show_download_progress
+}
+
+
+report_install()  {
+  INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
+  report  $INST_LOG  "Install log"
+}
+
+
+lin_module()  { (
+  if [ $MODULE == "moonbase" ] ; then
+    if ! current_locked && ! solo_locked ; then
+      linING="/var/lock/installing.$MODULE"
+      echo $$ > $linING       &&
+      get_moonbase            &&
+      rm -f $linING           &&
+      return
+    else
+      exit 1
+    fi
+  fi
+  check_blacklist             &&
+  run_details                 &&
+  run_conflicts               &&
+  satisfy_depends             &&
+  show_downloading            &&
+  
+  if ! current_locked && ! solo_locked ; then
+    echo $$ > $linING          &&
+    if ! [[ $CFLAGS ]] ; then
+      optimize
+    fi                         &&
+    start_logging
+
+    if ! run_pre_build ; then
+      LIN_ERROR="PRE_BUILD"
+    else
+      if ! run_build ; then
+        LIN_ERROR="BUILD"
+      else
+        if ! run_post_build ; then
+          LIN_ERROR="POST_BUILD"
+	fi
+      fi
+    fi
+
+    devoke_installwatch
+    stop_logging
+    
+    if [ -n "$LIN_ERROR" ] ; then
+      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi  
+
+    if ! boost ; then
+      LIN_ERROR="boost"
+      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
+    else
+      if ! run_post_install ; then
+        LIN_ERROR="POST_INSTALL"
+      fi
+    fi
+
+    if [ -n "$LIN_ERROR" ] ; then
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi
+
+    rm_source_dir               &&
+    report_install              &&
+    rm  -f  $linING             &&
+    sound  SUCCESS              &&
+    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
+
+    if  [  "$?"  !=  0  ];  then
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
+      return 1
+    fi
+  fi
+) }
+
+
+lin_locked()  {
+  [     -f        /var/lock/installing.$1  ]  &&
+  ps        `cat  /var/lock/installing.$1`    |
+  grep  -q  "lin"
+}
+
+
+solo_locked()  {
+  for SOLO_MODULE in `cat $SOLO` ; do
+    if lin_locked $SOLO_MODULE ; then
+      message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}"  \
+               "of other modules is disabled during a"     \
+               "lin ${MODULE_COLOR}${SOLO_MODULE}"         \
+               "${DEFAULT_COLOR}"
+      return
+    fi
+  done
+  false
+}
+
+
+current_locked() {
+  if  lin_locked  $MODULE;  then
+    message  "${PROBLEM_COLOR}Detected lin lock file:"  \
+             "${FILE_COLOR}${linING}${DEFAULT_COLOR}"
+    message  "Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
+             "to finish installing or for the lock to clear."
+
+    while  lin_locked  $MODULE;  do  sleep  2;  done
+    false
+  else
+    false
+  fi
+}
+
+
+lin_modules()  {
+  for MODULE in $@ ; do
+  
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      if ! module_held $MODULE ; then
+        linING="/var/lock/installing.$MODULE"
+        if  [  -n  "$COMPILE"      ]  ||
+            [  -n  "$RECONFIGURE"  ]  ||
+            module_installed  $MODULE   ||
+            !  resurrect     $MODULE;  then
+          if  !  lin_module;  then
+            if  [  -n  "$LOGTMP"  ];  then
+              echo  "$MODULE"  >>  /tmp/fail_$LOGTMP
+            fi
+            lin_EXIT_STATUS=1;  
+          else
+            if  [  -n  "$LOGTMP"  ];  then
+              echo  "$MODULE"  >>  /tmp/success_$LOGTMP
+            fi
+          fi
+        fi
+      else
+        verbose_msg "Skipping compile and install for held module \"$MODULE\""
+      fi
+    fi
+  done
+
+  if  [  -n  "$lin_EXIT_STATUS"  ];  then
+    exit  1
+  fi
+}
+
+
+build_depends()  {
+  for MODULE in $@ ; do
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      if ! module_held $MODULE ; then
+        ( 
+          run_details    &&
+          run_configure  &&
+          run_depends    &&
+          satisfy_depends
+        )
+      else
+        verbose_msg "Skipping dependancy checking of held module \"$MODULE\""
+      fi
+    fi
+  done
+}
+
+
+build_sources()  {
+  for MODULE in $@ ; do
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      if ! module_held $MODULE ; then
+        lget $MODULE >> $D_LOG 2>&1
+      else
+        verbose_msg "Skipping download check for held module \"$MODULE\""
+      fi
+    fi
+  done
+}
+
+
