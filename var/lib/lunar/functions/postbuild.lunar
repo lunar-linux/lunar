@@ -27,19 +27,24 @@
 
 gather_docs()  {
   debug_msg "gather_docs ($@)"
-  [ "$GARBAGE" == "on" ] || return 0
+  if [ "$GARBAGE" != "on" ] ; then
+    return
+  fi
 
   DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
-  mkdir  -p  $DOC_DIR
+  mkdir -p $DOC_DIR
 
   if [ -d "$SOURCE_DIRECTORY" ] ; then
-    ( cd $SOURCE_DIRECTORY && for FILE in \
-      README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
-      conf SETUP NEWS Change* manual* Manual* ; do
-        [ -e $FILE ] && {
+    (
+      cd $SOURCE_DIRECTORY
+      for FILE in \
+        README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
+        conf SETUP NEWS Change* manual* Manual* ; do
+	# copy all but prune stuff which obviously is code
+        if [ -e $FILE -a ! -f $FILE/Makefile ] ; then
           verbose_msg "installing docs: \"$DOC_DIR/$FILE\""
           cp -ar $FILE $DOC_DIR 2> /dev/null
-        }
+        fi
       done
     )
   fi
