@@ -86,8 +86,3 @@
 	* var/lib/lunar/functions/depends.lunar: Try to fix
 	optional_depends
 
-2003-04-30 22:46  sofar
-
-	* bin/lvu, var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/misc.lunar: few simple download fixes.
-
