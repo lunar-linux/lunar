@@ -51,34 +51,33 @@ get_svn() {(
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting local SVN copy"
     # unpacking in last component dir of $SVN_DIR
-    CD=$(pwd)
+    CD=$(pwd -P)
     if ! tar xjf $SOURCE_CACHE/$2 ; then
       message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
       
       rm_source_dir /tmp/$MODULE-$VERSION
       mk_source_dir /tmp/$MODULE-$VERSION
     fi
+    cd $CD
   fi
 
   NUM_RETRY=${NUM_RETRY:-5}
-
-  # 0 == infinity
   if [ $NUM_RETRY -eq 0 ]; then
       NUM_RETRY=1000
   fi
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [[ -d ${SVN_DIR}/.svn ]]; then
+    if [ -d ${SVN_DIR}/.svn ] ; then
       cd ${SVN_DIR}
       verbose_msg "[${TRY}] svn up"
       svn up && GOT_SVN="yes" 
       cd ${CD}
-    elif ! [[ -d ${SVN_DIR}/.svn ]]; then
+    else
       verbose_msg "[${TRY}] svn co $SVN_URL $SVN_DIR"
       svn co $SVN_URL $SVN_DIR && GOT_SVN="yes"
     fi
 
-    if [[ "$?" == "0" ]]; then
+    if [ "$?" == "0" ] ; then
       break
     fi
 
@@ -87,7 +86,7 @@ get_svn() {(
   
   if [[ "$GOT_SVN" == "yes" ]]; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-    # pack in last component dir of $CVSMODULE
+    # pack in last component dir of $SVN_DIR
     tar cjf $SOURCE_CACHE/$2 $SVN_DIR
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $1"
@@ -120,7 +119,7 @@ get_cvs() {(
     CVSRELEASE="-r $CVSRELEASE"
   fi
 
-  export CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
+  CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
 
   message  "${MESSAGE_COLOR}Downloading CVS module"                      \
            "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
@@ -132,7 +131,7 @@ get_cvs() {(
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting local CVS copy"
     # unpacking in last component dir of $CVSMODULE
-    CD=$(pwd)
+    CD=$(pwd -P)
     mkdir -p $(dirname $CVSMODULE)
     cd $(dirname $CVSMODULE)
     if ! tar xjf $SOURCE_CACHE/$2 ; then
@@ -147,29 +146,27 @@ get_cvs() {(
   verbose_msg "CVSROOT=\"$CVSROOT\""
 
   NUM_RETRY=${NUM_RETRY:-5}
-
-  # 0 == infinity
   if [ $NUM_RETRY -eq 0 ]; then
-      NUM_RETRY=1000
+    NUM_RETRY=1000
   fi
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [[ -d $CVSMODULE/CVS ]]; then
+    if [ ! -d $CVSMODULE/CVS ] ; then
       verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
       cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
-    elif ! [[ -d CVS ]]; then
+    else 
       verbose_msg "[${TRY}] cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE"
-      cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
+      CVSROOT=$CVSROOT cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
     fi
 
-    if [[ "$?" == "0" ]]; then
+    if [ "$?" == "0" ] ; then
       break
     fi
 
     sleep 2
   done
   
-  if [[ "$GOT_CVS" == "yes" ]]; then
+  if [ "$GOT_CVS" == "yes" ] ; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
     # pack in last component dir of $CVSMODULE
     cd $(dirname $CVSMODULE)
