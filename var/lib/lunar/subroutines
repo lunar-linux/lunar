@@ -46,6 +46,12 @@ fi
 edit_file()  {  ${EDITOR:-nano}  $1;  }
 
 
+# function : view_file
+# usage    : view_file FILENAME
+# purpose  : to view a file
+view_file()  {  ${PAGER:-less}  $1;  }
+
+
 # function : directories
 # usage    : VARIABLE=`directories < dirlistfile`
 # purpose  : to determine the directories from a given list
@@ -175,7 +181,7 @@ report() {
 
     VIEW_PROMPT="View $2 for ${MODULE_COLOR}${MODULE}-${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}?"
     sound  REPORT
-    if  query  "$VIEW_PROMPT" n;  then  less  $1;  fi
+    if  query  "$VIEW_PROMPT" n;  then  view_file  $1;  fi
   fi
 
   if  [  "$MAIL_REPORTS"  ==  "on"  ];  then

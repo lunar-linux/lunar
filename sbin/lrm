@@ -223,7 +223,7 @@ main()	{
 root_check || exit 1
 
 if    [  $#      ==  0  ];  then  
-   help  |  less
+   help  |  view_file
    exit 0
 fi
 

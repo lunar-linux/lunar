@@ -92,7 +92,7 @@ add_pkgs()  { (
 show_file()	{
   if  [  -f  $1  ];  then
     if  [  "`file  -b  $1  |  cut  -d ' '  -f1`"  == "bzip2" ];  then
-      bzcat  $1  |  less
+      bzcat  $1  |  view_file
     else
       $DIALOG  --textbox  $1  10  0
     fi
@@ -373,7 +373,7 @@ grep_install_logs() {
                     0 0`
   then
     cd  $INSTALL_LOGS
-    grep  "$WHAT\$"  *  | less
+    grep  "$WHAT\$"  *  | view_file
   fi
 }
 
