@@ -276,8 +276,3 @@
 	  support (NO WARRANTY) that allows you to override VERSION (don't
 	  try this with more than one module ;^))
 
-2004-09-27 21:41  sofar
-
-	* var/lib/lunar/functions/main.lunar: #452: force double checking
-	  on $LUNAR_MODULE with some msgs.
-
