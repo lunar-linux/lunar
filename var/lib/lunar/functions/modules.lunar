@@ -87,7 +87,7 @@ set_moonbase_md5()
 # purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
 get_moonbase_md5() 
 {
-   MOONBASE_MD5=`grep ^MOONBASE_MD5: $MODULE_INDEX 2>/dev/null | \
+   MOONBASE_MD5=`grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
                  cut -d : -f 2-2`
    [ -z "$MOONBASE_MD5" ] && MOONBASE_MD5="0"
    echo "$MOONBASE_MD5"
@@ -195,31 +195,31 @@ run_module_file()
 module_installed()
 {
    if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
-     STAT=`grep "^$1\:"         $MODULE_STATUS 2>/dev/null | cut -d : -f3`
+     STAT=`grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3`
    else
-     STAT=`grep "^$1-custom\:"  $MODULE_STATUS 2>/dev/null | cut -d : -f3`
+     STAT=`grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3`
    fi
    [  "$STAT"  ==  "installed"  ]
 }
 
 
 module_held() {
-   STAT=`grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f3` &&
+   STAT=`grep "^$1\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3` &&
    [ "$STAT" == "held" ]
 }
 
 
 module_exiled()  {
-   STAT=`grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f3` &&
+   STAT=`grep "^$1\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3` &&
    [ "$STAT" == "exiled" ]
 }
 
 
 installed_version() {
    if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
-     echo `grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f4`
+     echo `grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
    else  
-     echo `grep "^$1-custom\:" $MODULE_STATUS 2>/dev/null | cut -d : -f4`
+     echo `grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
    fi
 }
 

@@ -468,6 +468,7 @@ add_module()  {
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP   >   $MODULE_STATUS 2>/dev/null  &&
   echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
   cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP           &&
   unlock_file $MODULE_STATUS_BACKUP                           &&

@@ -240,7 +240,6 @@ process_lrm_queue()
 
       run_module_file PRE_REMOVE 
 
-      verbose_msg "removing files..."
       while read TARGET
       do
          [ "$DEBUG" == "on" ] && echo -n "    checking $TARGET.. "
@@ -374,8 +373,7 @@ downgrade()
       verbose_msg "removing \"$MODULE-$I_VERSION\""
       [ "$TEST" == "on" ] && lrm2 -ts $MODULE || lrm2 -s $MODULE
 
-   } || 
-   {
+   } || {
       verbose_msg "\"$MODULE\" is NOT installed at the moment"
    }
 
