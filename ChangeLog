@@ -1,3 +1,17 @@
+2004-03-21 22:17  sofar
+
+	* var/lib/lunar/functions/: config.lunar, modules.lunar: Adding all
+	round checking for the [sg]et_config_ functions.
+
+2004-03-21 20:51  sofar
+
+	* sbin/lin, sbin/lunar, var/lib/lunar/functions/depends.lunar:
+	Major bug(!) fixes: - remove write_config alltogether from lunar -
+	rewrite core algorithm, now truly adheres to the proper order:
+	depends, download (with smart download queue filler), install.
+	Should fix the multi-lget spawns and fix the install order (tho
+	that didn't really break, it was not just how I intended it to be).
+
 2004-03-18 12:16  sofar
 
 	* sbin/lrm, var/lib/lunar/functions/config.lunar,
@@ -246,16 +260,4 @@
 2004-02-03 18:41  cmak
 
 	* var/lib/lunar/functions/prune.lunar: fixed bug 439
-
-2004-01-21 16:56  tchan
-
-	* usr/share/doc/lunar/CREDITS: Fixed another typo.  Added Erik
-	Sorenson to the file for his depends code contribution.
-
-2004-01-21 16:32  hardkrash
-
-	* var/lib/lunar/functions/depends.lunar: making algorithim
-	improvments proposed by Erik Søe Sørensen
-	
-	thankyou sir
 
