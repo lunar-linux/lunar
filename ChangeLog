@@ -52,12 +52,3 @@
 	* var/lib/lunar/functions/postbuild.lunar: Same permissions but
 	changed code so it's actually not rediculous
 
-2004-05-26 11:28  prox
-
-	* var/lib/lunar/functions/depends.lunar: correction
-
-2004-05-26 09:33  prox
-
-	* var/lib/lunar/functions/depends.lunar: added is_depended <module>
-	<depend>, will return 1 if the depend for the module given is on
-
