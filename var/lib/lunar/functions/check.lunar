@@ -323,16 +323,15 @@ run_fix()  {
     export_ld $EXPORT_LD_PATH
   fi
 
-  until  [  "$FIXED"     ==  "yes"  ]   ||
-         [  "$HOPELESS"  ==  "yes"  ];  do
-
-       FIXED="yes"
+  until [ "$FIXED" == "yes" ] || [ "$HOPELESS" == "yes" ] ; do
+    FIXED="yes"
     HOPELESS="no"
 
-    for  MODULE  in  $MODULES ;  do
+    for MODULE in $MODULES ; do
      # ENV separation required here!
      (
-      fix_depends $MODULE
+	  run_details $MODULE &&
+      fix_depends $MODULE &&
 
       # if we were called with --fixdepends then we may skip the rest
       if [ -n "$FIXDEPENDS" ] ; then
@@ -342,43 +341,38 @@ run_fix()  {
       if module_installed $MODULE                      &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
           [  "$MODULE"  !=  "j2sdk"    ]               &&
-	  ! module_held $MODULE                        &&
+          ! module_held $MODULE                        &&
           !  echo  $PASSED  |  grep  -qw  "$MODULE";  then
 
-        if    run_checks     $MODULE  ||
-              [  -n  "$NOFIX"  ]
-        then
+        if run_checks $MODULE || [ -n "$NOFIX" ] ; then
           PASSED="$PASSED $MODULE"
         else
           FIXED="no"
-          (  
-	    run_details $MODULE  &&
-            satisfy_depends      &&
-            unset FIX            &&
-            satisfy_depends
-          )
+          satisfy_depends      &&
+          unset FIX            &&
+          satisfy_depends      &&
 
-          if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
-            export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
+          if [ "$LDD_CHECK" == "on" ] ; then
+            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
             export_ld $EXPORT_LD_PATH
           fi
 
-          if    run_checks     $MODULE  ||
-                [  -n  "$NOFIX"  ]
-          then
+          if run_checks $MODULE || [ -n "$NOFIX" ] ; then
 
             PASSED="$PASSED $MODULE"
-            if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
-              export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
+            if [ "$LDD_CHECK" == "on" ] ; then
+              export LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
               export_ld $EXPORT_LD_PATH 
             fi
 
           else
-            unset  FIX
-            if    !  lin  --compile  $MODULE;  then  HOPELESS="yes"
-            elif  !  run_checks      $MODULE;  then  HOPELESS="yes"
+            unset FIX
+            if ! lin --compile $MODULE ; then
+              HOPELESS="yes"
+            elif ! run_checks $MODULE ; then
+              HOPELESS="yes"
             fi
-            export  FIX="--fix"
+            export FIX="--fix"
           fi
         fi
       fi
