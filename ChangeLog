@@ -150,15 +150,3 @@
 
 	* bin/lvu: fast, faster, ranitha!
 
-2004-11-22 14:40  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Make sure depends.cache is
-	  as similar to depends/depends.backup as possible
-
-2004-11-22 11:19  sofar
-
-	* var/lib/lunar/functions/download.lunar: Adding a 'FRESORT_URL'.
-	  This feature allows you to download first from a central
-	  repository. Please do not tell people to use this on our own
-	  mirrors (except strikers' mirror ;^)).
-
