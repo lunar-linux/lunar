@@ -121,6 +121,8 @@ prepare_install() {
     lrm  --keepconfig  --nosustain  $MODULE
     true
   fi
+  # turn on tracking now
+  invoke_installwatch
 }
 
 
@@ -249,6 +251,11 @@ default_cpan_build() {
 
 default_post_build() {
   debug_msg "default_post_build ($@)"
+
+  if [ -z "$LD_PRELOAD" ]; then
+    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} never calls prepare_install!${DEFAULT_COLOR}"
+  fi
+  
   {
     gather_docs
 

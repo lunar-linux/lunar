@@ -285,10 +285,6 @@ lin_module()  {
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"
     else
-
-      # important stuff here!!!
-      invoke_installwatch &&
-      
       if ! run_build ; then
         LIN_ERROR="BUILD"
       else
@@ -298,7 +294,6 @@ lin_module()  {
       fi
     fi
 
-    devoke_installwatch
     stop_logging
     
     if [ -n "$LIN_ERROR" ] ; then
