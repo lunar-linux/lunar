@@ -1,3 +1,22 @@
+2004-04-16 10:57  sofar
+
+	* var/lib/lunar/functions/main.lunar: Add this back: last minute
+	source code presence check before compile starts.
+
+2004-04-16 10:37  sofar
+
+	* bin/lvu: Merging vertigo's patch suggestion and taking a bit of
+	time to rewrite those two secionts of code.
+
+2004-04-16 10:18  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Don't even try to check if
+	we can't update them anyway...
+
+2004-04-16 10:15  sofar
+
+	* sbin/lin: Adding adjustment suggested by jazman
+
 2004-04-11 21:54  sofar
 
 	* var/lib/lunar/functions/: depends.lunar, modules.lunar: Fix for
@@ -306,8 +325,4 @@
 	* etc/lunar/mirrors/LRESORT: The master cache does not resolve to
 	the same address as www.lunar-linux.org, so I changed the USA
 	master cache to become www.lunar-linux.org/lunar/cache
-
-2004-02-15 11:25  sofar
-
-	* etc/lunar/config: Grrr mispaste
 
