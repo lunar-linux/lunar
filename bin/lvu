@@ -355,7 +355,9 @@ show_module_component()  {
 long_search()  {
   for  SECTION  in  `list_sections`;  do
     for  MODULE  in  `list_modules  $SECTION`;  do
-      (   [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
+      (   
+          SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE   &&
+          [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
                . $MOONBASE/$SECTION/$MODULE/DETAILS     |
           grep  -q  -i  "$1"                 &&
           echo  "$SECTION/$MODULE"
