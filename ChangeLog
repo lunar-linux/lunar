@@ -1,3 +1,8 @@
+2004-06-26 16:41  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Fix a bad bug showing way
+	too many modules for a section
+
 2004-06-25 11:33  sofar
 
 	* var/lib/lunar/functions/tracking.lunar: Explicitly do not track
@@ -120,8 +125,4 @@
 
 	* var/lib/lunar/functions/: download.lunar, main.lunar,
 	recovery.lunar: s/successfull/successful/ Spellchecker anyone? ;)
-
-2004-04-27 07:12  sofar
-
-	* etc/lunar/mirrors/GNOME: These files are TAB separated now.
 
