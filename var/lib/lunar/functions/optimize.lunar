@@ -910,7 +910,7 @@ optimize_architecture()  {
                 --nocancel                       \
 		--stdout                         \
 		--inputbox                       \
-		"Enter the number of concurrent makes ( >= 1 ). Hint: how many CPU's do you have?"  \
+		"Enter the number of concurrent makes ( > 1 ). Or leave this BLANK!"  \
 		0 55 $MAKES`
 
   STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
