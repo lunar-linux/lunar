@@ -83,7 +83,7 @@ display_moonbase_changes()  {
 
   MODULE_INDEX_BACKUP=/tmp/`basename $MODULE_INDEX`
   
-  if [ -e $MOUDLE_INDEX ] && [ -e $MODULE_INDEX_BACKUP ]; then
+  if [ -e "$MODULE_INDEX" ] && [ -e "$MODULE_INDEX_BACKUP" ]; then
 
     NEW_MODULES=`diff -I $MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | wc -l`
     DEL_MODULES=`diff -I $MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | wc -l`
