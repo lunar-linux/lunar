@@ -1,3 +1,28 @@
+2002-09-24 20:49  xoritor
+
+	* sbin/lin: Fixing linewrap/editor errors... thx niki :-)
+	
+2002-09-24 16:59  xoritor
+
+	* sbin/lin: Updating lin to not set PATH, other than to add for the wrappers.  Added an echo to say wether a module is blacklisted or not, but does not do anything but echo.  This is a placeholder for future code that will allow a blacklist for gcc 2x or optimization unfriendly modules to be easily identified.
+	
+2002-09-24 16:52  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Adding PSAFE to optimize_make().
+	  PSAFE=no can be added to a DETAILS file to set MAKES=1 so that multiple makes do not occur
+	
+2002-09-24 02:51  tchan
+
+	* var/state/lunar/gcc.x86: unrar now compiles with gcc-3.2 or greater.
+	
+2002-09-23 23:59  sofar
+
+	* sbin/lin, usr/share/man/man8/lin.8, var/lib/lunar/subroutines: Adding proper fix for lin --fix: lin --fixdepends will ONLY rebuild your depends database, without recompiling modules!
+	
+2002-09-23 21:03  sofar
+
+	* var/lib/lunar/subroutines: Incremental numbered backups removed: they might confuse xinetd! Just don't cp a new version if it already exists, since most likely the SA modified it and we should leave it alone.
+	
 2002-09-23 12:03  kongar
 
 	* var/lib/lunar/subroutines: 
