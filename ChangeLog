@@ -238,7 +238,3 @@
 	entire reverse tree (not installed modules too!) orphans: meuh
 	cleanup help: added hints to new functions
 
-2003-12-30 13:11  sofar
-
-	* bin/lvu: Added 'lvu short' just because I like it
-
