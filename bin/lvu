@@ -610,9 +610,9 @@ parse()  {
       ;;
       
     section)
-      if [ -n "$SECTION" ] ; then
-        list_modules $SECTION
-      elif [ -z "$SECTION" ] ; then
+      if [ -n "$2" ] ; then
+        list_modules $2
+      elif [ -z "$2" ] ; then
 	list_sections
       fi
       ;;
