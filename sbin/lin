@@ -172,7 +172,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdfhprRsv" -l "compile,debug,deps,from,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsv" -l "compile,debug,deps,from:,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
