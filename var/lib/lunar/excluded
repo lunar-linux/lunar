@@ -1,6 +1,5 @@
 /boot/grub/menu.1st
 /dev
-/devices
 /etc/X11/xdm/Xsession
 /etc/cron.daily
 /etc/cron.hourly
