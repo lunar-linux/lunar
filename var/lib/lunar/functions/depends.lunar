@@ -336,8 +336,17 @@ create_depends_cache() {
       :
     }
 
+    # speedups for system moonbases:
+    if [ "$MOONASE" == "/var/lib/lunar/moonbase" ] ; then
+      DEPFILES=$(grep "/DEPENDS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase))
+      # don't forget zlocal:
+      DEPFILES="$DEPFILES $(find $MOONBASE/zlocal -type f -name DEPENDS)"
+    else
+      DEPFILES=$(find $MOONBASE -type f -name DEPENDS)
+    fi
+
     # fast method for re-creating the depends.cache, might take long though
-    for DEPFILE in $(find $MOONBASE -type f -name DEPENDS) ; do
+    for DEPFILE in $DEPFILES ; do
       MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" | cut -d/ -f2-) . $DEPFILE
     done > $TMP_DEP_CACHE &&
     install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 

@@ -98,11 +98,22 @@ create_module_index() {
   # index file
   TMP_INDEX=$(temp_create "module.index")
 
-  # this *really* is the fastest way to do it, no guarantees, we
-  # do have to make sure MOONBASE is coherent and tidy though
-  echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
-  find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
-
+  # here we have two options: system moonbase or custom:
+  if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
+    # short way out:
+    echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
+    grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
+        sed -e 's:/DETAILS$::g' -e 's:/var/lib/lunar/moonbase/::g' | \
+	awk -F: '{print $2":"$1}' >> $TMP_INDEX
+    # we search zlocal locally to make sure they get found:
+    find $MOONBASE/zlocal -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
+  else
+    # this *really* is the fastest way to do it, no guarantees, we
+    # do have to make sure MOONBASE is coherent and tidy though
+    echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
+  fi
+  
   # this should be safe enough:
   lock_file $MODULE_INDEX &&
   install -m644 $TMP_INDEX $MODULE_INDEX
