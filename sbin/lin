@@ -357,8 +357,7 @@ ldd_check()  {  (
 
     LOG=`cat   $I_LOG                               |
          grep      "/bin/\|/games/\|/lib/\|/sbin/"  |
-         grep  -v  
-"/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
+         grep  -v  "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
 
     for  FILE  in  $LOG;  do
       if  [     -f  "$FILE"  ]     &&
