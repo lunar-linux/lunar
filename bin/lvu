@@ -131,11 +131,8 @@ import_snapshot()  {
   SOURCE_DIRECTORY=$BUILD_DIRECTORY/snapshot
 
   if [ -f "$1" ] ; then
-    THERE=$(pwd -P)
-    cd $BUILD_DIRECTORY
-    mk_source_dir $SOURCE_DIRECTORY
-
-    bzcat $THERE/$SNAPSHOT | tar -x
+    ( mk_source_dir $SOURCE_DIRECTORY )
+    bzcat $SNAPSHOT | tar -x -C $BUILD_DIRECTORY
     cd $SOURCE_DIRECTORY
 
     for LINE in $(cat packages) ; do
