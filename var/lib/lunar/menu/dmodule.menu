@@ -25,7 +25,7 @@ This setting permits the SA to track different base
 scripts via selecting the aprropriate module. There 
 are at least two base modules at the time of writing. 
 
-Reagrdless of the number of modules listed here, 
+Regardless of the number of modules listed here, 
 *lunar* module is the default and stable one.
 
 The modules MUST exist in the moonbase and MUST meet
