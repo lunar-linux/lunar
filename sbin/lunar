@@ -52,6 +52,7 @@ optimize                Shortcut to the optimization menu
 fix                     Check and fix all modules and internal state of lunar
 nofix                   Check but do not fix modules and internal state
 fixdepends              Check and fix the dependency database of lunar
+set  [var [value]]      Check internal variable(s) and assign their values
 resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
 install    modulename(s)  Install a checklist of modules
 remove     modulename(s)  Remove a checklist of modules
@@ -617,45 +618,25 @@ ZLOCAL_OVERRIDES=off
       esac
     done
 
-    TEMP=`cat       $LOCAL_CONFIG    |
-          grep  -v  "ARCHIVE="       |
-	  grep  -v  "AUTORESURRECT=" |
-          grep  -v  "AUTOFIX="       |
-          grep  -v  "AUTOPRUNE="     |
-          grep  -v  "CABAL="         |
-          grep  -v  "KEEP_SOURCE="   |
-          grep  -v  "MAIL_REPORTS="  |
-          grep  -v  "VIEW_REPORTS="  |
-          grep  -v  "PRESERVE="      |
-          grep  -v  "SOUND="         |
-          grep  -v  "SUSTAIN="       |
-          grep  -v  "VOYEUR="        |
-          grep  -v  "REAP="          |
-          grep  -v  "GARBAGE="       |
-          grep  -v  "color"          |
-          grep  -v  "TMPFS="         |
-	  grep  -v  "VERBOSE="       |
-	  grep  -v  "ZLOCAL_OVERRIDES="`
+    set_local_config "ARCHIVE" "$ARCHIVE"
+    set_local_config "AUTORESURRECT" "$AUTORESURRECT"
+    set_local_config "AUTOFIX" "$AUTOFIX"
+    set_local_config "AUTOPRUNE" "$AUTOPRUNE"
+    set_local_config "CABAL" "$CABAL"
+    set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
+    set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"
+    set_local_config "PRESERVE" "$PRESERVE"
+    set_local_config "SOUND" "$SOUND"
+    set_local_config "SUSTAIN" "$SUSTAIN"
+    set_local_config "VIEW_REPORTS" "$VIEW_REPORTS"
+    set_local_config "VOYEUR" "$VOYEUR"
+    set_local_config "REAP" "$REAP"
+    set_local_config "GARBAGE" "$GARBAGE"
+    set_local_config "TMPFS" "$TMPFS"
+    set_local_config "VERBOSE" "$VERBOSE"
+    set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
+    set_local_config "COLOR" "$SOUND"
 
-    echo  "$TEMP"                        >   $LOCAL_CONFIG
-    echo  "      ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
-    echo  "AUTORESURRECT=$AUTORESURRECT" >>  $LOCAL_CONFIG
-    echo  "      AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
-    echo  "    AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
-    echo  "        CABAL=$CABAL"         >>  $LOCAL_CONFIG
-    echo  "  KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
-    echo  " MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "     PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
-    echo  "        SOUND=$SOUND"         >>  $LOCAL_CONFIG
-    echo  "      SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
-    echo  " VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "       VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
-    echo  "         REAP=$REAP"          >>  $LOCAL_CONFIG
-    echo  "      GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "        color $COLOR"         >>  $LOCAL_CONFIG
-    echo  "        TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
-    echo  "      VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
-    echo  "ZLOCAL_OVERRIDES=$ZLOCAL_OVERRIDES" >> $LOCAL_CONFIG
   fi
 }
 
@@ -736,6 +717,24 @@ foreground_execute() {
   rm  -f        $INSTALL_QUEUE
 
   goodbye
+}
+
+
+setvar() {
+  if [ -z "$*" ] ; then
+    sort -n $LOCAL_CONFIG | grep -v -e UNIQID -e color | while read LINE ; do
+      printf "%32s %s\n" "$(echo $LINE|cut -d= -f1)" "$(echo $LINE|cut -d= -f2-)"
+    done
+  else
+    VAR=$1
+    shift
+    if [ -z "$*" ] ; then
+      VAL=$(get_local_config "$VAR")
+      printf "%s=%s\n" "$VAR" "$VAL"
+    else
+      set_local_config "$VAR" "$@"
+    fi
+  fi
 }
 
 
@@ -848,6 +847,7 @@ else
     update     ) update                                 ;;
     rebuild    ) rebuild                                ;;
     optimize   ) optimize_architecture                  ;;
+    set        ) shift && setvar $@                     ;;
     fix        ) shift && run_fix $@                    ;;
     nofix      ) shift && export NOFIX=on && run_fix $@ ;;
     fixdepends ) shift && fix_depends $@                ;;

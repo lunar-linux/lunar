@@ -46,7 +46,7 @@ create_uniq_id() {
 
   verbose_msg "id(\"$IFACE\")=\"$UNIQID\""
 
-  echo  "      UNIQID=$UNIQID"   >>   $LOCAL_CONFIG
+  set_local_config "UNIQID" "$UNIQID"
 
 }
 

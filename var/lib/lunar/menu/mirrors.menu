@@ -80,11 +80,10 @@ mirror_menu()  {
          MIRROR_URL=`$DIALOG  --inputbox  "Please enter the URL."  0 0`
       fi
 
-      [ -z "$MIRROR_URL" ] && continue
-
-      write_config "$MIRROR=" "$MIRROR=$MIRROR_URL" &&
-
-      $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+      if [ -n "$MIRROR_URL" ] ; then
+        set_local_config "$MIRROR" "$MIRROR_URL" &&
+        $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+      fi
     fi
   done
 }

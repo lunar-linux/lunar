@@ -31,18 +31,17 @@ Regardless of the number of modules listed here,
 The modules MUST exist in the moonbase and MUST meet
 some common criteria. Better do not hack by yourself."
 
- LUNAR_MODULES=`echo "$LUNAR_MODULES" | tr " " "\t"`
+ LUNAR_MODULES=$(echo "$LUNAR_MODULES" | tr " " "\t")
  LUNAR_MODULES=${LUNAR_MODULES:=lunar}
-  LUNAR_MODULE=${LUNAR_MODULE:=lunar}
+ LUNAR_MODULE=${LUNAR_MODULE:=lunar}
 
  unset SDM
- for LUNAR in $LUNAR_MODULES
- do
+ for LUNAR in $LUNAR_MODULES ; do
     [ "$LUNAR" == "$LUNAR_MODULE" ] && ONOFF="on" || ONOFF="off"
     SDM=$SDM"$LUNAR:module:$ONOFF:"
  done
 
- SDM=`echo "$SDM" | tr ":" "\t"`
+ SDM=$(echo "$SDM" | tr ":" "\t")
 
  LUNAR_MODULE=`$DIALOG  --title "Default Lunar Module" \
                         --ok-label  "Commit"           \
@@ -50,7 +49,7 @@ some common criteria. Better do not hack by yourself."
                               "$PROMPT"                \
                                0 0 0 $SDM`
 
- write_config "LUNAR_MODULE=" "LUNAR_MODULE=$LUNAR_MODULE"
+ set_local_config "LUNAR_MODULE" "$LUNAR_MODULE"
 
 }
 

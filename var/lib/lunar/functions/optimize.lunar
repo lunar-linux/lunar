@@ -492,11 +492,7 @@ optimize_speed() {
         Profiling) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
-		     if ! [[ `grep KEEP_SOURCE=on /etc/lunar/local/config` ]]; then
-		       echo "KEEP_SOURCE=yes" >> /etc/lunar/local/config
-		     elif [[ `grep KEEP_SOURCE=off /etc/lunar/local/config` ]]; then
-		       sedit "s/KEEP_SOURCE=off/KEEP_SOURCE=on/" /etc/lunar/local/config
-		     fi
+		     set_local_config "KEEP_SOURCE" "on"
                    else
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
@@ -847,7 +843,7 @@ optimize_architecture()  {
   help compiler_help          &&
   compiler_options            &&
   menu radiolist              &&
-  COMPILER=$RESULT
+  GCCVER=$RESULT
   
   help cc_help                &&
   cc_options                  &&
@@ -923,6 +919,8 @@ optimize_architecture()  {
 		--inputbox                       \
 		"Enter the number to set the stack to, leave empty for default."  \
 		0 55 $STACK`
+
+  set_optimize
 
 }
 

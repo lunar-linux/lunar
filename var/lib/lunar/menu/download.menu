@@ -49,37 +49,29 @@ Example: .mit.edu,mysite.com"
 
 confirm_proxy_settings() {
 
-confirm()  {
- $DIALOG  $2  --nocancel  --yesno  "$1"  8 50
-}
-    FINISHED=NO
+  confirm()  {
+    $DIALOG  $2  --nocancel  --yesno  "$1"  8 50
+  }
 
-    while [ "$FINISHED" != "YES" ]
-    do
-      PROMPT="Are these settings correct?"
-      PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
-      PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
-      PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
+  FINISHED=NO
 
-   if confirm "$PROMPT" "--cr-wrap"; then
+  while [ "$FINISHED" != "YES" ] ; do
+    PROMPT="Are these settings correct?"
+    PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
+    PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
+    PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
+
+    if confirm "$PROMPT" "--cr-wrap" ; then
        FINISHED=YES
-   else
+    else
        configure_proxy
        FINISHED=NO
-   fi
-    done
+    fi
+  done
 
-    [ "$HPROXY" != "" ] && 
-      write_config "http_proxy=" "  http_proxy=$HPROXY" ||
-      write_config "http_proxy="
-      
-    [ "$FPROXY" != "" ] && 
-      write_config "ftp_proxy="  "   ftp_proxy=$FPROXY" ||
-      write_config "ftp_proxy="
-      
-    [ "$NPROXY" != "" ] && 
-      write_config "no_proxy="   "    no_proxy=$NPROXY" ||
-      write_config "no_proxy=" 
+  set_local_config "http_proxy" "$HPROXY" 
+  set_local_config "ftp_proxy" "$FPROXY"
+  set_local_config "no_proxy" "$NPROXY"
 }
 
 proxy_exit_message() {
@@ -117,9 +109,7 @@ Example: enter 8000 for downloading no faster then \
                               "$PROMPT"               \
                                0 0  "$DOWNLOAD_RATE"`
   then
-    [  -z  "$DOWNLOAD_RATE"          ]  ||
-    [      "$DOWNLOAD_RATE" ==  "0"  ]  ||
-    write_config "DOWNLOAD_RATE=" "DOWNLOAD_RATE=$DOWNLOAD_RATE"
+    set_local_config "DOWNLOAD_RATE" "$DOWNLOAD_RATE"
   fi
 }
 
@@ -133,9 +123,7 @@ enter 0 for no threshold. Default threshold is 10 minutes"
                               "$PROMPT"               \
                                0 0  "$CVS_THRESHOLD"`
   then
-    [  -z  "$CVS_THRESHOLD"          ]  ||
-    [      "$DOWNLOAD_RATE" ==  "0"  ]  ||
-    write_config "CVS_THRESHOLD=" "CVS_THRESHOLD=$CVS_THRESHOLD"
+    set_local_config "CVS_THRESHOLD" "$CVS_THRESHOLD"
   fi
 }
 
@@ -174,8 +162,8 @@ FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
       Passive)  FTP_ACTIVE=off
                ;;
    esac
-
-   write_config "FTP_ACTIVE" "   FTP_ACTIVE=$FTP_ACTIVE"
+   
+   set_local_config "FTP_ACTIVE" "$FTP_ACTIVE"
 }
 
 set_partial_downloads(){
@@ -200,11 +188,10 @@ CONTINUE=off in DETAILS file :=) or vice-versa."
    #lets get rid of " and spaces in the variable
    PARTIAL=`echo $PARTIAL | sed s/\"//g | tr -d " "`
 
-   if [ "$PARTIAL" == "Enable" ]
-   then
-      write_config "CONTINUE" "     CONTINUE=on"     
+   if [ "$PARTIAL" == "Enable" ] ; then
+     set_local_config "CONTINUE" "on"
    else
-      write_config "CONTINUE" "     CONTINUE=off"
+     set_local_config "CONTINUE" "off"
    fi
 }
 
@@ -212,16 +199,15 @@ set_fuzzy_downloads(){
 
    PROMPT="Please enable/disable the fuzzy download option.
 
-The default behaviour of lget is to try all possible file
-extensions while downloading the files, regardless of the 
-file extension given in DETAILS file. You may disable this
-behaviour if you want to search and download the exact filename
-and extension.
+The default behaviour of lget is to skip all possible file
+extensions while downloading the files.  You may enable this
+behaviour if you want to search and download alternative filenames
+and extensions.
 
 This option can also be set per module basis. Add
 FUZZY=off in DETAILS file :=) or vice-versa."
 
-   FUZZY=${FUZZY:=on}
+   FUZZY=${FUZZY:=off}
 
    FUZZ=`$DIALOG  --title "Fuzzy Downloads" \
                             --ok-label  "Commit" \
@@ -233,11 +219,10 @@ FUZZY=off in DETAILS file :=) or vice-versa."
    #lets get rid of " and spaces in the variable
    FUZZ=`echo $FUZZ | sed s/\"//g | tr -d " "`
 
-   if [ "$FUZZ" == "Enable" ]
-   then
-      write_config "FUZZY"  "        FUZZY=on"
+   if [ "$FUZZ" == "Enable" ] ; then
+     set_local_config "FUZZY" "on"
    else
-      write_config "FUZZY"  "        FUZZY=off"        
+     set_local_config "FUZZY" "off"
    fi
 }
 
@@ -264,11 +249,10 @@ USE_CACHE=off in DETAILS file :=) or vice-versa."
    #lets get rid of " and spaces in the variable
    CACHE=`echo $CACHE | sed s/\"//g | tr -d " "`
 
-   if [ "$CACHE" == "Enable" ]
-   then
-      write_config "USE_CACHE" "    USE_CACHE=on"
+   if [ "$CACHE" == "Enable" ] ; then
+     set_local_config "USE_CACHE" "on"
    else
-      write_config "USE_CACHE" "    USE_CACHE=off"
+     set_local_config "USE_CACHE" "off"
    fi
 }
 
@@ -290,8 +274,7 @@ NUM_RETRY=<n> in DETAILS file :=)"
                            "$PROMPT"                \
                             0 0  "$NUM_RETRY"`
   then
-    [  -z  "$NUM_RETRY"          ]  ||
-    write_config "NUM_RETRY=" "    NUM_RETRY=$NUM_RETRY"
+    set_local_config "NUM_RETRY" "$NUM_RETRY"
   fi
 }
 
@@ -315,10 +298,10 @@ should be reported to maintainer@lunar-linux.org.
 
   EXHAUSTIVE=`echo $EXHAUSTIVE | sed s/\"//g | tr -d " "`
 
-  if [ "$EXHAUSTIVE" == "Enable" ]; then
-    write_config "EXHAUSTIVE" "  EXHAUSTIVE=on"
+  if [ "$EXHAUSTIVE" == "Enable" ] ; then
+    set_local_config "EXHAUSTIVE" "on"
   else
-    write_config "EXHAUSTIVE" "  EXHAUSTIVE=off"
+    set_local_config "EXHAUSTIVE" "off"
   fi
 
 }

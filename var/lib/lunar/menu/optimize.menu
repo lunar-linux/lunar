@@ -1,21 +1,10 @@
 #Copyrighted Jason Johnston  2002 under GPLv2
 
-optimize() {
+set_optimize() {
 
-  if ! [[ $COMPILER ]]; then
-     COMPILER=2;
-  fi
-  if ! [[ $GCCVER ]]; then
-     GCCVER=$COMPILER
-  fi
-  if [[ `grep GCCVER /etc/lunar/local/config` ]]; then
-     if [[ $GCCVER == "" ]]; then
-        sedit "s/GCCVER=/GCCVER=$COMPILER/" /etc/lunar/local/config
-     fi
-     sedit "s/GCCVER=[2|3]/GCCVER=$COMPILER/" /etc/lunar/local/config
-  else
-     echo -e GCCVER=$COMPILER >> /etc/lunar/local/config
-  fi
+  GCCVER=${GCCVER:=3}
+  set_local_config "GCCVER" "$GCCVER"
+
   echo -e PLATFORM=$PLATFORM            '\n'\
           BUILD=$BUILD                  '\n'\
 	  MAKES=$MAKES                  '\n'\
@@ -420,4 +409,5 @@ menu() {
                         0 0 0                   \
                       "${OPTIONS[@]}"`
    fi
+
 }

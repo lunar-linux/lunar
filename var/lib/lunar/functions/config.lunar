@@ -1,4 +1,5 @@
 #!/bin/bash
+############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -6,109 +7,67 @@
 ############################################################
 #                                                          #
 # $FUNCTIONS/config                                        #
-# includes write_config function                           #
-#                                                          #
-# 20020713                                                 #
-#                                                          #
-############################################################
-#                                                          #
-# Copyrighted Kagan Kongar 2002 under GPLv2                #
+# set_config, get_config                                   #
+# set_local_config, get_local_config                       #
+# set_module_config, get_module_config                     #
 #                                                          #
 ############################################################
-
-# function: write_config
-# usage   : write_config <line to remove> [<line to add>]
-# purpose : removes a line from the $LOCAL_CONFIG and adds another (if given)
-function write_config() {
-   [ -z "$1" ] && return 1        
-
-   TMP_LOCAL_CONFIG="/tmp/lunar.localconfig.$$"
-   rm -f $TMP_LOCAL_CONFIG 2>/dev/null
-
-   LOCAL_CONFIG_BACKUP="/tmp/lunar.localconfigbackup.$$"
-   rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
-
-   function handle_trap() {
-      cp $LOCAL_CONFIG_BACKUP $LOCAL_CONFIG 2>/dev/null     
-      unlock_file $LOCAL_CONFIG        
-      rm -f $TMP_LOCAL_CONFIG 2>/dev/null
-      rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
-      exit 1
-   }
+#                                                          #
+# Copyrighted Auke Kok 2004 under GPLv2                    #
+#                                                          #
+############################################################
 
 
-   [ -f "$LOCAL_CONFIG" ] || {
-           touch $LOCAL_CONFIG     &&
-           chmod 644 $LOCAL_CONFIG &&
-           chown 0:0 $LOCAL_CONFIG
-   }
 
-   cp $LOCAL_CONFIG $LOCAL_CONFIG_BACKUP 2>/dev/null || return 1
+set_config() {
+  debug_msg "set_config ($@)"
 
-   trap "handle_trap" INT QUIT TERM
-
-   lock_file $LOCAL_CONFIG
-
-   grep -v $1 $LOCAL_CONFIG 2>/dev/null > $TMP_LOCAL_CONFIG        
-
-   cat $TMP_LOCAL_CONFIG 2>/dev/null > $LOCAL_CONFIG || return 1
-   
-   [ -n "$2" ] && {
-      echo $2  >> $LOCAL_CONFIG || return 1
-   }
-
-   unlock_file $LOCAL_CONFIG
-
-   rm -f $TMP_LOCAL_CONFIG 2>/dev/null
-   rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
-   trap INT QUIT TERM
-}
-
-# function: get_module_configured
-#    usage: get_module_configured <date of config implement>
-#  purpose: This function is to implement a standard method 
-#           to specify a CONFIGURATION file format change in 
-#           the moonbase.  the date passed should be the unix date 
-#           that the format was last changed.  This is so that when 
-#           a CONFIGURE file has changed we can inform the user 
-#           instead of ignoring changes.
-
-get_module_configured(){
-  debug_msg "module_configured ($@)"
-  if [ "$#" -ne "1" ] ; then
-    message "${PROBLEM_COLOR}Configuration date missing, assuming unconfigured."
-    message "${MESSAGE_COLOR}Please inform the lunar devlopers of this issue. ${DEFAULT_COLOR}"
-    return false
+  LINE=$(cat $1 | grep -w "$2=.*")
+  if [ "$1" == "$LOCAL_CONFIG" ] ; then
+    NEW=$(printf "%16s=%s" "$2" "$3")
+  else
+    NEW="$2=$3"
   fi
-
-  # Check for file, return false for missing
-  if [ ! -f "$MODULE_CONFIG" ] ; then
-    debug_msg "Config file for $MODULE not found"
-    return false
+  lock_file $1 &&
+  if [ -n "$LINE" ] ; then
+    sedit "s:$LINE:$NEW:" $1
+  else
+    echo "$NEW" >> $1
   fi
-
-  # Check for configured date flag
-  MC_CONFIG_DATE=$(grep "CONFIGURED=" $MODULE_CONFIG | sed "s:.*=\([0-9]*\)[^0-9]*:\1:")
-  if [ -n "$MC_CONFIG_DATE" ] ; then
-    if [ "$MC_CONFIG_DATE" -le "$1" ] ; then
-      # the file is old, reconfigure
-      return false
-    else
-      # configuration current
-      return true
-    fi
-  fi
-  # other error?
-  return false
+  unlock_file $1
 }
 
 
-# function: set_module_configured
-#    usage: set_module_configured [<quoted list of lines to append to file>]   -#  purpose: to freshen the module configuration file with current config date
-set_module_configured() {
-  debug_msg "set_module_configured ($@)"
-  echo "CONFIGURED=$(date -u +%Y%m%d)" > $MODULE_CONFIG
-  for line in $@ ; do
-    echo "$line" >> $MODULE_CONFIG
-  done
+get_config() {
+  cat $1 | grep -w "$2=.*" | cut -d= -f2-
 }
+
+
+set_local_config() {
+  debug_msg "set_local_config ($@)"
+  set_config "$LOCAL_CONFIG" "$1" "$2"
+}
+
+
+get_local_config() {
+  debug_msg "get_local_config ($@)"
+  get_config "$LOCAL_CONFIG" "$1"
+}
+
+
+set_module_config() {
+  debug_msg "set_module_config ($@)"
+  if [ -n "$MODULE" ] ; then
+    set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
+  fi
+}
+
+
+get_module_config() {
+  debug_msg "get_module_config ($@)"
+  if [ -n "$MODULE" ] ; then
+    get_config "$DEPENDS_CONFIG/$MODULE" "$1"
+  fi
+}
+
+
