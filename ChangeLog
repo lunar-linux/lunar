@@ -1,3 +1,12 @@
+2005-03-23 16:18  sofar
+
+	* var/lib/lunar/: functions/download.lunar,
+	  functions/plugins.lunar, plugins/download-cvs.plugin,
+	  plugins/download-file.plugin, plugins/download-generic.plugin,
+	  plugins/download-svn.plugin: Adding a plugin system for
+	  downloading source code(tested). This codeset allows people to
+	  write plugins for other things later on.
+
 2005-03-23 08:42  sofar
 
 	* bin/lvu: Wanna get nitpicking? eat this!
