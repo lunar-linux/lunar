@@ -1,0 +1,10 @@
+#
+# This is not a real patch file, but in this directory (patch) you could
+# have placed diffs that will automatically be applied to the source tree.
+#
+
+# note there are right ways to make diffs and wrong ones, as a general rule
+# you need to include the full source dir. The patch will be applied by
+# the command patch -p1 < $filename.
+
+# also please make unidiffs! (diff -u)
