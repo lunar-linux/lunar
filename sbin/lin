@@ -133,7 +133,7 @@ use_xinetd()  { (
     for  SERVICE  in  $ALL_SERVICES;  do
       if    query  "Invoke $SERVICE via xinetd?"  y
       then  SERVICES="$SERVICE $SERVICES"
-      else return 1
+#      else return 1
       fi
     done
 
