@@ -731,6 +731,32 @@ optimize_ccc_warn() {
 
 optimize() {
   debug_msg "optimize ($@)"
+  # Source in the optimization settings if it exists.
+  if [ -s /etc/lunar/local/optimizations ] ; then
+    . /etc/lunar/local/optimizations
+  else
+    verbose_msg "initializing optimizations with hard-coded defaults"
+    echo -e PLATFORM=x86            '\n'    \
+BUILD=i386-pc-linux-gnu '\n'    \
+MAKES=                  '\n'    \
+COPT=                   '\n'    \
+CCOPT=                  '\n'    \
+BOPT=-O0                '\n'    \
+CPU=i386                '\n'    \
+SPD=( )                 '\n'    \
+STACK=                  '\n'    \
+XTRA=( )                '\n'    \
+FPM=                    '\n'    \
+CC_WARN=( )             '\n'    \
+CCC_WARN=( )            '\n'    \
+LDF=( )                 '\n'    \
+ADDON=( ) > /etc/lunar/local/optimizations
+  fi
+
+  #lets get the BUILD if it is not defined   
+  [ -z "$BUILD" ] && optimize_cpu $CPU
+  [ -n "$BUILD" ] && export BUILD || 
+  echo "Set your optimization preferences via lunar"
 
   unset CFLAGS CXXFLAGS LDFLAGS
 
@@ -810,34 +836,12 @@ optimize_architecture()  {
     exit 0
   fi
 
-  # Source in the optimization settings if it exists.
-  if [ -s /etc/lunar/local/optimizations ] ; then
-    . /etc/lunar/local/optimizations
-  else
-    verbose_msg "initializing optimizations with hard-coded defaults"
-    echo -e PLATFORM=x86            '\n'    \
-            BUILD=i386-pc-linux-gnu '\n'    \
-            MAKES=                  '\n'    \
-            COPT=                   '\n'    \
-            CCOPT=                  '\n'    \
-            BOPT=-O0                '\n'    \
-            CPU=i386                '\n'    \
-            SPD=( )                 '\n'    \
-            STACK=                  '\n'    \
-            XTRA=( )                '\n'    \
-            FPM=                    '\n'    \
-            CC_WARN=( )             '\n'    \
-            CCC_WARN=( )            '\n'    \
-            LDF=( )                 '\n'    \
-            ADDON=( ) > /etc/lunar/local/optimizations
+  if [ -f /etc/lunar/local/optimizations ] ; then
+    .  /etc/lunar/local/optimizations
   fi
 
-  #lets get the BUILD if it is not defined   
-  [ -z "$BUILD" ] && optimize_cpu $CPU
-  [ -n "$BUILD" ] && export BUILD || 
-  echo "Set your optimization preferences via lunar"
-# Flow control for the menus. This will also check for gcc3,
-# if it exists it will allow more options.
+  # Flow control for the menus. This will also check for gcc3,
+  # if it exists it will allow more options.
   TITLE="Lunar Optimizations"
 
   help compiler_help          &&
