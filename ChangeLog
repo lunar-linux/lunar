@@ -1,3 +1,15 @@
+2003-02-01 14:55  sofar
+
+	* sbin/lget: Okay, here's the problem: you implement downloading with locking, so lin
+	can call lget without worrying wether it is already downloading or now,
+	now you add another download option, but you forget to add locking to that
+	feature. As you can guess, when you try to install AND lin forces a download
+	through that other feature, it will start to download it, and then probe
+	for it again just before pre_build, because lin calls lget twice somehow. Not
+	at all a problem, unless you forget to add the locking mechanism to the other
+	feature, right? (short: implemented locking where it is needed, should fix
+	download/lin problems of CVS modules)
+	
 2003-02-01 05:18  wizfactor
 
 	* sbin/lin: Finished updating xinet (bug 232)
