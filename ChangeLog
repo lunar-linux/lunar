@@ -337,15 +337,3 @@
 	* var/lib/lunar/subroutines: show difference between optional and
 	required depends.
 
-2003-02-28 00:25  sofar
-
-	* sbin/lget, var/lib/lunar/functions/download.lunar: code cleanups:
-	lget!
-	
-	- moved general functions into functions/download.lunar -
-	structured code, no weird function names - molecularized code:
-	download_module, get_url, become more atomic functions and less
-	vague.	- made lget a dummy frontend, as it should be. lin may
-	possibly completely skip lget now and run a download process
-	internally.
-
