@@ -1,3 +1,9 @@
+2003-11-25 23:22  sofar
+
+	* var/lib/lunar/functions/uniqid.lunar: Fixes moonbase downloads
+	time-outing if dbguin is down... we prolly have to merge this into
+	lunar ASAP.
+
 2003-11-19 01:20  elaine
 
 	* var/lib/lunar/functions/modules.lunar: Providing for ARCH
