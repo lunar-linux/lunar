@@ -1,3 +1,11 @@
+2004-06-13 13:11  sofar
+
+	* etc/lunar/mirrors/SFORGE: Added australia SF mirror optusnet
+
+2004-06-13 12:52  sofar
+
+	* var/lib/lunar/functions/depends.lunar: Cosmetics
+
 2004-06-04 12:21  sofar
 
 	* var/lib/lunar/functions/postbuild.lunar: Same permissions but
