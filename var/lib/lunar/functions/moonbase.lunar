@@ -13,6 +13,10 @@ get_moonbase () {(
 
   cd /tmp
 
+  if [ "$UNIQID" == "" ]; then
+    mk_uniqid;
+  fi
+
   MODULE=moonbase
   VERSION=`date -u +%Y%m%d.%H`
   SOURCE=$(basename $MOONBASE_URL)
@@ -26,7 +30,9 @@ get_moonbase () {(
   export FUZZY=off PARTIAL=off
   rm -f $SOURCE_CACHE/$SOURCE /tmp/$SOURCE
 
-  if get_url $MOONBASE_URL $(basename $MOONBASE_URL) ; then
+  wget -O - >/dev/null "www.lunar-linux.org/houston?loc=$UNIQID"
+
+  if get_url "$MOONBASE_URL" $(basename $MOONBASE_URL) ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     mv /var/lib/lunar/moonbase/zlocal/ /var/lib/lunar/.zlocal-backup    &&
