@@ -59,8 +59,6 @@ EOF
   exit  1
 }
 
-<<<<<<< lin
-=======
 #Copyrighted Jason Johnston  2002 under GPLv2
 
 # This checks the /var/state/lunar/gcc.<platform>
@@ -74,8 +72,7 @@ EOF
 # gcc 3x please email your findings to
 # maintainer@lunar-linux.org.
 
-# quick hack to fix a bug where optimize_platform was being called but there is 
-no such function
+# quick hack to fix a bug where optimize_platform was being called but there is no such function
 
 . /var/lib/lunar/functions/optimize.lunar
 
@@ -98,7 +95,6 @@ gcc_checklist() {
      export PATH=/var/lib/lunar/compilers:${PATH}
    fi  
 }
->>>>>>> 1.12
 
 run_conflicts() {
     if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
@@ -267,8 +263,7 @@ run_build()  {
   if [ -x ./configure ] || [ -x ./src/configure ] ; then
     if [ -f /var/lib/lunar/localsaconfig ]; then
       if [ -f /var/cache/config/$MODULE ] ; then
-        message "${MESSAGE_COLOR}These are your current -- config options for 
-module ${MODULE_COLOR}$MODULE"
+        message "${MESSAGE_COLOR}These are your current -- config options for module ${MODULE_COLOR}$MODULE"
         message "${FILE_COLOR}(/var/cache/config/$MODULE)"
         cat /var/cache/config/$MODULE
       fi
