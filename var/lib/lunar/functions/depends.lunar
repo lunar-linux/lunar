@@ -187,8 +187,14 @@ run_depends() {
 	else
 	  DEPMOD_AVAIL="Install & use optional ${PROBLEM_COLOR}(not yet installed) ${MESSAGE_COLOR}module${QUERY_COLOR} $1"
 	fi
-	if query  "$DEPMOD_AVAIL 
-        dependency - purpose: $4? " $DEFAULT ; then
+
+        # this is shortcut case s1) as discussed in lunar-dev ML
+	if module_installed $1 && [ -z "$2" -a -z "$3" ] ; then
+	  verbose_msg "Auto-adding optional dependency \"$1\""
+          add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+	  lin --deps $1
+	elif query  "$DEPMOD_AVAIL 
+          dependency - purpose: $4? " $DEFAULT ; then
           add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
           lin --deps $1
         else
@@ -264,7 +270,13 @@ satisfy_depends()  {
 conflicts() {
   debug_msg "conflicts ($@)"
   if module_installed $1 ; then
-    lrm $1
+    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${MODULE_COLOR}$1${DEFAULT_COLOR}${PROBLEM_COLOR} conflicts with module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+    if query "Do you want to remove module ${DEFAULT_COLOR}${MODULE_COLOR}$1${DEFAULT_COLOR}${QUERY_COLOR} ? " n ; then
+      lrm $1
+    else
+      message "${PROBLEM_COLOR}ERROR: Cannot continue installing conflicting modules, exiting!${DEFAULT_COLOR}"
+      return 1
+    fi
   fi
 
   true
@@ -289,10 +301,16 @@ build_module_depends() {
 (
   debug_msg "build_module_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then
+    if ! run_conflicts $1 ; then
+      exit 1
+    fi &&
     run_details $1 &&
     run_configure &&
     run_depends
   else
+    if ! run_conflicts $1 ; then
+      exit 1
+    fi &&
     run_details $1 &&
     run_depends &&
     satisfy_depends
