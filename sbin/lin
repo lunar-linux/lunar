@@ -553,14 +553,16 @@ run_fix()  { (
   MODULES=$*
 
   if  [  -z  "$MODULES"  ];  then
-    MODULES=`cat  $MODULE_STATUS_BACKUP |  cut  -d : -f1`
+    MODULES=$(cat $MODULE_STATUS_BACKUP | cut  -d: -f1 | sort)
   fi
 
   PASSED=":"
 
+  [ -n "$EXPORT_LD_PATH" ] ||
+    export EXPORT_LD_PATH=$(find /usr/lib -type d ! -empty)
   if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
     LD_LIBRARY_PATH_OLD="$LD_LIBRARY_PATH"
-    export_ld  `find  /usr/lib  -type  d  ! -empty`
+    export_ld $EXPORT_LD_PATH
   fi
 
   until  [  "$FIXED"     ==  "yes"  ]   ||
@@ -570,14 +572,13 @@ run_fix()  { (
     HOPELESS="no"
 
     for  MODULE  in  $MODULES;  do
+
+      show_fancy_progress "Processing: $MODULE"
+
       if  status_okay  $MODULE                         &&
-          [  "$MODULE"  !=  "lunar"  ]               &&
+          [  "$MODULE"  !=  "lunar"  ]                 &&
           [  "$MODULE"  !=  "j2sdk"    ]               &&
           !  echo  $PASSED  |  grep  -q  ":$MODULE:";  then
-
-        message  "${CHECK_COLOR}Checking integrity of"  \
-                 "${MODULE_COLOR}${MODULE}"             \
-                 "${DEFAULT_COLOR}"
 
         if    run_checks     $MODULE  ||
               [  -n  "$NOFIX"  ]
@@ -593,7 +594,7 @@ run_fix()  { (
 
           if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
             export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
-            export_ld  `find  /usr/lib  -type  d  ! -empty`
+            export_ld $EXPORT_LD_PATH
           fi
 
           if    run_checks     $MODULE  ||
@@ -603,7 +604,7 @@ run_fix()  { (
             PASSED="$PASSED$MODULE:"
             if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
               export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
-              export_ld  `find  /usr/lib  -type  d  ! -empty`
+              export_ld $EXPORT_LD_PATH 
             fi
 
           else
