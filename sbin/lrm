@@ -214,7 +214,7 @@ check_status() {
 
   if [ "$NOSUSTAIN" != "on" -a "$UPGRADE" != "on" ] ; then
     debug_msg "checking if \"$1\" is sustained"
-    if grep -q -w "$MODULE" "$SUSTAINED" ; then
+    if grep -q "^$MODULE$" "$SUSTAINED" ; then
       message  "${MODULE_COLOR}${MODULE}"       \
                "${PROBLEM_COLOR}is sustained."  \
                "${DEFAULT_COLOR}"
