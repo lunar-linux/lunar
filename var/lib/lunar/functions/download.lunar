@@ -308,10 +308,14 @@ get_url() {
       URL="$CPAN_URL/${1:7}"
       FILE=$(basename $URL)
       get_url $URL $2
-    elif [ "${1:0:5}" == "file:" ] ; then
-      # adding this since wget is a bitch and will not fetch this... sigh
-      # this will copy file to $2... so you may use it as you like
-      cp ${1/file:/} $2
+
+    # adding this since wget is a bitch and will not fetch this... sigh
+    # this will copy file to $2... so you may use it as you like
+    elif [ -n "$BASE_URL" -a "${BASE_URL:0:7}" == "file://" ] ; then
+      cp $(echo $BASE_URL | sed 's/file:\/\///') $2
+    elif [ "${1:0:7}" == "file://" ] ; then
+      cp $(echo $1 | sed 's/file:\/\///') $2
+
     else
       # ordinary URL's handled by fuzzy_wget
       connect &&
