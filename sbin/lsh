@@ -13,7 +13,7 @@ if (( $# > 0 )) ; then
 else
   export PS1="\[\033[0;31m\][lunar] \u@\h \w \\$ \[\033[0m\]"
   message "\n    ${PROBLEM_COLOR}Warning:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
-          "lsh is potential hazardous to your system.${DEFAULT_COLOR}\n"
+          "lsh is potentially hazardous to your system.${DEFAULT_COLOR}\n"
   bash --rcfile /etc/lunar/config
 fi
 
