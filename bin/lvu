@@ -325,12 +325,6 @@ older()  {
 }
 
 
-show_from()  {
-  cd  $INSTALL_LOGS
-  grep  $1  *
-}
-
-
 show_module_component()  {
   COMPONENT=$1
      MODULE=$2
@@ -338,26 +332,6 @@ show_module_component()  {
   if [ -e $MOONBASE/$SECTION/$MODULE/$COMPONENT ] ; then
     cat $MOONBASE/$SECTION/$MODULE/$COMPONENT
   fi
-}
-
-
-long_search()  {
-  for MODULE in $(list_moonbase) ; do
-  (
-    run_details $MODULE | grep -q -i "$1"  &&
-    echo "$SECTION/$MODULE"
-  )
-  done
-}
-
-
-service()  {
-  for MODULE in $(list_moonbase) ; do
-    if [ -f $MOONBASE/$SECTION/$MODULE/services ] && 
-        grep -q -i "$1" $MOONBASE/$SECTION/$MODULE/services ; then
-      echo "$SECTION/$MODULE"
-    fi
-  done
 }
 
 
@@ -613,7 +587,8 @@ parse()  {
       ;;
 
     from)
-      show_from $2
+      cd $INSTALL_LOGS
+      grep $2 *
       ;;
       
     newer)
@@ -755,11 +730,25 @@ parse()  {
       ;;
       
     search)
-      long_search "$2"
+      for SECTION in $(list_sections) ; do
+        for MODULE in $(list_modules $SECTION) ; do
+        (
+          run_module_file $MODULE DETAILS | grep -q -i "$2" &&
+          echo "$SECTION/$MODULE"
+        )
+	done
+      done
       ;;
       
     service)
-      service "$2"
+      for SECTION in $(list_sections) ; do
+        for MODULE in $(list_modules $SECTION) ; do
+          if [ -f $MOONBASE/$SECTION/$MODULE/services ] && 
+              grep -q -i "$2" $MOONBASE/$SECTION/$MODULE/services ; then
+            echo "$SECTION/$MODULE"
+          fi
+	done
+      done
       ;;
       
     depends)
