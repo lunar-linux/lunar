@@ -173,10 +173,3 @@
 	* bin/lvu: Elaine forgot to change 3 occations of mv_edit to
 	mod_v_safe_edit
 
-2003-10-01 16:28  elaine
-
-	* var/lib/lunar/functions/: check.lunar, edit.lunar, install.lunar,
-	modules.lunar, sizes.lunar, temp.lunar, tracking.lunar:
-	install.lunar: fixed failure to correctly remove depends/module
-	file rename mv_edit() routine mod_v_safe_edit()
-
