@@ -262,7 +262,7 @@ lvu_catalog_html()  {
           MODULE="<font size=-1>$MODULE</font>"
         fi
         echo  "<td>$MODULE</td>"
-        echo  "<td><font size=-1>$BOLD $VERSION $UNBOLD</font></td>"
+        echo  "<td><font size=-1>$VERSION</font></td>"
         echo  "<td><font size=-1>$UPDATED</font></td>"
 
         WEBSITE=$WEB_SITE
