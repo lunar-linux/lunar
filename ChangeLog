@@ -131,14 +131,3 @@
 	workaround you used for the download procedure .. theedge is
 	lget'ed twice f.e. [FIXED]
 
-2004-04-17 16:33  sofar
-
-	* sbin/lin: thx for spotting this nick
-
-2004-04-17 16:02  sofar
-
-	* sbin/lin: Adding a trap that cleans up /tmp/lunar.lin.* and also
-	removes the known temporary files. This works like a charm in
-	cleaning up threads on cancelled or breaking compiles. Hopefully
-	this catches and cleans up on a lot of bad things now.
-
