@@ -50,10 +50,26 @@ renew() {
 
 update() {
   debug_msg "update ($@)"
-  if  ps  -C  lin  >  /dev/null;  then
-    echo    "Unable to update lunar concurrently while installing."
-    sleep   5
-    return  1
+  if ps -C lin > /dev/null ; then
+    error_message "${PROBLEM_COLOR}Unable to update lunar concurrently while installing.${DEFAILT_COLOR}"
+    return 1
+  fi
+
+  # test if $LUNAR_MODULE is installed (for old boxes)
+  if [ -z "$LUNAR_MODULE" ] ; then
+    for ALT in $LUNAR_MODULES ; do
+      if module_installed $ALT ; then
+        lunar set LUNAR_MODULE $ALT
+        export LUNAR_MODULE=$ALT
+	verbose_msg "LUNAR_MODULE set to \"$ALT\""
+      fi
+    done
+    if [ -z "$LUNAR_MODULE" ] ; then
+      error_message "${PROBLEM_COLOR}Error:${DEFAULT_COLOR} ${MESSAGE_COLOR}No core code installed: install one of the following first:${DEFAULT_COLOR}"
+      error_message $LUNAR_MODULES
+      error_message "${MESSAGE_COLOR}then try again (I can't update if I don't know which toolset I use)${DEFAULT_COLOR}"
+      return 1
+    fi
   fi
 
   if lin moonbase ; then
@@ -64,7 +80,6 @@ update() {
       lunar renew
     fi
   fi
-
 }
 
 
