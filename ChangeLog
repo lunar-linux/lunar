@@ -348,20 +348,3 @@
 	still noisy), lots and lots of core rewrites, optimizations,
 	formatting and spacing, removal of old and unused code, etc.
 
-2003-02-13 12:25  sofar
-
-	* var/lib/lunar/subroutines: more more cleanups
-
-2003-02-13 12:13  sofar
-
-	* sbin/lin: more cleanups
-
-2003-02-13 12:09  sofar
-
-	* var/lib/lunar/subroutines: More code cleanups.
-
-2003-02-13 12:01  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Code cleanups and
-	speedups.
-
