@@ -1,3 +1,11 @@
+2003-02-22 20:26  csm
+
+	* var/lib/lunar/excluded: adding a fe wmore files to the list
+
+2003-02-22 16:11  sofar
+
+	* sbin/lget: verbosity, better separating cvs/non-cvs.
+
 2003-02-22 11:55  sofar
 
 	* var/lib/lunar/subroutines: More verbosity in core functions:
