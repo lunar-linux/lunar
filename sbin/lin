@@ -78,7 +78,7 @@ main() {
   if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
 
     if [ -n "$MOD_VERSION" ] ; then
-      message "${MESSAGE_COLOR} -V|--Version only allowed for single-mdoule install!${DEFAULT_COLOR}"
+      message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
       exit 1
     fi
 
