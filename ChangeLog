@@ -167,21 +167,3 @@
 	var/lib/lunar/menu/integrity.menu: Moved the rest of the
 	depreciated "lin --fix" over to "lunar fix".
 
-2003-09-11 16:03  tchan
-
-	* sbin/lin: Corrected a spelling mistake.
-
-2003-09-11 05:09  elaine
-
-	* bin/lvu, sbin/lin, usr/share/man/man8/lin.8,
-	var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/install.lunar,
-	var/lib/lunar/functions/locking.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/sizes.lunar,
-	var/lib/lunar/functions/temp.lunar,
-	var/lib/lunar/functions/tracking.lunar: Initial versioning support
-	for lunar, where versions are either version-aware modules or
-	subdirectories of the primary module.
-
