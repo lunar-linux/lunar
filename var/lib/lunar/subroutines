@@ -523,7 +523,6 @@ install_initd()  { (
   fi
 
   for INITDSCRIPT in $INITDSCRIPTS; do
-    [ -f $INITDSCRIPT ] || continue
     ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
     	rm /etc/rc?.d/???$INITDSCRIPT
     chkconfig --add $INITDSCRIPT
