@@ -151,3 +151,41 @@ unpack() {
 
 
 
+# usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
+gpg_verify_source() {
+  if [ ! -x /usr/bin/gpg ] ; then
+    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
+    return 1
+  fi
+
+  # do we need to download a keyset?
+  if [ -n "$3" ] ; then
+    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
+    verbose_msg "Downloading pub keys from \"$3\""
+    if wget $3 -O $TMP_GPG_KEYS -q ; then
+      GNUPGHOME=/var/state/lunar/ gpg --import $TMP_GPG_KEYS
+    fi
+  fi
+  
+  # try to get the required key
+  TMP_GPG_SIG=$(temp_create "gpg-signature")
+  verbose_msg "Downloading signature \"$2\""
+  if wget $2 -O $TMP_GPG_SIG -q ; then
+    verbose_msg "Verifying signature of \"$1\""
+    verbose_msg "GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $1"
+    if GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $1 ; then
+      echo good!
+    else
+      echo bad!
+    fi
+#    temp_destroy $TMP_SIG
+    verbose_msg "result was \"$?\""
+  else
+    message "B()RK"
+    temp_destroy $TMP_SIG
+    exit 1
+  fi
+
+}
+
+
