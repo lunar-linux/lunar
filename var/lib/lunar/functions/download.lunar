@@ -462,14 +462,22 @@ show_downloading()
 {
     debug_msg "show_downloading ($@)"
     DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
-    DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
-    if [ ! -d /proc/$DOWNLOAD_PID -a -f $DOWNLOAD_LOG ]; then
-        cat $DOWNLOAD_LOG
-    else
-        tail -s 0.0 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
-        sleep 1
+    if [ -n "$DOWNLOAD_PID" ]; then
+        DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
+        if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
+            cat $DOWNLOAD_LOG
+        else
+            tail -s 0.0 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+            sleep 1
+        fi
+        rm $DOWNLOAD_LOG
+    elif lget_locked $MODULE; then
+        message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
+        while lget_locked $MODULE; do
+	    echo -n "."
+	    sleep 5
+	done
     fi
-    rm $DOWNLOAD_LOG
 }
 
 
