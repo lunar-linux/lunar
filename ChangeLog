@@ -153,9 +153,3 @@
 
 	* sbin/lin: Adding adjustment suggested by jazman
 
-2004-04-11 21:54  sofar
-
-	* var/lib/lunar/functions/: depends.lunar, modules.lunar: Fix for
-	normal users seeing garbage when the call lunar's core tools with
-	garbage. should clean up stuff a bit.
-
