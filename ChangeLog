@@ -134,11 +134,3 @@
 	* var/lib/lunar/functions/download.lunar: Make it possible to do
 	  'lget moonbase --url file:///path/to/moonbase.tar.bz2'
 
-2004-11-25 15:05  sofar
-
-	* var/lib/lunar/functions/: build.lunar, main.lunar: Semantical
-	  change: prepare_install is now MANDATORY. it is also the step
-	  where invoke_installwatch is called. I added a WARNING that
-	  checks after BUILD if it was set correctly, and warns if it
-	  isn't. In the future this will become an ERROR.
-
