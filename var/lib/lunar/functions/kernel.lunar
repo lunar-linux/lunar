@@ -206,3 +206,17 @@ root    $GRUB_ROOT
   sleep 4
 
 }
+
+# function update_aboot
+# Description: creates /boot/aboot.conf lines
+# usage: update_aboot bootimagename menuname
+#
+
+# This function is a work in progress. Please treat it as such.
+# -Aaron Watry 1/6/2004
+
+update_aboot()  {
+
+  echo "Updating aboot"
+
+}
