@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lvu - view Lunar module information                      #
@@ -897,6 +897,8 @@ parse()  {
 
   # main program loop
   . /etc/lunar/config
+
+  set_priority
 
   if [ $# == 0 ] ; then
     help | view_file

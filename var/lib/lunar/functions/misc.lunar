@@ -1,0 +1,135 @@
+############################################################
+#                                                          #
+# misc.lunar - Lunar subroutines                           #
+#                                                          #
+############################################################
+#                                                          #
+# this WAS the subroutines of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2001 by Kyle Sallee                            #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+
+# function : directories
+# usage    : VARIABLE=`directories < dirlistfile`
+# purpose  : to determine the directories from a given list
+directories() {
+  while read ITEM ; do
+    if [ -d "$ITEM" ] && [ ! -h "$ITEM" ] ; then
+      echo "$ITEM"
+    fi
+  done
+}
+
+
+# function : files
+# usage    : VARIABLE=`files < dirlistfile`
+# purpose  : to determine the ordinary files from a given list
+files() {
+  while read ITEM ; do
+    if [ -f "$ITEM" ] && [ ! -h "$ITEM" ] ; then
+      echo "$ITEM"
+    fi
+  done
+}
+
+
+# function : sysmlinks
+# usage    : VARIABLE=`symlinks < dirlistfile`
+# purpose  : to determine the symbolic links from a given list
+symlinks() {
+  while read ITEM ; do
+    if [ -h "$ITEM" ] ; then
+      echo "$ITEM"
+    fi
+  done
+}
+
+
+# function : dirnames
+# usage    : VARIABLE=`dirnames < dirlistfile`
+# purpose  : info about the real locations of symlinks
+dirnames() {
+  while read FILE ; do
+    dirname "$FILE"
+  done
+}
+
+
+# function : exists
+# usage    : VARIABLE=`exists < dirlistfile`
+# purpose  : filter out the non-existent files in a list
+exists() {
+  while read ITEM ; do
+    if [ -e "$ITEM" ] ; then
+      echo $ITEM
+    fi
+  done
+}
+
+
+# function : guess_filename
+# usage    : guess_filename <filename>
+# purpose  : fuzzy check for the existance of the filename
+guess_filename()  {
+  FILENAME=$1
+  BASENAME=${FILENAME/.tar.gz/}
+  BASENAME=${BASENAME/.tar.bz2}
+  BASENAME=${BASENMAE/.tgz/}
+
+  if [ -f $FILENAME ] ; then
+    echo $FILENAME
+  elif [ "$FUZZY" == "off" ] ; then
+    return 1
+  elif [ -f $BASENAME.tar.gz ] ; then
+    echo $BASENAME.tar.gz
+  elif [ -f $BASENAME.tar.bz2 ] ; then
+    echo $BASENAME.tar.bz2
+  elif [ -f $BASENAME.tgz ] ; then
+    echo $BASENAME.tgz
+  else
+    return 1
+  fi
+}
+
+
+# function : filter
+# usage    : filter $FILE
+# purpose  : filter stdin with files/dirs/symlinks provided in file $1.
+filter() {
+  if [ -f $1 ] ; then
+    grep -v $(
+      for DIR in `directories < $1 2>/dev/null` ; do
+        echo -n "^$DIR\|"
+      done
+      for FILE in `files < $1 2>/dev/null` ; do
+        echo -n "^$FILE\$\|"
+      done
+      for SYM in `symlinks < $1 2>/dev/null` ; do
+        echo -n "^$SYM\$\|"
+      done
+      echo -n "/dev/null"
+      )
+  else
+    cat
+  fi
+
+}
+
+

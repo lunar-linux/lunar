@@ -6,6 +6,8 @@
 
 . /etc/lunar/config
 
+set_priority
+
 message "\n    ${PROBLEM_COLOR}Warning:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
         "lsh is potential hazardous to your system.${DEFAULT_COLOR}\n"
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lget - get sources from the net                          #
@@ -25,7 +25,6 @@
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
 #                                                          #
 ############################################################
-
 
 
 help() {
@@ -123,8 +122,9 @@ main() {
 
 . /etc/lunar/config
 
-root_check || exit 1
+root_check
+enviro_check
+set_priority
 
-renice +10 -p $$  >/dev/null
 main  $*
 

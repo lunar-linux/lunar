@@ -24,101 +24,6 @@
 #                                                          #
 ############################################################
 
-# the below is for running the code located in subroutines
-# under $FUNCTIONS subdirectory.
-if [ -d "$FUNCTIONS" ]
-then
-   for FILE in `echo $FUNCTIONS/*.lunar`
-   do
-      [ -s "$FILE" ] && . "$FILE"
-   done
-fi
-
-#lets get the BUILD if it is not defined   
-  [ -z "$BUILD" ] && optimize_cpu $CPU
-  [ -n "$BUILD" ] && export BUILD || 
-  echo "Set your optimization preferences via lunar"
-#
-
-
-# function : directories
-# usage    : VARIABLE=`directories < dirlistfile`
-# purpose  : to determine the directories from a given list
-directories() {
-  while  read       ITEM;  do
-    if  [     -d  "$ITEM"  ]   &&
-        [  !  -h  "$ITEM"  ];  then
-      echo        "$ITEM"
-    fi
-  done
-}
-
-
-# function : files
-# usage    : VARIABLE=`files < dirlistfile`
-# purpose  : to determine the ordinary files from a given list
-files()  {
-  while  read       ITEM;   do
-    if  [     -f  "$ITEM"  ]   &&
-        [  !  -h  "$ITEM"  ];  then
-      echo        "$ITEM"
-    fi
-  done
-}
-
-
-# function : sysmlinks
-# usage    : VARIABLE=`symlinks < dirlistfile`
-# purpose  : to determine the symbolic links from a given list
-symlinks()  {
-  while  read    ITEM;   do
-    if  [  -h  "$ITEM"  ];  then
-      echo     "$ITEM"
-    fi
-  done
-}
-
-
-# function : dirnames
-# usage    : VARIABLE=`dirnames < dirlistfile`
-# purpose  : info about the real locations of symlinks
-dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
-
-
-# function : exists
-# usage    : VARIABLE=`exists < dirlistfile`
-# purpose  : filter out the non-existent files in a list
-exists()  {  while  read  ITEM;  do  [  -e  $ITEM  ]  &&  echo  $ITEM;  done;  }
-
-
-# function : guess_filename
-# usage    : guess_filename <filename>
-# purpose  : fuzzy check for the existance of the filename
-guess_filename()  {
-  FILENAME=$1
-  BASENAME=`echo  $FILENAME         |
-            sed  "s/\.tar\.gz$//"   |
-            sed  "s/\.tgz$//"       |
-            sed  "s/\.tar\.bz2$//"`
-
-  if    [  -f  $FILENAME          ];  then  echo  $FILENAME
-  elif  [  "$FUZZY"  ==  "off"    ];  then  return  1
-  elif  [  -f  $BASENAME.tar.gz   ];  then  echo  $BASENAME.tar.gz
-  elif  [  -f  $BASENAME.tar.bz2  ];  then  echo  $BASENAME.tar.bz2
-  elif  [  -f  $BASENAME.tgz      ];  then  echo  $BASENAME.tgz
-  else  false
-  fi
-}
-
-
-boost_locked()  {
-
-  [  -f     $BOOST_LOCK  ]  &&
-  ps  `cat  $BOOST_LOCK`    |
-  grep  -q  lin
-
-}
-
 
 save_libraries()  {
 
@@ -260,28 +165,6 @@ validate_source_dir()  {
     false
   fi
 
-}
-
-
-# Usage: bad_flags "list of flags to remove"
-# Example: bad_flags -ffast-math -funroll-loops
-bad_flags() {
-
-  verbose_msg "bad_flags \"$@\""
-  if [[ $1 == "ALL" ]]; then
-    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
-  elif [[ $1 == "compiler" ]]; then
-    unset CFLAGS CXXFLAGS CPPFLAGS
-  elif [[ $1 == "linker" ]]; then
-    unset LDFLAGS
-  else
-    for BAD_FLAG in $@; do
-      CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
-      CXXFLAGS=`echo $CXXFLAGS | sed s/$BAD_FLAG//`
-      CPPFLAGS=`echo $CPPFLAGS | sed s/$BAD_FLAG//`
-      LDFLAGS=`echo $LDFLAGS | sed s/$BAD_FLAG//`
-    done
-  fi
 }
 
 
@@ -434,7 +317,7 @@ add_module()  {
 
 
 conflicts() {
-  if  module_installed  $1;  then
+  if module_installed $1 ; then
     lrm $1
   fi
 
@@ -442,105 +325,6 @@ conflicts() {
 
 } 
 
-
-filter() {
-
-  if  [  -f  $1  ];  then
-
-     DIRS=`directories  <  $1  2>/dev/null`
-    FILES=`files        <  $1  2>/dev/null`
-     SYMS=`symlinks     <  $1  2>/dev/null`
-
-    RID_LIST=`for  DIR   in  $DIRS;   do  echo  -n  "^$DIR\|";     done
-              for  FILE  in  $FILES;  do  echo  -n  "^$FILE\$\|";  done
-              for  SYM   in  $SYMS;   do  echo  -n  "^$SYM\$\|";   done
-              echo  -n  "/dev/null"`
-
-    grep  -v  "$RID_LIST"
-
-  else
-    cat
-  fi
-
-}
-
-
-reap_modified_file()  {
-
-  message  "${FILE_COLOR}${1}${DEFAULT_COLOR}"
-  message  "${MESSAGE_COLOR}was previously modified by SA?"
-  case  $PRESERVE  in
-     on)  message  "Therefore, it was not reaped."  ;;
-    off)  SAVE="$1.`date  -u  +%Y%m%d`"
-          mv  $1  $SAVE
-          message  "Therefore, it was moved to"
-          message  "${FILE_COLOR}${SAVE}"  ;;
-  esac
-  message  "${DEFAULT_COLOR}"
-
-}
-
-
-reap_regular_files()  {  while  read  FILE;  do  rm  -f   "$FILE";  done;  }
-
-
-reap_config_files()  {
-
-  while  read  FILE;  do
-
-    if    grep  -q  "$(  md5sum  "$FILE" )"  "$MD5S"
-    then  rm    -f               "$FILE"
-    else  reap_modified_file     "$FILE"
-    fi
-
-  done
-
-}
-
-
-reaper()  { (
-#  Example:  reaper "$INSTALL_LOG"  "$MD5_LOG"
-
-  if  !  [  "$REAP"  ==  "on"  ]   ||
-      !  [  -f  $1             ];  then  return
-  fi
-
-  export  IFS="$TAB_ENTER_IFS"
-
-  MD5S=$2
-  MD5S=${MD5S:=/dev/null}
-
-           UNIQUE="`uuidgen`"
-     REAPER_FILES="/tmp/reaper.$UNIQUE.files"
-      REAPER_DIRS="/tmp/reaper.$UNIQUE.dirs"
-      REAPER_SYMS="/tmp/reaper.$UNIQUE.syms"
-
-  rm  -f  $REAPER_FILES  $REAPER_DIRS  $REAPER_SYMS
-
-  filter  $PROTECTED  <  $1  |
-  filter  $EXCLUDED          |
-  while   read  ITEM;  do
-    if    [  -h  "$ITEM"  ];  then  echo  "$ITEM"  >>  $REAPER_SYMS
-    elif  [  -f  "$ITEM"  ];  then  echo  "$ITEM"  >>  $REAPER_FILES
-    elif  [  -d  "$ITEM"  ];  then  echo  "$ITEM"  >>  $REAPER_DIRS
-    fi
-  done
-
-  [     -f           $REAPER_FILES  ]  &&
-  grep      "^/etc"  $REAPER_FILES     |
-  reap_config_files
-
-  [     -f           $REAPER_FILES  ]  &&
-  grep  -v  "^/etc"  $REAPER_FILES     |
-  reap_regular_files
-
-  [  -f  $REAPER_SYMS   ]  &&  rm     -f  `cat          $REAPER_SYMS`                         2>/dev/null
-  [  -f  $REAPER_DIRS   ]  &&  rmdir      `sort  -r     $REAPER_DIRS`                         2>/dev/null
-  [  -f  $REAPER_FILES  ]  &&  rmdir      `dirnames  <  $REAPER_FILES  |  uniq  |  sort  -r`  2>/dev/null
-
-  rm  -f  $REAPER_FILES  $REAPER_DIRS  $REAPER_SYMS
-
-) }
 
 push_install_queue() {
  
@@ -728,23 +512,10 @@ activity_log()  { (
 ) }
 
 
-invoke_installwatch()  {
-  if  [  -e  /usr/lib/installwatch.so  ];  then
-    export  INSTALLWATCHFILE=/tmp/$MODULE.iw
-    export  LD_PRELOAD=/usr/lib/installwatch.so
-  fi
-}
-
-
-devoke_installwatch()  {
-  unset  LD_PRELOAD
-}
-
-
 syms_not_owned()  {
 
   cat  $1  |
-  while  read  ITEM;  do
+  while read ITEM ; do
 
     if  [  -h  "$ITEM"  ]   &&
         [  -f  "$ITEM"  ];  then
@@ -764,49 +535,6 @@ syms_not_owned()  {
 
   done
 
-}
-
-
-parse_iw()  {
-
-  OMIT="^/dev\|^/tmp\|^/usr/src"
-  OMIT_IN="	rename\|	symlink\|	unlink"
-
-  grep -v "$OMIT_IN" $IW_LOG | cut -f3 | grep -v "$OMIT"
-  cat                $IW_LOG | cut -f4 | grep -v "$OMIT" | grep "^/"
-
-}
-
-
-
-
-track()  {
-
-  message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
-
-  export  IFS="$TAB_ENTER_IFS"
-
-  parse_iw                   |
-  sort                       |
-  uniq                       |
-  filter  "$EXCLUDED"        |
-  filter  "$LOCAL_EXCLUDED"  |
-  exists                     >  $TMP_LOG
-
-  echo  "$C_LOG_BZ"         >>  $TMP_LOG
-  echo  "$MD5_LOG"          >>  $TMP_LOG
-  echo  "$INST_LOG"         >>  $TMP_LOG
-
-  MISOWNED_SYMLINKS=`syms_not_owned  $TMP_LOG
-                     echo  -n  "/dev/null"`
-
-  if    [  "$MISOWNED_SYMLINKS"  ==  "/dev/null"  ]
-  then  cp  $TMP_LOG  $INST_LOG
-  else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
-  fi
-
-  verbose_msg "removing \"$IW_LOG\""
-  rm  -f  $IW_LOG  $TMP_LOG
 }
 
 
@@ -907,8 +635,7 @@ find_pam_aware()  { (
 ) }
 
 
-verify_source()  
-{
+verify_source() {
 
   VERIFIED="true"
 
@@ -928,51 +655,8 @@ verify_source()
 }
 
 
-verify_sources()  {  md5_verify_source  `sources  $MODULE MD5`;  }
-
-op_conflicts(){
-   RETVALUE=true
-   ([ "$OPTIMIZATIONS" == "none" ] && $RETVALUE) && return
-   if `echo $OPTIMIZATIONS | grep speedy | grep -q tiny`  ; then
-      $DIALOG  --msgbox  \
-      "speedy (-03) and tiny (-Os) are not compatible!" 8 40
-      RETVALUE=true
-   else
-      RETVALUE=false
-   fi 
-   $RETVALUE
+verify_sources() {
+  md5_verify_source `sources $MODULE MD5`
 }
 
 
-# function : enviro_check
-# usage    : enviro_check
-# purpose  : check if the environment is sane
-enviro_check()
-{
-#check is SHELL is defined
-   set | grep -q "^SHELL=" || {
-      echo  ""
-      echo "The SHELL environment variable is NOT defined"
-      echo "If you are using su, consider using su -"
-      echo  ""
-      return 1
-   }
-   return 0
-}
-
-# function : root_check
-# usage    : root_check
-# purpose  : check if the user is root
-root_check()
-{
-   [ "$UID" == "0" ] && return 0
-
-   echo  ""
-   echo "User must have root privileges to run this program"
-   echo  ""
-   return 1
-}
-
-
-# check the environment to continue!!
-enviro_check || return 1

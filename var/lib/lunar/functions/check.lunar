@@ -87,7 +87,7 @@ find_check()  { (
          grep      "/bin/\|/games/\|/include/\|/lib/\|/sbin/"  |
          grep  -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/"`
 
-    for  ITEM  in  $LOG;  do
+    for ITEM in $LOG ; do
       if  [  -e  "$ITEM"  ];  then
         true
       else
@@ -128,7 +128,7 @@ sym_check()  { (
 
     LOG=`cat   $I_LOG`
 
-    for  ITEM  in  $LOG;  do
+    for ITEM in $LOG ; do
       if  [  -h  "$ITEM"  ]  &&
           [  -f  "$ITEM"  ]
       then

@@ -20,7 +20,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
               MOONBASE=/var/lib/lunar/moonbase
              PROTECTED=/var/lib/lunar/protected
                   SOLO=/var/lib/lunar/solo
-           SUBROUTINES=/var/lib/lunar/subroutines
              FUNCTIONS=/var/lib/lunar/functions
                  MENUS=/var/lib/lunar/menu
              SUSTAINED=/var/lib/lunar/sustained
@@ -122,5 +121,12 @@ export        DIALOGRC=/etc/lunar/dialogrc
 	STANDARD_IFS=" 	
 "
 
-. $SUBROUTINES
-[ -s "$LOCAL_CONFIG" ] && . $LOCAL_CONFIG
+
+for FUNCTION in $FUNCTIONS/*.lunar ; do
+  . $FUNCTION
+done
+
+if [ -s "$LOCAL_CONFIG" ] ; then
+  . $LOCAL_CONFIG
+fi
+

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lin - install Lunar modules                              #
@@ -89,13 +89,6 @@ check_blacklist() {
   else
     touch /var/state/lunar/blacklist.$PLATFORM
   fi
-}
-
-
-use_wrappers() {
-  if [ "$GCCWRAPPERS" == "on" ] ; then
-    export PATH=/var/lib/lunar/compilers:${PATH}
-  fi  
 }
 
 
@@ -308,12 +301,6 @@ remove_line()  {
 }
 
 
-status_okay()  {
-  module_installed  $1  ||
-  module_held       $1
-}
-
-
 run_fix()  { (
   MODULES=$*
 
@@ -345,7 +332,7 @@ run_fix()  { (
         continue
       fi        
 
-      if  status_okay  $MODULE                         &&
+      if module_installed $MODULE                      &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
           [  "$MODULE"  !=  "j2sdk"    ]               &&
 	  module_held $MODULE                          &&
@@ -535,7 +522,7 @@ lin_module()  { (
   then
     echo  $$  >  $linING        &&
     if ! [[ $CFLAGS ]]; then
-      optimize_platform $GCCVER &&
+      optimize $GCCVER &&
       use_wrappers
     fi                          &&
     start_logging
@@ -698,11 +685,14 @@ build_depends()  {
 
 }
 
+
 pass_one()  {
 #  This pass does configuration and dependency identification.
   build_depends  ||  exit  1
   if  [  -n  "$DEPS_ONLY"  ];  then  exit  0;  fi
 }
+
+
 build_sources()  {
   for  MODULE  in  $MODULES;  do
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
@@ -714,14 +704,20 @@ build_sources()  {
     fi
   done
 }
+
+
 pass_two()  {
 #  This pass downloads required sources.
   if  [  -z  "$SEPARATE"   ];  then  build_sources;  fi
 }
+
+
 pass_three()  {
 #  This pass compiles sources
   lin_modules
 }
+
+
 pass_zero()  {
   PASS_ZERO="y"
   export  D_LOG="/tmp/lunar.downloading.`uuidgen`"
@@ -732,11 +728,12 @@ pass_zero()  {
   rm -f $PREPD 2>/dev/null
 }
 
+
 main()	{
   process_parameters        $*
   MODULES=`strip_parameters  $*`
 
-  if echo $MODULES | grep -qw moonbase ; then
+  if echo $MODULES | grep -q moonbase ; then
     # just update moonbase, no other modules
     MODULE=moonbase
     lin_module
@@ -756,17 +753,21 @@ main()	{
   fi
   true
 }
+
+
 . /etc/lunar/config
 
 export  IFS="$STANDARD_IFS"
 
-root_check || exit 1
+root_check
+enviro_check
+set_priority
 
-if    [  $#      ==  0  ];  then 
-   help  |  view_file
-   exit
+if [ $# == 0 ] ; then 
+  help | view_file
+  exit
+else
+  main  $*
 fi
 
-  LUNAR_PRIORITY=${LUNAR_PRIORITY:="+10"}
-  renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
-  main  $*
+

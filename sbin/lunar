@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lunar - Lunar module management utility                  #
@@ -27,8 +27,7 @@
 ############################################################
 
 
-show_modules()	
-{ 
+show_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
         !  module_held       $MODULE  &&
@@ -835,23 +834,19 @@ Lunar Module Management Utility
 
 #lets load the menu code
 if [ -n "$MENUS" ]; then
-   for FILE in `echo $MENUS/*.menu`
-   do
+   for FILE in `echo $MENUS/*.menu` ; do
       [ -s "$FILE" ] && . "$FILE"
    done
 fi
-root_check || exit
 
-LUNAR_PRIORITY=${LUNAR_PRIORITY:="+10"}
-renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
+root_check
+enviro_check
+set_priority
+
+export  IFS="$TAB_ENTER_IFS"
 
 LUNAR_MODULE=${LUNAR_MODULE:=lunar}
-export  IFS="$TAB_ENTER_IFS"
-# LUNAR_VERSION=`installed_version lunar`
-LUNAR_SECTION=`find_section  $LUNAR_MODULE`
-LUNAR_DETAILS="$MOONBASE/$LUNAR_SECTION/$LUNAR_MODULE/DETAILS"
-LUNAR_VERSION=`grep  "UPDATED="  $LUNAR_DETAILS  | 
-sed  "s/UPDATED=//"`
+LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
 
 main  $*
 

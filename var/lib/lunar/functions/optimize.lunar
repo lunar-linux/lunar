@@ -19,6 +19,7 @@
 #         of SSE instructions.
 # $LDF  = This sets the system wide linking optimizations.
 
+
 # Source in the optimization settings if it exists.
 if [[ -s /etc/lunar/local/optimizations ]]; then
    . /etc/lunar/local/optimizations
@@ -41,6 +42,42 @@ else
           ADDON=( ) > /etc/lunar/local/optimizations
 fi
 
+
+#lets get the BUILD if it is not defined   
+  [ -z "$BUILD" ] && optimize_cpu $CPU
+  [ -n "$BUILD" ] && export BUILD || 
+  echo "Set your optimization preferences via lunar"
+#
+
+
+# Usage   : bad_flags "list of flags to remove"
+# Example : bad_flags -ffast-math -funroll-loops
+bad_flags() {
+  verbose_msg "bad_flags \"$@\""
+  if [[ $1 == "ALL" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  elif [[ $1 == "compiler" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS
+  elif [[ $1 == "linker" ]]; then
+    unset LDFLAGS
+  else
+    for BAD_FLAG in $@; do
+      CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
+      CXXFLAGS=`echo $CXXFLAGS | sed s/$BAD_FLAG//`
+      CPPFLAGS=`echo $CPPFLAGS | sed s/$BAD_FLAG//`
+      LDFLAGS=`echo $LDFLAGS | sed s/$BAD_FLAG//`
+    done
+  fi
+}
+
+
+use_wrappers() {
+  if [ "$GCCWRAPPERS" == "on" ] ; then
+    export PATH=/var/lib/lunar/compilers:${PATH}
+  fi  
+}
+
+
 optimize_make() {
   if [[ $PSAFE == "no" ]]; then
    unset MAKES
@@ -59,6 +96,7 @@ optimize_make() {
   verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
 }
  
+
 optimize_base() {
    if ! [[ $1 ]]; then
       BOPT="None"
@@ -86,6 +124,7 @@ optimize_base() {
                ;;
    esac
 }
+
 
 optimize_cpu()  {
    if ! [[ $1 ]]; then
@@ -444,6 +483,7 @@ optimize_cpu()  {
    esac
 }
 
+
 optimize_speed() {
    for A in ${SPD[@]}; do
       case $A in
@@ -554,6 +594,7 @@ optimize_speed() {
    done
 }
 
+
 optimize_stack() {
   if [[ $STACK > 0 ]]; then
     if [[ $PLATFORM == "x86" ]]; then
@@ -564,6 +605,7 @@ optimize_stack() {
       CPPFLAGS="$CPPFLAGS $STACK"
   fi
 }
+
 
 optimize_extra() {
  for A in ${XTRA[@]}; do
@@ -600,6 +642,7 @@ optimize_extra() {
  done
 }
 
+
 # Set how floating point math is done
 optimize_fp() {
    case $1 in
@@ -624,6 +667,7 @@ optimize_fp() {
    esac
 }
 
+
 # Set up the Linker optimizations
 optimize_ld() {
    if [[ $LDFLAGS ]]; then
@@ -647,6 +691,7 @@ optimize_ld() {
       esac
    done
 }
+
 
 optimize_addon() {
   if ! [[ `grep ADDON /etc/lunar/local/optimizations` ]]; then
@@ -680,6 +725,7 @@ optimize_addon() {
   verbose_msg "CC_EXT=\"$CC_EXT\", CXX_EXT=\"$CXX_EXT\""
 }
 
+
 optimize_cc_warn() {
   for W in ${CC_WARN[@]}; do
     case $W in
@@ -689,6 +735,7 @@ optimize_cc_warn() {
     esac
   done
 }
+
 
 optimize_ccc_warn() {
   for W in ${CCC_WARN[@]}; do
@@ -701,7 +748,8 @@ optimize_ccc_warn() {
   done
 }
 
-optimize_platform() {
+
+optimize() {
    unset CFLAGS CXXFLAGS LDFLAGS
    GCCVER="$1"
 
@@ -718,37 +766,37 @@ optimize_platform() {
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
-      Alpha)    optimize_make  $MAKES     &&
-                optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra ${XTRA[@]} &&
-                optimize_fp    $FPM       &&
+      Alpha)    optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
 		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
-                optimize_ld    ${LDF[@]}  &&
+                optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
-      PowerPC)  optimize_make  $MAKES     &&
-                optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra ${XTRA[@]} &&
-                optimize_fp    $FPM       &&
+      PowerPC)  optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
 		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
-                optimize_ld    ${LDF[@]}  &&
+                optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
-      SPARC)    optimize_make  $MAKES     &&
-                optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra ${XTRA[@]} &&
-                optimize_fp    $FPM       &&
+      SPARC)    optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
 		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
-                optimize_ld    ${LDF[@]}  &&
+                optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
    esac
@@ -766,6 +814,7 @@ optimize_platform() {
   verbose_msg "LDFLAGS=\"$LDFLAGS\""
 
 }
+
 
 # This is the flow control and error checking for the menus.
 optimize_architecture()  {
@@ -868,3 +917,5 @@ optimize_architecture()  {
 
   optimize
 }
+
+
