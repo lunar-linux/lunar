@@ -800,6 +800,11 @@ ADDON=( ) > /etc/lunar/local/optimizations
                 ;;
   esac
 
+  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" ] ; then
+    CFLAGS=$(echo $CFLAGS | sed 's:-mcpu:-mtune:')
+    CXXFLAGS=$(echo $CXXFLAGS | sed 's:-mcpu:-mtune:')
+  fi
+
   export CC_EXT
   export CXX_EXT
   export CFLAGS
