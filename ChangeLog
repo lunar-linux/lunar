@@ -30,25 +30,3 @@
 
 	* sbin/lget: Slight miscalculation, cleanup
 
-2003-10-04 20:13  sofar
-
-	* sbin/lget, sbin/lin, sbin/lunar,
-	var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/install.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/sources.lunar: <sofar> I have a bugfix for
-	the core here <sofar> it involves -r being confused with --deps
-	<sofar> something broke in the core about 3/4 months back <sofar> I
-	just found it and fixed the problem, commit to lunar will follow
-	shortly <sofar> e.g. do a lin -r lunar.... you'll see 5 lunar
-	questions but 20+ unwanted ones <sofar> that is a BUG, and never
-	was intentional.  <sofar> I also have changed lget behaviour,
-	defaults to NOT download anything, and downloads everything with
-	lget --all <sofar> lemme see what else is in theere <sofar> one
-	cosmetic bug fix regarding download log <sofar> lunar exile XXX can
-	now also be called if a module is NOT installed <sofar> FUZZY
-	downloads now default to OFF <sofar> and gpg: syntax has changed a
-	bit
-
