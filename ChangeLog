@@ -1,3 +1,7 @@
+2005-02-02 12:12  sofar
+
+	* var/lib/lunar/functions/build.lunar: meh... suck
+
 2005-01-19 12:09  moe
 
 	* var/lib/lunar/functions/view.lunar: There's also the type 'data'
