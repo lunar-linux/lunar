@@ -71,3 +71,12 @@ get_module_config() {
 }
 
 
+get_other_module_config() {
+  debug_msg "get_other_module_config ($@)"
+  if [ -n "$1" ] ; then
+    get_config "$DEPENDS_CONFIG/$1" "$2"
+  fi
+}
+
+
+

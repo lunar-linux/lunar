@@ -124,7 +124,7 @@ use_xinetd()  {
       add_depends  "$MODULE"  "xinetd"  "off"  "optional"
     fi
 
-    echo  "SERVICES=\"$SERVICES\""  >>  $MODULE_CONFIG
+    set_module_config "SERVICES" "$SERVICES"
     if [ "$RETURN" == "1" ] ; then
       return 1
     else
@@ -196,7 +196,7 @@ use_initd()  {
     done
     cd $SCRIPT_DIRECTORY
 
-    echo   "INITDSCRIPTS=\"$INSTALLED_INIDSCRIPTS\"" >> $MODULE_CONFIG
+    set_module_config "INITDSCRIPTS" "$INSTALLED_INIDSCRIPTS"
   fi
 }
 

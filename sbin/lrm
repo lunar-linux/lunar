@@ -67,7 +67,7 @@ handle_config_files() {
 
     if [ "$TARGET_MD5" == "$OLD_MD5" ] ; then
       debug_msg "removing \"$1\""
-      return 1
+      return 0
     fi
 
     if [ "$TARGET_MD5" != "$OLD_MD5" ] ; then
@@ -143,6 +143,17 @@ lrm_module() {
   # time-out 1: PRE_REMOVE
   run_module_file $MODULE PRE_REMOVE
 
+  # init.d scripts stop before rm phase, but only if ! upgrading
+  if [ "$KEEPCONFIG" != "on" ] ; then
+    # pre-read these variables!
+    SERVICES=$(get_module_config "SERVICES")
+    XINETD=$(get_other_module_config "xinetd" "INITDSCRIPTS")
+    for INITDSCRIPT in $(get_module_config "INITDSCRIPTS") ; do
+      verbose_msg "Stopping service $INITDSCRIPT"
+      ( cd / && /etc/init.d/$INITDSCRIPT stop )
+    done
+  fi
+
   # grep -v the install logs over the protected stuff, this
   # yields the files that may be removed
   cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
@@ -165,6 +176,11 @@ lrm_module() {
   else
     verbose_msg "removing module from dependency listing and configs"
     remove_depends $MODULE
+    # restart xinetd after xinetd.confs have been removed by lrm...
+    if [ -n "$SERVICES" -a -n "$XINETD" ] ; then
+      verbose_msg "restarting xinetd"
+      /etc/init.d/xinetd restart
+    fi
   fi
 
   # administration duty time:
