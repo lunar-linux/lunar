@@ -1,3 +1,12 @@
+2003-07-23 22:54  sofar
+
+	* var/lib/lunar/functions/: build.lunar, install.lunar,
+	sources.lunar: Fixing a bug that niki spotted, propagation of error
+	result now comes from missing downloads down to lin_module, which
+	exists before optimize now too. General order in pre-build stage
+	improved too. Moving verify_source code out of build into
+	sources.lunar.
+
 2003-07-22 21:01  sofar
 
 	* sbin/lin, var/lib/lunar/functions/depends.lunar,
