@@ -13,11 +13,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
         DEFAULT_PREFIX=/usr
 
-      COLONY_DIRECTORY=/etc/lunar/colony
-          COLONY_NAMES=$COLONY_DIRECTORY/names
-           COLONY_KEYS=$COLONY_DIRECTORY/keys
-         COLONY_OUTPUT=/tmp/colony.output
-
               EXCLUDED=/var/lib/lunar/excluded
               MOONBASE=/var/lib/lunar/moonbase
              PROTECTED=/var/lib/lunar/protected
@@ -56,7 +51,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
               ARCHIVE=${ARCHIVE:=on}
               AUTOFIX=${AUTOFIX:=on}
             AUTOPRUNE=${AUTOPRUNE:=off}
-               COLONY=${COLONY:=off}
          MAIL_REPORTS=${MAIL_REPORTS:=off}
              PRESERVE=${PRESERVE:=on}
                  REAP=${REAP:=on}
@@ -69,7 +63,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
          PROMPT_DELAY=${PROMPT_DELAY:=150}
  	  GCCWRAPPERS=${GCCWRAPPERS:=on}
         PROBE_EXPIRED=${PROBE_EXPIRED:=on}
-           MAX_COLONYS=16
         LUNAR_PRIORITY="+10"
 
 #total number of sources for a module

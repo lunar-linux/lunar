@@ -508,7 +508,6 @@ log_menu()  {
 
 feature_menu()  {
   A_HELP="Create convenient auto-install scripts for common executables?"
-  B_HELP="Administrate groups of Unix/Linux boxes?"
   C_HELP="Colorized messages on lin and lrm?"
   D_HELP="Use tmpfs for module installs?"
   E_HELP="Remove files when lrm?"
@@ -532,7 +531,6 @@ feature_menu()  {
    AUTORESURRECT=${AUTORESURRECT:=on}
          AUTOFIX=${AUTOFIX:=on}
        AUTOPRUNE=${AUTOPRUNE:=off}
-           CABAL=${CABAL:=off}
            COLOR=${COLOR:=on}
      KEEP_SOURCE=${KEEP_SOURCE:=off}      
     MAIL_REPORTS=${MAIL_REPORTS:=off}
@@ -560,7 +558,6 @@ feature_menu()  {
       "AUTORESURRECT"    "Toggle"  "$AUTORESURRECT" "$H_HELP"   \
       "AUTOFIX"          "Toggle"  "$AUTOFIX"       "$F_HELP"   \
       "AUTOPRUNE"        "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
-      "CABAL"            "Toggle"  "$CABAL"         "$B_HELP"   \
       "COLOR"            "Toggle"  "$COLOR"         "$C_HELP"   \
       "KEEP_SOURCE"      "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
       "GARBAGE"          "Toggle"  "$GARBAGE"       "$G_HELP"   \
@@ -582,7 +579,6 @@ feature_menu()  {
    AUTORESURRECT=off
          AUTOFIX=off
        AUTOPRUNE=off
-           CABAL=off
            COLOR=off
      KEEP_SOURCE=off    
     MAIL_REPORTS=off
@@ -604,7 +600,6 @@ ZLOCAL_OVERRIDES=off
        AUTORESURRECT) AUTORESURRECT=on  ;;
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
-               CABAL)         CABAL=on  ;;
                COLOR)         COLOR=on  ;;
          KEEP_SOURCE)   KEEP_SOURCE=on  ;;      
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
@@ -626,7 +621,6 @@ ZLOCAL_OVERRIDES=off
     set_local_config "AUTORESURRECT" "$AUTORESURRECT"
     set_local_config "AUTOFIX" "$AUTOFIX"
     set_local_config "AUTOPRUNE" "$AUTOPRUNE"
-    set_local_config "CABAL" "$CABAL"
     set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
     set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"
     set_local_config "PRESERVE" "$PRESERVE"
@@ -763,38 +757,20 @@ main_menu()  {
         OK="Select"
     CANCEL="Exit"
 
-    if  [  "$CABAL"  ==  "on"  ];  then
-      COMMAND=`$DIALOG --title "Main Menu"                   \
-                       --item-help                           \
-                       --ok-label      "$OK"                 \
-                       --cancel-label  "$CANCEL"             \
-                       --menu                                \
-                       "$LUNAR_MODULE version: $LUNAR_VERSION"       \
-                       0 0 0                                 \
-                       "M"  "Module      Menu"     "$M_HELP"  \
-                       "O"  "Option      Menu"     "$O_HELP"  \
-                       "L"  "Log         Menu"     "$L_HELP"  \
-                       "Q"  "Queue       Menu"     "$Q_HELP"  \
-		       "N"  "Maintenance Menu"     "$N_HELP"  \
-                       "F"  "Foreground  Execute"  "$F_HELP"  \
-                       "B"  "Background  Execute"  "$B_HELP"`  
-    else
-      COMMAND=`$DIALOG --title "Main Menu"                   \
-                       --item-help                           \
-                       --ok-label      "$OK"                 \
-                       --cancel-label  "$CANCEL"             \
-                       --menu                                \
-                       "$LUNAR_MODULE version: $LUNAR_VERSION"       \
-                       0 0 0                                 \
-                       "M"  "Module      Menu"     "$M_HELP"  \
-                       "O"  "Option      Menu"     "$O_HELP"  \
-                       "L"  "Log         Menu"     "$L_HELP"  \
-                       "Q"  "Queue       Menu"     "$Q_HELP"  \
-		       "N"  "Maintenance Menu"     "$N_HELP"  \
-                       "F"  "Foreground  Execute"  "$F_HELP"  \
-                       "B"  "Background  Execute"  "$B_HELP"`
-    fi
-  do
+    COMMAND=`$DIALOG --title "Main Menu"                   \
+                     --item-help                           \
+                     --ok-label      "$OK"                 \
+                     --cancel-label  "$CANCEL"             \
+                     --menu                                \
+                     "$LUNAR_MODULE version: $LUNAR_VERSION"       \
+                     0 0 0                                 \
+                     "M"  "Module      Menu"     "$M_HELP"  \
+                     "O"  "Option      Menu"     "$O_HELP"  \
+                     "L"  "Log         Menu"     "$L_HELP"  \
+                     "Q"  "Queue       Menu"     "$Q_HELP"  \
+		     "N"  "Maintenance Menu"     "$N_HELP"  \
+                     "F"  "Foreground  Execute"  "$F_HELP"  \
+                     "B"  "Background  Execute"  "$B_HELP"`
     case  $COMMAND in
       M)  module_menu         ;;
       O)  option_menu         ;;
