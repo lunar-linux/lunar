@@ -1,3 +1,7 @@
+2003-02-24 20:01  kc8apf
+
+	* var/lib/lunar/excluded: Add mailman site config to excluded
+
 2003-02-22 20:26  csm
 
 	* var/lib/lunar/excluded: adding a fe wmore files to the list
