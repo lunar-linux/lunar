@@ -685,9 +685,11 @@ optimize_platform() {
                 ;;
    esac
 
-[ -e /usr/bin/lunar-gcc ] && export CC="lunar-gcc"
-[ -e /usr/bin/lunar-g++ ] && export CCC="lunar-g++"
-[ -e /usr/bin/lunar-g++ ] && export CXX="lunar-g++"
+if [ -n "$NOWRAP" ] ; then
+  export CC="lunar-gcc"
+  export CCC="lunar-g++"
+  export CXX="lunar-g++"
+fi
 export CFLAGS
 export COPT="$CFLAGS"
 export CCOPT="$CXXFLAGS -Wno-deperecated"
