@@ -1,3 +1,16 @@
+2002-08-26 18:33  sofar
+
+	* sbin/lin: Added --probe|-p functionality to lin!
+
+2002-08-26 17:11  sofar
+
+	* var/lib/lunar/subroutines: Fixes for cvs moonbase problems
+
+2002-08-26 14:15  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: This should fix it
+	permanently.
+
 2002-08-25 20:47  sofar
 
 	* var/lib/lunar/subroutines: Some visual fixes
