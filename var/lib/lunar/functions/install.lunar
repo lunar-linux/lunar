@@ -48,9 +48,7 @@ check_blacklist() {
   if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
     BLKLST=`grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM`
     if [[ $BLKLST == $MODULE ]]; then
-      message "${PROBLEM_COLOR}" \
-              "Module $MODULE is blacklisted and will not be installed." \
-	      "${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
       exit 0
     fi
   else
@@ -444,7 +442,7 @@ lin_module()  { (
         temp_destroy $INSTALLWATCHFILE
       fi
       sound FAILURE
-      message "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
       report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
@@ -465,7 +463,7 @@ lin_module()  { (
 
     if [ -n "$LIN_ERROR" ] ; then
       sound FAILURE
-      message "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
       report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
@@ -480,7 +478,7 @@ lin_module()  { (
 
     if [ "$?" != 0 ] ; then
       sound FAILURE
-      message "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}! Problem detected${DEFAULT_COLOR}"
       rm -f $linING
       report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
@@ -513,10 +511,8 @@ solo_locked()  {
 
 current_locked() {
   if  lin_locked  $MODULE;  then
-    message  "${PROBLEM_COLOR}Detected lin lock file:"  \
-             "${FILE_COLOR}${linING}${DEFAULT_COLOR}"
-    message  "Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-             "to finish installing or for the lock to clear."
+    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}${linING}${MESSAE_COLOR}"
+    message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULTT_COLOR}${MESSAGE_COLOR}to finish installing or for the lock to clear."
 
     while  lin_locked  $MODULE;  do  sleep  2;  done
     false

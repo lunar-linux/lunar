@@ -48,7 +48,7 @@ patch_it ()
     fi
   fi
 
-  message "${PROBLEM_COLOR}Broken patch file \"$1\"!${DEFAULT_COLOR}"
+  message "${PROBLEM_COLOR}! Broken patch file ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
   rm -f $TMPFILE1 $TMPFILE2
   return -1
 }

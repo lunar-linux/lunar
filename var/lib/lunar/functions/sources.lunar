@@ -76,13 +76,11 @@ md5_verify_source() {
     fi
       
     if [ "$TEMP" != "$2" ] ; then 
-       message  "${PROBLEM_COLOR}Wrong md5 sum for ${FILE_COLOR}${1}" \
-                 "${DEFAULT_COLOR}"
-       message  "${PROBLEM_COLOR}Removing ${FILE_COLOR}${SOURCE_CACHE}/${1}" \
-                "${DEFAULT_COLOR}"
+       message  "${PROBLEM_COLOR}! Wrong md5 sum for ${FILE_COLOR}${1}${DEFAULT_COLOR}"
+       message  "${PROBLEM_COLOR}Removing ${FILE_COLOR}${SOURCE_CACHE}/${1}${DEFAULT_COLOR}"
        rm -f $SOURCE_CACHE/$1 2>/dev/null                             &&
-       message  "${FILE_COLOR}Removed!!${DEFAULT_COLOR}"              ||
-       message  "${PROBLEM_COLOR}Unable to remove!!${DEFAULT_COLOR}" 
+       message  "${FILE_COLOR}Removed${DEFAULT_COLOR}"              ||
+       message  "${PROBLEM_COLOR}Unable to remove${DEFAULT_COLOR}" 
        ALL_OK=false
     fi
 
@@ -110,14 +108,14 @@ unpack() {
   esac
 
   if [ $? != 0 ] ; then
-    message "${PROBLEM_COLOR}Error while unpacking \"$1\", aborting $0!${DEFAULT_COLOR}"
-    exit 1
+    message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
+    return 1
   fi
   
   [ -n "$SOURCE_DIRECTORY" ] &&
   [ -d "$SOURCE_DIRECTORY" ]
   
-  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
+  if [[ $(echo $CFLAGS | grep fbranch-probabilities) ]]; then
     chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
   else
     chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 

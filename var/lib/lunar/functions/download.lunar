@@ -35,7 +35,7 @@
 
 get_svn() {(
   if ! module_installed subversion ; then
-    message "${PROBLEM_COLOR}Cannot fetch SVN sources without \"subversion\" installed!${DEFAULT_COLOR}"
+    message "${PROBLEM_COLOR}! Cannot fetch SVN sources without \"subversion\" installed${DEFAULT_COLOR}"
     exit 1
   fi
 
@@ -96,7 +96,7 @@ get_svn() {(
 
 get_cvs() {(
   if ! module_installed cvs ; then
-    message "${PROBLEM_COLOR}Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
+    message "${PROBLEM_COLOR}! Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
     exit 1
   fi
 
