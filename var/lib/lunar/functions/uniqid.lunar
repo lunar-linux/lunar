@@ -11,7 +11,7 @@
 
 push_uniq_id() {
   debug_msg "push_uniq_id ($@)"
-  if [ "$UNIQID" == "" ]; then
+  if [ -z "$UNIQID" ]; then
     create_uniq_id
   fi
  
@@ -23,11 +23,11 @@ push_uniq_id() {
 
 create_uniq_id() {
   debug_msg "create_uniq_id ($@)"
-  if [ $UNIQID >= "" ]; then 
+  if [ -n "$UNIQID" ]; then 
     return
   fi
 
-  OS=`uname -s`
+  OS=$(uname -s)
 
   if [  "$OS"  == "OpenBSD" ]; then
     HASH="sha1"

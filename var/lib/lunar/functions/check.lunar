@@ -25,7 +25,7 @@
 ############################################################
 
 
-ldd_check()  {  (
+ldd_check()  {
   debug_msg "ldd_check ($@)"
   if  [  "$LDD_CHECK"  ==  "off"    ] ;  then
     return
@@ -35,7 +35,7 @@ ldd_check()  {  (
        I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
   LDD_STATUS=0
 
-  if  [  -e  $I_LOG  ];  then
+  if  [  -e  "$I_LOG"  ];  then
     IFS_OLD="$IFS"
     export  IFS="	
 "
@@ -65,10 +65,10 @@ ldd_check()  {  (
     done
   fi
   return  $LDD_STATUS
-) }
+}
 
 
-find_check()  { (
+find_check()  {
   debug_msg "find_check ($@)"
   if  [  "$FIND_CHECK"  ==  "off"             ]   ||
       [  "$1"           ==  "xfree86"         ]   ||
@@ -80,7 +80,7 @@ find_check()  { (
         I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
   FIND_STATUS=0
 
-  if  [  -e  $I_LOG  ];  then
+  if  [  -e  "$I_LOG"  ];  then
     IFS_OLD="$IFS"
     export  IFS="	
 "
@@ -112,10 +112,10 @@ find_check()  { (
     FIND_STATUS=1
   fi
   return  $FIND_STATUS
-) }
+}
 
 
-sym_check()  { (
+sym_check()  {
   debug_msg "sym_check ($@)"
   if  [  "$SYM_CHECK"  ==  "off"  ];  then
     return
@@ -124,7 +124,7 @@ sym_check()  { (
 	  VERSION=`installed_version  $MODULE`
         I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
 
-  if  [  -e  $I_LOG  ];  then
+  if  [  -e  "$I_LOG"  ];  then
     IFS_OLD="$IFS"
     export  IFS="	
 "
@@ -146,10 +146,10 @@ sym_check()  { (
       fi
     done
   fi
-) }
+}
 
 
-md5sum_check()  { (
+md5sum_check()  {
   debug_msg "md5sum_check ($@)"
   if  [  "$MD5SUM_CHECK"  ==  "off"  ];  then
     return
@@ -161,7 +161,7 @@ md5sum_check()  { (
 
   MD5SUM_STATUS=0
 
-  if  [  -e  $MD5_LOG  ];  then
+  if  [  -e  "$MD5_LOG"  ];  then
     IFS_OLD="$IFS"
     export  IFS="	
 "
@@ -203,7 +203,7 @@ md5sum_check()  { (
     MD5SUM_STATUS=1
   fi
   return  $MD5SUM_STATUS
-) }
+}
 
 
 run_checks() {
@@ -214,4 +214,4 @@ run_checks() {
   md5sum_check $1
 }
 
-		
+

@@ -99,16 +99,20 @@ guess_filename()  {
   BASENAME=${BASENAME/.tar.bz2/}
   BASENAME=${BASENAME/.tgz/}
 
-  if [ -f $FILENAME ] ; then
+  if [ -f "$FILENAME" ] ; then
+    debug_msg "guess_filename: $FILENAME"
     echo $FILENAME
   elif [ "$FUZZY" == "off" ] ; then
     return 1
-  elif [ -f $BASENAME.tar.gz ] ; then
+  elif [ -f "$BASENAME.tar.gz" ] ; then
     echo $BASENAME.tar.gz
-  elif [ -f $BASENAME.tar.bz2 ] ; then
+    debug_msg "guess_filename: $BASENAME.tar.gz"
+  elif [ -f "$BASENAME.tar.bz2" ] ; then
     echo $BASENAME.tar.bz2
-  elif [ -f $BASENAME.tgz ] ; then
+    debug_msg "guess_filename: $BASENAME.tar.bz2"
+  elif [ -f "$BASENAME.tgz" ] ; then
     echo $BASENAME.tgz
+    debug_msg "guess_filename: $BASENAME.tgz"
   else
     return 1
   fi
@@ -120,7 +124,7 @@ guess_filename()  {
 # purpose  : filter stdin with files/dirs/symlinks provided in file $1.
 filter() {
   debug_msg "filter ($@)"
-  if [ -f $1 ] ; then
+  if [ -f "$1" ] ; then
     grep -v $(
       for DIR in `directories < $1 2>/dev/null` ; do
         echo -n "^$DIR\|"

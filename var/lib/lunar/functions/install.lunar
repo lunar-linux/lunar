@@ -43,12 +43,12 @@ check_blacklist() {
   # maintainer@lunar-linux.org.
 
   # Usage check_checklist $MODULES
-  if ! [[ $PLATFORM ]]; then
+  if [ -z "$PLATFORM" ] ; then
     PLATFORM=x86
   fi
-  if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
-    BLKLST=`grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM`
-    if [[ $BLKLST == $MODULE ]]; then
+  if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
+    BLKLST=$(grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM)
+    if [ "$BLKLST" == "$MODULE" ] ; then
       message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
       exit 0
     fi
@@ -74,7 +74,7 @@ prepare_depends_status()  {
 
 prepare_module_config()  {
   debug_msg "prepare_module_config ($@)"
-  if [ ! -x $MODULE_CONFIG  ] ; then
+  if [ ! -x "$MODULE_CONFIG" ] ; then
     touch $MODULE_CONFIG
     chmod a+x $MODULE_CONFIG
   fi
@@ -108,7 +108,7 @@ run_pre_build() {
 
   cd $BUILD_DIRECTORY
 
-  if verify_sources ; then
+  if verify_all_sources $MODULE ; then
     if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
       run_module_file $MODULE PRE_BUILD
     else
@@ -253,7 +253,7 @@ remove_line()  {
 }
 
 
-run_fix()  { (
+run_fix()  {
   debug_msg "run_fix ($@)"
   MODULES=$*
 
@@ -297,10 +297,11 @@ run_fix()  { (
           PASSED="$PASSED$MODULE:"
         else
           FIXED="no"
-          (  run_details $MODULE  &&
-             satisfy_depends      &&
-             unset FIX            &&
-             satisfy_depends
+          (  
+	    run_details $MODULE  &&
+            satisfy_depends      &&
+            unset FIX            &&
+            satisfy_depends
           )
 
           if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
@@ -330,10 +331,11 @@ run_fix()  { (
     done
   done
   rm  -f  /tmp/LD_LIBRARY_PATH_FILE
-) }
+}
 
 
-resurrect()  {  ( 
+resurrect()  {
+(
   debug_msg "resurrect ($@)"
   if ! run_details $1 ; then
     return 1
@@ -351,7 +353,7 @@ resurrect()  {  (
 
   CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
 
-  if [ -f $CACHE_BZ ] && bzip2 -tf $CACHE_BZ ; then
+  if [ -f "$CACHE_BZ" ] && bzip2 -tf $CACHE_BZ ; then
     message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
     bzip2 -cd $CACHE_BZ | tar -Pkx 1>/dev/null 2>&1
     add_module $MODULE $STATUS $VERSION
@@ -362,7 +364,8 @@ resurrect()  {  (
   else
     false
   fi
-)  }
+)
+}
 
 
 show_download_progress()  {
@@ -398,7 +401,8 @@ show_downloading() {
 
 
 
-lin_module()  { (
+lin_module()  {
+(
   debug_msg "lin_module ($@)"
   # make sure we got all the info
   if ! run_details $1 ; then
@@ -451,7 +455,7 @@ lin_module()  { (
 
       # important stuff here!!!
       invoke_installwatch &&
-      if ! [[ $CFLAGS ]] ; then
+      if [ -z "$CFLAGS" ] ; then
         optimize
       fi  &&
       
@@ -515,7 +519,8 @@ lin_module()  { (
       return 1
     fi
   fi
-) }
+)
+}
 
 
 lin_locked()  {
@@ -555,22 +560,29 @@ current_locked() {
 }
 
 
+build_module_depends() {
+(
+  debug_msg "build_module_depends ($@)"
+  run_details $1 &&
+  run_configure &&
+  run_depends &&
+  satisfy_depends
+)
+}
+
+
 build_depends()  {
   debug_msg "build_depends ($@)"
   for MODULE in $@ ; do
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
       if ! module_held $MODULE ; then
-        ( 
-          run_details $MODULE  &&
-          run_configure        &&
-          run_depends          &&
-          satisfy_depends
-        )
+        build_module_depends $MODULE
       else
         verbose_msg "Skipping dependency checking of held module \"$MODULE\""
       fi
     fi
   done
 }
+
 
 

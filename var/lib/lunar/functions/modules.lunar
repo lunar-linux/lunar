@@ -27,7 +27,7 @@
 # function : list_sections
 # usage    : list_sections
 # purpose  : list the moonbase sections, filter out the specific files
-list_sections() {(
+list_sections() {
   debug_msg "list_sections ($@)"
   check_module_index
   SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
@@ -45,13 +45,13 @@ list_sections() {(
   fi
 
   return 1
-)}
+}
 
 
 # function : list_modules
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
-list_modules() {(
+list_modules() {
   debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
     message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
@@ -64,18 +64,18 @@ list_modules() {(
     echo "$MODULE" 
   done
   return 0
-)}
+}
 
 
 # function : list_moonbase
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
-list_moonbase() {(
+list_moonbase() {
   debug_msg "list_moonbase ($@)"
   for SECTION in $(list_sections) ; do
     list_modules $SECTION
   done				
-)}
+}
 
 
 # function : list_installed
@@ -98,7 +98,7 @@ create_module_index() {
   # silently fail if we cannot write to $MODULE_INDEX, it is okay
   # for this to fail in case we are a mere user using lvu's search
   # functionality
-  if [ ! -w $MODULE_INDEX ] ; then
+  if [ ! -w "$MODULE_INDEX" ] ; then
     return 0
   fi
 
@@ -120,7 +120,7 @@ create_module_index() {
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
   debug_msg "function check_module_index ($@)"
-  if [ `get_moonbase_md5` != `set_moonbase_md5` ] ; then
+  if [ $(get_moonbase_md5) != $(set_moonbase_md5) ] ; then
     create_module_index
     return 0
   else
@@ -133,11 +133,20 @@ function check_module_index() {
 # usage    : find_section "module name"
 # purpose  : finds the section of a given module as parameter
 # returns  : (0) on success, (1) on failure, errors on stdout
-find_section() {(
+find_section() {
   debug_msg "find_section ($@)"
+
+  ZLOCAL_OVERRIDES=${ZLOCAL_OVERRIDES:=off}
+  if [ "$ZLOCAL_OVERRIDES" == "on" ] ; then
+    if [ -d "$MOONBASE/zlocal/$1" ] ; then
+      echo "zlocal"
+      return 0
+    fi
+  fi
+
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
-    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+    if [ -d "$MOONBASE/$SECTION/$1" ] ; then
       echo "$SECTION"
       return 0
     fi
@@ -147,7 +156,7 @@ find_section() {(
 
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
-    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+    if [ -d "$MOONBASE/$SECTION/$1" ] ; then
       echo "$SECTION"
       return 0
     fi
@@ -161,7 +170,7 @@ find_section() {(
   done
 
   return 1
-)}
+}
 
 
 # function : run_details
@@ -215,8 +224,7 @@ run_module_file() {
 # function : module_installed
 # usage    : module_installed $MODULE
 # purpose  : check if $MODULE is installed (or held)
-module_installed()
-{
+module_installed() {
   $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q -e "^$1:installed" -e "^$1:held")
 }
 

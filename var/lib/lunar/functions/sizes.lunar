@@ -19,8 +19,7 @@
 # function: find_module_size
 # usage   : find_module_size <module> |version|
 # purpose : finds the installed size of module in KB
-find_module_size()
-{
+find_module_size() {
    #this functions checks the modules file if there is already size entry
    module_size()
    {

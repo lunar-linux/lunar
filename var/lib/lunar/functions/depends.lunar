@@ -66,11 +66,11 @@ function find_depends() {
 
 
 
-is_depends()  {  (
+is_depends()  {
   debug_msg "is_depends ($@)"
   # Is $1 a previously selected dependency of any module.
   return $(cat $DEPENDS_STATUS | cut -d: -f2- | grep -q "^$1:on:")
-)  }
+}
                                                                                 
                                                                                 
 in_depends()  {
@@ -176,7 +176,7 @@ run_depends() {
                                                                                 
   prepare_depends_status
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
-  if [ -s $SCRIPT_DIRECTORY/DEPENDS ] ; then
+  if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
     message  "${CHECK_COLOR}Checking dependencies for"  \
              "${MODULE_COLOR}${MODULE}"                   \
              "${DEFAULT_COLOR}"
@@ -220,7 +220,7 @@ rework_module() {
   }
   run_depends() {
   debug_msg "  run_depends ($@)"
-    if [ -s $SCRIPT_DIRECTORY/DEPENDS ] ; then
+    if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
       show_fancy_progress "Processing: $MODULE"
       run_module_file $MODULE DEPENDS
     fi
@@ -356,7 +356,7 @@ fix_depends () {
   if [ -n "$CHANGED_MODULES" ] ; then
                                                                                 
     for MODULE in $CHANGED_MODULES ; do
-      if [ ! -e $TMP/depends.new.$MODULE ] ; then
+      if [ ! -e "$TMP/depends.new.$MODULE" ] ; then
         rework_module $MODULE
       fi
     done
@@ -436,7 +436,7 @@ satisfy_depends()  {
   
   unset OPTS
 
-  if [ -s $MODULE_CONFIG ] ; then
+  if [ -s "$MODULE_CONFIG" ] ; then
     . $MODULE_CONFIG
   fi
 

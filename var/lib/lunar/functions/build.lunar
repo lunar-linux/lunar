@@ -44,7 +44,7 @@ save_libraries()  {
   grep   "/lib/"  $OLD_LOG  |
   while  read  LINE;  do
 
-    if   [  -f      $LINE   ]  &&
+    if [ -f "$LINE"  ]  &&
          file  -bL  $LINE   |
          grep  -q   "shared object"
     then
@@ -177,89 +177,76 @@ validate_source_dir()  {
 default_pre_build() {
   debug_msg "default_pre_build ($@)"
   verbose_msg "running \"default_pre_build\""
-  if [[ $CVS_SERVER ]]; then
-    validate_source_dir  $SOURCE_DIRECTORY
-    if [[ -d $SOURCE_DIRECTORY ]] &&
-       [[ $KEEP_SOURCE == "on" ]]; then
-      cd $SOURCE_DIRECTORY &&
-      make clean
-    else
-      mk_source_dir        &&
-      cd                   $SOURCE_DIRECTORY &&
-      unpack               $MODULE-$VERSION.tar.bz2
-    fi
+  validate_source_dir  $SOURCE_DIRECTORY 
+  if [[ -d $SOURCE_DIRECTORY ]] &&
+     [[ $KEEP_SOURCE == "on" ]]; then
+    cd $SOURCE_DIRECTORY && 
+    make clean
   else
-    validate_source_dir  $SOURCE_DIRECTORY 
-    if [[ -d $SOURCE_DIRECTORY ]] &&
-       [[ $KEEP_SOURCE == "on" ]]; then
-      cd $SOURCE_DIRECTORY && 
-      make clean
-    else
-      mk_source_dir        $SOURCE_DIRECTORY &&
-      unpack               $SOURCE
-    fi
+    mk_source_dir        $SOURCE_DIRECTORY &&
+    unpack               $SOURCE
   fi
 }
 
 
 default_config() {
   debug_msg "default_config ($@)"
-   verbose_msg "running \"default_config\""
+  verbose_msg "running \"default_config\""
 
-   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
-   verbose_msg "OPTS=\"$OPTS\""                &&
-   verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+  verbose_msg "OPTS=\"$OPTS\""                &&
+  verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
 
-   ./configure  --build=$BUILD            \
-                --prefix=/usr             \
-                --sysconfdir=/etc         \
-                --localstatedir=/var      \
-                --infodir=/usr/share/info \
-                --mandir=/usr/share/man   \
-                $OPTS
+  ./configure  --build=$BUILD            \
+               --prefix=/usr             \
+               --sysconfdir=/etc         \
+               --localstatedir=/var      \
+               --infodir=/usr/share/info \
+               --mandir=/usr/share/man   \
+               $OPTS
 } > $C_FIFO 2>&1
 
 
 default_cvs_config() {
   debug_msg "default_cvs_config ($@)"
-   verbose_msg "running \"default_cvs_config\""
+  verbose_msg "running \"default_cvs_config\""
 
-   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
-   verbose_msg "OPTS=\"$OPTS\""                &&
-   verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+  verbose_msg "OPTS=\"$OPTS\""                &&
+  verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
 
-   ./autogen.sh --build=$BUILD            \
-                --prefix=/usr             \
-                --sysconfdir=/etc         \
-                --localstatedir=/var      \
-                --infodir=/usr/share/info \
-                --mandir=/usr/share/man   \
-                $OPTS
+  ./autogen.sh --build=$BUILD            \
+               --prefix=/usr             \
+               --sysconfdir=/etc         \
+               --localstatedir=/var      \
+               --infodir=/usr/share/info \
+               --mandir=/usr/share/man   \
+               $OPTS
 } > $C_FIFO 2>&1
 
 
 default_make() {
   debug_msg "default_make ($@)"
-   verbose_msg "running \"default_make\""
-   make                               &&
-   prepare_install                    &&
-   make    install
+  verbose_msg "running \"default_make\""
+  make                               &&
+  prepare_install                    &&
+  make    install
 } > $C_FIFO 2>&1
 
 
 default_build() {
   debug_msg "default_build ($@)"
-   verbose_msg "running \"default_build\""
-   default_config  &&
-   default_make
+  verbose_msg "running \"default_build\""
+  default_config  &&
+  default_make
 } > $C_FIFO 2>&1
 
 
 default_cvs_build() {
   debug_msg "default_cvs_build ($@)"
-   verbose_msg "running \"default_cvs_build\""
-   default_cvs_config  &&
-   default_make
+  verbose_msg "running \"default_cvs_build\""
+  default_cvs_config  &&
+  default_make
 } > $C_FIFO 2>&1
 
 
@@ -375,6 +362,7 @@ purge_modules() {
   debug_msg "purge_modules ($@)"
   verbose_msg "Discovering modules that were removed from moonbase"
   for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+  (
     if ! run_details $MODULE &> /dev/null ; then
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
@@ -384,6 +372,7 @@ purge_modules() {
         message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
       fi
     fi
+  )
   done 
 }
 
@@ -394,6 +383,7 @@ purge_modules() {
 list_expired_modules() {
   debug_msg "list_expired_modules ($@)"
   for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
+  (
     MODULE=$(echo "$LINE" | cut -d: -f1)
     IDATE=$(echo "$LINE" | cut -d: -f2)
     STATUS=$(echo "$LINE" | cut -d: -f3)
@@ -408,6 +398,7 @@ list_expired_modules() {
 	fi
       fi
     fi
+  )
   done
 }
 
@@ -441,7 +432,7 @@ sort_by_dependency() {
 # function : update_modules
 # usage    : update_modules
 # purpose  : update all installed modules that need to be updated
-update_modules() {(
+update_modules() {
   debug_msg "update_modules ($@)"
 
   export IFS="$STANDARD_IFS"
@@ -456,7 +447,6 @@ update_modules() {(
   
   verbose_msg "Sorting update queue"
   QUEUE=$(sort_by_dependency $LIST)
-
 
   message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
   TMP_QUEUE=$(temp_create "update-queue")
@@ -475,7 +465,7 @@ update_modules() {(
   if [ -n "$QUEUE" ] ; then
     lin -c $QUEUE
   fi
-)}
+}
 
 
 
@@ -516,7 +506,7 @@ clean_logs()  {
 
 }
 
-activity_log()  { (
+activity_log()  {
   debug_msg "activity_log ($@)"
 
     DATE=`date  -u  +%Y%m%d-%T`
@@ -529,7 +519,7 @@ activity_log()  { (
   lock_file $ACTIVITY_LOG &&
   echo "$DATE	$COMMAND	$MODULE	$VERSION	$OUTCOME	$INFO"  >> $ACTIVITY_LOG &&
   unlock_file $ACTIVITY_LOG
-) }
+}
 
 
 syms_not_owned()  {
@@ -559,7 +549,7 @@ syms_not_owned()  {
 }
 
 
-find_pam_aware()  { (
+find_pam_aware()  {
   debug_msg "find_pam_aware ($@)"
 
   cat  $MODULE_STATUS_BACKUP  |
@@ -581,6 +571,6 @@ find_pam_aware()  { (
     fi
   done
 
-) }
+}
 
 

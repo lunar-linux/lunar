@@ -117,8 +117,6 @@ strip_parameters()  {
 }
 
 
-
-
 main()	{
   process_parameters $@
   MODULES=$(strip_parameters $@)
@@ -204,7 +202,7 @@ main()	{
       temp_destroy $TEMP_PREPAREDDEPS
 
     else
-      if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
+      if [ -z "$TEMP_PREPAREDDEPS" ] ; then
         FLAG_PREPAREDDEPS_SET=on
         export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
       fi
@@ -216,6 +214,7 @@ main()	{
 	    build_depends $MODULE &&
 	    if [ ! -n "$DEPS_ONLY" ] ; then
 	      if ! lin_module $MODULE ; then
+                temp_destroy $TEMP_PREPAREDDEPS
 	        exit 1
               fi
 	    fi
@@ -224,6 +223,7 @@ main()	{
 	  build_depends $MODULE &&
 	  if [ ! -n "$DEPS_ONLY" ] ; then
             if ! lin_module $MODULE ; then
+              temp_destroy $TEMP_PREPAREDDEPS
 	      exit 1
 	    fi
 	  fi

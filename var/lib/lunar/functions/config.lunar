@@ -19,8 +19,7 @@
 # function: write_config
 # usage   : write_config <line to remove> [<line to add>]
 # purpose : removes a line from the $LOCAL_CONFIG and adds another (if given)
-function write_config()
-{
+function write_config() {
    [ -z "$1" ] && return 1        
 
    TMP_LOCAL_CONFIG="/tmp/lunar.localconfig.$$"

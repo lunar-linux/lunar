@@ -149,7 +149,7 @@ sound()  {
   debug_msg "sound ($@)"
   case  $SOUND  in
     on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e  $SOUND_FILE  ];  then
+         if  [  -e "$SOUND_FILE" ] ; then
            (  cd  /  ;  play  $SOUND_FILE  & )
          fi
     ;;

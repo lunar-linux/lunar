@@ -20,53 +20,24 @@
 # $LDF  = This sets the system wide linking optimizations.
 
 
-# Source in the optimization settings if it exists.
-if [[ -s /etc/lunar/local/optimizations ]]; then
-   . /etc/lunar/local/optimizations
-else
-  verbose_msg "initializing optimizations with hard-coded defaults"
-  echo -e PLATFORM=x86            '\n'    \
-          BUILD=i386-pc-linux-gnu '\n'    \
-	  MAKES=                  '\n'    \
-	  COPT=                   '\n'    \
-	  CCOPT=                  '\n'    \
-          BOPT=-O0                '\n'    \
-          CPU=i386                '\n'    \
-          SPD=( )                 '\n'    \
-	  STACK=                  '\n'    \
-          XTRA=( )                '\n'    \
-          FPM=                    '\n'    \
-	  CC_WARN=( )             '\n'    \
-	  CCC_WARN=( )            '\n'    \
-          LDF=( )                 '\n'    \
-          ADDON=( ) > /etc/lunar/local/optimizations
-fi
-
-
-#lets get the BUILD if it is not defined   
-  [ -z "$BUILD" ] && optimize_cpu $CPU
-  [ -n "$BUILD" ] && export BUILD || 
-  echo "Set your optimization preferences via lunar"
-#
-
 
 # Usage   : bad_flags "list of flags to remove"
 # Example : bad_flags -ffast-math -funroll-loops
 bad_flags() {
   debug_msg "bad_flags ($@)"
   verbose_msg "bad_flags \"$@\""
-  if [[ $1 == "ALL" ]]; then
+  if [[ "$1" == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
-  elif [[ $1 == "compiler" ]]; then
+  elif [[ "$1" == "compiler" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS
-  elif [[ $1 == "linker" ]]; then
+  elif [[ "$1" == "linker" ]]; then
     unset LDFLAGS
   else
-    for BAD_FLAG in $@; do
-      CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
-      CXXFLAGS=`echo $CXXFLAGS | sed s/$BAD_FLAG//`
-      CPPFLAGS=`echo $CPPFLAGS | sed s/$BAD_FLAG//`
-      LDFLAGS=`echo $LDFLAGS | sed s/$BAD_FLAG//`
+    for BAD_FLAG in "$@" ; do
+      CFLAGS=$(echo $CFLAGS | sed s/$BAD_FLAG//)
+      CXXFLAGS=$(echo $CXXFLAGS | sed s/$BAD_FLAG//)
+      CPPFLAGS=$(echo $CPPFLAGS | sed s/$BAD_FLAG//)
+      LDFLAGS=$(echo $LDFLAGS | sed s/$BAD_FLAG//)
     done
   fi
 }
@@ -83,18 +54,17 @@ use_wrappers() {
 
 optimize_make() {
   debug_msg "optimize_make ($@)"
-  if [[ $PSAFE == "no" ]]; then
+  if [ "$PSAFE" == "no" ] ; then
    unset MAKES
-  fi
-  if [[ $MAKES == "1" ]]; then
+  elif [ "$MAKES" == "1" ] ; then
    unset MAKES
   fi
   if module_installed linux-openmosix; then
     alias make="mosrun -h make"
-    if [[ $MAKES > 1 ]]; then
+    if [ "$MAKES" > 1 ] ]; then
       alias make="mosrun -h make -j$MAKES"
     fi
-  elif [[ $MAKES > 1 ]]; then
+  elif [ "$MAKES" > 1 ] ; then
     alias make="make -j$MAKES"
   fi
   verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
@@ -103,7 +73,7 @@ optimize_make() {
 
 optimize_base() {
   debug_msg "optimize_base ($@)"
-   if ! [[ $1 ]]; then
+   if ! [ "$1" ] ; then
       BOPT="None"
    fi
 
@@ -761,9 +731,36 @@ optimize_ccc_warn() {
 
 optimize() {
   debug_msg "optimize ($@)"
-   unset CFLAGS CXXFLAGS LDFLAGS
+  # Source in the optimization settings if it exists.
+  if [ -s /etc/lunar/local/optimizations ] ; then
+    . /etc/lunar/local/optimizations
+  else
+    verbose_msg "initializing optimizations with hard-coded defaults"
+    echo -e PLATFORM=x86            '\n'    \
+BUILD=i386-pc-linux-gnu '\n'    \
+MAKES=                  '\n'    \
+COPT=                   '\n'    \
+CCOPT=                  '\n'    \
+BOPT=-O0                '\n'    \
+CPU=i386                '\n'    \
+SPD=( )                 '\n'    \
+STACK=                  '\n'    \
+XTRA=( )                '\n'    \
+FPM=                    '\n'    \
+CC_WARN=( )             '\n'    \
+CCC_WARN=( )            '\n'    \
+LDF=( )                 '\n'    \
+ADDON=( ) > /etc/lunar/local/optimizations
+  fi
 
-   case $PLATFORM in
+  #lets get the BUILD if it is not defined   
+  [ -z "$BUILD" ] && optimize_cpu $CPU
+  [ -n "$BUILD" ] && export BUILD || 
+  echo "Set your optimization preferences via lunar"
+
+  unset CFLAGS CXXFLAGS LDFLAGS
+
+  case $PLATFORM in
       x86)      optimize_make     $MAKES     &&
                 optimize_base     $BOPT      &&
                 optimize_cpu      $CPU       &&
@@ -805,7 +802,7 @@ optimize() {
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
                 ;;
-   esac
+  esac
 
   export CC_EXT
   export CXX_EXT
@@ -816,11 +813,11 @@ optimize() {
   export LDFLAGS
 
   use_wrappers
+  verbose_msg "BUILD=\"$BUILD\""
   verbose_msg "GCCVER=\"$GCCVER\""
   verbose_msg "CFLAGS=\"$CFLAGS\""
   verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
   verbose_msg "LDFLAGS=\"$LDFLAGS\""
-
 }
 
 

@@ -71,7 +71,6 @@ create_install_log() {
   debug_msg "create_install_log ($@)"
 
   TMP_INST_LOG=$(temp_create "install-log")
-  chmod 644 $TMP_INST_LOG
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
   rm -f $INST_LOG &> /dev/null
 
@@ -94,7 +93,7 @@ create_install_log() {
                       echo  -n  "/dev/null")
 
   if [ "$MISOWNED_SYMLINKS" == "/dev/null" ] ; then
-    cp $TMP_INST_LOG $INST_LOG
+    install -m644 $TMP_INST_LOG $INST_LOG
   else
     grep -v "$MISOWNED_SYMLINKS" $TMP_INST_LOG > $INST_LOG
   fi
@@ -129,7 +128,7 @@ create_install_cache() {
 }
 
 
-boost()	{ (
+boost()	{
   debug_msg "boost ($@)"
 
   create_install_log    &&
@@ -141,6 +140,6 @@ boost()	{ (
 
   rm  -f  $BOOST_LOCK
 
-) }
+}
 
 

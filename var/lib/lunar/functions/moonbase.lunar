@@ -9,7 +9,8 @@
 ############################################################
 
 
-get_moonbase () {(
+get_moonbase () {
+(
   debug_msg "get_moonbase  ($@)"
 
   SYSTEM_MOONBASE=/var/lib/lunar/moonbase
@@ -30,11 +31,11 @@ get_moonbase () {(
   run_details
   rm -f /tmp/$SOURCE
 
-  if [ ! -d $SYSTEM_MOONBASE ] ; then
+  if [ ! -d "$SYSTEM_MOONBASE" ] ; then
     mkdir -p $SYSTEM_MOONBASE
   fi
   
-  if [ ! -d $SYSTEM_MOONBASE/zlocal ] ; then
+  if [ ! -d "$SYSTEM_MOONBASE/zlocal" ] ; then
     mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
 
@@ -61,7 +62,7 @@ get_moonbase () {(
     # get ready to regenerate the module index cache file
     TMP_MODULE_INDEX=$(temp_create "module-index")
     cp $MODULE_INDEX $TMP_MODULE_INDEX
-    if [ -f $MODULE_INDEX ]; then
+    if [ -f "$MODULE_INDEX" ]; then
       rm -f $MODULE_INDEX
     fi
     create_module_index
@@ -73,7 +74,8 @@ get_moonbase () {(
     INFO="Could not download a fresh moonbase"
   fi
   activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
-)}
+)
+}
 
 
 # function : set_moonbase_md5
