@@ -606,8 +606,14 @@ optimize_ld() {
       case $A in
          Strip)     LDFLAGS="$LDFLAGS -s"
                     ;;
-         Debug)     LDFLAGS="$LDFLAGS -S"
-                    ;;
+# The Debug option breaks some modules (eg: tar and gzip, just to mention a
+# few), so this option should either be removed, or remain "deactivated"
+# untill this has been resolved but the hatch is that we don't know how many
+# modules is affected by it... See bug No. 75. Or contact me (Niki Guldbran
+# <nikig@vip.cybercity.dk>)
+#
+#         Debug)     LDFLAGS="$LDFLAGS -S"
+#                    ;;
          Combreloc) LDFLAGS="$LDFLAGS -z combreloc"
                     ;;
       esac
