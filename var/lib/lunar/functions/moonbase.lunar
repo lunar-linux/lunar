@@ -33,7 +33,7 @@ get_moonbase () {
 
   # make sure we set these values up front to be sure
   run_details
-  rm -f /tmp/$SOURCE
+  rm -f $TMPDIR/$SOURCE
 
   if [ ! -d "$SYSTEM_MOONBASE" ] ; then
     mkdir -p $SYSTEM_MOONBASE

@@ -371,8 +371,8 @@ find_active_lin()  {
 
 follow_active_lin()  {
   if [ -f /var/lock/installing.$1 -a -d /proc/$(cat /var/lock/installing.$1) ] ; then
-    if  [ -f /tmp/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* ] ; then
-      tail -f /tmp/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* --follow=name --pid=$(cat /var/lock/installing.$1)  2>/dev/null
+    if  [ -f $TMPDIR/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* ] ; then
+      tail -f $TMPDIR/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* --follow=name --pid=$(cat /var/lock/installing.$1)  2>/dev/null
     fi
   fi
 }

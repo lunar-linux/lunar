@@ -19,7 +19,6 @@
 
 temp_create() {
   debug_msg "temp_create ($@)"
-  TMPDIR=${TMPDIR:-/var/tmp}
   mod_v_safe_edit $1
   TMPFILE=$MOD_V_SNAME
   if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$TMPFILE.XXXXXXXXXX ) ; then

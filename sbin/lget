@@ -53,7 +53,7 @@ EOF
 
 
 main() {
-  cd /tmp
+  cd $TMPDIR
   
   MODULES="$@"
 

@@ -51,8 +51,8 @@ get_svn() {
   message  "${MESSAGE_COLOR}Downloading SVN module for" \
  	   "module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-  mk_source_dir /tmp/$MODULE-$VERSION
-  cd /tmp/$MODULE-$VERSION
+  mk_source_dir $TMPDIR/$MODULE-$VERSION
+  cd $TMPDIR/$MODULE-$VERSION
 
   if [ -f "$2" ] ; then
     verbose_msg "Extracting local SVN copy"
@@ -61,8 +61,8 @@ get_svn() {
     if ! tar xjf $2 ; then
       message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
       
-      rm_source_dir /tmp/$MODULE-$VERSION
-      mk_source_dir /tmp/$MODULE-$VERSION
+      rm_source_dir $TMPDIR/$MODULE-$VERSION
+      mk_source_dir $TMPDIR/$MODULE-$VERSION
     fi
     cd $CD
   fi
@@ -98,8 +98,8 @@ get_svn() {
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $1"
   fi
 
-  cd /tmp
-  rm_source_dir /tmp/$MODULE-$VERSION
+  cd $TMPDIR
+  rm_source_dir $TMPDIR/$MODULE-$VERSION
 
 }
 
@@ -130,8 +130,8 @@ get_cvs() {
            "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
  	   "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-  mk_source_dir /tmp/$MODULE-$VERSION
-  cd /tmp/$MODULE-$VERSION
+  mk_source_dir $TMPDIR/$MODULE-$VERSION
+  cd $TMPDIR/$MODULE-$VERSION
   
   if [ -f "$2" ] ; then
     verbose_msg "Extracting local CVS copy"
@@ -144,11 +144,11 @@ get_cvs() {
     if ! tar xjf $2 ; then
       message "${PROBLEM_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
       
-      rm_source_dir /tmp/$MODULE-$VERSION
-      mk_source_dir /tmp/$MODULE-$VERSION
-      cd /tmp/$MODULE-$VERSION
+      rm_source_dir $TMPDIR/$MODULE-$VERSION
+      mk_source_dir $TMPDIR/$MODULE-$VERSION
+      cd $TMPDIR/$MODULE-$VERSION
     else
-      cd /tmp/$MODULE-$VERSION/$CVSMODULE
+      cd $TMPDIR/$MODULE-$VERSION/$CVSMODULE
     fi
   fi
 
@@ -178,15 +178,15 @@ get_cvs() {
   if [ "$GOT_CVS" == "yes" ] ; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
     # pack in last component dir of $CVSMODULE
-    cd /tmp/$MODULE-$VERSION/$(dirname $CVSMODULE)
+    cd $TMPDIR/$MODULE-$VERSION/$(dirname $CVSMODULE)
     tar cjf $2 $(basename $CVSMODULE)
     cd $CD
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
   fi
 
-  cd /tmp
-  rm_source_dir /tmp/$MODULE-$VERSION
+  cd $TMPDIR
+  rm_source_dir $TMPDIR/$MODULE-$VERSION
 
 }
 
@@ -209,7 +209,7 @@ fuzzy_wget()  {
   debug_msg "fuzzy_wget ($@)"
 
   # this is what the download will be stored as initially:
-  TMP_FILE=/tmp/$(basename $2)
+  TMP_FILE=$TMPDIR/$(basename $2)
 
   if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
     WGET_FTP_CONNECTION="--passive-ftp"
@@ -272,7 +272,7 @@ fuzzy_wget()  {
 #
 get_url() {
 (
-  cd /tmp
+  cd $TMPDIR
   debug_msg "get_url ($@)"
   if [ -n "$1" ] ; then
     if [ "${1:0:6}" == "cvs://" ] ; then

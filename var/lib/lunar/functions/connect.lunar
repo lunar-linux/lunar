@@ -61,17 +61,17 @@ disconnect()  {
   then  return
   fi
 
-  rm  -f           /tmp/disconnect
-  cat  <<  EOF  >  /tmp/disconnect
+  rm  -f           $TMPDIR/disconnect
+  cat  <<  EOF  >  $TMPDIR/disconnect
 #!/bin/sh
 
 while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
 poff
-rm  -f  /tmp/disconnect
+rm  -f  $TMPDIR/disconnect
 EOF
 
-chmod  a+x  /tmp/disconnect
-            /tmp/disconnect  &
+chmod  a+x  $TMPDIR/disconnect
+            $TMPDIR/disconnect  &
 
 }
 

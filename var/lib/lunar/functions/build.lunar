@@ -291,7 +291,7 @@ syms_not_owned()  {
 
       if  !  grep  -q  "$DEST"  "$1"
       then   echo  -n  "$ITEM\|"
-             echo      "$ITEM"  >>  /tmp/$MODULE.rejected.symlinks
+             echo      "$ITEM"  >>  $TMPDIR/$MODULE.rejected.symlinks
       fi
 
     fi

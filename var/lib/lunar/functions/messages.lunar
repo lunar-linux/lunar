@@ -54,13 +54,13 @@ debug_msg() {
   if [ -n "$LUNAR_DEBUG" ] ; then
     echo "++ $@" > /dev/stderr
     if [ "$LUNAR_DEBUG" -ge "2" ] ; then
-      echo "++ $@" >> /tmp/lp_debuglog.$$
-      if [ -f /tmp/l_debug_var.$$ ] ; then
-        mv /tmp/l_debug_var.$$ /tmp/l_debug_var.$$.old
+      echo "++ $@" >> $TMPDIR/lp_debuglog.$$
+      if [ -f $TMPDIR/l_debug_var.$$ ] ; then
+        mv $TMPDIR/l_debug_var.$$ $TMPDIR/l_debug_var.$$.old
       fi 
-      set | grep '^[A-Z]' | sed 's/^/VAR /' > /tmp/l_debug_var.$$
-      diff -U0 /tmp/l_debug_var.$$.old /tmp/l_debug_var.$$ | \
-          grep -v "^@@" | grep "VAR" | tee -a /tmp/lp_debuglog.$$ > /dev/stderr
+      set | grep '^[A-Z]' | sed 's/^/VAR /' > $TMPDIR/l_debug_var.$$
+      diff -U0 $TMPDIR/l_debug_var.$$.old $TMPDIR/l_debug_var.$$ | \
+          grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ > /dev/stderr
     fi
   fi
 }

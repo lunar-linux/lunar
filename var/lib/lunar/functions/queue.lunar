@@ -52,7 +52,7 @@ remove_queue() {
 
    if [ -n "$2" ];
    then
-      TMP_QUEUE="/tmp/lunar_remove_queue.$$"
+      TMP_QUEUE="$TMPDIR/lunar_remove_queue.$$"
       rm -f $TMP_QUEUE 2>/dev/null
       lock_file $1                 &&
       cat $1 | grep -v "^"$2"\$" > $TMP_QUEUE
