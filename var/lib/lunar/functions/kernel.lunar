@@ -22,54 +22,28 @@
 #               module dirs.
 # Name        : backup_mods_krnl
 # Arg 1       : Filename of the kernel to backup (With or witout full path)
-#               With the format $MODULENAME_$VERSION_$EXTRAVERSION
-# Arg 2       : the number of levels we need to backup, minimum a number of 
-#               "2" is required
+#               With the format $VERSION_$EXTRAVERSION
 backup_mods_krnl()
 {
   debug_msg "backup_mods_krnl ($@)"
 
   devoke_installwatch  
 
-  KERNEL_STRING=$(basename $1 | cut -d "_" -f "2-")
-  KERNEL_MODULE=$(basename $1 | cut -d "_" -f "-1")
-  KERNEL_VERSION=$(echo $KERNEL_STRING | cut -d "_" -f "1")
-  KERNEL_EXTRA=$(echo $KERNEL_STRING | cut -d "_" -f "2")
+  BKUP_KRNL=$1
 
-  BACKUP_LEVEL=$2
-
-  if [ -d /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_${I} ]; then
-    verbose_msg "removing old kernel modules backup no. \"$BACKUP_LEVEL\""
-    rm -rf /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_${I}
-  fi
-  if [ -f /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_${I} ]; then
-    verbose_msg "removing old kernel backup no. \"$BACKUP_LEVEL\""
-    rm /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_${I}
+  if [ -f /boot/${BKUP_KRNL}.old ]; then
+    verbose_msg "moving old kernel backup"
+    mv -f /boot/${BKUP_KRNL}.old /boot/${BKUP_krnl}.old_2
   fi
 
-  for I in $(seq $BACKUP_LEVEL -1 1); do
-     if [ -d /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_$((${I} - 1)) ]; then
-      verbose_msg "moving kernel modules backup from no. \"$((${I} - 1))\" to \"${I}\""
-      mv /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_$((${I} - 1)) \
-         /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_${I}
-    fi
-
-    if [ -f /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_$((${I} - 1 )) ]; then
-      verbose_msg "moving kernel backup from no. \"$((${I} - 1))\" to \"${I}\""
-      mv /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_$((${I} - 1)) \
-         /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_${I}
-    fi
-  done
-
-  if [ -d /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA} ]; then
-    verbose_msg "moving current kernel modules to first backup no. \"0\""
-    mv /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}       \
-       /lib/modules/${KERNEL_VERSION}-${KERNEL_EXTRA}.old_0
+  if [ -f /boot/${BKUP_KRNL} ]; then
+    verbose_msg "copying ${BKUP_KRNL}"
+    cp -p /boot/${BKUP_KRNL} /boot/${BKUP_KRNL}.old
   fi
-  if [ -f /boot/${KERNEL_MODULE}_${KERNEL_STRING} ]; then
-    verbose_msg "moving current kernel to first backup no. \"0\""
-    mv /boot/${KERNEL_MODULE}_${KERNEL_STRING}       \
-       /boot/${KERNEL_MODULE}_${KERNEL_STRING}.old_0
+
+  if [ -d /lib/modules/${BKUP_KRNL} ]; then
+    rm -rf /lib/modules/${BKUP_KRNL}.old
+    cp -a /lib/modules/${BKUP_KRNL} /lib/modules/${BKUP_KRNL}.old
   fi
 
   invoke_installwatch 
@@ -96,7 +70,7 @@ image                   =       /boot/$IMAGE_NAME
 "
 
 LILO_OLD_IMAGE_ENTRY="
-image                   =       /boot/$IMAGE_NAME.old_1
+image                   =       /boot/$IMAGE_NAME.old
         label           =       $BOOT_LABEL.old
         read-only 
 "
@@ -121,7 +95,8 @@ image                   =       /boot/$IMAGE_NAME.old_1
           if  !  grep  -q  "$IMAGE_NAME"  /etc/lilo.conf;  then
             echo  -e  "$LILO_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
           fi
-          if  !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf;  then
+          if  [ -f /boot/"$IMAGE_NAME.old" ] && 
+              !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf ;  then
             echo  -e  "$LILO_OLD_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
           fi
         fi
@@ -140,7 +115,8 @@ image                   =       /boot/$IMAGE_NAME.old_1
       if  !  grep  -q  "$IMAGE_NAME"  /etc/lilo.conf;  then
         echo  -e  "$LILO_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
       fi
-      if  !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf;  then
+      if  [ -f /boot/"$IMAGE_NAME.old" ] && 
+          !  grep  -q  "$IMAGE_NAME.old"  /etc/lilo.conf ;  then
         echo  -e  "$LILO_OLD_IMAGE_ENTRY"  >>  /etc/lilo.conf.new
       fi
     fi
@@ -204,7 +180,8 @@ if  ! ( grep  -q  "$IMAGE_NAME"     /boot/grub/menu.lst &&
           if  !  grep  -q  "$IMAGE_NAME"  /boot/grub/menu.lst;  then
             echo  -e  "$GRUB_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
           fi
-          if  !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst;  then
+          if  [ -f /boot/"$IMAGE_NAME.old" ] && 
+              !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst ;  then
             echo  -e  "$GRUB_OLD_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
           fi
         fi
@@ -223,7 +200,8 @@ if  ! ( grep  -q  "$IMAGE_NAME"     /boot/grub/menu.lst &&
       if  !  grep  -q  "$IMAGE_NAME"  /boot/grub/menu.lst;  then
         echo  -e  "$GRUB_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
       fi
-      if  !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst;  then
+      if   [ -f /boot/"$IMAGE_NAME.old" ] && 
+           !  grep  -q  "$IMAGE_NAME.old"  /boot/grub/menu.lst ;  then
         echo  -e  "$GRUB_OLD_IMAGE_ENTRY"  >>  /boot/grub/menu.lst.new
       fi
     fi
