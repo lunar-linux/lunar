@@ -27,7 +27,3 @@
 	var/lib/lunar/functions/sources.lunar: Merging theedge back into
 	lunar.
 
-2003-04-01 18:32  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: BAH
-
