@@ -481,8 +481,8 @@ function show_tree() {
 
   # purpose: Retrieve all dependencies
   get_depends() {
-    NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
-    OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
+    NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z\.\/"+_-]*\).*/\1/p'
+    OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z\.\/"+_-]*\).*/(\1)/p'
     DEPENDS=$(sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " ")
     for dep in ${DEPENDS}
     do
