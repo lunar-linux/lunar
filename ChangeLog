@@ -185,28 +185,3 @@
 	removing files from /etc/ at all, and added proper init.d script
 	shutdowns on plain 'lrm' commands, as well as xinetd restarts.
 
-2004-03-17 23:28  tchan
-
-	* sbin/lunar: Committed a small bug fix for sofar while he was
-	sleeping.
-
-2004-03-17 22:58  sofar
-
-	* etc/lunar/config, sbin/lunar,
-	var/lib/lunar/functions/config.lunar,
-	var/lib/lunar/functions/optimize.lunar,
-	var/lib/lunar/functions/uniqid.lunar,
-	var/lib/lunar/menu/dmodule.menu, var/lib/lunar/menu/download.menu,
-	var/lib/lunar/menu/integrity.menu, var/lib/lunar/menu/mirrors.menu,
-	var/lib/lunar/menu/optimize.menu: New config concept: atomic config
-	operations: - get/set_module_config: get/sets a var for a module -
-	get_set_local_config: get/sets a var in /etc/lunar/local/config -
-	rewrote menu's and optimization code to fit (contained a bug sinces
-	last week resulting in optimize menu's not working properly -
-	fixed) - tested mildly, the concept is sound but I may have dropped
-	a thread!!! (This commit is ON THE EDGE. You are warned) -
-	implemented lunar set [VAR [VAL]] for easy access to system vars -
-	forgot to recode all of moonbase to use these methods. things
-	break. get over it, or help me fix it in the next weekend.  - gone
-	to bed. sleeping while your boxes die.
-
