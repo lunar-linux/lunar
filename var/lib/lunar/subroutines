@@ -406,13 +406,14 @@ validate_source_dir()  {
 
 }
 
-
 default_pre_build() {
-
-  validate_source_dir  $SOURCE_DIRECTORY  &&
-  mk_source_dir        $SOURCE_DIRECTORY  &&
-  unpack               $SOURCE
-
+  if [[ `echo $MODULE | grep -e -cvs` ]]; then
+    validate_source_dir  $SOURCE_DIRECTORY
+  else
+    validate_source_dir  $SOURCE_DIRECTORY  &&
+    mk_source_dir        $SOURCE_DIRECTORY  &&
+    unpack               $SOURCE
+  fi
 }
 
 default_config() 

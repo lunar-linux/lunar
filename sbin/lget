@@ -50,6 +50,29 @@ EOF
 
 }
 
+use_cvs() {
+  run_details &&
+  cd $BUILD_DIRECTORY 
+  if [[ $CVS_SERVER ]]; then
+    export CVSROOT=$CVS_SERVER
+    if [[ $CVS_LOGIN ]]; then
+      cvs login | echo $CVS_LOGIN
+    fi 
+    if ! [[ $CVS_MODULE ]]; then
+      CVS_MODULE=`echo $MODULE | sed s/-cvs//`
+    fi     
+    if [[ -d $CVS_MODULE/CVS ]]; then
+      cd $CVS_MODULE 
+      cvs -z3 up -PAd &&
+      GOT_CVS="yes"
+    elif ! [[ -d $CVS_MODULE/CVS ]]; then
+      rm -rf $CVS_MODULE  &&
+      cvs -z3 co $CVS_MODULE  &&
+      GOT_CVS="yes"
+    fi
+  fi
+}
+
 
 erase()  {
 
@@ -320,29 +343,53 @@ main() {
   if  [  -z  "$MODULES"  ];  then
     for  SECTION  in  `list_sections`;  do
       for  MODULE  in  `list_modules $SECTION`;  do
-	MODULES=$(echo $MODULES $MODULE)
+	      MODULES=$(echo $MODULES $MODULE)
       done
     done
   fi
-		    
+    
   for  MODULE  in  $MODULES;  do
     SECTION=$(find_section $MODULE)
+    if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
+      TYPE="normal"
+    elif grep -q CVS_SERVER "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
+      TYPE="cvs"
+    fi   
     if [ "$EXHAUSTIVE" == "yes" ] ; then
-      if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
-	MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
-	if [ -f $MIRRORS/$MIRROR ] ; then
-	  for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	    eval ${MIRROR}_URL=$MIRROR_URL
-	    if download_module $MODULE ; then
-	      break
-	    fi
+      if [[ $TYPE == "normal" ]] ; then
+        MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+	      if [ -f $MIRRORS/$MIRROR ] ; then
+	        for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	          eval ${MIRROR}_URL=$MIRROR_URL
+            if download_module $MODULE ; then
+	            break
+	          fi
           done 
-	else
-	  download_module $MODULE
-	fi
+	      else
+	        download_module $MODULE
+	      fi
+      elif [[ $TYPE == "cvs" ]] ; then
+        MIRROR=$(grep CVS_SERVER $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+	      if [ -f $MIRRORS/$MIRROR ] ; then
+	        for CVS_MIRROR in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	          eval ${MIRROR}_URL=$CVS_MIRROR
+            if [[ $GOT_CVS == "yes" ]]; then
+	            break
+	          fi
+          done 
+	      else
+          if [[ $GOT_CVS != "yes" ]]; then
+	          use_cvs $MODULE
+          fi
+	      fi        
       fi
     else
-      download_module $MODULE
+      if [[ $TYPE == "cvs" ]] && 
+         [[ $GOT_CVS != "yes" ]]; then
+        use_cvs $MODULE
+      else
+        download_module $MODULE
+      fi
     fi
   done
 

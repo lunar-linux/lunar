@@ -770,7 +770,9 @@ lin_module()  { (
     run_build                   &&
     run_post_build              &&
     run_post_install            &&
-    rm_source_dir               &&
+    if [[ $KEEP_SOURCE != "yes" ]]; then 
+      rm_source_dir               
+    fi
     report_install              &&
     rm  -f  $linING             &&
     sound  SUCCESS              &&
