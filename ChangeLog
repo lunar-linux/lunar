@@ -414,25 +414,3 @@
 	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
 	more fixes.
 
-2003-01-29 20:26  sofar
-
-	* sbin/lunar: Fix for that nasty one bug.
-
-2003-01-29 19:34  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated the URL's and added a
-	bit more info.
-
-2003-01-29 12:27  sofar
-
-	* bin/lvu, sbin/lin, sbin/lrm, sbin/lunar, usr/sbin/colony,
-	var/lib/lunar/subroutines: Generalizing code: less is now replaced
-	with view_file(), which also handles stdin of course. It also will
-	use the $PAGER env variable for those who want to override it with
-	their default pager. Small effort, big gain.
-
-2003-01-29 10:28  sofar
-
-	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
-	the logfile easier: 'lvu activity'
-
