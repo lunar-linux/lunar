@@ -197,9 +197,11 @@ call_wget()  {
    [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
    [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
+   S_FILE=$(basename $1)
+
    debug_msg "call_wget: PWD=$PWD"
-   verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1\""
-   wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1
+   verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1 --output-document $S_FILE\""
+   wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$S_FILE"
 }
 
 
