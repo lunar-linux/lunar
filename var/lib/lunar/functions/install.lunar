@@ -83,10 +83,11 @@ prepare_module_config()  {
 
 # run the CONFIGURE script
 run_configure() {
+  mod_v_safe_edit $MODULE
   debug_msg "run_configure ($@)"
   if [ -n "$RECONFIGURE" ];  then
-    verbose_msg "Reconfiguring \"$MODULE\""
-    rm -f $DEPENDS_CONFIG/$MODULE
+    verbose_msg "Reconfiguring \"$MOD_V_SNAME\""
+    rm -f $DEPENDS_CONFIG/$MOD_V_SNAME
     remove_depends $MODULE
   fi
 
@@ -124,7 +125,7 @@ run_pre_build() {
 
 stop_logging() {
   debug_msg "stop_logging ($@)"
- mv_edit $MODULE 
+ mod_v_safe_edit $MODULE 
   message  "${MESSAGE_COLOR}Creating"                        \
            "${FILE_COLOR}$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
@@ -137,7 +138,7 @@ stop_logging() {
 
 start_logging () {
   debug_msg "start_logging  ($@)"
- mv_edit $MODULE 
+ mod_v_safe_edit $MODULE 
   export C_LOG=$(temp_create "${MOD_V_SNAME}.compile-log")
   export C_FIFO=$(temp_create "${MOD_V_SNAME}.compile-fifo")
 
@@ -360,7 +361,7 @@ lin_module()  {
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
   # lock the module for installation, check for moonbase call
- mv_edit $MODULE 
+ mod_v_safe_edit $MODULE 
   linING="/var/lock/installing.$MOD_V_SNAME"
   if [ "$MODULE" == "moonbase" ] ; then
     if ! current_locked && ! solo_locked ; then

@@ -70,7 +70,7 @@ parse_iw() {
 create_install_log() {
 
   debug_msg "create_install_log ($@)"
- mv_edit $MODULE
+ mod_v_safe_edit $MODULE
 
   TMP_INST_LOG=$(temp_create "install-log")
   INST_LOG="$INSTALL_LOGS/$MOD_V_SNAME-$VERSION"
@@ -106,7 +106,7 @@ create_install_log() {
 
 create_md5sum_log()  {
   debug_msg "create_md5sum_log ($@)"
- mv_edit $MODULE
+ mod_v_safe_edit $MODULE
 
   rm -f $MD5SUM_LOGS/$MOD_V_SNAME-$VERSION &> /dev/null
   
@@ -120,7 +120,7 @@ create_md5sum_log()  {
 
 create_install_cache() {
   debug_msg "create_install_cache($@)"
- mv_edit $MODULE 
+ mod_v_safe_edit $MODULE 
 
   if [ "$ARCHIVE" == "off" ] ; then
     return

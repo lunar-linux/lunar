@@ -21,7 +21,7 @@
 # purpose : finds the installed size of module in KB
 find_module_size() {
    #this functions checks the modules file if there is already size entry
-   mv_edit $1
+   mod_v_safe_edit $1
    module_size()
    {
       unset SIZE

@@ -258,7 +258,7 @@ rework_module() {
                                                                                 
   # here starts the real work:
   MODULE=$1
- mv_edit $MODULE 
+ mod_v_safe_edit $MODULE 
                                                                                 
   # base vars needed to execute DEPENDS
   SECTION=$(find_section $MODULE)
