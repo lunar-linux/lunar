@@ -91,15 +91,15 @@ main() {
       exit 1
     fi
 
-    if [ -z "$TEMP_DOWNLOADLOG" ] ; then
-      export TEMP_DOWNLOADLOG=$(temp_create "download-log")
+    if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
+      export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
     fi
 
     # pass 1 : run full dependency checking
     # This pass does configuration and dependency identification.
     if ! DEPS_ONLY=--deps build_depends $MODULES ; then
-      temp_destroy $TEMP_DOWNLOADLOG
+      temp_destroy $TEMP_DOWNLOAD_PIDS
       temp_destroy $TEMP_PREPAREDDEPS
       verbose_msg "Unexpected errors, bailing out!"
       exit 1
@@ -121,7 +121,19 @@ main() {
         LIST="$(need_source $M | uniq) $LIST"
       done
       verbose_msg "download queue: $LIST $MODULES"
-      lget $LIST $MODULES >> $TEMP_DOWNLOADLOG 2>&1 &
+      for M in $LIST $MODULES; do
+          THIS_TEMP=$(temp_create "$M.download.log")
+          rm $THIS_TEMP
+          eval TEMP_DOWNLOAD_LOG_$M=$THIS_TEMP
+      done
+      (
+          for M in $LIST $MODULES; do
+              eval THIS_TEMP=\$TEMP_DOWNLOAD_LOG_$M
+              lget $M > $THIS_TEMP 2>&1 &
+              echo "$M:`jobs -p`:$THIS_TEMP" >> $TEMP_DOWNLOAD_PIDS
+              wait
+          done
+      ) &    
 
       # pass 3 : compile/install
       # no strange stuff should happen here anymore
@@ -148,7 +160,7 @@ main() {
     fi
 
     # cleanups that we need to do
-    temp_destroy $TEMP_DOWNLOADLOG
+    temp_destroy $TEMP_DOWNLOAD_PIDS
     temp_destroy $TEMP_PREPAREDDEPS
 
   else
@@ -217,7 +229,7 @@ GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:w:" -l "compile,debug,deps,from:,
 
 # the following trap makes sure all threads exit in case something weird
 # happens:
-trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOADLOG \$INSTALLWATCHFILE) ; exit 1" CHLD INT TERM KILL
+trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOAD_PIDS \$INSTALLWATCHFILE) ; exit 1" CHLD INT TERM KILL
 
 if [ -z "$?" ] ; then
   help | view_file

@@ -458,17 +458,18 @@ testpack () {
 }
 
 
-show_downloading() {
-  debug_msg "show_downloading ($@)"
-  if [ -e "$TEMP_DOWNLOADLOG" ] ; then
-    verbose_msg "====== download progess:"
-    while lget_locked $MODULE ; do
-      sleep 1
-    done
-    cat $TEMP_DOWNLOADLOG
-    > $TEMP_DOWNLOADLOG
-    verbose_msg "====== end download progress"
-  fi
+show_downloading()
+{
+    debug_msg "show_downloading ($@)"
+    DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
+    DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
+    if [ ! -d /proc/$DOWNLOAD_PID -a -f $DOWNLOAD_LOG ]; then
+        cat $DOWNLOAD_LOG
+    else
+        tail --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+        sleep 1
+    fi
+    rm $DOWNLOAD_LOG
 }
 
 
