@@ -242,15 +242,3 @@
 
 	* bin/lvu: Added 'lvu short' just because I like it
 
-2003-12-29 18:09  sofar
-
-	* var/lib/lunar/functions/: build.lunar, check.lunar,
-	depends.lunar, download.lunar, edit.lunar, install.lunar,
-	kernel.lunar, locking.lunar, logging.lunar, main.lunar,
-	messages.lunar, modules.lunar, prune.lunar, queue.lunar,
-	sources.lunar: Major code cleanup: - cosmetic modifications - new
-	prune code (the old one sucked ass) - new dependency sort (about
-	20x faster) - rewrote rebuild code (should be much more reliable) -
-	Reordered code into it's proper .lunar files, got rid of
-	install.lunar
-
