@@ -399,10 +399,3 @@
 	improved too. Moving verify_source code out of build into
 	sources.lunar.
 
-2003-07-22 21:01  sofar
-
-	* sbin/lin, var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/install.lunar: Fix for breaking tars,
-	uniformizing tmpfiles a bit more too.
-
