@@ -296,7 +296,7 @@ cpu_options() {
                      "pca56"       "pca56"        $( [ "$CPU" == "pca56" ] && echo "on" || echo "off" )         "$pca56_HELP"
                      "ev6"         "ev6"          $( [ "$CPU" == "ev6" ] && echo "on" || echo "off" )         "$ev6_HELP"
                      "ev67"        "ev67"         $( [ "$CPU" == "ev67" ] && echo "on" || echo "off" )         "$ev67_HELP"
-		     "ev68"        "ev68"         $( [ "$CPU" == "ev68" ] && echo "on" || echo "off" )         "$ev68_HELP"
+		     "ev68"        "ev68"         $( [ "$CPU" == "ev68" ] && echo "on" || echo "off" )         "$ev68_HELP" )
                      ;;
 
   PowerPC) OPTIONS=( "common" "common"	$( [ "$CPU" == "common" ] && echo "on" || echo "off" )   "$common_HELP"
