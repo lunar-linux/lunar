@@ -64,7 +64,8 @@ install_pam_confs()  {
 }
 
 
-install_xinetd_confs()  {
+install_xinetd_confs()  { (
+  unset IFS
   debug_msg "install_xinetd_confs ($@)"
   if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
     cd       "$SCRIPT_DIRECTORY/xinetd.d"
@@ -88,7 +89,7 @@ install_xinetd_confs()  {
       invoke_installwatch
     fi
   fi
-}
+) }
 
 
 use_xinetd()  {
