@@ -792,7 +792,6 @@ lin_modules()  {
       module_installed $MODULE && continue
     fi
 
-    apprentice_off  $MODULE
     linING="/var/lock/installing.$MODULE"
 
     if  [  -n  "$COMPILE"      ]  ||

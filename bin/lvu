@@ -141,7 +141,6 @@ checksum()      { for FILE in `cat $1 | files`; do sum -s  $FILE; done; }
 md5sum_files()  { for FILE in `cat $1 | files`; do md5sum  $FILE; done; }
 
 alien()  {
-  apprentice_off
 
   message  "In a few minutes I will print files found on this disk"
   message  "that were not installed by lunar.  This is not a"
@@ -166,7 +165,6 @@ alien()  {
   rm  -f  /tmp/lvu.found
   rm  -f  /tmp/lvu.known
 
-  apprentice_on
 }
 
 lvu_catalog()  {

@@ -17,7 +17,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
            COLONY_KEYS=$COLONY_DIRECTORY/keys
          COLONY_OUTPUT=/tmp/colony.output
 
-         APP_LAUNCHERS=/var/lib/lunar/apprentice
               EXCLUDED=/var/lib/lunar/excluded
               MOONBASE=/var/lib/lunar/moonbase
              PROTECTED=/var/lib/lunar/protected
@@ -52,7 +51,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
 #  Or by exporting them before installing or removing.
 
                  LIN=lin
-           APPRENTICE=${APPRENTICE:=off}
               ARCHIVE=${ARCHIVE:=on}
               AUTOFIX=${AUTOFIX:=on}
             AUTOPRUNE=${AUTOPRUNE:=off}

@@ -83,8 +83,6 @@ downgrade()  {
 
     if  module_installed  $MODULE;  then
       lrm  $MODULE
-    else
-      apprentice_off  $MODULE
     fi
 
     bzcat   $CACHE_BZ  |  tar  -Pkx  2>/dev/null
@@ -216,7 +214,6 @@ main()	{
              "${MODULE_COLOR}${MODULE}"           \
              "${DEFAULT_COLOR}"
     activity_log  "lrm"  "$MODULE"  "$VERSION"  "success"
-    apprentice_on  $MODULE
   done
 
   return  $LRM_EXIT_STATUS
