@@ -1,82 +1,57 @@
-.TH "LIN" "8" "July 2003" "Lunar Linux" "LUNAR"
+.TH "LIN" "8" "August 2003" "Lunar Linux" "LUNAR"
 .SH "NAME"
-lin \- lunar install software packages
+lin \- Lunar install software modules
 .SH "SYNOPSIS"
 .B lin
 [options] [package1] ... [package2] ...
 .SH "COPYRIGHT"
-.if n lin(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
-.if t lin(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if n lin(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if t lin(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .SH "EXAMPLE"
 To install emacs type:
 .IP 
 .B lin emacs
 .SH "DESCRIPTION"
 .I lin
-is part of the .SM lunar source\-code package management suite. It is a command\-line tool for automatically retrieving, unpacking, compiling, installing, and tracking software installations. 
+is part of the
+.B Lunar
+source\-code package management suite. It is a command\-line tool for automatically retrieving, unpacking, compiling, installing, and tracking software installations. 
 .SH "OPTIONS"
-.TP 
-.B "\-f, \-\-fix"
-Discover and fix broken modules. Four methods are used to do this. The methods can be toggled using lunar\->Option\->Integrity Checking.
-A fix is automatically issued after a .B lunar update.
-.IP 
-.I "Find Check"
-.IP 
-Discovers missing binary executables, libraries and header files.
-.IP 
-.I MD5 Sum
-.IP 
-Discovers modified executables and libraries.
-.IP 
-.I Ldd Check
-.IP 
-Discovers Broken executables and libraries.
-.IP 
-.I Sym Check
-.IP 
-Discovers miss\-owned symbolic links to files.
-.TP 
-.B "\-n, \-\-nofix"
-Discover broken modules (as \-\-fix) , but does not fix them.
-.TP 
-.B "\-s"
-Download 1st, lin 2nd. eg
-.B lin
-bash fileutils
-.IP 
-Downloads bash and compiles fileutils.
-.TP 
-.B "\-\-deps"
-Configures the modules and determines their dependencies, but they are not
-compiled or installed.
-.TP 
-.B "\-d, \-\-fixdepends"
-Reconstructs the depends database without recompiling modules. This might help if your depends database is missing or corrupted.
 .TP 
 .B "\-c, \-\-compile"
 Compiles module even if there is a compile cache in /var/cache/lunar.
 .TP 
-.B "\-r, \-\-reconfigure"
-Select new configuration and dependencies for modules.
+.B "-d, --debug"
+Enables debug messages, very useful when emailing a bug report.
+.TP
+.B "\-\-deps"
+Configures the modules and determines their dependencies, but they are not
+compiled or installed.
 .TP 
+.B "-f, \-\-from" directory
+Specify an alternate directory to search for source code tarballs. An alternative
+to /var/spool/lunar. 
+.TP 
+.B "\-h, \-\-help"
+Outputs short help.
+.TP
 .B "\-p, \-\-probe"
 Only lin if the module was not previously installed.
 .TP 
-.B "\-\-from directory"
-Specify an alternate directory to search for cached modules. An alternate
-to /var/cache/lunar. Cached modules are modules that your have already
-compiled. There for installation is quick.
+.B "\-r, \-\-reconfigure"
+Select new configuration and dependencies for modules.
 .TP 
-.B "\-\-url URL"
-Specify an alternative download url.
-.TP 
-.B "\-\-pam"
-reinstalls all installed modules that can use Linux\-PAM.
-.TP 
-.B "\-h, \-\-help"
-Display short help.
+.B "\-R, \-\-resurrect"
+Reinstalls a module which has been removed but still has the compiled version available.
+.TP
+.B "-s, --silent"
+Decreases the level of message output.
+.TP
+.B "-v, --verbose"
+Increases the level of message output.
 .SH "FILES"
-All files can be edited by hand, but its easier to edit them with lunar.
+All files can be edited by hand, but its easier to edit them with
+.B lunar.
 .TP 
 .I /etc/lunar/config
 .IP 
@@ -98,9 +73,10 @@ Various local settings and compiler optimization parameters (select with lunar).
 .IP 
 Dependency and configuration information for modules.
 .TP 
-.I /var/lib/lunar/subroutines
+.I /var/lib/lunar/functions/*.lunar
 .IP 
-Contains functions used by .I lin.
+Contains functions used by
+.B lin.
 .I 
 .SH "ENVIRONMENT"
 .PP 
@@ -133,20 +109,19 @@ The optimise setting. Used to configure what optimisations are used while compil
 .IP color
 If set to yes lin outputs nice colour. Green for messages, gray for compiling, yellow for questions, and red for errors.
 .IP PROMPT_DELAY
-The delay in seconds that .B lin gives you when waiting for responses from you.
+The delay in seconds that
+.B lin
+pauses when waiting for responses from you.
 .IP MAIL_REPORTS
-If set to yes 
-.I README
-and
-.I INSTALL
-files along with compiler and installation logs will be mailed to the admin
+If set to yes, installation logs will be mailed to the admin upon a successful compile. Compile logs will be mailed instead upon a failed compilation.
 .IP ADMIN'S_EMAIL
 The mailbox where the reports will be mailed. The admin's email address.
 .IP PRESERVE
-When set to yes, files that have been edited will not get deleted when the module is re\-installed
+When set to yes, configuration files that have been edited will not get deleted when the module is re\-installed
 .IP SOUND
 If set to yes then sounds will be enabled if the
-.I lunar\-sound is installed
+.I lunar\-sound
+module is installed
 .IP SUSTAIN
 When set to yes this disallows removing of modules that would cause terrible malfunctions. eg glibc, gcc, bash, to name some obvious ones. 
 .IP VIEW_REPORTS
@@ -161,11 +136,11 @@ If set to yes whenever a library is updated all packages that depend on that lib
 See the \-f options above for explanations of these.
 .SH "ADVANCED USAGE"
 .PP 
-Installing from an alternate module cache.
+Using source code tarballs from an alternate location.
 .IP 
 lin
 .B \-\-from
-/root/lunar/personal/cache
+/root/spool/lunar
 emacs
 .SH "NOTES"
 Do not include 
@@ -192,6 +167,8 @@ Updated Thomas Stewart 01/15/2002
 Converted to Lunar by Terry Chan 03/23/2002
 .PP 
 Updated by Chuck Mead 07/17/2003
+.PP
+Updated by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"

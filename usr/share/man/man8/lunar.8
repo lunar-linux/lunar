@@ -51,8 +51,25 @@ jump straight into the compiler optimizations menu.
 .PP 
 .I fix
 .IP 
-Check and fix all modules and internal state of lunar.
-.PP 
+Check and fix all modules and internal state of lunar. Four methods are available.  The methods can be toggled using lunar\->Option\->Integrity Checking.  A fix is automatically issued afer a
+.B lunar update.
+.IP 
+.I "Find Check"
+.IP 
+Discovers missing binary executables, libraries and header files.
+.IP 
+.I MD5 Sum
+.IP 
+Discovers modified executables and libraries.
+.IP 
+.I Ldd Check
+.IP 
+Discovers Broken executables and libraries.
+.IP 
+.I Sym Check
+.IP 
+Discovers mis\-owned symbolic links to files.
+.TP 
 .I nofix
 .IP 
 Check but do not fix modules and internal state.
@@ -60,6 +77,7 @@ Check but do not fix modules and internal state.
 .I fixdepends
 .IP 
 Check and fix the dependency database of lunar.
+Reconstructs the depends database without recompiling modules. This might help if your depends database is missing or corrupted.
 .PP 
 .I resurrect
 .IP 
