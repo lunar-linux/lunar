@@ -297,6 +297,15 @@ run_build()  {
     fi
   fi
 
+  # automatically apply patches
+  if [ -d $SCRIPT_DIRECTORY/patch ]; then
+    message "${MESSAGE_COLOR}Applying auto-patches...${DEFAULT_COLOR}"
+    for P in $( ls $SCRIPT_DIRECTORY/patch/* | grep -v CVS ); do
+      message "${FILE_COLOR}$(basename $P):${DEFAULT_COLOR}"
+      patch -p1 < $P
+    done
+  fi
+
   if  [  -x  $SCRIPT_DIRECTORY/BUILD  ];  then
           .  $SCRIPT_DIRECTORY/BUILD
   else
