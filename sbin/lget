@@ -52,6 +52,11 @@ EOF
 
 use_cvs() {(
   run_details && if [[ $CVS_SERVER ]]; then
+
+    if ! module_installed cvs ; then
+      message "${PROBLEM_COLOR}Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
+      exit 1
+    fi
     
     message  "${MESSAGE_COLOR}Downloading CVS module"                      \
              "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
@@ -62,6 +67,8 @@ use_cvs() {(
 
     export CVSROOT=$CVS_SERVER
 
+    [ -f ~/.cvspass ] || touch ~/.cvspass
+
     if [[ $CVS_LOGIN ]]; then
       echo "$CVS_LOGIN" | cvs login
     fi
@@ -71,12 +78,15 @@ use_cvs() {(
     fi
 
     if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
+      [ "$VERBOSE"=="on" ] && echo "+ Extracting old CVS source tarball"
       tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
     fi
 
     if [[ -d $CVS_MODULE/CVS ]]; then
+      [ "$VERBOSE"=="on" ] && echo "+ cvs -qz3 up -PAd $CVS_MODULE"
       cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
     elif ! [[ -d CVS ]]; then
+      [ "$VERBOSE"=="on" ] && echo "+ cvs -qz3 co $CVS_MODULE"
       cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
     fi
 
