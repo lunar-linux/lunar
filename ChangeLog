@@ -36,8 +36,3 @@
 	* var/lib/lunar/functions/download.lunar: Did not spot this typo
 	before...
 
-2003-03-30 20:45  sofar
-
-	* usr/share/man/: man1/lvu.1, man8/lunar.8: updating these man
-	pages!
-
