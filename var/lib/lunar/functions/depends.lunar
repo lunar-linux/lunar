@@ -388,3 +388,15 @@ create_depends_cache() {
     verbose_msg "Skipping depends cache regeneration"
   fi
 }
+
+
+# list all installed modules depending on $1
+list_installed_depending() {
+  debug_msg "list_installed_depending($2)"
+  for SUBDEP in $(grep ":$1:on:required" $DEPENDS_STATUS | cut -d: -f1 | sort | uniq) ; do
+    if $(module_installed $SUBDEP ) ; then
+      list_installed_depending $SUBDEP | sort | uniq
+      echo $SUBDEP
+    fi
+  done
+}

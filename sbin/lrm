@@ -27,6 +27,8 @@ usage: lrm [options] [module ...]
    -k | --keepconfig    remove module(s) but keep dependencies and config
    -n | --nosustain     removes module(s) even if they are sustained
    -v | --verbose       Increases the level of message output
+   -p | --purge         Delete all modules that depend on the module(s)
+                          being removed as well
    
 lrm is a script for removing installed modules.
    If invoked without options, lrm will remove all installed files 
@@ -285,7 +287,7 @@ downgrade() {
 . /etc/lunar/config
 
 
-GETOPT_ARGS=$(getopt -q -n lrm -o "dD:hknv" -l "debug,downgrade:,help,keepconfig,nosustain,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lrm -o "dD:hknvp" -l "debug,downgrade:,help,keepconfig,nosustain,verbose,purge" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -310,6 +312,7 @@ else
      -k|--keepconfig ) export KEEPCONFIG="on" ; shift ;;
      -n|--nosustain  ) export NOSUSTAIN="on" ; shift ;;
      -v|--verbose    ) export VERBOSE="on" ; shift ;;
+     -p|--purge      ) export PURGE="on" ; shift ;;
      --) shift; break ;;
       *) help;  break ;;
    esac
@@ -317,7 +320,25 @@ else
 
   for MODULE in "${@#-}" ; do
     if check_status "$MODULE" ; then
-      LIST="$LIST $MODULE"
+      # assemble pureg list if requested
+      if [ "$PURGE" == "on" ] ; then
+        DEPS=$(list_installed_depending "$MODULE")
+        for DEP in $DEPS ; do
+          # skip held modules
+          if ! module_held $DEP ; then
+	    # no duplicates
+	    if ! $(echo $LIST | grep -qw $DEP) ; then
+              message "${MESSAGE_COLOR}Inserting ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} into the removal queue${DEFAULT_COLOR}"
+              LIST="$LIST $DEP"
+	    fi
+          fi
+        done
+	# last append the module itself
+	LIST="$LIST $MODULE"
+      else
+        # no fancy checks, just add to the list
+        LIST="$LIST $MODULE"
+      fi
     fi
   done
   for MODULE in $LIST ; do
