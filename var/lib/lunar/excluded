@@ -16,6 +16,9 @@
 /etc/nsswitch.conf
 /etc/passwd
 /etc/passwd-
+/etc/postfix/main.cf
+/etc/postfix/master.cf
+/etc/postfix/aliases
 /etc/protocols
 /etc/services
 /etc/shadow
