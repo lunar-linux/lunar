@@ -1,3 +1,14 @@
+2005-03-09 13:23  moe
+
+	* var/lib/lunar/functions/prune.lunar: wheeps .. committed a
+	  slightly older version. This is the final solution.
+
+2005-03-09 13:17  moe
+
+	* var/lib/lunar/functions/prune.lunar: Fixing lunar prune for good.
+	  God, this has been bothering me. Might break things .. but this
+	  is theedge ;-) However, I've been giving it a good test.
+
 2005-03-08 07:48  moe
 
 	* usr/share/man/man8/lfirsttime.8: Typo
