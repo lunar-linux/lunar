@@ -363,17 +363,3 @@
 	(l228,l296). PLEASE LEAVE IT OUT NOW, since doing this belongs in
 	the lrm code.
 
-2003-02-14 15:52  tchan
-
-	* var/lib/lunar/subroutines: Added back in the "missing" call to
-	remove_modules.  I believe it is still required and was removed by
-	sofar accidentally in his clean up.
-
-2003-02-14 00:06  sofar
-
-	* sbin/lin, sbin/lunar, var/lib/lunar/excluded,
-	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar:
-	Major code update, including VERBOSE flag (default off, cos lin is
-	still noisy), lots and lots of core rewrites, optimizations,
-	formatting and spacing, removal of old and unused code, etc.
-
