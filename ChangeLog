@@ -1,3 +1,19 @@
+2003-11-11 18:39  elaine
+
+	* var/lib/lunar/functions/install.lunar: Always keep a copy of the
+	scripts used to create a module. This is intended to be useful for
+	general backtracking, debugging and to provide an adjunct to the
+	activity file to know what's been done without resorting to cvs
+	history.
+	
+	Also safeguards local development work for devs who overwrite their
+	work with 'lin moonbase' and the like (and yes this is the *real*
+	reason for adding this little hack).
+	
+	Adding this to post_install because at this point we know that we
+	have a successful install (logs and everything have in theory been
+	created by the time we get here.
+
 2003-11-09 15:18  sofar
 
 	* bin/lvu: lvu tree fix. thanks lurch!
@@ -155,15 +171,4 @@
 	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to
 	the excluded list because sometimes they get deleted by
 	scrollkeeper or libglade2
-
-2003-09-12 02:11  elaine
-
-	* usr/share/man/man8/lin.8: Added clarification to manual page -V
-	version names must begin with [0-9]
-
-2003-09-12 00:33  niki
-
-	* sbin/lunar, var/lib/lunar/functions/main.lunar,
-	var/lib/lunar/menu/integrity.menu: Moved the rest of the
-	depreciated "lin --fix" over to "lunar fix".
 
