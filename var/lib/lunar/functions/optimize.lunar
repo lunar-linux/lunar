@@ -61,10 +61,10 @@ optimize_make() {
   fi
   if module_installed linux-openmosix; then
     alias make="mosrun -h make"
-    if [ "$MAKES" > 1 ] ]; then
+    if [[ "$MAKES" > 1 ]] ; then
       alias make="mosrun -h make -j$MAKES"
     fi
-  elif [ "$MAKES" > 1 ] ; then
+  elif [[ $MAKES > 1 ]] ; then
     alias make="make -j$MAKES"
   fi
   verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
@@ -582,8 +582,8 @@ optimize_speed() {
 
 optimize_stack() {
   debug_msg "optimize_stack ($@)"
-  if [[ $STACK > 0 ]]; then
-    if [[ $PLATFORM == "x86" ]]; then
+  if [[ $STACK > 0 ]] ; then
+    if [ $PLATFORM == "x86" ] ; then
       STACK="-mpreferred-stack-boundary=$STACK" 
     fi
       CFLAGS="$CFLAGS $STACK"
