@@ -832,7 +832,7 @@ main()  {
 	  
     md5sum)
       if [ -n "$2" ] ; then
-        if ! md5sum_files "$INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2)" ; then
+        if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
 	  md5sum_files  "$INSTALL_LOGS/*"
         fi
       fi
@@ -998,11 +998,11 @@ main()  {
 
     compile)
       run_details $2 ; 
-        if [ -f $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2 ] ; then
-          view_file $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2
+        if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
+          view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
         else
           VERSION=$(installed_version $2)
-          view_file $COMPILE_LOGS/$MOD_V_SNAME-$(installed_version $2).bz2 \
+          view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
              "Compile log for $2 does not exist"
         fi
       #fi
@@ -1010,7 +1010,7 @@ main()  {
 	      
    install)
      if run_details $2 ; then
-       view_file $INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2) \
+       view_file $INSTALL_LOGS/$2-$(installed_version $2) \
            "Install log for $2 does not exist"
      fi
      ;;
