@@ -346,7 +346,7 @@ build_depends()  {
 create_depends_cache() {
   debug_msg "create_depends_cache($@)"
 
-  if [ ! -w $DEPENDS_CACHE ] ; then
+  if [ ! -w $DEPENDS_CACHE -a -e $DEPENDS_CACHE ] ; then
     return 1
   fi
 
