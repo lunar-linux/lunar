@@ -859,25 +859,21 @@ main()  {
       ;;
       
     search)
-      for SECTION in $(list_sections) ; do
-        for MODULE in $(list_modules $SECTION) ; do
-        (
-          run_module_file $MODULE DETAILS | grep -q -i "$2" &&
-          echo "$SECTION/$MODULE"
-        )
-	done
-      done
+      cat $MODULE_INDEX | grep -v 'MOONBASE_MD5' | while read ENTRY ; do
+        MOD=$(echo $ENTRY | cut -d: -f1)
+	SEC=$(echo $ENTRY | cut -d: -f2)
+        echo $MOONBASE/$SEC/$MOD/DETAILS
+      done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
       
     service)
-      for SECTION in $(list_sections) ; do
-        for MODULE in $(list_modules $SECTION) ; do
-          if [ -f $MOONBASE/$SECTION/$MODULE/services ] && 
-              grep -q -i "$2" $MOONBASE/$SECTION/$MODULE/services ; then
-            echo "$SECTION/$MODULE"
-          fi
-	done
-      done
+      cat $MODULE_INDEX | grep -v 'MOONBASE_MD5' | while read ENTRY ; do
+        MOD=$(echo $ENTRY | cut -d: -f1)
+	SEC=$(echo $ENTRY | cut -d: -f2)
+	if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
+	  echo $MOONBASE/$SEC/$MOD/services
+	fi
+      done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
       
     depends)
@@ -997,23 +993,22 @@ main()  {
      ;;
 
    links)
-     if [ -z "$2" ] ; then
-       return 1
-     else
-       for FILE in $(lvu install $2) ; do
-         TYPE=$(file $FILE | cut -d' ' -f2)
-         if [[ "$TYPE" == "ELF" ]] ; then
-           BINARIES="$BINARIES $FILE"
-           verbose_msg "found binary: \"$FILE\""
-         fi
-       done
-       for BINARY in $BINARIES ; do
-         LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
-       done
-       for LINK in $LINKSTO ; do
-         lvu from $LINK | cut -d: -f1
-       done | sort | uniq
-     fi
+     [[ -z "$2" ]] && return 1
+
+     REGEX=""
+     for LINK in `lvu install $2 | xargs file | awk -F: '/ELF/ { print $1 }' | xargs ldd | egrep -v ':$' | cut -d' ' -f3 | sort | uniq`
+     do
+	 if [[ -z $REGEX ]]
+	 then
+	 	REGEX="($LINK)"
+	 else
+	 	REGEX="${REGEX}|($LINK)"
+	 fi
+     done
+
+     pushd $INSTALL_LOGS >/dev/null
+     egrep -l "$REGEX" *
+     popd >/dev/null
      ;;
      
    what)
