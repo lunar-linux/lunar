@@ -36,6 +36,9 @@ set_config() {
 
   lock_file $1 &&
   if [ -n "$LINE" ] ; then
+    # make sure we escape those ':' characters:
+    LINE=$(echo $LINE | sed 's/:/\\:/g')
+    NEW=$(echo $NEW | sed 's/:/\\:/g')
     sedit "s:$LINE:$NEW:" $1
   else
     echo "$NEW" >> $1
