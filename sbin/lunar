@@ -34,15 +34,15 @@ Lunar -- a menu-driven software package management utility
 Example:        lunar
   This invokes the full-screen interface
   
-Usage:		lunar [optional parameters] [parameters]
+Usage:		lunar [general options] [command [command parameters]]
 
-Optional Parameters:
+General options:
 
 -d  |  --debug                  Enables debug messages
 -h  |  --help                   Displays this help text
 -v  |  --verbose                Increases the level of message output
 
-Parameters:
+Commands:
 
 prune                   Removes old sources and install/compile logs
 renew                   Checks ver. against moonbase & recompiles if necessary
@@ -50,6 +50,7 @@ update                  Fetches latest moonbase and then does a "renew"
 rebuild                 Recompiles all installed modules
 optimize                Shortcut to the optimization menu
 fix                     Check and fix all modules and internal state of lunar
+nofix                   Check but do not fix modules and internal state
 fixdepends              Check and fix the dependency database of lunar
 resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
 install    modulename(s)  Install a checklist of modules
@@ -439,10 +440,10 @@ queue_menu()  {
 
 maintenance_menu() {
   while
-    F_HELP="lin --fix: Check and fix all modules and internal state of lunar"
-    N_HELP="lin --nofix: Check all modules but do not fix the internal state"
-    D_HELP="lin --fixdepends: Check and fix the dependency database of lunar"
-    P_HELP="lunar prune: Prune old sources and install/compile logs"
+    F_HELP="Check and fix all modules and internal state of lunar"
+    N_HELP="Check all modules but do not fix the internal state"
+    D_HELP="Check and fix the dependency database of lunar"
+    P_HELP="Prune old sources and install/compile logs"
     
     COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
                       --ok-label      "Select"                           \
@@ -458,10 +459,10 @@ maintenance_menu() {
 		      "P"     "Prune old sources and logs"     "$P_HELP"`
   do
     case $COMMAND in
-     F)  lin --fix        ;;
-     N)  lin --nofix      ;;
-     D)  lin --fixdepends ;;
-     P)  lunar prune      ;;
+     F)  lunar fix          ;;
+     N)  lunar nofix        ;;
+     D)  lunar fixdepends   ;;
+     P)  lunar prune        ;;
     esac
     message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
     read
@@ -818,7 +819,7 @@ main() {
   
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lunar -o "dv" -l "debug,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lunar -o "dhv" -l "debug,help,verbose" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -840,20 +841,21 @@ else
   done
 
   case "$1" in
-    prune    )  prune                         ;;
-    renew    )  renew                         ;;
-    update   )  update                        ;;
-    rebuild  )  rebuild                       ;;
-    optimize )  optimize_architecture         ;;
-    fix      )  shift && run_fix $@           ;;
-    fixdepends) shift && fix_depends $@       ;;
-    resurrect)  shift && resurrect_modules $@ ;;
-    install  )  shift && lin $@               ;;
-    remove   )  shift && lrm $@               ;;
-    hold     )  shift && hold_modules $@      ;;
-    unhold   )  shift && unhold_modules $@    ;;
-    exile    )  shift && exile_modules $@     ;;
-    unexile  )  shift && unexile_modules $@   ;;
+    prune      ) prune                                  ;;
+    renew      ) renew                                  ;;
+    update     ) update                                 ;;
+    rebuild    ) rebuild                                ;;
+    optimize   ) optimize_architecture                  ;;
+    fix        ) shift && run_fix $@                    ;;
+    nofix      ) shift && export NOFIX=on && run_fix $@ ;;
+    fixdepends ) shift && fix_depends $@                ;;
+    resurrect  ) shift && resurrect_modules $@          ;;
+    install    ) shift && lin $@                        ;;
+    remove     ) shift && lrm $@                        ;;
+    hold       ) shift && hold_modules $@               ;;
+    unhold     ) shift && unhold_modules $@             ;;
+    exile      ) shift && exile_modules $@              ;;
+    unexile    ) shift && unexile_modules $@            ;;
     *) main ;; 
   esac
 fi

@@ -526,21 +526,13 @@ function show_tree() {
 
 show_urls() { (
   # function overrides:
-  call_wget() {
-    echo $@
-  }
-  guess_filename() {
-    false
-  }
-  file() {
-    return
-  }
-  mv() {
-    return
-  }
-  get_cvs() {
-    return
-  }
+  call_wget() { echo $@ ; }
+  guess_filename() { false ; }
+  file() { return ; }
+  mv() { return ; }
+  get_cvs() { return ; }
+  testpack() { return ; }
+  connect() { return ; }
  
   SILENT=on
   VERBOSE=off
@@ -560,7 +552,7 @@ show_urls() { (
 ) }
 
 
-parse()  {
+main()  {
   case $1 in
     html)
       lvu_catalog_html
@@ -892,16 +884,32 @@ parse()  {
 }
 
 
-  # main program loop
-  . /etc/lunar/config
 
+. /etc/lunar/config
+
+GETOPT_ARGS=$(getopt -q -n lvu -o "dhv" -l "debug,help,verbose" -- "$@")
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  export IFS="$STANDARD_IFS"
+  
   set_priority
+  
+  while true ; do
+    case "$1" in
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -h|--help        ) help ; exit                                        ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
 
-  if [ $# == 0 ] ; then
-    help | view_file
-  else
-    parse $@
-  fi
+  main $@
+fi
 
 
 
