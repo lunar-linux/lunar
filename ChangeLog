@@ -1,3 +1,9 @@
+2004-07-09 19:43  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: Slightly modified after
+	ranitha's optimize patch for gcc-3.4.x. This will transform the
+	obsolete -mcpu into -mtune.
+
 2004-07-06 20:21  sofar
 
 	* var/lib/lunar/functions/edit.lunar: Allow patches to be searched
@@ -104,21 +110,4 @@
 
 	* var/lib/lunar/functions/depends.lunar: Bad is when this file is
 	missing and it never gets created...
-
-2004-05-10 15:31  sofar
-
-	* var/lib/lunar/functions/check.lunar: This is a fix for 'lunar
-	fix' looping on clean installs: <sofar|work> yeah I did some chroot
-	crunching ;^) <sofar|work> on a clean ISO <sofar|work> there's
-	md5sum mismatches in glibc's libxxx.a files that trigger it
-	<sofar|work> then ENV var pollution makes the wrong files
-	rebuild... you get the rest
-
-2004-05-10 11:46  sofar
-
-	* var/lib/lunar/functions/recovery.lunar: This way recovery even
-	recovers the approximate install date. I've tested this on many
-	boxes now and it's absolutely wonderfull. Considering putting this
-	in the lunar maintenance menu so people can use it (although it's
-	still mopping up after some other part goofs up)
 
