@@ -1,3 +1,13 @@
+2003-11-16 00:19  hardkrash
+
+	* var/lib/lunar/functions/: install.lunar, messages.lunar: added
+	xterm status messages
+
+2003-11-15 14:52  elaine
+
+	* var/lib/lunar/functions/depends.lunar: Just pushing around the
+	formatting again
+
 2003-11-14 17:37  tchan
 
 	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
@@ -162,8 +172,4 @@
 
 	* bin/lvu, sbin/lget: lget - added -V |--Version syntax luv
 	corrected 'versions' command oper.
-
-2003-09-16 21:23  sofar
-
-	* var/lib/lunar/functions/main.lunar: Bugfix #372
 
