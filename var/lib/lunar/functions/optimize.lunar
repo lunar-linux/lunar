@@ -682,7 +682,7 @@ optimize_platform() {
    GCCVER="$1"
 
    case $PLATFORM in
-      x86)      optimaze_make  $MAKES      &&
+      x86)      optimize_make  $MAKES      &&
                 optimize_cc    $CC         &&
                 optimize_ccc   $CCC        &&
                 optimize_base  $BOPT       &&
