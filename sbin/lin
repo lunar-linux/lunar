@@ -35,27 +35,16 @@ Usage:		lin  [parameters]  [module]
 
 Optional Parameters:
 
--f  |  --fix			Discover and fix broken modules
--n  |  --nofix			Discover, but do not fix broken modules
--d  |  --fixdepends             Discover and fix dependency problems, but
-                                do not recompile modules
-
--s				Download 1st, lin 2nd
-    |  --deps			Configure modules and determine dependencies, 
-				but do not lin.
-
-       --debug                  show debug output
--p  |  --probe                  Only lin if not already installed
-
 -c  |  --compile		Ignore $INSTALL_CACHE and compiles
+-d  |  --debug                  Enables debug messages
+       --deps			Configure modules and determine dependencies, 
+-f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
+-h  |  --help                   Displays this help text
+-p  |  --probe                  Only lin if not already installed
 -r  |  --reconfigure		Select new dependencies for modules
-
-       --from	directory	Specify an alternate for $SOURCE_CACHE
-       --url	URL		Specify an alternate download URL
-
-       --pam			re-lins all installed modules that
-				can use Linux-PAM
-
+-R  |  --resurrect              Force module to be unpacked from /var/cache/lunar
+-s  |  --silent			Decreases the level of message output
+-v  |  --verbose                Increases the level of message output
 EOF
   exit  1
 }

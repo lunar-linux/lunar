@@ -19,13 +19,12 @@
 help() {
 cat << END
 usage: lrm [options] [module ...]
-   -h  --help        displays this screen
-       --debug       debug output
-   -d  --downgrade   [module] [version] downgrades a module
-   -s  --nosustain   removes module(s) even if they are sustained
-   -k  --keepconfig  remove module(s) but keep dependencies and config
-   -t  --test        test only, do not actually do anything
-   -V  --version     display version information and exit
+   -d | --debug         Enables debug messages
+   -D | --downgrade [module] [version] downgrades a module
+   -h | --help          Displays this help text
+   -k | --keepconfig    remove module(s) but keep dependencies and config
+   -n | --nosustain     removes module(s) even if they are sustained
+   -v | --verbose       Increases the level of message output
    
 lrm is a script for removing installed modules.
    If invoked without options, lrm will remove all installed files 
@@ -327,7 +326,7 @@ create_lrm_queue() {
 
 
 
-GETOPT_ARGS=$(getopt -q -n lin -o "dD:hknv" -l "debug,downgrade:,help,keepconfig,nosustain,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lrm -o "dD:hknv" -l "debug,downgrade:,help,keepconfig,nosustain,verbose" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file

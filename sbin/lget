@@ -41,8 +41,11 @@ every available source specified in the moonbase.
 
 Optional Parameters:
 
-       --from directory Specify an alternate for $SOURCE_CACHE
-       --url URL  Specify an alternate download URL
+   -d | --debug                 Enables debug messages
+   -f | --from  directory       Specify an alternate for $SOURCE_CACHE
+   -h | --help                  Displays this help text
+   -u | --url     URL           Specify an alternate download URL
+   -v | --verbose               Increases the level of message output
 EOF
 
   exit  1
@@ -83,7 +86,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lget -o "dfhuv" -l "debug,from,help,url,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "df:hu:v" -l "debug,from:,help,url:,verbose" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file

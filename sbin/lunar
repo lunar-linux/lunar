@@ -27,6 +27,41 @@
 ############################################################
 
 
+help()	{
+  cat  <<  EOF
+Lunar -- a menu-driven software package management utility
+
+Example:        lunar
+  This invokes the full-screen interface
+  
+Usage:		lunar [optional parameters] [parameters]
+
+Optional Parameters:
+
+-d  |  --debug                  Enables debug messages
+-h  |  --help                   Displays this help text
+-v  |  --verbose                Increases the level of message output
+
+Parameters:
+
+prune                   Removes old sources and install/compile logs
+renew                   Checks ver. against moonbase & recompiles if necessary
+update                  Fetches latest moonbase and then does a "renew"
+rebuild                 Recompiles all installed modules
+optimize                Shortcut to the optimization menu
+fix                     Check and fix all modules and internal state of lunar
+fixdepends              Check and fix the dependency database of lunar
+resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
+install    modulename(s)  Install a checklist of modules
+remove     modulename(s)  Remove a checklist of modules
+hold       modulename(s)  Place a hold on a checklist of modules
+unhold     modulename(s)  Remove a hold on a checklist of modules
+exile      modulename(s)  Remove a module and prevent it from being resurrected
+unexile    modulename(s)  Allows a module to be compiled|resurrected again
+EOF
+  exit  1
+}
+
 show_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
