@@ -156,25 +156,3 @@
 
 	* bin/lvu: Fix for lvu what problem encountered by wizfactor.
 
-2003-04-22 21:37  sofar
-
-	* var/lib/lunar/subroutines: Prevent moonbase to be tagged for
-	removal on a lunar update.
-
-2003-04-22 15:32  sofar
-
-	* var/lib/lunar/functions/moonbase.lunar: Atomizing get_moonbase,
-	making use of download_module etc. Adding support for install log
-	too, as well as updating the installed list.
-
-2003-04-22 12:08  sofar
-
-	* var/lib/lunar/functions/messages.lunar: small nitpicking in ayle
-	6
-
-2003-04-22 11:01  sofar
-
-	* var/lib/lunar/: subroutines, functions/prune.lunar: Moving prune
-	code out, several cosmetic and non-cosmetic prune fixes. Prune code
-	seems okay here. (slow but correct behaviour)
-
