@@ -315,6 +315,7 @@ run_fix()  {
   if [ -z "$EXPORT_LD_PATH" ] ; then
     verbose_msg "Saving LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
     export EXPORT_LD_PATH=$(find /usr/lib -type d ! -empty)
+  fi
   if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
     LD_LIBRARY_PATH_OLD="$LD_LIBRARY_PATH"
     export_ld $EXPORT_LD_PATH
