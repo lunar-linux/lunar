@@ -565,51 +565,9 @@ function show_tree() {
 
 
 show_eert() {
-  # yup, here we go again:
-  run_depends() {
-    # local definitions
-    function depends() {
-      debug_msg "depends ($@)"
-      echo "+$1"
-    }
-
-    optional_depends() {
-      debug_msg "optional_depends ($@)"
-      echo "-$1"
-    }
-    
-    debug_msg "run_depends ($@)"
-    SECTION=$(grep "^$1:" $MODULE_INDEX | cut -d: -f2)
-    CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-    if [ -f $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH
-    elif [ -f $MOONBASE/$SECTION/$1/DEPENDS ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS
-    fi
-  }
-
-  # this is tricky, so lets not make any mistakes:
-  if [ -z "$TMP_DEPLIST" ] ; then
-    FLAG=1
-    TMP_DEPLIST=$(temp_create "all-dependencies")
-    trap "rm -f $TMP_DEPLIST ; exit" INT KILL TERM
-    # fill the tree
-    if [ -n "$SHORTTREE" ] ; then
-      # short: whatever is in the depends db
-      cat $DEPENDS_STATUS | sed -e 's/:optional:/:-:/g' -e 's/:required:/:+:/g' | awk -F: '{print $1":"$4$2}' > $TMP_DEPLIST
-    else
-      # long: gather ALL dependencies, no matter installed, held or not
-      for MODULE in $(list_moonbase) ; do
-        run_depends $MODULE | while read DEP ; do
-          echo "$MODULE:$DEP" >> $TMP_DEPLIST
-        done
-      done
-    fi
-  fi
-
   show_rtree() {
     # we need to do an reverse tree for $1
-    RDEPS=$(grep ":[+-]$1$" $TMP_DEPLIST | cut -d: -f1 | sort | uniq)
+    RDEPS=$(grep ":$1:" $DEPENDS_CACHE | cut -d: -f1 | sort | uniq)
 
     if module_installed $1 ; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -618,9 +576,9 @@ show_eert() {
     fi
     
     for DEP in $RDEPS ; do
-      CUR=$(grep "^$DEP:[+-]$1" $TMP_DEPLIST | cut -d: -f2 | uniq)
-      CUR=${CUR:0:1}
-      if [ "$CUR" == "+" ] ; then
+      REL=$(grep "^$DEP:$1:" $DEPENDS_CACHE)
+      CUR=$(echo $REL | cut -d: -f1)
+      if echo $REL | grep -q :required: ; then
         if module_installed $DEP ; then
           STR="$STR${FILE_COLOR}$DEP ${DEFAULT_COLOR}"
         else
@@ -632,7 +590,6 @@ show_eert() {
         else
           STR="$STR${LRM_COLOR}[$DEP] ${DEFAULT_COLOR}"
         fi
-
       fi
     done
 
