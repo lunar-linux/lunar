@@ -42,6 +42,8 @@ Optional Parameters:
     |  --deps			Configure modules and determine dependencies, 
 				but do not lin.
 
+-p  |  --probe                  Only lin if not already installed
+
 -c  |  --compile		Ignore $INSTALL_CACHE and compiles
 -r  |  --reconfigure		Select new dependencies for modules
 
@@ -628,6 +630,7 @@ process_parameters()  {
                   --deps)  export  DEPS_ONLY="$1";      shift 1  ;;
         -r|--reconfigure)  RECONFIGURE="$1";            shift 1  ;;
             -c|--compile)  COMPILE="$1";                shift 1  ;;
+	      -p|--probe)  PROBE="yes";                 shift 1  ;;
                   --from)  export  SOURCE_CACHE=$2;     shift 2  ;;
                 --silent)  SILENT="$1";                 shift 1  ;;
                 -f|--fix)  export  FIX="$1";            shift 1  ;;
@@ -654,6 +657,7 @@ strip_parameters()  {
                 -f|--fix)  shift 1  ;;
               -n|--nofix)  shift 1  ;;
             -c|--compile)  shift 1  ;;
+	      -p|--probe)  shift 1  ;;
                       -s)  shift 1  ;;
                    --url)  shift 2  ;;
                    --pam)  shift 1  ;;
@@ -794,6 +798,11 @@ current_locked()  {
 }
 lin_modules()  {
   for  MODULE  in  $MODULES;  do
+  
+    if [ -n "$PROBE" ] ; then
+      module_installed $MODULE && continue
+    fi
+
     apprentice_off  $MODULE
     linING="/var/lock/installing.$MODULE"
 
@@ -834,7 +843,12 @@ run_lget()  {
 build_depends()  {
 
   for  MODULE  in  $MODULES;  do
-    ( run_details    &&
+    ( 
+      if [ -n "$PROBE" ] ; then
+        module_installed $MODULE && continue
+      fi
+      
+      run_details    &&
       run_configure  &&
       run_depends    &&
       satisfy_depends
@@ -850,7 +864,12 @@ pass_one()  {
 }
 build_sources()  {
   for  MODULE  in  $MODULES;  do
-    ( run_details      &&
+    (
+      if [ -n "$PROBE" ] ; then
+        module_installed $MODULE && continue
+      fi
+
+      run_details      &&
       satisfy_depends  &&
       run_lget
     )
