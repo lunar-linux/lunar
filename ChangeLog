@@ -192,22 +192,3 @@
 
 	* var/lib/lunar/subroutines: hmm, this seems more logical.
 
-2003-02-24 22:55  sofar
-
-	* sbin/lget, sbin/lin, sbin/lrm, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/postbuild.lunar: large rewrite of verbose
-	messages:
-	
-	- verbose_msg is now a main function - the function always returns
-	true hence fixing the wiped depends problem - migrated all calls to
-	new scheme - split up lunar messages functions to messages.lunar -
-	split up editing functions to edit.lunar - made lrm slightly less
-	verbose
-
-2003-02-24 20:01  kc8apf
-
-	* var/lib/lunar/excluded: Add mailman site config to excluded
-
