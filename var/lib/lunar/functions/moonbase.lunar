@@ -12,6 +12,10 @@
 get_moonbase () {
 (
   debug_msg "get_moonbase  ($@)"
+  if $(module_held "moonbase") ; then
+    verbose_msg "Skipping compile and install for held module \"moonbase\""
+    return
+  fi
 
   SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
