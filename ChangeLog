@@ -206,13 +206,3 @@
 
 	* var/lib/lunar/functions/init.lunar: fix indent'n
 
-2003-12-10 18:07  elaine
-
-	* var/lib/lunar/functions/install.lunar: trimmed HHMM from
-	module_history tarball filename
-
-2003-12-10 16:52  elaine
-
-	* var/lib/lunar/functions/init.lunar: Working around the readonly
-	variables sothat enviro_check won't complain during iso/install
-
