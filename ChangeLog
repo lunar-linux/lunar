@@ -1,3 +1,10 @@
+2004-11-04 09:31  sofar
+
+	* var/lib/lunar/functions/messages.lunar: Adding the 'mquery'
+	  function wrapper. This will be used later to simplify writing
+	  CONFIGURE statements (of course it also will work from BUILD but
+	  you shouldn't do that)
+
 2004-11-01 07:56  sofar
 
 	* var/lib/lunar/functions/modules.lunar: this must have slipped
