@@ -15,9 +15,10 @@ push_uniq_id() {
   fi
  
   verbose_msg "registering \"$UNIQID\" with server"
-  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID" &>/dev/null
-  
+  wget -q -O - "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID" 
+
 }
+
 
 create_uniq_id() {
   if [ $UNIQID >= "" ]; then 

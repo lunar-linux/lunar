@@ -79,6 +79,7 @@ prepare_module_config()  {
 }
 
 
+# run the CONFIGURE script
 run_configure() {
   if [ -n "$RECONFIGURE" ];  then
     verbose_msg "Reconfiguring \"$MODULE\""
@@ -382,7 +383,8 @@ lin_module()  { (
     return 1
   fi
 
-  if [ "$AUTORESURRECT" == "on" ] ; then
+  # resurrect if we can, but not is -c was issued
+  if [ "$AUTORESURRECT" == "on" -a -n "$COMPILE" ] ; then
     if resurrect $MODULE ; then
       return 0
     fi

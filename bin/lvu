@@ -100,15 +100,15 @@ export_snapshot()  {
   cp  -a  /etc           $SOURCE_DIRECTORY
   cp  -a  $CONFIG_CACHE  $SOURCE_DIRECTORY
 
-  for  LINE  in  `cat  $MODULE_STATUS`;  do
-    MODULE=`echo  $LINE  |  cut  -d  :  -f1`
-     STATUS=`echo  $LINE  |  cut  -d  :  -f2`
+  for  LINE  in  $(cat  $MODULE_STATUS) ;  do
+    MODULE=$(echo  $LINE  |  cut  -d  :  -f1)
+     STATUS=$(echo  $LINE  |  cut  -d  :  -f2)
     if  [  "$STATUS"  ==  "installed"  ];  then
       echo  $MODULE  >>  /usr/src/snapshot/install
     fi
   done
 
-  SNAPSHOT="/root/snapshot-$HOSTNAME-`date  -u  +%Y%m%d`.tar.bz2"
+  SNAPSHOT="/root/snapshot-$HOSTNAME-$(date  -u  +%Y%m%d).tar.bz2"
 
   cd  $BUILD_DIRECTORY
   tar    -c  snapshot     |
@@ -129,7 +129,7 @@ import_snapshot()  {
     bzcat $SNAPSHOT  |  tar  -x
     cd  $SOURCE_DIRECTORY
 
-    for  LINE  in  `cat  install`;  do
+    for  LINE  in  $(cat  install);  do
       push_install_queue  $LINE
     done
     report  $INSTALL_QUEUE  "Install Queue"
@@ -148,14 +148,14 @@ import_snapshot()  {
 
 
 checksum() {
-  for FILE in `cat $1 | files` ; do
+  for FILE in $(cat $1 | files) ; do
     sum -s  $FILE
   done
 }
 
 
 md5sum_files() {
-  for FILE in `cat $1 | files` ; do
+  for FILE in $(cat $1 | files) ; do
     md5sum  $FILE
   done
 }
@@ -190,16 +190,16 @@ alien() {
 
 
 lvu_catalog()  {
-  echo  "Lunar Moonbase for `date  -u`"
+  echo  "Lunar Moonbase for $(date  -u)"
 
   ((  COUNT=0  ))
 
-  for  SECTION  in  `list_sections`;  do
+  for  SECTION  in  $(ist_sections);  do
     echo 
     echo  "-------------------------------------------------"
     echo  "SECTION:  $SECTION"  
     echo  "-------------------------------------------------"
-    for  MODULE  in  `list_modules $SECTION`;  do
+    for  MODULE  in  $(list_modules $SECTION);  do
       echo  $MODULE
       ((  COUNT++  ))
     done
@@ -212,14 +212,14 @@ lvu_catalog()  {
 
 lvu_catalog_html()  {
 
-  echo  "<html><head><title>Lunar Moonbase for `date  -u`</title>"
+  echo  "<html><head><title>Lunar Moonbase for $(date  -u)</title>"
   echo  "<meta http-equiv=\"Pragma\" content=\"no-cache\"></head>"
   echo  "<body>"
 
   echo  "<table align=\"center\" border=5>"
 
   echo  "<tr><th colspan=5><font color=maroon size=+1>"
-  echo  "Lunar Moonbase<br>`date  -u`"
+  echo  "Lunar Moonbase<br>$(date  -u)"
   echo  "</font></th></tr>"
 
   echo  "<tr>"
@@ -232,12 +232,12 @@ lvu_catalog_html()  {
 
   ((  COUNT=0  ))
 
-  for  SECTION  in  `list_sections`;  do
+  for  SECTION  in  $(list_sections);  do
     ((  SECTION_COUNT=0 ))
     echo  "<tr><th colspan=5><font color="maroon">$SECTION</font></th></tr>"
-    for  MODULE  in  `list_modules $SECTION`;  do
+    for  MODULE  in  $(list_modules $SECTION);  do
       (
-        run_module_file $MODULE DETAILS &> /dev/null
+        run_details $MODULE &> /dev/null
         echo  "<tr>"
         if  [  "$MODULE"  ==  "linux"  ]   ||
             [  "$MODULE"  ==  "glibc"  ];  then
@@ -262,7 +262,7 @@ lvu_catalog_html()  {
             SHRINK="<font size=-2>"
           UNSHRINK="</font>"
         else
-           WEBSITE="`echo  $WEB_SITE  |  cut  -c-30`..."
+           WEBSITE="$(echo  $WEB_SITE  |  cut  -c-30)..."
             SHRINK="<font size=-3>"
           UNSHRINK="</font>"
         fi
@@ -299,14 +299,12 @@ newer()  {
   [ -z "$1" ] && return 1      
   DATE=$1
   [ "$DATE" -lt "20010101" ] && return 1        
-  [ "$DATE" -gt "20310101" ] && return 1        
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-        run_details $MODULE
-        if  [  $ENTERED  -gt  $DATE  ];  then
-          echo  $MODULE
-        fi
-    done
+  [ "$DATE" -gt "20310101" ] && return 1
+  for MODULE in $(list_moonbase) ; do
+    run_details $MODULE
+    if [ $ENTERED -gt $DATE ] ; then
+      echo $MODULE
+    fi
   done
 }
 
@@ -316,8 +314,8 @@ older()  {
   DATE=$1
   [ "$DATE" -lt "20010101" ] && return 1        
   [ "$DATE" -gt "20310101" ] && return 1        
-  for  LINE  in `cat  $MODULE_STATUS_BACKUP`;  do
-    LIN_DATE=`echo  $LINE  |  cut  -d  :  -f2`
+  for  LINE  in $(cat $MODULE_STATUS_BACKUP) ; do
+    LIN_DATE=$(echo  $LINE  |  cut  -d  :  -f2)
     if  [  $LIN_DATE  -gt  $DATE  ]  2>/dev/null;  then
       true
     else
@@ -336,41 +334,36 @@ show_from()  {
 show_module_component()  {
   COMPONENT=$1
      MODULE=$2
-    SECTION=`find_section  $MODULE`
-  if  [  -x  $MOONBASE/$SECTION/$MODULE/$COMPONENT  ];  then
-    cat      $MOONBASE/$SECTION/$MODULE/$COMPONENT
+    SECTION=$(find_section $MODULE)
+  if [ -e $MOONBASE/$SECTION/$MODULE/$COMPONENT ] ; then
+    cat $MOONBASE/$SECTION/$MODULE/$COMPONENT
   fi
 }
 
 
 long_search()  {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules  $SECTION`;  do
-      (
-        run_module_file $MODULE DETAILS      |
-          grep  -q  -i  "$1"                 &&
-          echo  "$SECTION/$MODULE"
-      )
-    done
+  for MODULE in $(list_moonbase) ; do
+  (
+    run_details $MODULE | grep -q -i "$1"  &&
+    echo "$SECTION/$MODULE"
+  )
   done
 }
 
 
 service()  {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-      if    [  -f  $MOONBASE/$SECTION/$MODULE/services  ]  && 
-            grep  -q  -i  "$1"  $MOONBASE/$SECTION/$MODULE/services
-      then  echo  "$SECTION/$MODULE"
-      fi
-    done
+  for MODULE in $(list_moonbase) ; do
+    if [ -f $MOONBASE/$SECTION/$MODULE/services ] && 
+        grep -q -i "$1" $MOONBASE/$SECTION/$MODULE/services ; then
+      echo "$SECTION/$MODULE"
+    fi
   done
 }
 
 
 find_lining()  {
-  for  FILE in `ls  /var/lock/lining*  2>/dev/null`;  do
-    if  ps  `cat  $FILE  2>/dev/null`  |  grep  -q  lin;  then
+  for  FILE in $(ls  /var/lock/lining*  2>/dev/null);  do
+    if  ps  $(cat  $FILE  2>/dev/null)  |  grep  -q  lin;  then
       echo  $FILE  |  sed  "s:/var/lock/lining.::"
       return  0
     fi
@@ -381,14 +374,14 @@ find_lining()  {
 
 peak_lining()  {
   if  [  -f     /var/lock/lining.$1   ]            &&
-      ps  `cat  /var/lock/lining.$1  2>/dev/null`  |
+      ps  $(cat  /var/lock/lining.$1  2>/dev/null)  |
       grep  -q  lin                                &&
       [  -f  /tmp/$1.compile.log  ]
   then
     nice  -n  +20                  \
     tail  -f  /tmp/$1.compile.log  \
           --follow=name            \
-          --pid=`cat /var/lock/lining.$1`  2>/dev/null
+          --pid=$(cat /var/lock/lining.$1)  2>/dev/null
   fi
 }
 
@@ -407,13 +400,13 @@ activate_voyeur()  {
   DEFAULT_DELAY=${DEFAULT_DELAY:=60}
 
   while  true;  do
-    if    !  ACTIVE_MODULE=`find_lining`;  then
+    if    !  ACTIVE_MODULE=$(find_lining) ;  then
       message  "${MESSAGE_COLOR}Waiting"       \
                "${DEFAULT_DELAY}"              \
                "seconds for a lin to begin."  \
                "${DEFAULT_COLOR}"
       for  ((  DELAY=DEFAULT_DELAY  ;  DELAY > 0  ;  DELAY--  )); do
-        if  ACTIVE_MODULE=`find_lining`;  then
+        if  ACTIVE_MODULE=$(find_lining);  then
           break
         else
           sleep 1
@@ -430,7 +423,7 @@ activate_voyeur()  {
 
 
 show_leafs()  {
-  for  MODULE  in  `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
+  for  MODULE  in  $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ;  do
     if    !  cut  -d :  -f2-  $DEPENDS_STATUS  |
              grep             "^$MODULE:"       |
              grep  -q         ":on:"
@@ -441,11 +434,11 @@ show_leafs()  {
 
 
 show_orphans()  {
-  for MODULE in `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
-    for  LINE  in  `grep  "^${MODULE}:"  $DEPENDS_STATUS`;  do
-       DEPENDS=`echo  $LINE  |  cut  -d :  -f2`
-        STATUS=`echo  $LINE  |  cut  -d :  -f3`
-      OPTIONAL=`echo  $LINE  |  cut  -d :  -f4`
+  for MODULE in $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ; do
+    for  LINE  in  $(grep  "^${MODULE}:"  $DEPENDS_STATUS) ;  do
+       DEPENDS=$(echo  $LINE  |  cut  -d :  -f2)
+        STATUS=$(echo  $LINE  |  cut  -d :  -f3)
+      OPTIONAL=$(echo  $LINE  |  cut  -d :  -f4)
       if ! module_installed $DEPENDS ; then
         if [ "$OPTIONAL" == "required" ]; then
           echo "$MODULE: $DEPENDS is missing"
@@ -460,9 +453,9 @@ show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
 
-    for  LINE  in  `grep  ":$1:"  $DEPENDS_STATUS`;  do
-       MODULE=`echo  $LINE  |  cut  -d :  -f1`
-      STATUS=`echo  $LINE  |  cut  -d :  -f3`
+    for  LINE  in  $(grep  ":$1:"  $DEPENDS_STATUS) ; do
+       MODULE=$(echo  $LINE  |  cut  -d :  -f1)
+      STATUS=$(echo  $LINE  |  cut  -d :  -f3)
 
       if    [  "$STATUS"  ==  "on"  ]
       then  echo          $MODULE
@@ -481,11 +474,11 @@ function show_tree() {
   [[ -z "$1" ]] && help && exit 1
 
   FORMATTED_MODULE="$1"
-  MODULE=`echo $1 | sed 's/[()]//g'`
-  MODULE_DIR="${MOONBASE}/`find_section ${MODULE}`/${MODULE}"
+  MODULE=$(echo $1 | sed 's/[()]//g')
+  MODULE_DIR="${MOONBASE}/$(find_section ${MODULE})/${MODULE}"
   DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
 
-  if [[ ! -x "${MODULE_DIR}/DETAILS" ]]; then
+  if [ ! -e "${MODULE_DIR}/DETAILS" ] ; then
     echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
     return 1
   fi
@@ -496,7 +489,7 @@ function show_tree() {
     for (( i=0; i<${INDENT}; i++ )); do
       TREE="${TREE}|-->"
     done
-    TREE=`echo ${TREE} | sed 's/-->|/   |/g'`
+    TREE=$(echo ${TREE} | sed 's/-->|/   |/g')
     echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
   }
 
@@ -504,7 +497,7 @@ function show_tree() {
   get_depends() {
     NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
     OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
-    DEPENDS=`sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " "`
+    DEPENDS=$(sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " ")
     for dep in ${DEPENDS}
     do
       adep=$(echo ${dep} | tr -d "()")
@@ -523,7 +516,7 @@ function show_tree() {
 
   # purpose: Get reverse dependencies
   get_reverse_depends() {
-    DEPENDS=`grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " "`
+    DEPENDS=$(grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " ")
     [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
   }
 
@@ -588,7 +581,7 @@ show_urls() { (
   fi
   
   for MODULE in $MODULES ; do
-    download_module
+    download_module $MODULE
   done
 ) }
 
@@ -712,11 +705,12 @@ parse()  {
       ;;
 
     maintainer)
-      run_details $2
-      if [ -n "$MAINTAINER" ] ; then  
-        echo $MAINTAINER
-      else
-        echo maintainer@lunar-linux.org
+      if run_details $2 ; then
+        if [ -n "$MAINTAINER" ] ; then  
+          echo $MAINTAINER
+        else
+          echo maintainer@lunar-linux.org
+        fi
       fi
       ;;
       
@@ -776,27 +770,29 @@ parse()  {
       if [ -z "$2" ] ; then
         return 1
       else
-        run_details $2
-        if [ -n "$WEB_SITE" ] ; then
-          echo $WEB_SITE
-        else
-          echo "http://www.lunar-linux.org"
+        if run_details $2 ; then
+          if [ -n "$WEB_SITE" ] ; then
+            echo $WEB_SITE
+          else
+            echo "http://www.lunar-linux.org"
+	  fi
         fi
       fi
       ;;
       
     version)
-      if [ -n "$2" ] ; then (
-        run_details $2 
-	echo $VERSION
-      ) fi
+      if [ -n "$2" ] ; then
+        if run_details $2 ; then
+  	  echo $VERSION
+	fi
+      fi
       ;;
       
     size)
       if [ -z "$2" ] ; then
         MODULES=$(cat $MODULE_STATUS | cut -d: -f1 | sort)
         for MODULE in $MODULES ; do
-          echo $MODULE `find_module_size $MODULE`
+          echo $MODULE $(find_module_size $MODULE)
         done
       else
         if module_installed $2 ; then
@@ -817,35 +813,38 @@ parse()  {
       ;;
 
     compile)
-      run_details $2
-      if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
-        view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
-      else
-        VERSION=$(installed_version $2)
-        view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
-           "Compile log for $2 does not exist"
+      if run_details $2 ; then
+        if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
+          view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
+        else
+          VERSION=$(installed_version $2)
+          view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+             "Compile log for $2 does not exist"
+        fi
       fi
       ;;
 	      
    install)
-     view_file $INSTALL_LOGS/$2-$(installed_version $2) \
-         "Install log for $2 does not exist"
+     if run_details $2 ; then
+       view_file $INSTALL_LOGS/$2-$(installed_version $2) \
+           "Install log for $2 does not exist"
+     fi
      ;;
 
    compiler)
-     if [ -z "$2" ] ; then
-       return 1
-     else
-       if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then 
-         echo "Install log for $2 does not exist" 
-         return 1
-       else
-         cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
-           if file $LINE | grep -q "ELF " ; then
-             echo -n "$LINE "
-             strings -a $LINE | grep GCC: | sort -r | head -n 1
-           fi  
-         done
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then 
+           echo "Install log for $2 does not exist" 
+           return 1
+         else
+           cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
+             if file $LINE | grep -q "ELF " ; then
+               echo -n "$LINE "
+               strings -a $LINE | grep GCC: | sort -r | head -n 1
+             fi  
+           done
+         fi
        fi
      fi
      ;;
@@ -872,29 +871,25 @@ parse()  {
      
    what)
      if [ ! -z "$2" ] ; then
-       (
+       if run_details $2 ; then
          run_module_file $2 DETAILS
-       )
+       fi
      fi
      ;;
 	   
    where)
-     if SECTION=`find_section $2` ; then
-       echo "$SECTION"
-     else
-       message "$2 not found"
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         echo $(find_section $2)
+       fi
      fi
      ;;
 
    cd)
-     if [ -z "$2" ] ; then
-       return 1
-     else
-       if SECTION=`find_section $2` ; then
-         cd $MOONBASE/$SECTION/$2
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         cd $MOONBASE/$(find_section $2)/$2
          $SHELL
-       else
-         return 1
        fi
      fi
      ;;

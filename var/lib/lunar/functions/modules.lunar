@@ -197,7 +197,7 @@ run_module_file() {
       return 1
     fi
   fi
-  if [ -x "$SCRIPT_DIRECTORY/$2" ] ; then
+  if [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
     . $SCRIPT_DIRECTORY/$2
   fi    
 }

@@ -8,7 +8,7 @@
 # $FUNCTIONS/depends                                       #
 # includes find_depends is_depends in_depends              #
 # remove_depends add_depends run_depends                   #
-# handle_depends rework_module rework_list                 #
+# rework_module rework_list                                #
 # fix_depends satisfy_depends                              #
 #                                                          #
 # 20020710                                                 #
@@ -172,9 +172,6 @@ run_depends() {
     run_module_file $MODULE DEPENDS
   fi
 }
-
-
-handle_depends()  {  true;  }
 
 
 # rework_module : check depends database for a module
@@ -412,6 +409,8 @@ fix_depends () {
 # function : satisfy_depends
 # usage    : satisfy_depends (operates on $MODULE variable)
 # purpose  : re-check module deps based on DEPENDS_CONFIG and DEPENDS_STATUS
+# NOTE: this is where a missing dependency gets installed! IOW we really do
+# "satisfy" any dependencies here!
 satisfy_depends()  {
                                                                                 
   [ -n "$DEPS_ONLY" ] && return 0
@@ -454,3 +453,16 @@ satisfy_depends()  {
   rm $TMP_FILE 2> /dev/null
                                                                                 
 }
+
+
+# conflicts... remove conflicting modules
+conflicts() {
+  if module_installed $1 ; then
+    lrm $1
+  fi
+
+  true
+} 
+
+
+

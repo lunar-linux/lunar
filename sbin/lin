@@ -170,7 +170,7 @@ main()	{
       # pass 3 : compile/install
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
-        verbose_msg "starting installation of \"$MODULES\""
+        verbose_msg "starting installation of \"$MODULE\""
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
           if ! module_held $MODULE ; then
             linING="/var/lock/installing.$MODULE"

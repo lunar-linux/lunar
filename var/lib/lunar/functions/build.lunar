@@ -315,15 +315,6 @@ add_module()  {
 }
 
 
-conflicts() {
-  if module_installed $1 ; then
-    lrm $1
-  fi
-
-  true
-} 
-
-
 push_install_queue() {
   remove_queue   $REMOVE_QUEUE    "$1"
   remove_queue   $INSTALL_QUEUE   "$1"
