@@ -34,12 +34,12 @@ show_modules()
         !  module_exiled     $MODULE
     then
       SHORT="Short Description Unavailable"
-      if  [  -x $MOONBASE/$1/$MODULE/DETAILS  ];  then
-             .  $MOONBASE/$1/$MODULE/DETAILS  >  /dev/null
+      (
+        run_details
         echo  $MODULE
         echo  $VERSION
         echo  $SHORT
-      fi
+      )
     fi
   done
 }
@@ -217,8 +217,8 @@ rebuild()  {
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
     SHORT="Short Description Unavailable"
-    .  $MOONBASE/$1/$MODULE/DETAILS  >  /dev/null
-
+    (
+    run_details
     STATUS="OFF"
 
     if    module_installed  $MODULE  ||
@@ -227,16 +227,11 @@ make_checklist()  {
     else  STATUS="off"
     fi
 
-#    if  LINE=`grep  "^$MODULE:"  $MODULE_STATUS_BACKUP`  &&
-#        [  "`echo  $LINE  |  cut  -d :  -f3`"  ==  "installed"  ]
-#    then  VERSION=`echo  $LINE    |  cut  -d : -f4`
-#          STATUS="ON"
-#    fi
-
     echo  $MODULE
     echo  $VERSION
     echo  $STATUS
     echo  $SHORT
+    )
   done
 }
 
