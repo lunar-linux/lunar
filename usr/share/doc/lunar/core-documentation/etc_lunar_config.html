@@ -31,27 +31,27 @@ dialog binary used by the lunar core tools<br>
 </table>
 <br>
 <br>
-<h3>Variable Defines</h3>
+<h3>Global Variable Defines</h3>
 <br>
 <table cellpadding="2" cellspacing="2" border="1"
  style="text-align: left; width: 100%;">
   <tbody>
     <tr>
       <td style="vertical-align: top;">CONFIG_CACHE=/etc/lunar/local</td>
-      <td style="vertical-align: top;">directory containing configs
+      <td style="vertical-align: top;">Directory containing configs
 which are system specific</td>
     </tr>
     <tr>
       <td style="vertical-align: top;">LOCAL_CONFIG=/etc/lunar/local/config<br>
       </td>
-      <td style="vertical-align: top;">file which contains system
-specific local defines<br>
+      <td style="vertical-align: top;">File containing system specific
+local defines<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">DEPENDS_CONFIG=/etc/lunar/local/depends<br>
       </td>
-      <td style="vertical-align: top;">each file in this directory
+      <td style="vertical-align: top;">Each file in this directory
 contains information about how the module was configured at install time<br>
       </td>
     </tr>
@@ -59,14 +59,33 @@ contains information about how the module was configured at install time<br>
       <td style="vertical-align: top;">LOCAL_EXCLUDED=/etc/lunar/local/excluded<br>
       </td>
       <td style="vertical-align: top;">Local list of files that are
-excluded during a lin or lrm.<br>
+excluded during a lin or lrm<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">MIRRORS=/etc/lunar/mirrors<br>
       </td>
       <td style="vertical-align: top;">List of mirrors known to contain
-alternate download locations for sources.<br>
+alternate download locations for sources<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LUNAR_MODULES="lunar theedge"<br>
+      </td>
+      <td style="vertical-align: top;">Two versions of Lunar core tools<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">BUILD_DIRECTORY=/usr/src<br>
+      </td>
+      <td style="vertical-align: top;">The directory Lunar uses to
+build modules<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">DOCUMENT_DIRECTORY=/usr/share/doc<br>
+      </td>
+      <td style="vertical-align: top;">Location used for documentation<br>
       </td>
     </tr>
   </tbody>
