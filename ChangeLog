@@ -1,3 +1,13 @@
+2003-02-25 23:52  sofar
+
+	* var/lib/lunar/subroutines: bugfix #199: remove_depends $MODULE
+	will also remove OPTIONAL depends on $MODULE, so lin will prompt
+	again if you want to install it or not.
+
+2003-02-25 19:35  sofar
+
+	* var/lib/lunar/subroutines: This is slightly too much IMO
+
 2003-02-25 08:44  sofar
 
 	* var/lib/lunar/subroutines: hmm, this seems more logical.
