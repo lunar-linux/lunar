@@ -214,9 +214,3 @@
 	* var/lib/lunar/functions/download.lunar: Add retry functionality
 	to CVS download
 
-2003-05-20 23:15  kc8apf
-
-	* var/state/lunar/: blacklist.PowerPC, blacklist.x86: Added yaboot
-	and aboot to x86 blacklist Added grub, lilo, and e3 to PowerPC
-	blacklist
-
