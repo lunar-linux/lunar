@@ -248,23 +248,3 @@
 	for people running with system moonbases, up to 5x faster
 	regeneration of module.index and depends.cache
 
-2004-03-07 23:32  sofar
-
-	* etc/lunar/config, sbin/lin, sbin/lrm,
-	var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/moonbase.lunar: Fixes for: - dependency
-	sorting algorithm, completely rewritten from scratch, implemented
-	using a depends.cache file which speeds up all dependency work
-	immensely. The time needed to create the cache might still be a
-	little long tho (2:30 uncached on my box). sorting time for entire
-	moonbase is about 2:30 now, mostly spending in the fgrep. sorting
-	time on 400 modules is < 30 seconds.  - double questions removed -
-	moonbase index creation is now more atomic than it was, it's
-	generated in a tmpfile, then pivoted to the real location, same for
-	depends.cache (crtl-c in the creation will not damage it) - lrm fix
-	that caused files in /boot to be deleted. as far as I can see this
-	was still an TODO left open by kongar&&those-before-him (ouch).
-	tested and works.  - added $DEPENDS_CACHE var in etc/lunar/config
-
