@@ -1,3 +1,10 @@
+2004-03-18 12:16  sofar
+
+	* sbin/lrm, var/lib/lunar/functions/config.lunar,
+	var/lib/lunar/functions/postbuild.lunar: Bugfix: theedge wasnt
+	removing files from /etc/ at all, and added proper init.d script
+	shutdowns on plain 'lrm' commands, as well as xinetd restarts.
+
 2004-03-17 23:28  tchan
 
 	* sbin/lunar: Committed a small bug fix for sofar while he was
