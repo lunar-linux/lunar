@@ -1,3 +1,7 @@
+2004-11-24 13:09  sofar
+
+	* bin/lvu: This seems to fix 'lvu urls'
+
 2004-11-23 09:33  sofar
 
 	* bin/lvu: fast, faster, ranitha!
