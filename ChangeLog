@@ -129,7 +129,3 @@
 	tarball. This enables the xfce-cvs modules to be rewritten using
 	the new cvs source scheme.
 
-2003-03-17 23:56  sofar
-
-	* var/lib/lunar/subroutines: misc cosmetic fix.
-
