@@ -18,17 +18,3 @@
 	* var/lib/lunar/functions/download.lunar: Added ability to specify
 	release tag for CVS downloads
 
-2003-04-16 19:47  sofar
-
-	* bin/lvu, lib/lsb/init-functions, sbin/lrm,
-	usr/share/man/man1/lvu.1, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/optimize.lunar,
-	var/lib/lunar/functions/postbuild.lunar,
-	var/lib/lunar/functions/sources.lunar: Merging theedge back into
-	lunar.
-
