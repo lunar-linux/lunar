@@ -23,7 +23,7 @@
 if [[ -s /etc/lunar/local/optimizations ]]; then
    . /etc/lunar/local/optimizations
 else
-  echo -e PLATFORM=x86            '\n'    \
+  echo -e PLATFOM=x86             '\n'    \
           BUILD=i386-pc-linux-gnu '\n'    \
 	  MAKES=                  '\n'    \
 	  COPT=                   '\n'    \
