@@ -164,8 +164,3 @@
 	functions/optimize.lunar, functions/postbuild.lunar,
 	functions/sources.lunar: Small cleanups, verbosity output uniformed
 
-2003-04-06 22:47  sofar
-
-	* var/lib/lunar/functions/: depends.lunar, edit.lunar: bugfix #273,
-	also minor code cleanups
-
