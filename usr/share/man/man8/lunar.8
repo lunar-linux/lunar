@@ -1,67 +1,94 @@
-.TH "LUNAR" "8" "July 2003" "Lunar-Linux.org" "Lunar"
+.TH "LUNAR" "8" "August 2003" "Lunar-Linux.org" "Lunar"
 .SH "NAME"
 lunar \- menu\-driven software package management utility
 .SH "SYNTAX"
-.I lunar
-[ update | renew | rebuild | optimize | prune | resurrect | install | remove | hold | unhold | exile | unexile ]
+.B lunar
+-d|--debug|-h|--help|-v|--verbose
+.PP
+.B lunar
+[prune|renew|update|rebuild|optimize|fix|nofix|fixdepends|resurrect|install|remove|hold|unhold|exile|unexile]
 .SH "COPYRIGHT"
-.if n lunar(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
-.if t lunar(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if n lunar(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if t lunar(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .SH "DESCRIPTION"
-.I lunar is an easy\-to\-use menu\-driven (dialog\-based) interface to the .I lunar source\-based package management system.
+.I lunar
+is an easy\-to\-use menu\-driven (dialog\-based) interface to the
+.I Lunar
+source\-based package management system.
 .SH "OPTIONS"
 .I lunar
 without options will start the menu\-driven package management utility.
+.PP 
+.B "-d, --debug"
+enables debug messages, very useful when emailing a bug report
+.TP
+.B "-h, --help"
+outputs short help
+.TP
+.B "-v, --verbose"
+increases the level of message output
+.TP
+.I prune
+.IP 
+Removes all old source code and old backups. Since the number of sources on the system grows steadily on a running system, you will need to clean some of the kept copies of sources and compile caches. The source code from previous versions are kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date,
+but not installed.
+.PP
+.I renew
+.IP 
+check installed versions of sources against the moonbase, and recompile where necessary. This is the same as the final stage of a lunar update.
 .PP 
 .I update
 .IP 
 automatically updates all installed software packages. This option is non\-interactive and does not start up the menu\-driven interface. It is suitable for use in cron jobs.
 .PP 
-.I renew
-.IP 
-check installed versions of sources against the moonbase, and recompile where necessary. This is the same as the final stage of a lunar update.
-.PP 
 .I rebuild
 .IP 
 automatically rebuilds all installed software packages. This option is non\-interactive and does not start up the menu\-driven interface. It is suitable for use in cron jobs and is useful for rebuilding distributed binaries from source.
-<pp>
+.PP
 .I optimize
 .IP 
 jump straight into the compiler optimizations menu.
 .PP 
-.I prune
+.I fix
 .IP 
-Removes all old source code and old backups. Since the number of sources on the system grows steadily on a running system, you will need to clean some of the kept copies of sources and compile caches. The source code from previous versions are kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date,
-but not installed.
-<pp>
+Check and fix all modules and internal state of lunar.
+.PP 
+.I nofix
+.IP 
+Check but do not fix modules and internal state.
+.PP 
+.I fixdepends
+.IP 
+Check and fix the dependency database of lunar.
+.PP 
 .I resurrect
 .IP 
 Reinstalls a module which has been removed but still has the compiled version available.
-<pp>
+.PP
 .I install
 .IP 
 Installs a module.
-<pp>
+.PP
 .I remove
 .IP 
 Removes a module.
-<pp>
+.PP
 .I hold
 .IP 
 Places a module on hold so it cannot be built/rebuilt.
-<pp>
+.PP
 .I unhold
 .IP 
 Removes a module from hold status so it can be built/rebuilt.
-<pp>
+.PP
 .I exile
 .IP 
 Prevents a module from being installed or resurrected. Perhaps because you've installed a customized module.
-<pp>
+.PP
 .I unexile
 .IP 
 Removes a module from exiled status.
-<pp>
+.PP
 .SH "REQUIREMENTS"
 .I lunar
 requires a connection to the Internet
@@ -111,7 +138,8 @@ Updated Thomas Stewart 01/15/2002
 Converted to Lunar by Terry Chan 03/23/2002
 .PP 
 Updated by Chuck Mead 07/17/2003
-<pp>
+.PP
+Updated by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
