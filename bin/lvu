@@ -848,7 +848,7 @@ main()  {
           if [ -n "$WEB_SITE" ] ; then
             echo $WEB_SITE
           else
-            echo "http://www.lunar-linux.org"
+            echo "http://lunar-linux.org"
 	  fi
         fi
       fi
