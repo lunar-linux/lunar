@@ -214,7 +214,15 @@ run_details() {
     fi
    
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
-    run_module_file $1 DETAILS &> /dev/null &&
+    if [ -z "$WANT_VERSION" ] ; then
+      run_module_file $1 DETAILS &> /dev/null || return -1
+    else
+      TMP_DETAILS=$(temp_create "details.version")
+      cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^[ ]*VERSION=/d' > $TMP_DETAILS
+      VERSION="$WANT_VERSION"
+      . $TMP_DETAILS &> /dev/null || return -1
+      temp_destroy $TMP_DETAILS
+    fi
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
     mod_v_safe_edit $1 
     MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MOD_V_SNAME}

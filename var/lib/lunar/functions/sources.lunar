@@ -203,6 +203,11 @@ verify_all_sources() {
     return 1
   fi
 
+  if [ -n "$WANT_VERSION" ] ; then
+    message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Integrity checking is disabled when using \"--want\"!${DEFAULT_COLOR}"
+    return 0
+  fi
+
   for (( C=0 ; C<=$MAX_SOURCES ; C++ )) ; do
     TEMP=SOURCE$((C))
     TEMP=${TEMP/SOURCE0/SOURCE}
