@@ -156,18 +156,21 @@ lrm_module() {
 
   # grep -v the install logs over the protected stuff, this
   # yields the files that may be removed
-  cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
-    if [ -e "$TARGET" ] ; then
-      if [ -d "$TARGET" ] ; then
-        echo "$TARGET" >> $TMP_DIRS
-      else
-        handle_config_files $TARGET &&
-        remove_something $TARGET
+  if [ "$REAP" == "on" ] ; then
+    cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
+      if [ -e "$TARGET" ] ; then
+        if [ -d "$TARGET" ] ; then
+          echo "$TARGET" >> $TMP_DIRS
+        else
+          handle_config_files $TARGET &&
+          remove_something $TARGET
+        fi
       fi
-    fi
-  done
-
-  process_directories $TMP_DIRS
+    done
+    process_directories $TMP_DIRS
+  else
+    verbose_msg "Skipping removal of files completely (REAP=$REAP)"
+  fi
 
   # time-out 2: POST_REMOVE
   run_module_file $MODULE POST_REMOVE
