@@ -1,3 +1,45 @@
+2003-07-28 21:51  sofar
+
+	* sbin/lget, sbin/lin, sbin/lrm,
+	var/lib/lunar/functions/messages.lunar,
+	var/lib/lunar/functions/tracking.lunar: adding uniformly the
+	--debug option. If you specify it twice it will dump VARs (and BTW
+	make a huge mess in /tmp too). small oops in create_install_logs.
+	rewrite of lrm to make it look like someone paid attention.
+	
+	QOTD: Be careful when you bite into your hamburger.		   
+	 -- Derek Bok
+
+2003-07-28 20:29  sofar
+
+	* var/lib/lunar/functions/: build.lunar, messages.lunar,
+	tracking.lunar: Rewriting boost, now making things easy and
+	understandable, as well as simple. doing some shuffling with code.
+	All install log parsing code goes to tracking.lunar. Note I removed
+	debug_msgs from message() and verbose_msg() to reduce clutter a
+	bit.
+
+2003-07-28 17:54  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Booohooo
+
+2003-07-28 17:41  elaine
+
+	* var/lib/lunar/functions/: build.lunar, check.lunar, config.lunar,
+	connect.lunar, depends.lunar, download.lunar, edit.lunar,
+	init.lunar, install.lunar, locking.lunar, main.lunar,
+	messages.lunar, misc.lunar, modules.lunar, moonbase.lunar,
+	optimize.lunar, postbuild.lunar, prune.lunar, queue.lunar,
+	recovery.lunar, sizes.lunar, sources.lunar, temp.lunar,
+	tracking.lunar, uniqid.lunar, updatelog.lunar, useradd.lunar,
+	view.lunar: debug-msg ified all functions in
+	/var/lib/lunar/functions/*.lunar
+
+2003-07-28 17:40  elaine
+
+	* sbin/: lin, lrm: Changed DEBUG to LUNAR_DEBUG, lin still needs
+	it's functions debug-ized
+
 2003-07-27 23:36  sofar
 
 	* sbin/lrm: adding debug_msg to lrm, stumbling on a bug that caused
@@ -289,9 +331,4 @@
 2003-05-31 02:24  tchan
 
 	* bin/lvu: Fixed the lvu section bug reported by kc8apf.
-
-2003-05-29 20:09  jasper
-
-	* var/lib/lunar/functions/download.lunar: Add retry functionality
-	to CVS download
 
