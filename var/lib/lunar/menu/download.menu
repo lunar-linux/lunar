@@ -107,8 +107,8 @@ proxy_menu()
 download_options() {
 
 set_download_rate()  {
-  PROMPT="Please enter the maximum KB per second for lgeting. \
-Example: enter 8K for downloading no faster then \
+  PROMPT="Please enter the maximum bytes per second for lgeting. \
+Example: enter 8000 for downloading no faster then \
 8 Kbytes per second"
 
   if  DOWNLOAD_RATE=`$DIALOG  --title "Download Rate" \
