@@ -11,6 +11,8 @@
 
 get_moonbase () {(
 
+  cd /tmp
+
   MODULE=moonbase
   VERSION=`date -u +%Y%m%d.%H`
   SOURCE=$(basename $MOONBASE_URL)

@@ -122,27 +122,6 @@ guess_filename()  {
 }
 
 
-testpack() {
-
-  FILENAME=`guess_filename                $1`  ||
-  FILENAME=`guess_filename  $SOURCE_CACHE/$1`
-
-  [  -f  $FILENAME  ]                                    &&
-  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
-  
-  case  $COMPRESSOR  in
-        bzip2)  bzip2  -tf   $FILENAME   1>/dev/null 2>&1  ;;
-         gzip)  gzip   -tf   $FILENAME   1>/dev/null 2>&1  ;;
-    compress*)  gzip   -tf   $FILENAME   1>/dev/null 2>&1  ;;
-          Zip)  unzip  -tq   $FILENAME   1>/dev/null 2>&1  ;;
-          RPM)  rpmunpack  < $FILENAME   |                 \
-                gzip   -t                1>/dev/null 2>&1  ;;
-            *)  true                                       ;;
-  esac
-
-}
-
-
 unpack() {
 
     FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
