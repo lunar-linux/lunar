@@ -362,15 +362,7 @@ optimize_cpu()  {
                CXXFLAGS="$CXXFLAGS -mcpu=ev4"
                BUILD="alpha-linux"
                ;;
-      a21064)  CFLAGS="$CFLAGS -mcpu=ev4"
-               CXXFLAGS="$CXXFLAGS -mcpu=ev4"
-               BUILD="alpha-linux"
-               ;;
       ev5)     CFLAGS="$CFLAGS -mcpu=ev5"
-               CXXFLAGS="$CXXFLAGS -mcpu=ev5"
-               BUILD="alpha-linux"
-               ;;
-      a21164)  CFLAGS="$CFLAGS -mcpu=ev5"
                CXXFLAGS="$CXXFLAGS -mcpu=ev5"
                BUILD="alpha-linux"
                ;;
@@ -378,19 +370,7 @@ optimize_cpu()  {
                CXXFLAGS="$CXXFLAGS -mcpu=ev56"
                BUILD="alpha-linux"
                ;;
-      a21164a) CFLAGS="$CFLAGS -mcpu=ev56"
-               CXXFLAGS="$CXXFLAGS -mcpu=ev56"
-               BUILD="alpha-linux"
-               ;;
       pca56)   CFLAGS="$CFLAGS -mcpu=pca56"
-               CXXFLAGS="$CXXFLAGS -mcpu=pca56"
-               BUILD="alpha-linux"
-               ;;
-     a21164pc) CFLAGS="$CFLAGS -mcpu=pca56"
-               CXXFLAGS="$CXXFLAGS -mcpu=pca56"
-               BUILD="alpha-linux"
-               ;;
-     a21164PC) CFLAGS="$CFLAGS -mcpu=pca56"
                CXXFLAGS="$CXXFLAGS -mcpu=pca56"
                BUILD="alpha-linux"
                ;;
@@ -398,18 +378,13 @@ optimize_cpu()  {
                CXXFLAGS="$CXXFLAGS -mcpu=ev6"
                BUILD="alpha-linux"
                ;;
-      a21264)  CFLAGS="$CFLAGS -mcpu=ev6"
-               CXXFLAGS="$CXXFLAGS -mcpu=ev6"
-               BUILD="alpha-linux"
-               ;;
       ev67)    CFLAGS="$CFLAGS -mcpu=ev67"
                CXXFLAGS="$CXXFLAGS -mcpu=ev67"
                BUILD="alpha-linux"
                ;;
-      a21264a) CFLAGS="$CFLAGS -mcpu=ev67"
+      ev68)    CFLAGS="$CFLAGS -mcpu=ev67"
                CXXFLAGS="$CXXFLAGS -mcpu=ev67"
-               BUILD="alpha-linux"
-               ;;
+	       BUILD="alpha-linux"
 
 # Begin SPARC options
       v7)            CFLAGS="$CFLAGS"
