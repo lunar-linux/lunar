@@ -1,3 +1,8 @@
+2003-03-30 20:45  sofar
+
+	* usr/share/man/: man1/lvu.1, man8/lunar.8: updating these man
+	pages!
+
 2003-03-29 23:41  sofar
 
 	* var/lib/lunar/functions/depends.lunar: Better handling of
@@ -165,16 +170,4 @@
 
 	* var/lib/lunar/subroutines: show difference between optional and
 	required depends.
-
-2003-02-28 00:25  sofar
-
-	* sbin/lget, var/lib/lunar/functions/download.lunar: code cleanups:
-	lget!
-	
-	- moved general functions into functions/download.lunar -
-	structured code, no weird function names - molecularized code:
-	download_module, get_url, become more atomic functions and less
-	vague.	- made lget a dummy frontend, as it should be. lin may
-	possibly completely skip lget now and run a download process
-	internally.
 
