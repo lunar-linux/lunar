@@ -97,9 +97,3 @@
 	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar,
 	var/lib/lunar/menu/mirrors.menu: Merging theedge into lunar! =^D
 
-2003-01-20 15:23  sofar
-
-	* var/lib/lunar/sustained: Sorry for the gpm fans, but gpm is *NOT*
-	a vital package for the correct functioning of lunar. Removing it
-	here.
-
