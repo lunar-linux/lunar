@@ -1,3 +1,12 @@
+2004-01-02 00:39  sofar
+
+	* bin/lvu: Reworked the following routines:
+	
+	tree: now soupah fast stree: even faster and abbreviated eert: does
+	what it did, but faster (installed mods only) leert: shows the
+	entire reverse tree (not installed modules too!) orphans: meuh
+	cleanup help: added hints to new functions
+
 2003-12-30 13:11  sofar
 
 	* bin/lvu: Added 'lvu short' just because I like it
@@ -177,14 +186,4 @@
 	example modules, please be patient)
 	 - autoresurrect logging disabled (too much noise in logs,
 	especially with sound on).
-
-2003-11-02 15:27  elaine
-
-	* var/lib/lunar/functions/depends.lunar: Minor tweak to prompt,
-	split to 2 lines, should now fit 80col.
-
-2003-11-02 02:25  elaine
-
-	* var/lib/lunar/functions/depends.lunar: Added install-status to
-	opt-deps query and clarified the query text
 
