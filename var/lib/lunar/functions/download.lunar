@@ -78,13 +78,26 @@ get_cvs() {(
 
   verbose_msg "CVSROOT=\"$CVSROOT\""
 
-  if [[ -d $CVSMODULE/CVS ]]; then
-    verbose_msg "cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE"
-    cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE && GOT_CVS="yes" 
-  elif ! [[ -d CVS ]]; then
-    verbose_msg "cvs -qz3 co $CVSRELEASE $CVSMODULE"
-    cvs -qz3 co $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
-  fi
+  NUM_RETRY=${NUM_RETRY:=5}
+
+  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ ))
+  do
+      verbose_msg "${MESSAGE_COLOR}Try: ${TRY}${DEFAULT_COLOR}"
+
+      if [[ -d $CVSMODULE/CVS ]]; then
+	verbose_msg "cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE"
+	cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE && GOT_CVS="yes" 
+      elif ! [[ -d CVS ]]; then
+	verbose_msg "cvs -qz3 co $CVSRELEASE $CVSMODULE"
+	cvs -qz3 co $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
+      fi
+
+      if [[ "$?" == "0" ]]; then
+	  break
+      fi
+
+      sleep 2
+  done
   
   if [[ "$GOT_CVS" == "yes" ]]; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
