@@ -480,7 +480,6 @@ feature_menu()  {
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
 
-      APPRENTICE=${APPRENTICE:=off}
          ARCHIVE=${ARCHIVE:=on}
          AUTOFIX=${AUTOFIX:=on}
        AUTOPRUNE=${AUTOPRUNE:=off}
@@ -506,7 +505,6 @@ feature_menu()  {
                         --checklist             \
                         ""                      \
                         0 40 14                 \
-      "APPRENTICE"    "Toggle"  "$APPRENTICE"    "$A_HELP"   \
       "ARCHIVE"       "Toggle"  "$ARCHIVE"       "$I_HELP"   \
       "AUTOFIX"       "Toggle"  "$AUTOFIX"       "$F_HELP"   \
       "AUTOPRUNE"     "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
@@ -524,7 +522,6 @@ feature_menu()  {
 
   then
   
-      APPRENTICE=off
          ARCHIVE=off
          AUTOFIX=off
        AUTOPRUNE=off
@@ -542,7 +539,6 @@ feature_menu()  {
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
-          APPRENTICE)    APPRENTICE=on  ;;
              ARCHIVE)       ARCHIVE=on  ;;
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
@@ -561,7 +557,6 @@ feature_menu()  {
     done
 
     TEMP=`cat       $LOCAL_CONFIG    |
-          grep  -v  "APPRENTICE="    |
           grep  -v  "ARCHIVE="       |
           grep  -v  "AUTOFIX="       |
           grep  -v  "AUTOPRUNE="     |
@@ -578,7 +573,6 @@ feature_menu()  {
           grep  -v  "TMPFS="`
 
     echo  "$TEMP"                       >   $LOCAL_CONFIG
-    echo  "  APPRENTICE=$APPRENTICE"    >>  $LOCAL_CONFIG
     echo  "     ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
     echo  "     AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
     echo  "   AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
