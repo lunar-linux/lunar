@@ -1,3 +1,30 @@
+2004-10-18 10:32  sofar
+
+	* sbin/lin: Okay this works much better, I completely oversaw the
+	  fact that lin_module already handles autoresurrect itself and
+	  this code here is completely superfluous (just plain wrong)
+
+2004-10-18 10:28  sofar
+
+	* sbin/lin: Bugfix #501: make sure the module can override this
+	  call to autoresurrect too
+
+2004-10-18 07:32  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Demoted this message to
+	  debug level
+
+2004-10-18 07:28  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Bugfix: don't run this on
+	  moonbase upgrades.
+
+2004-10-17 23:44  v3rt1g0
+
+	* bin/lvu: Better handeling of non-existant modules in lvu tree
+	  (and its variations).  Now it will tell the user, in the standard
+	  way, that the module they asked about doesn't exists.
+
 2004-10-13 02:31  v3rt1g0
 
 	* var/lib/lunar/functions/postbuild.lunar: I'm finally getting
