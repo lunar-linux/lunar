@@ -665,7 +665,7 @@ option_menu()  {
     F_HELP="Select many options on or off at once"
     M_HELP="Select ftp and http mirrors for faster downloads"
     O_HELP="Select architecture optimizations"
-    I_HELP="Select the test that lin --fix, and AUTOFIX execute"
+    I_HELP="Select the test that lunar fix, and AUTOFIX execute"
     D_HELP="Options for downloads"
     L_HELP="Select default lunar module"
 
