@@ -74,8 +74,3 @@
 	  (note that this can only be used by manually changing
 	  /etc/lunar/local/optimizations )
 
-2005-01-11 21:52  striker
-
-	* var/lib/lunar/functions/download.lunar: Fix for possible wget
-	  exploit
-
