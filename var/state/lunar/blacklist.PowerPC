@@ -2,3 +2,8 @@ grub
 lilo
 e3
 aboot
+silo
+sparc-utils
+egcs64
+binutils-sparc64
+bin86
