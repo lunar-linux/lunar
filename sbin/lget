@@ -52,24 +52,30 @@ EOF
 
 use_cvs() {
   run_details &&
-  cd $BUILD_DIRECTORY 
+  cd $BUILD_DIRECTORY
   if [[ $CVS_SERVER ]]; then
+    mk_source_dir $CVS_MODULE
+    unset CVS_RSH
     export CVSROOT=$CVS_SERVER
     if [[ $CVS_LOGIN ]]; then
       cvs login < $CVS_LOGIN
     fi 
     if ! [[ $CVS_MODULE ]]; then
       CVS_MODULE=`echo $MODULE | sed s/-cvs//`
-    fi     
-    if [[ -d $CVS_MODULE/CVS ]]; then
-      cd $CVS_MODULE 
-      cvs -qz3 up -PAd &&
-      GOT_CVS="yes"
-    elif ! [[ -d $CVS_MODULE/CVS ]]; then
-      rm -rf $CVS_MODULE  &&
-      cvs -qz3 co $CVS_MODULE  &&
-      GOT_CVS="yes"
     fi
+    if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
+      tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
+    fi
+    if [[ -d $CVS_MODULE/CVS ]]; then
+      cd $CVS_MODULE
+      cvs -qz3 up -PAd && GOT_CVS="yes" 
+      cd ..
+    elif ! [[ -d CVS ]]; then
+      cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
+    fi
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
+    tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
+    rm_source_dir
   fi
 }
 

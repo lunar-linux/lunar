@@ -94,6 +94,7 @@ dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
 # usage    : sedit "sed string" filename
 # purpose  : sed edit a file;  example  : sedit "s/TEST/TSET/" filename
 sedit()  {
+  message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${2}${DEFAULT_COLOR}"
   TMP_FILE="/tmp/`basename  $2`.`uuidgen`"
   rm    -rf    $TMP_FILE
   cp    $2     $TMP_FILE
@@ -447,6 +448,14 @@ patch_it() {
 default_pre_build() {
   if [[ `echo $MODULE | grep -e -cvs` ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
+    if [[ -d $SOURCE_DIRECTORY ]] &&
+       [[ $KEEP_SOURCE == "on" ]]; then
+      cd $SOURCE_DIRECTORY &&
+      make clean
+    else
+      mk_source_dir        $SOURCE_DIRECTORY &&
+      unpack               $MODULE-$VERSION.tar.bz2
+    fi
   else
     validate_source_dir  $SOURCE_DIRECTORY 
     if [[ -d $SOURCE_DIRECTORY ]] &&
