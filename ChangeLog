@@ -179,12 +179,3 @@
 	Ok this is a start of adding coreutils to Lunar.  I removed
 	fileutils, sh-utils, and textutils and added in coreutils
 
-2003-03-12 23:48  sofar
-
-	* var/lib/lunar/: subroutines, functions/download.lunar,
-	functions/moonbase.lunar: get_moonbase is now in it's own file, and
-	calls get_url to download, so any settings required are taken into
-	consideration. Also added a little bit more verbosity info, and a
-	*sub* version (hour after the dot) which is cosmetic only for
-	logging purposes.
-
