@@ -558,7 +558,9 @@ check_blacklist() {
   # gcc 3x please email your findings to
   # maintainer@lunar-linux.org.
 
-  eval $(grep PLATFORM= /etc/lunar/local/optimizations)
+  if [ -z "$PLATFORM" ] ; then
+    eval $(grep PLATFORM= /etc/lunar/local/optimizations)
+  fi
 
   # Usage check_checklist $MODULES
   PLATFORM=${PLATFORM:-x86}

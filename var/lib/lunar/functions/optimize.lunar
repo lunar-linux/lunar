@@ -892,7 +892,7 @@ optimize_architecture()  {
   FPM=$RESULT
 
   help ccc_warn_help          &&
-  ccc_warn            &&
+  ccc_warn                    &&
   menu checklist              &&
   CCC_WARN=$RESULT  
 
@@ -924,7 +924,6 @@ optimize_architecture()  {
 		"Enter the number to set the stack to, leave empty for default."  \
 		0 55 $STACK`
 
-  optimize
 }
 
 

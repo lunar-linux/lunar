@@ -209,6 +209,9 @@ lin_module()  {
   if ! current_locked && ! solo_locked ; then
     echo $$ > $linING  &&
     start_logging  &&
+    if [ -z "$BUILD" ] ; then
+      optimize
+    fi &&
 
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"
@@ -216,9 +219,6 @@ lin_module()  {
 
       # important stuff here!!!
       invoke_installwatch &&
-      if [ -z "$CFLAGS" ] ; then
-        optimize
-      fi  &&
       
       if ! run_build ; then
         LIN_ERROR="BUILD"

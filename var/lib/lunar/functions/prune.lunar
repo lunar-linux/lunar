@@ -14,14 +14,15 @@
 # purpose  : prune all old logs, source copy's, install caches
 prune() {
   debug_msg "prune ($@)"
+
+  if [ -z "$BUILD" ] ; then
+    eval $(grep BUILD= /etc/lunar/local/optimizations)
+  fi
   
   TMP_SPOOL_KEEP=$(temp_create "spool-keep")
   TMP_CACHE_KEEP=$(temp_create "cache-keep")
 
   message "${MESSAGE_COLOR}Generating keep lists...${DEFAULT_COLOR}"
-  if [ -z "$BUILD" ] ; then
-    optimize
-  fi
   for MODULE in $(list_moonbase) ; do
     # spool:
     for SOURCE in $(sources $MODULE) ; do
