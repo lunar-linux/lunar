@@ -1,3 +1,11 @@
+2003-02-02 00:08  sofar
+
+	* var/lib/lunar/menu/optimize.menu: More info for the meek
+	
+2003-02-01 23:31  sofar
+
+	* sbin/: lrm, lrm2: Lrm2 will replace lrm forever into eternity!
+	
 2003-02-01 19:33  csm
 
 	* usr/share/man/man8/lfirsttime.8: a few updates and cleanups
