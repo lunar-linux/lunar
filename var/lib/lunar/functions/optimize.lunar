@@ -727,12 +727,12 @@ optimize_architecture()  {
   
   help cc_help                &&
   cc_options                  &&
-  menu                        &&
+  menu checklist              &&
   CC=$RESULT
 
   help ccc_help               &&
   ccc_options                 &&
-  menu                        &&
+  menu checklist              &&
   CCC=$RESULT
 
   help platform_help          &&
