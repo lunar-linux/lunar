@@ -27,9 +27,3 @@
 	* var/lib/lunar/functions/messages.lunar: /dev/stderr isnt
 	  standard, >&2 is more common
 
-2004-07-09 19:43  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Slightly modified after
-	  ranitha's optimize patch for gcc-3.4.x. This will transform the
-	  obsolete -mcpu into -mtune.
-
