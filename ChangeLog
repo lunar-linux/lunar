@@ -201,17 +201,3 @@
 	  command as a parameter, which will then be evaluated within the
 	  lsh environment. Example: `lsh list_expired_modules`
 
-2004-10-29 14:28  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Extra bluntly running the
-	  check&&create module index in case $MODULE_INDEX is missing (the
-	  -w check would fail if it was missing)
-
-2004-10-29 14:17  sofar
-
-	* bin/lvu, var/lib/lunar/functions/modules.lunar,
-	  var/lib/lunar/functions/moonbase.lunar,
-	  var/lib/lunar/functions/updatelog.lunar: Removing MOONBASE_MD5
-	  code as I suspect that it screws things up and it's unused
-	  anyway.
-
