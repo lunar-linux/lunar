@@ -125,9 +125,9 @@ remove_depends() {
 add_depends() {
   debug_msg "add_depends ($@)"
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
-	  if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
-		  remove_depends "$1" "$2"
-		fi
+    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
+      remove_depends "$1" "$2"
+    fi
                                                                                 
     verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
                                                                                 
@@ -145,7 +145,7 @@ run_depends() {
   debug_msg "run_depends ($@)"
   # local definitions of depends and optional_depends!
   depends()  {
-  debug_msg "  depends ($@)"
+    debug_msg "  depends ($@)"
     grep -q "^"$1"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
 
     if ! module_installed $1 && ! module_held $1 ; then
@@ -156,11 +156,11 @@ run_depends() {
         message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
                 "Adding required dependency${FILE_COLOR}"   \
                 "$1 ${DEFAULT_COLOR}"
+        add_depends "$MODULE" "$1" "on" "required" "$2" "$3"
         lin --deps $1
         echo "$1" >> $TEMP_PREPAREDDEPS
       fi
     fi
-    add_depends "$MODULE" "$1" "on" "required" "$2" "$3"
   }
                                                                                 
   optional_depends()  {
@@ -189,10 +189,10 @@ run_depends() {
 	fi
 	if query  "$DEPMOD_AVAIL 
         dependency - purpose: $4? " $DEFAULT ; then
-          lin  --deps  $1
           add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+          lin --deps $1
         else
-	  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+          add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
 	fi
       fi
     fi
