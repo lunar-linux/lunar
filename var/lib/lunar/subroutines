@@ -1532,7 +1532,7 @@ get_moonbase() {
   fi
   create_module_index
   
-  activity_log "lin" "$MODULE" "$VERSION" "$OUTCOME" "$INFO"
+  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
 
 }
 
