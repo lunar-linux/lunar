@@ -323,7 +323,7 @@ else
     if check_status "$MODULE" ; then
       # assemble pureg list if requested
       if [ "$PURGE" == "on" ] ; then
-        DEPS=$(list_installed_depending "$MODULE")
+        DEPS=$(list_installed_depending "$MODULE" | sort | uniq)
         for DEP in $DEPS ; do
           # skip held modules
           if ! module_held $DEP ; then
