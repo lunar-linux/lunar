@@ -52,6 +52,8 @@ Increases the level of message output.
 .TP
 .B "\-V, \-\-Version version
 Specify a (non-standard) module version for installation.
+.B Note:
+versions must begin with a numeral ([0-9]).
 .SH "FILES"
 All files can be edited by hand, but its easier to edit them with
 .B lunar.
@@ -159,7 +161,8 @@ either as
 .B package/version 
 or
 .B --Version version
-(where a /version exists in the moonbase).
+(where a /version exists in the moonbase). Package versions are required to begin with
+a numeral ([0-9]). 
 To get complete listing of software packages type
 .I lvu moonbase
 .TP 
