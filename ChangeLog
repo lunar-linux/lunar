@@ -1,3 +1,10 @@
+2003-10-24 22:38  tchan
+
+	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
+	blacklist.SPARC, blacklist.x86: Updated the blacklist files for
+	known problem modules across several architectures.  Getting ready
+	for the SPARC64 iso.
+
 2003-10-19 04:36  tchan
 
 	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
