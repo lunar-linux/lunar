@@ -149,7 +149,7 @@ run_configure() {
 
 run_pre_build() {
   if  [  -f  /tmp/$MODULE.iw ] ; then
-    [ "$VERBOSE" == "on" ] && echo "+ removing \"/tmp/$MODULE.iw\""
+    verbose_msg echo "removing \"/tmp/$MODULE.iw\""
     rm /tmp/$MODULE.iw
   fi
 
@@ -215,8 +215,7 @@ run_build()  {
 
   invoke_installwatch
 
-  [ "$VERBOSE" == "on" ] && 
-     echo "+ building \"$MODULE\" version \"$VERSION\" in `pwd`"
+  verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
   if [ -x ./configure ] || [ -x ./src/configure ] ; then
     if [ -f /var/lib/lunar/localsaconfig ]; then

@@ -96,107 +96,10 @@ symlinks()  {
 dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
 
 
-# function : sedit
-# usage    : sedit "sed string" filename [filename [...]]
-# purpose  : sed edit files;  example : sedit "s/TSET/TEST/" file file...
-sedit()  {
-  SEDIT=$1
-  shift
-  for FILE in $@ ; do
-    [ "$VERBOSE" == "on" ] && echo "+ Editing ${FILE}"
-    sed -i "$SEDIT" "$FILE"
-  done
-}
-
-
 # function : exists
 # usage    : VARIABLE=`exists < dirlistfile`
 # purpose  : filter out the non-existent files in a list
 exists()  {  while  read  ITEM;  do  [  -e  $ITEM  ]  &&  echo  $ITEM;  done;  }
-
-# function : return_error
-# usage    : return_error error_string $FUNCTION
-# purpose  : return info if a function is called with wrong params, exits imm.
-return_error() {
-   echo "$1 in function $2"
-   exit
-}
-
-sound()  {
-
-  case  $SOUND  in
-    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e  $SOUND_FILE  ];  then
-           (  cd  /  ;  play  $SOUND_FILE  & )
-         fi
-    ;;
-  esac
-
-}
-
-query()  
-{ 
-#  2 arguments
-#  query  "what do you want?  "  DEFAULT
-
-  if  [  -z  "$SILENT"  ];  then
-
-    # message  "Press y for yes, n for no."
-    if  [  -n  "$MODULE"  ];  then
-      echo  -e  -n  "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}:  "
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    else
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    fi
-
-    read   -t  $PROMPT_DELAY  -n  1  RESPONSE
-    echo
-
-    RESPONSE=${RESPONSE:=$2}
-    case  $RESPONSE  in
-      y|Y)  true  ;;
-        *)  false ;;
-    esac
-
-  else
-
-    echo  $2
-    case  $2  in
-        y|Y)  true    ;;
-          *)  false   ;;
-    esac
-
-  fi
-}
-
-
-message()    {  [  -n  "$SILENT"  ]  ||  echo  -e  "$*";  }
-
-
-report() {
-
-  if  [  ! -f  "$1"  ];  then  return;  fi
-
-  if  [  "$VIEW_REPORTS"  ==  "on"  ];  then
-
-    VIEW_PROMPT="View $2 for ${MODULE_COLOR}${MODULE}-${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}?"
-    sound  REPORT
-    if  query  "$VIEW_PROMPT" n;  then  view_file  $1;  fi
-  fi
-
-  if  [  "$MAIL_REPORTS"  ==  "on"  ];  then
-    MAILTEMP="/tmp/lunar.mail.`uuidgen`" 
-    date  -u  > $MAILTEMP
-    echo     >> $MAILTEMP
-    cat $1   >> $MAILTEMP
-    mail  -s  "Lunar Report from $HOSTNAME : $2 for $MODULE-$VERSION"  \
-              $ADMIN  < $MAILTEMP  2>/dev/null
-    rm -f $MAILTEMP 2>/dev/null          
-  fi
-
-  true
-
-}
 
 
 # function : guess_filename
@@ -245,7 +148,7 @@ unpack() {
     FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
   COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
 
-  [ "$VERBOSE" == "on" ] && echo "+ Unpacking $FILENAME in $(pwd)" && V=v
+  verbose_msg "Unpacking $FILENAME in $(pwd)" && V=v
 
   case  $COMPRESSOR  in
         bzip2)  bzip2  -cdf  $FILENAME  |  tar  -x${V}f  -  ;;
@@ -280,7 +183,7 @@ save_libraries()  {
 
   [ "$MODULE" == "glibc" ] && return 0
 
-  [ "$VERBOSE" == "on" ] && echo "+ saving libraries if any"
+  verbose_msg "saving libraries if any"
 
   OLD_VERSION=`installed_version  $MODULE`
   OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
@@ -300,7 +203,7 @@ save_libraries()  {
          file  -bL  $LINE   |
          grep  -q   "shared object"
     then
-      [ "$VERBOSE" == "on" ] && echo "++ saving $LINE"
+      verbose_msg "saving $LINE"
       if  [  -h  $LINE  ];  then
         DEST=$(  basename  $(  ls   -la  "$LINE"  |
                                cut  -d  '>'  -f2  |
@@ -326,7 +229,7 @@ save_libraries()  {
 
 release_saved_libraries()  {
 
-   [ "$VERBOSE" == "on" ] && echo "+ releasing saved libraries if any"
+   verbose_msg "releasing saved libraries if any"
    
    OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
    SAVED=$OLD_LIBS/$MODULE.saved.libraries
@@ -334,7 +237,7 @@ release_saved_libraries()  {
    [  -f  $SAVED  ]    &&
    cat    $SAVED       |
    while  read  FILE;  do
-     [ "$VERBOSE" == "on" ] && echo "++ $FILE"
+     verbose_msg "rm $FILE"
      rm  -f   "$FILE"
    done
 
@@ -355,7 +258,7 @@ prepare_install() {
 
   if  module_installed $MODULE  || module_held $MODULE ; then
     save_libraries
-    [ "$VERBOSE" == "on" ] && echo "+ calling \"lrm --keepconfig --nosustain $MODULE\""
+    verbose_msg "calling \"lrm --keepconfig --nosustain $MODULE\""
     lrm  --keepconfig  --nosustain  $MODULE
     true
   fi
@@ -371,7 +274,7 @@ rm_source_dir() {
   DEAD_DIR=$1
   DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
 
-  [ "$VERBOSE" == "on" ] && echo "+ destroying building dir \"$DEAD_DIR\""
+  verbose_msg "destroying building dir \"$DEAD_DIR\""
 
   if [ "$TMPFS" != "off" ]; then
     umount     $DEAD_DIR  2>  /dev/null
@@ -392,7 +295,7 @@ mk_source_dir() {
   NEW_DIR=$1
   NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
 
-  [ "$VERBOSE" == "on" ] && echo "+ creating building dir \"$NEW_DIR\""
+  verbose_msg "creating building dir \"$NEW_DIR\""
 
   if [ "$TMPFS" != "off" ]; then 
     umount  $NEW_DIR  2>/dev/null
@@ -409,7 +312,7 @@ mk_source_dir() {
 
 validate_source_dir()  {
 
-  [ "$VERBOSE" == "on" ] && echo "+ validating \"$SOURCE_DIRECTORY\""
+  verbose_msg "validating \"$SOURCE_DIRECTORY\""
   if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
       [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
       echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
@@ -429,7 +332,7 @@ validate_source_dir()  {
 # Example: bad_flags -ffast-math -funroll-loops
 bad_flags() {
 
-  [ "$VERBOSE" == "on" ] && echo "+ bad_flags \"$@\""
+  verbose_msg "bad_flags \"$@\""
   if [[ $1 == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
   elif [[ $1 == "compiler" ]]; then
@@ -447,32 +350,8 @@ bad_flags() {
 }
 
 
-# Usage: patch_it location/name level 
-# Example: patch_it $SOURCE_CACHE/foo.bz2 1
-patch_it() {
-  [ "$VERBOSE" == "on" ] && echo "+ patch_it \"$1\" \"$2\""
-  if [[ `echo $1 | grep .tar` ]]; then
-    if [[ `echo $1 | grep .bz2` ]]; then
-      bzcat $1 | tar x -O | patch -N -p$2
-    elif  [[ `echo $1 | grep .gz` ]]; then
-      zcat $1 | tar x -O | patch -N -p$2
-    else
-      cat $1 | tar x -O | patch -N -p$2
-    fi      
-  else
-    if [[ `echo $1 | grep .bz2` ]]; then
-      bzcat $1 | patch -N -p$2
-    elif [[ `echo $1 | grep .gz` ]]; then
-      zcat $1 | patch -N -p$2
-    else
-      cat $1 | patch -N -p$2 
-    fi
-  fi
-}
-
-
 default_pre_build() {
-  [ "$VERBOSE" == "on" ] && echo "+ running default_pre_build"
+  verbose_msg "running default_pre_build"
   if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
     if [[ -d $SOURCE_DIRECTORY ]] &&
@@ -500,13 +379,11 @@ default_pre_build() {
 
 default_config() 
 {
-   [ "$VERBOSE" == "on" ] && echo "+ running default_config"
+   verbose_msg "running default_config"
 
-   [ "$VERBOSE" == "on" ] && {
-      echo "+ CFLAGS=$CFLAGS"                &&
-      echo "+ OPTS=$OPTS"                    &&
-      echo "+ ./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
-   }
+   verbose_msg "CFLAGS=$CFLAGS"                &&
+   verbose_msg "OPTS=$OPTS"                    &&
+   verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
 
    ./configure  --build=$BUILD            \
                 --prefix=/usr             \
@@ -520,7 +397,7 @@ default_config()
 
 default_make()
 {
-   [ "$VERBOSE" == "on" ] && echo "+ running default_make"
+   verbose_msg "running default_make"
    make                               &&
    prepare_install                    &&
    make    install
@@ -529,7 +406,7 @@ default_make()
 
 default_build() 
 {
-   [ "$VERBOSE" == "on" ] && echo "+ running default_build"
+   verbose_msg "running default_build"
    default_config  &&
    default_make
 } > $C_FIFO 2>&1
@@ -558,7 +435,7 @@ default_post_build() {
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
 remove_module() {
 
-  [ "$VERBOSE" == "on" ] && echo "+ updating lunar state files after module removal"
+  verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS                                     && 
   lock_file $MODULE_STATUS_BACKUP                              &&
   grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
@@ -588,7 +465,7 @@ remove_module() {
 # usage   : add_module <module_name>
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
-  [ "$VERBOSE" == "on" ] && echo "+ updating lunar state files after module installation"
+  verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
   echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
@@ -632,10 +509,10 @@ remove_depends()
   if    [  -n  "$2"  ]
   then  
      grep  -v  "^$1:$2"  $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
-     [ "$VERBOSE" == "on" ] && echo "+ removing depends for \"$1\" on \"$2\""
+     verbose_msg "removing depends for \"$1\" on \"$2\""
   else  
      grep  -v  "^$1:"    $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
-     [ "$VERBOSE" == "on" ] && echo "+ removing depends for \"$1\""
+     verbose_msg "removing depends for \"$1\""
   fi
   cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
   
@@ -648,7 +525,7 @@ add_depends()
 {
   remove_depends  "$1"  "$2"
 
-  [ "$VERBOSE" == "on" ] && echo "+ adding depends for \"$1\" on \"$2\""
+  verbose_msg "adding depends for \"$1\" on \"$2\""
 
   lock_file $DEPENDS_STATUS_BACKUP                       &&
   lock_file $DEPENDS_STATUS                              &&
@@ -793,7 +670,7 @@ run_depends() {
 
   # local definitions of depends and optional_depends!
   depends()  {
-    [ "$VERBOSE" == "on" ] && echo "+ \"$MODULE\" depends on \"$1\""
+    verbose_msg "\"$MODULE\" depends on \"$1\""
 
     grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
     if  ! module_installed  $1   &&
@@ -821,7 +698,7 @@ run_depends() {
     #              $4 = description of why to use this module.
 
 
-    [ "$VERBOSE" == "on" ] && echo "+ \"$MODULE\" optionally depends on \"$1\""
+    verbose_msg "\"$MODULE\" optionally depends on \"$1\""
     if  !  in_depends  "$MODULE"  "$1";  then
 
       if    module_exiled  $1
@@ -1078,29 +955,6 @@ satisfy_depends()  {
 }
 
 
-color()  {
-
-  case  $1  in
-    off)  unset  MODULE_COLOR
-          unset  VERSION_COLOR
-          unset  QUERY_COLOR
-          unset  LRM_COLOR
-          unset  CHECK_COLOR
-          unset  RESURRECT_COLOR
-          unset  FILE_COLOR
-          unset  SYMLINK_COLOR
-          unset  PROBLEM_COLOR
-          unset  MESSAGE_COLOR
-          unset  DEFAULT_COLOR
-          COLOR=off
-          ;;
-     on)  COLOR=on
-          ;;
-  esac
-
-}
-
-
 invoke_installwatch()  {
   if  [  -e  /usr/lib/installwatch.so  ];  then
     export  INSTALLWATCHFILE=/tmp/$MODULE.iw
@@ -1178,7 +1032,7 @@ track()  {
   else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
   fi
 
-  [ "$VERBOSE" == "on" ] && echo "+ removing \"$IW_LOG\""
+  verbose_msg "removing \"$IW_LOG\""
   rm  -f  $IW_LOG  $TMP_LOG
 }
 
@@ -1331,7 +1185,7 @@ prune()
   while  read  FILE;  do
       grep  -q  "^$FILE$"  $KEEP  || {
         rm  $SOURCE_CACHE/$FILE 2>/dev/null
-	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
       }
   done
 
@@ -1341,7 +1195,7 @@ prune()
   while  read  FILE;  do
       grep  -q  "^$FILE$"  $KEEP  || {
         rm  $INSTALL_CACHE/$FILE 2>/dev/null
-	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
       }	
   done
 
@@ -1355,7 +1209,7 @@ prune()
   while  read  FILE;  do
       grep -q "^$FILE$"   $KEEP2 || {
         rm $INSTALL_LOGS/$FILE
-	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
       }
   done
 
@@ -1365,7 +1219,7 @@ prune()
   while  read  FILE;  do
       grep -q "^$FILE$"    $KEEP2 || {
         rm $COMPILE_LOGS/$FILE.bz2
-	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
       }
   done
 
@@ -1375,7 +1229,7 @@ prune()
   while  read  FILE;  do
       grep -q "^$FILE$"    $KEEP2 || {
         rm $MD5SUM_LOGS/$FILE
-	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
       }
   done
 

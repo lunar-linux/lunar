@@ -29,14 +29,14 @@ gather_docs()  {
   [ "$GARBAGE" == "on" ] || return 0
 
   DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
-  [ "$VERBOSE" == "on" ] && echo "+ installing standard documentation into \"$DOC_DIR\" if any"
+  verbose_msg "installing standard documentation into \"$DOC_DIR\" if any"
   mkdir  -p  $DOC_DIR
 
   ( cd $SOURCE_DIRECTORY && for FILE in \
     README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
     conf SETUP NEWS Change* manual* Manual* ; do
       [ -e $FILE ] && {
-        [ "$VERBOSE" == "on" ] && echo "++ $DOC_DIR/$FILE"
+        verbose_msg "installing docs: \"$DOC_DIR/$FILE\""
         cp -ar $FILE $DOC_DIR 2> /dev/null
       }
     done
@@ -46,7 +46,7 @@ gather_docs()  {
 
 install_pam_confs()  {
   if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
-    [ "$VERBOSE" == "on" ] && echo "+ handling pam config files"
+    verbose_msg "handling pam config files"
     cd       "$SCRIPT_DIRECTORY/pam.d"
 
     [ -d /etc/pam.d ] || mkdir  -p  /etc/pam.d
@@ -64,6 +64,7 @@ install_pam_confs()  {
 install_xinetd_confs()  { (
   if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
     cd       "$SCRIPT_DIRECTORY/xinetd.d"
+    verbose_msg "handling xinetd config files"
 
     [ -d /etc/xinetd.d ] || mkdir  -p  /etc/xinetd.d
 
@@ -134,6 +135,7 @@ install_initd()  { (
   [ -d /etc/init.d ] || mkdir -p /etc/init.d
 
   if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
+    verbose_msg "handling init.d scripts"
     cd $SCRIPT_DIRECTORY/init.d
     SCRIPTS=[!CVS]*
     ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)

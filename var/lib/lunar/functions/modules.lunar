@@ -187,7 +187,7 @@ run_module_file()
 {
    [ -z "$SCRIPT_DIRECTORY" ]  && return 1
    [ -s "$SCRIPT_DIRECTORY/$1" ] || return 1
-   [ "$VERBOSE" == "on" ] && echo "+ running \"$MODULE\" \"$1\" file"
+   verbose_msg "running \"$MODULE\" \"$1\" file"
    [ "$TEST" != "on" ] && . $SCRIPT_DIRECTORY/$1 > /dev/null
 }
 
