@@ -213,13 +213,11 @@ lvu_catalog_html()  {
 
   echo  "<html><head><title>Lunar Moonbase for `date  -u`</title>"
   echo  "<meta http-equiv=\"Pragma\" content=\"no-cache\"></head>"
-  echo  "<body background=\"media/blackmarble.jpg\">"
+  echo  "<body>"
 
-  echo  "<table  align=\"center\""
-  echo  "        background=\"media/whitemarble.jpg\""
-  echo  "        border=5>"
+  echo  "<table align=\"center\" border=5>"
 
-  echo  "<tr><th colspan=5><font color=maroon  size=+1>"
+  echo  "<tr><th colspan=5><font color=maroon size=+1>"
   echo  "Lunar Moonbase<br>`date  -u`"
   echo  "</font></th></tr>"
 
@@ -292,7 +290,7 @@ lvu_catalog_html()  {
     echo "<tr><th colspan=5>Modules in $SECTION section: $SECTION_COUNT</th></tr>"
   done
 
-  echo  "<tr><th colspan=5>Total modules:  $COUNT</th></tr>"
+  echo  "<tr><th colspan=5>Total modules: $COUNT</th></tr>"
   echo  "</table></body></html>"
 }
 
