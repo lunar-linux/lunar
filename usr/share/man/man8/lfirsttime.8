@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "lfirsttime 8"
-.TH lfirsttime 8 "2005-03-07" "Moritz Heiber" "Lunar Linux for the first time"
+.TH lfirsttime 8 "2005-03-08" "Moritz Heiber" "Lunar Linux for the first time"
 .SH "NAME"
 lfirsttime \- or 'What to do after a successful installation?'
 .SH "SYNOPSIS"
@@ -220,7 +220,7 @@ The package repository from where the \fBcoretools\fR gather their \fBpackage in
 Execute: \fBlin moonbase\fR
 .Sh "Set your preferences"
 .IX Subsection "Set your preferences"
-\&\fBLunar Linux\fR is higly customize\- and configurable. For changing the options that affect your system you may use the menu driven \fBlunar\fR configuration utility. It's based upon ncurses which means you can even run it in the console of your choice. You need to become root to use it.
+\&\fBLunar Linux\fR can easily be customized and is highly configurable. For changing the options that affect your system you may use the menu driven \fBlunar\fR configuration utility. It's based upon ncurses which means you can even run it in the console of your choice. You need to become root to use it.
 .IP "\fBOptimizations\fR" 4
 .IX Item "Optimizations"
 Set the right optimizations for your computer. Beware that changing your optimizations to the wrongly values might actually break your whole installations so be really carefull about what you're chosing. The \s-1ISO\s0 has been built with a minimum of available optimizations to ensure the highest amount of flexibility. To see wether or not your processor supports a certain feature try a \fBcat /proc/cpu\fR. It usually shows the available settings that suit your machine.
@@ -228,10 +228,10 @@ Set the right optimizations for your computer. Beware that changing your optimiz
 .IX Item "Integrity checking"
 Lunar is performing a range of security checks on tarballs and installed packages to prevent faulty tarballs and possible intruders from taking over your system. It also ensures that none of your currently installed packages is broken.
 .Sp
-You may select the amount of cheks from the \fBIntegrity checking\fR submenu at the \fBOptions\fR menu. It's generally recommeneded to at least chose \fB\s-1FIND_CHECK\s0\fR and \fB\s-1LDD_CHECK\s0\fR.
+You may select the amount of checks from the \fBIntegrity checking\fR submenu at the \fBOptions\fR menu. It's generally recommeneded to at least chose \fB\s-1FIND_CHECK\s0\fR and \fB\s-1LDD_CHECK\s0\fR.
 .IP "\fBFeature menu\fR" 4
 .IX Item "Feature menu"
-As mentioned before, Lunar is highly configurable. Thus you have a a whole menu to select its features from. It's strongly advised to at least take a look at it and get used to them. Explanations are usually displayed as soon as you select an item.
+As mentioned before, Lunar is highly configurable. Thus you have a whole menu to select its features from. It's strongly advised to at least take a look at it and get used to them. Explanations are usually displayed as soon as you select an item.
 .IP "\fBApart from that\fR" 4
 .IX Item "Apart from that"
 Take a look at the \fBlunar\fR configuration tool. It can be a \fBpowerful companion\fR while achieving the goal of setting up your system.
@@ -263,9 +263,12 @@ The first thing to do would be to 're'lin' (i.e. execute \fBlin \-c\fR once more
 Once the update has been completed successfully you may go ahead and customize your installation to suit your own needs. Well done!
 .SH "HINTS"
 .IX Header "HINTS"
+.IP "\fBTAB-completion\fR" 4
+.IX Item "TAB-completion"
+All of the coretools are able to do tab\-completion. Say, you want to install the module 'xfce4\-panel' just go ahead and type 'lin xfce4\-p<\s-1TAB\s0>' and lin is going to append the rest of the module's name to the command. Once there are too few characters to resolve the name into one single module you just need to hit \s-1TAB\s0 twice to get a list of all the modules starting with the characters you just typed i.e. 'lin xfce<\s-1TAB\s0><\s-1TAB\s0>' is going to give you a list of all modules starting with 'xfce'.
 .IP "\fB\s-1IRC\s0 channel\fR" 4
 .IX Item "IRC channel"
-The fastest help you get by chatting with the developers directly. Join the \fBLunar Linux \s-1IRC\s0 channel\fR at freenode
+The fastest help you get is by chatting with the developers directly. Join the \fBLunar Linux \s-1IRC\s0 channel\fR at freenode
 .Sp
 irc://irc.freenode.net/#lunar
 .SH "NOTES"
