@@ -41,27 +41,24 @@ exit 1
 }
 
 
-exit_proc()
-{
-   [ "$DEBUG" == "on" ] && echo "Clearing temporary files.. "
-   rm -f $LRM_QUEUE  2>/dev/null
-   rm -f $LRM_TEMP   2>/dev/null
-   rm -f $TEMP_FILE  2>/dev/null
-   rm -f $TEMP2_FILE 2>/dev/null
-   exit
+exit_proc() {
+  debug_msg "exit_proc ($@)"
+  temp_destroy $LRM_QUEUE
+  temp_destroy $LRM_TEMP
+  temp_destroy $TEMP_FILE
+  temp_destroy $TEMP2_FILE
+  exit
 }
 
 
-trap_proc()
-{
-   verbose_msg "Trapped a signal! "
-   exit_proc
-
+trap_proc() {
+  verbose_msg "Trapped a signal! "
+  exit_proc
 }
 
 
-handle_config_files()
-{
+handle_config_files() {
+  debug_msg "handle_config_files ($@)"
   TARGET="$1"
   if dirname "$TARGET" | grep -q "^/etc" ; then
     verbose_msg "Examining config file \"$TARGET\""
@@ -99,82 +96,52 @@ handle_config_files()
   fi
 }
 
-remove_something()
-{
+remove_something() {
+  debug_msg "remove_something ($@)"
    if [ -z "$1" ]; then
-      [ "$DEBUG" == "on" ] && 
-         echo "    Target parameter not passed, exiting"
-      return 1
+     debug_msg "remove_something: No args, exiting"
+     return 1
    fi
 
    if ! [ -e "$1" ] && ! [ -L "$1" ] ; then
-      [ "$DEBUG" == "on" ] && 
-         echo "    Target does not exist, exiting"
-      return 1
+     debug_msg "remove_something: no such file $1, exiting"
+     return 1
    fi
 
    TARGET="$1"
 
-   [ "$DEBUG" == "on" ] && echo -n "    removing $TARGET.. "
-
-   if [ "$TEST" == "on" ] 
-   then
-      if [ "$DEBUG" == "on" ]
-      then
-         [ -w "$TARGET" ] && 
-         echo "removed"   || 
-         echo "NOT removed!"
-      fi
+   if [ -d "$TARGET" ] ; then
+     rmdir $TARGET 2> /dev/null
+   else
+     rm -f $TARGET 2>/dev/null
    fi
 
-   if [ "$TEST" != "on" ]
-   then
-      [ -d "$TARGET" ]           && 
-      rmdir $TARGET 2> /dev/null || 
-      rm -f $TARGET 2>/dev/null
-
-      TMP_VAR="$?"
-
-      if [ "$DEBUG" == "on" ]
-      then
-         [ "$TMP_VAR" == "0" ]   && 
-         echo "removed"          ||
-         echo "NOT removed!"
-      fi
+   if [ "$?" == "0" ] ; then
+     debug_msg "remove_something: removed $TARGET succesfully"
+   else
+     debug_msg "remove_something: removed $TARGET not succesful"
    fi
 }
 
-process_directories()
-{
-   verbose_msg "processing directories..."
+process_directories() {
+  debug_msg "process_directories ($@)"
 
-   if [ -z "$1" ]; then
-      [ "$DEBUG" == "on" ] && 
-         echo "    Filename parameter not passed, exiting"
-      return 1
-   fi
+  if [ -z "$1" ]; then
+    debug_msg "process_directories: No args, exiting"
+    return 1
+  fi
 
-   if ! [ -d "$1" ]; then
-      [ "$DEBUG" == "on" ] && 
-         echo "    Filename does not exist, exiting"
-      return 1
-   fi
-
-   cat $1 | sort -r > $2
-
-   while read LINE
-   do
-      remove_something "$LINE"
-   done < $2
+  cat $1 | sort -r | while read LINE ; do
+    remove_something "$LINE"
+  done
 }
 
-process_lrm_queue()
-{
-   export TEMP_FILE="/tmp/lrm.temp.`uuidgen`"
-   rm -f $TEMP_FILE 2>/dev/null   
 
-   export TEMP2_FILE="/tmp/lrm.temp.`uuidgen`"
-   rm -f $TEMP2_FILE 2>/dev/null   
+process_lrm_queue() {
+  debug_msg "process_lrm_queue ($@)"
+
+   export TEMP_FILE=$(temp_create "lrm")
+   export TEMP2_FILE=$(temp_create "lrm")
 
    [ "$DEBUG" == "on" ] && 
    [ -s "$LRM_QUEUE" ]    && 
@@ -239,8 +206,7 @@ process_lrm_queue()
    done
 }
 
-check_status()
-{
+check_status() {
    module_installed $MODULE || {
       message  "${MODULE_COLOR}${MODULE}"  \
       "${PROBLEM_COLOR}is not installed."  \
@@ -261,8 +227,8 @@ check_status()
    true
 }
 
-downgrade()
-{
+
+downgrade() {
    # a local function for listing the contents of install cache
    list_available_cache()
    {
@@ -349,8 +315,7 @@ downgrade()
    exit
 }
 
-create_lrm_queue() 
-{
+create_lrm_queue() {
 
   [ "$#" == "0" ] && help;
 
@@ -374,10 +339,8 @@ create_lrm_queue()
       touch $PROTECTED 
     }
 
-  export  LRM_QUEUE="/tmp/lrm.queue.$$"
-  export   LRM_TEMP="/tmp/lrm.temp.$$"
-  [ -f "$LRM_QUEUE"  ] && rm -f $LRM_QUEUE 2>/dev/null
-  [ -f "$LRM_TEMP"   ] && rm -f $LRM_TEMP  2>/dev/null
+  export LRM_QUEUE=$(temp_create "lrm-queue")
+  export LRM_TEMP=$(temp_create "lrm")
                        
    MODULE_LIST="$@"
    for MODULE in $MODULE_LIST
