@@ -47,8 +47,3 @@
 
 	* var/lib/lunar/functions/depends.lunar: Cosmetics
 
-2004-06-04 12:21  sofar
-
-	* var/lib/lunar/functions/postbuild.lunar: Same permissions but
-	changed code so it's actually not rediculous
-
