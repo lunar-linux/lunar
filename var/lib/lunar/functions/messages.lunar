@@ -29,15 +29,18 @@
 
 
 message() {
-  debug_msg "message ($@)"
-  [ -n "$SILENT" ] || echo  -e  "$*"
+  if [ -z "$SILENT" ] ; then
+    echo -e "$*"
+  fi
 }
 
 
 verbose_msg() {
-  debug_msg "verbose_msg ($@)"
-  [ "$VERBOSE" != "on" ] || message "+ $*"
+  if [ "$VERBOSE" == "on" ] ; then
+    message "+ $*"
+  fi
 }
+
 
 debug_msg() {
   if [ -n "$LUNAR_DEBUG" ] ; then

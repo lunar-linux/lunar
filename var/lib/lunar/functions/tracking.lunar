@@ -63,11 +63,16 @@ parse_iw() {
 }
 
 
-# function : track
-# usage    : track
+# function : create_install_log
+# usage    : create_install_log
 # purpose  : create an install log
-track() {
-  debug_msg "track ($@)"
+create_install_log() {
+  debug_msg "create_install_log ($@)"
+
+  TMP_INST_LOG=$(temp_create "install-log")
+  INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
+  rm -f $INST_LOG &> /dev/null
+
   message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
 
   export IFS="$TAB_ENTER_IFS"
@@ -77,21 +82,66 @@ track() {
   uniq                       |
   filter  "$EXCLUDED"        |
   filter  "$LOCAL_EXCLUDED"  |
-  exists                     >  $TMP_LOG
+  exists                     >  $TMP_INST_LOG
 
-  echo  "$C_LOG_BZ"         >>  $TMP_LOG
-  echo  "$MD5_LOG"          >>  $TMP_LOG
-  echo  "$INST_LOG"         >>  $TMP_LOG
+  if [ "$ARCHIVE" == "on" ] ; then
+    echo "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_INST_LOG
+  fi
+  echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
+  echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
-  MISOWNED_SYMLINKS=`syms_not_owned  $TMP_LOG
-                     echo  -n  "/dev/null"`
+  MISOWNED_SYMLINKS=$(syms_not_owned  $TMP_INST_LOG
+                      echo  -n  "/dev/null")
 
-  if    [  "$MISOWNED_SYMLINKS"  ==  "/dev/null"  ]
-  then  cp  $TMP_LOG  $INST_LOG
-  else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
+  if [ "$MISOWNED_SYMLINKS" == "/dev/null" ] ; then
+    cp $TMP_INST_LOG $INST_LOG
+  else
+    grep -v "$MISOWNED_SYMLINKS" $TMP_INST_LOG > $INST_LOG
   fi
 
-  rm  -f  $TMP_LOG
+  temp_destroy $TMP_INST_LOG
 }
+
+
+create_md5sum_log()  {
+  debug_msg "create_md5sum_log ($@)"
+
+  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
+  
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+
+  files < $INSTALL_LOGS/$MODULE-$VERSION | while read FILE ; do
+    md5sum $FILE >> $MD5SUM_LOGS/$MODULE-$VERSION
+  done
+
+}
+
+create_install_cache() {
+  debug_msg "create_install_cache($@)"
+
+  if [ "$ARCHIVE" == "off" ] ; then
+    return
+  fi
+
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2${DEFAULT_COLOR}"
+  tar cPjf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
+
+}
+
+
+boost()	{ (
+  debug_msg "boost ($@)"
+
+  create_install_log    &&
+  create_md5sum_log     &&
+  create_install_cache  &&
+  
+  add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+  verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+
+  rm  -f  $BOOST_LOCK
+
+) }
 
 
