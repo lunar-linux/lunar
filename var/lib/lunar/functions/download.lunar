@@ -50,9 +50,9 @@ get_svn() {(
 
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting local SVN copy"
-    # unpacking in last component dir of $CVSMODULE
+    # unpacking in last component dir of $SVN_DIR
     CD=$(pwd)
-    if ! unpack $2 ; then
+    if ! tar xjf $SOURCE_CACHE/$2 ; then
       message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
       
       rm_source_dir /tmp/$MODULE-$VERSION
@@ -69,8 +69,10 @@ get_svn() {(
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
     if [[ -d ${SVN_DIR}/.svn ]]; then
-      verbose_msg "[${TRY}] svn up $SVN_URL"
-      svn up $SVN_URL && GOT_SVN="yes" 
+      cd ${SVN_DIR}
+      verbose_msg "[${TRY}] svn up"
+      svn up && GOT_SVN="yes" 
+      cd ${CD}
     elif ! [[ -d ${SVN_DIR}/.svn ]]; then
       verbose_msg "[${TRY}] svn co $SVN_URL $SVN_DIR"
       svn co $SVN_URL $SVN_DIR && GOT_SVN="yes"
@@ -133,7 +135,7 @@ get_cvs() {(
     CD=$(pwd)
     mkdir -p $(dirname $CVSMODULE)
     cd $(dirname $CVSMODULE)
-    if ! unpack $2 ; then
+    if ! tar xjf $SOURCE_CACHE/$2 ; then
       message "${PROBLEM_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
       
       rm_source_dir /tmp/$MODULE-$VERSION
@@ -153,8 +155,8 @@ get_cvs() {(
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
     if [[ -d $CVSMODULE/CVS ]]; then
-      verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE $CVSMODULE"
-      cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes" 
+      verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
+      cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
     elif ! [[ -d CVS ]]; then
       verbose_msg "[${TRY}] cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE"
       cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
