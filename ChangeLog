@@ -1,3 +1,8 @@
+2003-08-08 14:04  tchan
+
+	* usr/share/man/man8/lget.8: Updating the size estimate of moonbase
+	in the lget manpage.
+
 2003-08-08 06:53  tchan
 
 	* usr/share/man/man8/: lin.8, lunar.8: Updated man pages to match
@@ -478,9 +483,4 @@
 2003-06-12 22:16  sofar
 
 	* bin/lvu: Adding support for "exiled" command
-
-2003-06-09 14:51  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Fixes the disappearing
-	modules.index line (yikes!)
 
