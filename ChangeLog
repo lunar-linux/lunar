@@ -1,3 +1,15 @@
+2005-03-28 13:26  sofar
+
+	* var/lib/lunar/plugins/check-md5sum.plugin: locale-fix: do not
+	  rely on 'FAILED' in the output, since in spanish it is "TU MADRE"
+
+2005-03-27 22:02  sofar
+
+	* var/lib/lunar/: functions/kernel.lunar, functions/plugins.lunar,
+	  plugins/bootloader-grub.plugin, plugins/bootloader-lilo.plugin:
+	  Moving bootloader code to plugins: we need to move the plugins
+	  out to the moonbase-modules later on.
+
 2005-03-25 17:56  sofar
 
 	* var/lib/lunar/: functions/check.lunar, functions/plugins.lunar,
