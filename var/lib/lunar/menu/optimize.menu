@@ -18,8 +18,8 @@ optimize() {
   fi
   echo -e PLATFOM=$PLATFORM     '\n'    \
           BUILD=$BUILD          '\n'    \
-          CC=$CC                '\n'    \
-          CCC=$CCC              '\n'    \
+          COPT=$COPT            '\n'    \
+          CCOPT=$CCOPT          '\n'    \
           BOPT=$BOPT            '\n'    \
           CPU=$CPU              '\n'    \
           SPD=( ${SPD[@]} )     '\n'    \
@@ -205,7 +205,7 @@ help() {
       ldf_help)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
-      Debug_HELP="Strip debug symbols only"
+#     Debug_HELP="Strip debug symbols only"
   Combreloc_HELP="Combreloc"
                ;;
 
@@ -225,10 +225,10 @@ compiler_options() {
 }
 
 cc_options(){
-  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  "off"   "$Pipe_HELP" )
 }
 ccc_options(){
-  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  "off"   "$Pipe_HELP" )
 }
 
 platform_options() {
@@ -372,7 +372,7 @@ ccc_warn_options() {
 
 ldf_options() {
    OPTIONS=( "Strip"       "-s"            "$LDF1"  "$Strip_HELP"
-             "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
+#            "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
              "Combreloc"   "-z combreloc"  "$LDF3"  "$Combreloc_HELP" )
 
 }

@@ -499,7 +499,7 @@ install_xinetd_confs()  { (
 
     if  [  -n  "$SERVICES"  ];  then
       devoke_installwatch
-      /etc/init.d/xinetd  restart
+      [ ! -x /etc/init.d/xinetd ] || /etc/init.d/xinetd  restart
       invoke_installwatch
     fi
   fi
@@ -510,15 +510,17 @@ install_initd()  { (
 
   [ -d /etc/init.d ] || mkdir -p /etc/init.d
 
-  if  [ -d  $SCRIPT_DIRECTORY/init.d  ]
-    then
-    ALL_INITDSCRIPTS=`grep -l "# chkconfig: " $SCRIPT_DIRECTORY/init.d/* | cut -d / -f 9`
+  if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
+    cd $SCRIPT_DIRECTORY/init.d
+    SCRIPTS=$(find . -type f -maxdepth 1 )
+    ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
 
     for INITDSCRIPT in $ALL_INITDSCRIPTS; do
       if [ ! -f /etc/init.d/$INITDSCRIPT ] ; then
         /usr/bin/install -g 0 -o 0 -m 700 $SCRIPT_DIRECTORY/init.d/$INITDSCRIPT /etc/init.d/
       fi
     done
+    cd $SCRIPT_DIRECTORY
   fi
 
   for INITDSCRIPT in $INITDSCRIPTS; do
@@ -1470,7 +1472,7 @@ get_moonbase() {
 
   echo -e "${MESSAGE_COLOR}Downloading ${FILE_COLOR}${SOURCE}" \
           "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-  wget -O /tmp/$SOURCE $MOONBASE_URL \
+   wget -O /tmp/$SOURCE $MOONBASE_URL \
      $RATE $FTP_CONNECTION $RETRIES $PARTIAL                        &&
   echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
           "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
@@ -1485,7 +1487,7 @@ get_moonbase() {
   echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}"       \
           "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
   
-  tar xfy $SOURCE_CACHE/$SOURCE -C /var/lib/lunar                   &&
+  bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar             &&
   OUTCOME=success || OUTCOME=failed
   
   rm -f $SOURCE_CACHE/$SOURCE

@@ -300,19 +300,14 @@ MAX_SOURCES=${MAX_SOURCES:=100}
 
 }
 
+download_module() {
 
-
-lget_moonbase()  {
-
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-      (  LGETING=/var/lock/lgetting.$MODULE
-         run_details  &&
-         download
-      )
-    done
-  done
-
+  MODULE=$1
+  (
+    LGETING=/var/lock/lgetting.$MODULE
+    run_details  &&
+    download
+  )
 }
 
 
@@ -323,17 +318,33 @@ main() {
   MODULES=`strip_parameters  $*`
 
   if  [  -z  "$MODULES"  ];  then
-    lget_moonbase
-  else
-
-    for  MODULE  in  $MODULES;  do
-      (  LGETING=/var/lock/lgetting.$MODULE
-         run_details  &&
-         download
-      )
+    for  SECTION  in  `list_sections`;  do
+      for  MODULE  in  `list_modules $SECTION`;  do
+	MODULES=$(echo $MODULES $MODULE)
+      done
     done
-
   fi
+		    
+  for  MODULE  in  $MODULES;  do
+    SECTION=$(find_section $MODULE)
+    if [ "$EXHAUSTIVE" == "yes" ] ; then
+      if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
+	MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+	if [ -f $MIRRORS/$MIRROR ] ; then
+	  for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	    eval ${MIRROR}_URL=$MIRROR_URL
+	    if download_module $MODULE ; then
+	      break
+	    fi
+          done 
+	else
+	  download_module $MODULE
+	fi
+      fi
+    else
+      download_module $MODULE
+    fi
+  done
 
 }
 
@@ -344,3 +355,4 @@ root_check || exit 1
 
 renice +10 -p $$  >/dev/null
 main  $*
+
