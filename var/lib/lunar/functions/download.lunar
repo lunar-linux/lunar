@@ -467,7 +467,7 @@ show_downloading()
         if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
             cat $DOWNLOAD_LOG
         else
-            tail -s 0.0 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+            tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
             sleep 1
         fi
         rm $DOWNLOAD_LOG
