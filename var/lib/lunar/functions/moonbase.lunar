@@ -39,7 +39,7 @@ get_moonbase () {(
     mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
 
-  wget -O - >/dev/null "www.lunar-linux.org/houston?loc=$UNIQID"
+  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID"
 
   if download_module ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
