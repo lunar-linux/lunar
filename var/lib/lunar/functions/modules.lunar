@@ -475,28 +475,42 @@ purge_modules() {
 }
 
 
-# function : list_expired_modules
-# usage    : list_expired_modules
-# purpose  : return a list of modules that need to be updated
-list_expired_modules() {
-  debug_msg "list_expired_modules ($@)"
-  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
+module_is_expired() {
+  debug_msg "module_is_expired ($@)"
   (
+    if [ -z "$MODULE" ] ; then
+      MODULE=$1
+    fi
+    LINE=$(grep "^$MODULE:" $MODULE_STATUS | grep -v "^moonbase")
     MODULE=$(echo "$LINE" | cut -d: -f1)
     IDATE=$(echo "$LINE" | cut -d: -f2)
     STATUS=$(echo "$LINE" | cut -d: -f3)
     IVERSION=$(echo "$LINE" | cut -d: -f4)
     if run_details $MODULE &> /dev/null ; then
       if [ "$STATUS" == "installed" ] ; then
-        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
-          (( "$UPDATED" > "$IDATE" )) ; then
-          if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
-            echo $MODULE
-          fi
+        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] ||
+	  (( "$UPDATED" > "$IDATE" )) ; then
+	  if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
+	    return 0
+	  fi
 	fi
       fi
     fi
+    # nope... it's not expired
+    return -1
   )
+}
+
+
+# function : list_expired_modules
+# usage    : list_expired_modules
+# purpose  : return a list of modules that need to be updated
+list_expired_modules() {
+  debug_msg "list_expired_modules ($@)"
+  for MODULE in $(list_installed) ; do
+    if $(module_is_expired $MODULE) ; then
+      echo "$MODULE"
+    fi
   done
 }
 
