@@ -1,3 +1,12 @@
+2003-09-17 00:36  elaine
+
+	* bin/lvu, sbin/lget: lget - added -V |--Version syntax luv
+	corrected 'versions' command oper.
+
+2003-09-16 21:23  sofar
+
+	* var/lib/lunar/functions/main.lunar: Bugfix #372
+
 2003-09-15 14:58  nhudson
 
 	* etc/lunar/mirrors/GNOME: 
@@ -412,10 +421,4 @@
 	* bin/lvu, var/lib/lunar/functions/download.lunar: Fixing lvu
 	search bug, adding full support for svn:// urls, see moonbase/zbeta
 	dor 2 example modules that use svn:// URL's.
-
-2003-07-18 03:08  tchan
-
-	* var/lib/lunar/functions/optimize.lunar: Again, fixed the typo of
-	"PLATFOM" to be "PLATFORM".  This was fixed in a previous version
-	of this code but was LOST in sofar's latest merge.
 
