@@ -502,7 +502,7 @@ function show_tree() {
 
   # purpose: Get reverse dependencies
   get_reverse_depends() {
-    DEPENDS=$(grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " ")
+    DEPENDS=$(grep :${MODULE}: "$DEPENDS_STATUS" | sort | uniq | cut -d':' -f1 | tr "\n" " ")
     [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
   }
 

@@ -250,9 +250,34 @@ default_build() {
 
 default_cvs_build() {
   debug_msg "default_cvs_build ($@)"
-  verbose_msg "running \"default_cvs_build\""
   default_cvs_config  &&
   default_make
+} > $C_FIFO 2>&1
+
+
+default_cpan_pre_build() {
+  debug_msg "default_cpan_pre_build ($@)"
+  mk_source_dir $SOURCE_DIRECTORY
+}
+
+
+default_cpan_build() {
+  debug_msg "default_cpan_build ($@)"
+  prepare_install
+  verbose_msg "running \"default_cpan_build\""
+  if [ ! -x /usr/bin/cpan ] ; then
+    return 1
+  fi
+  
+  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
+  echo "o conf cpan_root /var/state/lunar
+        o conf build_dir $SOURCE_DIRECTORY
+        o conf keep_source_where $SOURCE_CACHE/cpan
+	install $CPAN_MODULE
+	quit" | /usr/bin/cpan
+  RESULT=$?
+  rm_source_dir $SOURCE_DIRECTORY
+  return $RESULT
 } > $C_FIFO 2>&1
 
 

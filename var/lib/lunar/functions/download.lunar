@@ -33,6 +33,11 @@
 ############################################################
 
 
+get_cpan() {
+  debug_msg "skipping cpan downloads for $@"
+}
+
+
 get_svn() {
   debug_msg "get_svn ($@)"
   if ! module_installed subversion ; then
@@ -307,16 +312,10 @@ get_url() {
       else
         get_svn $1 $2
       fi
-    elif [ "$1:0:7}" == "cpan://" ] ; then
-      # no way, this cannot be tru
-      #
-      # and it isn't, but I thought this would be a cute, simple way of
-      # fetching sources and possibly have 'CPAN' do all the work for us
-      # thereby not opposing the normal perl module modules (like File-Tail)
-      #
-      # TODO play with this
+    elif [ "${1:0:7}" == "cpan://" ] ; then
+      # skip CPAN modules here...
       :
-    elif [ "{$1:0:5}" == "file:" ] ; then
+    elif [ "${1:0:5}" == "file:" ] ; then
       # adding this since wget is a bitch and will not fetch this... sigh
       # this will copy file to $2... so you may use it as you like
       cp ${1/file:/} $2
@@ -407,6 +406,8 @@ download_module() {
 	elif [ "${URL:0:6}" == "svn://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SOURCE_CACHE/$SRC
+	elif [ "${URL:0:6}" == "cpan://" ] ; then
+	  verbose_msg "skipping CPAN downloads!!!"
 	else
 	  verbose_msg "Skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
 	  continue 2
