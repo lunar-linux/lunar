@@ -86,12 +86,3 @@
 	var/lib/lunar/menu/integrity.menu: Moved the rest of the
 	depreciated "lin --fix" over to "lunar fix".
 
-2003-08-16 20:00  elaine
-
-	* var/lib/lunar/functions/postbuild.lunar: Merged fix to lunar
-
-2003-08-16 19:56  elaine
-
-	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Copied Sofar's
-	theedge wrapper fixes to lunar
-
