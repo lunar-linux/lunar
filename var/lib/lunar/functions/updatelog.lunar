@@ -82,7 +82,7 @@ display_success_info()  {
 display_moonbase_changes()  {  
 
   MODULE_INDEX_BACKUP=/tmp/`basename $MODULE_INDEX`
-  DIFF='diff -I MOONBASE_MD5'
+  DIFF='diff -I $MOONBASE_MD5'
   
   if [ -e $MOUDLE_INDEX ] && [ -e $MODULE_INDEX_BACKUP ]; then
 
