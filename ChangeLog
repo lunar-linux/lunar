@@ -1,3 +1,9 @@
+2003-11-02 15:31  elaine
+
+	* var/lib/lunar/functions/depends.lunar: Mod opt-depends prompt to
+	clarify function, indicate whether the quried package is already
+	present and split to 2 lines
+
 2003-10-26 14:16  sofar
 
 	* sbin/lin, var/lib/lunar/functions/main.lunar,
