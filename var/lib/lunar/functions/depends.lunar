@@ -306,14 +306,14 @@ build_module_depends() {
     fi &&
     run_details $1 &&
     run_configure &&
-    run_depends
+    RECONFIGURE= run_depends
   else
     if ! run_conflicts $1 ; then
       exit 1
     fi &&
     run_details $1 &&
-    run_depends &&
-    satisfy_depends
+    RECONFIGURE= run_depends &&
+    RECONFIGURE= satisfy_depends
   fi
 )
 }
