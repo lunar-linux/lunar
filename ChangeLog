@@ -185,8 +185,3 @@
 	* usr/share/man/: man1/lvu.1, man8/lunar.8: updating these man
 	pages!
 
-2003-03-29 23:41  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Better handling of
-	depends: avoid unnecesary messages and edits
-
