@@ -1,3 +1,7 @@
+2005-03-28 23:53  v3rt1g0
+
+	* sbin/lsh: Just a little typo that has been bugging me.
+
 2005-03-28 13:26  sofar
 
 	* var/lib/lunar/plugins/check-md5sum.plugin: locale-fix: do not
