@@ -1,3 +1,21 @@
+2005-04-04 13:36  sofar
+
+	* var/lib/lunar/plugins/download-generic.plugin: Add generic
+	  https:// to the plugins (needed for cvs module)
+
+2005-04-04 11:22  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Replacing an expensive
+	  call with efficient code
+
+2005-04-04 11:11  sofar
+
+	* sbin/lin, var/lib/lunar/functions/modules.lunar,
+	  var/lib/lunar/functions/moonbase.lunar: Two changes: reinstate
+	  moonbase changelog (was somehow broken) Make lin a single thread
+	  and not call itself but rather call the main() function again
+	  (which retains cmdline settings like debug, verbose, etc)
+
 2005-04-02 15:43  sofar
 
 	* var/lib/lunar/functions/download.lunar: Rather elegant and simple
@@ -297,8 +315,4 @@
 	  not being accessible on some systems etc. Note user can still
 	  override PATH with `lunar set PATH xxxxx`, but it's not exported
 	  to sub-apps.
-
-2005-02-02 12:12  sofar
-
-	* var/lib/lunar/functions/build.lunar: meh... suck
 
