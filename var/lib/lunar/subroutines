@@ -1030,7 +1030,10 @@ sort_install_queue() {
 
    cp $INSTALL_QUEUE $TMP_INSTALL || return 1
 
-   for MODULE in `cat $TMP_INSTALL`; do find_depends $MODULE; done
+   for MODULE in `cat $TMP_INSTALL`; do
+     show_fancy_progress "Processing: $MODULE"
+     find_depends $MODULE
+   done
 
    for LINE in `tsort $TMP_DEPENDS 2>/dev/null`; do
       if grep -q "^$LINE\$" $TMP_INSTALL 2>/dev/null; then
