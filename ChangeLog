@@ -3,218 +3,197 @@
 	* etc/lunar/config, sbin/lin, var/lib/lunar/compilers/cc,
 	var/lib/lunar/functions/optimize.lunar,
 	var/lib/lunar/menu/optimize.menu: New Wrapper style!!!
-
+	
 2002-09-05 13:50  sofar
 
 	* var/lib/lunar/compilers/: cc, gcc: Fix (no symlinks)
-
+	
 2002-09-05 13:48  sofar
 
 	* var/lib/lunar/compilers/: cc, g++, gcc: New wrappers
-
+	
 2002-09-05 13:02  kongar
 
 	* sbin/lin: 
 	xinetd installation now neglects CVS subdirs
 	
-	it is not possible to select xinetd AND init.d, it is now either
-	xinetd OR init.d
-
+	it is not possible to select xinetd AND init.d, it is now
+	either xinetd OR init.d
+	
 2002-09-04 16:37  tchan
 
-	* var/lib/lunar/functions/: optimize.lunar, optimize.lunar.sofar:
-	Fixed optimize.lunar, again, to just plain export CC,CCC,CXX, with
-	no conditional testing.
-
+	* var/lib/lunar/functions/: optimize.lunar, optimize.lunar.sofar: Fixed optimize.lunar, again, to just plain export CC,CCC,CXX, with no conditional
+	testing.
+	
 2002-09-03 13:54  sofar
 
-	* var/lib/lunar/subroutines: only restart xinetd if the init.d
-	script is available
-
+	* var/lib/lunar/subroutines: only restart xinetd if the init.d script is available
+	
 2002-09-03 13:49  sofar
 
 	* sbin/lin: Make sure pwd is back to normal
-
+	
 2002-09-03 13:48  sofar
 
 	* var/lib/lunar/subroutines: Fixe 2: right greps
-
+	
 2002-09-03 13:43  sofar
 
 	* sbin/lin: Fix 1 for CVS moonbases: lin skipping directories
-
+	
 2002-09-03 13:18  sofar
 
 	* var/lib/lunar/subroutines: That wasn't right
-
+	
 2002-09-03 13:13  sofar
 
-	* var/lib/lunar/subroutines: Fixing CVS moonbase bug trying to cp
-	CVS/
-
+	* var/lib/lunar/subroutines: Fixing CVS moonbase bug trying to cp CVS/
+	
 2002-09-03 00:48  sofar
 
 	* etc/lunar/mirrors/SFORGE: Adding 2 apparently new mirrors
-
+	
 2002-09-02 21:27  sofar
 
-	* var/lib/lunar/menu/download.menu: Adding menu switch for
-	EXHAUSTIVE option
-
+	* var/lib/lunar/menu/download.menu: Adding menu switch for EXHAUSTIVE option
+	
 2002-09-02 21:05  sofar
 
-	* sbin/lget: New feature: exhaustive mirror testing when
-	downloading (EXHAUSTIVE=yes)
-
+	* sbin/lget: New feature: exhaustive mirror testing when downloading (EXHAUSTIVE=yes)
+	
 2002-09-02 19:54  sofar
 
 	* etc/lunar/mirrors/SFORGE: TABS instead of SPACES
-
+	
 2002-09-02 18:42  sofar
 
 	* etc/lunar/mirrors/LAST_RESORT, etc/lunar/mirrors/LRESORT,
 	etc/lunar/mirrors/SFORGE, etc/lunar/mirrors/SOURCEFORGE,
 	var/lib/lunar/menu/mirrors.menu: Renamed these for later more handy
-
+	
 2002-09-02 17:57  sofar
 
 	* sbin/lin: reworked probe tests more decently
-
+	
 2002-09-02 17:21  sofar
 
-	* usr/share/man/man8/lunar.8: updated man page for new
-	functionality
-
+	* usr/share/man/man8/lunar.8: updated man page for new functionality
+	
 2002-09-02 16:45  tchan
 
-	* var/lib/lunar/menu/optimize.menu: Commented out the DEBUG strip
-	option from the Lunar menus.  It breaks too many builds and there
-	is no good way to fix this right now in Lunar.	Commented out with
-	Xoritor's blessing!
-
+	* var/lib/lunar/menu/optimize.menu: Commented out the DEBUG strip option from the Lunar menus.  It breaks too
+	many builds and there is no good way to fix this right now in Lunar.  Commented
+	out with Xoritor's blessing!
+	
 2002-09-02 02:38  tchan
 
-	* var/lib/lunar/functions/optimize.lunar: Okay, this version of
-	optimize.lunar incorporates sofar's "menu checklist" fix but does
-	NOT include his nowrap code which is still broken.  This version
-	correctly has niki's fix for the Debug strip optimization.  sofar
-	needs to check the sense of his [ -n $NOWRAP ] test.  If I do NOT
-	have $NOWRAP set, then I obviously want the lunar gcc wrappers but
-	his code will NOT export the CC,CXX,CCC variables correctly.
-
+	* var/lib/lunar/functions/optimize.lunar: Okay, this version of optimize.lunar incorporates sofar's "menu checklist"
+	fix but does NOT include his nowrap code which is still broken.  This version
+	correctly has niki's fix for the Debug strip optimization.  sofar needs to
+	check the sense of his [ -n $NOWRAP ] test.  If I do NOT have $NOWRAP set,
+	then I obviously want the lunar gcc wrappers but his code will NOT export
+	the CC,CXX,CCC variables correctly.
+	
 2002-09-02 02:04  csm
 
-	* var/lib/lunar/functions/optimize.lunar: reverting to version 1.6
-	optimize.lunar.sofar is 1.8
-
+	* var/lib/lunar/functions/optimize.lunar: reverting to version 1.6 optimize.lunar.sofar is 1.8
+	
 2002-09-02 01:53  csm
 
-	* var/lib/lunar/functions/optimize.lunar.sofar: adding in this file
-	after reverting optimize.lunar
-
+	* var/lib/lunar/functions/optimize.lunar.sofar: adding in this file after reverting optimize.lunar
+	
 2002-09-01 16:32  sofar
 
-	* var/lib/lunar/functions/optimize.lunar: set NOWRAP=yes in
-	/etc/lunar/local/config to bypass the compile wrappers
-
+	* var/lib/lunar/functions/optimize.lunar: set NOWRAP=yes in /etc/lunar/local/config to bypass the compile wrappers
+	
 2002-09-01 16:18  sofar
 
-	* var/lib/lunar/: menu/optimize.menu, functions/optimize.lunar:
-	Misc fixes
-
+	* var/lib/lunar/: menu/optimize.menu, functions/optimize.lunar: Misc fixes
+	
 2002-09-01 15:14  sofar
 
-	* var/lib/lunar/menu/download.menu: Even better explanation (used
-	from man wget)
-
+	* var/lib/lunar/menu/download.menu: Even better explanation (used from man wget)
+	
 2002-09-01 15:10  sofar
 
-	* var/lib/lunar/menu/download.menu: Fixed proper explanation of
-	values in dl rate.
-
+	* var/lib/lunar/menu/download.menu: Fixed proper explanation of values in dl rate.
+	
 2002-09-01 04:24  niki
 
-	* var/lib/lunar/functions/optimize.lunar: The bug that is discribed
-	in bug no. 75, has some how been reactivated, which i have disabled
-	again. See the text in the file, or contact me Niki Guldbrand
-	<nikig@vip.cybercity.dk> for further info.
-
+	* var/lib/lunar/functions/optimize.lunar: The bug that is discribed in bug no. 75, has some how been reactivated,
+	which i have disabled again. See the text in the file, or contact me
+	Niki Guldbrand <nikig@vip.cybercity.dk> for further info.
+	
 2002-08-31 04:42  tchan
 
-	* var/state/lunar/gcc.x86: Alphabetized the list and fixed a few
-	entries. gcc does compile with gcc-3.2 !  :-)
-
+	* var/state/lunar/gcc.x86: Alphabetized the list and fixed a few entries. gcc does compile with
+	gcc-3.2 !  :-)
+	
 2002-08-30 15:08  sofar
 
 	* usr/share/man/man8/lin.8: Removed apprentice
-
+	
 2002-08-30 15:07  sofar
 
 	* sbin/lunar: Cleaning up apprentice
-
+	
 2002-08-30 15:05  sofar
 
 	* bin/lvu, etc/lunar/config, sbin/lin, sbin/lrm,
-	var/lib/lunar/apprentice, var/lib/lunar/subroutines: Eradicated
-	apprentice, still looking for lose body parts...
-
+	var/lib/lunar/apprentice, var/lib/lunar/subroutines: Eradicated apprentice, still looking for lose body parts...
+	
 2002-08-30 11:16  sofar
 
 	* sbin/lget: Bugfix: #130
-
+	
 2002-08-29 16:28  sofar
 
-	* var/lib/lunar/subroutines: now --nofix also leaves dependancy
-	file untouched
-
+	* var/lib/lunar/subroutines: now --nofix also leaves dependancy file untouched
+	
 2002-08-29 15:30  sofar
 
-	* var/lib/lunar/subroutines: Final fixes ot lin --nofix (tested &&
-	confirmed working fix)
-
+	* var/lib/lunar/subroutines: Final fixes ot lin --nofix (tested && confirmed working fix)
+	
 2002-08-29 11:16  sofar
 
 	* var/lib/lunar/subroutines: Fix for the --nofix case
-
+	
 2002-08-29 10:12  sofar
 
-	* var/lib/lunar/subroutines: Small fix that possibly fixes the
-	--nofix bug
-
+	* var/lib/lunar/subroutines: Small fix that possibly fixes the --nofix bug
+	
 2002-08-29 08:28  kongar
 
 	* var/lib/lunar/protected: added smtpd.conf from cyrus-sasl
-
+	
 2002-08-28 21:48  sofar
 
 	* var/lib/lunar/subroutines: Typo fix
-
+	
 2002-08-28 19:02  sofar
 
-	* var/lib/lunar/subroutines: Fixed removal of install_queue with
-	test
-
+	* var/lib/lunar/subroutines: Fixed removal of install_queue with test
+	
 2002-08-28 18:12  sofar
 
 	* var/lib/lunar/subroutines: Final fixes to fix_depends
-
+	
 2002-08-28 15:59  sofar
 
 	* var/lib/lunar/subroutines: Fix for missing depends
-
+	
 2002-08-28 11:07  sofar
 
 	* var/lib/lunar/subroutines: More fixes
-
+	
 2002-08-28 09:55  sofar
 
-	* var/lib/lunar/subroutines: Fix for queue length > 1 in
-	fix_depends
-
+	* var/lib/lunar/subroutines: Fix for queue length > 1 in fix_depends
+	
 2002-08-28 09:40  sofar
 
 	* var/lib/lunar/subroutines: More fix_depends fixes
-
+	
 2002-08-28 09:17  kongar
 
 	* bin/lvu, usr/share/man/man1/lvu.1: 
@@ -222,160 +201,68 @@
 	used to create the ELF files of a modules.
 	
 	manpage is amended to reflect the changes.
-
+	
 2002-08-28 09:12  sofar
 
 	* var/lib/lunar/subroutines: Fix for exiled modules
-
+	
 2002-08-28 08:47  sofar
 
 	* var/lib/lunar/subroutines: Bugfixes.
-
+	
 2002-08-27 15:16  sofar
 
 	* var/lib/lunar/subroutines: Visual fix
-
+	
 2002-08-27 14:22  sofar
 
 	* var/lib/lunar/functions/modules.lunar: uniform layout
-
+	
 2002-08-27 14:14  sofar
 
 	* var/lib/lunar/subroutines: Bugfix #49
-
+	
 2002-08-27 14:13  xoritor
 
-	* var/lib/lunar/menu/optimize.menu: Removed Normal option for CC
-	and CCC in menu.
-
+	* var/lib/lunar/menu/optimize.menu: Removed Normal option for CC and CCC in menu.
+	
 2002-08-27 12:32  sofar
 
-	* var/lib/lunar/functions/optimize.lunar: Let it work if the
-	wrappers are missing
-
+	* var/lib/lunar/functions/optimize.lunar: Let it work if the wrappers are missing
+	
 2002-08-26 23:46  sofar
 
 	* var/lib/lunar/subroutines: more fixes
-
+	
 2002-08-26 23:18  sofar
 
 	* var/lib/lunar/subroutines: Typo fix
-
+	
 2002-08-26 23:11  sofar
 
-	* var/lib/lunar/subroutines: One more fix for single module calls
-	to fix_depends
-
+	* var/lib/lunar/subroutines: One more fix for single module calls to fix_depends
+	
 2002-08-26 23:07  sofar
 
-	* var/lib/lunar/subroutines: Fix for single module list in
-	run_depends
-
+	* var/lib/lunar/subroutines: Fix for single module list in run_depends
+	
 2002-08-26 22:44  sofar
 
 	* sbin/lin, var/lib/lunar/subroutines: Code merge: lfix -> theedge
-
+	
 2002-08-26 18:36  sofar
 
 	* usr/share/man/man8/lin.8: Added -p option to man page
-
+	
 2002-08-26 18:33  sofar
 
 	* sbin/lin: Added --probe|-p functionality to lin!
-
+	
 2002-08-26 17:11  sofar
 
 	* var/lib/lunar/subroutines: Fixes for cvs moonbase problems
-
+	
 2002-08-26 14:15  sofar
 
-	* var/lib/lunar/functions/updatelog.lunar: This should fix it
-	permanently.
-
-2002-08-25 20:47  sofar
-
-	* var/lib/lunar/subroutines: Some visual fixes
-
-2002-08-25 19:30  sofar
-
-	* sbin/lin: Some visual and speed improvements
-
-2002-08-25 13:12  sofar
-
-	* sbin/lget: Better english
-
-2002-08-25 12:45  sofar
-
-	* etc/lunar/mirrors/SOURCEFORGE: New mirror in chechia
-
-2002-08-23 11:39  sofar
-
-	* sbin/lin: Added compile fail log msg
-
-2002-08-23 11:34  sofar
-
-	* sbin/lin: Fixed installwatchfile cleanup on failed compiles
-
-2002-08-23 10:30  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: Suspect this was a typo!
-
-2002-08-23 10:18  sofar
-
-	* sbin/lunar: Fix: wasn't installing LUNAR_MODULE conditionally
-
-2002-08-22 21:47  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Removed cc_optimize and
-	ccc_optimize functions in order to better implement the wrapper
-	method:   Enable calling of any ADDON, CC, CCC, and CXX options.   
-	Calls one program so libtool does not die.    Fixes many compile
-	issues with broken builds.    Enables ccache and distcc to work
-	transparently.
+	* var/lib/lunar/functions/updatelog.lunar: This should fix it permanently.
 	
-	Requires lunar-gcc and lunar-g++ to be installed in /usr/bin, they
-	will be in the installed by the gcc module.
-
-2002-08-22 04:37  tchan
-
-	* usr/sbin/: lget, lin, lrm, lrm2, lunar, lvis, lvu: Moved these
-	files to /sbin.  lvu moved to /bin.  This is for the people that
-	have /usr on a seperate partition.  The lunar tools have to be
-	available.
-
-2002-08-22 03:04  tchan
-
-	* install: Modified this to add the /bin and /sbin directories.
-
-2002-08-22 03:02  tchan
-
-	* bin/lvu: Moved this file from /usr/sbin to /bin.  This helps with
-	people who have /usr mounted as a seperate partition.  lvu is in
-	/bin because non-root users can use it too!
-
-2002-08-22 03:01  tchan
-
-	* sbin/: lget, lin, lrm, lrm2, lunar, lvis: Moved these files from
-	/usr/sbin to /sbin.  This helps with people who have /usr on a
-	seperate partition.
-
-2002-08-21 11:30  sofar
-
-	* var/lib/lunar/subroutines: Added fancy_progress for
-	sort_install_queue
-
-2002-08-21 03:22  tchan
-
-	* var/lib/lunar/solo: Fixed the entry for gcc3.  There is no gcc3,
-	only gcc and gcc2 modules now.
-
-2002-08-21 02:51  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed type-o in
-	optimize_make (was optimaze_make).
-
-2002-08-21 01:39  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Preliminary make
-	optimization support:	Allow make -jN to be set and used.
-
