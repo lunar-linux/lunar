@@ -3,13 +3,14 @@
 lget \- downloads module source files
 .SH SYNOPSIS
 .B lget
-.PP
-.B lget
-module_1 module_2 module_2
+module_1 module_2 module_3
 .PP
 .B lget -h|--help
 .PP
-.B lget -d|--debug|-f|--from|-u|--url|-v|--verbose module_1 module_2
+.B lget -a|--all
+.PP
+.B lget -d|--debug|-f|--from|-u|--url|-v|--verbose 
+module_1 module_2
 .SH COPYRIGHT
 .if n lget(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .if t lget(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
@@ -27,14 +28,14 @@ for automatically downloading a modules associated source files.
 .SH "OPTIONS"
 .TP
 .B lget
-.PP
-Invoked with no parameters, it starts to download the source code for every single module in moonbase (about 2.5G as of 08/08/2003).
-This is useful if you have a fast link or want to start your own Lunar source code mirror.
-.TP
-.B lget
 module_1 <module_2> <module_3>
 .PP
 This automatically downloads the specified module sources.
+.TP
+.B lget -a|--all
+.PP
+Download the source code for every single module in moonbase (about 2.5G as of 08/08/2003).
+This is useful if you have a fast link or want to start your own Lunar source code mirror.
 .TP
 .B lget -d|--debug
 .PP
