@@ -239,8 +239,3 @@
 	* var/lib/lunar/functions/modules.lunar: Providing for ARCH
 	specific script files *note* all x86 = <SCRIPT>.i386
 
-2003-11-16 00:19  hardkrash
-
-	* var/lib/lunar/functions/: install.lunar, messages.lunar: added
-	xterm status messages
-
