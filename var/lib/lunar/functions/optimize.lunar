@@ -784,5 +784,12 @@ optimize_architecture()  {
   menu checklist              &&
   ADDON=( $RESULT )
 
+  MAKES=`dialog --title "Make - parallellizing" \
+                --nocancel                       \
+		--stdout                         \
+		--inputbox                       \
+		"Enter the number of concurrent makes ( >= 1 ). Hint: how many CPU's do you have?"  \
+		0 55 $MAKES`
+
   optimize
 }
