@@ -1,0 +1,13 @@
+service ftp
+{
+	socket_type	= stream
+	protocol	= tcp
+	wait		= no
+	user		= root
+	server		= /usr/sbin/proftpd
+	server_args	=
+	per_source	= 8
+	log_type	= FILE /var/log/xinetd/proftpd
+	log_on_success	= PID HOST USERID EXIT DURATION
+	log_on_failure	= USERID ATTEMPT
+}

@@ -1,0 +1,419 @@
+Kyle Sallee		cromwell@kublai.com
+
+			designed & implemented		Sorcery
+			designed & implemented		Sorcerer GNU Linux
+			created		Sorcerer GNU Linux Logo, 
+					but not Tux the Penguin.
+					Original Tux logo created
+					by Larry Ewing
+			created		/etc/sorcery/*
+			created		/usr/sbin/boost
+			created		/usr/sbin/cast
+			created		/usr/sbin/dispel
+			created		/usr/sbin/sorcery
+			created		/var/lib/sorcery/apprentice
+			created		/var/lib/sorcery/excluded
+			created		/var/lib/sorcery/protected
+			created		/var/lib/sorcery/subroutines
+			created		Sorcerer Install/Rescue ISO9660
+			created		/initrd/sbin/init
+			created		/usr/sbin/sgl.install
+			modified	/usr/sbin/gaze
+			spell		bzip2
+					gzip
+					tar
+					unzip
+					zip
+					zlib
+					SDL_mixer
+					audiofile
+					aumix
+					esound
+					gnome-audio
+					gnome-media
+					kdemultimedia
+					libao
+					libmikmod
+					libogg
+					libvorbis
+					mikmod
+					sorcery-sound
+					sox
+					vorbis-tools
+					xmms
+					cdrtools
+					dcd
+					eject
+					everybuddy
+					gnomeicu
+					netwrite
+					GConf
+					ORBit
+					Python
+					autoconf
+					automake
+					bin86
+					binutils
+					bison
+					bonobo
+					cvs
+					db
+					diffutils
+					edb
+					eel
+					expat
+					flex
+					gcc
+					gdbm
+					gettext
+					glib
+					glibc
+					gmp
+					gnome-common
+					gnome-core
+					gnome-db
+					gnome-libs
+					gnome-objc
+					gnome-python
+					gnome-vfs
+					guile
+					j2sdk
+					kdebindings
+					kdelibs
+					kdepim
+					kdesdk
+					kdevelop
+					libast
+					libgda
+					libglade
+					libgtop
+					libpcap
+					librsvg
+					libtool
+					libxml
+					libxml2
+					linux
+					m4
+					make
+					nasm
+					ncurses
+					oaf
+					patch
+					pcre
+					perl
+					pkgconfig
+					popt
+					readline
+					scrollkeeper
+					slang
+					tcl-tk
+					xml-i18n-tools
+					aspell
+					dia
+					gnome-user-docs
+					groff
+					kde-i18n-af
+					kde-i18n-az
+					kde-i18n-bg
+					kde-i18n-cs
+					kde-i18n-da
+					kde-i18n-de
+					kde-i18n-el
+					kde-i18n-en_GB
+					kde-i18n-eo
+					kde-i18n-es
+					kde-i18n-et
+					kde-i18n-fi
+					kde-i18n-fr
+					kde-i18n-he
+					kde-i18n-hu
+					kde-i18n-is
+					kde-i18n-it
+					kde-i18n-ja
+					kde-i18n-ko
+					kde-i18n-lt
+					kde-i18n-lv
+					kde-i18n-mt
+					kde-i18n-nl
+					kde-i18n-no
+					kde-i18n-no_NY
+					kde-i18n-pl
+					kde-i18n-pt
+					kde-i18n-pt_BR
+					kde-i18n-ro
+					kde-i18n-ru
+					kde-i18n-sk
+					kde-i18n-sl
+					kde-i18n-sr
+					kde-i18n-sv
+					kde-i18n-ta
+					kde-i18n-th
+					kde-i18n-tr
+					kde-i18n-uk
+					kde-i18n-xh
+					kde-i18n-zh-TW.Big5
+					kde-i18n-zh_CN.GB2312
+					kdoc
+					latex2html
+					linuxdoc-tools
+					man
+					man-pages
+					openjade
+					teTeX
+					teTeX-texmf
+					TeXmacs
+					ed
+					elvis
+					emacs
+					gawk
+					nano
+					sed
+					vim
+					zile
+					ftpfs
+					lftp
+					linux-ftpd
+					netkit-ftp
+					rsync
+					wget
+					FlightGear
+					SearchAndRescue
+					SimGear
+					asteroids3D
+					black-box
+					bumprace
+					bzflag
+					castle-combat
+					csmash
+					fgfs-base
+					glaxium
+					gltron
+					gnome-chess
+					gnome-games
+					kdegames
+					kdetoys
+					mjstest
+					moon-lander
+					penguin-command
+					rockdodger
+					ssystem
+					torcs
+					tuxkart
+					tuxracer
+					xmame
+					xscorch
+					SDL
+					SDL_image
+					fnlib
+					freetype1
+					freetype2
+					gdk-pixbuf
+					gimp
+					glass
+					glut
+					gtk+
+					gtk-engines
+					imlib
+					imlib2
+					jpeg
+					kdeartwork
+					kdegraphics
+					libmng
+					libpng
+					libungif
+					netpbm
+					plib
+					qt-x11
+					tiff
+					xlockmore
+					xscreensaver
+					exim
+					mutt
+					pine
+					uudeview
+					bind
+					bind-tools
+					dhcp
+					gnome-network
+					iptables
+					kdenetwork
+					minicom
+					net-tools
+					netkit-base
+					netkit-bootparamd
+					netkit-ntalk
+					netkit-routed
+					netkit-rsh
+					netkit-rusers
+					netkit-rwall
+					netkit-rwho
+					netkit-telnet
+					netkit-tftp
+					netkit-timed
+					nmap
+					openssh
+					openssl
+					ppp
+					samba
+					tcp_wrappers
+					tcpdump
+					traceroute
+					xinetd
+					zebra
+					pan
+					slrn
+					tin
+					trn
+					ImageMagick
+					a2ps
+					cups
+					cups-drivers
+					ghostscript
+					ghostscript-fonts-other
+					ghostscript-fonts-std
+					gimp-print
+					gnome-print
+					magicfilter
+					pdq
+					psutils
+					default-profile
+					gnome
+					kde
+					useful-profile
+					Eterm
+					qlogin
+					splitvt
+					Linux-PAM
+					Wine
+					at
+					bash
+					bc
+					bonnie++
+					console-data
+					console-tools
+					control-center
+					cryptoapi
+					dialog
+					e2fsprogs
+					fcron
+					file
+					fileutils
+					findutils
+					glade
+					gnome-admin
+					gnome-applets
+					gnome-crash
+					gnome-lokkit
+					gnome-pim
+					gnome-utils
+					gnupg
+					grep
+					hdparm
+					kdeaddons
+					kdeadmin
+					kdeutils
+					less
+					libPropList
+					lilo
+					lsof
+					mc
+					metalog
+					modutils
+					mtools
+					nautilus
+					openldap
+					parted
+					procinfo
+					procps
+					psmisc
+					reiserfsprogs
+					sh-utils
+					shadow
+					sorcery
+					sudo
+					sysklogd
+					syslinux
+					sysvinit
+					texinfo
+					textutils
+					util-linux
+					util-linux-crypto
+					xdelta
+					MPlayer
+					libdvdcss
+					libdvdread
+					smpeg
+					xawtv
+					xine-dvdnav
+					xine-lib
+					xine-ui
+					apache
+					dillo
+					libghttp
+					lynx
+					mod_perl
+					NVIDIA_GLX
+					NVIDIA_kernel
+					WindowMaker
+					blackbox
+					enlightenment
+					fvwm
+					gdm
+					icewm
+					kdebase
+					xfree86
+	20011017			libunicode
+					libiconv
+					galeon
+					gdb
+					insight
+	20011025			snort
+			ISO9660		Install/Rescue
+	20011026			a52dec
+					ogle
+					ogle_gui
+	20011031			compface
+	20011101			psiconv
+					wv
+	20011104			crossfire
+					crossfire-client
+	20011106			w3c-libwww
+	20011114			mysql
+	20011123			zisofs-tools
+	20011128			manedit
+					gmanedit
+	20011202			chromium
+					chromium-data
+	20011213			xmountains
+					tuxpuck
+					vectoroids
+					luola
+					CriticalMass
+	20011217			exult
+	20011219			mm
+	20020101			curl
+	20020105			cvsfs
+	20020105			linux-identd
+	20020107			allegro
+					si3d
+	20020108			gradm
+	20020109			falconseye
+	20020111			w32codec
+	20020112			SDL_gfx
+					vnc
+	20020114			rp-pppoe
+	20020119			mwavem
+	20020123			ucl
+					btmgr
+	20020124			gnome-mime-data
+	20020125			postfix
+	20020128			copter-commander
+	20020130			xrally
+					circuslinux
+					crack-attack
+					toppler
+					tuxmath
+					tuxtype
+	20020203			syslog-ng
+					libol
+

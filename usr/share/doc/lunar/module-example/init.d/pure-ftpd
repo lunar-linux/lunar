@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Startup script for the pure-ftpd FTP Server 
+#
+# chkconfig: 2345 85 15
+# description: Pure-FTPd is an FTP server daemon based upon Troll-FTPd
+# processname: pure-ftpd
+# pidfile: /var/run/pure-ftpd.pid
+
+PURE_PID=/var/run/pure-ftpd.pid
+
+case $1 in
+   start|restart) echo   "$1ing pure-ftpd, ftp daemon.."
+                  [ -e "$PURE_PID" ] && kill `cat $PURE_PID`
+                  pure-ftpd -b -B
+                  ;;
+
+            stop) echo   "$1ping pure-ftpd."
+                  [ -e "$PURE_PID" ] && kill `cat $PURE_PID`
+                  ;;
+
+               *) echo   "Usage: $0 {start|stop|restart}"
+                  ;;
+esac

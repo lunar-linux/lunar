@@ -1,0 +1,82 @@
+"Master Site"		ftp://ftp.kde.org/pub/kde
+"Custom Mirror"		Custom
+USA			ftp://download.sourceforge.net/pub/mirrors/kde
+USA			http://download.sourceforge.net/mirrors/kde
+USA			ftp://kde.us.themoes.org/pub/kde
+USA			http://kde.us.themos.org/pub/kde
+USA			ftp://ftp.us.kde.org/pub/kde
+USA			http://ftp.us.kde.org/pub/kde
+USA			ftp://csociety-ftp.ecn.purdue.edu/pub/kde
+USA			http://csociety-ftp.ecn.purdue.edu/pub/kde
+United Kingdom		ftp://kde.uk.themoes.org/pub/kde
+United Kingdom		http://kde.uk.themoes.org/pub/kde
+United Kingdom		ftp://ftp.mirror.ac.uk/sites/ftp.kde.org/pub/kde
+United Kingdom		http://ftp.mirror.ac.uk/sites/ftp.kde.org/pub/kde
+Australia		ftp://ftp.au.kde.org/pub/kde
+Australia		http://ftp.au.kde.org/pub/kde
+Austria			ftp://ftp.at.kde.org/hci/kde
+Austria			http://ftp.at.kde.org/hci/kde
+Czech Republic		ftp://ftp.fi.muni.cz/pub/kde
+Czech Republic		http://ftp.fi.muni.cz/pub/kde
+Czech Republic		ftp://sunsite.mff.cuni.cz/MIRRORS/ftp.kde.org/pub/kde
+Czech Republic		http://sunsite.mff.cuni.cz/MIRRORS/ftp.kde.org/pub/kde
+Germany			ftp://ftp.de.kde.org/pub/kde
+Germany			http://ftp.de.kde.org/pub/kde
+Germany			ftp://ftp.fh-heilbronn.de/pub/mirrors/kde
+Germany			ftp://ftp.fu-berlin.de/pub/unix/X11/gui/kde
+Germany			ftp://ftp.gwdg.de/pub/x11/kde
+Germany			http://ftp.gwdg.de/pub/x11/kde
+Germany			ftp://ftp.tu-chemnitz.de/pub/X11/kde
+Germany			http://cgi.tu-chemnitz.de/ftp-home/pub/X11/kde
+Germany			ftp://ftp.rz.uni-wuerzburg.de/pub/unix/kde
+Germany			ftp://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.kde.org/pub/kde
+Germany			http://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.kde.org/pub/kde
+Germany			ftp://sunsite.informatik.rwth-aachen.de/pub/Linux/kde
+Netherlands		ftp://ftp.eu.uu.net/pub/kde
+Poland			ftp://ftp.tuniv.szczecin.pl/pub/kde
+Poland			htp://ftp.tuniv.szczecin.pl/pub/kde
+Poland			ftp://ftp.task.gda.pl/pub/unix/kde
+Poland			http://ftp.task.gda.pl/pub/unix/kde
+Poland			ftp://sunsite.icm.edu.pl/pub/unix/kde
+Switzerland		ftp://sunsite.cnlab-switch.ch/mirror/kde
+Denmark			ftp://sunsite.dk/mirrors/kde
+Denmark			http://mirrors.sunsite.dk/kde
+Sweden			ftp://ftp.se.kde.org/pub/kde
+Sweeden			http://ftp.se.kde.org/pub/kde
+Sweeden			ftp://ftp.dataplus.se/pub/linux/kde
+Greece			ftp://ftp.duth.gr/pub/kde
+Greece			http://ftp.duth.gr/pub/kde
+Yugoslavia		ftp://ftp.kde.org.yu/mirrors/ftp.kde.org
+Yugoslavia		ftp://ftp.kde.org.yu/mirrors/ftp.kde.org/pub/kde
+Belgium			ftp://ftp.belnet.be/pub/mirror/ftp.kde.org/pub/kde
+Belgium			http://ftp.belnet.be/pub/mirror/ftp.kde.org/pub/kde
+Belgium			ftp://ftp.easynet.be/kde
+Belgium			http://ftp.easynet.be/kde
+France			ftp://ftp.lip6.fr/pub/X11/kde
+France			http:://www-ftp.lip6.fr/pub/X11/kde
+Ireland			ftp://ftp.esat.net/mirrors/ftp.kde.org/pub/kde
+Ireland			http://ftp.esat.net/mirrors/ftp.kde.org/pub/kde
+Portugal		ftp://ftp.dei.uc.pt/pub/kde
+Portugal		http://ftp.dei.uc.pt/pub/kde
+Portugal		ftp://ftp.eq.uc.pt/pub/software/unix/KDE
+Portugal		http://ftp.eq.uc.pt/software/unix/KDE
+United Kingdom		ftp://ftp.net.lut.ac.uk/kde
+United Kingdom		http://ftp.net.lut.ac.uk/kde
+United Kingdom		ftp://sunsite.doc.ic.ac.uk/Mirrors/ftp.kde.org/pub/kde
+Bulgaria		ftp://ftp.digsys.bg/pub/kde
+Romania			ftp://ftp.lbi.ro/pub/Linux/KDE
+Romania			ftp://ftp.tuiasi.ro/pub/mirrors/ftp.kde.org/pub/kde
+Russia			ftp://ftp.chg.ru/pub/X11/kde
+Hong Kong		ftp://ftp.dll.com.hk/pub/mirrors/KDE
+Japan			ftp://mirror.nucba.ac.jp/mirror/KDE
+Japan			http://mirror.nucba.ac.jp/mirror/KDE
+Republic of Korea	ftp://linux.sarang.net/mirror/desktop/kde
+Singapore		ftp://kde.lugs.org.sg/pub/kde.org
+South Africa		ftp://ftp.sun.ac.za/sites/ftp.kde.org/pub/kde
+South Africa		http://ftp.sun.ac.za/sites/ftp.kde.org/pub/kde
+USA			ftp://ftp.rutgers.edu/pub/kde
+USA			http://ftp.rutgers.edu/pub/kde
+USA			ftp://mirror.chpc.utah.edu/pub/kde
+Brazil			ftp://ftp.matrix.com.br/pub/kde
+Brazil			http://ftp.matrix.com.br/pub/kde
+Costa Rica		ftp://ftp.ucr.ac.cr/pub/Unix/linux/kde

@@ -1,0 +1,4 @@
+
+The pam.d directory can contain PAM config files. They will automatically
+be installed in /etc/pam.d if you provide them in a module.
+

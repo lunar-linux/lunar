@@ -1,0 +1,12 @@
+Brian Peterson		brian.peterson@tcinternet.net
+
+	20010804	/usr/sbin/gaze
+			/usr/man/man1/cast.1.gz
+			/usr/man/man1/dispel.1.gz
+	20010806	/usr/man/man1/sorcery.1.gz
+			/usr/man/man1/gaze.1.gz
+	20010807	/usr/man/man1/grimoire.1.gz
+	20010808	/usr/man/man1/boost.1.gz
+	20010814	enhanced	/usr/sbin/cast
+			enhanced	/usr/sbin/dispel
+	20010816	spell		samba

@@ -1,0 +1,89 @@
+.TH LGET 8 "March 2002" "Lunar Linux" LUNAR
+.SH NAME
+lget \- downloads module source files
+.SH SYNOPSIS
+.B lget
+.PP
+.B lget
+module_1 module_2 module_2
+.PP
+.B lget
+(--from|--url) module_1 module_2 module_2
+.SH COPYRIGHT
+.if n lget(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t lget(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.SH "EXAMPLE"
+To download emacs type:
+.IP
+.B lget
+emacs
+.SH "DESCRIPTION" 
+.I lget
+is part of the
+.SM lunar
+source-code package management suite. It is a command-line tool
+for automatically downloading a packages associated source files. 
+.SH "OPTIONS"
+.TP
+.B lget
+.PP
+By itself it trys to download every single package (about 1.2G as of 02/17/2002).
+This is useful if you have a fast link or want to test everything.
+.TP
+.B lget
+module_1 <module_2> <module_3>
+.PP
+This automatically downloads the specified module sources.
+.TP
+.B lget
+--from module
+.PP
+This specifies a different
+.I /var/spool/lunar
+directory. This is the default location for downloaded sources.
+.TP
+.B lget
+--url
+.PP
+This tries to download the specified module from a different location. This is
+useful if the original link is down.
+.TP
+.B "-h, --help"
+outputs short help
+.SH "FILES"
+.TP
+.I /etc/lunar/config & /etc/lunar/local/config
+.IP
+These files store the settings for default locations. Its best to leave
+these alone as they are in quite good places by default. See lin(8) for more
+details about these files.
+.IP
+.TP
+.I /var/lib/lunar/subroutines
+.IP
+Contains functions used by 
+.B lget
+.SH ADVANCED USAGE
+Specifing a different download location for linux
+.IP
+lget
+.B --url http://ftp.mirror.ac.uk/sites/ftp.kernel.org/linux/kernel/2.4/linux-2.4.17.tar.bz2 linux
+.SH "NOTES"
+Do not include 
+.SM version
+or
+.SM section
+when specifying a package. To get complete listing of installed software
+packages and versions type
+.B lvu installed
+.SH "AUTHOR"
+Thomas Stewart
+.PP
+Converted to Lunar by Terry Chan 03/23/2002
+.PP
+.SH "REPORTING BUGS"
+Report bugs to <maintainer@lunar-penguin.org>
+.SH "SEE ALSO"
+lunar(8), lin(8), lvu(1), lrm(8)
+.SH "WARRANTY"
+This is free software with ABSOLUTELY NO WARRANTY

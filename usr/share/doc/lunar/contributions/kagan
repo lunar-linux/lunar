@@ -1,0 +1,26 @@
+Kagan Kongar		kongar@tsrsb.org.tr
+
+	20011119	spell		nedit
+	20011122			FileRunner
+					mcrypt
+					mhash
+					prboom
+	20011124			GUIlib
+					SDL_net
+					libmcrypt
+	20011207			aide
+	20011212			portsentry
+					Net_SSLeay
+					drac
+					xprobe
+					teapop
+	20011214			squid
+	20011216			john
+	20011217			dosfstools
+	20011219			apache-mod_ssl
+	20011228			whois
+					Linux-HOWTOs
+					Linux-mini-HOWTOs
+	20020104			raidtools
+	20020106			biew
+	20020204			qlogin

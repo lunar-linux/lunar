@@ -1,0 +1,81 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/locking                                       #
+# includes lock_file and unlock_file functions             #
+#                                                          #
+# 20020526                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+# function: lock_file
+# usage   : lock_file <absolute file name>
+# purpose : locks a file or wait until. Better use as lock_file <file> && || etc
+function lock_file()
+{
+   function file_lock()
+   {
+#locking is disabled if ln or rm not found!!
+      [ -x "/bin/ln" ] || return 0
+      [ -x "/bin/rm" ] || return 0
+
+      TEMPFILE="$1.$$"
+      LOCKFILE="$1.lock"
+      echo $$ > $TEMPFILE 2>/dev/null ||
+      {
+         message "${PROBLEM_COLOR}You don't have permission to access" \
+                 "$TEMPFILE ${DEFAULT_COLOR}"
+         exit 1
+      }
+      ln $TEMPFILE $LOCKFILE 2>/dev/null &&
+      {
+         rm -f $TEMPFILE
+         return 0
+      } 
+      [ -f "$LOCKFILE" ]         || return 1
+      STALE_PID=`< $LOCKFILE`
+      [ "$STALE_PID" -gt "0" ]   || return 1
+      kill -0 $STALE_PID 2>/dev/null &&
+      {
+         rm -f $TEMPFILE
+         return 1
+      }
+      rm $LOCKFILE 2>/dev/null &&
+      echo "Removed stale lock file of process $STALE_PID"
+      ln $TEMPFILE $LOCKFILE 2>/dev/null &&
+      {
+         rm -f $TEMPFILE
+         return 0
+      }
+      rm -f $TEMPFILE
+      return 1
+   }
+
+   while ! file_lock $1
+   do
+      message "${MESSAGE_COLOR}Waiting to lock the file $1${DEFAULT_COLOR}"
+      sleep 1
+   done
+   return 0
+}
+
+
+# function: unlock_file
+# usage   : unlock_file <absolute file name>
+# purpose : unlocks a file
+function unlock_file()
+{
+#unlocking is disabled if rm not found!!
+   [ -x "/bin/rm" ] || return 0
+   rm $1.lock 2>/dev/null && return 0
+   return 1
+}
+

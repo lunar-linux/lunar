@@ -1,0 +1,47 @@
+#
+# DETAILS example
+#
+
+# This demonstrates how to put in every possible parameter in a DETAILS
+# file. Note that not everything is required, but a minimum is:
+
+# MODULE		name of the module, identical to the name if the
+#			directory it resides in
+# VERSION		current version number of the package
+# SOURCE		the name of the source file
+# SOURCE_DIRECTORY	the name of where the source will unpack
+# SOURCE_URL[0]		the name of source file
+# WEBSITE		the main website of the package
+# ENTERED		the date (format yyyymmdd) when it was added
+# UPDATED		tha date (format yyyymmdd) when a recompile 
+#			was needed
+# SHORT			a one line description
+
+# and of course the long description that looks like this:
+#	cat << EOF
+#	blablablabla
+#	....
+#	EOF
+
+
+# here's an example with some comments and additions:
+#           MODULE=pure-ftpd
+#          VERSION=1.0.12
+#           SOURCE=$MODULE-$VERSION.tar.gz
+# SOURCE_DIRECTORY=$BUILD_DIRECTORY/$MODULE-$VERSION
+#    SOURCE_URL[0]=http://telia.dl.sourceforge.net/pureftpd/$SOURCE
+#         WEB_SITE=http://www.pureftpd.org
+#          ENTERED=20010922
+#          UPDATED=20020609
+#       MAINTAINER=maintaner@moongroup.com
+#            SHORT="An efficient, lightweight, and secure FTP server"
+# cat << EOF
+# Pure FTP Server is a fast, production quality, standards-
+# conformant FTP server based on Troll-FTPd. It has no known
+# buffer overflows, is trivial to set up, and is especially
+# designed for modern kernels. Features include PAM support,
+# IPv6, chroot()ed home directories, virtual domains, built-in
+# 'ls', FXP protocol, anti-warez system, bandwidth throttling,
+# bounded ports for passive downloads, an LDAP backend, XML
+# output, and more.
+# EOF

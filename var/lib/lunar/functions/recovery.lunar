@@ -1,0 +1,133 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/recovery                                      #
+# includes rebuild_status_files, replace_status_file,      #
+#          check_status_files                              #
+# 20020528                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+# function : rebuild_status_files
+# usage    : rebuild_status_files
+# purpose  : rebuild the accidentally deleted status files
+rebuild_status_files() {
+  message "${PROBLEM_COLOR} Unable to find MODULE_STATUS files\n"          \
+          "${MODULE_COLOR}$MODULE_STATUS and $MODULE_STATUS_BACKUP"        \
+          "${DEFAULT_COLOR}\n"                                             \
+          "${PROBLEM_COLOR}This is a serious error!!\n\nInformation about" \
+          "the modules on hold CAN NOT be recovered.\nHowever, the files"  \
+          "can be re-constructed.\nDo not forget to check your on hold "   \
+          "modules!"                                                       \
+          "${DEFAULT_COLOR}\n"
+
+  if ! query \
+     "Do you want to re-construct the status files from install logs?" y; then
+     message  "${PROBLEM_COLOR}Unable to continue without status files :=("\
+              "No more operation!!"                                        \
+              "${DEFAULT_COLOR}"
+     exit 1
+  fi
+
+  if ! [ -d "$INSTALL_LOGS" ]; then
+     message  "${PROBLEM_COLOR}Unable to continue without install logs :=("\
+              "No more operation!!"  \
+              "${DEFAULT_COLOR}"
+     exit 1
+  fi
+
+  message  "${MESSAGE_COLOR}Re-creating status files." \
+           "${DEFAULT_COLOR}"                          \
+           "${PROBLEM_COLOR}DO NOT BREAK!!"            \
+           "${DEFAULT_COLOR}"
+
+  trap ""  2
+  LOG_FILES=`ls -rt $INSTALL_LOGS`
+  for MODULE_NAME in $LOG_FILES; do
+     let "COUNTS=3"
+     REAL_NAME=$MODULE_NAME
+     unset SECTION
+     while [ "$COUNTS" -gt "0" ]; do
+        REAL_NAME=`echo $REAL_NAME | cut -d "-" -f -"$COUNTS"`
+        SECTION=`find_section $REAL_NAME`
+        if [ -n "$SECTION" ]; then
+           let "COUNTS++"
+           VERSION=`echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-`
+           add_module  $REAL_NAME installed $VERSION 
+           OUTTEXT="Processing: $REAL_NAME-$VERSION          "
+           echo -en "$OUTTEXT"
+           for ((II=1; II<=${#OUTTEXT}; II++)); do echo -en "\b"; done
+           break;
+        fi
+        let "COUNTS--"
+     done
+   done
+   echo " "
+   cp $MODULE_STATUS $MODULE_STATUS_BACKUP
+   message  "${MESSAGE_COLOR}Success!!"   \
+            "${DEFAULT_COLOR}\n"
+
+  trap 2
+}
+
+
+# function : replace_status_file
+# usage    : replace_status_file
+# purpose  : cp $MODULE_STATUS_BACKUP $MODULE_STATUS via query
+replace_status_file() {
+
+   if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; return; fi
+    message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS file"   \
+             "${MODULE_COLOR}$MODULE_STATUS"                      \
+             "${DEFAULT_COLOR}"
+
+   if query "Do you want to use the backup?" y; then
+      if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; fi
+      if `cp $MODULE_STATUS_BACKUP $MODULE_STATUS`; then
+         message  "${MESSAGE_COLOR}Success!!"   \
+                  "${DEFAULT_COLOR}"
+      else
+         message  "${PROBLEM_COLOR}Unsuccessfull :=( No more operation!!"  \
+                  "${DEFAULT_COLOR}"
+         exit 1
+      fi
+   else
+      message  "${PROBLEM_COLOR}Unable to continue without that :=("\
+               "No more operation!!"  \
+               "${DEFAULT_COLOR}"
+      exit 1
+   fi
+}
+
+# function : check_status_files
+# usage    : check_status_files
+# purpose  : checks the avail of MODULE_STATUS and MODULE_STATUS_BACKUP files
+check_status_files() {
+   if ! [ -f "$MODULE_STATUS" ]; then replace_status_file; fi
+   if ! [ -f "$MODULE_STATUS" ]; then echo "Unknown error!!!"; exit; fi
+   if ! [ -f "$MODULE_STATUS_BACKUP" ]; then
+         message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS_BACKUP file" \
+                  "${MODULE_COLOR}$MODULE_STATUS_BACKUP"                     \
+                  "${DEFAULT_COLOR}"
+         if `cp $MODULE_STATUS $MODULE_STATUS_BACKUP`; then
+            message  "${MESSAGE_COLOR}MODULE_STATUS is succesfully copied" \
+                     "to MODULE_STATUS_BACKUP"   \
+                     "${DEFAULT_COLOR}"
+         else
+            message  "${PROBLEM_COLOR}Unsuccessfull while copying" \
+                     "MODULE_STATUS to MODULE_STATUS_BACKUP :=(  " \
+                     "No more operation!!"                         \
+                     "${DEFAULT_COLOR}"
+            exit 1
+         fi
+   fi
+}
+

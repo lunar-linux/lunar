@@ -1,0 +1,16 @@
+Barak			barak@wi.rr.com
+
+	20010830	enhanced	/usr/sbin/cast
+	20010902	spell		alsa-driver
+			spell		alsa-lib
+			spell		alsa-utils
+	20010903	spell		alsaplayer
+			spell		freeamp
+			spell		musicbrainz
+	20010913	spell		grip
+	20010914	spell		cdparanoia
+			spell		bladeenc
+	20011010	spell		libxslt
+	20011013	spell		gnomemm
+			spell		gtkmm
+			spell		libsigc++

@@ -1,0 +1,225 @@
+.TH "LVU" "1" "March 2002" "Lunar Linux" "LUNAR"
+.SH "NAME"
+lvu \- query/view lunar package management information
+.SH "SYNOPSIS"
+.B lvu
+alien|leafs|orphans|prune|pam
+.PP 
+.B lvu
+what|where|website|sources|maintainer <module>
+.PP 
+.B lvu
+compile|install|sum|md5sum <module>
+.PP 
+.B lvu
+export|import [snapshot]
+.PP 
+.B lvu
+moonbase|html|updatelog
+.PP 
+.B lvu
+search "phrase"
+.PP 
+.B lvu
+newer|older <yyyymmdd>
+.PP 
+.B lvu
+from <path/file>
+.PP 
+.B lvu
+installed [module]
+.PP 
+.B lvu
+section [section]
+.PP 
+.B lvu
+voyeur [delay or module]
+.PP 
+.B lvu
+depends <module>
+.PP
+.B lvu
+tree <module>
+.PP
+.B lvu
+eert <module>
+.PP
+.B lvu
+$MODULE_SCRIPT <module>
+.PP 
+.B lvu
+size [module]
+.SH "COPYRIGHT"
+.if n lvu(1) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if n lvu(1) also contains material which is Copyright (C) Lunar\-Penguin team.
+
+.SH "DESCRIPTION"
+.I lvu
+is part of the lunar source\-based package management suite. It is a general purpose command\-line tool for displaying package logs, version information, checking for installed packages, checksums, message digests, maintainer information, package URL information, removing obsolete packages, displaying new packages, untracked files, sections, searching for files that are installed, finding when modules were created and packages in the software catalogue. It can even take and retrieve snapshots of currently installed packages for easy duplication.
+.SH "OPTIONS"
+.B alien
+.IP 
+find and display all files which are not currently tracked by the lunar package management system
+.PP 
+.B leafs
+.IP 
+displays installed modules that have no explicit dependencies on them
+.PP
+.B orphans
+.IP
+displays installed modules that are missing required dependancies
+.PP
+.B prune
+.IP 
+removes all old source code and old backups. Otherwise the source code from previous versions is kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date, but not installed.
+.PP 
+.B pam
+.IP 
+display modules installed that are pam aware
+.PP 
+.B what
+module
+.IP 
+view the long package description
+.PP 
+.B where
+module
+.IP 
+display the section a module belongs to
+.PP 
+.B website
+module
+.IP 
+display the URL for the specified module
+.PP 
+.B sources
+module
+.IP 
+list all source files contained in a module
+.PP 
+.B maintainer
+module
+.IP 
+display the email address of the person currently responsible for maintaining a specified module
+.PP 
+.B compile
+module
+.IP 
+show the compiler output generated when the module was built
+.PP 
+.B install
+module
+.IP 
+used to determine what files were installed by a module and where those files are located
+.PP 
+.B sum
+<module>
+.IP 
+print CRC checksums for modules(s). If no module is given it defaults to all.
+.PP 
+.B md5sum
+<module>
+.IP 
+print module MD5 message digests (fingerprints). If no module is given it default to all
+.PP 
+.B export
+.IP 
+take a snapshot of all modules currently installed
+.PP 
+.B import snapshot 
+.IP 
+restore the snapshot from a previous
+.I lvu export command (see the export option)
+.PP 
+.B moonbase
+.IP 
+prints the entire moonbase
+.PP 
+.B html
+.IP 
+prints the entire moonbase in a nice html format
+.PP 
+.B updatelog
+.IP 
+view summary log of previous lunar update
+.PP 
+.B search
+"phrase"
+.IP 
+Searches modules long descriptions for
+.I phrase
+.PP 
+.B newer
+date
+.IP 
+print packages that are newer than a specified date. the date must be specified in the 'yyyymmdd' format, where y=year, m=month, and d=day
+.PP 
+.B older
+date
+.IP 
+print packages that are older than a specified date. the date must be specified in the 'yyyymmdd' format, where y=year, m=month, and d=day
+.PP 
+.B from <path/>file
+.IP 
+find out what module has
+.I <path>/file
+installed
+.PP 
+.B installed <module>
+.IP 
+view all installed packages and corresponding version numbers or check
+to see whether a particular package is installed and if it is
+installed display its version number
+.PP 
+.B section
+<module>
+.IP 
+view a list of all sections in the software catalogue or display a list of packages from a specific section
+.PP 
+.B size <module>
+.IP 
+display the size of a given module or your Lunar installation in KB
+.PP 
+.B voyeur
+<module>
+.IP 
+start looking at what lin is compiling at the moment and outputs it. A module can be optionally specified.
+.PP 
+.B depends
+<module>
+.IP
+displays the modules that explicitly or recursively depend on this module.
+.PP
+.B tree
+<module>
+.IP
+displays a tree of the module's dependencies.
+.PP
+.B eert
+<module>
+.IP
+displays a tree of the module's reverse dependencies.
+.PP
+.B $MODULE_SCRIPT
+module
+.IP 
+replace $MODULE_SCRIPT with any of the following DETAILS | CONFIGURE | CONFLICTS | PRE_BUILD | BUILD | POST_BUILD | POST_INSTALL | POST_REMOVE to show module scripts for the
+.I module
+.SH "AUTHOR"
+Original version written by Brian Peterson
+.PP 
+Modified by Kyle Sallee
+.PP 
+Updated Thomas Stewart 01/15/2002
+.PP 
+Converted to Lunar by Terry Chan 03/23/2002
+.PP 
+Edited and new functions added by Chuck Mead 05/21/2002
+.SH "REPORTING BUGS"
+Report bugs to <maintainer@lunar\-penguin.org>
+.SH "SEE ALSO"
+lunar(8), lin(8), lrm(8), lget(8), moonbase(1)
+.SH "WARRANTY"
+This is free software with ABSOLUTELY NO WARRANTY
+
+

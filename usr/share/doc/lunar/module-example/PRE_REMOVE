@@ -1,0 +1,3 @@
+if  [  -x  /etc/init.d/pure-ftpd  ]; then
+           chkconfig --del pure-ftpd
+fi

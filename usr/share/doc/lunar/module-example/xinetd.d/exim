@@ -1,0 +1,15 @@
+service smtp
+{
+	socket_type	= stream
+	protocol	= tcp
+	wait		= no
+	user		= mail
+	group		= mail
+	server		= /usr/sbin/exim
+	server_args	= -bs
+	per_source	= 8
+	log_type	= FILE /var/log/xinetd/exim
+	log_on_success	= PID HOST USERID EXIT DURATION
+	log_on_failure	= USERID ATTEMPT
+
+}

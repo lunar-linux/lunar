@@ -1,0 +1,104 @@
+2002-08-20 15:18  xoritor
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	Added Float (-ffloat-store) option to the menu.  Enabled addon use
+	(ccache and distcc) not just selection.  Finished descriptions on
+	XTRA menu.
+
+2002-08-20 13:01  dem
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed a c++ and -pipe
+	typo in the CXX variable
+
+2002-08-20 11:38  sofar
+
+	* var/lib/lunar/subroutines: Bugfix: allow scripts to switch IW on
+	and off without removing an existing installwatch log file.
+
+2002-08-20 03:07  xoritor
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	Enabled multiple selection of "extra features":   XTRA is now an
+	array holding all of your options.    Multiple options are allowed,
+	but be careful, not all are compatible!      XTRA=( mmx dnow )
+
+2002-08-19 23:43  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Updates to CXX
+	implementaions.
+
+2002-08-19 22:05  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: True fix for exporting
+	CXX not just a CXX=CCC hackfix.
+
+2002-08-19 19:35  xoritor
+
+	* var/lib/lunar/menu/optimize.menu: Fixed wrong setting of some
+	variables:   FPM and XTRA now set correct values.
+
+2002-08-19 18:53  sofar
+
+	* usr/share/man/man1/lvu.1: Added orphans
+
+2002-08-19 18:50  sofar
+
+	* usr/sbin/lvu: Added lvu orphans: checks installed modules for
+	missing required dependancies.
+
+2002-08-19 18:17  sofar
+
+	* usr/: sbin/lvu, share/man/man1/lvu.1: Renamed orphans to 'leafs'
+
+2002-08-19 17:28  sofar
+
+	* usr/sbin/lin: Comment fix
+
+2002-08-19 17:26  sofar
+
+	* usr/sbin/lunar: New lunar update routine.
+
+2002-08-19 15:54  tchan
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed a typo in CXXFLGS,
+	should be CXXFLAGS.
+
+2002-08-19 14:09  sofar
+
+	* usr/sbin/lin: Added functionality: lin moonbase. Also callable as
+	"lin <list of modules incliding "moonbase">"
+
+2002-08-19 13:45  sofar
+
+	* etc/lunar/config: Added MOONBASE_URL
+
+2002-08-19 13:43  sofar
+
+	* var/lib/lunar/subroutines: Added get_moonbase()
+
+2002-08-19 13:24  sofar
+
+	* var/lib/lunar/solo: Synced and added theedge and moonbase
+
+2002-08-19 12:06  sofar
+
+	* var/lib/lunar/subroutines: Away with clean_moonbase!
+
+2002-08-19 05:35  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Added CXX support to
+	optimizations.
+
+2002-08-19 04:40  xoritor
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu: Fix
+	for optimizations to allow gcc3 module rename to gcc.
+
+2002-08-19 04:30  xoritor
+
+	* usr/sbin/lin: Fix test for gcc3 rename to gcc.
+
+2002-08-19 04:24  csm
+
+	* etc/lunar/local/README: just testing commit
+

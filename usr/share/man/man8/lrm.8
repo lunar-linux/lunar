@@ -1,0 +1,95 @@
+.TH LRM 8 "March 2002" "Lunar Linux" LUNAR
+.SH NAME
+lrm \- removes software packages
+.SH SYNOPSIS
+.B lrm
+[options] [package1] ... [package2] ...
+.PP
+.B lrm -e|--exile|-d|--downgrade
+<package> <version>
+.SH COPYRIGHT
+.if n lrm(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t lrm(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.SH "EXAMPLE"
+To uninstall emacs type:
+.IP
+.B lrm
+emacs
+.SH "DESCRIPTION" 
+.I lrm
+is part of the
+.SM lunar
+source-code package management suite. It is a command-line tool
+for automatically uninstalling a package and its associated
+files. 
+.SH "OPTIONS"
+.TP
+.B "-d, --downgrade"
+downgrade is an option for removing the selected module and restoring
+a previously installed version
+.TP
+.B "-e, --exile"
+removes software package and sets package status to 'exile'. This prevents
+it from being installed again automatically
+.TP
+.B "-h, --help"
+outputs short help
+.SH "FILES"
+.TP
+.I /var/lib/lunar/excluded
+.IP
+List of files that are excluded during a lin or lrm.
+.TP
+.I /var/lib/lunar/protected
+.IP
+Contains a list of files that will not be removed.
+.TP
+.I /var/lib/lunar/solo
+.IP
+List of solo modules.
+.TP
+.I /var/lib/lunar/sustained
+.IP
+List of modules that are essential to system, and lrm of these modules is not permitted.
+Installing and upgrading is fine.
+.TP
+.I /var/lib/lunar/subroutines
+.IP
+Contains functions used by 
+.B lrm
+.SH ADVANCED USAGE
+Protecting a file from updates
+.IP
+lrm
+.B --exile
+glibc
+.PP
+Rolling back to a previous version of a package 
+.IP
+lrm
+.B --downgrade 
+glibc 2.2.3 
+.SH "NOTES"
+Do not include 
+.SM version
+or
+.SM section
+when specifying a package. To get complete listing of installed software
+packages and versions type
+.B lvu installed
+.SH "NOTES"
+Downgrade will only rollback to versions that were previously installed.
+It will not download older versions from the Internet.
+.SH "AUTHOR"
+Kyle Sallee
+.PP
+Updated Thomas Stewart 01/15/2002
+.PP
+Converted to Lunar by Terry Chan 03/23/2002
+.PP
+.SH "REPORTING BUGS"
+Report bugs to <maintainer@lunar-penguin.org>
+.SH "SEE ALSO"
+lunar(8), lin(8), lvu(1), lget(8)
+.SH "WARRANTY"
+This is free software with ABSOLUTELY NO WARRANTY

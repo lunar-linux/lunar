@@ -1,0 +1,71 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/depends                                       #
+# includes find_depends                                    #
+#                                                          #
+# 20020710                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+# function : find_depends 
+# usage    : find_depends "module name"
+# purpose  : recursive dependency finder, no need to be installed
+function find_depends()
+{
+   [ -n "$1" ]                || return 1
+   run_details $1             || return 1
+   [ -n "$SCRIPT_DIRECTORY" ] || return 1   
+
+   REQ_DEPENDS="/tmp/lunar_req_depends.`uuidgen`"
+   rm -f $REQ_DEPENDS 2>/dev/null
+
+   DEPENDS_FILE=$SCRIPT_DIRECTORY/DEPENDS
+   [ -s "$DEPENDS_FILE" ]     || return 1
+   
+   grep -q ^depends $DEPENDS_FILE 2>/dev/null && {
+       grep ^depends $DEPENDS_FILE 2>/dev/null |
+       tr "\t" " "                             |
+       sed "s/^depends *//g"                   |
+       cut -d " " -f 1-1                       |
+       sed "s/[\'\"\\ &]//g"                   |
+       while read TMP_DEP
+       do
+          echo $TMP_DEP >> $REQ_DEPENDS
+          echo $TMP_DEP $1 >> $TMP_DEPENDS   
+       done
+   }
+
+   grep -q ^optional_depends $DEPENDS_FILE 2>/dev/null && {
+       grep ^optional_depends $DEPENDS_FILE 2>/dev/null |
+       tr "\t" " "                                      |
+       sed "s/^optional_depends *//g"                   |
+       cut -d " " -f 1-1                                |
+       sed "s/[\'\"\\ &]//g"                            |
+       while read TMP_DEP
+       do
+          echo $TMP_DEP >> $REQ_DEPENDS
+          echo $TMP_DEP $1 >> $TMP_DEPENDS   
+       done
+   }
+   [ -s "$REQ_DEPENDS" ] && {
+      cat $REQ_DEPENDS |
+      while read REQ_DEP
+      do
+         grep -q " $REQ_DEP" $TMP_DEPENDS ||
+         find_depends $REQ_DEP
+      done
+   }
+
+   rm -f $REQ_DEPENDS 2>/dev/null
+   rm -f $OPT_DEPENDS 2>/dev/null
+
+}
