@@ -62,7 +62,7 @@ select_section() {
            --cancel-label  "Exit"            \
            --menu                            \
            ""                                \
-           0 0 10                            \
+           0 40 15                           \
            `show_sections`
 }
 
@@ -236,28 +236,22 @@ select_pkgs()  {
 
 
 make_hold_checklist()  {
-  for  LINE in `sort  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-    VERSION=`echo  "$LINE"  |  cut  -d : -f4`
-
-    if  [  "$STATUS"  ==  "installed"  ]   ||
-        [  "$STATUS"  ==  "held"       ];  then
-
-      [  "$STATUS"  ==  "held"  ]  &&
-      HELD="on"                    ||
-      HELD="off"
-
-      if  SECTION=`find_section  $MODULE`;  then
-        SHORT="Short Description Unavailable"
-	run_module_file $MODULE DETAILS &> /dev/null
-
-        echo  $MODULE
-        echo  $VERSION
-        echo  $HELD
-        echo  $SHORT
+  for LINE in $(sort $MODULE_STATUS_BACKUP) ; do
+  (
+    MODULE=$(echo "$LINE" | cut -d: -f1)
+    STATUS=$(echo "$LINE" | cut -d: -f3)
+    VERSION=$(echo "$LINE" | cut -d: -f4)
+    if [ "$STATUS" == "installed" ] || [ "$STATUS" == "held" ] ; then
+      [ "$STATUS" == "held" ] && HELD="on" || HELD="off"
+      SHORT="Short description unavailable"
+      if run_details $MODULE &> /dev/null ; then
+        echo $MODULE
+        echo $VERSION
+        echo $HELD
+        echo $SHORT
       fi
     fi
+  )
   done
 }
 
