@@ -1,39 +1,38 @@
+2003-09-19 21:32  sofar
+
+	* var/lib/lunar/functions/install.lunar: This fixes the double DL bug. see lunar for more info in commit msg
+	
 2003-09-17 00:36  elaine
 
-	* bin/lvu, sbin/lget: lget - added -V |--Version syntax luv
-	corrected 'versions' command oper.
-
+	* bin/lvu, sbin/lget: lget - added -V |--Version syntax luv corrected 'versions' command oper.
+	
 2003-09-16 21:23  sofar
 
 	* var/lib/lunar/functions/main.lunar: Bugfix #372
-
+	
 2003-09-15 14:58  nhudson
 
 	* etc/lunar/mirrors/GNOME: 
 	Updating Gnome mirror locations
-
+	
 2003-09-14 23:16  nhudson
 
 	* var/lib/lunar/excluded: 
-	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to
-	the excluded list because sometimes they get deleted by
-	scrollkeeper or libglade2
-
+	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to the excluded list because sometimes they get deleted by scrollkeeper or libglade2
+	
 2003-09-12 02:11  elaine
 
-	* usr/share/man/man8/lin.8: Added clarification to manual page -V
-	version names must begin with [0-9]
-
+	* usr/share/man/man8/lin.8: Added clarification to manual page -V version names must begin with [0-9]
+	
 2003-09-12 00:33  niki
 
 	* sbin/lunar, var/lib/lunar/functions/main.lunar,
-	var/lib/lunar/menu/integrity.menu: Moved the rest of the
-	depreciated "lin --fix" over to "lunar fix".
-
+	var/lib/lunar/menu/integrity.menu: Moved the rest of the depreciated "lin --fix" over to "lunar fix".
+	
 2003-09-11 16:03  tchan
 
 	* sbin/lin: Corrected a spelling mistake.
-
+	
 2003-09-11 05:09  elaine
 
 	* bin/lvu, sbin/lin, usr/share/man/man8/lin.8,
@@ -44,381 +43,6 @@
 	var/lib/lunar/functions/modules.lunar,
 	var/lib/lunar/functions/sizes.lunar,
 	var/lib/lunar/functions/temp.lunar,
-	var/lib/lunar/functions/tracking.lunar: Initial versioning support
-	for lunar, where versions are either version-aware modules or
-	subdirectories of the primary module.
-
-2003-08-31 18:51  sofar
-
-	* etc/lunar/config, etc/lunar/mirrors/LRESORT,
-	var/lib/lunar/functions/download.lunar: Adding nl.lunar-linux.org
-	to the mirror URL's, since it's rsynced hourly and can be used
-	normally like the dk mirror. Also adding it to LRESORT as so we can
-	drop the number of downloads from dbguin. Small fix for calls to
-	LRESORT downloads, and starting to rephrase numeric statements to
-	something that is unmistakenly numeric (( ... )).
-
-2003-08-19 20:06  sofar
-
-	* var/lib/lunar/excluded: Adding /root/.distcc and resorting it
-	alphabetically.
-
-2003-08-16 19:54  elaine
-
-	* var/lib/lunar/functions/postbuild.lunar: $IFS setting was causing
-	variables to be improperly set for 'grep'
-
-2003-08-16 17:04  sofar
-
-	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Needed cos some
-	developers insist on passing spaces around within #defines.
-
-2003-08-14 21:27  sofar
-
-	* var/lib/lunar/functions/: build.lunar, postbuild.lunar: yeah I
-	know... looks like nothing... somehow this fixes all those init.d
-	scripts hanging since a tee traces the fork to the daemon and waits
-	before it exits... this should fix all 3 bugs on
-	bugs.lunar-linux.org related to init.d scripts (I hope)
-
-2003-08-14 20:25  sofar
-
-	* var/lib/lunar/functions/install.lunar: re-enabling reports for
-	succesfull resurrects, perhaps this needs a more elaborate rewrite,
-	but it works for now. broken resurrects are not reported (as tchan
-	says they werent in the past anyways).
-
-2003-08-14 19:57  sofar
-
-	* var/lib/lunar/functions/check.lunar: Disabling recompiles after
-	"lunar fixdepends"
-
-2003-08-14 19:41  sofar
-
-	* var/lib/lunar/: compilers/c++, compilers/cc, compilers/g++,
-	compilers/gcc, functions/download.lunar, functions/optimize.lunar:
-	this one fixes the appearing '1' file and also re-enables distcc
-	(MAKES wasn't being set correctly due to this bug.) I'm also
-	enabling DEBUG output in the wrapper scripts so you can see -pipe
-	DOES WORK, you just don't see it ;^).
-
-2003-08-11 02:22  elaine
-
-	* var/lib/lunar/unset.sh: Scattershot, unset all variables not
-	needed for external programs (e.g. ./configure; make; make install 
-	 Usage: ( source /var/lib/lunar/unset.sh && ./configure [opts] )
-
-2003-08-08 14:04  tchan
-
-	* usr/share/man/man8/lget.8: Updating the size estimate of moonbase
-	in the lget manpage.
-
-2003-08-08 06:53  tchan
-
-	* usr/share/man/man8/: lin.8, lunar.8: Updated man pages to match
-	sofar's latest revisions.
-
-2003-08-08 05:59  tchan
-
-	* usr/share/man/man8/lunar.8: Updated man page for lunar with
-	sofar's latest version.
-
-2003-08-08 05:39  tchan
-
-	* usr/share/man/man8/lget.8: Updated the man page for lget, upto
-	sofar's latest version.
-
-2003-08-08 05:16  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Added the reference to the man
-	page for lnet.
-
-2003-08-08 05:13  tchan
-
-	* usr/share/man/man8/lcrash.8: Updated lcrash man page.
-
-2003-08-08 05:10  tchan
-
-	* usr/share/man/man8/lrm.8: Updated man page for lrm upto sofar's
-	latest revisions.
-
-2003-08-08 04:44  tchan
-
-	* usr/share/man/man1/moonbase.1: Updated the man page for moonbase.
-
-2003-08-08 04:37  tchan
-
-	* usr/share/man/man1/lvu.1: Updated the lvu man page to reflect
-	sofar's latest changes.
-
-2003-08-08 04:16  tchan
-
-	* bin/lvu: Corrected some more typos in help() function.
-
-2003-08-08 03:59  tchan
-
-	* bin/lvu: Added some fixes to the help() function for lvu. 
-	Brought it upto date with sofar's latest standardized command line
-	options.
-
-2003-08-07 23:52  sofar
-
-	* sbin/lin, var/lib/lunar/functions/install.lunar: fix as of
-	request tchan: $BUILD was unset during resurrect, and hooking up
-	the code in lunar. Both approaches (lin -R or lunar resurrect)
-	tested thorougly.
-
-2003-08-07 18:01  sofar
-
-	* sbin/lin: Muchos gracias a tchan.
-
-2003-08-07 16:12  sofar
-
-	* sbin/lin: Slightly goofed up lin --deps code handling...
-
-2003-08-07 10:29  sofar
-
-	* usr/share/man/man8/lfirsttime.8: small adjustments
-
-2003-08-07 10:21  sofar
-
-	* usr/share/man/man8/lcrash.8: Updating this page to make it a bit
-	more recent.
-
-2003-08-07 09:48  sofar
-
-	* bin/lvu, sbin/lunar, var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/install.lunar: Adding uniform parameter
-	passing to lvu, fixing up lvu urls to ignore testpack() and
-	connect(), hooking up --help to lunar, also making it call the
-	proper fix/nofix/fixdepends code. Last merged fixing code into
-	check.lunar, so this is all together in one file and not in
-	install.lunar.
-
-2003-08-07 07:35  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Reverted tchans patch
-	since that killed the optimizations on compile. Adding a line where
-	the optimizations are read just before the menu's are run, so we're
-	all happy now.
-
-2003-08-07 05:56  tchan
-
-	* sbin/: lget, lin, lrm, lunar: Added/corrected help() function
-	text in all four coretools.  Still needs work by sofar.
-
-2003-08-07 04:24  tchan
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed the bug in theedge
-	of "lunar optimize" not loading up the settings from
-	/etc/lunar/local/optimizations.  sofar had moved the sourcing of
-	the optimizations file into the optimize() which is too late.  I
-	moved it to the top of the optimize_architecture().  Older code
-	just had the sourcing of optimizations at the top of optimize.lunar
-	script.
-
-2003-08-06 23:12  sofar
-
-	* sbin/: lget, lin, lrm, lunar: Uniformizing parameter passing
-	using getopt, making this a LOT simpler, cleaner and simply pwetty.
+	var/lib/lunar/functions/tracking.lunar: Initial versioning support for lunar, where versions are either
+	version-aware modules or subdirectories of the primary module.
 	
-	QOTD: The man who understands one woman is qualified to understand
-	pretty well everything. 		 -- Yeats
-
-2003-08-06 21:53  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Small update.  Removed the
-	install perl instructions.  Perl has been part of the Lunar ISO for
-	quite some time now.
-
-2003-08-06 01:31  niki
-
-	* var/lib/lunar/functions/install.lunar: Added a missing space in a
-	message.
-
-2003-08-05 07:52  sofar
-
-	* var/lib/lunar/functions/: download.lunar, misc.lunar: Fixes?
-
-2003-08-04 23:19  sofar
-
-	* etc/lunar/mirrors/SFORGE, sbin/lin, sbin/lunar,
-	var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/config.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/install.lunar,
-	var/lib/lunar/functions/locking.lunar,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/misc.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/moonbase.lunar,
-	var/lib/lunar/functions/optimize.lunar,
-	var/lib/lunar/functions/postbuild.lunar,
-	var/lib/lunar/functions/sizes.lunar,
-	var/lib/lunar/functions/sources.lunar,
-	var/lib/lunar/functions/tracking.lunar,
-	var/lib/lunar/functions/uniqid.lunar: Bugfixes and cleanups. 
-	Adding ZLOCAL_OVERRIDE if you want modules in zlocal to override
-	the moonbase ones (NOT RECOMMENDED) Pathetically scanning if
-	statements for empty arguments committing SOURCE_VFY syntax...
-	SOURCE_MD5 syntax is dead as of now in theedge... gpg lives!
-	
-	shite I fergot the rest.
-	
-	QOTD: A bureaucrat's idea of cleaning up his files is to make a
-	copy of everything before he destroys it.
-
-2003-08-04 18:49  elaine
-
-	* var/lib/lunar/functions/install.lunar: Removed
-	devoke_installwatch from before run_post_build
-
-2003-08-02 22:16  elaine
-
-	* var/lib/lunar/functions/tracking.lunar: Added chmod 644 after
-	temp_create to make install logs readable
-
-2003-07-29 20:49  elaine
-
-	* var/lib/lunar/functions/: build.lunar, check.lunar, config.lunar,
-	connect.lunar, depends.lunar, download.lunar, edit.lunar,
-	init.lunar, install.lunar, locking.lunar, main.lunar,
-	messages.lunar, misc.lunar, modules.lunar, moonbase.lunar,
-	optimize.lunar, postbuild.lunar, prune.lunar, queue.lunar,
-	recovery.lunar, sizes.lunar, sources.lunar, temp.lunar,
-	tracking.lunar, uniqid.lunar, updatelog.lunar, useradd.lunar,
-	view.lunar: Added #!/bin/bash to lib files for vim / emacs
-	highlighting
-
-2003-07-29 14:54  elaine
-
-	* var/lib/lunar/functions/download.lunar: grepping for syntax
-	error, found beer
-
-2003-07-28 21:51  sofar
-
-	* sbin/lget, sbin/lin, sbin/lrm,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/tracking.lunar: adding uniformly the
-	--debug option. If you specify it twice it will dump VARs (and BTW
-	make a huge mess in /tmp too). small oops in create_install_logs.
-	rewrite of lrm to make it look like someone paid attention.
-	
-	QOTD: Be careful when you bite into your hamburger.		   
-	 -- Derek Bok
-
-2003-07-28 20:29  sofar
-
-	* var/lib/lunar/functions/: build.lunar, messages.lunar,
-	tracking.lunar: Rewriting boost, now making things easy and
-	understandable, as well as simple. doing some shuffling with code.
-	All install log parsing code goes to tracking.lunar. Note I removed
-	debug_msgs from message() and verbose_msg() to reduce clutter a
-	bit.
-
-2003-07-28 17:54  sofar
-
-	* var/lib/lunar/functions/sources.lunar: Booohooo
-
-2003-07-28 17:41  elaine
-
-	* var/lib/lunar/functions/: build.lunar, check.lunar, config.lunar,
-	connect.lunar, depends.lunar, download.lunar, edit.lunar,
-	init.lunar, install.lunar, locking.lunar, main.lunar,
-	messages.lunar, misc.lunar, modules.lunar, moonbase.lunar,
-	optimize.lunar, postbuild.lunar, prune.lunar, queue.lunar,
-	recovery.lunar, sizes.lunar, sources.lunar, temp.lunar,
-	tracking.lunar, uniqid.lunar, updatelog.lunar, useradd.lunar,
-	view.lunar: debug-msg ified all functions in
-	/var/lib/lunar/functions/*.lunar
-
-2003-07-28 17:40  elaine
-
-	* sbin/: lin, lrm: Changed DEBUG to LUNAR_DEBUG, lin still needs
-	it's functions debug-ized
-
-2003-07-27 23:36  sofar
-
-	* sbin/lrm: adding debug_msg to lrm, stumbling on a bug that caused
-	directories not being removed...
-
-2003-07-27 23:05  sofar
-
-	* var/lib/lunar/functions/: build.lunar, download.lunar,
-	install.lunar, messages.lunar, temp.lunar: adding debugging code,
-	to use do: DEBUG=on lin $MODULE (or any other lunar core program)
-
-2003-07-27 21:33  sofar
-
-	* var/lib/lunar/functions/sources.lunar: Try this:
-	
-	gpg_verify_source /var/spool/lunar/sendmail.8.12.9.tar.gz
-	http://www.sendmail.org/ftp/sendmail.8.12.9.tar.gz.sig
-	http://www.sendmail.org/ftp/PGPKEYS
-
-2003-07-25 08:52  sofar
-
-	* var/lib/lunar/functions/install.lunar: Polishing up resurrect:
-	
-	- it is now "autoresurrect" - lunar resurrect $MODULE is the way to
-	force a resurrect - resurrect is skipped with -c - resurrect is
-	skipped when the module is already installed, because	we rather
-	want a recompile then to make sure...
-	
-	this should be the end of the resurrect rewrite.
-
-2003-07-24 22:04  sofar
-
-	* var/lib/lunar/functions/download.lunar: one more try....
-
-2003-07-24 21:40  sofar
-
-	* var/lib/lunar/functions/download.lunar: trying again!
-
-2003-07-24 21:28  sofar
-
-	* var/lib/lunar/functions/download.lunar: Some CVS handling code
-	cleanups that revealed problems... perhaps this solves Moe's
-	issues.
-
-2003-07-23 22:54  sofar
-
-	* var/lib/lunar/functions/: build.lunar, install.lunar,
-	sources.lunar: Fixing a bug that niki spotted, propagation of error
-	result now comes from missing downloads down to lin_module, which
-	exists before optimize now too. General order in pre-build stage
-	improved too. Moving verify_source code out of build into
-	sources.lunar.
-
-2003-07-22 21:01  sofar
-
-	* sbin/lin, var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/install.lunar: Fix for breaking tars,
-	uniformizing tmpfiles a bit more too.
-
-2003-07-20 17:18  sofar
-
-	* sbin/lunar: fixing hold menu.
-
-2003-07-20 16:52  sofar
-
-	* var/lib/lunar/functions/download.lunar: Fixes for the SVN urls,
-	symplifying svn and cvs ups.
-
-2003-07-20 15:35  sofar
-
-	* var/lib/lunar/functions/connect.lunar: since these 2 are a royal
-	pain in the ass I decided to kick them into their own
-	forget-me-file.
-
-2003-07-20 15:34  sofar
-
-	* bin/lvu, var/lib/lunar/functions/download.lunar: Fixing lvu
-	search bug, adding full support for svn:// urls, see moonbase/zbeta
-	dor 2 example modules that use svn:// URL's.
-
