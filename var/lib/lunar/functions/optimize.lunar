@@ -685,9 +685,9 @@ optimize_platform() {
                 ;;
    esac
 
-export CC="lunar-gcc"
-export CCC="lunar-g++"
-export CXX="lunar-g++"
+[ -e /usr/bin/lunar-gcc ] && export CC="lunar-gcc"
+[ -e /usr/bin/lunar-g++ ] && export CCC="lunar-g++"
+[ -e /usr/bin/lunar-g++ ] && export CXX="lunar-g++"
 export CFLAGS
 export COPT="$CFLAGS"
 export CCOPT="$CXXFLAGS -Wno-deperecated"
