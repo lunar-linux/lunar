@@ -289,6 +289,8 @@ dl_source()  {
 
   if  [  -n  "$1"  ];  then
 
+    [ "$VERBOSE" == "on" ] && echo "+ downloading source file \"$1\" for module \"$MODULE\""
+
     FILE="$1"
     shift  1
 
@@ -352,6 +354,7 @@ download_module() {
   
   MODULE=$1
   (
+    [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
     run_details  &&
     download
   )
@@ -366,10 +369,13 @@ main() {
   MODULES=`strip_parameters  $*`
 
   if  [  -z  "$MODULES"  ];  then
+    [ "$VERBOSE" == "on" ] && echo "+ downloading entire moonbase"
     MODULES=$(list_moonbase)
   fi
 
   for  MODULE  in  $MODULES;  do
+
+    (
 
     LGETING=/var/lock/lgetting.$MODULE
     if  !  lget_locked;  then
@@ -382,42 +388,21 @@ main() {
         TYPE="cvs"
       fi
     
-      if [ "$EXHAUSTIVE" == "yes" ] ; then
-        if [[ $TYPE == "normal" ]] ; then
-      
-          MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+      if [ "$EXHAUSTIVE" == "yes" ] && [ "$TYPE" != "cvs" ] ; then
+        MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
 	
-          if [ -f $MIRRORS/$MIRROR ] ; then
-	    for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	      eval ${MIRROR}_URL=$MIRROR_URL
-              if download_module $MODULE ; then
-	        break
-	      fi
-            done 
-	  else
-	    download_module $MODULE
-	  fi
-	
-        elif [[ $TYPE == "cvs" ]] ; then
-      
-          MIRROR=$(grep CVS_SERVER $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
-	
-          if [ -f $MIRRORS/$MIRROR ] ; then
-	    for CVS_MIRROR in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	      eval ${MIRROR}_URL=$CVS_MIRROR
-              if [[ $GOT_CVS == "yes" ]]; then
-	        break
-	      fi
-            done 
-	  else
-            if [[ $GOT_CVS != "yes" ]]; then
-	      use_cvs $MODULE
-            fi
-	  fi
-        fi
-      
+        if [ -f $MIRRORS/$MIRROR ] ; then
+	  for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	    eval ${MIRROR}_URL=$MIRROR_URL
+            if download_module $MODULE ; then
+	      break
+	    fi
+          done 
+	else
+	  download_module $MODULE
+	fi
       else
-    
+        # non- EXHAUSTIVE or CVS
         if [[ $TYPE == "cvs" ]] && [[ $GOT_CVS != "yes" ]]; then
           use_cvs $MODULE
         else
@@ -428,8 +413,12 @@ main() {
       rm  -f  $LGETING 2> /dev/null
     
     else
+      # locked
       false
     fi
+
+  )
+  
   done
 
 }
