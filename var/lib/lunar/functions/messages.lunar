@@ -31,7 +31,7 @@
 
 # error msgs go to stderr !
 error_message() {
-  echo -e "$*" > /dev/stderr
+  echo -e "$*" >&2
 }
 
 
