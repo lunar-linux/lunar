@@ -59,26 +59,22 @@ EOF
   exit  1
 }
 
-#Copyrighted Jason Johnston  2002 under GPLv2
 
-# This checks the /var/state/lunar/gcc.<platform>
-# file to see if it exists.  If it does exist then
-# we grep it to see the names of the modules that
-# DO NOT compile with gcc 3x.  If the module is
-# on the list, we set the path so that gcc 3x is
-# NOT used.
-
-# If you find a module that does not compile with
-# gcc 3x please email your findings to
-# maintainer@lunar-linux.org.
-
-# quick hack to fix a bug where optimize_platform was being called but there is no such function
-
-. /var/lib/lunar/functions/optimize.lunar
-
-
-# Useage check_checklist $MODULES
 check_blacklist() {
+  #Copyrighted Jason Johnston  2002 under GPLv2
+
+  # This checks the /var/state/lunar/gcc.<platform>
+  # file to see if it exists.  If it does exist then
+  # we grep it to see the names of the modules that
+  # DO NOT compile with gcc 3x.  If the module is
+  # on the list, we set the path so that gcc 3x is
+  # NOT used.
+
+  # If you find a module that does not compile with
+  # gcc 3x please email your findings to
+  # maintainer@lunar-linux.org.
+
+  # Usage check_checklist $MODULES
   if ! [[ $PLATFORM ]]; then
     PLATFORM=x86
   fi
@@ -286,93 +282,6 @@ export_ld()  {
 }
 
 
-ldd_check()  {  (
-  if  [  "$LDD_CHECK"  ==  "off"    ] ;  then
-    return
-  fi
-     MODULE=$1
-     VERSION=`installed_version  $MODULE`
-       I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  LDD_STATUS=0
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG                               |
-         grep      "/bin/\|/games/\|/lib/\|/sbin/"  |
-         grep  -v  "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
-
-    for  FILE  in  $LOG;  do
-      if  [     -f  "$FILE"  ]     &&
-          [  !  -h  "$FILE"  ]     &&
-          file  -b  "$FILE"        |
-          grep  -q  "ELF"          &&
-          ldd       "$FILE"  2>&1  |
-          grep  -q  "not found"
-      then
-        (  export  IFS="$IFS_OLD"
-           message  "${FILE_COLOR}${FILE}"        \
-                    "${DEFAULT_COLOR}of"          \
-                    "${MODULE_COLOR}${MODULE}"    \
-                    "${PROBLEM_COLOR}is broken."  \
-                    "${DEFAULT_COLOR}"
-           ldd      "$FILE" 2>&1 | grep  "not found"
-        )
-        LDD_STATUS=1
-      fi
-    done
-  fi
-  return  $LDD_STATUS
-) }
-
-
-find_check()  { (
-  if  [  "$FIND_CHECK"  ==  "off"             ]   ||
-      [  "$1"           ==  "xfree86"         ]   ||
-      [  "$1"           ==  "xfree86-custom"  ];  then
-    return
-  fi
-      MODULE=$1
-      VERSION=`installed_version  $MODULE`
-        I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  FIND_STATUS=0
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG                                          |
-         grep      "/bin/\|/games/\|/include/\|/lib/\|/sbin/"  |
-         grep  -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/"`
-
-    for  ITEM  in  $LOG;  do
-      if  [  -e  "$ITEM"  ];  then
-        true
-      else
-        (  export  IFS="$IFS_OLD"
-           message  "${FILE_COLOR}${ITEM}"         \
-                    "${DEFAULT_COLOR}of"           \
-                    "${MODULE_COLOR}${MODULE}"       \
-                    "${PROBLEM_COLOR}is missing."  \
-                    "${DEFAULT_COLOR}"
-        )
-        FIND_STATUS=1
-      fi
-    done
-  else
-    (  export  IFS="$IFS_OLD"
-       message  "${MODULE_COLOR}${MODULE} "                     \
-                "${PROBLEM_COLOR}is missing an install log."  \
-                "${DEFAULT_COLOR}"
-    )
-    FIND_STATUS=1
-  fi
-  return  $FIND_STATUS
-) }
-
 
 show_owner()  {
   OWNER=`grep  $TARGET  $INSTALL_LOGS/*  |
@@ -399,106 +308,9 @@ remove_line()  {
 }
 
 
-sym_check()  { (
-  if  [  "$SYM_CHECK"  ==  "off"  ];  then
-    return
-  fi
-      MODULE=$1
-	  VERSION=`installed_version  $MODULE`
-        I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG`
-
-    for  ITEM  in  $LOG;  do
-      if  [  -h  "$ITEM"  ]  &&
-          [  -f  "$ITEM"  ]
-      then
-      TARGET=$(  basename  $(  ls   -la  "$ITEM"  |
-                               cut  -d  '>'  -f2  |
-                               cut  -c  2-
-                            )
-              )
-        if  !  grep  -q  "$TARGET"  $I_LOG
-        then  (  export  IFS="$IFS_OLD";  remove_line  )
-        fi
-      fi
-    done
-  fi
-) }
-
-
-md5sum_check()  { (
-  if  [  "$MD5SUM_CHECK"  ==  "off"  ];  then
-    return
-  fi
-
-  MODULE=$1
-  VERSION=`installed_version  $MODULE`
-  MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
-
-  MD5SUM_STATUS=0
-
-  if  [  -e  $MD5_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    OUTPUT=`cat  $MD5_LOG                                         |
-            grep      "/bin/\|/games/\|/include/\|/lib/\|/sbin/"  |
-            grep  -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/"       |
-            md5sum  --check  2>/dev/null                          |    
-            grep   -v       ": OK"                                |
-            cut    -d :  -f1`
-
-    if  [  -n  "$OUTPUT"  ];  then
-      for  FILE  in  $OUTPUT;  do
-        if  [     -f  "$FILE"  ]  &&
-            [  !  -h  "$FILE"  ]  &&
-            file  -b  "$FILE"     |
-            egrep  -q  "executable|shared object|current ar archive"
-        then
-          MD5SUM=`md5sum  $FILE`
-          if  !  grep  -q  "$MD5SUM"  $MD5SUM_LOGS/*;  then
-            (  export  IFS="$IFS_OLD"
-               message  "${FILE_COLOR}${FILE}"               \
-                        "${DEFAULT_COLOR}of"                 \
-                        "${MODULE_COLOR}${MODULE}"           \
-                        "${PROBLEM_COLOR}has wrong md5sum."  \
-                        "${DEFAULT_COLOR}"
-            )
-            MD5SUM_STATUS=1
-          fi
-        fi
-      done
-    fi
-  else
-    (  export  IFS="$IFS_OLD"  
-       message  "${MODULE_COLOR}${MODULE} "                 \
-                "${PROBLEM_COLOR}is missing a md5sum log."  \
-                "${DEFAULT_COLOR}"
-    )
-    MD5SUM_STATUS=1
-  fi
-  return  $MD5SUM_STATUS
-) }
-
-
 status_okay()  {
   module_installed  $1  ||
   module_held       $1
-}
-
-
-run_checks()  {
-     sym_check  $1
-    find_check  $1  &&
-     ldd_check  $1  &&
-  md5sum_check  $1
 }
 
 

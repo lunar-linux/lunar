@@ -103,18 +103,17 @@ query() {
 
 color()  {
   case  $1  in
-    off)
-          unset  CHECK_COLOR
-          unset  DEFAULT_COLOR
-          unset  FILE_COLOR
-          unset  LRM_COLOR
-          unset  MESSAGE_COLOR
-          unset  MODULE_COLOR
-          unset  PROBLEM_COLOR
-          unset  QUERY_COLOR
-          unset  RESURRECT_COLOR
-          unset  SYMLINK_COLOR
+    off)  unset  MODULE_COLOR
           unset  VERSION_COLOR
+          unset  QUERY_COLOR
+          unset  LRM_COLOR
+          unset  CHECK_COLOR
+          unset  RESURRECT_COLOR
+          unset  FILE_COLOR
+          unset  SYMLINK_COLOR
+          unset  PROBLEM_COLOR
+          unset  MESSAGE_COLOR
+          unset  DEFAULT_COLOR
           COLOR=off
           ;;
      on)  COLOR=on
@@ -124,12 +123,11 @@ color()  {
 
 
 sound()  {
-  case $SOUND in
-    on)
-      SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-      if [ -e $SOUND_FILE ] ; then
-        ( cd / && play $SOUND_FILE ) &
-      fi
+  case  $SOUND  in
+    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
+         if  [  -e  $SOUND_FILE  ];  then
+           (  cd  /  ;  play  $SOUND_FILE  & )
+         fi
     ;;
   esac
 }

@@ -604,10 +604,10 @@ update_installed()  {
   rm -f $INSTALL_QUEUE
   for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
 
-      MODULE=$(echo "$LINE" | cut -d : -f1)
-       IDATE=$(echo "$LINE" | cut -d : -f2)
-      STATUS=$(echo "$LINE" | cut -d : -f3)
-    IVERSION=$(echo "$LINE" | cut -d : -f4)
+      MODULE=$(echo "$LINE" | cut  -d : -f1)
+       IDATE=$(echo "$LINE" | cut  -d : -f2)
+      STATUS=$(echo "$LINE" | cut  -d : -f3)
+    IVERSION=$(echo "$LINE" | cut  -d : -f4)
 
     show_fancy_progress "Processing: $MODULE"
 

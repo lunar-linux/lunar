@@ -25,9 +25,7 @@
 ############################################################
 #                                                          #
 # Parts Copyrighted Jason Johnston 2002 under GPLv2        #
-#                                                          #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
-#                                                          #
 # Parts Copyrighted Auke Kok 2003 under GPLv2              #
 #                                                          #
 ############################################################
@@ -162,7 +160,7 @@ md5sum_files() {
 }
 
 
-alien()  {
+alien() {
 
   message  "In a few minutes I will print files found on this disk"
   message  "that were not installed by lunar.  This is not a"
@@ -331,16 +329,6 @@ older()  {
 }
 
 
-maintainer()  {
-  run_details $1
-  if  [ -n "$MAINTAINER" ] ; then  
-    echo $MAINTAINER
-  else
-    echo maintainer@lunar-linux.org
-  fi
-}
-
-
 show_from()  {
   cd  $INSTALL_LOGS
   grep  $1  *
@@ -490,49 +478,6 @@ show_depends()  {
 }
 
 
-old_show_depends()  {
-  if  !  echo  "$DONE"  |  grep  -q  "$1";  then
-    DONE="$DONE  $1"
-    cd  $DEPENDS_CONFIG
-    for  MODULE  in  `ls`;  do
-      if    grep  "$1"    $MODULE  |  grep  -q  " on "
-      then  echo          $MODULE
-            show_depends  $MODULE
-      fi
-    done
-  fi
-}
-
-
-how_version()  {  
-  [ -z "$MODULE" ] && return 1
-  run_details $1
-  if [  -n  "$VERSION"  ] ; then
-    echo $VERSION  
-  else
-    echo "$MODULE does not exist or has no version."  
-  fi  
-}  
-
-
-# show the size of installed module, if no module name given, 
-# show sizes of all installed modules
-show_size() {
-   show_all_sizes() {
-      MODULES=`cat  $MODULE_STATUS_BACKUP |  cut  -d : -f1 | sort`
-      for MODULE in $MODULES
-       do
-          echo $MODULE `find_module_size $MODULE`
-       done
-   }
-
-   [ -z "$MODULE" ] && show_all_sizes && return
-   [ -n "$VERSION" ]               && 
-   echo `find_module_size $MODULE` ||
-   message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
-}
-
-
 # function: show_tree
 # usage: show_tree <module>
 # purpose: show a tree of the module's dependencies (recursive)
@@ -601,6 +546,7 @@ function show_tree() {
                 fi
         fi
 }
+
 
 show_urls() { (
   # function overrides:
@@ -753,7 +699,12 @@ parse()  {
       ;;
 
     maintainer)
-      maintainer $2
+      run_details $2
+      if [ -n "$MAINTAINER" ] ; then  
+        echo $MAINTAINER
+      else
+        echo maintainer@lunar-linux.org
+      fi
       ;;
       
     DETAILS)
@@ -829,7 +780,18 @@ parse()  {
       ;;
       
     size)
-      show_size "$2"
+      if [ -z "$2" ] ; then
+        MODULES=$(cat $MODULE_STATUS | cut -d: -f1 | sort)
+        for MODULE in $MODULES ; do
+          echo $MODULE `find_module_size $MODULE`
+        done
+      else
+        if module_installed $2 ; then
+          find_module_size $2
+        else
+          message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
+        fi
+      fi
       ;;
       
     tree)
