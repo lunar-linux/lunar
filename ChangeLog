@@ -1,3 +1,7 @@
+2003-02-25 08:44  sofar
+
+	* var/lib/lunar/subroutines: hmm, this seems more logical.
+
 2003-02-24 22:55  sofar
 
 	* sbin/lget, sbin/lin, sbin/lrm, var/lib/lunar/subroutines,
@@ -400,20 +404,4 @@
 
 	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
 	the logfile easier: 'lvu activity'
-
-2003-01-25 23:17  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Nice going ;^)
-
-2003-01-25 22:01  sofar
-
-	* var/lib/lunar/subroutines: Last CVS commit for CVS problems.
-
-2003-01-25 22:00  sofar
-
-	* var/lib/lunar/functions/modules.lunar: This is niiiiice
-
-2003-01-25 21:59  sofar
-
-	* sbin/lget: CVS dir fixes.
 
