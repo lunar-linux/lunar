@@ -92,14 +92,6 @@ is_depends()  {
 }
 
 
-# dont use until agreed on dev mailinglist
-#is_depended()  {
-#  debug_msg "is_depended ($@)"
-#  # Is $1 a previously selected dependency of any module.
-#  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
-#}
-                                                                                
-                                                                                
 in_depends()  {
   debug_msg "in_depends ($@)"
   # Was $2 presented as a depenency for module $1
@@ -126,26 +118,26 @@ remove_depends() {
 
   cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
                                                                                 
-  unlock_file $DEPENDS_STATUS_BACKUP &&
-  unlock_file $DEPENDS_STATUS
+  unlock_file $DEPENDS_STATUS &&
+  unlock_file $DEPENDS_STATUS_BACKUP
 }
                                                                                 
 
 add_depends() {
   debug_msg "add_depends ($@)"
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
-    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
-      remove_depends "$1" "$2"
-    fi
-                                                                                
-    verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
-                                                                                
     lock_file $DEPENDS_STATUS_BACKUP                       &&
     lock_file $DEPENDS_STATUS                              &&
-    echo  "$1:$2:$3:$4:$5:$6"  >>  $DEPENDS_STATUS         &&
-    cat  $DEPENDS_STATUS        >  $DEPENDS_STATUS_BACKUP  &&
-    unlock_file $DEPENDS_STATUS_BACKUP                     &&
-    unlock_file $DEPENDS_STATUS
+    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
+      grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
+	else
+      verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
+	fi
+                                                                                
+    echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
+    cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP           &&
+    unlock_file $DEPENDS_STATUS                            &&
+    unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
                                                                                 
