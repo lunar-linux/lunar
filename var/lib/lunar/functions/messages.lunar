@@ -39,8 +39,16 @@ verbose_msg() {
 }
 
 
+debug_msg() {
+  if [ -n "$DEBUG" ] ; then
+    echo "++ $@" > /dev/stderr
+  fi
+}
+
+
 # function : report FILE [description] MODULE VERSION
 report() {
+  debug_msg "report ($@)"
   if [ ! -f "$1" ] ; then
     return
   fi
@@ -67,6 +75,7 @@ report() {
 
 
 query() {
+  debug_msg "query ($@)"
   #  2 arguments
   #  query  "what do you want?  "  DEFAULT
 
@@ -102,6 +111,7 @@ query() {
 
 
 color()  {
+  debug_msg "color($@)"
   case  $1  in
     off)  unset  MODULE_COLOR
           unset  VERSION_COLOR
@@ -123,6 +133,7 @@ color()  {
 
 
 sound()  {
+  debug_msg "sound ($@)"
   case  $SOUND  in
     on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
          if  [  -e  $SOUND_FILE  ];  then

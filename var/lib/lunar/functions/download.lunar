@@ -34,6 +34,7 @@
 
 
 get_svn() {(
+  debug_msg "get_svn ($@)"
   if ! module_installed subversion ; then
     message "${PROBLEM_COLOR}! Cannot fetch SVN sources without \"subversion\" installed${DEFAULT_COLOR}"
     exit 1
@@ -99,6 +100,7 @@ get_svn() {(
 
 
 get_cvs() {(
+  debug_msg "get_cvs ($@)"
   if ! module_installed cvs ; then
     message "${PROBLEM_COLOR}! Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
     exit 1
@@ -183,6 +185,7 @@ get_cvs() {(
 
 
 erase()  {
+  debug_msg "erase ($@)"
   if [ "$PARTIAL" = "off" ]; then
     verbose_msg "erase: deleting \"$(guess_filename $1)\""
     rm -f $(guess_filename $1)
@@ -191,6 +194,7 @@ erase()  {
 
 
 call_wget()  {  
+  debug_msg "call_wget ($@)"
    [ -n "$http_proxy" ] && export http_proxy=$http_proxy
    [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
    [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
@@ -201,6 +205,7 @@ call_wget()  {
 
 
 fuzzy_wget()  {
+  debug_msg "fuzzy_wget ($@)"
 
   FTP_CONNECTION="--passive-ftp"
   [ "$FTP_ACTIVE"  == "on"   ] || 
@@ -250,6 +255,7 @@ fuzzy_wget()  {
 
 
 get_url() {
+  debug_msg "get_url ($@)"
   if  [  -n  "$1"  ] ;  then
     if [ "${1:0:6}" == "cvs://" ] ; then
       # cvs urls
@@ -306,11 +312,13 @@ get_url() {
 
 
 lget_lock()  {
+  debug_msg "lget_lock ($@)"
   echo $$ > /var/lock/lgetting.$1
 }
 
 
 lget_locked()  {
+  debug_msg "lget_locked ($@)"
   if [ -f "/var/lock/lgetting.$1" ] &&
         ps `cat /var/lock/lgetting.$1` | grep  -q  "lget" ; then
     true
@@ -321,11 +329,13 @@ lget_locked()  {
 
 
 lget_unlock()  {
+  debug_msg "lget_unlock ($@)"
   rm -f /var/lock/lgetting.$1 &> /dev/null
 }
 
 
 download_module() { (
+  debug_msg "download_module ($@)"
   if ! run_details $1 ; then
     exit 1
   fi
@@ -390,6 +400,7 @@ download_module() { (
 
 
 testpack () {
+  debug_msg "testpack ($@)"
   FILENAME=`guess_filename $1` || FILENAME=`guess_filename $SOURCE_CACHE/$1`
   if [ -f $FILENAME ] ; then
     COMPRESSOR=`file -b $FILENAME | cut -d ' ' -f1`

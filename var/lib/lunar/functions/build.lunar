@@ -26,6 +26,7 @@
 
 
 save_libraries()  {
+  debug_msg "save_libraries ($@)"
 
   [ "$MODULE" == "glibc" ] && return 0
 
@@ -72,6 +73,7 @@ save_libraries()  {
 
 
 release_saved_libraries()  {
+  debug_msg "release_saved_libraries ($@)"
    OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
    SAVED=$OLD_LIBS/$MODULE.saved.libraries
 
@@ -87,6 +89,7 @@ release_saved_libraries()  {
 
 
 prepare_install() {
+  debug_msg "prepare_install ($@)"
   if  module_installed $MODULE  || module_held $MODULE ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
@@ -106,6 +109,7 @@ prepare_install() {
 
 
 rm_source_dir() {
+  debug_msg "rm_source_dir ($@)"
 
   [ "$KEEP_SOURCE" == "on" ] && return 0
 
@@ -129,6 +133,7 @@ rm_source_dir() {
 
 
 mk_source_dir() {
+  debug_msg "mk_source_dir ($@)"
 
   cd  $BUILD_DIRECTORY
 
@@ -151,6 +156,7 @@ mk_source_dir() {
 
 
 validate_source_dir()  {
+  debug_msg "validate_source_dir ($@)"
 
   verbose_msg "validating \"$SOURCE_DIRECTORY\""
   if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
@@ -169,6 +175,7 @@ validate_source_dir()  {
 
 
 default_pre_build() {
+  debug_msg "default_pre_build ($@)"
   verbose_msg "running \"default_pre_build\""
   if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
@@ -196,6 +203,7 @@ default_pre_build() {
 
 
 default_config() {
+  debug_msg "default_config ($@)"
    verbose_msg "running \"default_config\""
 
    verbose_msg "CFLAGS=\"$CFLAGS\""            &&
@@ -213,6 +221,7 @@ default_config() {
 
 
 default_cvs_config() {
+  debug_msg "default_cvs_config ($@)"
    verbose_msg "running \"default_cvs_config\""
 
    verbose_msg "CFLAGS=\"$CFLAGS\""            &&
@@ -230,6 +239,7 @@ default_cvs_config() {
 
 
 default_make() {
+  debug_msg "default_make ($@)"
    verbose_msg "running \"default_make\""
    make                               &&
    prepare_install                    &&
@@ -238,6 +248,7 @@ default_make() {
 
 
 default_build() {
+  debug_msg "default_build ($@)"
    verbose_msg "running \"default_build\""
    default_config  &&
    default_make
@@ -245,6 +256,7 @@ default_build() {
 
 
 default_cvs_build() {
+  debug_msg "default_cvs_build ($@)"
    verbose_msg "running \"default_cvs_build\""
    default_cvs_config  &&
    default_make
@@ -252,6 +264,7 @@ default_cvs_build() {
 
 
 default_post_build() {
+  debug_msg "default_post_build ($@)"
   {
     gather_docs
 
@@ -273,6 +286,7 @@ default_post_build() {
 # usage    : remove_module; but $MODULE must be defined earlier
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
 remove_module() {
+  debug_msg "remove_module ($@)"
 
   verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS                                     && 
@@ -304,6 +318,7 @@ remove_module() {
 # usage   : add_module <module_name>
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
+  debug_msg "add_module ($@)"
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
@@ -316,6 +331,7 @@ add_module()  {
 
 
 push_install_queue() {
+  debug_msg "push_install_queue ($@)"
   remove_queue   $REMOVE_QUEUE    "$1"
   remove_queue   $INSTALL_QUEUE   "$1"
   !  module_installed             "$1"  &&
@@ -324,6 +340,7 @@ push_install_queue() {
 
 
 push_remove_queue() {
+  debug_msg "push_remove_queue ($@)"
 
   remove_queue   $INSTALL_QUEUE  "$1"
   remove_queue   $REMOVE_QUEUE   "$1"
@@ -336,6 +353,7 @@ push_remove_queue() {
 # usage    : sort_install_queue
 # purpose  : sorts the install queue according to the dependencies
 sort_install_queue() {
+  debug_msg "sort_install_queue ($@)"
    for MODULE in $@; do
      QUEUE="$QUEUE $MODULE"
      show_fancy_progress "Processing: $MODULE"
@@ -354,6 +372,7 @@ sort_install_queue() {
 # usage    : purge_modules
 # purpose  : purge modules that were removed from moonbase
 purge_modules() {
+  debug_msg "purge_modules ($@)"
   verbose_msg "Discovering modules that were removed from moonbase"
   for MODULE in $(list_installed | grep -v "^moonbase$") ; do
     if ! run_details $MODULE &> /dev/null ; then
@@ -373,6 +392,7 @@ purge_modules() {
 # usage    : list_expired_modules
 # purpose  : return a list of modules that need to be updated
 list_expired_modules() {
+  debug_msg "list_expired_modules ($@)"
   for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
     MODULE=$(echo "$LINE" | cut -d: -f1)
     IDATE=$(echo "$LINE" | cut -d: -f2)
@@ -396,6 +416,7 @@ list_expired_modules() {
 # usage    : LIST=$(sort_by_dependency $LIST)
 # purpose  : return a LIST sorted by dependency
 sort_by_dependency() {
+  debug_msg "sort_by_dependency ($@)"
   LIST=$@
   for MODULE in $LIST ; do
     unset DEPS
@@ -421,6 +442,7 @@ sort_by_dependency() {
 # usage    : update_modules
 # purpose  : update all installed modules that need to be updated
 update_modules() {(
+  debug_msg "update_modules ($@)"
 
   export IFS="$STANDARD_IFS"
 
@@ -458,6 +480,7 @@ update_modules() {(
 
 
 log_list()  {
+  debug_msg "log_list ($@)"
 
    echo `cat  $MODULE_STATUS_BACKUP                | \
          cut  -d  :  -f1,4 --output-delimiter="-"`
@@ -466,6 +489,7 @@ log_list()  {
 
 
 clean_logs()  {
+  debug_msg "clean_logs ($@)"
 
   LOGS=`log_list`
 
@@ -493,6 +517,7 @@ clean_logs()  {
 }
 
 activity_log()  { (
+  debug_msg "activity_log ($@)"
 
     DATE=`date  -u  +%Y%m%d-%T`
   COMMAND=$1
@@ -508,6 +533,7 @@ activity_log()  { (
 
 
 syms_not_owned()  {
+  debug_msg "syms_not_owned ($@)"
 
   cat  $1  |
   while read ITEM ; do
@@ -534,7 +560,8 @@ syms_not_owned()  {
 
 
 archive()  {
-
+  debug_msg "archive ($@)"
+  
   LINES=`wc  -l  <  $INST_LOG`
   ((  CHUNKS     =  LINES  /  1024  ))
   ((  REMAINDER  =  LINES  %  1024  ))
@@ -581,6 +608,7 @@ archive()  {
 
 
 boost()	{ (
+  debug_msg "boost ($@)"
 
      CACHE="/tmp/$MODULE-$VERSION-$BUILD.tar"
   CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
@@ -606,6 +634,7 @@ boost()	{ (
 
 
 find_pam_aware()  { (
+  debug_msg "find_pam_aware ($@)"
 
   cat  $MODULE_STATUS_BACKUP  |
   while  read  LINE;  do

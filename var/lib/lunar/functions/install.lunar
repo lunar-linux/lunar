@@ -28,6 +28,7 @@
 
 
 check_blacklist() {
+  debug_msg "check_blacklist ($@)"
   #Copyrighted Jason Johnston  2002 under GPLv2
 
   # This checks the /var/state/lunar/gcc.<platform>
@@ -58,18 +59,21 @@ check_blacklist() {
 
 
 run_conflicts() {
+  debug_msg "run_conflicts ($@)"
   run_module_file $MODULE CONFLICTS
 }
 
 
 # create the dependency files if they do not exist
 prepare_depends_status()  {
+  debug_msg "prepare_depends_status ($@)"
   [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
   [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
 
 
 prepare_module_config()  {
+  debug_msg "prepare_module_config ($@)"
   if [ ! -x $MODULE_CONFIG  ] ; then
     touch $MODULE_CONFIG
     chmod a+x $MODULE_CONFIG
@@ -79,6 +83,7 @@ prepare_module_config()  {
 
 # run the CONFIGURE script
 run_configure() {
+  debug_msg "run_configure ($@)"
   if [ -n "$RECONFIGURE" ];  then
     verbose_msg "Reconfiguring \"$MODULE\""
     rm -f $DEPENDS_CONFIG/$MODULE
@@ -98,6 +103,7 @@ run_configure() {
 
 
 run_pre_build() {
+  debug_msg "run_pre_build ($@)"
   message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
 
   cd $BUILD_DIRECTORY
@@ -117,6 +123,7 @@ run_pre_build() {
 
 
 stop_logging() {
+  debug_msg "stop_logging ($@)"
   message  "${MESSAGE_COLOR}Creating"                        \
            "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
@@ -128,6 +135,7 @@ stop_logging() {
 
 
 start_logging () {
+  debug_msg "start_logging ($@)"
   export C_LOG=$(temp_create "${MODULE}.compile-log")
   export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
 
@@ -141,6 +149,7 @@ start_logging () {
 
 
 activate_voyeur()  {
+  debug_msg "activate_voyeur ($@)"
   if [ -z "$SILENT" ] ; then
     case $VOYEUR in
       on) tee -a $C_LOG < $C_FIFO              & ;;
@@ -153,6 +162,7 @@ activate_voyeur()  {
 
 
 run_build()  {
+  debug_msg "run_build ($@)"
   if [ -d "$SOURCE_DIRECTORY" ] ; then
     cd $SOURCE_DIRECTORY
   fi
@@ -185,6 +195,7 @@ run_build()  {
 
 
 run_post_build() {
+  debug_msg "run_post_build ($@)"
   if [ -s $SCRIPT_DIRECTORY/POST_BUILD ] ; then
     run_module_file $MODULE POST_BUILD
   fi
@@ -193,6 +204,7 @@ run_post_build() {
 
 
 run_post_install() {
+  debug_msg "run_post_install ($@)"
   if [ -s $SCRIPT_DIRECTORY/POST_INSTALL ] ; then
     run_module_file $MODULE POST_INSTALL
   fi
@@ -200,6 +212,7 @@ run_post_install() {
 
 
 export_ld()  {
+  debug_msg "export_ld ($@)"
   for  DIRECTORY  in  $*;  do
     if  file  -b  $DIRECTORY/*.so*  |
         grep  -q  "shared object"
@@ -215,6 +228,7 @@ export_ld()  {
 
 
 show_owner()  {
+  debug_msg "show_owner ($@)"
   OWNER=`grep  $TARGET  $INSTALL_LOGS/*  |
          cut  -d :  -f1                  |
          sed  -n  1p`
@@ -225,6 +239,7 @@ show_owner()  {
 
 
 remove_line()  {
+  debug_msg "remove_line ($@)"
   F_TMP=$(temp_create "${MODULE}.remove-line")
   cp $I_LOG $F_TMP
   grep -v $ITEM $F_TMP > $I_LOG
@@ -239,6 +254,7 @@ remove_line()  {
 
 
 run_fix()  { (
+  debug_msg "run_fix ($@)"
   MODULES=$*
 
   if  [  -z  "$MODULES"  ];  then
@@ -318,6 +334,7 @@ run_fix()  { (
 
 
 resurrect()  {  ( 
+  debug_msg "resurrect ($@)"
   if ! run_details $1 ; then
     return 1
   fi
@@ -349,6 +366,7 @@ resurrect()  {  (
 
 
 show_download_progress()  {
+  debug_msg "show_download_progress ($@)"
   if [ -f "$TEMP_DOWNLOADLOG" ] ; then
     if [ -z "$LC_OLD" ] ; then
       LC_OLD=0
@@ -366,6 +384,7 @@ show_download_progress()  {
 
 
 show_downloading() {
+  debug_msg "show_downloading ($@)"
   if [ -e "$TEMP_DOWNLOADLOG" ] ; then
     verbose_msg "====== download progess:"
     while ! lget $MODULE >> $TEMP_DOWNLOADLOG 2>&1 ; do
@@ -380,6 +399,7 @@ show_downloading() {
 
 
 lin_module()  { (
+  debug_msg "lin_module ($@)"
   # make sure we got all the info
   if ! run_details $1 ; then
     return 1
@@ -500,6 +520,7 @@ lin_module()  { (
 
 
 lin_locked()  {
+  debug_msg "lin_locked ($@)"
   [     -f        /var/lock/installing.$1  ]  &&
   ps        `cat  /var/lock/installing.$1`    |
   grep  -q  "lin"
@@ -507,6 +528,7 @@ lin_locked()  {
 
 
 solo_locked()  {
+  debug_msg "solo_locked ($@)"
   for SOLO_MODULE in `cat $SOLO` ; do
     if lin_locked $SOLO_MODULE ; then
       message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}"  \
@@ -521,6 +543,7 @@ solo_locked()  {
 
 
 current_locked() {
+  debug_msg "current_locked ($@)"
   if  lin_locked  $MODULE;  then
     message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}${linING}${MESSAE_COLOR}"
     message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULTT_COLOR}${MESSAGE_COLOR}to finish installing or for the lock to clear."
@@ -534,6 +557,7 @@ current_locked() {
 
 
 build_depends()  {
+  debug_msg "build_depends ($@)"
   for MODULE in $@ ; do
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
       if ! module_held $MODULE ; then
