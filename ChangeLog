@@ -1,3 +1,7 @@
+2003-03-20 00:04  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: BEER for kongar!!!
+
 2003-03-18 20:38  sofar
 
 	* var/lib/lunar/functions/download.lunar: CVS code now handles cvs
@@ -225,21 +229,4 @@
 
 	* var/lib/lunar/functions/sources.lunar: Fix for lvu prune removing
 	CVS sources.
-
-2003-02-17 16:47  tchan
-
-	*
-	usr/share/doc/lunar/core-documentation/_etc_lunar_local_config.html
-	: Corrected the typo "defult" to "default".
-
-2003-02-17 00:55  csm
-
-	*
-	usr/share/doc/lunar/core-documentation/_etc_lunar_local_config.html
-	: more updates adding to the core documentation!
-
-2003-02-17 00:55  csm
-
-	* usr/share/doc/lunar/core-documentation/:
-	Reference_Directory.html, etc_lunar_config.html: more updates
 
