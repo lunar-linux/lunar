@@ -1,3 +1,12 @@
+2003-08-16 20:00  elaine
+
+	* var/lib/lunar/functions/postbuild.lunar: Merged fix to lunar
+
+2003-08-16 19:56  elaine
+
+	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Copied Sofar's
+	theedge wrapper fixes to lunar
+
 2003-08-11 02:23  elaine
 
 	* var/lib/lunar/unset.sh: Scattershot, unset all variables not
@@ -55,15 +64,4 @@
 2003-06-26 15:23  niki
 
 	* var/lib/lunar/excluded: Now all the host keys are also preserved.
-
-2003-06-17 14:22  elaine
-
-	* var/lib/lunar/functions/moonbase.lunar: adjusted script location
-	to cgi-bin
-
-2003-06-17 02:15  elaine
-
-	* var/lib/lunar/functions/: moonbase.lunar, uniqid.lunar: Add a
-	client id, sent to lunar-linux.org with a null wget cmd unique id
-	by hashing the MAC addrs of the primary interface
 
