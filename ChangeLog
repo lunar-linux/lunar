@@ -157,10 +157,3 @@
 	* sbin/lrm, var/lib/lunar/functions/depends.lunar: lrm fixes,
 	removing TEST slowly, cosmetic fix in the fixdepends code
 
-2003-04-07 20:51  sofar
-
-	* var/lib/lunar/: subroutines, functions/download.lunar,
-	functions/edit.lunar, functions/messages.lunar,
-	functions/optimize.lunar, functions/postbuild.lunar,
-	functions/sources.lunar: Small cleanups, verbosity output uniformed
-
