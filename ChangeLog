@@ -226,8 +226,3 @@
 	* var/lib/lunar/functions/build.lunar: added error message to make
 	clean failing in default_pre_build
 
-2003-12-08 23:31  watryac04
-
-	* var/state/lunar/blacklist.Alpha: Removed e3, as it now works
-	(non-asm version)
-
