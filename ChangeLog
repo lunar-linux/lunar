@@ -1,3 +1,16 @@
+2004-11-26 08:20  sofar
+
+	* var/lib/lunar/functions/download.lunar: Make it possible to do
+	  'lget moonbase --url file:///path/to/moonbase.tar.bz2'
+
+2004-11-25 15:05  sofar
+
+	* var/lib/lunar/functions/: build.lunar, main.lunar: Semantical
+	  change: prepare_install is now MANDATORY. it is also the step
+	  where invoke_installwatch is called. I added a WARNING that
+	  checks after BUILD if it was set correctly, and warns if it
+	  isn't. In the future this will become an ERROR.
+
 2004-11-24 13:09  sofar
 
 	* bin/lvu: This seems to fix 'lvu urls'
@@ -267,31 +280,4 @@
 
 	* var/lib/lunar/functions/main.lunar: #452: force double checking
 	  on $LUNAR_MODULE with some msgs.
-
-2004-09-26 20:47  sofar
-
-	* var/lib/lunar/functions/main.lunar: #341: explicitly omit core
-	  code and moonbase during rebuild
-
-2004-09-26 15:36  sofar
-
-	* var/lib/lunar/functions/sources.lunar: fix for #433: This resets
-	  the owner and strips setGid and setUid bits on files while
-	  extracting them. As a proper precaution this should always
-	  happen. I am confident this will fix a lot of other problems in
-	  the future.
-
-2004-09-26 15:03  sofar
-
-	* sbin/lrm: bugfix #460 (tested). I forgot to add the "optimize"
-	  call since BUILD is no longer set by default. Also some leftover
-	  and untested code after cleaning up probably.
-
-2004-09-26 02:01  v3rt1g0
-
-	* bin/lvu: The error message received when doing 'lvu size
-	  AModuleThatIsNotInstalled' was not displaying the incorrect
-	  module name as intended.  This is because it was using the wrong
-	  variable to get the module name.  Now it should be using the
-	  right variable.
 
