@@ -458,7 +458,6 @@ lin_module()  { (
       if ! run_build ; then
         LIN_ERROR="BUILD"
       else
-        devoke_installwatch
         if ! run_post_build ; then
           LIN_ERROR="POST_BUILD"
 	fi
