@@ -85,7 +85,7 @@ display_moonbase_changes()  {
     fi
 
     if [ "$DEL_MODULES" != "0" ]; then
-      message "Removed modules:${DEFAULT_COLOR}"
+      message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
       diff -I "MOONBASE_MD5:" $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
       message
     fi
