@@ -17,7 +17,7 @@ Example : ping www.google.com
 The above may or may not work. If it's not working you may be having a name resolution problem, try pinging to the IP address instead of the name,
 .BR 
 
-Example: ping 216.239.37.101
+Example: ping 216.228.105.15 (www.lunar-linux.org)
 .BR 
 
 If pinging to IP is working but pinging to name fails, check the \fB/etc/resolv.conf\fR file and see if the nameserver entries are there. You may also want to check the man page, \fBman resolv.conf\fR if you are not familiar with the entries which should be in that file.
@@ -25,7 +25,9 @@ If pinging to IP is working but pinging to name fails, check the \fB/etc/resolv.
 
 If pinging the IP address fails, check to see if your network interface is up and running. You may use the command \fBifconfig\fR to see the interface status. You must be able to see the details of your network interface in the output of ifconfig. If you cannot, then check if your NIC (network interface card) module is loaded (assuming you are using a modular kernel); use the command \fBlsmod\fR to see the loaded modules. If you do not know for sure what type of network card you have try executing the command: \fBcat /proc/pci|grep Ethernet\fR.  This should output the manufacturer and model of your ethernet card.  If your NIC module is there but your interface is not up, reconfigure the interface with the command \fBlnet\fR and test again.  If your NIC module is still not listed in the output of lsmod, the chances are you have misconfigured the kernel or misconfigured networking.  To check the kernel modules, try \fBls \-l /lib/modules/`uname \-r`/kernel/drivers/net\fR to see the network modules available in the kernel.  If you are unable to see your NIC module, recompile and reinstall your kernel with the command \fBlin \-c linux\fR and try again after reboot.
 .BR 
+The network can completely be configured using \fBlnet\fR, make sure you set up your interface correctly as needed. If needed follow the next steps to manually adjust the configuration.
 
+.BR
 The network configuration file for your Lunar installation may be found in \fB/etc/config.d/network/<interface>\fR, ie; the configuration of your eth0 is written under \fB/etc/config.d/network/eth0\fR The configuration script you may use to configure your interfaces is called \fBlnet\fR. Any time you adjust the configuration of your networking interface you must restart networking to implement any changes you have made. The init script used to start/stop/restart network is \fB/etc/init.d/network\fR.
 .BR 
 
@@ -34,11 +36,9 @@ Good luck and please remember that you must be able to ping dbguin.lunar\-linux.
 
 \fB2. Update the Moonbase: \fRSince Lunar Linux is a source based distribution, some of the binaries and/or modules on the CD may have been upgraded to newer versions already. 
 .IP 
-Install Perl with the command \fBlin perl\fR. Perl is a vital package for your system. \fBDo not bypass this step\fR.
-.BR 
-
 Do a \fBlin moonbase; lin lunar\fR. These commands will update the package collection (Moonbase) and the core package management tools.
-.LP 
+.LP
+
 
 \fB3. Set Your Preferences: \fRThere are a number of options which you may set or reset. For optimum performance, you must visit those.
 .IP 
@@ -86,7 +86,7 @@ Below are some useful addresses
 This is a work in progress. Expect frequent updates.
 .SH "SEE ALSO"
 .LP 
-lunar(8), moonbase(1), lin(8), lvu(1), lget(8), lrm(8)
+lunar(8), moonbase(1), lin(8), lvu(1), lget(8), lrm(8), lnet(8)
 .SH "DISCLAIMER"
 .LP 
 The information and examples given here are for illustrative purposes. Use at
