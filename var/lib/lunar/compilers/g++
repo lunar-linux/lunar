@@ -1,4 +1,6 @@
 #!/bin/bash
 
-$CXX_EXT /usr/bin/g++ $CCOPT "$@"
+export PATH=${PATH/\/var\/lib\/lunar\/compilers:/}
+
+$CXX_EXT g++ $CCOPT "$@"
 
