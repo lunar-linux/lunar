@@ -47,8 +47,7 @@
 /etc/services
 /etc/shadow
 /etc/shadow-
-/etc/ssh/ssh_config
-/etc/ssh/sshd_config
+/etc/ssh
 /etc/ssl
 /etc/sudoers
 /etc/sysctl.conf
