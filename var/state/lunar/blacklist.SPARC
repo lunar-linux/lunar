@@ -6,3 +6,4 @@ nasm
 uClibc
 uml
 yaboot
+memtest86+
