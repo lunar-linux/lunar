@@ -1,9 +1,9 @@
-.TH MOONBASE "1" "March 2002" "Lunar Linux" LUNAR
+.TH MOONBASE "1" "August 2003" "Lunar Linux" LUNAR
 .SH NAME
-moonbase \- the software catalog for lunar
+moonbase \- the software catalog for the Lunar-Linux distribution
 .SH COPYRIGHT
-.if n moonbase(1) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
-.if t moonbase(1) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if n moonbase(1) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t moonbase(1) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .SH "DESCRIPTION"
 The software catalog is a list of software modules (simply referred to
 as "modules") divided into sections. Each module contains one
@@ -20,7 +20,7 @@ DETAILS and optionally contain one or more of the following description files:
 CONFIGURE, DEPENDS, CONFLICTS, PRE_BUILD, BUILD, POST_BUILD, POST_INSTALL, POST_REMOVE.
 If a description file does not exist in the module directory then a set of default
 description instructions are used. The default instructions for each description
-file can be found in /var/lib/lunar/subroutines.
+file can be found in /var/lib/lunar/functions/*.lunar.
 .SH "DETAILS"
 \fBPROFILES\fR
 .PP
@@ -106,7 +106,7 @@ description files yourself. Most software catalog entries are simple. For
 example try looking under /var/lib/lunar/moonbase/editors/emacs.
 If however you want to look at a very unusual, but much more complex example look at
 /var/lib/lunar/moonbase/x11/xfree86. To understand how the software
-catalog works, it is also important to look at /var/lib/lunar/subroutines and
+catalog works, it is also important to look at /var/lib/lunar/functions/*.lunar and
 examine the functions default_pre_build, default_build, and default_post_build.
 .SH "AUTHOR"
 Kyle Sallee
@@ -117,9 +117,11 @@ Converted to Lunar by Terry Chan 03/23/2002
 .PP
 Updated by Terry Chan 5/22/2002
 .PP
+Updated by Terry Chan 8/08/2003
+.PP
 .SH "REPORTING BUGS"
 .PP
-Report bugs to <maintainer@lunar-penguin.org>
+Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
 lunar(8), lin(8), lrm(8), lvu(1), lget(8)
 .PP
