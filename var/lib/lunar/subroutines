@@ -91,11 +91,15 @@ dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
 
 
 # function : sedit
-# usage    : sedit "sed string" filename
-# purpose  : sed edit a file;  example  : sedit "s/TEST/TSET/" filename
+# usage    : sedit "sed string" filename [filename [...]]
+# purpose  : sed edit files;  example : sedit "s/TSET/TEST/" file file...
 sedit()  {
-  message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${2}${DEFAULT_COLOR}"
-  sed -i~ "$1" "$2" 
+  SEDIT=$1
+  shift
+  for FILE in $@ ; do
+    message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${FILE}${DEFAULT_COLOR}"
+    sed -i "$SEDIT" "$FILE"
+  done
 }
 
 
