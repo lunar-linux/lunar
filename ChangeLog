@@ -1,3 +1,59 @@
+2003-08-07 10:29  sofar
+
+	* usr/share/man/man8/lfirsttime.8: small adjustments
+
+2003-08-07 10:21  sofar
+
+	* usr/share/man/man8/lcrash.8: Updating this page to make it a bit
+	more recent.
+
+2003-08-07 09:48  sofar
+
+	* bin/lvu, sbin/lunar, var/lib/lunar/functions/check.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/install.lunar: Adding uniform parameter
+	passing to lvu, fixing up lvu urls to ignore testpack() and
+	connect(), hooking up --help to lunar, also making it call the
+	proper fix/nofix/fixdepends code. Last merged fixing code into
+	check.lunar, so this is all together in one file and not in
+	install.lunar.
+
+2003-08-07 07:35  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: Reverted tchans patch
+	since that killed the optimizations on compile. Adding a line where
+	the optimizations are read just before the menu's are run, so we're
+	all happy now.
+
+2003-08-07 05:56  tchan
+
+	* sbin/: lget, lin, lrm, lunar: Added/corrected help() function
+	text in all four coretools.  Still needs work by sofar.
+
+2003-08-07 04:24  tchan
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed the bug in theedge
+	of "lunar optimize" not loading up the settings from
+	/etc/lunar/local/optimizations.  sofar had moved the sourcing of
+	the optimizations file into the optimize() which is too late.  I
+	moved it to the top of the optimize_architecture().  Older code
+	just had the sourcing of optimizations at the top of optimize.lunar
+	script.
+
+2003-08-06 23:12  sofar
+
+	* sbin/: lget, lin, lrm, lunar: Uniformizing parameter passing
+	using getopt, making this a LOT simpler, cleaner and simply pwetty.
+	
+	QOTD: The man who understands one woman is qualified to understand
+	pretty well everything. 		 -- Yeats
+
+2003-08-06 21:53  tchan
+
+	* usr/share/man/man8/lfirsttime.8: Small update.  Removed the
+	install perl instructions.  Perl has been part of the Lunar ISO for
+	quite some time now.
+
 2003-08-06 01:31  niki
 
 	* var/lib/lunar/functions/install.lunar: Added a missing space in a
