@@ -115,7 +115,7 @@ rebuild()  {
 }
 
 
-expand_cache_safe() { (
+expand_cache_safe() {(
   debug_msg "expand_cache_safe ($@)"
 
   export SOURCE_DIRECTORY=$BUILD_DIRECTORY/resurrect-$MODULE-$VERSION
@@ -127,9 +127,13 @@ expand_cache_safe() { (
   tar j --list < $1 > $TMP_TARGETS
   TMP_TARGETS_OK=$(temp_create "resurrect.targets_OK.$MODULE")
   # do directories: we don't care here
-  for TARGET in $(cat $TMP_TARGETS | directories) ; do
-    debug_msg "mkdir -p $TARGET"
-    mkdir -p $TARGET
+  # the sed trick is advanced: a non-greedy pattern that returns all
+  # directory names listed in the input
+  for TARGET in $(cat $TMP_TARGETS | sed 's/\/[^\/]*$/\//g' ) ; do
+	if [ ! -d $TARGET ]; then
+      debug_msg "mkdir -p $TARGET"
+      mkdir -p $TARGET
+    fi
   done
   # do links
   for TARGET in $(find $SOURCE_DIRECTORY -type l | sed "s:$SOURCE_DIRECTORY::g" ) ; do
@@ -143,7 +147,7 @@ expand_cache_safe() { (
   # do files - bulk process the normal ones
   cat $TMP_TARGETS | grep -v -f $EXCLUDED >> $TMP_TARGETS_OK
   # now double check the EXCLUDED ones
-  for TARGET in $(cat $TMP_TARGETS | files | grep -f $EXCLUDED ) ; do
+  for TARGET in $(cat $TMP_TARGETS | grep -f $EXCLUDED ) ; do
     if [ -e "$TARGET" ] ; then
       debug_msg "Cowardishly not overwriting \"$TARGET\""
     else
