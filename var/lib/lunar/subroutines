@@ -1768,8 +1768,10 @@ fix_depends () {
 
   CHANGED_MODULES=
   # we NEED this
-  rm $INSTALL_QUEUE
-  touch $INSTALL_QUEUE
+  if [ -f $INSTALL_QUEUE] ; then
+    rm $INSTALL_QUEUE
+    touch $INSTALL_QUEUE
+  fi
   
   if [ -n "$1" ] ; then
     rework_list $*
