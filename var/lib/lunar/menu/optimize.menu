@@ -211,12 +211,6 @@ help() {
                   unset CPUINFO EXT FLAGS
                ;;
    # Warn help
-  cc_warn_help)
-           MENU="Enable/Disable C compiler warnings"
-Deprecated_HELP="Disable warnings of deprecated..."
-
-              ;;
-              
  ccc_warn_help)
           MENU="Enable/Disable C++ compiler warnings"
      Deprecated_HELP="Disable warnings of deprecated..."
@@ -376,10 +370,6 @@ fpm_options() {
              "SSE"       ""   $([ "$FPM" == "SSE" ] && echo "on" || echo "off" )      "$SSE_HELP"
              "Both"      ""   $([ "$FPM" == "Both" ] && echo "on" || echo "off" )     "$Both_HELP"
              "Altivec"   ""   $([ "$FPM" == "Altivec" ] && echo "on" || echo "off" )  "$Altivec_HELP" )
-}
-
-cc_warn() { 
-  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
 }
 
 ccc_warn() { 

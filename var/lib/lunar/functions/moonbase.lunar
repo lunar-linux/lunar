@@ -24,10 +24,7 @@ get_moonbase () {(
    CLEAR_CACHE=on
   }
 
-  if [ "$UNIQID" == "" ]; then
-    mk_uniqid;
-  fi
-
+  # make sure we set these values up front to be sure
   run_details
   rm -f /tmp/$SOURCE
 
@@ -39,9 +36,9 @@ get_moonbase () {(
     mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
 
-  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID"
+  push_uniq_id
 
-  if download_module ; then
+  if download_module $MODULE ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&

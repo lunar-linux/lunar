@@ -22,9 +22,8 @@ usage: lrm [options] [module ...]
    -h  --help        displays this screen
        --debug       debug output
    -d  --downgrade   [module] [version] downgrades a module
-   -e  --exile       exiles modules
    -s  --nosustain   removes module(s) even if they are sustained
-   -k  --keepconfig  remove module(s) but keep dependancies and config
+   -k  --keepconfig  remove module(s) but keep dependencies and config
    -t  --test        test only, do not actually do anything
    -V  --version     display version information and exit
    
@@ -35,9 +34,6 @@ of installed modules.
    Downgrading a module means removing the current installed version
 of the module and installing a specific version; given that the 
 specific version is already in $INSTALL_CACHE/.
-   Exile is for removing the module and eliminating any possibilty
-for its re-installing via automatic processess. An exiled module can be
-un-exiled via linning it.
    Some modules (such as bash and gcc)  are marked "non-removable" by the 
 system. In order to remove "sustained" modules, use the nosustain option.
 END
@@ -192,28 +188,6 @@ process_lrm_queue()
 
       run_details $MODULE &> /dev/null
 
-      if ! module_installed $MODULE
-      then
-         if module_exiled $MODULE
-         then
-            message  "${MODULE_COLOR}${MODULE}"            \
-                     "${PROBLEM_COLOR}is already exiled."  \
-                     "${DEFAULT_COLOR}"
-            continue
-          fi
-
-         [ "$EXILE" == "on" ] && 
-         [ "$TEST" != "on"  ] &&
-         remove_module $MODULE
-
-         verbose_msg "module $MODULE is exiled"
-
-         message  "${LRM_COLOR}Exiled module:"  \
-                  "${MODULE_COLOR}${MODULE}"    \
-                  "${DEFAULT_COLOR}"
-         continue
-      fi
-
        VERSION=`installed_version  $MODULE`
       INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
        MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
@@ -246,7 +220,7 @@ process_lrm_queue()
       run_module_file POST_REMOVE
 
       if [ "$KEEPCONFIG" == "on" ] ; then
-        verbose_msg "skipping removal of dependancy listing and configs"
+        verbose_msg "skipping removal of dependency listing and configs"
       else
         verbose_msg "removing module from dependency listing and configs"
         remove_depends  $MODULE
@@ -255,8 +229,6 @@ process_lrm_queue()
       verbose_msg "removing module from installed list.. "
       
       [ "$TEST" != "on" ] && remove_module  $MODULE
-
-      [ "$EXILE" == "on" ] && EXTEMP=" and exiled"
 
       message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
                 "${MODULE_COLOR}${MODULE}"    \
@@ -424,7 +396,7 @@ set_priority
 [ "$#" == "0" ] && help
 
 LRM_OPT=`getopt -q -o d:ehstvVk \
-         --long debug,downgrade:,exile,help,nosustain,test,keepconfig \
+         --long debug,downgrade:,help,nosustain,test,keepconfig \
          -n lrm -- "$@"`
 
 [ "$?" == "0" ] || help
@@ -439,7 +411,6 @@ while true ; do
                         downgrade "${@#-}"
                         exit
                         break;;
-      -e|--exile      ) export EXILE=on;       shift ;;
       -h|--help       ) help  ;;
       -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
       -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;

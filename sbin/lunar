@@ -35,7 +35,7 @@ show_modules()	{
     then
       SHORT="Short Description Unavailable"
       (
-        run_details
+        run_details $MODULE
         echo  $MODULE
         echo  $VERSION
         echo  $SHORT
@@ -185,60 +185,12 @@ remove_pkgs()	{
 }
 
 
-update_pkgs() {
-
-  if  ps  -C  lin  >  /dev/null;  then
-    echo    "Unable to update lunar concurrently while installing."
-    sleep   5
-    return  1
-  fi
-
-  lin moonbase
-  if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
-  then
-    lin $LUNAR_MODULE && lunar renew
-  else
-    lunar renew
-  fi
-
-}
-
-
-rebuild()  {
-  rm  -f  $INSTALL_QUEUE
-
-  message  "To do a non recursive rebuild"
-  message  "all installed modules must be fixed first."
-  sleep  3
-  $LIN  --fix
-
-  for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-    if  [  "$STATUS"   ==  "installed"  ]   &&
-        [  "$MODULE"  !=  "$LUNAR_MODULE"      ];  then
-      echo  $MODULE  >>  $INSTALL_QUEUE
-    fi
-  done
-
-  message  "Sorting the dependencies, that may take some time"
-  sort_install_queue
-
-  unset  MODULE
-  if    query  "Edit Rebuild/Install Queue?" n
-  then  edit_file  $INSTALL_QUEUE
-  fi
-
-  $LIN  --compile  `cat  $INSTALL_QUEUE`
-  rm -f                  $INSTALL_QUEUE
-}
-
 
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
     SHORT="Short Description Unavailable"
     (
-    run_details
+    run_details $MODULE
     STATUS="OFF"
 
     if    module_installed  $MODULE  ||
@@ -381,7 +333,7 @@ module_menu() {
                       "U"  "Update"   "$U_HELP"`
   do
     case  $COMMAND in
-      U)  update_pkgs  ;;
+      U)  update       ;;
       S)  select_pkgs  ;;
       A)  add_pkgs     ;;
       R)  remove_pkgs  ;;
@@ -468,7 +420,7 @@ maintenance_menu() {
   while
     F_HELP="lin --fix: Check and fix all modules and internal state of lunar"
     N_HELP="lin --nofix: Check all modules but do not fix the internal state"
-    D_HELP="lin --fixdepends: Check and fix the dependancy database of lunar"
+    D_HELP="lin --fixdepends: Check and fix the dependency database of lunar"
     P_HELP="lunar prune: Prune old sources and install/compile logs"
     
     COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
@@ -481,7 +433,7 @@ maintenance_menu() {
                       0 40 6                                             \
                       "F"     "Fix everything"                 "$F_HELP" \
                       "N"     "Check everything but don't fix" "$N_HELP" \
-                      "D"     "Fix dependancies"               "$D_HELP" \
+                      "D"     "Fix dependencies"               "$D_HELP" \
 		      "P"     "Prune old sources and logs"     "$P_HELP"`
   do
     case $COMMAND in
@@ -537,6 +489,7 @@ feature_menu()  {
   E_HELP="Remove files when lrm?"
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
+  H_HELP="Automatically resurrect modules instead of compiling them?"
   I_HELP="Create archives of installed software?"
   K_HELP="Keep source code in /usr/src on good compiles? (gcc profiling needs it)"
   M_HELP="Email reports?"
@@ -549,6 +502,7 @@ feature_menu()  {
   W_HELP="Verbose display of compilation process?"
 
          ARCHIVE=${ARCHIVE:=on}
+   AUTORESURRECT=${AUTORESURRECT:=on}
          AUTOFIX=${AUTOFIX:=on}
        AUTOPRUNE=${AUTOPRUNE:=off}
            CABAL=${CABAL:=off}
@@ -576,6 +530,7 @@ feature_menu()  {
                         ""                      \
                         0 40 14                 \
       "ARCHIVE"       "Toggle"  "$ARCHIVE"       "$I_HELP"   \
+      "AUTORESURRECT" "Toggle"  "$AUTORESURRECT" "$H_HELP"   \
       "AUTOFIX"       "Toggle"  "$AUTOFIX"       "$F_HELP"   \
       "AUTOPRUNE"     "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
       "CABAL"         "Toggle"  "$CABAL"         "$B_HELP"   \
@@ -595,6 +550,7 @@ feature_menu()  {
   then
   
          ARCHIVE=off
+   AUTORESURRECT=off
          AUTOFIX=off
        AUTOPRUNE=off
            CABAL=off
@@ -614,6 +570,7 @@ feature_menu()  {
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
              ARCHIVE)       ARCHIVE=on  ;;
+       AUTORESURRECT) AUTORESURRECT=on  ;;
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                CABAL)         CABAL=on  ;;
@@ -634,6 +591,7 @@ feature_menu()  {
 
     TEMP=`cat       $LOCAL_CONFIG    |
           grep  -v  "ARCHIVE="       |
+	  grep  -v  "AUTORESURRECT=" |
           grep  -v  "AUTOFIX="       |
           grep  -v  "AUTOPRUNE="     |
           grep  -v  "CABAL="         |
@@ -650,23 +608,24 @@ feature_menu()  {
           grep  -v  "TMPFS="         |
 	  grep  -v  "VERBOSE="`
 
-    echo  "$TEMP"                       >   $LOCAL_CONFIG
-    echo  "     ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
-    echo  "     AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
-    echo  "   AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
-    echo  "       CABAL=$CABAL"         >>  $LOCAL_CONFIG
-    echo  " KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
-    echo  "MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "    PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
-    echo  "       SOUND=$SOUND"         >>  $LOCAL_CONFIG
-    echo  "     SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
-    echo  "VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "      VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
-    echo  "        REAP=$REAP"          >>  $LOCAL_CONFIG
-    echo  "     GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "       color $COLOR"         >>  $LOCAL_CONFIG
-    echo  "       TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
-    echo  "     VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
+    echo  "$TEMP"                        >   $LOCAL_CONFIG
+    echo  "      ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
+    echo  "AUTORESURRECT=$AUTORESURRECT" >>  $LOCAL_CONFIG
+    echo  "      AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
+    echo  "    AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
+    echo  "        CABAL=$CABAL"         >>  $LOCAL_CONFIG
+    echo  "  KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
+    echo  " MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
+    echo  "     PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
+    echo  "        SOUND=$SOUND"         >>  $LOCAL_CONFIG
+    echo  "      SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
+    echo  " VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
+    echo  "       VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
+    echo  "         REAP=$REAP"          >>  $LOCAL_CONFIG
+    echo  "      GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
+    echo  "        color $COLOR"         >>  $LOCAL_CONFIG
+    echo  "        TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
+    echo  "      VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
   fi
 }
 
@@ -810,17 +769,19 @@ main_menu()  {
 
 main() {
   case  $1  in
-      prune)  prune                      ;;
-      renew)  update_installed
-              upgrade_install_queue      ;;
-     update)  update_pkgs  autoupdate    ;;
-    rebuild)  rebuild                    ;;
-   optimize)  optimize_architecture      ;;
-    install)  shift && lin $@            ;;
-     remove)  shift && lrm $@            ;;
-       hold)  shift && hold_modules $@   ;;
-     unhold)  shift && unhold_modules $@ ;;
-          *)  main_menu                  ;;
+      prune)  prune                         ;;
+      renew)  renew                         ;;
+     update)  update                        ;;
+    rebuild)  rebuild                       ;;
+   optimize)  optimize_architecture         ;;
+  resurrect)  shift && resurrect_modules $@ ;;
+    install)  shift && lin $@               ;;
+     remove)  shift && lrm $@               ;;
+       hold)  shift && hold_modules $@      ;;
+     unhold)  shift && unhold_modules $@    ;;
+      exile)  shift && exile_modules $@     ;;
+    unexile)  shift && unexile_modules $@   ;;
+          *)  main_menu                     ;;
   esac
 }
 
@@ -834,9 +795,9 @@ Lunar Module Management Utility
 
 #lets load the menu code
 if [ -n "$MENUS" ]; then
-   for FILE in `echo $MENUS/*.menu` ; do
-      [ -s "$FILE" ] && . "$FILE"
-   done
+  for FILE in `echo $MENUS/*.menu` ; do
+    [ -s "$FILE" ] && . "$FILE"
+  done
 fi
 
 root_check
@@ -848,5 +809,5 @@ export  IFS="$TAB_ENTER_IFS"
 LUNAR_MODULE=${LUNAR_MODULE:=lunar}
 LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
 
-main  $*
+main $*
 

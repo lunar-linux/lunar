@@ -35,7 +35,6 @@ boost_locked() {
 # purpose  : start logging all disk accesses with installwatch
 invoke_installwatch() {
   if [ -e /usr/lib/installwatch.so ] ; then
-    export INSTALLWATCHFILE=/tmp/$MODULE.iw
     export LD_PRELOAD=/usr/lib/installwatch.so
   fi
 }
@@ -56,9 +55,8 @@ parse_iw() {
   OMIT="^/dev\|^/tmp\|^/usr/src"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
-  grep -v "$OMIT_IN" $IW_LOG | cut -f3 | grep -v "$OMIT"
-  cat                $IW_LOG | cut -f4 | grep -v "$OMIT" | grep "^/"
-
+  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v "$OMIT"
+  cat                $INSTALLWATCHFILE | cut -f4 | grep -v "$OMIT" | grep "^/"
 }
 
 
@@ -68,7 +66,7 @@ parse_iw() {
 track() {
   message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
 
-  export  IFS="$TAB_ENTER_IFS"
+  export IFS="$TAB_ENTER_IFS"
 
   parse_iw                   |
   sort                       |
@@ -89,8 +87,7 @@ track() {
   else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
   fi
 
-  verbose_msg "removing \"$IW_LOG\""
-  rm  -f  $IW_LOG  $TMP_LOG
+  rm  -f  $TMP_LOG
 }
 
 

@@ -74,29 +74,28 @@ prepare_depends_status()  {
 
 
 prepare_module_config()  {
-  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
-  if  [  !  -x  $MODULE_CONFIG  ];  then
-    touch       $MODULE_CONFIG
-    chmod  a+x  $MODULE_CONFIG
+  if [ ! -x $MODULE_CONFIG  ] ; then
+    touch $MODULE_CONFIG
+    chmod a+x $MODULE_CONFIG
   fi
 }
 
 
 run_configure() {
-  if  [  -n  "$RECONFIGURE"  ];  then
-    rm  -f  $DEPENDS_CONFIG/$MODULE
-    remove_depends  $MODULE
+  if [ -n "$RECONFIGURE" ];  then
+    verbose_msg "Reconfiguring \"$MODULE\""
+    rm -f $DEPENDS_CONFIG/$MODULE
+    remove_depends $MODULE
   fi
 
   prepare_module_config
-  use_xinetd || {
-  if  [  -n  "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ;  then
-    use_initd
+
+  if ! use_xinetd ; then
+    if [ -n "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ; then
+      use_initd
+    fi
   fi
-  }
-
-  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
-
+  grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if  [  -x  $SCRIPT_DIRECTORY/CONFIGURE  ];  then
     . $SCRIPT_DIRECTORY/CONFIGURE
   fi
@@ -104,22 +103,16 @@ run_configure() {
 
 
 run_pre_build() {
-  if  [  -f  /tmp/$MODULE.iw ] ; then
-    verbose_msg echo "removing \"/tmp/$MODULE.iw\""
-    rm -f /tmp/$MODULE.iw
-  fi
+  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
 
-  message  "${MESSAGE_COLOR}Building"  \
-           "${MODULE_COLOR}${MODULE}"    \
-           "${DEFAULT_COLOR}"
+  cd $BUILD_DIRECTORY
 
-  cd  $BUILD_DIRECTORY
-
-  verify_sources  &&
-  if  [  -x  $SCRIPT_DIRECTORY/PRE_BUILD  ];  then
-           . $SCRIPT_DIRECTORY/PRE_BUILD
-  else
-    default_pre_build
+  if verify_sources ; then
+    if [ -x $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
+      . $SCRIPT_DIRECTORY/PRE_BUILD
+    else
+      default_pre_build
+    fi
   fi
 }
 
@@ -129,26 +122,26 @@ stop_logging() {
            "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
 
-  bzip2  -9f  <  $C_LOG  >  $COMPILE_LOGS/$MODULE-$VERSION.bz2
-  rm -f $C_LOG $C_FIFO
-  unset C_LOG C_FIFO
+  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.bz2
+  temp_destroy $C_LOG
+  temp_destroy $C_FIFO
 }
 
 
 view_compile_log()  {
-    sleep   1
-    report              $C_LOG  "Compile log"
+    sleep  1
+    report $C_LOG "Compile log"
 }
 
 
 start_logging () {
-  export C_LOG=/tmp/$MODULE.compile.log
-  export C_FIFO=/tmp/$MODULE.compile.fifo
+  export C_LOG=$(temp_create "${MODULE}_compilelog")
+  export C_FIFO=$(temp_create "${MODULE}_compilefifo")
 
-  rm  -f $C_FIFO
-  mknod  $C_FIFO p
-  rm  -f $C_LOG
-  echo  "Compile log for $MODULE  $VERSION  Built on `date  -u`"  >  $C_LOG
+  # just remaking this as FIFO
+  rm -f $C_FIFO
+  mknod $C_FIFO p
+  echo  "Compile log for  $MODULE  $VERSION  Built on `date  -u`" > $C_LOG
 
   activate_voyeur
 }
@@ -166,10 +159,9 @@ activate_voyeur()  {
 
 
 run_build()  {
-  [  -d  "$SOURCE_DIRECTORY"  ]  &&
-  cd      $SOURCE_DIRECTORY
-
-  invoke_installwatch
+  if [ -d "$SOURCE_DIRECTORY" ] ; then
+    cd $SOURCE_DIRECTORY
+  fi
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
@@ -311,9 +303,9 @@ run_fix()  { (
           PASSED="$PASSED$MODULE:"
         else
           FIXED="no"
-          (  run_details
-             satisfy_depends
-             unset  FIX
+          (  run_details $MODULE  &&
+             satisfy_depends      &&
+             unset FIX            &&
              satisfy_depends
           )
 
@@ -347,87 +339,31 @@ run_fix()  { (
 ) }
 
 
-process_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  export  DEPS_ONLY="$1";      shift 1  ;;
-        -r|--reconfigure)  RECONFIGURE="$1";            shift 1  ;;
-            -c|--compile)  COMPILE="$1";                shift 1  ;;
-	      -p|--probe)  PROBE="yes";                 shift 1  ;;
-                  --from)  export  SOURCE_CACHE=$2;     shift 2  ;;
-                --silent)  SILENT="$1";                 shift 1  ;;
-                -f|--fix)  export  FIX="$1";            shift 1  ;;
-              -n|--nofix)  export  FIX="--fix"
-                           export  NOFIX="$1";          shift 1  ;;
-	 -d|--fixdepends)  export  FIXDEPENDS="$1";
-	 		   export  FIX="$1";            shift 1  ;;
-                      -s)  SEPARATE="$1";               shift 1  ;;
-                   --url)  export  BASE_URL="$2";       shift 2  ;;
-                   --pam)  lin  -c  `find_pam_aware`;   shift 1  ;;
-                       *)  help                                  ;;
-      esac
-    else
-      shift
-   fi
-  done
-}
-
-
-strip_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  shift 1  ;;
-        -r|--reconfigure)  shift 1  ;;
-                  --from)  shift 2  ;;
-                --silent)  shift 1  ;;
-                -f|--fix)  shift 1  ;;
-              -n|--nofix)  shift 1  ;;
-         -d|--fixdepends)  shift 1  ;;
-            -c|--compile)  shift 1  ;;
-	      -p|--probe)  shift 1  ;;
-                      -s)  shift 1  ;;
-                   --url)  shift 2  ;;
-                   --pam)  shift 1  ;;
-                       *)  shift 1  ;;
-      esac
-    else
-      echo  $1
-      shift
-   fi
-  done
-}
-
-
-resurrect()  {  (  
-  run_details      &&
+resurrect()  {  ( 
+  if ! run_details $1 ; then
+    return 1
+  fi
   run_conflicts    &&
   satisfy_depends  &&
 
-  STATUS=installed
+  STATUS=installed &&
 
-  if  module_held  $MODULE;  then
-    VERSION=`installed_version  $MODULE`
-     STATUS=held
-     lrm --keepconfig $MODULE
-  fi
+  if module_held $MODULE ; then
+    VERSION=`installed_version $MODULE`
+    STATUS=held
+    lrm --keepconfig $MODULE
+  fi &&
 
   CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
 
-  if  [      -f   $CACHE_BZ  ]  &&
-      bzip2  -tf  $CACHE_BZ;    then
-
-    bzip2         -cd   $CACHE_BZ  |  tar  -Pkx  1>/dev/null  2>&1
-    add_module     $MODULE  $STATUS  $VERSION
+  if [ -f $CACHE_BZ ] && bzip2 -tf $CACHE_BZ ; then
+    message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
+    bzip2 -cd $CACHE_BZ | tar -Pkx 1>/dev/null 2>&1
+    add_module $MODULE $STATUS $VERSION
+    verbose_msg "running \"lin --fix $MODULE\""
+    lin --fix $SILENT $MODULE
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
-    message  "${RESURRECT_COLOR}Resurrected module:"  \
-             "${MODULE_COLOR}${MODULE}"                \
-             "${DEFAULT_COLOR}"                      \
-             "version"                               \
-             "${VERSION_COLOR}${VERSION}"            \
-             "${DEFAULT_COLOR}"
-    lin  --fix  $SILENT  $MODULE
+    message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}succesfully${DEFAULT_COLOR}"
   else
     false
   fi
@@ -435,28 +371,32 @@ resurrect()  {  (
 
 
 show_download_progress()  {
-  if  [  -f  "$D_LOG"  ];  then
-    if  [  -z  "$LC_OLD"  ];  then
+  if [ -f "$TEMP_DOWNLOADLOG" ] ; then
+    if [ -z "$LC_OLD" ] ; then
       LC_OLD=0
     fi
 
-    LC=`cat  $D_LOG  2>/dev/null  |  wc  -l  |  tr  -d ' '`
+    LC=`cat $TEMP_DOWNLOADLOG 2>/dev/null | wc -l | tr -d ' '`
 
-    if  [  "$LC"  !=  "$LC_OLD"  ];  then
-      ((  LC_OLD++  ))
-      sed  -n ${LC_OLD},${LC}p  $D_LOG
+    if [ "$LC" != "$LC_OLD" ] ; then
+      verbose_msg "====== download progess:"
+      (( LC_OLD++ ))
+      sed  -n ${LC_OLD},${LC}p $TEMP_DOWNLOADLOG
       LC_OLD=$LC
+      verbose_msg "====== end download progress"
     fi
   fi
 }
 
 
-show_downloading()  {
-  while  !  lget  $MODULE;  do
+show_downloading() {
+  if [ -e "$TEMP_DOWNLOADLOG" ] ; then
+    while ! lget $MODULE >> $TEMP_DOWNLOADLOG 2>&1 ; do
+      show_download_progress
+      sleep 1
+    done
     show_download_progress
-    sleep 1
-  done
-    show_download_progress
+  fi
 }
 
 
@@ -467,9 +407,28 @@ report_install()  {
 
 
 lin_module()  { (
-  if [ $MODULE == "moonbase" ] ; then
+  # make sure we got all the info
+  if ! run_details $1 ; then
+    return 1
+  fi
+
+  if [ "$AUTORESURRECT" == "on" ] ; then
+    if resurrect $MODULE ; then
+      return 0
+    fi
+  fi
+
+  # make sure we have the source code
+  download_module $MODULE
+  
+  # set the installwatchfile
+  export INSTALLWATCHFILE=$(temp_create "$MODULE-installwatch")
+  invoke_installwatch
+
+  # lock the module for installation, check for moonbase call
+  linING="/var/lock/installing.$MODULE"
+  if [ "$MODULE" == "moonbase" ] ; then
     if ! current_locked && ! solo_locked ; then
-      linING="/var/lock/installing.$MODULE"
       echo $$ > $linING       &&
       get_moonbase            &&
       rm -f $linING           &&
@@ -479,11 +438,13 @@ lin_module()  { (
     fi
   fi
   check_blacklist             &&
-  run_details                 &&
+  
+  # here we run CONFLICTS, DEPENDS and CONFIGURE stuff
   run_conflicts               &&
   satisfy_depends             &&
   show_downloading            &&
-  
+ 
+  # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
     echo $$ > $linING          &&
     if ! [[ $CFLAGS ]] ; then
@@ -507,7 +468,9 @@ lin_module()  { (
     stop_logging
     
     if [ -n "$LIN_ERROR" ] ; then
-      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
+      if [ -f "$INSTALLWATCHFILE" ] ; then
+        temp_destroy $INSTALLWATCHFILE
+      fi
       sound  FAILURE
       message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
       rm  -f  $linING
@@ -518,11 +481,14 @@ lin_module()  { (
 
     if ! boost ; then
       LIN_ERROR="boost"
-      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
     else
       if ! run_post_install ; then
         LIN_ERROR="POST_INSTALL"
       fi
+    fi
+    if [ -f "$INSTALLWATCHFILE" ] ; then
+      verbose_msg "removing installwatch file"
+      temp_destroy $INSTALLWATCHFILE
     fi
 
     if [ -n "$LIN_ERROR" ] ; then
@@ -534,9 +500,10 @@ lin_module()  { (
       return 1
     fi
 
+    
     rm_source_dir               &&
     report_install              &&
-    rm  -f  $linING             &&
+    rm -f $linING               &&
     sound  SUCCESS              &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
 
@@ -588,64 +555,18 @@ current_locked() {
 }
 
 
-lin_modules()  {
-  for MODULE in $@ ; do
-  
-    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-      if ! module_held $MODULE ; then
-        linING="/var/lock/installing.$MODULE"
-        if  [  -n  "$COMPILE"      ]  ||
-            [  -n  "$RECONFIGURE"  ]  ||
-            module_installed  $MODULE   ||
-            !  resurrect     $MODULE;  then
-          if  !  lin_module;  then
-            if  [  -n  "$LOGTMP"  ];  then
-              echo  "$MODULE"  >>  /tmp/fail_$LOGTMP
-            fi
-            lin_EXIT_STATUS=1;  
-          else
-            if  [  -n  "$LOGTMP"  ];  then
-              echo  "$MODULE"  >>  /tmp/success_$LOGTMP
-            fi
-          fi
-        fi
-      else
-        verbose_msg "Skipping compile and install for held module \"$MODULE\""
-      fi
-    fi
-  done
-
-  if  [  -n  "$lin_EXIT_STATUS"  ];  then
-    exit  1
-  fi
-}
-
-
 build_depends()  {
   for MODULE in $@ ; do
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
       if ! module_held $MODULE ; then
         ( 
-          run_details    &&
-          run_configure  &&
-          run_depends    &&
+          run_details $MODULE  &&
+          run_configure        &&
+          run_depends          &&
           satisfy_depends
         )
       else
-        verbose_msg "Skipping dependancy checking of held module \"$MODULE\""
-      fi
-    fi
-  done
-}
-
-
-build_sources()  {
-  for MODULE in $@ ; do
-    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-      if ! module_held $MODULE ; then
-        lget $MODULE >> $D_LOG 2>&1
-      else
-        verbose_msg "Skipping download check for held module \"$MODULE\""
+        verbose_msg "Skipping dependency checking of held module \"$MODULE\""
       fi
     fi
   done

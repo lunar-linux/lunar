@@ -29,53 +29,37 @@
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {
 
-  verbose_msg "find_depends $@"
-   [ -n "$1" ]                || return 1
-   run_details $1             || return 1
-   [ -n "$SCRIPT_DIRECTORY" ] || return 1   
+  # as always, use private depends() and optional_depends() functions
+  depends () {
+    if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
+      export FOUND_DEPENDS="$FOUND_DEPENDS $1"
+      find_depends $1
+      echo $1
+    fi
+  }
 
-   REQ_DEPENDS="/tmp/lunar_req_depends.`uuidgen`"
-   rm -f $REQ_DEPENDS 2>/dev/null
+  optional_depends() {
+    if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
+      if module_installed $1 ; then
+        export FOUND_DEPENDS="$FOUND_DEPENDS $1"
+        find_depends $1
+        echo $1
+      fi
+    fi
+  }
+  
+  export FOUND_DEPENDS="$FOUND_DEPENDS $1"
+  if ! run_details $1 ; then
+    exit 1
+  fi
 
-   DEPENDS_FILE=$SCRIPT_DIRECTORY/DEPENDS
-   [ -s "$DEPENDS_FILE" ]     || return 1
-   
-   grep -q ^depends $DEPENDS_FILE 2>/dev/null && {
-       grep ^depends $DEPENDS_FILE 2>/dev/null |
-       tr "\t" " "                             |
-       sed "s/^depends *//g"                   |
-       cut -d " " -f 1-1                       |
-       sed "s/[\'\"\\ &]//g"                   |
-       while read TMP_DEP
-       do
-          echo $TMP_DEP >> $REQ_DEPENDS
-          echo $TMP_DEP $1 >> $TMP_DEPENDS   
-       done
-   }
+  if [ -e "$MODULE_CONFIG" ] ; then
+    . "$MODULE_CONFIG"
+  fi
 
-   grep -q ^optional_depends $DEPENDS_FILE 2>/dev/null && {
-       grep ^optional_depends $DEPENDS_FILE 2>/dev/null |
-       tr "\t" " "                                      |
-       sed "s/^optional_depends *//g"                   |
-       cut -d " " -f 1-1                                |
-       sed "s/[\'\"\\ &]//g"                            |
-       while read TMP_DEP
-       do
-          echo $TMP_DEP >> $REQ_DEPENDS
-          echo $TMP_DEP $1 >> $TMP_DEPENDS   
-       done
-   }
-   [ -s "$REQ_DEPENDS" ] && {
-      cat $REQ_DEPENDS |
-      while read REQ_DEP
-      do
-         grep -q " $REQ_DEP" $TMP_DEPENDS ||
-         find_depends $REQ_DEP
-      done
-   }
-
-   rm -f $REQ_DEPENDS 2>/dev/null
-   rm -f $OPT_DEPENDS 2>/dev/null
+  if [ -x "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
+    . "$SCRIPT_DIRECTORY/DEPENDS"
+  fi
 
 }
 
@@ -100,17 +84,16 @@ remove_depends() {
                                                                                 
   if [ -n "$2" ] ; then
     if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
-	    grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
+      grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
       verbose_msg "removing depends for \"$1\" on \"$2\""
-		fi
-  else
-	  if grep -q "^$1:" $DEPENDS_STATUS ; then
-      grep -v "^$1:" $DEPENDS_STATUS_BACKUP | \
-      grep -v ":$1:on:optional:" > $DEPENDS_STATUS
-      verbose_msg "removing all depends for and optional on \"$1\""
-		fi
+    fi
+  elif grep -q "^$1:" $DEPENDS_STATUS ; then
+    grep -v "^$1:" $DEPENDS_STATUS_BACKUP | \
+    grep -v ":$1:on:optional:" > $DEPENDS_STATUS
+    verbose_msg "removing all depends for and optional on \"$1\""
   fi
-  cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
+
+  cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
                                                                                 
   unlock_file $DEPENDS_STATUS_BACKUP &&
   unlock_file $DEPENDS_STATUS
@@ -138,7 +121,7 @@ add_depends() {
 run_depends() {
   # local definitions of depends and optional_depends!
   depends()  {
-    grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
+    grep -q "^"$1"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
 
     if ! module_installed $1 && ! module_held $1 ; then
       if ! is_depends $1 && module_exiled $1 ; then
@@ -148,7 +131,7 @@ run_depends() {
                 "Adding required dependency${FILE_COLOR}"   \
                 "$1 ${DEFAULT_COLOR}"
         lin --deps $1
-        echo "$1" >> $PREPD
+        echo "$1" >> $TEMP_PREPAREDDEPS
       fi
     fi
     add_depends "$MODULE" "$1" "on" "required" "$2" "$3"
@@ -183,7 +166,7 @@ run_depends() {
   }
                                                                                 
   prepare_depends_status
-  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
+  grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
     message  "${CHECK_COLOR}Checking dependencies for"  \
              "${MODULE_COLOR}${MODULE}"                   \
@@ -239,7 +222,7 @@ rework_module() {
   # base vars needed to execute DEPENDS
   SECTION=$(find_section $MODULE)
   SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-  MODULE_CONFIG=$CONFIG_CACHE/depends/$MODULE
+  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
                                                                                 
   # reroute depends output to our private files:
   OLD_DEPENDS_STATUS=$DEPENDS_STATUS
@@ -281,10 +264,10 @@ rework_module() {
         OLD_OFF_OPTS=$(echo $OLDDEP | cut -d: -f6)
         NEW_OFF_OPTS=$(echo $NEWDEP | cut -d: -f6)
         if [ -z "$NEWDEP" ] ; then
-          echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from the dependancy list${DEFAULT_COLOR}"
+          echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from the dependency list${DEFAULT_COLOR}"
         else
           if [ -z "$OLDDEP" ] ; then
-            echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was added to the $NEW_REQD dependancy list${DEFAULT_COLOR}"
+            echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was added to the $NEW_REQD dependency list${DEFAULT_COLOR}"
           else
             # the dep changed!
             if [ "$OLD_STATUS" == "on" -a "$NEW_STATUS" == "on" ]; then
@@ -434,16 +417,15 @@ fix_depends () {
 satisfy_depends()  {
                                                                                 
   [ -n "$DEPS_ONLY" ] && return 0
-  unset  OPTS
-  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
-                                                                                
+  unset OPTS
+
   if  [  -s  $MODULE_CONFIG  ];  then
           .  $MODULE_CONFIG
   fi
                                                                                 
   TMP_FILE="/tmp/satisfy_depends.`uuidgen`"
   grep  "^$MODULE:"  $DEPENDS_STATUS > $TMP_FILE
-                                                                                
+
   while read LINE; do
     DEP_MODULE=`echo  $LINE  |  cut  -d :  -f2`
     DEP_STATUS=`echo  $LINE  |  cut  -d :  -f3`

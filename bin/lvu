@@ -820,7 +820,7 @@ parse()  {
       ;;
 
     compile)
-      run_details 
+      run_details $2
       if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
         view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
       else

@@ -195,8 +195,7 @@ default_pre_build() {
 }
 
 
-default_config() 
-{
+default_config() {
    verbose_msg "running \"default_config\""
 
    verbose_msg "CFLAGS=\"$CFLAGS\""            &&
@@ -283,8 +282,7 @@ remove_module() {
   unlock_file $MODULE_STATUS_BACKUP                            &&
   unlock_file $MODULE_STATUS 
 
-  if  [  -n  "$EXILE"  ];  
-  then
+  if [ -n "$EXILE" ] ; then
      lock_file $MODULE_STATUS                            && 
      lock_file $MODULE_STATUS_BACKUP                     &&
      echo  "$1::exiled:0.0"  >>  $MODULE_STATUS          &&
@@ -300,6 +298,7 @@ remove_module() {
      unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
+
 
 # function: add_module
 # usage   : add_module <module_name>
@@ -322,17 +321,14 @@ conflicts() {
   fi
 
   true
-
 } 
 
 
 push_install_queue() {
- 
   remove_queue   $REMOVE_QUEUE    "$1"
   remove_queue   $INSTALL_QUEUE   "$1"
   !  module_installed             "$1"  &&
   add_queue  $INSTALL_QUEUE       "$1"
-    
 }
 
 
@@ -342,7 +338,6 @@ push_remove_queue() {
   remove_queue   $REMOVE_QUEUE   "$1"
   module_installed               "$1"  &&
   add_queue  $REMOVE_QUEUE       "$1"
-    
 }
 
 
@@ -351,115 +346,126 @@ push_remove_queue() {
 # purpose  : sorts the install queue according to the dependencies
 sort_install_queue() {
 
-   if ! [ -s $INSTALL_QUEUE ]; then return; fi
 
-   message  "${MESSAGE_COLOR}Sorting module dependencies...${DEFAULT_COLOR}"
-
-   export   TMP_DEPENDS="/tmp/lunar_tmp_depends.$$"
-   rm -f $TMP_DEPENDS 2>/dev/null
-
-   export   TMP_INSTALL="/tmp/lunar_install_queue.$$"
-   rm -f $TMP_INSTALL 2>/dev/null
-
-   cp $INSTALL_QUEUE $TMP_INSTALL || return 1
-
-   for MODULE in `cat $TMP_INSTALL`; do
+   for MODULE in $@; do
+     QUEUE="$QUEUE $MODULE"
      show_fancy_progress "Processing: $MODULE"
-     find_depends $MODULE
+     for DEP in $(find_depends $MODULE) ; do
+       if $(echo "$@" | grep -qw "$DEP") ; then
+         QUEUE="$DEP $QUEUE"
+       fi
+     done
    done
 
-   for LINE in `tsort $TMP_DEPENDS 2>/dev/null`; do
-      if grep -q "^$LINE\$" $TMP_INSTALL 2>/dev/null; then
-         remove_queue $INSTALL_QUEUE $LINE
-         add_queue    $INSTALL_QUEUE $LINE
-      fi
-   done
-   rm -f $TMP_DEPENDS 2>/dev/null
-   rm -f $TMP_INSTALL 2>/dev/null
+   echo $QUEUE | tsort
 }
 
-# function : update_installed
-# usage    : update_installed
-# purpose  : add the packages which will be updated  into the INSTALL_QUEUE
-update_installed()  {
 
-  message "${MESSAGE_COLOR}Searching installed modules for upgrade..." \
-           "${DEFAULT_COLOR}"
-  rm -f $INSTALL_QUEUE
-  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
-
-      MODULE=$(echo "$LINE" | cut  -d : -f1)
-       IDATE=$(echo "$LINE" | cut  -d : -f2)
-      STATUS=$(echo "$LINE" | cut  -d : -f3)
-    IVERSION=$(echo "$LINE" | cut  -d : -f4)
-
-    show_fancy_progress "Processing: $MODULE"
-
-    if [ "$STATUS" == "installed" ] ; then
-
-      if ! run_details $MODULE &> /dev/null ; then
-     
-        message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
-      
-        if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
-	  lrm $MODULE
-          continue
-	else
-	  message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
-	  echo
-	fi
-	
+# function : purge_modules
+# usage    : purge_modules
+# purpose  : purge modules that were removed from moonbase
+purge_modules() {
+  verbose_msg "Discovering modules that were removed from moonbase"
+  for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+    if ! run_details $MODULE &> /dev/null ; then
+      message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+      if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
+        lrm $MODULE
+        continue
       else
+        message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
+      fi
+    fi
+  done 
+}
 
+
+# function : list_expired_modules
+# usage    : list_expired_modules
+# purpose  : return a list of modules that need to be updated
+list_expired_modules() {
+  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
+    MODULE=$(echo "$LINE" | cut -d: -f1)
+    IDATE=$(echo "$LINE" | cut -d: -f2)
+    STATUS=$(echo "$LINE" | cut -d: -f3)
+    IVERSION=$(echo "$LINE" | cut -d: -f4)
+    if run_details $MODULE ; then
+      if [ "$STATUS" == "installed" ] ; then
         if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
-	      (( "$UPDATED" > "$IDATE" )) ; then
+          (( "$UPDATED" > "$IDATE" )) ; then
           if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
-            add_queue $INSTALL_QUEUE $MODULE
+            echo $MODULE
           fi
-        fi
-     
-     fi
-
+	fi
+      fi
     fi
   done
-  sort_install_queue
 }
 
-# function : upgrade_install_queue
-# usage    : upgrade_install_queue
-# purpose  : optionally edit INSTALL_QUEUE, install modules, fix and prune
-upgrade_install_queue()  {
 
-  if  [  -f  $INSTALL_QUEUE  ];  then
-
-    message  "The following modules will be updated:"
-    cat  $INSTALL_QUEUE
-    unset  MODULE
-    if    query  "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${QUERY_COLOR} ?" n
-    then  edit_file  $INSTALL_QUEUE
+# function : sort_by_dependency
+# usage    : LIST=$(sort_by_dependency $LIST)
+# purpose  : return a LIST sorted by dependency
+sort_by_dependency() {
+  LIST=$@
+  for MODULE in $LIST ; do
+    unset DEPS
+    for DEP in $(find_depends $MODULE) ; do
+      if $(echo $LIST | grep -qw $DEP) ; then
+        DEPS="$DEPS $DEP"
+      fi
+    done
+    TMP_LIST="$TMP_LIST $DEPS $MODULE"
+  done
+  
+  for MODULE in $TMP_LIST ; do
+    if ! $(echo $QUEUE | grep -qw $MODULE) ; then
+      QUEUE="$QUEUE $MODULE"
     fi
+  done
 
-    if  [  -n  "`cat  $INSTALL_QUEUE`"  ];  then
-      export  LOGTMP=$$_`date +%s`
-      lin      `cat  $INSTALL_QUEUE`         
-      rm             $INSTALL_QUEUE
-    fi
-
-  fi
-
-  if  [  "$AUTOFIX"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOFIX :    lin --fix${DEFAULT_COLOR}"
-    lin --fix
-  fi
-
-  if  [  "$AUTOPRUNE"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lunar prune${DEFAULT_COLOR}"
-    prune
-  fi
-
-  display_update_log update
-
+  echo $QUEUE
 }
+
+
+# function : update_modules
+# usage    : update_modules
+# purpose  : update all installed modules that need to be updated
+update_modules() {(
+
+  export IFS="$STANDARD_IFS"
+
+  verbose_msg "Searching for modules to update"
+  LIST=$(list_expired_modules)
+  
+  if [ -z "$LIST" ] ; then
+    verbose_msg "Nothing to update!"
+    return
+  fi
+  
+  verbose_msg "Sorting update queue"
+  QUEUE=$(sort_by_dependency $LIST)
+
+
+  message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
+  TMP_QUEUE=$(temp_create "update-queue")
+  for MODULE in $QUEUE ; do
+    echo $MODULE >> $TMP_QUEUE
+    echo $MODULE
+  done
+
+  unset MODULE
+  if query "Do you wish to edit the update queue ? " n ; then
+    edit_file $TMP_QUEUE
+  fi
+  QUEUE=$(cat $TMP_QUEUE)
+  temp_destroy $TMP_QUEUE
+
+  if [ -n "$QUEUE" ] ; then
+    lin -c $QUEUE
+  fi
+)}
+
 
 
 log_list()  {
@@ -593,7 +599,6 @@ boost()	{ (
    TMP_LOG="/tmp/$MODULE-$VERSION"
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
    MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
-    IW_LOG="/tmp/$MODULE.iw"
 
   rm  -f   $CACHE
   rm  -f   $INST_LOG

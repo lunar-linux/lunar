@@ -23,25 +23,34 @@
 sources() { (
   MAX_SOURCES=${MAX_SOURCES:=100}
 
-  run_details $1 || return 1
+  if ! run_details $1 ; then
+    return 1
+  fi
 
   for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ )) ; do
     TEMP=SOURCE$((CNT))
-    eval TEMP=\$${TEMP/SOURCE0/SOURCE}
-    eval TEMP2=\$SOURCE$((CNT+1))
-    eval TEMP3=\$SOURCE$((CNT+2))
+    TEMP=${TEMP/SOURCE0/SOURCE}
 
-    TEMP1_MD5=${TEMP1}_MD5[@]
-    eval TEMP_MD5=\${$TEMP1_MD5}
-    TEMP_MD5=${TEMP_MD5:=0}
+    eval SRC1=\$${TEMP}
+    if [ "$2" == "MD5" ] ; then
+      eval SRC_MD5=\$${TEMP}_MD5
+      if [ -z "$SRC_MD5" ] ; then
+        SRC_MD5=0
+      fi
+    fi
 
-    [ -n "$TEMP" ]         &&
-    echo  $TEMP            &&
-    [ "$2" == "MD5" ]      && 
-    echo  $TEMP_MD5 
+    eval SRC2=\$SOURCE$((CNT+1))
+    eval SRC3=\$SOURCE$((CNT+2))
+
+    if [ -n "$SRC1" ] ; then
+      echo $SRC1
+      if [ "$2" == "MD5" ] ; then
+        echo $SRC_MD5
+      fi
+    fi
 
     #if two consequtive empty sources, then break
-    [ -z "$TEMP2" ] && [ -z "$TEMP3" ] && {
+    [ -z "$SRC2" ] && [ -z "$SRC3" ] && {
       break
     }
   done
@@ -51,33 +60,35 @@ sources() { (
 # function : md5_verify_source
 # usage    : md5_verify_source filename_1 md5_1, filename_2 md52.....
 # purpose  : md5 verifies a filename
-md5_verify_source()
-{
-   ALL_OK=true   
-   while [ -n "$2" ]
-   do
-      verify_source $1 || return 1
+md5_verify_source() {
+  ALL_OK=true   
+  while [ -n "$2" ]
+  do
+    if ! verify_source $1 ; then
+      return 1
+    fi
 
+    if [ "$2" == "0" ] ; then
+      TEMP=0
+    else
       verbose_msg "checking md5sum of \"$1\""
-
-      [ "$2" == "0" ]  && 
-      TEMP=0           || 
-      TEMP=`md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1`
+      TEMP=$(md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
+    fi
       
-      [ "$TEMP" == "$2" ] || {
-         message  "${PROBLEM_COLOR}Wrong md5 sum for ${FILE_COLOR}${1}" \
-                   "${DEFAULT_COLOR}"
-         message  "${PROBLEM_COLOR}Removing ${FILE_COLOR}${SOURCE_CACHE}/${1}" \
-                  "${DEFAULT_COLOR}"
-         rm -f $SOURCE_CACHE/$1 2>/dev/null                             &&
-         message  "${FILE_COLOR}Removed!!${DEFAULT_COLOR}"              ||
-         message  "${PROBLEM_COLOR}Unable to remove!!${DEFAULT_COLOR}" 
-         ALL_OK=false
-      }
+    if [ "$TEMP" != "$2" ] ; then 
+       message  "${PROBLEM_COLOR}Wrong md5 sum for ${FILE_COLOR}${1}" \
+                 "${DEFAULT_COLOR}"
+       message  "${PROBLEM_COLOR}Removing ${FILE_COLOR}${SOURCE_CACHE}/${1}" \
+                "${DEFAULT_COLOR}"
+       rm -f $SOURCE_CACHE/$1 2>/dev/null                             &&
+       message  "${FILE_COLOR}Removed!!${DEFAULT_COLOR}"              ||
+       message  "${PROBLEM_COLOR}Unable to remove!!${DEFAULT_COLOR}" 
+       ALL_OK=false
+    fi
 
-      shift 2
-   done
-   $ALL_OK
+    shift 2
+  done
+  $ALL_OK
 }
 
 

@@ -25,7 +25,7 @@ if [[ -s /etc/lunar/local/optimizations ]]; then
    . /etc/lunar/local/optimizations
 else
   verbose_msg "initializing optimizations with hard-coded defaults"
-  echo -e PLATFORM=x86            '\n'    \
+  echo -e PLATFOM=x86             '\n'    \
           BUILD=i386-pc-linux-gnu '\n'    \
 	  MAKES=                  '\n'    \
 	  COPT=                   '\n'    \
@@ -120,7 +120,7 @@ optimize_base() {
       Fastest) CFLAGS="-O3"
                CXXFLAGS="-O3"
                ;;
-      Smaller) CFLAGS="-Os"
+        Small) CFLAGS="-Os"
                CXXFLAGS="-Os"
                ;;
    esac
@@ -735,17 +735,6 @@ optimize_addon() {
 }
 
 
-optimize_cc_warn() {
-  for W in ${CC_WARN[@]}; do
-    case $W in
-    Deprecated)
-      CFLAGS="$CFLAGS -Wno-deprecated"
-      ;;
-    esac
-  done
-}
-
-
 optimize_ccc_warn() {
   for W in ${CCC_WARN[@]}; do
     case $W in
@@ -769,7 +758,6 @@ optimize() {
                 optimize_extra    ${XTRA[@]} &&
 		optimize_stack               &&
                 optimize_fp       $FPM       &&
-		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
@@ -780,7 +768,6 @@ optimize() {
                 optimize_speed    ${SPD[@]}  &&
                 optimize_extra    ${XTRA[@]} &&
                 optimize_fp       $FPM       &&
-		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
@@ -791,7 +778,6 @@ optimize() {
                 optimize_speed    ${SPD[@]}  &&
                 optimize_extra    ${XTRA[@]} &&
                 optimize_fp       $FPM       &&
-		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
@@ -802,7 +788,6 @@ optimize() {
                 optimize_speed    ${SPD[@]}  &&
                 optimize_extra    ${XTRA[@]} &&
                 optimize_fp       $FPM       &&
-		optimize_cc_warn             &&
 		optimize_ccc_warn            &&
                 optimize_ld       ${LDF[@]}  &&
 		optimize_addon
@@ -890,11 +875,6 @@ optimize_architecture()  {
   fpm_options                 &&
   menu radiolist              &&
   FPM=$RESULT
-
-  help cc_warn_help           &&
-  cc_warn             &&
-  menu checklist              &&
-  CC_WARN=$RESULT
 
   help ccc_warn_help          &&
   ccc_warn            &&

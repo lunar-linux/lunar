@@ -21,7 +21,7 @@
 # purpose : finds the installed size of module in KB
 find_module_size()
 {
-   #this functions checks the packages file if there is already size entry
+   #this functions checks the modules file if there is already size entry
    module_size()
    {
       unset SIZE

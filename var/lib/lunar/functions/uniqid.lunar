@@ -8,8 +8,18 @@
 #                                                          #
 ############################################################
 
-mk_uniqid() {
 
+push_uniq_id() {
+  if [ "$UNIQID" == "" ]; then
+    create_uniq_id
+  fi
+ 
+  verbose_msg "registering \"$UNIQID\" with server"
+  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID" &>/dev/null
+  
+}
+
+create_uniq_id() {
   if [ $UNIQID >= "" ]; then 
     return
   fi
@@ -19,22 +29,22 @@ mk_uniqid() {
   if [  "$OS"  == "OpenBSD" ]; then
     HASH="sha1"
     IFACE=`netstat -r | grep default | awk '{print $7}'`
-
   elif [  "$OS"  == "Linux" ]; then
     HASH="md5sum"
     IFACE=`netstat -r | grep default | awk '{print $8}'`
-
-  else exit 1
-
+  else
+    exit 1
   fi
 
-
-  echo "Interface=$IFACE"
   UNIQID=`ifconfig $IFACE |\
       awk '/addr.*[:]* [0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/ {print $NF}' |\
       tr 'A-Z' 'a-z' | $HASH | awk '{print $1}'`
   export UNIQID
+
+  verbose_msg "id(\"$IFACE\")=\"$UNIQID\""
+
   echo  "      UNIQID=$UNIQID"   >>   $LOCAL_CONFIG
+
 }
 
 

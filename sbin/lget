@@ -95,23 +95,28 @@ strip_parameters()  {
 
 main() {
 
-  cd  /tmp
-  process_parameters        $*
-  MODULES=`strip_parameters  $*`
+  cd /tmp
+  process_parameters $@
+  MODULES=$(strip_parameters $@)
 
-  if  [  -z  "$MODULES"  ];  then
+  if [ -z "$MODULES" ] ; then
     verbose_msg "downloading entire moonbase"
     MODULES=$(list_moonbase | sort)
   fi
 
+  if echo $MODULES | grep -qw moonbase ; then
+    # just update moonbase, no other modules
+    get_moonbase
+    # remove moonbase rofm MODULES and continue
+    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+  fi
+
   for MODULE in $MODULES; do
-    if ! lget_locked ; then
-      lget_lock
-    
-      [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
-      download_module
-    
-      lget_unlock
+    if ! lget_locked $MODULE ; then
+      lget_lock $MODULE
+      verbose_msg "downloading module \"$MODULE\""
+      download_module $MODULE
+      lget_unlock $MODULE
     else
       false
     fi
