@@ -635,7 +635,7 @@ ZLOCAL_OVERRIDES=off
     set_local_config "TMPFS" "$TMPFS"
     set_local_config "VERBOSE" "$VERBOSE"
     set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
-    set_local_config "COLOR" "$SOUND"
+    set_local_config "COLOR" "$COLOR"
 
   fi
 }
