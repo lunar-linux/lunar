@@ -25,6 +25,7 @@ if [[ -s /etc/lunar/local/optimizations ]]; then
 else
   echo -e PLATFOM=x86             '\n'    \
           BUILD=i386-pc-linux-gnu '\n'    \
+	  MAKES=
           CC=                     '\n'    \
           CCC=                    '\n'    \
           BOPT=-O0                '\n'    \
@@ -35,6 +36,12 @@ else
           LDF=( )                 '\n'    \
           ADDON=( ) > /etc/lunar/local/optimizations
 fi
+
+optimize_make() {
+  if [[ $MAKES > 1 ]]; then
+    alias make="make -j$MAKES"
+  fi
+}
 
 optimize_cc() {
   if [[ $CC ]]; then
@@ -675,7 +682,8 @@ optimize_platform() {
    GCCVER="$1"
 
    case $PLATFORM in
-      x86)      optimize_cc    $CC         &&
+      x86)      optimaze_make  $MAKES      &&
+                optimize_cc    $CC         &&
                 optimize_ccc   $CCC        &&
                 optimize_base  $BOPT       &&
                 optimize_cpu   $CPU        &&
