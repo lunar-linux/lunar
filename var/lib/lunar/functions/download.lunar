@@ -282,7 +282,7 @@ get_url() {
     if [ "${1:0:6}" == "cvs://" ] ; then
       # cvs urls
       CVS_THRESHOLD=${CVS_THRESHOLD:-10}
-      if [ "$CVS_THRESHOLD" -gt 0 ] ; then
+      if (( "$CVS_THRESHOLD" > 0 )) ; then
         if [ ! -f "$2" ] ; then
 	  get_cvs $1 $2
         elif [ "$(find $2 -amin +$CVS_THRESHOLD)" == "$2" ] ; then
@@ -296,7 +296,7 @@ get_url() {
     elif [ "${1:0:6}" == "svn://" ] ; then
       # svn urls
       SVN_THRESHOLD=${SVN_THRESHOLD:-10}
-      if [ "SVN_THRESHOLD" -gt 0 ] ; then
+      if (( "SVN_THRESHOLD" > 0 )) ; then
         if [ ! -f "$2" ] ; then
 	  get_svn $1 $2
 	elif [ "$(find $2 -amin +$SVN_THRESHOLD)" == "$2" ] ; then
@@ -323,14 +323,14 @@ get_url() {
     else
       # ordinary URL's handled by fuzzy_wget
       if [ -n "$BASE_URL" ] ; then
-        URL=$BASE_URL/$(basename 2)
+        URL=$BASE_URL/$(basename $2)
       fi
       connect          &&
       if [ -n "$BASE_URL" ] ; then
         fuzzy_wget $BASE_URL/$(basename $2) $2
       elif ! fuzzy_wget $1 $2 ; then
         if [ -n "$LRESORT_URL" ] ; then
-          fuzzy_wget $LRESORT_URL/$(basename 2) $2
+          fuzzy_wget $LRESORT_URL/$(basename $2) $2
         fi
       fi
     fi
