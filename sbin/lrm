@@ -167,8 +167,8 @@ lrm_module() {
         if [ -d "$TARGET" ] ; then
           echo "$TARGET" >> $TMP_DIRS
         else
-          handle_config_files $TARGET &&
-          remove_something $TARGET
+          handle_config_files "$TARGET" &&
+          remove_something "$TARGET"
         fi
       fi
     done
