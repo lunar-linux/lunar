@@ -32,12 +32,12 @@ The network configuration of your box is under \fB/etc/config.d/network/<interfa
 Good luck and please remember that you must be able to ping lunar\-linux.org in order to update your system.
 .LP 
 
-\fB2. Update Your Moonbase: \fRSince Lunar Linux is a source based distribution, some of the programs in the CD are probably upgraded to new versions. 
+\fB2. Update Your Moonbase: \fRSince Lunar Linux is a source based distribution, some of the binaries and/or modules in the CD may have been upgraded to newer versions already. 
 .IP 
 Install Perl with the command \fBlin perl\fR. Perl is a vital package for your system. Do not bypass this step.
 .BR 
 
-Do a \fBlunar update\fR. This process will update the base scripts and the package collection (Moonbase). However, this process ALSO upgrades the already installed packages which you probably do not want at that stage (you will see why in the next sections). Better break that process AFTER the update is over and BEFORE the installation process. You can do two things to break it, a CTRL\-C after the download and copy is over, ie; when you see the \fBDo you wish to edit /var/log/lunar/queue/install? [n] \fR OR, you may say "y" to that query and delete all listed modules. This is a better (and preferred) way to update the Moonbase but do not update the installed packages.
+Do a \fBlin moonbase; lin lunar\fR. These commands will update the package collection (Moonbase) and the core package management tools.
 .LP 
 
 \fB3. Set Your Preferences: \fRThere are a number of options which you may set or reset. For optimum performance, you must visit those.
@@ -45,7 +45,7 @@ Do a \fBlunar update\fR. This process will update the base scripts and the packa
 Type \fBlunar\fR and press enter as root. See \fBoption\fR menu. Please visit \fBOptimize Architecture\fR item first. Select your CPU and compile options there (my own preferences are \fBi686 pipe faster strip\fR and the ISO is prepared with \fBi386 pipe small strip\fR).
 .BR 
 
-Also, check \fBOption \-> Integrity Checking\fR and be sure that at least FIND_CHECK and LDD_CHECK are enabled.
+Also, check \fBOption \-> Integrity Checking\fR and be sure that at least \fBFIND_CHECK\fR and \fBLDD_CHECK\fR are enabled.
 .BR 
 
 Do not forget to have a look at \fBOption \-> Feature Menu\fR
@@ -70,7 +70,7 @@ If there are any directories except the kernel, re\-lin those modules (lin \-c <
 
 .SH "LIFESAVERS"
 .LP 
-Find below some useful addresses
+Below are some useful addresses
 .BR 
 
 \fBWebsite: \fRhttp://www.lunar\-linux.org/
@@ -98,6 +98,8 @@ clarifications.
 This document is Copyrighted Kagan Kongar 2002. It may be reproduced and distributed in whole or in part, in any medium physical or electronic, as long as this copyright notice is retained on all copies.
 .LP
 Portions of this document Copyrighted (C) 2003 Terry Chan
-.SH "AUTHOR"
+.SH "AUTHORS"
 .LP 
 Kagan Kongar <kongar@tsrsb.org.tr>
+.PP
+Terry Chan   <tchan@lunar-linux.org>
