@@ -22,6 +22,8 @@
 #                                                          #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
 #                                                          #
+# Parts Copyrighted Steven Michalske 2004 under GPLv2      #
+#                                                          #
 ############################################################
 
 
@@ -181,7 +183,20 @@ default_cvs_config() {
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
-  make                               &&
+  # This code is simular to the optimize_make
+  # function from optimize.lunar
+  # This is needed because bash does not expand aliases in functions
+  if module_installed linux-openmosix; then
+    if [[ "$MAKES" > 1 ]] ; then
+      mosrun -h make -j$MAKES
+      else
+      mosrun -h make
+    fi
+  elif [[ $MAKES > 1 ]] ; then
+    make -j$MAKES
+  else
+    make
+  fi                                 &&
   prepare_install                    &&
   make    install
 } > $C_FIFO 2>&1
