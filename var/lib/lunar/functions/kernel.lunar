@@ -146,6 +146,9 @@ root    $GRUB_ROOT
     (( IMAGE_COUNT=0 ))
     for LINE in $(cat /boot/grub/menu.lst) ; do
       if echo $LINE | grep -q "title" ; then
+        # To create a separating line between entries
+        echo "" >> /boot/grub/menu.lst.new
+
         if (( IMAGE_COUNT == 0 )) ; then
           if ! grep -q "$IMAGE_NAME" /boot/grub/menu.lst ; then
             echo -e "$GRUB_IMAGE_ENTRY" >> /boot/grub/menu.lst.new
@@ -179,21 +182,16 @@ root    $GRUB_ROOT
     y|Y) edit_file /boot/grub/menu.lst ;;
   esac
 
-  message "Install GRUB into MBR of first drive? [y|Y]"
-  read GRUB_FIRST_DRIVE
-  case $GRUB_FIRST_DRIVE in
-    y|Y) GRUB_BOOT_DEVICE="(hd0)" ;; 
-    *  ) message "Otherwise please specify in GRUB notation the desired drive/partition"
-         message "Using parenthesis and NO spaces!"
-         message "Samples: (hd1)    2nd drive MBR"
-         message "         (hd1,0)  2nd drive with 1st partition"
-         message "         (hd0,2)  1st drive with 3rd partition"
-         echo -n "GRUB_BOOT_DEVICE=(hd#,#):  "
-         read GRUB_BOOT_DEVICE ;;
-  esac
-
-  /usr/sbin/grub-install "$GRUB_BOOT_DEVICE"
-  sleep 4
+cat << EOF
+* * * * * * * * * * * * * * * * * * * * * * * *
+*                                             *
+*              W A R N I N G                  *                            
+*                                             *
+*  Do not forget to install grub to your MBR  *
+*  if you haven't done so before rebooting    *
+*                                             *
+* * * * * * * * * * * * * * * * * * * * * * * *
+EOF
 
 }
 
