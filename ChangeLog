@@ -218,14 +218,3 @@
 	as this coide would only be called by modules that use the new
 	scheme
 
-2004-01-11 22:33  hardkrash
-
-	* var/lib/lunar/functions/build.lunar: This is the fix to bug 432. 
-	Where the make alias isn't being used while linning.  This also
-	will fix open mosix builds too. 
-	http://bugs.lunar-linux.org/view_bug_page.php?f_id=0000432
-
-2004-01-11 22:25  hardkrash
-
-	* sbin/lin: first of 2 parts to fix make alias in the lunar scripts
-
