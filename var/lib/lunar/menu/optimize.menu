@@ -225,10 +225,10 @@ compiler_options() {
 }
 
 cc_options(){
-  OPTIONS=( "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
 }
 ccc_options(){
-  OPTIONS=( "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
 }
 
 platform_options() {
