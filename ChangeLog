@@ -1,45 +1,9 @@
-2002-09-24 00:39  tchan
+2002-11-21 05:31  hardkrash
 
-	* sbin/lin, usr/share/man/man8/lin.8, var/lib/lunar/subroutines:
-	Synced sofar's changes in theedge with lunar.  These changes are
-	all related to the new "lin --fixdepends" code.
+	* var/lib/lunar/functions/optimize.lunar: Added PPC and Power options to lunar optomization functions
+	
+2002-11-21 05:29  hardkrash
 
-2002-09-22 15:20  csm
-
-	* sbin/lin, var/lib/lunar/subroutines: syncing lunar with theedge
-
-2002-09-21 03:13  csm
-
-	* bin/lvu, var/state/lunar/gcc.x86: syncing up with theedge
-
-2002-09-20 23:20  kc8apf
-
-	* var/lib/lunar/functions/optimize.lunar: 
-	More optimization fixes
-
-2002-09-20 23:07  kc8apf
-
-	* var/lib/lunar/functions/optimize.lunar: 
-	Add proper build types for Alpha
-
-2002-09-20 21:49  kc8apf
-
-	* var/lib/lunar/menu/optimize.menu: 
-	Fixed CPU selection menu for Alpha
-
-2002-09-20 21:39  kc8apf
-
-	* etc/lunar/mirrors/GNOME: 
-	fix typo in GNOME mirrors
-
-2002-09-18 21:35  sofar
-
-	* var/lib/lunar/menu/optimize.menu: preserve $MAKES
-
-2002-09-18 09:26  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Fixing order of distcc
-	(ccache distcc gcc and not distcc ccache gcc), and adding distcc to
-	the c++ compiler addons, since mozilla and others compiled fine
-	with it.
-
+	* var/lib/lunar/menu/optimize.menu: Added PPC and Power processors to menus
+	corrected menu prompts
+	
