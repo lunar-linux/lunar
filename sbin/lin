@@ -91,9 +91,12 @@ gcc_checklist() {
    else
      touch /var/state/lunar/gcc.$PLATFORM
    fi
-   if [ "$GCCWRAPPERS" == "on" ] ; then
-     export PATH=/var/lib/lunar/compilers:${PATH}
-   fi  
+}
+
+use_wrappers() {
+  if [ "$GCCWRAPPERS" == "on" ] ; then
+    export PATH=/var/lib/lunar/compilers:${PATH}
+  fi  
 }
 
 run_conflicts() {
@@ -757,7 +760,8 @@ lin_module()  { (
   then
     echo  $$  >  $linING        &&
     if ! [[ $CFLAGS ]]; then
-      optimize_platform $GCCVER   
+      optimize_platform $GCCVER &&
+      use_wrappers
     fi
     run_pre_build               &&
     run_build                   &&
