@@ -1,3 +1,11 @@
+2003-02-20 00:24  sofar
+
+	* sbin/lin, var/lib/lunar/subroutines: Fix #247:
+	
+	- .iw file was being remove too much (only needed prior to starting
+	and after finishing) - compile log was being viewed before it was
+	generated.
+
 2003-02-19 23:42  sofar
 
 	* var/lib/lunar/functions/updatelog.lunar: Major rewrite: strickter
@@ -378,10 +386,4 @@
 	* var/lib/lunar/subroutines: Code change: sedit now handles
 	multiple files in one sedit statement, and in place backups are no
 	longer made.
-
-2003-01-20 15:23  sofar
-
-	* var/lib/lunar/sustained: Sorry for the gpm fans, but gpm is *NOT*
-	a vital package for the correct functioning of lunar. Removing it
-	here.
 
