@@ -153,52 +153,48 @@ run_depends() {
                                                                                 
   # local definitions of depends and optional_depends!
   depends()  {
-    verbose_msg "\"$MODULE\" depends on \"$1\""
-                                                                                
     grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
-    if  ! module_installed  $1   &&
-        ! module_held       $1
-    then
-      if  !  is_depends     $1   &&
-             module_exiled  $1
-      then  return  1
+
+    if ! module_installed $1 && ! module_held $1 ; then
+      if ! is_depends $1 && module_exiled $1 ; then
+        return 1
       else
         message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
                 "Adding required dependency${FILE_COLOR}"   \
                 "$1 ${DEFAULT_COLOR}"
-        lin  --deps  $1
+        lin --deps $1
         echo "$1" >> $PREPD
       fi
     fi
-    add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
+    add_depends "$MODULE" "$1" "on" "required" "$2" "$3"
   }
                                                                                 
   optional_depends()  {
-                                                                                
     # parameters:  $1 = module name
     #              $2 = configure parameter if module wanted
     #              $3 = configure parameter if module declined
     #              $4 = description of why to use this module.
                                                                                 
+    if ! in_depends "$MODULE" "$1" ; then
                                                                                 
-    verbose_msg "\"$MODULE\" optionally depends on \"$1\""
-    if  !  in_depends  "$MODULE"  "$1";  then
-                                                                                
-      if    module_exiled  $1
-      then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+      if module_exiled $1 ; then
+        verbose_msg "\"$MODULE\" optionally depends on \"$1\""
+        add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
       else
                                                                                 
-        if  module_installed  $1  ||
-            module_held       $1
-        then  DEFAULT="y"
-        else  DEFAULT="n"
+        if module_installed $1 || module_held $1 ; then
+          DEFAULT="y"
+	else
+          DEFAULT="n"
         fi
                                                                                 
-        if    is_depends  $1  ||
-              query  "Install optional dependency $1 $4? " $DEFAULT
-        then  lin  --deps  $1
-              add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-        else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+        if is_depends $1 ; then
+	  if query  "Install optional dependency $1 $4? " $DEFAULT ; then
+            lin  --deps  $1
+            add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+          else
+	    add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+	  fi
         fi
       fi
     fi
