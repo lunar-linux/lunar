@@ -2,16 +2,3 @@
 
 	* var/lib/lunar/excluded: Add mailman site config to excluded
 
-2003-02-05 18:05  sofar
-
-	* sbin/lrm: Rolling back lrm to assure people can avoid lrm(2)
-	issues for now.
-
-2003-02-05 14:17  sofar
-
-	* var/lib/lunar/excluded: and more
-
-2003-02-05 13:23  sofar
-
-	* var/lib/lunar/excluded: Adding some more in here
-
