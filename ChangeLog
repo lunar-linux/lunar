@@ -168,8 +168,3 @@
 	* var/lib/lunar/functions/install.lunar: This fixes the double DL
 	bug. see lunar for more info in commit msg
 
-2003-09-17 00:36  elaine
-
-	* bin/lvu, sbin/lget: lget - added -V |--Version syntax luv
-	corrected 'versions' command oper.
-
