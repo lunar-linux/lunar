@@ -105,7 +105,6 @@ get_cvs() {(
   fi
 
   [ -f ~/.cvspass ] || touch ~/.cvspass
-
   CVSURL=$(echo $1 | sed "s:^cvs\://::")
   CVSARGS=$(echo $CVSURL | cut -d@ -f1)
   CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
@@ -113,7 +112,6 @@ get_cvs() {(
   CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
   CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
   CVSOPTIONS=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f5)
-
 
   if [ ! -z $CVSRELEASE ]; then
     CVSRELEASE="-r $CVSRELEASE"
@@ -127,8 +125,8 @@ get_cvs() {(
 
   mk_source_dir /tmp/$MODULE-$VERSION
   cd /tmp/$MODULE-$VERSION
-
-  if [[ -f $SOURCE_CACHE/$2 ]]; then
+  
+  if [ -f $SOURCE_CACHE/$2 ] ; then
     verbose_msg "Extracting local CVS copy"
     # unpacking in last component dir of $CVSMODULE
     CD=$(pwd -P)
@@ -139,8 +137,10 @@ get_cvs() {(
       
       rm_source_dir /tmp/$MODULE-$VERSION
       mk_source_dir /tmp/$MODULE-$VERSION
+      cd /tmp/$MODULE-$VERSION
+    else
+      cd /tmp/$MODULE-$VERSION/$CVSMODULE
     fi
-    cd $CD
   fi
 
   verbose_msg "CVSROOT=\"$CVSROOT\""
@@ -151,7 +151,7 @@ get_cvs() {(
   fi
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [ -d $(basename $CVSMODULE)/CVS ] ; then
+    if [ -d CVS ] ; then
       verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
       cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
     else 
@@ -169,7 +169,7 @@ get_cvs() {(
   if [ "$GOT_CVS" == "yes" ] ; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
     # pack in last component dir of $CVSMODULE
-    cd $(dirname $CVSMODULE)
+    cd /tmp/$MODULE-$VERSION/$(dirname $CVSMODULE)
     tar cjf $SOURCE_CACHE/$2 $(basename $CVSMODULE)
     cd $CD
   else
