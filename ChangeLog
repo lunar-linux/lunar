@@ -129,10 +129,3 @@
 
 	* var/lib/lunar/functions/updatelog.lunar: BEER for kongar!!!
 
-2003-03-18 20:38  sofar
-
-	* var/lib/lunar/functions/download.lunar: CVS code now handles cvs
-	modules with paths (xfce-devel/xxx) and truncates the path from the
-	tarball. This enables the xfce-cvs modules to be rewritten using
-	the new cvs source scheme.
-
