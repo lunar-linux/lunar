@@ -97,10 +97,12 @@ voyeur      [delay|module] peak into module compilation
 
 pam                        display installed modules that are Linux-PAM aware
 
-depends     module         displays the modules that explicitly or
+depends     module         displays installed modules that explicitly or
                                recursively depend on this module.
 tree        module         displays a tree of the module's dependencies
-eert        module         displays a tree of the module's reverse dependencies
+stree       module         same as 'tree' but highly abbreviated
+eert        module         same as 'tree' but reverse and installed deps only
+leert       module         full reverse dependency tree
 
 \$MODULE_SCRIPT module      will print the module script for that module
 EOF
@@ -413,11 +415,11 @@ show_leafs()  {
 
 
 show_orphans()  {
-  for MODULE in $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ; do
-    for  LINE  in  $(grep  "^${MODULE}:"  $DEPENDS_STATUS) ;  do
-       DEPENDS=$(echo  $LINE  |  cut  -d :  -f2)
-        STATUS=$(echo  $LINE  |  cut  -d :  -f3)
-      OPTIONAL=$(echo  $LINE  |  cut  -d :  -f4)
+  for MODULE in $(grep :installed: $MODULE_STATUS | cut -d: -f1 | sort | uniq) ; do
+    debug_msg "checking \"$MODULE\""
+    for LINE in $(grep "^${MODULE}:" $DEPENDS_STATUS) ; do
+      DEPENDS=$(echo $LINE | cut -d: -f2)
+      OPTIONAL=$(echo $LINE | cut -d: -f4)
       if ! module_installed $DEPENDS ; then
         if [ "$OPTIONAL" == "required" ]; then
           echo "$MODULE: $DEPENDS is missing"
@@ -450,81 +452,210 @@ show_depends()  {
 # usage: show_tree <module>
 # purpose: show a tree of the module's dependencies (recursive)
 function show_tree() {
-  [[ -z "$1" ]] && help && exit 1
+  debug_msg "show_tree ($@)"
 
-  FORMATTED_MODULE="$1"
-  MODULE=$(echo $1 | sed 's/[()]//g')
-  MODULE_DIR="${MOONBASE}/$(find_section ${MODULE})/${MODULE}"
-  DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
-
-  if [ ! -e "${MODULE_DIR}/DETAILS" ] ; then
-    echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
-    return 1
+  # create dependency tracking file if needed
+  if [ -z "$TMP_SEEN" ] ; then
+    export TMP_SEEN=$(temp_create "seen")
+    export FLAG=1
+    trap "rm -f $TMP_SEEN ; exit" INT TERM KILL
   fi
 
-  # purpose: Create the tree for displaying
-  set_tree() {
-    TREE=""
-    for (( i=0; i<${INDENT}; i++ )); do
-      TREE="${TREE}|-->"
-    done
-    TREE=$(echo ${TREE} | sed 's/-->|/   |/g')
-    echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
+  run_depends() {
+    # local definitions
+    function depends() {
+      debug_msg "depends ($@)"
+      echo "+$1"
+    }
+
+    optional_depends() {
+      debug_msg "optional_depends ($@)"
+      echo "-$1"
+    }
+    
+    debug_msg "run_depends ($@)"
+    SECTION=$(grep "^$1:" $MODULE_INDEX | cut -d: -f2)
+    CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
+    if [ -f $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH ] ; then
+      . $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH
+    elif [ -f $MOONBASE/$SECTION/$1/DEPENDS ] ; then
+      . $MOONBASE/$SECTION/$1/DEPENDS
+    fi
   }
+ 
+  if [ -z "$1" ] ; then
+    help
+    exit 1
+  fi
 
-  # purpose: Retrieve all dependencies
-  get_depends() {
-    NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z\.\/"+_-]*\).*/\1/p'
-    OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z\.\/"+_-]*\).*/(\1)/p'
-    DEPENDS=$(sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " ")
-    for dep in ${DEPENDS}
-    do
-      adep=$(echo ${dep} | tr -d "()")
-      if grep "^${adep}:.*:installed:" ${MODULE_STATUS} >/dev/null
-      then
-        echo -ne "${FILE_COLOR}${dep} "
-      elif grep "^${adep}:.*:held:" ${MODULE_STATUS} >/dev/null
-      then
-        echo -ne "${LRM_COLOR}${dep} "
-      else
-        echo -ne "${PROBLEM_COLOR}${dep} "
-      fi
-    done
-    echo -e "${DEFAULT_COLOR}"
-  }
-
-  # purpose: Get reverse dependencies
-  get_reverse_depends() {
-    DEPENDS=$(grep :${MODULE}: "$DEPENDS_STATUS" | sort | uniq | cut -d':' -f1 | tr "\n" " ")
-    [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
-  }
-
-  # purpose: recurse
-  recurse() {
-    (( INDENT++ ))
-    for i in ${DEPENDS}; do
-      show_tree $i
-    done
-    (( INDENT-- ))
-  }
-
-  [[ -z "${INDENT}" ]] && INDENT=0
-
-  set_tree
-  if [[ -z "${REVERSE}" ]]; then
-    if [[ -x "${DEPENDS_FILE}" ]]; then
-      get_depends
-      recurse
+  # gather dependencies, sorted by 1) required, 2) optional, and
+  # alphabetically too
+  unset ALL
+  DEPS=$(run_depends $1 | sort | uniq)
+  for DEP in $DEPS ; do
+    if [ ${DEP:0:1} == "+" ] ; then
+      ALL="$DEP $ALL"
     else
-      echo "No dependencies"
+      ALL="$ALL $DEP"
+    fi
+  done
+  DEPS=$ALL
+
+  # show hit list:
+  if [ "$CUR" == "-" ] ; then
+    if module_installed $1 ; then
+      RES="${MODULE_COLOR}[$1]${DEFAULT_COLOR}: "
+    else
+      if [ -n "$SHORTTREE" ] ; then
+        return
+      fi
+      RES="${LRM_COLOR}[$1]${DEFAULT_COLOR}: "
     fi
   else
-    get_reverse_depends
-    if [[ -z "${DEPENDS}" ]]; then
-      echo "No reverse dependencies"
-    else
-      recurse
+    RES="${MODULE_COLOR}$1${DEFAULT_COLOR}: "
+  fi
+
+  if [ -n "$DEPS" -o -z "$SHORTTREE" ] ; then
+    # show all deps on the same line:
+    for DEP in $DEPS ; do
+      MOD=${DEP:1}
+      case "${DEP:0:1}" in
+        # required
+        +)
+          if module_installed $MOD ; then
+            COL="${FILE_COLOR}"
+          else
+            COL="${PROBLEM_COLOR}"
+          fi
+          RES="$RES${COL}$MOD${DEFAULT_COLOR} "
+        ;;
+        # optional
+        -)
+          if module_installed $MOD ; then
+            COL="${FILE_COLOR}"
+          else
+            COL="${LRM_COLOR}"
+          fi
+          RES="$RES${COL}[$MOD]${DEFAULT_COLOR} "
+        ;;
+      esac
+    done
+    RES="${INDENT}|--->${RES}"
+    echo -e "${RES:5}"
+  fi
+
+  # I (sofar) suck:
+  for DEP in $DEPS ; do
+    LASTDEP=${DEP:1}
+  done
+
+  INDENT="$INDENT|    "
+  # and recurse:
+  for DEP in $DEPS ; do
+    grep -q "^$DEP$" $TMP_SEEN
+    TEST=$?
+    if [ "$TEST" == "1" -o -z "$SHORTTREE" ] ; then
+      echo "$DEP" >> $TMP_SEEN
+      CUR=${DEP:0:1}
+      # note the FLAG= thingy here
+      FLAG= show_tree ${DEP:1}
     fi
+  done
+  # don't try this at home:
+  INDENT=${INDENT:0:((${#INDENT}-5))}
+
+  if [ -n "$FLAG" ] ; then
+    temp_destroy $TMP_SEEN
+    unset TMP_SEEN
+  fi
+}
+
+
+show_eert() {
+  # yup, here we go again:
+  run_depends() {
+    # local definitions
+    function depends() {
+      debug_msg "depends ($@)"
+      echo "+$1"
+    }
+
+    optional_depends() {
+      debug_msg "optional_depends ($@)"
+      echo "-$1"
+    }
+    
+    debug_msg "run_depends ($@)"
+    SECTION=$(grep "^$1:" $MODULE_INDEX | cut -d: -f2)
+    CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
+    if [ -f $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH ] ; then
+      . $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH
+    elif [ -f $MOONBASE/$SECTION/$1/DEPENDS ] ; then
+      . $MOONBASE/$SECTION/$1/DEPENDS
+    fi
+  }
+
+  # this is tricky, so lets not make any mistakes:
+  if [ -z "$TMP_DEPLIST" ] ; then
+    FLAG=1
+    TMP_DEPLIST=$(temp_create "all-dependencies")
+    trap "rm -f $TMP_DEPLIST ; exit" INT KILL TERM
+    # fill the tree
+    if [ -n "$SHORTTREE" ] ; then
+      # short: whatever is in the depends db
+      cat $DEPENDS_STATUS | sed -e 's/:optional:/:-:/g' -e 's/:required:/:+:/g' | awk -F: '{print $1":"$4$2}' > $TMP_DEPLIST
+    else
+      # long: gather ALL dependencies, no matter installed, held or not
+      for MODULE in $(list_moonbase) ; do
+        run_depends $MODULE | while read DEP ; do
+          echo "$MODULE:$DEP" >> $TMP_DEPLIST
+        done
+      done
+    fi
+  fi
+
+  show_rtree() {
+    # we need to do an reverse tree for $1
+    RDEPS=$(grep ":[+-]$1$" $TMP_DEPLIST | cut -d: -f1 | sort | uniq)
+
+    if module_installed $1 ; then
+      STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
+    else
+      STR="${INDENT}^----${PROBLEM_COLOR}$1${DEFAULT_COLOR}: "
+    fi
+    
+    for DEP in $RDEPS ; do
+      CUR=$(grep "^$DEP:[+-]$1" $TMP_DEPLIST | cut -d: -f2 | uniq)
+      CUR=${CUR:0:1}
+      if [ "$CUR" == "+" ] ; then
+        if module_installed $DEP ; then
+          STR="$STR${FILE_COLOR}$DEP ${DEFAULT_COLOR}"
+        else
+          STR="$STR${PROBLEM_COLOR}$DEP ${DEFAULT_COLOR}"
+        fi
+      else
+        if module_installed $DEP ; then
+          STR="$STR${FILE_COLOR}[$DEP] ${DEFAULT_COLOR}"
+        else
+          STR="$STR${LRM_COLOR}[$DEP] ${DEFAULT_COLOR}"
+        fi
+
+      fi
+    done
+
+    echo -e "${STR:5}"
+
+    INDENT="$INDENT|    "
+    for RDEP in $RDEPS ; do
+      FLAG= show_rtree $RDEP
+    done
+    INDENT="${INDENT:0:((${#INDENT}-5))}"
+  }
+
+  show_rtree $1
+
+  if [ -n "$FLAG" ] ; then
+    temp_destroy $TMP_DEPLIST
   fi
 }
 
@@ -605,7 +736,7 @@ main()  {
       ;;
       
     orphans)
-      show_orphans | sort | uniq
+      show_orphans
       ;;
       
     updatelog)
@@ -811,10 +942,19 @@ main()  {
     tree)
       show_tree "$2"
       ;;
+
+    stree)
+      SHORTTREE=1
+      show_tree "$2"
+      ;;
       
     eert)
-      REVERSE="on"
-      show_tree "$2"
+      SHORTTREE=1
+      show_eert "$2"
+      ;;
+
+    leert)
+      show_eert "$2"
       ;;
 
     compile)
