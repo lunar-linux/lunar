@@ -558,17 +558,13 @@ install_services()  { (
 install_bashmisc () { (
 
   if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
-    [ -f /etc/profile.d ] && mv /etc/profile.d /etc/profile.d.old
     [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
-    for FILE in $SCRIPT_DIRECTORY/profile.d/* ; do
-      [ -f $FILE ] && install -g 0 -o 0 -m 644 $FILE /etc/profile.d
-    done
+    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/* /etc/profile.d
   fi
   if [ -d $SCRIPT_DIRECTORY/skel ]; then
     [ -d /etc/skel ] || mkdir -p /etc/skel
-    for FILE in $SCRIPT_DIRECTORY/skel/* $SCRIPT_DIRECTORY/skel/.* ; do
-      [ -f $FILE ] && cp $FILE /etc/skel
-    done
+    cp $SCRIPT_DIRECTORY/skel/* /etc/skel &> /dev/null
+    cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
   fi
 
 ) }
@@ -741,25 +737,6 @@ add_depends()
   unlock_file $DEPENDS_STATUS
 }
 
-
-depends()  {
-  grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
-  if  ! module_installed  $1   &&
-      ! module_held       $1 
-  then
-    if  !  is_depends     $1   &&
-           module_exiled  $1 
-    then  return  1
-    else
-      message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
-              "Adding required dependency${FILE_COLOR}"   \
-              "$1 ${DEFAULT_COLOR}"
-      lin  --deps  $1
-      echo "$1" >> $PREPD
-    fi
-  fi
-  add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
-}
 
 
 conflicts() {
@@ -985,36 +962,67 @@ apprentice_on()  {
 }
 
 
+run_depends() {
 
-optional_depends()  {
-
-  # parameters:  $1 = module name
-  #              $2 = configure parameter if module wanted
-  #              $3 = configure parameter if module declined
-  #              $4 = description of why to use this module.
-
-
-  if  !  in_depends  "$MODULE"  "$1";  then
-
-    if    module_exiled  $1
-    then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-    else
-
-      if  module_installed  $1  ||
-          module_held       $1
-      then  DEFAULT="y"
-      else  DEFAULT="n"
-      fi
-
-      if    is_depends  $1  ||
-            query  "Install optional dependency $1 $4? " $DEFAULT
-      then  lin  --deps  $1
-            add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-      else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+  # local definitions of depends and optional_depends!
+  depends()  {
+    grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
+    if  ! module_installed  $1   &&
+        ! module_held       $1 
+    then
+      if  !  is_depends     $1   &&
+             module_exiled  $1 
+      then  return  1
+      else
+        message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
+                "Adding required dependency${FILE_COLOR}"   \
+                "$1 ${DEFAULT_COLOR}"
+        lin  --deps  $1
+        echo "$1" >> $PREPD
       fi
     fi
-  fi
+    add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
+  }
 
+  optional_depends()  {
+
+    # parameters:  $1 = module name
+    #              $2 = configure parameter if module wanted
+    #              $3 = configure parameter if module declined
+    #              $4 = description of why to use this module.
+
+
+    if  !  in_depends  "$MODULE"  "$1";  then
+
+      if    module_exiled  $1
+      then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+      else
+
+        if  module_installed  $1  ||
+            module_held       $1
+        then  DEFAULT="y"
+        else  DEFAULT="n"
+        fi
+
+        if    is_depends  $1  ||
+              query  "Install optional dependency $1 $4? " $DEFAULT
+        then  lin  --deps  $1
+              add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+        else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+        fi
+      fi
+    fi
+
+  }
+
+  prepare_depends_status
+  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
+  if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
+    message  "${CHECK_COLOR}Checking dependencies for"  \
+             "${MODULE_COLOR}${MODULE}"                   \
+             "${DEFAULT_COLOR}"
+    . $SCRIPT_DIRECTORY/DEPENDS
+  fi
 }
 
 # function : sort_install_queue
@@ -1123,12 +1131,12 @@ upgrade_install_queue()  {
   fi
 
   if  [  "$AUTOFIX"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOFIX:  lin  --fix${DEFAULT_COLOR}"
-    lin  --fix
+    message  "${MESSAGE_COLOR}Executing AUTOFIX :    lin --fix${DEFAULT_COLOR}"
+    lin --fix
   fi
 
   if  [  "$AUTOPRUNE"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOPRUNE:  lvu  prune${DEFAULT_COLOR}"
+    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lvu  prune${DEFAULT_COLOR}"
     prune
   fi
 
@@ -1599,6 +1607,221 @@ root_check()
    echo  ""
    return 1
 }
+
+
+# rework_module : check depends database for a module
+rework_module() {
+
+  # we declare these local to override the systems default ones:
+  optional_depends()  {
+    if    module_exiled  $1
+    then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+    else
+      if  module_installed  $1  ||
+          module_held       $1
+      then  add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
+      else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+      fi
+    fi
+  }
+
+  depends()  {  
+    if  ! module_installed  $1   &&
+        ! module_held       $1
+    then
+      if  !  is_depends     $1   &&
+             module_exiled  $1
+      then  return  1
+      else
+        echo -e "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR} is missing ${MODULE_COLOR}$1${DEFAULT_COLOR}"
+	CHANGED_MODULES="$CHANGED_MODULES $1"
+      fi  
+    fi
+    add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
+  } 
+
+  run_depends() {
+    if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
+      show_fancy_progress "Processing: $MODULE"
+      . $SCRIPT_DIRECTORY/DEPENDS
+    fi
+  }
+
+  # here starts the real work:
+  MODULE=$1
+
+  # base vars needed to execute DEPENDS
+  SECTION=$(find_section $MODULE)
+  SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+  MODULE_CONFIG=$CONFIG_CACHE/depends/$MODULE
+
+  # reroute depends output to our private files:
+  OLD_DEPENDS_STATUS=$DEPENDS_STATUS
+  OLD_DEPENDS_STATUS_BACKUP=$DEPENDS_STATUS_BACKUP
+      
+  DEPENDS_STATUS=$TMP/depends
+  DEPENDS_STATUS_BACKUP=$TMP/depends.backup
+  touch $DEPENDS_STATUS
+  touch $DEPENDS_STATUS_BACKUP
+
+  # fetch old depend data:
+  grep "^$MODULE:" $OLD_DEPENDS_STATUS | sort | uniq > $TMP/depends.old.$MODULE
+
+  # fetch new depend data:
+  run_depends
+  cat $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MODULE
+  
+  if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE &> /dev/null ) ; then
+    echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed depends:${DEFAULT_COLOR}"
+    CHANGED_MODULES="$CHANGED_MODULES $MODULE"
+    LIST=$(cat $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE | cut -d: -f2 | sort | uniq )
+    for DEP in $LIST; do
+      OLDDEP=$(grep ":$DEP:" $TMP/depends.old.$MODULE)
+      NEWDEP=$(grep ":$DEP:" $TMP/depends.new.$MODULE)
+      if [ "$OLDDEP" != "$NEWDEP" ] ; then
+
+        # diff style output for debugging:
+        # echo "- $OLDDEP"
+	# echo "+ $NEWDEP"
+	
+	# the tricky part is deciding what is necessary and what not:
+	OLD_STATUS=$(echo $OLDDEP | cut -d: -f3)
+	NEW_STATUS=$(echo $NEWDEP | cut -d: -f3)
+	OLD_REQD=$(echo $OLDDEP | cut -d: -f4)
+	NEW_REQD=$(echo $NEWDEP | cut -d: -f4)
+	OLD_ON_OPTS=$(echo $OLDDEP | cut -d: -f5)
+	NEW_ON_OPTS=$(echo $NEWDEP | cut -d: -f5)
+	OLD_OFF_OPTS=$(echo $OLDDEP | cut -d: -f6)
+	NEW_OFF_OPTS=$(echo $NEWDEP | cut -d: -f6)
+	if [ -z "$NEWDEP" ] ; then
+	  echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from the dependancy list${DEFAULT_COLOR}"
+	else
+	  if [ -z "$OLDDEP" ] ; then
+	    echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was added to the $NEW_REQD dependancy list${DEFAULT_COLOR}"
+	  else
+            # the dep changed!
+	    if [ "$OLD_STATUS" == "on" -a "$NEW_STATUS" == "on" ]; then
+	      if [ "$OLD_REQD" == "required" -a "$NEW_REQD" == "optional" ]
+	      then
+		echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to optional${DEFAULT_COLOR}"
+	      elif [ "$OLD_REQD" == "optional" -a "$NEW_REQD" == "required" ]
+	      then
+	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to required${DEFAULT_COLOR}"
+	      else
+	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has new compile flags for ${MODULE_COLOR}$DEP${MESSAGE_COLOR}${DEFAULT_COLOR}"
+	      fi
+	    elif [ "$OLD_STATUS" == "off" -a "$NEW_STATUS" == "off" ]; then
+              if [ "$OLD_REQD" == "required" -a "$NEW_REQD" == "optional" ]
+	      then
+	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to optional${DEFAULT_COLOR}"
+	      elif [ "$OLD_REQD" == "optional" -a "$NEW_REQD" == "required" ]
+	      then
+	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to required${DEFAULT_COLOR}"
+	      else
+	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has new compile flags for ${MODULE_COLOR}$DEP${MESSAGE_COLOR}${DEFAULT_COLOR}"
+	      fi
+	    elif [ "$OLD_STATUS" == "off" -a "$NEW_STATUS" == "on" ]; then
+	      echo -e "${MESSAGE_COLOR}* $NEW_REQD ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was installed${DEFAULT_COLOR}"
+	    elif [ "$OLD_STATUS" == "on" -a "$NEW_STATUS" == "off" ]; then
+	      echo -e "${MESSAGE_COLOR}* $NEW_REQD ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed${DEFAULT_COLOR}"
+	    else
+	      echo -e "${$MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} ${PROBLEM_COLOR}missed exception $OLD_STATUS $NEW_STATUS${DEFAULT_COLOR}"
+	    fi
+	  fi
+	fi
+      fi
+    done
+  fi
+
+  # clean up
+  rm $DEPENDS_STATUS
+  rm $DEPENDS_STATUS_BACKUP
+  DEPENDS_STATUS=$OLD_DEPENDS_STATUS
+  DEPENDS_STATUS_BACKUP=$OLD_DEPENDS_STATUS_BACKUP   
+
+}
+
+# rework_list : rework a list of modules and save output
+rework_list() {
+
+  for MODULE in $* ; do
+    rework_module $MODULE
+  done
+
+  cat $TMP/depends.new.* | sort | uniq > $TMP/depends.new-all
+
+}
+
+# fix_depends : single pass to fix depends database
+fix_depends () {
+
+  CHANGED_MODULES=
+  
+  if [ -n "$1" ] ; then
+    rework_list $*
+  else
+    rework_list $(cat $MODULE_STATUS | cut -d: -f1 | sort )
+  fi
+
+  # get normal depends() back:
+  . /var/lib/lunar/subroutines
+
+  if [ -n "$CHANGED_MODULES" ] ; then
+
+    # took me ages to think this out:
+    export lin_PASS=three
+    
+    for MODULE in $CHANGED_MODULES ; do
+      add_queue $INSTALL_QUEUE $MODULE
+    done
+    # we need to trick the system into thinking it has the new depends
+    # if we want to do one module at a time:
+    cp $DEPENDS_STATUS $TMP/depends
+    cat $TMP/depends.new-all > $DEPENDS_STATUS
+    cat $TMP/depends.new-all > $DEPENDS_STATUS_BACKUP
+    sort_install_queue
+    cat $TMP/depends > $DEPENDS_STATUS
+    cat $TMP/depends > $DEPENDS_STATUS_BACKUP
+    unset MODULE
+    if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
+      edit_file  $INSTALL_QUEUE
+    fi
+    for MODULE in $(cat $INSTALL_QUEUE) ; do
+      # this ensures the bastard doesn't recheck it:
+      cp $DEPENDS_STATUS $TMP/depends
+      cat $TMP/depends | grep -v "^$MODULE:" > $DEPENDS_STATUS
+      cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
+      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      if ! lin $MODULE ; then
+	# put back the faulty depends so we know fixing this failed
+	# and will be found again on the next run
+	cat $TMP/depends > $DEPENDS_STATUS
+	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      else
+	# sometimes after lin all depends are gone! force it down it's throat
+	cat $TMP/depends | grep -v "^$MODULE:" > $DEPENDS_STATUS
+	cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
+	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      fi
+      remove_queue $INSTALL_QUEUE $MODULE
+    done
+  fi
+
+}
+
+# run_depends_fix : wrapper to run fix_depends multiple times
+run_depends_fix () {
+  TMP=/tmp/.lfix.$$
+  [ -d $TMP ] || mkdir -p $TMP
+
+  for PASS in 1 2 3 ; do
+    fix_depends $*
+    [ -n "$CHANGED_MODULES" ] || break
+  done  
+
+  rm -rf $TMP
+}
+
 
 # check the environment to continue!!
 enviro_check || return 1

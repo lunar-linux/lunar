@@ -114,17 +114,6 @@ prepare_depends_status()  {
    [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
 
-run_depends() {
-    prepare_depends_status
-    grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
-    if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
-      message  "${CHECK_COLOR}Checking dependencies for"  \
-               "${MODULE_COLOR}${MODULE}"                   \
-               "${DEFAULT_COLOR}"
-      . $SCRIPT_DIRECTORY/DEPENDS
-    fi
-}
-
 prepare_module_config()  {
   MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
   if  [  !  -x  $MODULE_CONFIG  ];  then
@@ -575,7 +564,7 @@ run_fix()  { (
 
     for  MODULE  in  $MODULES;  do
 
-      show_fancy_progress "Processing: $MODULE"
+      fix_depends $MODULE
 
       if  status_okay  $MODULE                         &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
