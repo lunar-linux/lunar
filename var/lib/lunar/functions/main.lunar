@@ -206,12 +206,14 @@ lin_module()  {
   show_downloading            &&
 
   # last minute source code presence check:
-  for SOURCE in $(sources $MODULE) ; do
-    if [ ! -f $SOURCE_CACHE/$SOURCE ] ; then
-      download_module $MODULE
-      break
-    fi
-  done                        &&
+  (
+    for SOURCE in $(sources $MODULE) ; do
+      if [ ! -f $SOURCE_CACHE/$SOURCE ] ; then
+        lget $MODULE
+        break
+     fi
+    done
+  ) &&
 
   # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
