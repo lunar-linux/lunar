@@ -1783,8 +1783,10 @@ fix_depends () {
     cat $TMP/depends > $DEPENDS_STATUS
     cat $TMP/depends > $DEPENDS_STATUS_BACKUP
     unset MODULE
-    if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
-      edit_file  $INSTALL_QUEUE
+    if (( $# > 1 )) ; then
+      if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
+        edit_file  $INSTALL_QUEUE
+      fi
     fi
     for MODULE in $(cat $INSTALL_QUEUE) ; do
       # this ensures the bastard doesn't recheck it:
