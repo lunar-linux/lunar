@@ -1,3 +1,13 @@
+2003-08-08 15:29  tchan
+
+	* usr/share/man/man8/: lcrash.8, lfirsttime.8: Updating manpages in
+	lunar to match theedge.
+
+2003-08-08 15:28  tchan
+
+	* usr/share/man/man1/moonbase.1: Updating moonbase manpage in lunar
+	to match theedge.
+
 2003-07-03 21:44  sofar
 
 	* README: Testing the new repository.... ignore me
