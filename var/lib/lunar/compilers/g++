@@ -1,0 +1,4 @@
+#!/bin/bash
+
+$CXX_EXT /usr/bin/g++ $CCOPT "$@"
+
