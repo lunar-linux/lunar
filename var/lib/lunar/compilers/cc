@@ -1,4 +1,6 @@
 #!/bin/bash
 
-$CC_EXT /usr/bin/gcc $COPT "$@"
+export PATH=${PATH/\/var\/lib\/lunar\/compilers:/}
+
+$CC_EXT gcc $COPT "$@"
 
