@@ -1,3 +1,88 @@
+2002-08-28 18:12  sofar
+
+	* var/lib/lunar/subroutines: Final fixes to fix_depends
+
+2002-08-28 15:59  sofar
+
+	* var/lib/lunar/subroutines: Fix for missing depends
+
+2002-08-28 11:07  sofar
+
+	* var/lib/lunar/subroutines: More fixes
+
+2002-08-28 09:55  sofar
+
+	* var/lib/lunar/subroutines: Fix for queue length > 1 in
+	fix_depends
+
+2002-08-28 09:40  sofar
+
+	* var/lib/lunar/subroutines: More fix_depends fixes
+
+2002-08-28 09:17  kongar
+
+	* bin/lvu, usr/share/man/man1/lvu.1: 
+	new feature, "lvu compiler module" to display the compiler version
+	used to create the ELF files of a modules.
+	
+	manpage is amended to reflect the changes.
+
+2002-08-28 09:12  sofar
+
+	* var/lib/lunar/subroutines: Fix for exiled modules
+
+2002-08-28 08:47  sofar
+
+	* var/lib/lunar/subroutines: Bugfixes.
+
+2002-08-27 15:16  sofar
+
+	* var/lib/lunar/subroutines: Visual fix
+
+2002-08-27 14:22  sofar
+
+	* var/lib/lunar/functions/modules.lunar: uniform layout
+
+2002-08-27 14:14  sofar
+
+	* var/lib/lunar/subroutines: Bugfix #49
+
+2002-08-27 14:13  xoritor
+
+	* var/lib/lunar/menu/optimize.menu: Removed Normal option for CC
+	and CCC in menu.
+
+2002-08-27 12:32  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: Let it work if the
+	wrappers are missing
+
+2002-08-26 23:46  sofar
+
+	* var/lib/lunar/subroutines: more fixes
+
+2002-08-26 23:18  sofar
+
+	* var/lib/lunar/subroutines: Typo fix
+
+2002-08-26 23:11  sofar
+
+	* var/lib/lunar/subroutines: One more fix for single module calls
+	to fix_depends
+
+2002-08-26 23:07  sofar
+
+	* var/lib/lunar/subroutines: Fix for single module list in
+	run_depends
+
+2002-08-26 22:44  sofar
+
+	* sbin/lin, var/lib/lunar/subroutines: Code merge: lfix -> theedge
+
+2002-08-26 18:36  sofar
+
+	* usr/share/man/man8/lin.8: Added -p option to man page
+
 2002-08-26 18:33  sofar
 
 	* sbin/lin: Added --probe|-p functionality to lin!
