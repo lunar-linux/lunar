@@ -71,6 +71,8 @@ md5_verify_source()
    do
       verify_source $1 || return 1
 
+      verbose_msg "checking md5sum of \"$1\""
+
       [ "$2" == "0" ]  && 
       TEMP=0           || 
       TEMP=`md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1`
@@ -90,4 +92,39 @@ md5_verify_source()
    done
    $ALL_OK
 }
+
+
+unpack() {
+
+    FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
+  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
+
+  verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
+
+  case  $COMPRESSOR  in
+        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
+         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+          Zip)  unzip  -q    $FILENAME                  ;;
+          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
+                                        |  cpio  -idm   ;;
+            *)  false                                   ;;
+  esac
+
+  if [ $? != 0 ] ; then
+    message "${PROBLEM_COLOR}Error while unpacking \"$1\", aborting $0!${DEFAULT_COLOR}"
+    exit 1
+  fi
+  
+  [ -n "$SOURCE_DIRECTORY" ] &&
+  [ -d "$SOURCE_DIRECTORY" ]
+  
+  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
+    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
+  else
+    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
+  fi
+}
+
+
 

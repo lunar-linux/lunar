@@ -43,11 +43,15 @@ list_sections() {
    return 1
 }
 
+
 # function : list_modules
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {
-   [ -z "$1" ]  &&  return_error "no SECTION defined!" $FUNCNAME  &&  return 1
+  if [ -z "$1" ] ; then
+    message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
+    exit 1
+  fi
 
    for  MODULE  in  `ls $MOONBASE/$1 2>/dev/null | \
                      grep -v "ChangeLog"               | \

@@ -66,10 +66,9 @@ report() {
 }
 
 
-query()
-{
-#  2 arguments
-#  query  "what do you want?  "  DEFAULT
+query() {
+  #  2 arguments
+  #  query  "what do you want?  "  DEFAULT
 
   if  [  -z  "$SILENT"  ];  then
 
@@ -102,17 +101,7 @@ query()
 }
 
 
-# function : return_error
-# usage    : return_error error_string $FUNCTION
-# purpose  : return info if a function is called with wrong params, exits imm.
-return_error() {
-   echo "$1 in function $2"
-   exit
-}
-
-
 color()  {
-
   case  $1  in
     off)  unset  MODULE_COLOR
           unset  VERSION_COLOR
@@ -130,12 +119,10 @@ color()  {
      on)  COLOR=on
           ;;
   esac
-
 }
 
 
 sound()  {
-
   case  $SOUND  in
     on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
          if  [  -e  $SOUND_FILE  ];  then
@@ -143,20 +130,14 @@ sound()  {
          fi
     ;;
   esac
-
 }
 
 
-sound()  {
-
-  case  $SOUND  in
-    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e  $SOUND_FILE  ];  then
-           (  cd  /  ;  play  $SOUND_FILE  & )
-         fi
-    ;;
-  esac
-
+# function : show_fancy_progress
+# usage    : show_fancy_progress <fancy_progress_var_string>
+# purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
+show_fancy_progress () {
+   echo -en "\r                                                                            \r$1\r"
 }
 
 

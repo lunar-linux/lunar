@@ -111,33 +111,6 @@ guess_filename()  {
 }
 
 
-unpack() {
-
-    FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
-  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
-
-  verbose_msg "Unpacking $FILENAME in $(pwd)"
-
-  case  $COMPRESSOR  in
-        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
-         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-          Zip)  unzip  -q    $FILENAME                  ;;
-          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
-                                        |  cpio  -idm   ;;
-            *)  false                                   ;;
-  esac
-  [ -n "$SOURCE_DIRECTORY" ] &&
-  [ -d "$SOURCE_DIRECTORY" ]
-  
-  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
-    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
-  else
-    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
-  fi
-}
-
-
 boost_locked()  {
 
   [  -f     $BOOST_LOCK  ]  &&
@@ -150,8 +123,6 @@ boost_locked()  {
 save_libraries()  {
 
   [ "$MODULE" == "glibc" ] && return 0
-
-  verbose_msg "saving libraries if any"
 
   OLD_VERSION=`installed_version  $MODULE`
   OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
@@ -171,7 +142,7 @@ save_libraries()  {
          file  -bL  $LINE   |
          grep  -q   "shared object"
     then
-      verbose_msg "saving $LINE"
+      verbose_msg "saving library \"$LINE\""
       if  [  -h  $LINE  ];  then
         DEST=$(  basename  $(  ls   -la  "$LINE"  |
                                cut  -d  '>'  -f2  |
@@ -196,21 +167,17 @@ save_libraries()  {
 
 
 release_saved_libraries()  {
-
-   verbose_msg "releasing saved libraries if any"
-   
    OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
    SAVED=$OLD_LIBS/$MODULE.saved.libraries
 
    [  -f  $SAVED  ]    &&
    cat    $SAVED       |
    while  read  FILE;  do
-     verbose_msg "rm -f \"$FILE\""
+     verbose_msg "releasing library \"$FILE\""
      rm  -f   "$FILE"
    done
 
    ldconfig  $OLD_LIBS
-
 }
 
 
@@ -319,7 +286,7 @@ bad_flags() {
 
 
 default_pre_build() {
-  verbose_msg "running default_pre_build"
+  verbose_msg "running \"default_pre_build\""
   if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
     if [[ -d $SOURCE_DIRECTORY ]] &&
@@ -347,10 +314,10 @@ default_pre_build() {
 
 default_config() 
 {
-   verbose_msg "running default_config"
+   verbose_msg "running \"default_config\""
 
-   verbose_msg "CFLAGS=$CFLAGS"                &&
-   verbose_msg "OPTS=$OPTS"                    &&
+   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+   verbose_msg "OPTS=\"$OPTS\""                &&
    verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
 
    ./configure  --build=$BUILD            \
@@ -364,10 +331,10 @@ default_config()
 
 
 default_cvs_config() {
-   verbose_msg "running default_cvs_config"
+   verbose_msg "running \"default_cvs_config\""
 
-   verbose_msg "CFLAGS=$CFLAGS"                &&
-   verbose_msg "OPTS=$OPTS"                    &&
+   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+   verbose_msg "OPTS=\"$OPTS\""                &&
    verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
 
    ./autogen.sh --build=$BUILD            \
@@ -381,7 +348,7 @@ default_cvs_config() {
 
 
 default_make() {
-   verbose_msg "running default_make"
+   verbose_msg "running \"default_make\""
    make                               &&
    prepare_install                    &&
    make    install
@@ -389,14 +356,14 @@ default_make() {
 
 
 default_build() {
-   verbose_msg "running default_build"
+   verbose_msg "running \"default_build\""
    default_config  &&
    default_make
 } > $C_FIFO 2>&1
 
 
 default_cvs_build() {
-   verbose_msg "running default_cvs_build"
+   verbose_msg "running \"default_cvs_build\""
    default_cvs_config  &&
    default_make
 } > $C_FIFO 2>&1
@@ -625,14 +592,6 @@ sort_install_queue() {
    done
    rm -f $TMP_DEPENDS 2>/dev/null
    rm -f $TMP_INSTALL 2>/dev/null
-}
-
-# function : show_fancy_progress
-# usage    : show_fancy_progress <fancy_progress_var_string>
-# purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
-function show_fancy_progress
-{
-   echo -en "\r                                                                            \r$1\r"
 }
 
 # function : update_installed

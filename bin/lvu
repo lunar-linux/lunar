@@ -697,6 +697,24 @@ parse()  {
               }
               ;;
 
+   links)     [ -z "$MODULE" ] && return 1
+              for FILE in $(lvu install $MODULE) ; do
+                TYPE=$(file $FILE | cut -d' ' -f2)
+                if [[ "$TYPE" == "ELF" ]] ; then
+                  BINARIES="$BINARIES $FILE"
+                  verbose_msg "found binary: \"$FILE\""
+                fi
+              done
+
+              for BINARY in $BINARIES ; do
+                LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
+              done
+
+              for LINK in $LINKSTO ; do
+                lvu from $LINK | cut -d: -f1
+              done | sort | uniq
+              ;;
+
     installed)  if    [  -z  "$MODULE"    ]
                 then  view_file   $MODULE_STATUS
                 elif  [  -n  "$VERSION"  ]

@@ -17,28 +17,40 @@
 #            of formats
 patch_it ()
 { 
-    verbose_msg "patch_it \"$1\" \"$2\"";
-    if [[ -n `echo $1 | grep .tar` ]]; then
-        if [[ -n `echo $1 | grep .bz2` ]]; then
-            bzcat $1 | tar x -O | patch -N -p$2;
-        else
-            if [[ -n `echo $1 | grep .gz` ]]; then
-                zcat $1 | tar x -O | patch -N -p$2;
-            else
-                cat $1 | tar x -O | patch -N -p$2;
-            fi;
-        fi;
-    else
-        if [[ -n `echo $1 | grep .bz2` ]]; then
-            bzcat $1 | patch -N -p$2;
-        else
-            if [[ -n `echo $1 | grep .gz` ]]; then
-                zcat $1 | patch -N -p$2;
-            else
-                cat $1 | patch -N -p$2;
-            fi;
-        fi;
+  verbose_msg "patch_it \"$1\" \"$2\"";
+  
+  if [[ -n `echo $1 | grep .tar` ]] ; then
+    TARCMD="tar x -O"
+  else
+    TARCMD="cat"
+  fi
+
+  if [[ -n `echo $1 | grep .bz2` ]] ; then
+    GZCMD="bzcat"
+  elif [[ -n `echo $1 | grep .gz` ]] ; then
+    GZCMD="zcat"
+  else
+    GZCMD="cat"
+  fi
+
+  TMPFILE1=/tmp/lunar.patch.`uuidgen`
+  TMPFILE2=/tmp/lunar.patch.`uuidgen`
+
+  if $GZCMD $1 > $TMPFILE1 ; then
+    # uncompress OK
+    if cat $TMPFILE1 | $TARCMD > $TMPFILE2 ; then
+      # untar OK
+      if patch -N -p$2 < $TMPFILE2 ; then
+        # patch cmd is OK
+	rm -f $TMPFILE1 $TMPFILE2
+        return 0
+      fi
     fi
+  fi
+
+  message "${PROBLEM_COLOR}Broken patch file \"$1\"!${DEFAULT_COLOR}"
+  rm -f $TMPFILE1 $TMPFILE2
+  return -1
 }
 
 
@@ -51,7 +63,7 @@ sedit ()
     shift;
     for FILE in $@;
     do
-        verbose_msg "Editing ${FILE}";
+        verbose_msg "Editing \"${FILE}\"";
         sed -i "$SEDIT" "$FILE";
     done
 }
