@@ -201,20 +201,3 @@
 	* var/lib/lunar/functions/optimize.lunar: Fixing the dialog box for
 	MAKES=.  The old message was just too confusing for most people.
 
-2004-01-12 06:51  hardkrash
-
-	* var/lib/lunar/functions/config.lunar: Beginings for new CONFIGURE
-	file scheme that allows for formats and options to change
-	
-	new system will set a date in the $MODULE_CONFIG file in the
-	CONFIGURED variable with the set_module_configured function
-	
-	and the get_module configuted function checks if the configuration
-	date is newer than the stored one
-	
-	this i believe is a better way than we have now and it prevents yet
-	another variable in DETAILS files
-	
-	as this coide would only be called by modules that use the new
-	scheme
-
