@@ -1755,7 +1755,7 @@ rework_module() {
 rework_list() {
 
   for MODULE in $* ; do
-    rework_module $MODULE
+    module_exiled $MODULE || rework_module $MODULE
   done
 
   cat $TMP/depends.new.* | sort | uniq > $TMP/depends.new-all
