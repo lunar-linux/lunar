@@ -123,6 +123,7 @@ run_depends() {
 
     if ! module_installed $1 && ! module_held $1 ; then
       if ! is_depends $1 && module_exiled $1 ; then
+        message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}${1}${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
         return 1
       else
         message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
