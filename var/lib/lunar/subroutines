@@ -361,7 +361,7 @@ prepare_install() {
 
 rm_source_dir() {
 
-  cd  /
+  cd  $BUILD_DIRECTORY
 
   DEAD_DIR=$1
   DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
@@ -380,17 +380,19 @@ rm_source_dir() {
 
 mk_source_dir() {
 
+  cd  $BUILD_DIRECTORY
+
   NEW_DIR=$1
   NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
 
   if [ "$TMPFS" != "off" ]; then 
     umount  $NEW_DIR  2>/dev/null
     rmdir   $NEW_DIR  2>/dev/null
-    mkdir   $NEW_DIR  &&
+    mkdir  -p  $NEW_DIR  &&
     mount  -o  size=1g,nr_inodes=1m  -t  tmpfs  tmpfs  $NEW_DIR
   else
     rm -rf  $NEW_DIR  2>/dev/null
-    mkdir   $NEW_DIR
+    mkdir  -p  $NEW_DIR
   fi
 
 }
@@ -454,14 +456,14 @@ patch_it() {
 }
 
 default_pre_build() {
-  if [[ `echo $MODULE | grep -e -cvs` ]]; then
+  if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
     if [[ -d $SOURCE_DIRECTORY ]] &&
        [[ $KEEP_SOURCE == "on" ]]; then
       cd $SOURCE_DIRECTORY &&
       make clean
     else
-      mk_source_dir        $SOURCE_DIRECTORY &&
+      mk_source_dir        $CVS_MODULE &&
       unpack               $MODULE-$VERSION.tar.bz2
     fi
   else
