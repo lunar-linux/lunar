@@ -1,3 +1,17 @@
+2003-02-18 15:16  sofar
+
+	* bin/lvu: Sheez what a mess.
+
+2003-02-18 15:08  sofar
+
+	* bin/lvu: Failed compile logs should be displayed if available of
+	newer versions instead of older compile logs of installed versions.
+
+2003-02-18 14:28  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Fix for lvu prune removing
+	CVS sources.
+
 2003-02-17 16:47  tchan
 
 	*
