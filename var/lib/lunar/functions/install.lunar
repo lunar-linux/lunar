@@ -550,7 +550,7 @@ current_locked() {
   debug_msg "current_locked ($@)"
   if  lin_locked  $MODULE;  then
     message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}${linING}${MESSAE_COLOR}"
-    message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULTT_COLOR}${MESSAGE_COLOR}to finish installing or for the lock to clear."
+    message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULTT_COLOR}${MESSAGE_COLOR} to finish installing or for the lock to clear."
 
     while  lin_locked  $MODULE;  do  sleep  2;  done
     false
