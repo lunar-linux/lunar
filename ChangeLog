@@ -1,3 +1,10 @@
+2003-03-23 23:43  sofar
+
+	* sbin/lget, sbin/lin, var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/postbuild.lunar: deprecated use_cvs and the
+	CVS_MODULE scheme, CVS is now 100% transparent. Hope to merge these
+	changes into lunar soon.
+
 2003-03-23 14:28  sofar
 
 	* sbin/lin: typo
@@ -178,14 +185,4 @@
 
 	* var/lib/lunar/subroutines: More verbosity in core functions:
 	depends and optional_depends are much more verbose now.
-
-2003-02-21 00:00  sofar
-
-	* sbin/lin, var/lib/lunar/subroutines: Multiple fixes:
-	
-	* KEEP_SOURCE implemented in rm_source_dir for transparancy *
-	verbose error handling of multiple stages within lin (more needed
-	but this covers pretty much all cutomizable scripts) * adding
-	better logging which shows the failed section. (all devs shout "we
-	always wanted that!") * turned my alarm on and went to bed
 
