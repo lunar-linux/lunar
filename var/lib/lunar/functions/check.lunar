@@ -115,6 +115,21 @@ find_check()  {
 }
 
 
+remove_line()  {
+  debug_msg "remove_line ($@)"
+  F_TMP=$(temp_create "${MODULE}.remove-line")
+  cp $I_LOG $F_TMP
+  grep -v $ITEM $F_TMP > $I_LOG
+  temp_destroy $F_TMP
+
+  message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
+           "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+  message  "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
+  message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by `show_owner`"
+  message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
+}
+
+
 sym_check()  {
   debug_msg "sym_check ($@)"
   if  [  "$SYM_CHECK"  ==  "off"  ];  then
@@ -369,6 +384,5 @@ run_fix()  {
   done
   rm  -f  /tmp/LD_LIBRARY_PATH_FILE
 }
-
 
 

@@ -60,13 +60,13 @@ patch_it () {
 # usage    : sedit sed-statement file [file [file] ...]
 # purpose  : edit [files] with a sed function
 sedit () { 
-    SEDIT=$1;
-    shift;
-    for FILE in $@;
-    do
-        verbose_msg "Editing \"${FILE}\"";
-        sed -i "$SEDIT" "$FILE";
-    done
+  debug_msg "sedit ($@)"
+  SEDIT=$1
+  shift
+  for FILE in $@ ; do
+    verbose_msg "Editing \"$FILE\""
+    sed -i "$SEDIT" "$FILE"
+  done
 }
 
 

@@ -64,6 +64,19 @@ function find_depends() {
 }
 
 
+# function : sort_by_dependency
+# usage    : LIST=$(sort_by_dependency $LIST)
+# purpose  : return a LIST sorted by dependency
+sort_by_dependency() {
+ (
+  debug_msg "sort_by_dependency ($@)"
+  MODULES=$@
+  for MODULE in $MODULES ; do
+    grep ^$MODULE: $DEPENDS_STATUS | grep ":on:" | awk -F: '{print $1,$2}'
+  done | tsort | tac
+ )
+}
+
 
 is_depends()  {
   debug_msg "is_depends ($@)"
@@ -190,8 +203,6 @@ run_depends() {
 }
 
 
-                                                                           
-                                                                   
 # function : satisfy_depends
 # usage    : satisfy_depends (operates on $MODULE variable)
 # purpose  : re-check module deps based on DEPENDS_CONFIG and DEPENDS_STATUS
@@ -249,6 +260,50 @@ conflicts() {
 
   true
 } 
+
+
+run_conflicts() {
+  debug_msg "run_conflicts ($@)"
+  run_module_file $MODULE CONFLICTS
+}
+
+
+# create the dependency files if they do not exist
+prepare_depends_status()  {
+  debug_msg "prepare_depends_status ($@)"
+  [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
+  [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
+}
+
+
+build_module_depends() {
+(
+  debug_msg "build_module_depends ($@)"
+  if [ -n "$DEPS_ONLY" ] ; then
+    run_details $1 &&
+    run_depends
+  else
+    run_details $1 &&
+    run_configure &&
+    run_depends &&
+    satisfy_depends
+  fi
+)
+}
+
+
+build_depends()  {
+  debug_msg "build_depends ($@)"
+  for MODULE in $@ ; do
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      if ! module_held $MODULE ; then
+        build_module_depends $MODULE
+      else
+        verbose_msg "Skipping dependency checking of held module \"$MODULE\""
+      fi
+    fi
+  done
+}
 
 
 

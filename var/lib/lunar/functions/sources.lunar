@@ -92,11 +92,19 @@ md5_verify_source() {
 }
 
 
+erase()  {
+  debug_msg "erase ($@)"
+  if [ "$PARTIAL" == "off" ]; then
+    verbose_msg "erase: deleting \"$(guess_filename $1)\""
+    rm -f $(guess_filename $1)
+  fi
+}
+
+
 unpack() {
   debug_msg "unpack ($@)"
 
-    FILENAME=$(guess_filename $SOURCE_CACHE/$1)
-
+  FILENAME=$(guess_filename $SOURCE_CACHE/$1)
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
   case $(file -b $FILENAME | cut -d' ' -f1) in
@@ -114,17 +122,18 @@ unpack() {
     message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
     return 1
   fi
-  
+
+  # I don't get this :
   [ -n "$SOURCE_DIRECTORY" ] &&
   [ -d "$SOURCE_DIRECTORY" ]
   
+  # someone care to document this ???
   if [[ $(echo $CFLAGS | grep fbranch-probabilities) ]]; then
     chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
   else
     chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
   fi
 }
-
 
 
 # usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
@@ -240,4 +249,72 @@ verify_all_sources() {
   fi
 )
 }
+
+
+rm_source_dir() {
+  debug_msg "rm_source_dir ($@)"
+
+  if [ "$KEEP_SOURCE" == "on" ] ; then
+    return 0
+  fi
+
+  cd $BUILD_DIRECTORY
+  DEAD_DIR=$1
+  DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "destroying building dir \"$DEAD_DIR\""
+  if [ "$TMPFS" != "off" ] ; then
+    umount $DEAD_DIR 2> /dev/null
+    rmdir $DEAD_DIR 2> /dev/null
+  else
+    rm -rf $DEAD_DIR 2> /dev/null
+  fi
+
+  rm -f $BOOST_LOCK
+}
+
+
+mk_source_dir() {
+  debug_msg "mk_source_dir ($@)"
+
+  cd $BUILD_DIRECTORY
+  NEW_DIR=$1
+  NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "creating building dir \"$NEW_DIR\""
+  if [ "$TMPFS" != "off" ] ; then 
+    if [ -d "$NEW_DIR" ] ; then
+      verbose_msg "Removing old source directory first!"
+      umount $NEW_DIR 2>/dev/null
+      rmdir $NEW_DIR 2>/dev/null
+    fi
+    mkdir -p $NEW_DIR &&
+    mount -o size=1g,nr_inodes=1m -t tmpfs tmpfs $NEW_DIR
+  else
+    if [ -d $NEW_DIR ] ; then
+      verbose_msg "Removing old source directory first!"
+      rm -rf $NEW_DIR 2>/dev/null
+    fi
+    mkdir -p $NEW_DIR
+  fi
+}
+
+
+validate_source_dir()  {
+  debug_msg "validate_source_dir ($@)"
+
+  verbose_msg "validating \"$SOURCE_DIRECTORY\""
+  if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
+      [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
+      echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
+  then
+    true
+  else
+    message  "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."
+    message  "\$SOURCE_DIRECTORY must not be empty."
+    message  "\$SOURCE_DIRECTORY must be a subdirectory of \$BUILD_DIRECTORY"
+    false
+  fi
+}
+
 

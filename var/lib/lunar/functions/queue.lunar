@@ -66,3 +66,24 @@ remove_queue() {
       unlock_file $1
   fi
 }
+
+
+push_install_queue() {
+  debug_msg "push_install_queue ($@)"
+  remove_queue   $REMOVE_QUEUE    "$1"
+  remove_queue   $INSTALL_QUEUE   "$1"
+  !  module_installed             "$1"  &&
+  add_queue  $INSTALL_QUEUE       "$1"
+}
+
+
+push_remove_queue() {
+  debug_msg "push_remove_queue ($@)"
+
+  remove_queue   $INSTALL_QUEUE  "$1"
+  remove_queue   $REMOVE_QUEUE   "$1"
+  module_installed               "$1"  &&
+  add_queue  $REMOVE_QUEUE       "$1"
+}
+
+

@@ -29,6 +29,13 @@
 ############################################################
 
 
+# error msgs go to stderr !
+error_message() {
+  echo -e "$*" > /dev/stderr
+}
+
+
+# normal messages go to stdout
 message() {
   if [ -z "$SILENT" ] ; then
     echo -e "$*"

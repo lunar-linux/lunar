@@ -1,0 +1,69 @@
+#!/bin/bash
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/logging.lunar                                 #
+#                                                          #
+############################################################
+
+
+start_logging () {
+  debug_msg "start_logging  ($@)"
+  mod_v_safe_edit $MODULE 
+  export C_LOG=$(temp_create "${MOD_V_SNAME}.compile-log")
+  export C_FIFO=$(temp_create "${MOD_V_SNAME}.compile-fifo")
+
+  # just remaking this as FIFO
+  rm -f $C_FIFO
+  mknod $C_FIFO p
+  echo "Compile log for \"$MODULE\"-\"$VERSION\" Built on \"$(date  -u)\"" > $C_LOG
+
+  activate_voyeur
+}
+
+
+stop_logging() {
+  debug_msg "stop_logging ($@)"
+  mod_v_safe_edit $MODULE 
+  message  "${MESSAGE_COLOR}Creating"                        \
+           "${FILE_COLOR}$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"  \
+           "${DEFAULT_COLOR}"
+
+  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2
+  temp_destroy $C_LOG
+  temp_destroy $C_FIFO
+}
+
+
+activate_voyeur()  {
+  debug_msg "activate_voyeur ($@)"
+  if [ -z "$SILENT" ] ; then
+    case $VOYEUR in
+      on) tee -a $C_LOG < $C_FIFO              & ;;
+       *) tee -a $C_LOG < $C_FIFO >/dev/null   & ;;
+    esac
+  else
+    tee -a $C_LOG < $C_FIFO >/dev/null &
+  fi
+}
+
+
+activity_log()  {
+  debug_msg "activity_log ($@)"
+
+    DATE=`date  -u  +%Y%m%d-%T`
+  COMMAND=$1
+   MODULE=$2
+  VERSION=$3
+  OUTCOME=$4
+     INFO=$5
+
+  lock_file $ACTIVITY_LOG &&
+  echo "$DATE	$COMMAND	$MODULE	$VERSION	$OUTCOME	$INFO"  >> $ACTIVITY_LOG &&
+  unlock_file $ACTIVITY_LOG
+}
+
+

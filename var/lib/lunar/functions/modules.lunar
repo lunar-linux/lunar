@@ -54,17 +54,16 @@ list_sections() {
 list_modules() {
   debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
-    message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
+    error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
     exit 1
   fi
 
-  for MODULE in $(( ls $MOONBASE/$1 && ls -d $MOONBASE/$1/*/[0-9]* |
-        sed "s:$MOONBASE/$1/::" ) 2>/dev/null | \
-      grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README")
-  do
-    echo "$MODULE" 
-    debug_msg "XXXX Module=$MODULE"
-  done
+  if [ ! -d $MOONBASE/$1 ] ; then
+    error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  ls -d $MOONBASE/$1/* $MOONBASE/$1/*/[0-9]* 2> /dev/null | sed "s:$MOONBASE/$1/::" | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README"
   return 0
 }
 
@@ -108,7 +107,7 @@ create_module_index() {
 
   rm -f $MODULE_INDEX 2>/dev/null
 
-  echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
+  echo MOONBASE_MD5:$(set_moonbase_md5) > $MODULE_INDEX
   for SECTION in $(list_sections) ; do
     list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
   done
@@ -121,7 +120,7 @@ create_module_index() {
 # usage   : check_module_index
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
-  debug_msg "function check_module_index ($@)"
+  debug_msg "check_module_index ($@)"
   if [ $(get_moonbase_md5) != $(set_moonbase_md5) ] ; then
     create_module_index
     return 0
@@ -262,6 +261,19 @@ installed_version() {
 }
 
 
+# display current moonbase version of $MODULE
+module_version() {
+  debug_msg "module_version($@)"
+  (
+    if run_details $1 ; then
+      echo $VERSION
+    else
+      exit 1
+    fi
+  )
+}
+
+
 # function : hold_modules
 # usage    : hold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold
@@ -350,3 +362,195 @@ module_needs_update () {
     return 1
   fi
 }
+
+# function : remove_module
+# usage    : remove_module; but $MODULE must be defined earlier
+# purpose  : removed a module from the MODULE_STATUS files, no source removal
+remove_module() {
+  debug_msg "remove_module ($@)"
+
+  verbose_msg "updating lunar state files after module removal"
+  lock_file $MODULE_STATUS                                     && 
+  lock_file $MODULE_STATUS_BACKUP                              &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
+  cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
+  unlock_file $MODULE_STATUS_BACKUP                            &&
+  unlock_file $MODULE_STATUS 
+
+  if [ -n "$EXILE" ] ; then
+     lock_file $MODULE_STATUS                            && 
+     lock_file $MODULE_STATUS_BACKUP                     &&
+     echo  "$1::exiled:0.0"  >>  $MODULE_STATUS          &&
+     cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP   &&
+     unlock_file $MODULE_STATUS_BACKUP                   &&
+     unlock_file $MODULE_STATUS 
+
+     lock_file $DEPENDS_STATUS                           &&
+     lock_file $DEPENDS_STATUS_BACKUP                    &&
+     grep  -v  ":$1:" $DEPENDS_STATUS_BACKUP  >   $DEPENDS_STATUS  &&
+     cat $DEPENDS_STATUS >  $DEPENDS_STATUS_BACKUP       &&
+     unlock_file $DEPENDS_STATUS                         &&
+     unlock_file $DEPENDS_STATUS_BACKUP
+  fi
+}
+
+
+# function: add_module
+# usage   : add_module <module_name>
+# purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
+add_module()  {
+  debug_msg "add_module ($@)"
+  verbose_msg "updating lunar state files after module installation"
+  lock_file $MODULE_STATUS                                    && 
+  lock_file $MODULE_STATUS_BACKUP                             &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP   >   $MODULE_STATUS 2>/dev/null  &&
+  echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
+  cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP           &&
+  unlock_file $MODULE_STATUS_BACKUP                           &&
+  unlock_file $MODULE_STATUS 
+}
+
+
+# function : purge_modules
+# usage    : purge_modules
+# purpose  : purge modules that were removed from moonbase
+purge_modules() {
+  debug_msg "purge_modules ($@)"
+  verbose_msg "Discovering modules that were removed from moonbase"
+  for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+  (
+    if ! run_details $MODULE &> /dev/null ; then
+      message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+      if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
+        lrm $MODULE
+        continue
+      else
+        message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
+      fi
+    fi
+  )
+  done 
+}
+
+
+# function : list_expired_modules
+# usage    : list_expired_modules
+# purpose  : return a list of modules that need to be updated
+list_expired_modules() {
+  debug_msg "list_expired_modules ($@)"
+  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
+  (
+    MODULE=$(echo "$LINE" | cut -d: -f1)
+    IDATE=$(echo "$LINE" | cut -d: -f2)
+    STATUS=$(echo "$LINE" | cut -d: -f3)
+    IVERSION=$(echo "$LINE" | cut -d: -f4)
+    if run_details $MODULE &> /dev/null ; then
+      if [ "$STATUS" == "installed" ] ; then
+        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
+          (( "$UPDATED" > "$IDATE" )) ; then
+          if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
+            echo $MODULE
+          fi
+	fi
+      fi
+    fi
+  )
+  done
+}
+
+
+# function : update_modules
+# usage    : update_modules
+# purpose  : update all installed modules that need to be updated
+update_modules() {
+  debug_msg "update_modules ($@)"
+
+  export IFS="$STANDARD_IFS"
+
+  verbose_msg "Searching for modules to update"
+  LIST=$(list_expired_modules)
+  
+  if [ -z "$LIST" ] ; then
+    verbose_msg "Nothing to update!"
+    return
+  fi
+  
+  verbose_msg "Sorting update queue"
+  QUEUE=$(sort_by_dependency $LIST)
+
+  message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
+  TMP_QUEUE=$(temp_create "update-queue")
+  for MODULE in $QUEUE ; do
+    echo $MODULE >> $TMP_QUEUE
+    echo $MODULE
+  done
+
+  unset MODULE
+  if query "Do you wish to edit the update queue ? " n ; then
+    edit_file $TMP_QUEUE
+  fi
+  QUEUE=$(cat $TMP_QUEUE)
+  temp_destroy $TMP_QUEUE
+
+  if [ -n "$QUEUE" ] ; then
+    lin -c $QUEUE
+  fi
+}
+
+
+find_pam_aware()  {
+  debug_msg "find_pam_aware ($@)"
+
+  cat  $MODULE_STATUS_BACKUP  |
+  while  read  LINE;  do
+                        
+    MODULE="`echo  $LINE  |  cut  -d  :  -f1`"
+    STATUS="`echo  $LINE  |  cut  -d  :  -f3`"
+                                              
+    if  [  "$STATUS"  ==  "installed"  ]   ||
+        [  "$STATUS"  ==  "held"       ];  then
+
+      SECTION=`find_section  $MODULE`
+                                    
+      if    [  -d  "$MOONBASE/$SECTION/$MODULE/pam.d"  ]  &&
+            [  "$MODULE"  !=  "Linux-PAM"              ]
+      then  echo  $MODULE
+      fi
+
+    fi
+  done
+
+}
+
+
+check_blacklist() {
+  debug_msg "check_blacklist ($@)"
+  # Copyrighted Jason Johnston  2002 under GPLv2
+
+  # This checks the /var/state/lunar/gcc.<platform>
+  # file to see if it exists.  If it does exist then
+  # we grep it to see the names of the modules that
+  # DO NOT compile with gcc 3x.  If the module is
+  # on the list, we set the path so that gcc 3x is
+  # NOT used.
+
+  # If you find a module that does not compile with
+  # gcc 3x please email your findings to
+  # maintainer@lunar-linux.org.
+
+  eval $(grep PLATFORM= /etc/lunar/local/optimizations)
+
+  # Usage check_checklist $MODULES
+  PLATFORM=${PLATFORM:-x86}
+  if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
+    BLKLST=$(grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM)
+    if [ "$BLKLST" == "$MODULE" ] ; then
+      message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
+      exit 0
+    fi
+  else
+    touch /var/state/lunar/blacklist.$PLATFORM
+  fi
+}
+
+
