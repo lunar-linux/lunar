@@ -1,3 +1,13 @@
+2003-03-15 01:29  sofar
+
+	* var/lib/lunar/: subroutines, functions/download.lunar,
+	functions/moonbase.lunar: New cvs handling code: uses SOURCE_URL
+	and SOURCE. see gaim-cvs for example,note SOURCE_DIRECTORY becomes
+	important. more vebosity and misc code cleanups elsewhere. Hope
+	this works for everyone. Maybe tomorrow I'll look how this can be
+	used for the xfce cvs modules, but this new scheme does not
+	obliviate the old cvs handling code!!!
+
 2003-03-13 05:03  nhudson
 
 	* var/lib/lunar/sustained: 
