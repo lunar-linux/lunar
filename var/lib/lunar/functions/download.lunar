@@ -86,7 +86,7 @@ download_module() {
 			fi
 		}
 
-		if [ ! -f $SOURCE_CACHE/$SRC ] || plugin_call SOURCE_NEEDREFRESH $URL $SOURCE_CACHE/$SRC ; then
+		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SOURCE_CACHE/$SRC || [ ! -f $SOURCE_CACHE/$SRC ] ; then
 			# check for cache?
 			message "${MESSAGE_COLOR}Downloading source file" \
 				"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
