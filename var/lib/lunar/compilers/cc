@@ -1,0 +1,4 @@
+#!/bin/bash
+
+$CC_EXT /usr/bin/$(basename $0) $COPT "$@"
+
