@@ -137,16 +137,30 @@ find_section()
   local SECTION
 
   SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2`
-  [ -n "$SECTION" ] && echo "$SECTION" && return 0
+  if [ -n "$SECTION" ] ; then
+    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+      echo "$SECTION"
+      return 0
+    fi
+  fi
 
-  check_module_index                                 &&
+  check_module_index
+
   SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2` 
-  [ -n "$SECTION" ] && echo "$SECTION"  && return 0 
+  if [ -n "$SECTION" ] ; then
+    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+      echo "$SECTION"
+      return 0
+    fi
+  fi
            
   for  SECTION  in  $(list_sections) ; do
-     [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] &&
-        echo "$SECTION" && return 0
+    if [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] ; then
+      echo "$SECTION"
+      return 0
+    fi
   done
+
   return 1
 }
 
