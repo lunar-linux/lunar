@@ -223,19 +223,3 @@
 	x86.  uClibc does support other architectures, but the Lunar module
 	is currently setup for x86 ONLY!
 
-2003-11-11 18:39  elaine
-
-	* var/lib/lunar/functions/install.lunar: Always keep a copy of the
-	scripts used to create a module. This is intended to be useful for
-	general backtracking, debugging and to provide an adjunct to the
-	activity file to know what's been done without resorting to cvs
-	history.
-	
-	Also safeguards local development work for devs who overwrite their
-	work with 'lin moonbase' and the like (and yes this is the *real*
-	reason for adding this little hack).
-	
-	Adding this to post_install because at this point we know that we
-	have a successful install (logs and everything have in theory been
-	created by the time we get here.
-
