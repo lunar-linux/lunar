@@ -409,5 +409,6 @@ menu() {
                         0 0 0                   \
                       "${OPTIONS[@]}"`
    fi
+   RESULT=$(echo $RESULT | sed -e 's:^"::' -e 's:"$::')
 
 }
