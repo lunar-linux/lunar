@@ -218,7 +218,10 @@ run_module_file() {
       return 1
     fi
   fi
-  if [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
+  CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
+  if [ -e "$SCRIPT_DIRECTORY/$2.$CPU_ARCH" ]; then
+    . $SCRIPT_DIRECTORY/$2.$CPU_ARCH
+  elif [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
     . $SCRIPT_DIRECTORY/$2
   fi    
 }
