@@ -667,9 +667,7 @@ module_exiled()  {
 
 installed_version()  
 {
-  if [[ $1 == "linux" ]]; then
-    echo `uname -r`
-  elif    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
+  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
      echo  `grep  "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
   else  
      echo  `grep  "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
