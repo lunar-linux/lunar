@@ -97,7 +97,7 @@ replace_status_file() {
          message  "${MESSAGE_COLOR}Success!!"   \
                   "${DEFAULT_COLOR}"
       else
-         message  "${PROBLEM_COLOR}Unsuccessfull :=( No more operation!!"  \
+         message  "${PROBLEM_COLOR}Unsuccessful :=( No more operation!!"  \
                   "${DEFAULT_COLOR}"
          exit 1
       fi
@@ -125,7 +125,7 @@ check_status_files() {
                      "to MODULE_STATUS_BACKUP"   \
                      "${DEFAULT_COLOR}"
          else
-            message  "${PROBLEM_COLOR}Unsuccessfull while copying" \
+            message  "${PROBLEM_COLOR}Unsuccessful while copying" \
                      "MODULE_STATUS to MODULE_STATUS_BACKUP :=(  " \
                      "No more operation!!"                         \
                      "${DEFAULT_COLOR}"

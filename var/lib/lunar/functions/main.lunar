@@ -25,7 +25,7 @@ renew() {
 
   purge_modules
   
-  export TMP_LIN_SUCCESS=$(temp_create "successfull")
+  export TMP_LIN_SUCCESS=$(temp_create "successful")
   export TMP_LIN_FAIL=$(temp_create "failed")
       
   update_modules

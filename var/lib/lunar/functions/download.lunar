@@ -257,7 +257,7 @@ fuzzy_wget()  {
   if testpack $TMP_RESULTFILE ; then
     install -m644 $TMP_RESULTFILE $(dirname $2)/$(basename $TMP_RESULTFILE)
     rm $(guess_filename $TMP_RESULTFILE)
-    verbose_msg "download of \"$1\" successfull"
+    verbose_msg "download of \"$1\" successful"
   else
     rm -f $(guess_filename $TMP_RESULTFILE)
   fi
