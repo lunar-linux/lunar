@@ -1,3 +1,8 @@
+2004-04-26 10:02  sofar
+
+	* var/lib/lunar/functions/check.lunar: Fixing run_fix: it would fix
+	only held modules. Also cleaned up quite a bit.
+
 2004-04-24 19:08  sofar
 
 	* var/lib/lunar/functions/main.lunar: Env var pollution pro bono,
@@ -264,21 +269,4 @@
 
 	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
 	needed changes.
-
-2004-02-25 21:39  tchan
-
-	* var/lib/lunar/functions/edit.lunar: A temporary fix for grepping
-	tar, bz2, gz in patch names.  Only needed until sofar has time to
-	rewrite/correct this function properly.
-
-2004-02-25 17:06  tchan
-
-	* var/lib/lunar/functions/edit.lunar: Reverting Ratler's changes to
-	edit.lunar as they are totally wrong!  Don't mess with lunar core
-	unless you check with sofar first!
-
-2004-02-25 11:59  ratler
-
-	* var/lib/lunar/functions/edit.lunar: Patch submited by Jerry
-	Lundström that patch_it function to correctly grep for filetype
 
