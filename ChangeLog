@@ -64,9 +64,3 @@
 
 	* var/lib/lunar/functions/locking.lunar: color fixes
 
-2004-12-12 22:56  moe
-
-	* var/lib/lunar/functions/download.lunar: This will buy us some
-	  more time just incase the user is sitting behind a _really huge_
-	  pipe.
-
