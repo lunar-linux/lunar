@@ -1818,10 +1818,10 @@ fix_depends () {
         cat $TMP/depends.new.* >> $DEPENDS_STATUS
         cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       fi
-      FIX=$OLD_FIX ; unset OLD_FIX
-      export lin_PASS=$OLD_lin_PASS
       remove_queue $INSTALL_QUEUE $MODULE
     done
+    FIX=$OLD_FIX ; unset OLD_FIX
+    export lin_PASS=$OLD_lin_PASS
   fi
 
   rm -rf $TMP
