@@ -7,7 +7,7 @@
 This manual page is written to ease the life of the System Administrators after the installation part of \fBLunar Linux\fR is finished.
 .SH "DO NOT PANIC"
 .LP 
-These are the suggested operations immediately after the first boot of a newly installed Lunar box. The operations described below follows some logic and you better check them as sequentially ie; from beginning to end :=)
+These are the suggested operations immediately after the first boot of a newly installed Lunar box. The operations described below follows some logic and you better check them as sequentially ie; from beginning to end :=) Please remember that the Lunar Install/Rescue ISO is not a full featured system.  You must install more software via the "lin" mechanism to get a fully functioning server and/or workstation.  See the moonbase/profiles section for some handy collections of Lunar Modules.  It should also be noted that you MUST "lin xfree86", BEFORE you try to "lin" any other module that requires X-Windows.  For some reason this is not obvious to quite a few Lunar users.
 
 \fB1. Check Networking: \fRBetter check networking first, try pinging out.
 .IP 
@@ -42,10 +42,10 @@ Do a \fBlunar update\fR. This process will update the base scripts and the packa
 
 \fB3. Set Your Preferences: \fRThere are a number of options which you may set or reset. For optimum performance, you must visit those.
 .IP 
-Type \fBlunar\fR and press enter as root. See \fBoption\fR menu. Please visit \fBOptimize Architecture\fR item first. Select your CPU and compile options there (my own preferences are \fBi686 speedy strip\fR and the ISO is prepared with \fBi386 tiny strip\fR).
+Type \fBlunar\fR and press enter as root. See \fBoption\fR menu. Please visit \fBOptimize Architecture\fR item first. Select your CPU and compile options there (my own preferences are \fBi686 pipe faster strip\fR and the ISO is prepared with \fBi386 pipe small strip\fR).
 .BR 
 
-Also, check \fBOption \-> Integrity Checking\fR and be sure that the first three items are enabled.
+Also, check \fBOption \-> Integrity Checking\fR and be sure that at least FIND_CHECK and LDD_CHECK are enabled.
 .BR 
 
 Do not forget to have a look at \fBOption \-> Feature Menu\fR
@@ -76,10 +76,10 @@ Find below some useful addresses
 \fBWebsite: \fRhttp://www.lunar\-linux.org/
 .BR 
 
-\fBMaillist: \fRhttp://moongroup.com/mailman/listinfo/lunar
+\fBMaillist: \fRhttp://lunar\-linux.org/mailman/listinfo/lunar
 .BR 
 
-\fBIRC: \fRirc.openprojects.net #lunar
+\fBIRC: \fRirc.freenode.net #lunar
 
 .SH "NOTES"
 .LP 
@@ -96,6 +96,8 @@ clarifications.
 .SH "COPYRIGHT"
 .LP 
 This document is Copyrighted Kagan Kongar 2002. It may be reproduced and distributed in whole or in part, in any medium physical or electronic, as long as this copyright notice is retained on all copies.
+.LP
+Portions of this document Copyrighted (C) 2003 Terry Chan
 .SH "AUTHOR"
 .LP 
 Kagan Kongar <kongar@tsrsb.org.tr>
