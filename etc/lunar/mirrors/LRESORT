@@ -1,3 +1,4 @@
-Cache       			http://cache.lunar-linux.org/files/data
 Custom      			Custom
-Master      			http://www.lunar-linux.com/lunar/mirrors
+Master				http://www.lunar-linux.com/lunar/cache
+Denmark				http://dk.lunar-linux.org/files/cache
+Cache				http://cache.fwsystems.com/files/data
