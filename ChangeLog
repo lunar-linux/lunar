@@ -1,3 +1,7 @@
+2003-02-08 02:30  csm
+
+	* etc/lunar/config: changing the last resort URL to .org instead of .com
+	
 2003-02-06 10:08  sofar
 
 	* sbin/lrm: heh, got scared?
