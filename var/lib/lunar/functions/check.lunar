@@ -125,7 +125,7 @@ remove_line()  {
   message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
            "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
   message  "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
-  message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by `show_owner`"
+  message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by $(grep "^$TARGET$" $INSTALL_LOGS/* | cut -d: -f1)"
   message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
 }
 
