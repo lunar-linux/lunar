@@ -87,7 +87,7 @@ check_blacklist() {
     if [[ $BLKLST == $MODULE ]]; then
       message "${PROBLEM_COLOR}" \
               "Module $MODULE is blacklisted and will not be installed." \
-	      "${DEFAULT_COLOR}"
+	      "${DEFALUT_COLOR}"
       exit 0
     fi
   else

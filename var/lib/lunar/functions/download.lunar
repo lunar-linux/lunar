@@ -97,60 +97,6 @@ get_cvs() {(
 )}
 
 
-use_cvs() {(
-  run_details && if [[ $CVS_SERVER ]]; then
-
-    if ! module_installed cvs ; then
-      message "${PROBLEM_COLOR}Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
-      exit 1
-    fi
-    
-    message  "${MESSAGE_COLOR}Downloading CVS module"                      \
-             "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
-             "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-	     
-    mk_source_dir
-    cd $SOURCE_DIRECTORY
-
-    export CVSROOT=$CVS_SERVER
-
-    [ -f ~/.cvspass ] || touch ~/.cvspass
-
-    if [[ $CVS_LOGIN ]]; then
-      echo "$CVS_LOGIN" | cvs login
-    fi
-
-    if ! [[ $CVS_MODULE ]]; then
-      CVS_MODULE=`echo $MODULE | sed s/-cvs//`
-    fi
-
-    if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
-      verbose_msg "Extracting old CVS source tarball"
-      tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
-    fi
-
-    if [[ -d $CVS_MODULE/CVS ]]; then
-      verbose_msg "cvs -qz3 up -PAd $CVS_MODULE"
-      cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
-    elif ! [[ -d CVS ]]; then
-      verbose_msg "cvs -qz3 co $CVS_MODULE"
-      cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
-    fi
-
-    if [[ "$GOT_CVS" == "yes" ]]; then
-      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
-      tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
-    else
-      activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVS_MODULE"
-    fi
-
-    cd $BUILD_DIRECTORY
-    rm_source_dir
-
-  fi
-)}
-
-
 erase()  {
   if [ -z "$PARTIAL" ]; then
     verbose_msg "erase: deleting \"$(guess_filename $1)\""
