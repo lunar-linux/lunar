@@ -1107,7 +1107,7 @@ clean_logs()  {
 
 activity_log()  { (
 
-    DATE=`date  -u  +%Y%m%d`
+    DATE=`date  -u  +%Y%m%d-%T`
   COMMAND=$1
    MODULE=$2
   VERSION=$3
