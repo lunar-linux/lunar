@@ -1,3 +1,14 @@
+2004-04-17 16:33  sofar
+
+	* sbin/lin: thx for spotting this nick
+
+2004-04-17 16:02  sofar
+
+	* sbin/lin: Adding a trap that cleans up /tmp/lunar.lin.* and also
+	removes the known temporary files. This works like a charm in
+	cleaning up threads on cancelled or breaking compiles. Hopefully
+	this catches and cleans up on a lot of bad things now.
+
 2004-04-16 10:57  sofar
 
 	* var/lib/lunar/functions/main.lunar: Add this back: last minute
