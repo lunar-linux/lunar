@@ -162,13 +162,3 @@
 	* var/lib/lunar/functions/modules.lunar: A little bit faster, still
 	  the awk call is slow I wish there was something faster than that
 
-2004-11-11 10:03  sofar
-
-	* etc/lunar/dialogrc: 2003/08/25 jasper suggestion. I thought it
-	  was about time.
-
-2004-11-11 02:24  v3rt1g0
-
-	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
-	  blacklist.SPARC: memtest86+ is not non-x86 friendly
-
