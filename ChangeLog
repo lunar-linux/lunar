@@ -268,8 +268,3 @@
 	was still an TODO left open by kongar&&those-before-him (ouch).
 	tested and works.  - added $DEPENDS_CACHE var in etc/lunar/config
 
-2004-03-05 20:46  tchan
-
-	* var/lib/lunar/functions/depends.lunar: Added the suggested speed
-	fix from Erie Sorenson.  INCLUDED=$INCLUDED$'\n'$MOD
-
