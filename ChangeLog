@@ -1,3 +1,8 @@
+2004-01-14 20:42  tchan
+
+	* var/lib/lunar/functions/optimize.lunar: Fixing the dialog box for
+	MAKES=.  The old message was just too confusing for most people.
+
 2004-01-12 06:51  hardkrash
 
 	* var/lib/lunar/functions/config.lunar: Beginings for new CONFIGURE
@@ -238,9 +243,4 @@
 
 	* var/lib/lunar/functions/: install.lunar, messages.lunar: added
 	xterm status messages
-
-2003-11-15 14:52  elaine
-
-	* var/lib/lunar/functions/depends.lunar: Just pushing around the
-	formatting again
 
