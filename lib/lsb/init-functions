@@ -61,7 +61,6 @@ export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 # default_{start|stop|restart|probe|reload|status}
 #
 
-
   CHKCONFIG=`grep '^# chkconfig:'   $0 | cut -d : -f 2-2`
 CONFIGFILES=`grep '^# config:'      $0 | cut -d : -f 2-2 | tr -d " "`
 # DESCRIPTION=`grep '^# description: ' $0 | cut -d : -f 2-2 | tr -d " "`
@@ -95,7 +94,15 @@ get_data () {
     [ -z $SIGSTOP   ] &&   SIGSTOP=TERM
     [ -z $SIGRELOAD ] && SIGRELOAD=HUP
   fi
+
+  # VITAL INFO: SERVPID
+  if [ -f "$PIDFILE" ] ; then
+    if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+      SERVPID=$(cat $PIDFILE)
+    fi
+  fi
 }
+
 
 # define the output string colors and text
         ESC=`echo -en "\033"`
@@ -104,245 +111,323 @@ RESULT_FAIL="${ESC}[\061;31m${ESC}[70G[\040FAILED\040]${ESC}[m"
 RESULT_WARN="${ESC}[\061;33m${ESC}[70G[\040\040WARN\040\040]${ESC}[m"
 JUNK="]]]]]]"
 
+
 # Handy
 pgrep () {
-	/bin/pgrep -P 1 ^$PROCESS_BASE >& /dev/null && return 0 || return -1
-}
-pkill () {
-	[ -e $PIDFILE ] || return -1
-	kill -$SIGSTOP `cat $PIDFILE` >& /dev/null && return 0 || return -1
-}
-prload ()  {
-	[ -e $PIDFILE ] || return -1
-	kill -$SIGRELOAD `cat $PIDFILE` >& /dev/null && return 0 || return -1
-}
-mk_spid() {
-        /bin/pgrep -P 1 $PROCESS_BASE > $PIDFILE || return -1
-	echo "broken_pid" > /var/run/$PROCESS_BASE.bd && return 0 || return -1
+  if [ -n "$SERVPID" ] ; then
+    # we will kill the daemon:
+    if [ -d /proc/$SERVPID ] ; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    # where is the new daemon???
+    if [ -f "$PIDFILE" ] ; then
+      if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+        return 0
+      else
+        return -1
+      fi
+    else
+      # sleep 1
+      # second chance:
+      if [ -f "$PIDFILE" ] ; then
+        if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+          return 0
+        else
+          return -1
+	fi
+      else
+        return -1
+      fi
+    fi
+  fi
 }
 
+
+pkill () {
+  if [ -z "$SERVPID" ] ; then
+    return -1
+  else
+    if kill -$SIGSTOP $SERVPID >& /dev/null ; then
+      if [ -f $PIDFILE ] ; then
+        rm -f $PIDFILE
+      fi
+      return 0
+    else
+      return -1
+    fi
+  fi
+}
+
+
+prload () {
+  if [ ! -f $PIDFILE ] ; then
+    return -1
+  else
+    if kill -$SIGRELOAD $SERVPID >& /dev/null ; then
+      return 0
+    else
+      return -1
+    fi
+  fi
+}
+
+
 mkpid () {
-        if [ -e /var/run/$PROCESS_BASE.bd ]; then
-	  /bin/pgrep -P 1 $PROCESS_BASE > $PIDFILE && return 0 || return -1
-	else 
-	  return 
-	fi
+  if [ ! -e $PIDFILE ] ; then
+    echo -n "[PID] "
+    /bin/pgrep -P 1 "^$PROCESS_BASE$" > $PIDFILE && return 0 || return -1
+  else 
+    return 
+  fi
 }
+
+
 pidok () {
-	[ -e $PIDFILE ] && pgrep && 
-#	  [ "X`/bin/pgrep -P 1 $PROCESS_BASE`" == "X`cat $PIDFILE`" ] &&
-	  return 0 || return -1
+  if [ -e $PIDFILE ] ; then
+    if pgrep ; then 
+      return 0
+    else
+      return -1
+    fi
+  else
+    return -1
+  fi
 }
+
+
 log_success_msg () {
-	echo -e "$1 $RESULT_OK"
+  echo -e "$1 $RESULT_OK"
 }
+
+
 log_failure_msg () {
-	echo -e "$1 $RESULT_FAIL"
+  echo -e "$1 $RESULT_FAIL"
 }
+
+
 log_warning_msg () {
-	echo -e "$1 $RESULT_WARN"
+  echo -e "$1 $RESULT_WARN"
 }
+
+
 start_process () {
-	if [ ! -z "$RUNAS" ]; then
-	  /bin/su $RUNAS -c "$PROCESS_FULL $ARGS" &&
-	    return 0 || return -1
-	else
-	  $PROCESS_FULL $ARGS &&
-	    return 0 || return -1
-	fi
+  if [ ! -z "$RUNAS" ]; then
+    /bin/su $RUNAS -c "$PROCESS_FULL $ARGS" &&
+      return 0 || return -1
+  else
+    $PROCESS_FULL $ARGS &&
+    return 0 || return -1
+  fi
 }
+
 
 # the main functions are defined as default_ so you may call these
 # directly from a script too
 default_start () {
-		get_data
-		# start the daemon
-		echo -n "Starting $SHORT: "
-		# check to see if it's not already running
-		if ! pgrep ; then
-		  # start it up ourselves
-		  if start_process ; then
-		    # starup succeeded, now check if it really is running
-		    if pgrep ; then
-		      # make if none exists
-		      if [ ! -e $PIDFILE ] ; then
-			echo -n "broken daemon: "
-			mk_spid && echo "created /var/run/$PROCESS_BASE.pid" || 
-			echo "could not create /var/run/$PROCESS_BASE.pid"
-		      fi
-		      echo -e $RESULT_OK
-		    else 
-		      # startup failed on our side
-		      echo -e $RESULT_FAIL
-		    fi
-		  fi
-		else
-		  # it's already running idiot
-		  echo -n "already running"
-		  echo -e $RESULT_WARN
-		fi
+  get_data
+  # start the daemon
+  echo -n "Starting $SHORT: "
+  # check to see if it's not already running
+  if ! pgrep ; then
+    # sanity check:
+    if [ -f $PIDFILE ] ; then
+      rm -f $PIDFILE
+    fi
+    # start it up ourselves
+    if start_process ; then
+      # starup succeeded, now check if it really is running
+      if pgrep ; then
+        echo -e $RESULT_OK
+      else 
+        # here's the broken daemon case
+	mkpid
+	if pgrep ; then
+	  echo -e $RESULT_OK
+	else
+          # startup failed on our side
+          echo -e $RESULT_FAIL
+	fi
+      fi
+    fi
+  else
+    # it's already running idiot
+    echo -n "already running"
+    echo -e $RESULT_WARN
+  fi
 }
+
 
 default_stop () {
-		get_data
-		# stop the daemon
-		echo -n "Stopping $SHORT: "
-		if pgrep ; then
-		  for COUNT in 1 2 3 4 5 ; do
-		    pgrep && mkpid
-		    pgrep && pkill
-		    pgrep && echo -n "." && sleep 1
-		    if ! pgrep ; then
-		      # killed OK
-		      [ -e $PIDFILE ] && rm $PIDFILE
-		      echo -e $RESULT_OK
-		      break
-		    fi
-		  done
-		  if pgrep ; then
-                    # FAILED!
-		    mkpid
-		    echo -e " kill failed$RESULT_FAIL"
-		  fi
-		else
-		  echo -e "not running $RESULT_WARN"
-		fi
+  get_data
+  # stop the daemon
+  echo -n "Stopping $SHORT: "
+  if pgrep ; then
+    pkill
+    for COUNT in 1 2 3 4 5 ; do
+      pgrep && pkill
+      pgrep && echo -n "." && sleep 1
+      if ! pgrep ; then
+        # killed OK
+        [ -e $PIDFILE ] && rm $PIDFILE
+        echo -e $RESULT_OK
+        break
+      fi
+    done
+    if pgrep ; then
+      # FAILED!
+      mkpid
+      echo -e "kill failed$RESULT_FAIL"
+    fi
+  else
+    echo -e "not running $RESULT_WARN"
+  fi
 }
+
 
 default_restart () {
-		get_data
-		# restart ourselves
-		$0 stop && $0 start
+  get_data
+  # restart ourselves
+  $0 stop && $0 start
 }
+
 
 default_probe () {
-		get_data
-      		# see if we need to reload it based on the configs
-		if [ -e $PIDFILE ] ; then
-		  # is it really there?
-		  if pidok ; then
-		    # test date of config files against PID dile
-		    NEEDRELOAD="false"
-		    for CONFIGFILE in $CONFIGFILES ; do
-		      [ $CONFIGFILE -nt $PIDFILE ] && NEEDRELOAD="true"
-		    done
-		    if [ "X$NEEDRELOAD" == "Xtrue" ] ; then
-		      # we need to reload
-		      $0 reload
-		    else
-		      # no need to reload
-		      echo "Reload of $SHORT not needed"
-		    fi
-		  else
-		    # our process died!
-		    [ -e $PIDFILE ] && rm $PIDFILE
-		    echo "Reload of $SHORT failed: process died!"
-		  fi
-		else
-		  # no pid file???
-		  echo "Reload of $SHORT failed: cannot find process"
-		fi
+  get_data
+  # see if we need to reload it based on the configs
+  if [ -e $PIDFILE ] ; then
+    # is it really there?
+    if pidok ; then
+      # test date of config files against PID dile
+      NEEDRELOAD="false"
+      for CONFIGFILE in $CONFIGFILES ; do
+        [ $CONFIGFILE -nt $PIDFILE ] && NEEDRELOAD="true"
+      done
+      if [ "X$NEEDRELOAD" == "Xtrue" ] ; then
+        # we need to reload
+        $0 reload
+      else
+        # no need to reload
+        echo "Reload of $SHORT not needed"
+      fi
+    else
+      # our process died!
+      [ -e $PIDFILE ] && rm $PIDFILE
+      echo "Reload of $SHORT failed: process died!"
+    fi
+  else
+    # no pid file???
+    echo "Reload of $SHORT failed: cannot find process"
+  fi
 }
+
 
 default_reload () {
-		get_data
-		# reload it
-		echo -n "Reloading $SHORT: "
-		if [ -e $PIDFILE ] ; then
-		  # we have a pid file
-		  prload
-		  # test existence
-		  if pidok ; then
-		    # still running then
-		    touch $PIDFILE
-		    echo -e $RESULT_OK
-		  else
-		    # something went wrong
-		    if pgrep ; then
-		      # changed PID
-		      mkpid
-		      echo -e $RESULT_OK
-		    else
-		      # it died
-		      [ -e $PIDFILE ] && rm $PIDFILE
-		      echo -e "process died!$RESULT_FAIL"
-		    fi
-		  fi
-		else
-		  # no pid file???
-		  echo -e "cannot find process$RESULT_FAIL"
-		fi
+  get_data
+  # reload it
+  echo -n "Reloading $SHORT: "
+  if [ -e $PIDFILE ] ; then
+    # we have a pid file
+    prload
+    # test existence
+    if pidok ; then
+      # still running then
+      touch $PIDFILE
+      echo -e $RESULT_OK
+    else
+      # something went wrong
+      if pgrep ; then
+        # changed PID
+        mkpid
+        echo -e $RESULT_OK
+      else
+        # it died
+        [ -e $PIDFILE ] && rm $PIDFILE
+        echo -e "process died!$RESULT_FAIL"
+      fi
+    fi
+  else
+    # no pid file???
+    echo -e "cannot find process$RESULT_FAIL"
+  fi
 }
+
 
 default_status () {
-		get_data
-		# check if it is running
-		echo -n "Checking $SHORT: "
-		if pidok ; then
-		  # we have a pid file and it's okay
-		  echo -e "$RESULT_OK"
-		else
-		  # something went wrong
-		  if pgrep ; then
-		    # changed PID
-		    mkpid
-		    echo -e "Was reloaded$RESULT_OK"
-		  else
-		    # it died
-		    [ -e $PIDFILE ] && rm $PIDFILE
-		    echo -e "process died!$RESULT_FAIL"
-		  fi
-		fi
+  get_data
+  # check if it is running
+  echo -n "Checking $SHORT: "
+  if pidok ; then
+    # we have a pid file and it's okay
+    echo -e "$RESULT_OK"
+  else
+    # something went wrong
+    if pgrep ; then
+      # changed PID
+      mkpid
+      echo -e "Was reloaded$RESULT_OK"
+    else
+      # it died
+      [ -e $PIDFILE ] && rm $PIDFILE
+      echo -e "process died!$RESULT_FAIL"
+    fi
+  fi
 }
+
 
 default_install () {
-		get_data
-		# make the links for this file go to the right places
-		LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
-		LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
-		LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
-		ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
-		  echo "Warning: some links already exist!"
-		for LEVEL in 0 1 2 3 4 5 6 ; do
-		  echo $LEVELS | grep -q $LEVEL && {
-		    # make start link
-		    echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME
-		    ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME || true
-		  } || {
-		    # make stop link
-		    echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/K$LSTOP$BASENAME
-		    ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/K$LSTOP$BASENAME || true
-		  }
-		done
+  get_data
+  # make the links for this file go to the right places
+  LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
+  LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
+  LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
+  ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
+    echo "Warning: some links already exist!"
+  for LEVEL in 0 1 2 3 4 5 6 ; do
+    echo $LEVELS | grep -q $LEVEL && {
+      # make start link
+      echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME
+      ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME || true
+    } || {
+      # make stop link
+      echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/K$LSTOP$BASENAME
+      ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/K$LSTOP$BASENAME || true
+    }
+  done
 }
+
 
 default_uninstall () {
-		get_data
-   		# remove the links for this script
-		LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
-		LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
-		LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
-		for LEVEL in 0 1 2 3 4 5 6 ; do
-		  echo $LEVELS | grep -q $LEVEL && {
-		    # remove start link
-		    echo rm /etc/rc$LEVEL.d/S$LSTART$BASENAME
-		    rm /etc/rc$LEVEL.d/S$LSTART$BASENAME || true
-		  } || {
-		    # remove stop link
-		    echo rm /etc/rc$LEVEL.d/K$LSTOP$BASENAME
-		    rm /etc/rc$LEVEL.d/K$LSTOP$BASENAME || true
-		    # if ANYONE can explain why that || true is NEEDED
-		    # tell me PLEASE!!!
-		  }
-		done
-		ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
-		  echo "Warning: some links still exist!"
+  get_data
+     # remove the links for this script
+  LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
+  LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
+  LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
+  for LEVEL in 0 1 2 3 4 5 6 ; do
+    echo $LEVELS | grep -q $LEVEL && {
+      # remove start link
+      echo rm /etc/rc$LEVEL.d/S$LSTART$BASENAME
+      rm /etc/rc$LEVEL.d/S$LSTART$BASENAME || true
+    } || {
+      # remove stop link
+      echo rm /etc/rc$LEVEL.d/K$LSTOP$BASENAME
+      rm /etc/rc$LEVEL.d/K$LSTOP$BASENAME || true
+      # if ANYONE can explain why that || true is NEEDED
+      # tell me PLEASE!!!
+    }
+  done
+  ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
+    echo "Warning: some links still exist!"
 }
 
+
 default_usage () { 
-		# default usage message
-		echo "usage: $0 {start|stop|restart|reload|status}"
+  # default usage message
+  echo "usage: $0 {start|stop|restart|reload|status}"
 }
+
 
 # default when no action passed
 [ -z $1 ] && ACTION=usage || ACTION=$1
