@@ -39,7 +39,7 @@ and many of the <a href="#SUBROUTINES">subroutines</a> and <a
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">DIALOGRC=/etc/lunar/dialogrc </td>
+      <td style="vertical-align: top;"><a name="DIALOGRC"></a>DIALOGRC=/etc/lunar/dialogrc</td>
       <td style="vertical-align: top;">Configuration file for the
 dialog binary used by the lunar core tools.<br>
       </td>
@@ -66,7 +66,7 @@ dialog binary used by the lunar core tools.<br>
 which are system specific.</td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">LOCAL_CONFIG=/etc/lunar/local/config<br>
+      <td style="vertical-align: top;"><a name="LOCAL_CONFIG"></a>LOCAL_CONFIG=/etc/lunar/local/config<br>
       </td>
       <td style="vertical-align: top;">File containing system specific
 local defines.<br>
@@ -109,7 +109,7 @@ build modules.<br>
     <tr>
       <td style="vertical-align: top;">DOCUMENT_DIRECTORY=/usr/share/doc<br>
       </td>
-      <td style="vertical-align: top;">Location used for documentation.<br>
+      <td style="vertical-align: top;">Location for documentation.<br>
       </td>
     </tr>
     <tr>
@@ -118,7 +118,8 @@ build modules.<br>
 excluded during a lin or lrm.</td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">MOONBASE=/var/lib/lunar/moonbase<br>
+      <td style="vertical-align: top;"><a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=moonbase">MOONBASE</a>=/var/lib/lunar/moonbase<br>
       </td>
       <td style="vertical-align: top;">Default location of the moonbase
 (may be over ridden in /etc/lunar/local/config).<br>
@@ -142,31 +143,31 @@ compiled while other modules are being installed.<br>
       <td style="vertical-align: top;"><a name="SUBROUTINES"></a>SUBROUTINES=/var/lib/lunar/subroutines<br>
       </td>
       <td style="vertical-align: top;">File containing core subroutines
-which are used by many of the core tools. It sources all of the files in
-$FUNCTIONS.<br>
+which are used by many of the core tools. It sources all of the files in <a
+ href="#FUNCTIONS">$FUNCTIONS</a>.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;"><a name="FUNCTIONS"></a>FUNCTIONS=/var/lib/lunar/functions<br>
       </td>
-      <td style="vertical-align: top;">Directory containing subroutines
-in separate files<br>
+      <td style="vertical-align: top;">Directory containing <a
+ href="#SUBROUTINES">subroutines</a> in separate files<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">MENUS=/var/lib/lunar/menu<br>
       </td>
       <td style="vertical-align: top;">Directory containing shell
-scripts which generate menus used by dialog for the lunar menuing system.<br>
+scripts which generate menus used by <a href="#DIALOGRC">dialog</a> for
+the lunar menuing system.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">SUSTAINED=/var/lib/lunar/sustained<br>
       </td>
       <td style="vertical-align: top;">List of modules that are
-essential to system, and<br>
-removal of these modules is not permitted. Installing and upgrading is
-fine.<br>
+essential to system. Removal of these modules is not permitted.
+Installing and upgrading is fine.<br>
       </td>
     </tr>
     <tr>
@@ -194,7 +195,8 @@ functions so they are never run in parallel.<br>
       <td style="vertical-align: top;">ACTIVITY_LOG=/var/log/lunar/activity<br>
       </td>
       <td style="vertical-align: top;">Log file which is written to by
-various lunar subroutines to record actions executed by the lunar tools.<br>
+various lunar <a href="#SUBROUTINES">subroutines</a> to record actions
+executed by the lunar tools.<br>
       </td>
     </tr>
     <tr>
@@ -275,7 +277,7 @@ which are installed on the system.<br>
       </td>
       <td style="vertical-align: top;">If the value of $SOURCE_CACHE is
 empty make it equal to /var/spool/lunar else it continues to equal the
-value of it's previous define.<br>
+value of its previous define.<br>
       </td>
     </tr>
     <tr>
@@ -327,8 +329,8 @@ and subroutines.<br>
     <tr>
       <td style="vertical-align: top;">MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2<br>
       </td>
-      <td style="vertical-align: top;">Direct URL for the default Lunar
-moonbase.<br>
+      <td style="vertical-align: top;">Direct URL for the default Lunar <a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=moonbase">moonbase</a>.<br>
       </td>
     </tr>
     <tr>
@@ -343,8 +345,9 @@ patches.<br>
 /sbin /usr /var /opt/lunar"<br>
       </td>
       <td style="vertical-align: top;">Install locations which are
-tracked (recorded) by the lunar installation routines. Used mostly by
-lvu.<br>
+tracked (recorded) by the lunar installation routines. Interactive use
+provided mostly by <a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lvu">lvu</a>.<br>
       </td>
     </tr>
     <tr>
@@ -379,7 +382,7 @@ colors used by the Lunar tool set.<br>
       <td style="vertical-align: top;">TAB_ENTER_IFS="<br>
 "<br>
       </td>
-      <td style="vertical-align: top;">Enabling modification of the IFS
+      <td style="vertical-align: top;">Enabling modification of IFS
 (internal field separator) which is a bash shell default.<br>
       </td>
     </tr>
@@ -387,25 +390,26 @@ colors used by the Lunar tool set.<br>
       <td style="vertical-align: top;">ENTER_IFS="<br>
 "<br>
       </td>
-      <td style="vertical-align: top;">Enabling modification of the IFS
+      <td style="vertical-align: top;">Enabling modification of IFS
 (internal field separator) which is a bash shell default.</td>
     </tr>
     <tr>
       <td style="vertical-align: top;">STANDARD_IFS="<br>
 "<br>
       </td>
-      <td style="vertical-align: top;">Enabling modification of the IFS
+      <td style="vertical-align: top;">Enabling modification of IFS
 (internal field separator) which is a bash shell default.</td>
     </tr>
     <tr>
       <td style="vertical-align: top;">. $SUBROUTINES<br>
       </td>
-      <td style="vertical-align: top;">Sourcing the subroutines
-file&nbsp; /var/lib/lunar/subroutines.</td>
+      <td style="vertical-align: top;">Sourcing the <a
+ href="#SUBROUTINES">subroutines</a> file&nbsp;
+/var/lib/lunar/subroutines.</td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">[ -s "$LOCAL_CONFIG" ]
-&amp;&amp; . $LOCAL_CONFIG<br>
+      <td style="vertical-align: top;">[ -s "<a href="#LOCAL_CONFIG">$LOCAL_CONFIG</a>"
+] &amp;&amp; . <a href="#LOCAL_CONFIG">$LOCAL_CONFIG</a><br>
       </td>
       <td style="vertical-align: top;">If /etc/lunar/local/config
 exists and is not empty it is sourced. Some variables assigned in this
