@@ -32,6 +32,18 @@
 
 help() {
 cat << EOF
+LVU -- Lunar View utility (for viewing just about everything in Lunar-Linux)
+
+Usage:		lvu [general options] [command [command parameters]]
+
+GENERAL OPTIONS:
+
+-d  |  --debug                  Enables debug messages
+-h  |  --help                   Displays this help text
+-v  |  --verbose                Increases the level of message output
+
+Commands:
+
 Invoke lvu with desired command followed by arguments.
 Please note that anything in brackets [ ] is optional.
 
@@ -41,11 +53,11 @@ what        module         display a module's description
 where       module         display a module's section
 cd          module         change directory to module and execs a new shell
 alien                      discover untracked files
-from        path/file      discover what installed a file
+from        path/file      discover what installed a given file
 leafs                      display installed modules that have no explicit
                                dependencies on them
 orphans                    display installed modules that are missing
-                               dependancies
+                               dependencies
 held                       display held modules
 exiled                     display exiled modules
 
@@ -69,7 +81,7 @@ sum         [module]       display checksums
 md5sum      [module]       display md5sums
 
 export                     make snapshot of box's configuration.
-import                     snapshot restore snapshot.
+import      snapshot       restores an exported snapshot.
 
 section     [section]      display moonbase sections
 moonbase                   display text listing of the moonbase
@@ -77,8 +89,8 @@ html                       display html listing of the moonbase
 updatelog                  display summary log of previous lunar update
 activity                   display main log file
 
-newer       20020521       display available modules newer than May 21, 2002
-older       20010521       display modules installed before May 21, 2001
+newer       20030801       display available modules newer than Aug 01, 2003
+older       20030101       display modules installed before Jan 01, 2003
 
 voyeur      [delay|module] peak into module compilation
 
