@@ -129,7 +129,7 @@ download_module() {
 		else
 			# break out of the loop if the cache has it:
 			verbose_msg "Skipping download of \"$SRC\" (in cache)"
-			break
+			continue
 		fi
 	done
 ) 
