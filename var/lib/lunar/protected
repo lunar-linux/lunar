@@ -42,6 +42,7 @@
 /lib/modules
 /usr/X11R6/lib/X11/app-defaults
 /usr/bin/basename
+/usr/bin/dirname
 /usr/bin/file
 /usr/bin/install
 /usr/bin/make
