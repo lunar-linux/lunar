@@ -68,7 +68,7 @@ help() {
              MENU="Basic Optimization"
         None_HELP="-O0"
         Fast_HELP="-O1"
-      Faster_HELP="-02"
+      Faster_HELP="-O2"
      Fastest_HELP="-O3"
        Small_HELP="-Os"
                ;;
@@ -143,10 +143,11 @@ help() {
       supersparc_HELP="SuperSPARC"
        sparclite_HELP="SPARCLite"
       hypersparc_HELP="HyperSPARC"
+      sparclite86x_HELP="SPARCLite86x"
             f930_HELP="f930 SPARC"
             f934_HELP="f934 SPARC"
         sparclet_HELP="SPARCLet"
-           ts701_HELP="ts701 SPARC"
+          tsc701_HELP="tsc701 SPARC"
               v9_HELP="V9 SPARC"
       ultrasparc_HELP="ULTRASPARC"
                  ;;
@@ -322,18 +323,19 @@ cpu_options() {
                      "PowerPC" "PowerPC" $( [ "$CPU" == "PowerPC" ] && echo "on" || echo "off" ) "$PowerPC_HELP" )
                      ;;
   
-    SPARC) OPTIONS=( "v7"         "v7"         "$v7_HELP"
-                     "cypress"    "cypress"    "$cypress_HELP"
-                     "v8"         "v8"         "$v8_HELP"
-                     "supersparc" "supersparc" "$supersparc_HELP"
-                     "sparclite"  "sparclite"  "$sparclite_HELP"
-                     "hypersparc" "hypersparc" "$hypersparc_HELP"
-                     "f930"       "f930"       "$f930_HELP"
-                     "f934"       "f934"       "$f934_HELP"
-                     "sparclet"   "sparclet"   "$sparclet_HELP"
-                     "ts701"      "ts701"      "$ts701_HELP"
-                     "v9"         "v9"         "$v9_HELP"
-                     "ultrasparc" "ultrasparc" "$ultrasparc_HELP" )
+    SPARC) OPTIONS=( "v7"         "v7"         $( [ "$CPU" == "v7" ] && echo "on" || echo "off" ) "$v7_HELP"
+                     "cypress"    "cypress"    $( [ "$CPU" == "cypress" ] && echo "on" || echo "off" ) "$cypress_HELP"
+                     "v8"         "v8"         $( [ "$CPU" == "v8" ] && echo "on" || echo "off" ) "$v8_HELP"
+                     "supersparc" "supersparc" $( [ "$CPU" == "supersparc" ] && echo "on" || echo "off" ) "$supersparc_HELP"
+                     "sparclite"  "sparclite"  $( [ "$CPU" == "sparclite" ] && echo "on" || echo "off" ) "$sparclite_HELP"
+                     "hypersparc" "hypersparc" $( [ "$CPU" == "hypersparc" ] && echo "on" || echo "off" ) "$hypersparc_HELP"
+                     "sparclite86x" "sparclite86x"  $( [ "$CPU" == "sparclite86x" ] && echo "on" || echo "off" ) "$sparclite86x_HELP"
+                     "f930"       "f930"       $( [ "$CPU" == "f930" ] && echo "on" || echo "off" ) "$f930_HELP"
+                     "f934"       "f934"       $( [ "$CPU" == "f934" ] && echo "on" || echo "off" ) "$f934_HELP"
+                     "sparclet"   "sparclet"   $( [ "$CPU" == "sparclet" ] && echo "on" || echo "off" ) "$sparclet_HELP"
+                     "tsc701"     "tsc701"     $( [ "$CPU" == "tsc701" ] && echo "on" || echo "off" ) "$ts701_HELP"
+                     "v9"         "v9"         $( [ "$CPU" == "v9" ] && echo "on" || echo "off" ) "$v9_HELP"
+                     "ultrasparc" "ultrasparc" $( [ "$CPU" == "ultrasparc" ] && echo "on" || echo "off" ) "$ultrasparc_HELP" )
                      ;;
    esac
 
