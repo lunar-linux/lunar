@@ -1798,7 +1798,8 @@ fix_depends () {
     cat $TMP/depends.new.* >> $DEPENDS_STATUS
     cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
 
-    OLD_FIX=$FIX ; unset FIX
+    OLD_FIX=$FIX
+    [ "$FIX" == "--nofix" ] || unset FIX
     OLD_lin_PASS=$lin_PASS; export lin_PASS=three
 
     for MODULE in $CHANGED_MODULES ; do
