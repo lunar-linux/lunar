@@ -42,13 +42,11 @@ help() {
                  
          cc_help)
                   MENU="Options for the C compiler"
-           Normal_HELP="Do not set any options"
              Pipe_HELP="Enable gcc to use named pipes."
                 ;;
                 
         ccc_help)
                   MENU="Options for the C++ compiler"
-           Normal_HELP="Do not set any options"
              Pipe_HELP="Enable gcc to use named pipes."
                 ;;
                 
@@ -227,12 +225,10 @@ compiler_options() {
 }
 
 cc_options(){
-  OPTIONS=( "Normal" "Normal"  "$Normal_HELP"
-            "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( "Pipe"   "-pipe"   "$Pipe_HELP" )
 }
 ccc_options(){
-  OPTIONS=( "Normal" "Normal"  "$Normal_HELP"
-            "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( "Pipe"   "-pipe"   "$Pipe_HELP" )
 }
 
 platform_options() {
