@@ -270,20 +270,20 @@ cpu_options() {
                      "AthlonMP"    "AthlonMP"     $( [ "$CPU" == "AthlonMP" ] && echo "on" || echo "off" )    "$AthlonMP_HELP" )
                      ;;
 
-    Alpha) OPTIONS=( "ev4"     "ev4"     "$ev4_HELP"
-                     "ev45"    "ev45"    "$ev45_HELP"
-                     "21064"   "21064"   "$A21064_HELP"
-                     "ev5"     "ev5"     "$ev5_HELP"
-                     "21164"   "21164"   "$A21164_HELP"
-                     "ev56"    "ev56"    "$ev56_HELP"
-                     "21164a"  "21164a"  "$A21164a_HELP"
-                     "pca56"   "pca56"   "$pca56_HELP"
-                     "21164pc" "21164pc" "$A21164pc_HELP"
-                     "21164PC" "21164PC" "$A21164PC_HELP"
-                     "ev6"     "ev6"     "$ev6_HELP"
-                     "21264"   "21264"   "$A21264_HELP"
-                     "ev67"    "ev67"    "$ev67_HELP"
-                     "21264a"  "21264a"  "$A21264a_HELP" )
+    Alpha) OPTIONS=( "ev4"         "ev4"          $( [ "$CPU" == "ev4" ] && echo "on" || echo "off" )         "$ev4_HELP"
+                     "ev45"        "ev45"         $( [ "$CPU" == "ev45" ] && echo "on" || echo "off" )        "$ev45_HELP"
+                     "21064"       "21064"        $( [ "$CPU" == "21064" ] && echo "on" || echo "off" )         "$A21064_HELP"
+                     "ev5"         "ev5"          $( [ "$CPU" == "ev5" ] && echo "on" || echo "off" )         "$ev5_HELP"
+                     "21164"       "21164"        $( [ "$CPU" == "21164" ] && echo "on" || echo "off" )         "$A21164_HELP"
+                     "ev56"        "ev56"         $( [ "$CPU" == "ev56" ] && echo "on" || echo "off" )         "$ev56_HELP"
+                     "21164a"      "21164a"       $( [ "$CPU" == "21164a" ] && echo "on" || echo "off" )         "$A21164a_HELP"
+                     "pca56"       "pca56"        $( [ "$CPU" == "pca56" ] && echo "on" || echo "off" )         "$pca56_HELP"
+                     "21164pc"     "21164pc"      $( [ "$CPU" == "21164pc" ] && echo "on" || echo "off" )         "$A21164pc_HELP"
+                     "21164PC"     "21164PC"      $( [ "$CPU" == "21164PC" ] && echo "on" || echo "off" )         "$A21164PC_HELP"
+                     "ev6"         "ev6"          $( [ "$CPU" == "ev6" ] && echo "on" || echo "off" )         "$ev6_HELP"
+                     "21264"       "21264"        $( [ "$CPU" == "21264" ] && echo "on" || echo "off" )         "$A21264_HELP"
+                     "ev67"        "ev67"         $( [ "$CPU" == "ev67" ] && echo "on" || echo "off" )         "$ev67_HELP"
+                     "21264a"      "21264a"       $( [ "$CPU" == "21264a" ] && echo "on" || echo "off" )         "$A21264a_HELP" )
                      ;;
 
   PowerPC) OPTIONS=( "common" "common"   "$common_HELP"
