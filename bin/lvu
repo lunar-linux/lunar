@@ -319,31 +319,20 @@ older()  {
 }
 
 maintainer()  {
-  SECTION=`find_section  $1`
-  if  [  -x  $MOONBASE/$SECTION/$1/DETAILS  ];  then
-    .  $MOONBASE/$SECTION/$1/DETAILS  >  /dev/null
-    if  [  -n  "$MAINTAINER"  ];  then  
-      echo  $MAINTAINER
-    else
-      echo  maintainer@lunar-linux.org
-    fi
+  run_details $1
+  if  [  -n  "$MAINTAINER"  ];  then  
+    echo  $MAINTAINER
+  else
+    echo  maintainer@lunar-linux.org
   fi
 }
 
-get_moonbase_details()  {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-      if  [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ];  then
-          echo  $MOONBASE/$SECTION/$MODULE/DETAILS
-      fi
-    done
-  done
-}
 
 show_from()  {
   cd  $INSTALL_LOGS
   grep  $1  *
 }
+
 show_module_component()  {
   COMPONENT=$1
      MODULE=$2
@@ -476,6 +465,7 @@ show_depends()  {
     done
   fi
 }
+
 old_show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
@@ -488,25 +478,24 @@ old_show_depends()  {
     done
   fi
 }
+
 show_website()  {
   [ -z "$MODULE" ] && return 1
-
-  if    SECTION=`find_section  $MODULE`                     &&
-        .   $MOONBASE/$SECTION/$MODULE/DETAILS > /dev/null  &&
-        [  -n  "$WEB_SITE"  ]
-  then  echo    $WEB_SITE
-  else  echo   "http://www.lunar-linux.org"
+  run_details $1
+  if  [  -n  "$WEB_SITE"  ] ; then
+    echo $WEB_SITE
+  else
+    echo "http://www.lunar-linux.org"
   fi
 }
 
 show_version()  {  
-  [ -z "$MODULE" ] && return 1  
-  
-  if    SECTION=`find_section  $MODULE`                     &&  
-        .   $MOONBASE/$SECTION/$MODULE/DETAILS > /dev/null  &&  
-        [  -n  "$VERSION"  ]  
-  then  echo    $VERSION  
-  else  echo   "$MODULE does not exist or has no version."  
+  [ -z "$MODULE" ] && return 1
+  run_details $1
+  if [  -n  "$VERSION"  ] ; then
+    echo $VERSION  
+  else
+    echo "$MODULE does not exist or has no version."  
   fi  
 }  
 
@@ -653,15 +642,15 @@ parse()  {
 	      fi
 	      ;;
 
-    compile)  if  [  -z  "$VERSION"  ];  then
-                SECTION=`find_section  $MODULE`             &&
-                DETAILS=$MOONBASE/$SECTION/$MODULE/DETAILS  &&
-                [  -x  $DETAILS  ]                         &&
-                    .  $DETAILS                               >/dev/null
+    compile)  run_details 
+              if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
+	        display  $COMPILE_LOGS/$MODULE-$VERSION.bz2
+	      else
+                VERSION=$(installed_version $MODULE)
+                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
+                "Compile log for $MODULE does not exist"
               fi
-              display  $COMPILE_LOGS/$MODULE-$VERSION.bz2   \
-                       "Compile log for $MODULE does not exist"
-              ;;
+	      ;;
     install)  display  $INSTALL_LOGS/$MODULE-$VERSION   \
               "Install log for $MODULE does not exist"
               ;;

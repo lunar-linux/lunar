@@ -96,107 +96,10 @@ symlinks()  {
 dirnames() {  while  read  FILE;  do  dirname  "$FILE";  done;  }
 
 
-# function : sedit
-# usage    : sedit "sed string" filename [filename [...]]
-# purpose  : sed edit files;  example : sedit "s/TSET/TEST/" file file...
-sedit()  {
-  SEDIT=$1
-  shift
-  for FILE in $@ ; do
-    message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${FILE}${DEFAULT_COLOR}"
-    sed -i "$SEDIT" "$FILE"
-  done
-}
-
-
 # function : exists
 # usage    : VARIABLE=`exists < dirlistfile`
 # purpose  : filter out the non-existent files in a list
 exists()  {  while  read  ITEM;  do  [  -e  $ITEM  ]  &&  echo  $ITEM;  done;  }
-
-# function : return_error
-# usage    : return_error error_string $FUNCTION
-# purpose  : return info if a function is called with wrong params, exits imm.
-return_error() {
-   echo "$1 in function $2"
-   exit
-}
-
-sound()  {
-
-  case  $SOUND  in
-    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e  $SOUND_FILE  ];  then
-           (  cd  /  ;  play  $SOUND_FILE  & )
-         fi
-    ;;
-  esac
-
-}
-
-query()  
-{ 
-#  2 arguments
-#  query  "what do you want?  "  DEFAULT
-
-  if  [  -z  "$SILENT"  ];  then
-
-    # message  "Press y for yes, n for no."
-    if  [  -n  "$MODULE"  ];  then
-      echo  -e  -n  "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}:  "
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    else
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    fi
-
-    read   -t  $PROMPT_DELAY  -n  1  RESPONSE
-    echo
-
-    RESPONSE=${RESPONSE:=$2}
-    case  $RESPONSE  in
-      y|Y)  true  ;;
-        *)  false ;;
-    esac
-
-  else
-
-    echo  $2
-    case  $2  in
-        y|Y)  true    ;;
-          *)  false   ;;
-    esac
-
-  fi
-}
-
-
-message()    {  [  -n  "$SILENT"  ]  ||  echo  -e  "$*";  }
-
-
-report() {
-
-  if  [  ! -f  $1  ];  then  return;  fi
-
-  if  [  "$VIEW_REPORTS"  ==  "on"  ];  then
-
-    VIEW_PROMPT="View $2 for ${MODULE_COLOR}${MODULE}-${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}?"
-    sound  REPORT
-    if  query  "$VIEW_PROMPT" n;  then  view_file  $1;  fi
-  fi
-
-  if  [  "$MAIL_REPORTS"  ==  "on"  ];  then
-    MAILTEMP="/tmp/lunar.mail.`uuidgen`" 
-    date  -u  > $MAILTEMP
-    echo     >> $MAILTEMP
-    cat $1   >> $MAILTEMP
-    mail  -s  "Lunar Report from $HOSTNAME : $2 for $MODULE-$VERSION"  \
-              $ADMIN  < $MAILTEMP  2>/dev/null
-    rm -f $MAILTEMP 2>/dev/null          
-  fi
-
-  true
-
-}
 
 
 # function : guess_filename
@@ -219,40 +122,21 @@ guess_filename()  {
 }
 
 
-testpack() {
-
-  FILENAME=`guess_filename                $1`  ||
-  FILENAME=`guess_filename  $SOURCE_CACHE/$1`
-
-  [  -f  $FILENAME  ]                                    &&
-  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
-  
-  case  $COMPRESSOR  in
-        bzip2)  bzip2  -tf   $FILENAME   1>/dev/null 2>&1  ;;
-         gzip)  gzip   -tf   $FILENAME   1>/dev/null 2>&1  ;;
-    compress*)  gzip   -tf   $FILENAME   1>/dev/null 2>&1  ;;
-          Zip)  unzip  -tq   $FILENAME   1>/dev/null 2>&1  ;;
-          RPM)  rpmunpack  < $FILENAME   |                 \
-                gzip   -t                1>/dev/null 2>&1  ;;
-            *)  true                                       ;;
-  esac
-
-}
-
-
 unpack() {
 
     FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
   COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
 
+  verbose_msg "Unpacking $FILENAME in $(pwd)"
+
   case  $COMPRESSOR  in
-        bzip2)  bzip2  -cdf  $FILENAME  |  tar   -xf  -    ;;
-         gzip)  gzip   -cdf  $FILENAME  |  tar   -xf  -    ;;
-    compress*)  gzip   -cdf  $FILENAME  |  tar   -xf  -    ;;
-          Zip)  unzip  -q    $FILENAME                     ;;
-          RPM)  rpmunpack  < $FILENAME  |  gzip  -d        \
-                                        |  cpio  -idm      ;;
-            *)  false                                      ;;
+        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
+         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+          Zip)  unzip  -q    $FILENAME                  ;;
+          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
+                                        |  cpio  -idm   ;;
+            *)  false                                   ;;
   esac
   [ -n "$SOURCE_DIRECTORY" ] &&
   [ -d "$SOURCE_DIRECTORY" ]
@@ -276,27 +160,29 @@ boost_locked()  {
 
 save_libraries()  {
 
-   [ "$MODULE" == "glibc" ] && return 0
+  [ "$MODULE" == "glibc" ] && return 0
 
-    OLD_VERSION=`installed_version  $MODULE`
-        OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
+  verbose_msg "saving libraries if any"
+
+  OLD_VERSION=`installed_version  $MODULE`
+  OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
 
   [ -e "$OLD_LOG" ] || return 0      
 
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
   mkdir  -p  $OLD_LIBS
 
-            SAVED=$OLD_LIBS/$MODULE.saved.libraries
+  SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-
   grep   "/lib/"  $OLD_LOG  |
-  while  read        LINE;  do
+  while  read  LINE;  do
 
     if   [  -f      $LINE   ]  &&
          file  -bL  $LINE   |
          grep  -q   "shared object"
     then
+      verbose_msg "saving $LINE"
       if  [  -h  $LINE  ];  then
         DEST=$(  basename  $(  ls   -la  "$LINE"  |
                                cut  -d  '>'  -f2  |
@@ -307,12 +193,9 @@ save_libraries()  {
       else
         cp  $LINE  $OLD_LIBS
       fi
-      echo       $OLD_LIBS/`basename  $LINE`  >>  $SAVED
+      echo  $OLD_LIBS/`basename  $LINE`  >>  $SAVED
     fi
-
-
   done
-
 
   ldconfig  $OLD_LIBS
 
@@ -325,59 +208,59 @@ save_libraries()  {
 
 release_saved_libraries()  {
 
-       OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
-          SAVED=$OLD_LIBS/$MODULE.saved.libraries
-  [  -f  $SAVED  ]    &&
-  cat    $SAVED       |
-  while  read  FILE;  do
-    rm  -f   "$FILE"    
-  done
+   verbose_msg "releasing saved libraries if any"
+   
+   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+   SAVED=$OLD_LIBS/$MODULE.saved.libraries
 
-  ldconfig  $OLD_LIBS
+   [  -f  $SAVED  ]    &&
+   cat    $SAVED       |
+   while  read  FILE;  do
+     verbose_msg "rm -f \"$FILE\""
+     rm  -f   "$FILE"
+   done
+
+   ldconfig  $OLD_LIBS
 
 }
 
 
 prepare_install() {
+  if  module_installed $MODULE  || module_held $MODULE ; then
+    message  "${MESSAGE_COLOR}Preparing to install"  \
+             "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-  message  "${MESSAGE_COLOR}Preparing to install"  \
-           "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+    while  boost_locked;  do
+      sleep  5
+    done
 
-  while  boost_locked;  do
-    sleep  5
-  done
-
-  echo  $$  >  $BOOST_LOCK
-
-  if  module_installed  $MODULE   ||
-      module_held       $MODULE;  then
+    echo  $$  >  $BOOST_LOCK
 
     save_libraries
-    cp -a /usr/share/info/dir /tmp/info_dir.saved
-    lrm  --nosustain  $MODULE
-    mv /tmp/info_dir.saved /usr/share/info/dir
+    verbose_msg "calling \"lrm --keepconfig --nosustain $MODULE\""
+    lrm  --keepconfig  --nosustain  $MODULE
     true
-
   fi
-
-  rm  -f  /tmp/$MODULE.iw
-
 }
 
 
 rm_source_dir() {
+
+  [ "$KEEP_SOURCE" == "on" ] && return 0
 
   cd  $BUILD_DIRECTORY
 
   DEAD_DIR=$1
   DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
 
+  verbose_msg "destroying building dir \"$DEAD_DIR\""
+
   if [ "$TMPFS" != "off" ]; then
     umount     $DEAD_DIR  2>  /dev/null
     rmdir      $DEAD_DIR  2>  /dev/null
   else
     rm   -rf   $DEAD_DIR  2>  /dev/null
-  fi;
+  fi
 
   rm     -f  $BOOST_LOCK
 
@@ -390,6 +273,8 @@ mk_source_dir() {
 
   NEW_DIR=$1
   NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "creating building dir \"$NEW_DIR\""
 
   if [ "$TMPFS" != "off" ]; then 
     umount  $NEW_DIR  2>/dev/null
@@ -406,6 +291,7 @@ mk_source_dir() {
 
 validate_source_dir()  {
 
+  verbose_msg "validating \"$SOURCE_DIRECTORY\""
   if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
       [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
       echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
@@ -420,9 +306,12 @@ validate_source_dir()  {
 
 }
 
+
 # Usage: bad_flags "list of flags to remove"
 # Example: bad_flags -ffast-math -funroll-loops
 bad_flags() {
+
+  verbose_msg "bad_flags \"$@\""
   if [[ $1 == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
   elif [[ $1 == "compiler" ]]; then
@@ -439,29 +328,9 @@ bad_flags() {
   fi
 }
 
-# Usage: patch_it location/name level 
-# Example: patch_it $SOURCE_CACHE/foo.bz2 1
-patch_it() {
-  if [[ `echo $1 | grep .tar` ]]; then
-    if [[ `echo $1 | grep .bz2` ]]; then
-      bzcat $1 | tar x -O | patch -N -p$2
-    elif  [[ `echo $1 | grep .gz` ]]; then
-      zcat $1 | tar x -O | patch -N -p$2
-    else
-      cat $1 | tar x -O | patch -N -p$2
-    fi      
-  else
-    if [[ `echo $1 | grep .bz2` ]]; then
-      bzcat $1 | patch -N -p$2
-    elif [[ `echo $1 | grep .gz` ]]; then
-      zcat $1 | patch -N -p$2
-    else
-      cat $1 | patch -N -p$2 
-    fi
-  fi
-}
 
 default_pre_build() {
+  verbose_msg "running default_pre_build"
   if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
     if [[ -d $SOURCE_DIRECTORY ]] &&
@@ -486,236 +355,72 @@ default_pre_build() {
   fi
 }
 
+
 default_config() 
 {
-   echo CFLAGS:= $CFLAGS                   &&
-   echo OPTS:= $OPTS                       &&
-   set -x && #Let's show the logs what we've used for debug
+   verbose_msg "running default_config"
+
+   verbose_msg "CFLAGS=$CFLAGS"                &&
+   verbose_msg "OPTS=$OPTS"                    &&
+   verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+
    ./configure  --build=$BUILD            \
                 --prefix=/usr             \
                 --sysconfdir=/etc         \
                 --localstatedir=/var      \
                 --infodir=/usr/share/info \
                 --mandir=/usr/share/man   \
-                $OPTS                     &&
-   set +x      ##turn it off so that the logs stay readable
+                $OPTS
 } > $C_FIFO 2>&1
+
 
 default_make()
 {
+   verbose_msg "running default_make"
    make                               &&
    prepare_install                    &&
    make    install
 } > $C_FIFO 2>&1
 
+
 default_build() 
 {
+   verbose_msg "running default_build"
    default_config  &&
-   #activate_voyeur &&   
    default_make
 } > $C_FIFO 2>&1
 
 
-gather_docs()  {
-
-  DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
-  mkdir  -p  $DOC_DIR
-  cp         $SOURCE_DIRECTORY/README*     $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/INSTALL*    $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/FAQ*        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/CHAN*       $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/doc*        $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/DOC*        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/*doc        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/*rc         $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/conf        $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/SETUP       $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/NEWS        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/Change*     $DOC_DIR  2>/dev/null
-
-}
-
-
-install_pam_confs()  {
-
-  if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
-    cd       "$SCRIPT_DIRECTORY/pam.d"
-
-    [ -d /etc/pam.d ] || mkdir  -p  /etc/pam.d
-
-    for  FILE  in  `ls`;  do
-      if  !  [  -f  /etc/pam.d/$FILE  ];  then
-        /usr/bin/install -g 0 -o 0 -m 600 $FILE /etc/pam.d
-        cp  $FILE   /etc/pam.d
-      fi
-    done
-
-  fi
-
-}
-
-
-install_xinetd_confs()  { (
-
-  if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
-    cd       "$SCRIPT_DIRECTORY/xinetd.d"
-
-    [ -d /etc/xinetd.d ] || mkdir  -p  /etc/xinetd.d
-
-    for  SERVICE  in  $SERVICES;  do
-      for  FILE  in  `ls`;  do
-        if    grep  -q  "service $SERVICE"   $FILE  ; then
-	  if [ ! -f /etc/xinetd.d/$FILE ] ; then
-            /usr/bin/install --backup=numbered -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
-	  fi
-        fi
-      done
-    done
-
-    if  [  -n  "$SERVICES"  ];  then
-      devoke_installwatch
-      [ ! -x /etc/init.d/xinetd ] || /etc/init.d/xinetd  restart
-      invoke_installwatch
-    fi
-  fi
-
-) }
-
-install_initd()  { (
-
-  [ -d /etc/init.d ] || mkdir -p /etc/init.d
-
-  if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
-    cd $SCRIPT_DIRECTORY/init.d
-    SCRIPTS=$(find . -type f -maxdepth 1 )
-    ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
-
-    for INITDSCRIPT in $ALL_INITDSCRIPTS; do
-      if [ ! -f /etc/init.d/$INITDSCRIPT ] ; then
-        /usr/bin/install -g 0 -o 0 -m 700 $SCRIPT_DIRECTORY/init.d/$INITDSCRIPT /etc/init.d/
-      fi
-    done
-    cd $SCRIPT_DIRECTORY
-  fi
-
-  for INITDSCRIPT in $INITDSCRIPTS; do
-    ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
-    	rm /etc/rc?.d/???$INITDSCRIPT
-    chkconfig --add $INITDSCRIPT
-
-    CHKCONFIG=`grep '^# chkconfig:' /etc/init.d/$INITDSCRIPT | cut -d : -f 2-2`
-    if `echo $CHKCONFIG | grep -q $(/sbin/runlevel | cut -d ' ' -f 2-2) -`
-    then
-      devoke_installwatch
-      ( cd / && /etc/init.d/$INITDSCRIPT stop )
-      ( cd / && /etc/init.d/$INITDSCRIPT start )
-      invoke_installwatch
-    fi
-
-  done
-
-) }
-
-install_services()  { (
-
-
-  if  [  -f  $SCRIPT_DIRECTORY/services  ];  then
-
-  export  IFS="$ENTER_IFS"
-
-    cat  $SCRIPT_DIRECTORY/services  |
-    while  read  LINE;  do
-      grep  -q  "$LINE"      /etc/services  ||
-      echo      "$LINE"  >>  /etc/services
-    done
-  fi
-
-) }
-
-install_bashmisc () { (
-
-  if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
-    [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
-    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
-    message "\n${MESSAGE_COLOR}Please log out and log in again to make changes in your shell\nenvironment take effect.${DEFAULT_COLOR}\n"
-  fi
-  if [ -d $SCRIPT_DIRECTORY/skel ]; then
-    [ -d /etc/skel ] || mkdir -p /etc/skel
-    cp $SCRIPT_DIRECTORY/skel/* /etc/skel &> /dev/null
-    cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
-  fi
-
-) }
-
 default_post_build() {
+  {
+    gather_docs
 
-  install_pam_confs
-  install_services
-  install_xinetd_confs
-  install_initd
-  install_bashmisc
-  
-  if [  "$GARBAGE"  ==  "on"  ];  then
-      gather_docs
-  fi
+    install_pam_confs
+    install_services
+    install_xinetd_confs
+    install_initd
+    install_bashmisc
+  } | tee -a $C_LOG
 
   devoke_installwatch
   ldconfig
   # release_saved_libraries
   cd  /
-  boost
-
-}
-
-module_installed() 
-{
-
-      if  grep  -q  "^$1\:"         $MODULE_STATUS 2>/dev/null ;  then
-    STAT=`grep      "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`;  else
-    STAT=`grep      "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`
-  fi
-  [  "$STAT"  ==  "installed"  ]
-}
-
-module_held() {
-
-  STAT=`grep  "^$1\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`  &&
-  [  "$STAT"  ==  "held"  ]
-
-}
-
-module_exiled()  {
-
-  STAT=`grep  "^$1\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`  &&
-  [  "$STAT"  ==  "exiled"  ]
-
-}
-
-
-installed_version()  
-{
-  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
-     echo  `grep  "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
-  else  
-     echo  `grep  "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
-  fi
 }
 
 
 # function : remove_module
 # usage    : remove_module; but $MODULE must be defined earlier
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
-remove_module()
-{
-##  ! module_installed $MODULE && return 0
+remove_module() {
 
+  verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS                                     && 
   lock_file $MODULE_STATUS_BACKUP                              &&
   grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
   cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
   unlock_file $MODULE_STATUS_BACKUP                            &&
   unlock_file $MODULE_STATUS 
-
 
   if  [  -n  "$EXILE"  ];  
   then
@@ -739,9 +444,10 @@ remove_module()
 # usage   : add_module <module_name>
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
-  remove_module  $1
+  verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP   >   $MODULE_STATUS 2>/dev/null  &&
   echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
   cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP           &&
   unlock_file $MODULE_STATUS_BACKUP                           &&
@@ -749,77 +455,9 @@ add_module()  {
 }
 
 
-is_depends()  {  (
-  #  Is $1 a previously selected dependency of any module.
-
-  EXIT_STATUS="false"
-
-  for  DEP  in  `cut  -d :  -f2-  $DEPENDS_STATUS  |
-                 grep  "^$1:"`
-  do
-
-    DEP_STATUS=`echo  "$DEP"  |  cut  -d :  -f2`
-
-    if    [  "$DEP_STATUS"  ==  "on"  ]
-    then  EXIT_STATUS="true"
-          break
-    fi
-
-  done
-
-  $EXIT_STATUS
-
-)  }
-
-
-in_depends()  {
-  #  Was $2 presented as a depenency for module $1
-
-  if    grep  -q  "^$1:$2"  $DEPENDS_STATUS
-  then  true
-  else  false
-  fi
-
-}
-
-
-remove_depends()  
-{
-  lock_file $DEPENDS_STATUS_BACKUP &&
-  lock_file $DEPENDS_STATUS        ||
-  return 1
-
-  if    [  -n  "$2"  ]
-  then  
-     grep  -v  "^$1:$2"  $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
-  else  
-     grep  -v  "^$1:"    $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
-  fi
-  cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
-  
-  unlock_file $DEPENDS_STATUS_BACKUP &&
-  unlock_file $DEPENDS_STATUS
-}
-
-
-add_depends()  
-{
-  remove_depends  "$1"  "$2"
-
-  lock_file $DEPENDS_STATUS_BACKUP                       &&
-  lock_file $DEPENDS_STATUS                              &&
-  echo  "$1:$2:$3:$4:$5:$6"  >>  $DEPENDS_STATUS         &&
-  cat  $DEPENDS_STATUS        >  $DEPENDS_STATUS_BACKUP  &&
-  unlock_file $DEPENDS_STATUS_BACKUP                     &&
-  unlock_file $DEPENDS_STATUS
-}
-
-
-
 conflicts() {
-
   if  module_installed  $1;  then
-    lrm  $1
+    lrm $1
   fi
 
   true
@@ -946,69 +584,6 @@ push_remove_queue() {
 }
 
 
-run_depends() {
-
-  # local definitions of depends and optional_depends!
-  depends()  {
-    grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
-    if  ! module_installed  $1   &&
-        ! module_held       $1 
-    then
-      if  !  is_depends     $1   &&
-             module_exiled  $1 
-      then  return  1
-      else
-        message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
-                "Adding required dependency${FILE_COLOR}"   \
-                "$1 ${DEFAULT_COLOR}"
-        lin  --deps  $1
-        echo "$1" >> $PREPD
-      fi
-    fi
-    add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
-  }
-
-  optional_depends()  {
-
-    # parameters:  $1 = module name
-    #              $2 = configure parameter if module wanted
-    #              $3 = configure parameter if module declined
-    #              $4 = description of why to use this module.
-
-
-    if  !  in_depends  "$MODULE"  "$1";  then
-
-      if    module_exiled  $1
-      then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-      else
-
-        if  module_installed  $1  ||
-            module_held       $1
-        then  DEFAULT="y"
-        else  DEFAULT="n"
-        fi
-
-        if    is_depends  $1  ||
-              query  "Install optional dependency $1 $4? " $DEFAULT
-        then  lin  --deps  $1
-              add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-        else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-        fi
-      fi
-    fi
-
-  }
-
-  prepare_depends_status
-  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
-  if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
-    message  "${CHECK_COLOR}Checking dependencies for"  \
-             "${MODULE_COLOR}${MODULE}"                   \
-             "${DEFAULT_COLOR}"
-    . $SCRIPT_DIRECTORY/DEPENDS
-  fi
-}
-
 # function : sort_install_queue
 # usage    : sort_install_queue
 # purpose  : sorts the install queue according to the dependencies
@@ -1068,20 +643,16 @@ update_installed()  {
 
     if  [  "$STATUS"  ==  "installed"  ];  then
 
-      if ! run_details $MODULE ; then
+      if ! run_details $MODULE &> /dev/null  ; then
       
-        message
         message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       
         if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
 	  lrm $MODULE
-          echo
-          sleep 3         
           continue
 	else
 	  message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
 	  echo
-	  sleep 3
 	fi
 	
       else
@@ -1119,7 +690,7 @@ upgrade_install_queue()  {
     if  [  -n  "`cat  $INSTALL_QUEUE`"  ];  then
       export  LOGTMP=$$_`date +%s`
       lin      `cat  $INSTALL_QUEUE`         
-      rm              $INSTALL_QUEUE
+      rm             $INSTALL_QUEUE
     fi
 
   fi
@@ -1188,94 +759,17 @@ activity_log()  { (
   unlock_file $ACTIVITY_LOG
 ) }
 
-# function : satisfy_depends
-# usage    : satisfy_depends (operates on $MODULE variable)
-# purpose  : re-check module deps based on DEPENDS_CONFIG and DEPENDS_STATUS
-satisfy_depends()  {
-
-  [ -n "$DEPS_ONLY" ] && return 0      
-  unset  OPTS  
-  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
-    
-  if  [  -s  $MODULE_CONFIG  ];  then
-          .  $MODULE_CONFIG
-  fi
-
-  TMP_FILE="/tmp/satisfy_depends.`uuidgen`"
-  grep  "^$MODULE:"  $DEPENDS_STATUS > $TMP_FILE
-
-  while read LINE; do
-    DEP_MODULE=`echo  $LINE  |  cut  -d :  -f2`
-    DEP_STATUS=`echo  $LINE  |  cut  -d :  -f3`
-        DEP_ON=`echo  $LINE  |  cut  -d :  -f5`
-       DEP_OFF=`echo  $LINE  |  cut  -d :  -f6`
-
-    if  [  -n  "$FIX"  ]
-    then  if  DEP_STATUS="on"
-          then  lin  $FIX  $DEP_MODULE
-          fi
-    elif  [  "$DEP_STATUS"  ==  "off"  ]  ||
-          module_exiled  $DEP_MODULE
-    then  OPTS="$OPTS  $DEP_OFF"
-
-    elif  [  "$DEP_STATUS"  ==  "on"  ]   &&
-          !  module_installed  $DEP_MODULE  &&
-          !  module_held       $DEP_MODULE
-    then
-      if    lin  $SILENT  $COMPILE  $DEP_MODULE
-      then  OPTS="$OPTS  $DEP_ON"
-      else  exit  1
-      fi
-    else  OPTS="$OPTS  $DEP_ON"
-    fi
-
-  done < $TMP_FILE
-
-  rm $TMP_FILE 2> /dev/null
-
-}
-
-
-color()  {
-
-  case  $1  in
-    off)  unset  MODULE_COLOR
-          unset  VERSION_COLOR
-          unset  QUERY_COLOR
-          unset  LRM_COLOR
-          unset  CHECK_COLOR
-          unset  RESURRECT_COLOR
-          unset  FILE_COLOR
-          unset  SYMLINK_COLOR
-          unset  PROBLEM_COLOR
-          unset  MESSAGE_COLOR
-          unset  DEFAULT_COLOR
-          COLOR=off
-          ;;
-     on)  COLOR=on
-          ;;
-  esac
-
-}
-
 
 invoke_installwatch()  {
-
   if  [  -e  /usr/lib/installwatch.so  ];  then
-    if [ -z "$INSTALLWATCHFILE" ] ; then
-      rm  -rf  /tmp/$MODULE.iw
-    fi
     export  INSTALLWATCHFILE=/tmp/$MODULE.iw
     export  LD_PRELOAD=/usr/lib/installwatch.so
   fi
-
 }
 
 
 devoke_installwatch()  {
-
   unset  LD_PRELOAD
-
 }
 
 
@@ -1343,6 +837,7 @@ track()  {
   else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
   fi
 
+  verbose_msg "removing \"$IW_LOG\""
   rm  -f  $IW_LOG  $TMP_LOG
 }
 
@@ -1404,17 +899,18 @@ boost()	{ (
    MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
     IW_LOG="/tmp/$MODULE.iw"
 
-  rm  -rf  $CACHE
-  rm  -rf  $INST_LOG
+  rm  -f   $CACHE
+  rm  -f   $INST_LOG
   touch    $INST_LOG
-  rm  -rf  $TMP_LOG
-  rm  -rf  $MD5_LOG
+  rm  -f   $TMP_LOG
+  rm  -f   $MD5_LOG
   touch    $MD5_LOG
 
   track    &&
   archive  &&
-#find_module_size is in functions/sizes
   add_module  $MODULE installed $VERSION `find_module_size $MODULE $VERSION`
+
+  rm  -f  $BOOST_LOCK
 
 ) }
 
@@ -1492,16 +988,20 @@ prune()
            "${DEFAULT_COLOR}"
   ls  $SOURCE_CACHE  |
   while  read  FILE;  do
-      grep  -q  "^$FILE$"  $KEEP  ||
-      rm  $SOURCE_CACHE/$FILE 2>/dev/null
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $SOURCE_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $INSTALL_CACHE..." \
            "${DEFAULT_COLOR}"
   ls  $INSTALL_CACHE  |
   while  read  FILE;  do
-      grep  -q  "^$FILE$"  $KEEP  ||
-      rm  $INSTALL_CACHE/$FILE 2>/dev/null
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $INSTALL_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }	
   done
 
   KEEP2="/tmp/prune.instlist.$$"
@@ -1512,24 +1012,30 @@ prune()
              "${DEFAULT_COLOR}"
   ls  $INSTALL_LOGS  |
   while  read  FILE;  do
-      grep -q "^$FILE$"   $KEEP2 ||
-      rm $INSTALL_LOGS/$FILE
+      grep -q "^$FILE$"   $KEEP2 || {
+        rm $INSTALL_LOGS/$FILE
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $COMPILE_LOGS..." \
              "${DEFAULT_COLOR}"
   ls  $COMPILE_LOGS  | sed 's/.bz2$//' |
   while  read  FILE;  do
-      grep -q "^$FILE$"    $KEEP2 ||
-      rm $COMPILE_LOGS/$FILE.bz2
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $COMPILE_LOGS/$FILE.bz2
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $MD5SUM_LOGS..." \
              "${DEFAULT_COLOR}"
   ls  $MD5SUM_LOGS  |
   while  read  FILE;  do
-      grep -q "^$FILE$"    $KEEP2 ||
-      rm $MD5SUM_LOGS/$FILE
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $MD5SUM_LOGS/$FILE
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   rm  -f  $KEEP 2>/dev/null
@@ -1539,7 +1045,6 @@ prune()
 
 
 verify_sources()  {  md5_verify_source  `sources  $MODULE MD5`;  }
-handle_depends()  {  true;  }
 
 op_conflicts(){
    RETVALUE=true
@@ -1552,57 +1057,6 @@ op_conflicts(){
       RETVALUE=false
    fi 
    $RETVALUE
-}
-
-
-# get_moonbase ()
-# function: get_moonbase
-# usage   : get_moonbase
-# purpose : fetches a fresh moonbase from lunar-linux.org/lunar and install it
-get_moonbase() {
-  # we could variableize this too:
-  MODULE=moonbase
-  VERSION=`date -u +%Y%m%d`
-  SOURCE=${MODULE}-${VERSION}.tar.bz2
-
-  # initialize the dirs in case of goof-up
-  [ ! -d /var/lib/lunar/moonbase ] &&
-    mkdir -p /var/lib/lunar/moonbase
-  [ ! -d /var/lib/lunar/moonbase/zlocal ] &&
-    mkdir -p /var/lib/lunar/moonbase/zlocal
-
-  echo -e "${MESSAGE_COLOR}Downloading ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-   wget -O /tmp/$SOURCE $MOONBASE_URL \
-     $RATE $FTP_CONNECTION $RETRIES $PARTIAL                        &&
-  echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
-  mv /tmp/$SOURCE $SOURCE_CACHE/$SOURCE                             &&
-
-  # here we clean up our moonbase while we're at it!
-  mv /var/lib/lunar/moonbase/zlocal /var/lib/lunar/.zlocal-backup   &&
-  rm -rf /var/lib/lunar/moonbase                                    &&
-  mkdir /var/lib/lunar/moonbase                                     &&
-  mv /var/lib/lunar/.zlocal-backup /var/lib/lunar/moonbase/zlocal   &&
-  
-  echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}"       \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
-  
-  bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar             &&
-  OUTCOME=success || OUTCOME=failed
-  
-  rm -f $SOURCE_CACHE/$SOURCE
-  message  "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-
-  echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
-    	    "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-  if [ -f $MODULE_INDEX ]; then
-    rm $MODULE_INDEX                 
-  fi
-  create_module_index
-  
-  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
-
 }
 
 
@@ -1633,236 +1087,6 @@ root_check()
    echo "User must have root privileges to run this program"
    echo  ""
    return 1
-}
-
-
-# rework_module : check depends database for a module
-rework_module() {
-
-  # we declare these local to override the systems default ones:
-  optional_depends()  {
-    if    module_exiled  $1
-    then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-    else
-      if  module_installed  $1  ||
-          module_held       $1
-      then  add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-      else  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
-      fi
-    fi
-  }
-
-  depends()  {  
-    if  ! module_installed  $1   &&
-        ! module_held       $1
-    then
-      if  !  is_depends     $1   &&
-             module_exiled  $1
-      then  return  1
-      else
-        echo -e "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR} is missing ${MODULE_COLOR}$1${DEFAULT_COLOR}"
-	CHANGED_MODULES="$CHANGED_MODULES $1"
-      fi  
-    fi
-    add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
-  } 
-
-  run_depends() {
-    if  [  -x  $SCRIPT_DIRECTORY/DEPENDS  ];  then
-      show_fancy_progress "Processing: $MODULE"
-      . $SCRIPT_DIRECTORY/DEPENDS
-    fi
-  }
-
-  # here starts the real work:
-  MODULE=$1
-
-  # base vars needed to execute DEPENDS
-  SECTION=$(find_section $MODULE)
-  SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-  MODULE_CONFIG=$CONFIG_CACHE/depends/$MODULE
-
-  # reroute depends output to our private files:
-  OLD_DEPENDS_STATUS=$DEPENDS_STATUS
-  OLD_DEPENDS_STATUS_BACKUP=$DEPENDS_STATUS_BACKUP
-      
-  DEPENDS_STATUS=$TMP/depends
-  DEPENDS_STATUS_BACKUP=$TMP/depends.backup
-  touch $DEPENDS_STATUS
-  touch $DEPENDS_STATUS_BACKUP
-
-  # fetch old depend data:
-  grep "^$MODULE:" $OLD_DEPENDS_STATUS | sort | uniq > $TMP/depends.old.$MODULE
-
-  # fetch new depend data:
-  run_depends
-  grep "^$MODULE:" $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MODULE
-  
-  if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE &> /dev/null ) ; then
-    echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed depends:${DEFAULT_COLOR}"
-    CHANGED_MODULES="$CHANGED_MODULES $MODULE"
-    LIST=$(cat $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE | cut -d: -f2 | sort | uniq )
-    for DEP in $LIST; do
-      OLDDEP=$(grep ":$DEP:" $TMP/depends.old.$MODULE)
-      NEWDEP=$(grep ":$DEP:" $TMP/depends.new.$MODULE)
-      if [ "$OLDDEP" != "$NEWDEP" ] ; then
-
-        # diff style output for debugging:
-        # echo "- $OLDDEP"
-	# echo "+ $NEWDEP"
-	
-	# the tricky part is deciding what is necessary and what not:
-	OLD_STATUS=$(echo $OLDDEP | cut -d: -f3)
-	NEW_STATUS=$(echo $NEWDEP | cut -d: -f3)
-	OLD_REQD=$(echo $OLDDEP | cut -d: -f4)
-	NEW_REQD=$(echo $NEWDEP | cut -d: -f4)
-	OLD_ON_OPTS=$(echo $OLDDEP | cut -d: -f5)
-	NEW_ON_OPTS=$(echo $NEWDEP | cut -d: -f5)
-	OLD_OFF_OPTS=$(echo $OLDDEP | cut -d: -f6)
-	NEW_OFF_OPTS=$(echo $NEWDEP | cut -d: -f6)
-	if [ -z "$NEWDEP" ] ; then
-	  echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from the dependancy list${DEFAULT_COLOR}"
-	else
-	  if [ -z "$OLDDEP" ] ; then
-	    echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was added to the $NEW_REQD dependancy list${DEFAULT_COLOR}"
-	  else
-            # the dep changed!
-	    if [ "$OLD_STATUS" == "on" -a "$NEW_STATUS" == "on" ]; then
-	      if [ "$OLD_REQD" == "required" -a "$NEW_REQD" == "optional" ]
-	      then
-		echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to optional${DEFAULT_COLOR}"
-	      elif [ "$OLD_REQD" == "optional" -a "$NEW_REQD" == "required" ]
-	      then
-	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to required${DEFAULT_COLOR}"
-	      else
-	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has new compile flags for ${MODULE_COLOR}$DEP${MESSAGE_COLOR}${DEFAULT_COLOR}"
-	      fi
-	    elif [ "$OLD_STATUS" == "off" -a "$NEW_STATUS" == "off" ]; then
-              if [ "$OLD_REQD" == "required" -a "$NEW_REQD" == "optional" ]
-	      then
-	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to optional${DEFAULT_COLOR}"
-	      elif [ "$OLD_REQD" == "optional" -a "$NEW_REQD" == "required" ]
-	      then
-	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was changed to required${DEFAULT_COLOR}"
-	      else
-	        echo -e "${MESSAGE_COLOR}* ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has new compile flags for ${MODULE_COLOR}$DEP${MESSAGE_COLOR}${DEFAULT_COLOR}"
-	      fi
-	    elif [ "$OLD_STATUS" == "off" -a "$NEW_STATUS" == "on" ]; then
-	      echo -e "${MESSAGE_COLOR}* $NEW_REQD ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was installed${DEFAULT_COLOR}"
-	    elif [ "$OLD_STATUS" == "on" -a "$NEW_STATUS" == "off" ]; then
-	      echo -e "${MESSAGE_COLOR}* $NEW_REQD ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} was removed${DEFAULT_COLOR}"
-	    else
-	      echo -e "${$MESSAGE_COLOR}* ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} ${PROBLEM_COLOR}missed exception $OLD_STATUS $NEW_STATUS${DEFAULT_COLOR}"
-	    fi
-	  fi
-	fi
-      fi
-    done
-  fi
-
-  # clean up
-  rm $DEPENDS_STATUS
-  rm $DEPENDS_STATUS_BACKUP
-  DEPENDS_STATUS=$OLD_DEPENDS_STATUS
-  DEPENDS_STATUS_BACKUP=$OLD_DEPENDS_STATUS_BACKUP   
-
-}
-
-# rework_list : rework a list of modules and save output
-rework_list() {
-
-  for MODULE in $* ; do
-    module_exiled $MODULE || rework_module $MODULE
-  done
-
-}
-
-# fix_depends : single pass to fix depends database
-fix_depends () {
-
-  TMP=/tmp/lunar.fix
-  [ -d $TMP ] || mkdir -p $TMP
-
-  CHANGED_MODULES=
-  # we NEED this
-  if [ -f "$INSTALL_QUEUE" ] ; then
-    rm $INSTALL_QUEUE
-    touch $INSTALL_QUEUE
-  fi
-  
-  if [ -n "$1" ] ; then
-    rework_list $*
-  else
-    rework_list $(cat $MODULE_STATUS | cut -d: -f1 | sort )
-  fi
-
-  if [ -n "$CHANGED_MODULES" ] ; then
-
-    for MODULE in $CHANGED_MODULES ; do
-      if [ ! -e $TMP/depends.new.$MODULE ] ; then
-        rework_module $MODULE
-      fi
-    done
-    
-    # this ensures the bastard doesn't recheck it:
-    if [ -z "$NOFIX" ] ; then
-      mv $DEPENDS_STATUS $TMP/depends
-      cp $TMP/depends $TMP/depends.filter
-      for MODULE in $CHANGED_MODULES ; do
-        grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-        mv $TMP/depends.filter~ $TMP/depends.filter
-      done
-      mv $TMP/depends.filter $DEPENDS_STATUS 
-      cat $TMP/depends.new.* >> $DEPENDS_STATUS
-      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-    fi
-
-    OLD_FIX=$FIX
-    unset FIX
-    OLD_lin_PASS=$lin_PASS; export lin_PASS=three
-
-    for MODULE in $CHANGED_MODULES ; do
-      if [ -n "$FIXDEPENDS" ] ; then
-        # special case: when called with --fixdepends, skip recompile!
-	cp $TMP/depends $TMP/depends.filter
-	for MODULE in $CHANGED_MODULES ; do
-	  grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-	  mv $TMP/depends.filter~ $TMP/depends.filter
-	done
-        mv $TMP/depends.filter $DEPENDS_STATUS
-	cat $TMP/depends.new.* >> $DEPENDS_STATUS
-	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      else
-        if [ -z "$NOFIX" ] ; then
-          if ! lin -c $MODULE ; then
-	    # put back the faulty depends so we know fixing this failed
-	    # and will be found again on the next run
-	    cat $TMP/depends > $DEPENDS_STATUS
-	    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-          else
-	    # sometimes after lin all depends are gone! force it down it's throat
-            cp $TMP/depends $TMP/depends.filter
-            for MODULE in $CHANGED_MODULES ; do
-              grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-              mv $TMP/depends.filter~ $TMP/depends.filter
-            done
-            mv $TMP/depends.filter $DEPENDS_STATUS 
-            cat $TMP/depends.new.* >> $DEPENDS_STATUS
-            cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-	  fi
-	fi
-      fi
-      remove_queue $INSTALL_QUEUE $MODULE
-    done
-    
-    FIX=$OLD_FIX
-    unset OLD_FIX
-    export lin_PASS=$OLD_lin_PASS
-
-  fi
-
-  rm -rf $TMP
-
 }
 
 

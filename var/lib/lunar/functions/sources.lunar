@@ -20,43 +20,46 @@
 # usage    : sources <module_name> {MD5}
 # purpose  : displays the filenames and md5sums of sources for a given module
 sources()  
-{
-    MAX_SOURCES=${MAX_SOURCES:=100}
+{ (
 
-    run_details $1 || return 1
+  MAX_SOURCES=${MAX_SOURCES:=100}
 
-    for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ ))
-    do
-       TEMP1=`echo SOURCE$CNT | sed s/SOURCE0/SOURCE/`
-       TEMP2=`echo SOURCE$(( CNT+1))`
-       TEMP3=`echo SOURCE$(( CNT+2))`
+  run_details $1 || return 1
 
-       eval TEMP=\$$TEMP1
-       eval TEMP2=\$$TEMP2
-       eval TEMP3=\$$TEMP3
+  if [ -z "$CVS_MODULE" ]; then
+    for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ )) ; do
+      TEMP1=`echo SOURCE$CNT | sed s/SOURCE0/SOURCE/`
+      TEMP2=`echo SOURCE$(( CNT+1))`
+      TEMP3=`echo SOURCE$(( CNT+2))`
 
-       TEMP1_MD5=${TEMP1}_MD5[@]
-       eval TEMP_MD5=\${$TEMP1_MD5}
-       TEMP_MD5=${TEMP_MD5:=0}
+      eval TEMP=\$$TEMP1
+      eval TEMP2=\$$TEMP2
+      eval TEMP3=\$$TEMP3
 
+      TEMP1_MD5=${TEMP1}_MD5[@]
+      eval TEMP_MD5=\${$TEMP1_MD5}
+      TEMP_MD5=${TEMP_MD5:=0}
 
-       [ -n "$TEMP" ]         &&
-       echo  $TEMP            &&
-       [ "$2" == "MD5" ]      && 
-       echo  $TEMP_MD5 
+      [ -n "$TEMP" ]         &&
+      echo  $TEMP            &&
+      [ "$2" == "MD5" ]      && 
+      echo  $TEMP_MD5 
 
-#if two consequtive empty sources, then break
-       [ -z "$TEMP2" ] && [ -z "$TEMP3" ]  && {
-#lets clear the array
-         for (( CNT1=0; CNT1<=$CNT; CNT1++ ))
-         do
-            TEMP1=`echo SOURCE$CNT1 | sed s/SOURCE0/SOURCE/`
-            unset $TEMP1
-         done   
-         break
-       }
+      #if two consequtive empty sources, then break
+      [ -z "$TEMP2" ] && [ -z "$TEMP3" ]  && {
+      #lets clear the array
+        for (( CNT1=0; CNT1<=$CNT; CNT1++ ))
+        do
+          TEMP1=`echo SOURCE$CNT1 | sed s/SOURCE0/SOURCE/`
+          unset $TEMP1
+        done   
+        break
+      }
     done
-}
+  else
+    echo $MODULE-$VERSION.tar.bz2
+  fi
+) }
 
 # function : md5_verify_source
 # usage    : md5_verify_source filename_1 md5_1, filename_2 md52.....

@@ -1,0 +1,52 @@
+####################################################################
+#                                                                  #
+#  edit.lunar - functions to edit files                            #
+#                                                                  #
+####################################################################
+#                                                                  #
+# Parts copyright Jason Johnston 2002 under GPLv2                  #
+#                                                                  #
+# Parts copyright Auke Kok 2002 under GPLv2                        #
+#                                                                  #
+####################################################################
+
+
+patch_it ()
+{ 
+    verbose_msg "patch_it \"$1\" \"$2\"";
+    if [[ -n `echo $1 | grep .tar` ]]; then
+        if [[ -n `echo $1 | grep .bz2` ]]; then
+            bzcat $1 | tar x -O | patch -N -p$2;
+        else
+            if [[ -n `echo $1 | grep .gz` ]]; then
+                zcat $1 | tar x -O | patch -N -p$2;
+            else
+                cat $1 | tar x -O | patch -N -p$2;
+            fi;
+        fi;
+    else
+        if [[ -n `echo $1 | grep .bz2` ]]; then
+            bzcat $1 | patch -N -p$2;
+        else
+            if [[ -n `echo $1 | grep .gz` ]]; then
+                zcat $1 | patch -N -p$2;
+            else
+                cat $1 | patch -N -p$2;
+            fi;
+        fi;
+    fi
+}
+
+
+sedit ()
+{ 
+    SEDIT=$1;
+    shift;
+    for FILE in $@;
+    do
+        verbose_msg "Editing ${FILE}";
+        sed -i "$SEDIT" "$FILE";
+    done
+}
+
+

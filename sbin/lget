@@ -50,187 +50,6 @@ EOF
 
 }
 
-use_cvs() {(
-  run_details && if [[ $CVS_SERVER ]]; then
-    
-    message  "${MESSAGE_COLOR}Downloading CVS module"                      \
-             "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
-             "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-	     
-    mk_source_dir
-    cd $SOURCE_DIRECTORY
-
-    export CVSROOT=$CVS_SERVER
-
-    if [[ $CVS_LOGIN ]]; then
-      echo "$CVS_LOGIN" | cvs login
-    fi
-
-    if ! [[ $CVS_MODULE ]]; then
-      CVS_MODULE=`echo $MODULE | sed s/-cvs//`
-    fi
-
-    if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
-      tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
-    fi
-
-    if [[ -d $CVS_MODULE/CVS ]]; then
-      cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
-    elif ! [[ -d CVS ]]; then
-      cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
-    fi
-
-    if [[ "$GOT_CVS" == "yes" ]]; then
-      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
-      tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
-    else
-      activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVS_MODULE"
-    fi
-
-    cd $BUILD_DIRECTORY
-    rm_source_dir
-
-  fi
-)}
-
-
-erase()  {
-
-  if  [  -z  "$PARTIAL"  ];  then
-    rm  -f  $S_FILE.tar.gz  $S_FILE.tgz  $S_FILE.tar.bz2
-  fi
-
-}
-
-
-call_wget()  {  
-   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
-   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
-   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
-
-   wget  $CACHE  $RATE  $FTP_CONNECTION $RETRIES  $PARTIAL  $1;  
-}
-
-fuzzy_wget()  {
-
-  FTP_CONNECTION="--passive-ftp"
-  [ "$FTP_ACTIVE"  == "on"   ] || 
-  [ "$FTP_PASSIVE" == "off"  ] && 
-  unset FTP_CONNECTION 
-
-  PARTIAL="-c"
-  [ "$CONTINUE" == "off" ] && unset PARTIAL
-
-  CACHE="--cache=on"
-  [ "$USE_CACHE" == "off" ] && CACHE="--cache=off"
-
-  NUM_RETRY=${NUM_RETRY:=5}
-  RETRIES="--tries=${NUM_RETRY}"
-
-  [  -n  "$DOWNLOAD_RATE"  ] && RATE="--limit-rate=${DOWNLOAD_RATE}"
-
-  FUZZY=${FUZZY:=on}
-
-  S_URL=`echo  $URL              |
-         sed  "s/\.tar\.gz$//"   |
-         sed  "s/\.tgz$//"       |
-         sed  "s/\.tar\.bz2$//"`
-
-  S_FILE=`echo  $FILE             |
-          sed  "s/\.tar\.gz$//"   |
-          sed  "s/\.tgz$//"       |
-          sed  "s/\.tar\.bz2$//"`
-
-  if    erase  &&  call_wget  $URL;            then  FILE="$FILE"
-  elif  [  "$FUZZY"  ==  "off"  ];             then
-    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
-    return 1
-  elif  erase  &&  call_wget  $S_URL.tar.bz2;  then  FILE="$S_FILE.tar.bz2"
-  elif  erase  &&  call_wget  $S_URL.tar.gz;   then  FILE="$S_FILE.tar.gz"
-  elif  erase  &&  call_wget  $S_URL.tgz;      then  FILE="$S_FILE.tgz"
-  else
-    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
-    false
-  fi
-
-}
-
-
-disconnect()  {
-
-  if    ps  -C disconnect  >  /dev/null
-  then  return
-  fi
-
-  rm  -rf          /tmp/disconnect
-  cat  <<  EOF  >  /tmp/disconnect
-#!/bin/sh
-
-while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
-poff
-rm  /tmp/disconnect
-EOF
-
-chmod  a+x  /tmp/disconnect
-            /tmp/disconnect  &
-
-}
-
-
-connect()  {
-
-  if  !  ifconfig  |  grep  -q  "^eth"   &&
-      !  ifconfig  |  grep  -q  "^wlan"  &&
-      !  ifconfig  |  grep  -q  "^ppp"   &&
-      !  ifconfig  |  grep  -q  "^tun";  then
-    pon
-
-    # Timeout in deciseconds to wait for Interface to come up.
-    TIMEOUT=30
-
-    until  ifconfig  |  grep  -q  eth   ||
-           ifconfig  |  grep  -q  ppp   ||
-           [  $TIMEOUT == 0  ]
-    do
-      sleep  10
-      (( TIMEOUT-- ))
-    done
-    disconnect
-
-  fi
-
-}
-
-
-get() {
-
-  if  [  -n  "$1"  ] ;  then
-
-    FILE=`basename  $1`
-    if  [  -n  "$BASE_URL"  ];  then
-      URL=$BASE_URL/$FILE
-      connect          &&
-      fuzzy_wget       &&
-      testpack  $FILE  &&
-      mv        $FILE  $SOURCE_CACHE
-    else
-      URL=$1
-      connect          &&
-      fuzzy_wget       || {
-        FILE=`basename  $1`
-        [  -n  "$LRESORT_URL" ] && {
-          URL=$LRESORT_URL/$FILE
-          fuzzy_wget
-        }
-      } &&
-      testpack  $FILE  &&
-      mv        $FILE  $SOURCE_CACHE
-    fi
-
-  fi
-
-}
-
 
 process_parameters()  {
 
@@ -275,80 +94,6 @@ strip_parameters()  {
 }
 
 
-dl_source()  {
-
-  if  [  -n  "$1"  ];  then
-
-    FILE="$1"
-    shift  1
-
-    [ "$CLEAR_CACHE" == "on" ] && 
-    rm `guess_filename  $SOURCE_CACHE/$FILE` 2>/dev/null
-    
-    if  !  `guess_filename  $SOURCE_CACHE/$FILE  > /dev/null`
-    then
-
-      message  "${MESSAGE_COLOR}Downloading source file"  \
-               "${FILE_COLOR}${FILE}${DEFAULT_COLOR}"     \
-               "${MESSAGE_COLOR}for module"               \
-               "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-      for  URL  in  $*;  do
-        if  get  $URL;  then  break;  fi
-      done
-
-    fi
-  fi
-
-}
-
-
-lget_locked()  {
-
-  [     -f        $LGETING  ]  &&
-  ps        `cat  $LGETING`    |
-  grep  -q  "lget"
-
-}
-
-
-download() {
-
-  # MAX_SOURCES is defined at /etc/lunar/config
-  MAX_SOURCES=${MAX_SOURCES:=100}
-
-  for (( CNT=0; CNT<=MAX_SOURCES; CNT++ ))
-  do
-    TEMP1=`echo SOURCE$CNT | sed s/SOURCE0/SOURCE/`
-    TEMP2=`echo SOURCE$(( CNT+1))`
-    TEMP3=`echo SOURCE$(( CNT+2))`
-
-    eval TEMP=\$$TEMP1
-    eval TEMP2=\$$TEMP2
-    eval TEMP3=\$$TEMP3
-
-    TEMP1_URL=${TEMP1}_URL[@]
-    eval TEMP_URL=\${$TEMP1_URL}
-
-    [ -n "$TEMP" ] && dl_source  $TEMP   ${TEMP_URL[*]}
-
-    #if two consequtive empty sources, then break
-    [ -z "$TEMP2" ] && [ -z "$TEMP3" ]  && break
-  done
-
-}
-
-download_module() {
-  
-  MODULE=$1
-  (
-    run_details  &&
-    download
-  )
-  
-}
-
-
 main() {
 
   cd  /tmp
@@ -356,70 +101,28 @@ main() {
   MODULES=`strip_parameters  $*`
 
   if  [  -z  "$MODULES"  ];  then
+    verbose_msg "downloading entire moonbase"
     MODULES=$(list_moonbase)
   fi
 
-  for  MODULE  in  $MODULES;  do
-
-    LGETING=/var/lock/lgetting.$MODULE
-    if  !  lget_locked;  then
-      echo  $$  >  $LGETING
+  for MODULE in $MODULES; do
+   (
+    run_details &&
+    if ! lget_locked ; then
+      lget_lock
     
-      SECTION=$(find_section $MODULE)
-      if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
-        TYPE="normal"
-      elif grep -q CVS_SERVER "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
-        TYPE="cvs"
-      fi
-    
-      if [ "$EXHAUSTIVE" == "yes" ] ; then
-        if [[ $TYPE == "normal" ]] ; then
-      
-          MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
-	
-          if [ -f $MIRRORS/$MIRROR ] ; then
-	    for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	      eval ${MIRROR}_URL=$MIRROR_URL
-              if download_module $MODULE ; then
-	        break
-	      fi
-            done 
-	  else
-	    download_module $MODULE
-	  fi
-	
-        elif [[ $TYPE == "cvs" ]] ; then
-      
-          MIRROR=$(grep CVS_SERVER $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
-	
-          if [ -f $MIRRORS/$MIRROR ] ; then
-	    for CVS_MIRROR in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	      eval ${MIRROR}_URL=$CVS_MIRROR
-              if [[ $GOT_CVS == "yes" ]]; then
-	        break
-	      fi
-            done 
-	  else
-            if [[ $GOT_CVS != "yes" ]]; then
-	      use_cvs $MODULE
-            fi
-	  fi
-        fi
-      
+      if [ -n "$CVS_MODULE" ] && [ "$GOT_CVS" != "yes" ] ; then
+        use_cvs $MODULE
       else
-    
-        if [[ $TYPE == "cvs" ]] && [[ $GOT_CVS != "yes" ]]; then
-          use_cvs $MODULE
-        else
-          download_module $MODULE
-        fi
+        [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
+        download_module
       fi
     
-      rm  -f  $LGETING 2> /dev/null
-    
+      lget_unlock
     else
       false
     fi
+   )
   done
 
 }

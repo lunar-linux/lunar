@@ -23,7 +23,7 @@ function lock_file()
 {
    function file_lock()
    {
-#locking is disabled if ln or rm not found!!
+      #locking is disabled if ln or rm not found!!
       [ -x "/bin/ln" ] || return 0
       [ -x "/bin/rm" ] || return 0
 
@@ -48,7 +48,7 @@ function lock_file()
          rm -f $TEMPFILE
          return 1
       }
-      rm $LOCKFILE 2>/dev/null &&
+      rm -f $LOCKFILE 2>/dev/null &&
       echo "Removed stale lock file of process $STALE_PID"
       ln $TEMPFILE $LOCKFILE 2>/dev/null &&
       {
@@ -75,7 +75,7 @@ function unlock_file()
 {
 #unlocking is disabled if rm not found!!
    [ -x "/bin/rm" ] || return 0
-   rm $1.lock 2>/dev/null && return 0
+   rm -f $1.lock 2>/dev/null && return 0
    return 1
 }
 

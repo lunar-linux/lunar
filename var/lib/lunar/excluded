@@ -1,6 +1,5 @@
 /boot/grub/menu.1st
 /dev
-/devices
 /etc/X11/xdm/Xsession
 /etc/cron.daily
 /etc/cron.hourly
@@ -34,9 +33,7 @@
 /etc/nsswitch.conf
 /etc/passwd
 /etc/passwd-
-/etc/postfix/main.cf
-/etc/postfix/master.cf
-/etc/postfix/aliases
+/etc/postfix
 /etc/printcap
 /etc/procmailrc
 /etc/proftpd.conf
@@ -69,7 +66,7 @@
 /proc
 /tmp
 /usr/X11R6/lib/X11/xinit/xinitrc
-/usr/info/dir
+/usr/share/info/dir
 /var/lib/lunar/excluded
 /var/lib/lunar/protected
 /usr/lib/perl5/5.6.1/i586-linux-thread-multi/perllocal.pod
@@ -91,3 +88,13 @@
 /var/state/dhcpd.leases~
 /var/tmp
 /var/yp
+/usr/share/fonts/truetype/fonts.dir
+/usr/X11R6/lib/X11/fonts/100dpi/fonts.dir
+/usr/X11R6/lib/X11/fonts/75dpi/fonts.dir
+/usr/X11R6/lib/X11/fonts/CID/fonts.dir
+/usr/X11R6/lib/X11/fonts/local/fonts.dir
+/usr/X11R6/lib/X11/fonts/misc/fonts.dir
+/usr/X11R6/lib/X11/fonts/Speedo/fonts.dir
+/usr/X11R6/lib/X11/fonts/TTF/fonts.dir
+/usr/X11R6/lib/X11/fonts/Type1/fonts.dir
+/etc/X11/gdm/gdm.conf

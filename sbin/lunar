@@ -26,6 +26,7 @@
 #                                                          #
 ############################################################
 
+
 show_modules()	
 { 
   for  MODULE in `list_modules "$1"`;  do
@@ -44,14 +45,17 @@ show_modules()
   done
 }
 
-show_sections()  {
-  LIST=`list_sections`
 
-  for  LINE in $LIST;  do
-    echo  $LINE
-    echo  "section"
+show_sections()  {
+  for SECTION in $(list_sections);  do
+    [ -z "$(list_modules $SECTION)" ] || {
+      echo  $SECTION
+      echo  "section"
+    }
   done
 }
+
+
 select_section() {
   $DIALOG  --title "Section Selection Menu"  \
            --default-item  "$SECTION"        \
@@ -62,6 +66,8 @@ select_section() {
            0 0 10                            \
            `show_sections`
 }
+
+
 add_pkgs()  { (
   while
     SECTION=`select_section`
@@ -89,6 +95,8 @@ add_pkgs()  { (
     done
   done
 ) }
+
+
 show_file()	{
   if  [  -f  $1  ];  then
     if  [  "`file  -b  $1  |  cut  -d ' '  -f1`"  == "bzip2" ];  then
@@ -101,6 +109,8 @@ show_file()	{
     return  1
   fi
 }
+
+
 file_list() {
   LIST=`ls  $1`
   for  LINE  in  $LIST;  do
@@ -108,12 +118,16 @@ file_list() {
     echo  `file  -b  $1/$LINE  |  cut  -d ' ' -f1`
   done
 }
+
+
 file_menu() {
   FILE_LIST=`file_list $1`
   echo  $1/`$DIALOG  --title  "Please select a file."  \
                      --menu  "" 0 0 0                  \
                      $FILE_LIST`
 }
+
+
 show_installed_modules()  {
   for  LINE  in  `sort  $MODULE_STATUS_BACKUP`;  do
      MODULE=`echo  "$LINE"    |  cut  -d : -f1`
@@ -138,6 +152,8 @@ show_installed_modules()  {
     fi
   done
 }
+
+
 remove_pkgs()	{
   while
     if  [  -z  "$INSTALLED_MODULES"  ];  then
@@ -168,6 +184,8 @@ remove_pkgs()	{
     fi
   done
 }
+
+
 update_pkgs() {
 
   if  ps  -C  lin  >  /dev/null;  then
@@ -185,8 +203,10 @@ update_pkgs() {
   fi
 
 }
+
+
 rebuild()  {
-  rm  -rf  $INSTALL_QUEUE
+  rm  -f  $INSTALL_QUEUE
 
   message  "To do a non recursive rebuild"
   message  "all installed modules must be fixed first."
@@ -211,8 +231,9 @@ rebuild()  {
   fi
 
   $LIN  --compile  `cat  $INSTALL_QUEUE`
-  rm                      $INSTALL_QUEUE
+  rm -f                  $INSTALL_QUEUE
 }
+
 
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
@@ -235,6 +256,7 @@ make_checklist()  {
   done
 }
 
+
 process_section()  {
      KEEP_LIST=$2
 
@@ -247,11 +269,13 @@ process_section()  {
   done
 }
 
+
 select_pkgs()  {
   SELECT_TITLE="Module Toggle Selection Menu"
   SELECT_HELP="[X]=install  [ ]=remove"
 
   while  SECTION=`select_section`;  do
+    [ -z "$(list_modules $SECTION)" ] ||
     CHECKLIST=`make_checklist  $SECTION`
 
     if  OUTLIST=`$DIALOG  --title "$SELECT_TITLE"   \
@@ -266,6 +290,8 @@ select_pkgs()  {
     fi
   done
 }
+
+
 make_hold_checklist()  {
   for  LINE in `sort  $MODULE_STATUS_BACKUP`;  do
      MODULE=`echo  "$LINE"  |  cut  -d : -f1`
@@ -291,6 +317,8 @@ make_hold_checklist()  {
     fi
   done
 }
+
+
 hold_pkgs()  {
    CHECKLIST=`make_hold_checklist`
   HOLD_TITLE="Select modules to hold or unhold"
@@ -326,6 +354,8 @@ hold_pkgs()  {
   fi
 
 }
+
+
 module_menu() {
   while
     U_HELP="Current software hinders crackers' attempts to infiltrate your box"
@@ -362,6 +392,8 @@ module_menu() {
     esac
   done
 }
+
+
 grep_install_logs() {
   if  WHAT=`$DIALOG  --inputbox                                \
                     "Please enter full path and name of file"  \
@@ -372,6 +404,7 @@ grep_install_logs() {
   fi
 }
 
+
 set_email()  {
   if  ADMIN=`$DIALOG  --ok-label  "Commit"         \
                          --inputbox                   \
@@ -381,6 +414,8 @@ set_email()  {
     write_config "ADMIN=" "    ADMIN=$ADMIN"
   fi
 }
+
+
 set_delay()  {
   if  PROMPT_DELAY=`$DIALOG  --ok-label  "Commit"  \
                              --inputbox            \
@@ -390,6 +425,7 @@ set_delay()  {
     write_config "PROMPT_DELAY=" "PROMPT_DELAY=$PROMPT_DELAY"
   fi
 }
+
 
 queue_menu()  {
   while
@@ -427,6 +463,7 @@ queue_menu()  {
     esac
   done
 }
+
 
 maintenance_menu() {
   while
@@ -484,10 +521,12 @@ log_menu()  {
       I)  show_file  `file_menu  $INSTALL_LOGS`  ;;
       i)  edit_file  `file_menu  $INSTALL_LOGS`  ;;
       C)  show_file  `file_menu  $COMPILE_LOGS`  ;;
-      c)  rm         `file_menu  $COMPILE_LOGS`  ;;
+      c)  rm -f      `file_menu  $COMPILE_LOGS`  ;;
     esac
   done
 }
+
+
 feature_menu()  {
   A_HELP="Create convenient auto-install scripts for common executables?"
   B_HELP="Administrate groups of Unix/Linux boxes?"
@@ -505,6 +544,7 @@ feature_menu()  {
   T_HELP="Disallow lrm of modules that would cause terrible malfunctions?"
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
+  W_HELP="Verbose display of compilation process?"
 
          ARCHIVE=${ARCHIVE:=on}
          AUTOFIX=${AUTOFIX:=on}
@@ -520,6 +560,7 @@ feature_menu()  {
           VOYEUR=${VOYEUR:=on}
             REAP=${REAP:=on}
          GARBAGE=${GARBAGE:=on}
+	 VERBOSE=${VERBOSE:off}
 
         if [ -z $TMPFS ]; then
           TMPFS=on;
@@ -546,7 +587,8 @@ feature_menu()  {
       "VIEW_REPORTS"  "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
       "VOYEUR"        "Toggle"  "$VOYEUR"        "$V_HELP"   \
       "REAP"          "Toggle"  "$REAP"          "$E_HELP"   \
-      "TMPFS"         "Toggle"  "$TMPFS"         "$D_HELP"`
+      "TMPFS"         "Toggle"  "$TMPFS"         "$D_HELP"   \
+      "VERBOSE"       "Toggle"  "$VERBOSE"       "$W_HELP"`
 
   then
   
@@ -565,6 +607,7 @@ feature_menu()  {
             REAP=off
          GARBAGE=off
            TMPFS=off
+	 VERBOSE=off
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -583,6 +626,7 @@ feature_menu()  {
                 REAP)          REAP=on  ;;
              GARBAGE)       GARBAGE=on  ;;
                TMPFS)         TMPFS=on  ;;
+	     VERBOSE)       VERBOSE=on  ;;
       esac
     done
 
@@ -601,7 +645,8 @@ feature_menu()  {
           grep  -v  "REAP="          |
           grep  -v  "GARBAGE="       |
           grep  -v  "color"          |
-          grep  -v  "TMPFS="`
+          grep  -v  "TMPFS="         |
+	  grep  -v  "VERBOSE="`
 
     echo  "$TEMP"                       >   $LOCAL_CONFIG
     echo  "     ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
@@ -617,10 +662,12 @@ feature_menu()  {
     echo  "      VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
     echo  "        REAP=$REAP"          >>  $LOCAL_CONFIG
     echo  "     GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "color  $COLOR"               >>  $LOCAL_CONFIG
+    echo  "       color $COLOR"         >>  $LOCAL_CONFIG
     echo  "       TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
+    echo  "     VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
   fi
 }
+
 
 option_menu()  {
   while
@@ -662,10 +709,14 @@ option_menu()  {
     esac
   done
 }
+
+
 goodbye() {
   echo  "Have a good day."
   exit
 }
+
+
 background_execute() {
   $DIALOG  --msgbox  "Processing queues in the background."  0 0
 
@@ -673,15 +724,17 @@ background_execute() {
   lrm  `cat  $REMOVE_QUEUE`   1>/dev/null 2>&1
   rm  -f        $REMOVE_QUEUE
 
-  if  [  -f             $INSTALL_QUEUE  ];  then
+  if  [  -f            $INSTALL_QUEUE  ];  then
     lin  --deps  `cat  $INSTALL_QUEUE`
     (  lin       `cat  $INSTALL_QUEUE` 1>/dev/null 2>&1  &&
-         rm             $INSTALL_QUEUE
+         rm -f         $INSTALL_QUEUE
     )  &
   fi
 
   goodbye
 }
+
+
 foreground_execute() {
   [  -f         $REMOVE_QUEUE  ]  &&
   lrm  `cat  $REMOVE_QUEUE`
@@ -693,6 +746,8 @@ foreground_execute() {
 
   goodbye
 }
+
+
 main_menu()  {
   while
     M_HELP="Easy module management"
@@ -749,8 +804,9 @@ main_menu()  {
     esac
   done
 }
+
+
 main() {
-  rm  -f  $UPDATE_SCRIPT
   case  $1  in
       renew)  update_installed
               upgrade_install_queue    ;;
@@ -760,6 +816,8 @@ main() {
           *)  main_menu                ;;
   esac
 }
+
+
 DIALOG="dialog
 --backtitle
 Lunar Module Management Utility
@@ -786,4 +844,6 @@ LUNAR_SECTION=`find_section  $LUNAR_MODULE`
 LUNAR_DETAILS="$MOONBASE/$LUNAR_SECTION/$LUNAR_MODULE/DETAILS"
 LUNAR_VERSION=`grep  "UPDATED="  $LUNAR_DETAILS  | 
 sed  "s/UPDATED=//"`
+
 main  $*
+

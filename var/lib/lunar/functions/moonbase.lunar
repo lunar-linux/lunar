@@ -1,0 +1,52 @@
+############################################################
+#                                                          #
+# moonbase.lunar - get moonbase from the net               #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted  Auke Kok  2002 under GPLv2                  #
+#                                                          #
+############################################################
+
+
+get_moonbase () {(
+
+  cd /tmp
+
+  MODULE=moonbase
+  VERSION=`date -u +%Y%m%d.%H`
+  SOURCE=$(basename $MOONBASE_URL)
+
+  [ ! -d /var/lib/lunar/moonbase ] && mkdir -p /var/lib/lunar/moonbase
+  [ ! -d /var/lib/lunar/moonbase/zlocal ] && mkdir -p /var/lib/lunar/moonbase/zlocal
+  
+  echo -e "${MESSAGE_COLOR}Downloading ${FILE_COLOR}${SOURCE}" \
+          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
+
+  export FUZZY=off PARTIAL=off
+  rm -f $SOURCE_CACHE/$SOURCE /tmp/$SOURCE
+
+  if get_url $MOONBASE_URL $(basename $MOONBASE_URL) ; then
+    echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+    mv /var/lib/lunar/moonbase/zlocal/ /var/lib/lunar/.zlocal-backup    &&
+    rm -rf /var/lib/lunar/moonbase                                      &&
+    mkdir /var/lib/lunar/moonbase                                       &&
+    mv /var/lib/lunar/.zlocal-backup /var/lib/lunar/moonbase/zlocal     &&
+    echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+    bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar               &&
+    OUTCOME=success || OUTCOME=failed
+    rm -f $SOURCE_CACHE/$SOURCE
+    message "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
+    echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
+    if [ -f $MODULE_INDEX ]; then
+      rm -f $MODULE_INDEX
+    fi
+    create_module_index
+    activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+  else
+    activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+  fi
+)}
