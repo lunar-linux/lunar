@@ -1,3 +1,7 @@
+2003-06-26 15:23  niki
+
+	* var/lib/lunar/excluded: Now all the host keys are also preserved.
+
 2003-06-17 14:22  elaine
 
 	* var/lib/lunar/functions/moonbase.lunar: adjusted script location
