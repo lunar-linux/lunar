@@ -537,148 +537,22 @@ default_build()
 } > $C_FIFO 2>&1
 
 
-gather_docs()  {
-  [ "$GARBAGE" == "on" ] || return 0
-
-  DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
-  [ "$VERBOSE" == "on" ] && echo "+ installing standard documentation into \"$DOC_DIR\" if any"
-  mkdir  -p  $DOC_DIR
-
-  ( cd $SOURCE_DIRECTORY && for FILE in \
-    README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
-    conf SETUP NEWS Change* manual* Manual* ; do
-      [ -e $FILE ] && {
-        [ "$VERBOSE" == "on" ] && echo "++ $DOC_DIR/$FILE"
-        cp -ar $FILE $DOC_DIR 2> /dev/null
-      }
-    done
-  )
-}
-
-
-install_pam_confs()  {
-  if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
-    [ "$VERBOSE" == "on" ] && echo "+ handling pam config files"
-    cd       "$SCRIPT_DIRECTORY/pam.d"
-
-    [ -d /etc/pam.d ] || mkdir  -p  /etc/pam.d
-
-    for  FILE  in  `ls`;  do
-      if  !  [  -f  /etc/pam.d/$FILE  ];  then
-        /usr/bin/install -g 0 -o 0 -m 600 $FILE /etc/pam.d
-        cp  $FILE   /etc/pam.d
-      fi
-    done
-  fi
-} 
-
-
-install_xinetd_confs()  { (
-  if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
-    cd       "$SCRIPT_DIRECTORY/xinetd.d"
-
-    [ -d /etc/xinetd.d ] || mkdir  -p  /etc/xinetd.d
-
-    for  SERVICE  in  $SERVICES;  do
-      for  FILE  in  `ls`;  do
-        if    grep  -q  "service $SERVICE"   $FILE  ; then
-	  if [ ! -f /etc/xinetd.d/$FILE ] ; then
-            /usr/bin/install --backup=numbered -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
-	  fi
-        fi
-      done
-    done
-
-    if  [  -n  "$SERVICES"  ];  then
-      devoke_installwatch
-      [ ! -x /etc/init.d/xinetd ] || /etc/init.d/xinetd  restart
-      invoke_installwatch
-    fi
-  fi
-
-) }
-
-
-install_initd()  { (
-  [ -d /etc/init.d ] || mkdir -p /etc/init.d
-
-  if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
-    cd $SCRIPT_DIRECTORY/init.d
-    SCRIPTS=$(find . -type f -maxdepth 1 )
-    ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
-
-    for INITDSCRIPT in $ALL_INITDSCRIPTS; do
-      if [ ! -f /etc/init.d/$INITDSCRIPT ] ; then
-        /usr/bin/install -g 0 -o 0 -m 700 $SCRIPT_DIRECTORY/init.d/$INITDSCRIPT /etc/init.d/
-      fi
-    done
-    cd $SCRIPT_DIRECTORY
-  fi
-
-  for INITDSCRIPT in $INITDSCRIPTS; do
-    ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
-    	rm /etc/rc?.d/???$INITDSCRIPT
-    chkconfig --add $INITDSCRIPT
-
-    CHKCONFIG=`grep '^# chkconfig:' /etc/init.d/$INITDSCRIPT | cut -d : -f 2-2`
-    if `echo $CHKCONFIG | grep -q $(/sbin/runlevel | cut -d ' ' -f 2-2) -`
-    then
-      devoke_installwatch
-      ( cd / && /etc/init.d/$INITDSCRIPT stop )
-      ( cd / && /etc/init.d/$INITDSCRIPT start )
-      invoke_installwatch
-    fi
-
-  done
-) }
-
-
-install_services()  { (
-  if  [  -f  $SCRIPT_DIRECTORY/services  ];  then
-    export  IFS="$ENTER_IFS"
-    cat  $SCRIPT_DIRECTORY/services  |
-    while  read  LINE;  do
-      grep  -q  "$LINE"      /etc/services  ||
-      echo      "$LINE"  >>  /etc/services
-    done
-  fi
-) }
-
-
-install_bashmisc () { (
-
-  if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
-    [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
-    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
-    message "\n${MESSAGE_COLOR}Please log out and log in again to make changes in your shell\nenvironment take effect.${DEFAULT_COLOR}\n"
-  fi
-  if [ -d $SCRIPT_DIRECTORY/skel ]; then
-    [ -d /etc/skel ] || mkdir -p /etc/skel
-    cp $SCRIPT_DIRECTORY/skel/* /etc/skel &> /dev/null
-    cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
-  fi
-
-) }
-
-
 default_post_build() {
-
   {
+    gather_docs
+
     install_pam_confs
     install_services
     install_xinetd_confs
     install_initd
     install_bashmisc
-    gather_docs
   } | tee -a $C_LOG
 
   devoke_installwatch
   ldconfig
   # release_saved_libraries
   cd  /
-
 }
-
 
 
 # function : remove_module
