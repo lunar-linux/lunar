@@ -217,12 +217,3 @@
 	have a successful install (logs and everything have in theory been
 	created by the time we get here.
 
-2003-11-09 15:18  sofar
-
-	* bin/lvu: lvu tree fix. thanks lurch!
-
-2003-11-09 14:49  sofar
-
-	* var/lib/lunar/functions/: main.lunar, prune.lunar: Cleaning up
-	prune code, fix, moved all prune code to prune.lunar.
-
