@@ -1,3 +1,7 @@
+2003-02-20 21:36  sofar
+
+	* bin/lvu: echo .......... echo
+
 2003-02-20 00:24  sofar
 
 	* sbin/lin, var/lib/lunar/subroutines: Fix #247:
