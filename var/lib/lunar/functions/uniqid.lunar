@@ -16,7 +16,7 @@ push_uniq_id() {
   fi
  
   verbose_msg "registering \"$UNIQID\" with server"
-  wget -q -O - "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID" 
+  wget -t 1 -T 5 -q -O - "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID" 
 
 }
 
