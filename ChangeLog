@@ -1,3 +1,14 @@
+2003-03-05 23:19  sofar
+
+	* var/lib/lunar/: subroutines, functions/depends.lunar: More
+	merging out of grouped functions: depends functions all now reside
+	in depends.lunar
+
+2003-03-05 22:57  sofar
+
+	* var/lib/lunar/subroutines: show difference between optional and
+	required depends.
+
 2003-02-28 00:25  sofar
 
 	* sbin/lget, var/lib/lunar/functions/download.lunar: code cleanups:
