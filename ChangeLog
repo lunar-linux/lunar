@@ -1,3 +1,17 @@
+2004-10-29 14:28  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Extra bluntly running the
+	  check&&create module index in case $MODULE_INDEX is missing (the
+	  -w check would fail if it was missing)
+
+2004-10-29 14:17  sofar
+
+	* bin/lvu, var/lib/lunar/functions/modules.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/updatelog.lunar: Removing MOONBASE_MD5
+	  code as I suspect that it screws things up and it's unused
+	  anyway.
+
 2004-10-25 20:28  sofar
 
 	* sbin/lunar: Adding menu toggle to PROBE_EXPIRED in the FEATURE
