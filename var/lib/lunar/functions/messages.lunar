@@ -108,36 +108,33 @@ report() {
 
 query() {
   debug_msg "query ($@)"
-  #  2 arguments
-  #  query  "what do you want?  "  DEFAULT
+  # 2 arguments
+  # query "what do you want?  "  DEFAULT
 
-  if  [  -z  "$SILENT"  ];  then
-
-    # message  "Press y for yes, n for no."
-    if  [  -n  "$MODULE"  ];  then
-      echo  -e  -n  "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}:  "
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    else
-      echo  -e  -n  "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
-    fi
-
-    read   -t  $PROMPT_DELAY  -n  1  RESPONSE
-    echo
-
-    RESPONSE=${RESPONSE:=$2}
-    case  $RESPONSE  in
-      y|Y)  true  ;;
-        *)  false ;;
-    esac
-
+  if [ -z "$SILENT" ]; then
+    while [ -z "$RESPONSE" ]; do
+      if [ -n "$MODULE" ]; then
+        echo -e -n "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}: "
+      fi
+      echo -e -n "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
+      read -t $PROMPT_DELAY -n 1 RESPONSE
+      if [ -z "$RESPONSE" ]; then
+        RESPONSE=${RESPONSE:=$2}
+      else
+        echo
+      fi
+      case $RESPONSE in
+        y|Y)  true  ;;
+        n|N)  false ;;
+          *)  unset RESPONSE ;;
+      esac
+    done
   else
-
-    echo  $2
-    case  $2  in
-        y|Y)  true    ;;
-          *)  false   ;;
+    case $2 in
+      y|Y)  true    ;;
+      n|N)  false   ;;
+        *)  message "Error: bad input in query()" ; exit 1  ;;
     esac
-
   fi
 }
 
