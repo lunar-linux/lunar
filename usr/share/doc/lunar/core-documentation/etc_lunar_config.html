@@ -10,9 +10,9 @@
 </head>
 <body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"
  link="#0000ff" alink="#000088" vlink="#ff0000">
-<h2>File Name: etc/lunar/config </h2>
+<h2>File Name: /etc/lunar/config </h2>
 <br>
-Contains the the initial defines required for the lunar core's
+Contains the the initial defines required for the Lunar core toolset's
 operation.<br>
 <br>
 <br>
@@ -23,8 +23,8 @@ operation.<br>
   <tbody>
     <tr>
       <td style="vertical-align: top;">DIALOGRC=/etc/lunar/dialogrc </td>
-      <td style="vertical-align: top;">configuration file for the
-dialog binary used by the lunar core tools<br>
+      <td style="vertical-align: top;">Configuration file for the
+dialog binary used by the lunar core tools.<br>
       </td>
     </tr>
   </tbody>
@@ -32,6 +32,11 @@ dialog binary used by the lunar core tools<br>
 <br>
 <br>
 <h3>Global Variable Defines</h3>
+<br>
+The following table contains a list of global variables defined for use
+throughout the Lunar tool set. These are used by /sbin/lget&nbsp;
+/sbin/lin&nbsp; /sbin/lrm&nbsp; /sbin/lsh&nbsp; /sbin/lunar&nbsp;
+/sbin/lvis and /bin/lvu.<br>
 <br>
 <table cellpadding="2" cellspacing="2" border="1"
  style="text-align: left; width: 100%;">
@@ -187,6 +192,209 @@ which record the installation of modules.<br>
       </td>
       <td style="vertical-align: top;">Directory containing log files
 which record the compilation of modules.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">MD5SUM_LOGS=/var/log/lunar/md5sum<br>
+      </td>
+      <td style="vertical-align: top;">Directory containing md5sums for
+modules which use them.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">INSTALL_QUEUE=/var/log/lunar/queue/install<br>
+      </td>
+      <td style="vertical-align: top;">This file holds the the queues
+for installation that are used by the lunar core tools.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">REMOVE_QUEUE=/var/log/lunar/queue/remove<br>
+      </td>
+      <td style="vertical-align: top;">This file holds the the queues
+for removal that are used by the lunar core tools.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">DEPENDS_STATUS=/var/state/lunar/depends<br>
+      </td>
+      <td style="vertical-align: top;">Flat file dependency database
+for lunar.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">DEPENDS_STATUS_BACKUP=/var/state/lunar/depends.backup<br>
+      </td>
+      <td style="vertical-align: top;">Backup flat file dependency
+database for lunar.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">MODULE_STATUS=/var/state/lunar/packages<br>
+      </td>
+      <td style="vertical-align: top;">List of installed modules with
+their install date and version info.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">MODULE_STATUS_BACKUP=/var/state/lunar/packages.backup<br>
+      </td>
+      <td style="vertical-align: top;">Backup list of installed modules
+with their install date and version info.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: left;">MODULE_INDEX=/var/state/lunar/module.index<br>
+      </td>
+      <td style="vertical-align: top;">Module list which contains the
+moonbase group to which each module belongs.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: left;">INSTALL_CACHE=/var/cache/lunar<br>
+      </td>
+      <td style="vertical-align: top;">Backup copy of compiled modules
+which are installed on the system.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: left;">SOURCE_CACHE=${SOURCE_CACHE:=/var/spool/lunar}<br>
+      </td>
+      <td style="vertical-align: top;">If the value of $SOURCE_CACHE is
+empty make it equal to /var/spool/lunar else it continues to equal the
+value of it's previous define.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: left;">LIN=lin<br>
+      </td>
+      <td style="vertical-align: top;">The name of the script used to
+install lunar modules.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: left;">ARCHIVE=${ARCHIVE:=on}<br>
+AUTOFIX=${AUTOFIX:=on}<br>
+AUTOPRUNE=${AUTOPRUNE:=off}<br>
+COLONY=${COLONY:=off}<br>
+MAIL_REPORTS=${MAIL_REPORTS:=off}<br>
+PRESERVE=${PRESERVE:=on}<br>
+REAP=${REAP:=on}<br>
+ADMIN=${ADMIN:=root}<br>
+SOUND=${SOUND:=off}<br>
+SUSTAIN=${SUSTAIN:=on}<br>
+VIEW_REPORTS=${VIEW_REPORTS:=on}<br>
+VOYEUR=${VOYEUR:=on}<br>
+GARBAGE=${GARBAGE:=on}<br>
+PROMPT_DELAY=${PROMPT_DELAY:=150}<br>
+GCCWRAPPERS=${GCCWRAPPERS:=on}<br>
+MAX_COLONYS=16<br>
+LUNAR_PRIORITY="+10"<br>
+MAX_SOURCES=100<br>
+LDD_CHECK=${LDD_CHECK:=on}<br>
+FIND_CHECK=${FIND_CHECK:=on}<br>
+MD5SUM_CHECK=${MD5SUM_CHECK:=on}<br>
+SYM_CHECK=${SYM_CHECK:=off}<br>
+      </td>
+      <td style="vertical-align: top;">A comprehensive list of
+variables which may be locally assigned in /etc/lunar/local/config or
+by using the lunar tool.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">GNU_URL=ftp://ftp.gnu.org/pub/gnu<br>
+KDE_URL=ftp://ftp.kde.org/pub/kde<br>
+GNOME_URL=ftp://ftp.gnome.org/pub/GNOME<br>
+KERNEL_URL=ftp://ftp.kernel.org<br>
+SFORGE_URL=http://telia.dl.sourceforge.net/sourceforge<br>
+XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86<br>
+LRESORT_URL=http://www.lunar-linux.org/lunar/cache<br>
+      </td>
+      <td style="vertical-align: top;">URL variables used in modules
+and subroutines.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2<br>
+      </td>
+      <td style="vertical-align: top;">Direct URL for the default Lunar
+moonbase.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">PATCH_URL=http://www.lunar-linux.org/lunar/patches<br>
+      </td>
+      <td style="vertical-align: top;">Direct URL for all the Lunar
+patches.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">TRACKED="/bin /boot /etc /lib
+/sbin /usr /var /opt/lunar"<br>
+      </td>
+      <td style="vertical-align: top;">Install locations which are
+tracked (recorded) by the lunar installation routines. Used mostly by
+lvu.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">DEFAULT="\e[0m"<br>
+BOLD="\e[1m"<br>
+BLACK="\e[30m"<br>
+RED="\e[31m"<br>
+GREEN="\e[32m"<br>
+YELLOW="\e[33m"<br>
+BLUE="\e[34m"<br>
+VIOLET="\e[35m"<br>
+CYAN="\e[36m"<br>
+WHITE="\e[37m"<br>
+MODULE_COLOR="${WHITE}${BOLD}\e[40m"<br>
+VERSION_COLOR="${WHITE}${BOLD}\e[40m"<br>
+QUERY_COLOR="${YELLOW}${BOLD}"<br>
+LRM_COLOR="${YELLOW}${BOLD}"<br>
+CHECK_COLOR="${CYAN}"<br>
+RESURRECT_COLOR="${GREEN}${BOLD}"<br>
+FILE_COLOR="${GREEN}${BOLD}"<br>
+SYMLINK_COLOR="${CYAN}${BOLD}"<br>
+PROBLEM_COLOR="${RED}${BOLD}"<br>
+MESSAGE_COLOR="${BLUE}${BOLD}"<br>
+MESSAGE_COLOR="${CYAN}"<br>
+DEFAULT_COLOR="${DEFAULT}"<br>
+      </td>
+      <td style="vertical-align: top;">Variables defining the default
+colors used by the Lunar tool set.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">TAB_ENTER_IFS="<br>
+"<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">ENTER_IFS="<br>
+"<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">STANDARD_IFS="<br>
+"<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">. $SUBROUTINES<br>
+      </td>
+      <td style="vertical-align: top;">Sourcing the subroutines
+file&nbsp; /var/lib/lunar/subroutines.</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">[ -s "$LOCAL_CONFIG" ]
+&amp;&amp; . $LOCAL_CONFIG<br>
+      </td>
+      <td style="vertical-align: top;">If /etc/lunar/local/config
+exists and is not empty it is sourced. Some variables assigned in this
+file may over-ride those assigned here.<br>
+      </td>
     </tr>
   </tbody>
 </table>
