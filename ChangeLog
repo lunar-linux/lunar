@@ -1,3 +1,8 @@
+2003-05-18 11:24  jasper
+
+	* var/lib/lunar/functions/depends.lunar: Try to fix
+	optional_depends
+
 2003-04-30 22:46  sofar
 
 	* bin/lvu, var/lib/lunar/functions/download.lunar,
