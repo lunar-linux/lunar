@@ -64,7 +64,7 @@ help() {
 
    # Help for the cpu selections.
       cpu_help)
-          MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2)"
+          MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2 | head -n 1)"
          case $2 in
             x86)
           I386_HELP="I386 processors"
