@@ -142,7 +142,3 @@
 	  checks after BUILD if it was set correctly, and warns if it
 	  isn't. In the future this will become an ERROR.
 
-2004-11-24 13:09  sofar
-
-	* bin/lvu: This seems to fix 'lvu urls'
-
