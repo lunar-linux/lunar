@@ -162,20 +162,25 @@ get() {
   if  [  -n  "$1"  ] ;  then
 
     FILE=`basename  $1`
-    if  [  -n  "$BASE_URL"  ];  then  URL=$BASE_URL/$FILE
-                                else  URL=$1
-    fi
-
-    connect          &&
-    fuzzy_wget       || {
-       FILE=`basename  $1`
-       [  -n  "$LRESORT_URL" ] && {
+    if  [  -n  "$BASE_URL"  ];  then
+      URL=$BASE_URL/$FILE
+      connect          &&
+      fuzzy_wget       &&
+      testpack  $FILE  &&
+      mv        $FILE  $SOURCE_CACHE
+    else
+      URL=$1
+      connect          &&
+      fuzzy_wget       || {
+        FILE=`basename  $1`
+        [  -n  "$LRESORT_URL" ] && {
           URL=$LRESORT_URL/$FILE
-         fuzzy_wget
-       }
-    } &&
-    testpack  $FILE  &&
-    mv        $FILE  $SOURCE_CACHE
+          fuzzy_wget
+        }
+      } &&
+      testpack  $FILE  &&
+      mv        $FILE  $SOURCE_CACHE
+    fi
 
   fi
 
@@ -190,8 +195,8 @@ process_parameters()  {
 
       case  $1  in
          --from)  SOURCE_CACHE=$2;  shift 2  ;;
-         --help)  help              exit  1  ;;
-          --url)  BASE_URL="$2"     shift 2  ;;
+         --help)  help;             exit  1  ;;
+          --url)  BASE_URL="$2";    shift 2  ;;
               *)  help                       ;;
       esac
 
