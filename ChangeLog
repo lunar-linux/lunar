@@ -1,3 +1,22 @@
+2003-07-27 23:36  sofar
+
+	* sbin/lrm: adding debug_msg to lrm, stumbling on a bug that caused
+	directories not being removed...
+
+2003-07-27 23:05  sofar
+
+	* var/lib/lunar/functions/: build.lunar, download.lunar,
+	install.lunar, messages.lunar, temp.lunar: adding debugging code,
+	to use do: DEBUG=on lin $MODULE (or any other lunar core program)
+
+2003-07-27 21:33  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Try this:
+	
+	gpg_verify_source /var/spool/lunar/sendmail.8.12.9.tar.gz
+	http://www.sendmail.org/ftp/sendmail.8.12.9.tar.gz.sig
+	http://www.sendmail.org/ftp/PGPKEYS
+
 2003-07-25 08:52  sofar
 
 	* var/lib/lunar/functions/install.lunar: Polishing up resurrect:
