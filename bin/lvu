@@ -483,7 +483,7 @@ show_website()  {
   [ -z "$MODULE" ] && return 1
   run_details $1
   if  [  -n  "$WEB_SITE"  ] ; then
-    $WEB_SITE
+    echo $WEB_SITE
   else
     echo "http://www.lunar-linux.org"
   fi
