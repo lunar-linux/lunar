@@ -7,7 +7,7 @@ lrm \- removes Lunar software modules
 .PP
 .B lrm -h|--help
 .PP
-.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-v|--verbose <module>
+.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-p|--purge|-v|--verbose <module>
 .PP
 .B lrm -D|--downgrade <module> <version>
 .SH COPYRIGHT
@@ -45,6 +45,9 @@ emoves module(s) even if they are sustained
 .TP
 .B "-v, --verbose"
 increases the level of message output
+.TP
+.B "-p, --purge"
+remove all modules that require "module" through dependencies
 .SH "FILES"
 .TP
 .I /var/lib/lunar/excluded
@@ -92,7 +95,7 @@ Updated Thomas Stewart 01/15/2002
 .PP
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
-Updated by Terry Chan 08/08/2003
+Updated by Auke Kok 09/21/2004
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
