@@ -317,8 +317,3 @@
 	*sub* version (hour after the dot) which is cosmetic only for
 	logging purposes.
 
-2003-03-08 22:40  dem
-
-	* var/lib/lunar/excluded: This anoys the f*** out of me everytime
-	it overwritters it
-
