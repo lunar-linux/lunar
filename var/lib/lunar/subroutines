@@ -1755,7 +1755,7 @@ rework_list() {
 # fix_depends : single pass to fix depends database
 fix_depends () {
 
-  TMP=/tmp/.lfix.$$
+  TMP=/tmp/lunar.fix
   [ -d $TMP ] || mkdir -p $TMP
 
   CHANGED_MODULES=
@@ -1765,9 +1765,6 @@ fix_depends () {
   else
     rework_list $(cat $MODULE_STATUS | cut -d: -f1 | sort )
   fi
-
-  # get normal depends() back:
-  . /var/lib/lunar/subroutines
 
   if [ -n "$CHANGED_MODULES" ] ; then
 
@@ -1797,6 +1794,7 @@ fix_depends () {
       cat $TMP/depends | grep -v "^$MODULE:" > $DEPENDS_STATUS
       cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
       cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      OLD_FIX=$FIX ; unset FIX
       if ! lin $MODULE ; then
 	# put back the faulty depends so we know fixing this failed
 	# and will be found again on the next run
@@ -1808,6 +1806,7 @@ fix_depends () {
 	cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
 	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       fi
+      FIX=OLD_FIX ; unset OLD_FIX
       remove_queue $INSTALL_QUEUE $MODULE
     done
   fi
