@@ -59,6 +59,8 @@ EOF
   exit  1
 }
 
+<<<<<<< lin
+=======
 #Copyrighted Jason Johnston  2002 under GPLv2
 
 # This checks the /var/state/lunar/gcc.<platform>
@@ -72,7 +74,8 @@ EOF
 # gcc 3x please email your findings to
 # maintainer@lunar-linux.org.
 
-# quick hack to fix a bug where optimize_platform was being called but there is no such function
+# quick hack to fix a bug where optimize_platform was being called but there is 
+no such function
 
 . /var/lib/lunar/functions/optimize.lunar
 
@@ -81,32 +84,21 @@ gcc_checklist() {
    if ! [[ $PLATFORM ]]; then
       PLATFORM=x86
    fi
-   if [[ $GCCVER == "3" ]]; then
-      if [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
-          BLKLST=`grep $1 /var/state/lunar/gcc.$PLATFORM`
-          if [[ $BLKLST == $1 ]]; then
-               export PATH=$KDEDIR/bin:$QTDIR/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-               GCCVER=2
-          else
-               export PATH=$KDEDIR/bin:$QTDIR/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-          fi
-      else
-         touch /var/state/lunar/gcc.$PLATFORM
-      fi
-   elif ! [[ $GCCVER == "3" ]]; then
-      if ! [[ $GCCVER ]]; then
-         echo GCCVER=2 >> /etc/lunar/local/config
-      fi
-      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-      if ! [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
-         touch /var/state/lunar/gcc.$PLATFORM
-      fi
+   if [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
+     BLKLST=`grep $1 /var/state/lunar/gcc.$PLATFORM`
+     if [[ $BLKLST == $1 ]]; then
+       echo "Module $1 is blacklisted."
+     else
+       echo "Module $1 is NOT blacklisted."
+     fi
+   else
+     touch /var/state/lunar/gcc.$PLATFORM
    fi
    if [ "$GCCWRAPPERS" == "on" ] ; then
      export PATH=/var/lib/lunar/compilers:${PATH}
-   fi
-   
+   fi  
 }
+>>>>>>> 1.12
 
 run_conflicts() {
     if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
@@ -275,7 +267,8 @@ run_build()  {
   if [ -x ./configure ] || [ -x ./src/configure ] ; then
     if [ -f /var/lib/lunar/localsaconfig ]; then
       if [ -f /var/cache/config/$MODULE ] ; then
-        message "${MESSAGE_COLOR}These are your current -- config options for module ${MODULE_COLOR}$MODULE"
+        message "${MESSAGE_COLOR}These are your current -- config options for 
+module ${MODULE_COLOR}$MODULE"
         message "${FILE_COLOR}(/var/cache/config/$MODULE)"
         cat /var/cache/config/$MODULE
       fi
@@ -366,7 +359,8 @@ ldd_check()  {  (
 
     LOG=`cat   $I_LOG                               |
          grep      "/bin/\|/games/\|/lib/\|/sbin/"  |
-         grep  -v  "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
+         grep  -v  
+"/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
 
     for  FILE  in  $LOG;  do
       if  [     -f  "$FILE"  ]     &&
@@ -767,8 +761,9 @@ lin_module()  { (
       !     solo_locked
   then
     echo  $$  >  $linING        &&
-    gcc_checklist $MODULE       &&
-    optimize_platform $GCCVER   &&
+    if ! [[ $CFLAGS ]]; then
+      optimize_platform $GCCVER   
+    fi
     run_pre_build               &&
     run_build                   &&
     run_post_build              &&
