@@ -712,7 +712,7 @@ upgrade_install_queue()  {
   fi
 
   if  [  "$AUTOPRUNE"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lvu  prune${DEFAULT_COLOR}"
+    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lunar prune${DEFAULT_COLOR}"
     prune
   fi
 
