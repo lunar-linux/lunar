@@ -141,7 +141,7 @@ install_initd()  {
   [ -d /etc/init.d ] || mkdir -p /etc/init.d
 
   if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
-    verbose_msg "handling init.d scripts"
+    verbose_msg "handling init.d scripts" | tee -a $C_LOG
     cd $SCRIPT_DIRECTORY/init.d
     SCRIPTS=[!CVS]*
     ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
@@ -214,8 +214,8 @@ install_services()  {
 
 
 install_bashmisc () {
-  debug_msg "install_bashmisc  ($@)"
-  if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
+  debug_msg "install_bashmisc ($@)"
+  if [ -d $SCRIPT_DIRECTORY/profile.d ] ; then
     [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
     install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
     message "\n${MESSAGE_COLOR}Please log out and log in again to make changes in your shell\nenvironment take effect.${DEFAULT_COLOR}\n"
