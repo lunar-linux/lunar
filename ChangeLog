@@ -1,3 +1,7 @@
+2003-09-16 21:21  sofar
+
+	* var/lib/lunar/functions/main.lunar: Bugfix #372
+
 2003-09-15 14:58  nhudson
 
 	* etc/lunar/mirrors/GNOME: 
