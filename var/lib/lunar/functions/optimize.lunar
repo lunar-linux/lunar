@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # All specified optimizations are system wide,
 #  and apply to any module built using lin.
