@@ -1,0 +1,145 @@
+#!/bin/bash
+#                                                          #
+# subroutines - Lunar subroutines                          #
+#                                                          #
+############################################################
+#                                                          #
+# this WAS the subroutines of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2001 by Kyle Sallee                            #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+boost_locked() {
+  debug_msg "boost_locked ($@)"
+  [ -f $BOOST_LOCK ] && ps `cat $BOOST_LOCK` | grep -q lin
+}
+
+
+# function : invoke_installwatch
+# usage    : invoke_installwatch
+# purpose  : start logging all disk accesses with installwatch
+invoke_installwatch() {
+  debug_msg "invoke_installwatch ($@)"
+  if [ -e /usr/lib/installwatch.so ] ; then
+    export LD_PRELOAD=/usr/lib/installwatch.so
+  fi
+}
+
+
+# function : devoke_installwatch
+# usage    : devoke_installwatch
+# purpose  : stop logging all disk accesses with installwatch
+devoke_installwatch() {
+  debug_msg "devoke_installwatch ($@)"
+  unset LD_PRELOAD
+}
+
+
+# function : parse_iw
+# usage    : parse_iw
+# purpose  : remove unwanted accesses from the installwatch file
+parse_iw() {
+  debug_msg "parse_iw ($@)"
+  OMIT="^/dev\|^/tmp\|^/usr/src"
+  OMIT_IN="	rename\|	symlink\|	unlink"
+
+  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v "$OMIT"
+  cat                $INSTALLWATCHFILE | cut -f4 | grep -v "$OMIT" | grep "^/"
+}
+
+
+# function : create_install_log
+# usage    : create_install_log
+# purpose  : create an install log
+create_install_log() {
+  debug_msg "create_install_log ($@)"
+
+  TMP_INST_LOG=$(temp_create "install-log")
+  INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
+  rm -f $INST_LOG &> /dev/null
+
+  message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
+
+  export IFS="$TAB_ENTER_IFS"
+
+  parse_iw                   |
+  sort                       |
+  uniq                       |
+  filter  "$EXCLUDED"        |
+  filter  "$LOCAL_EXCLUDED"  |
+  exists                     >  $TMP_INST_LOG
+
+  echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
+  echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
+
+  MISOWNED_SYMLINKS=$(syms_not_owned  $TMP_INST_LOG
+                      echo  -n  "/dev/null")
+
+  if [ "$MISOWNED_SYMLINKS" == "/dev/null" ] ; then
+    install -m644 $TMP_INST_LOG $INST_LOG
+  else
+    grep -v "$MISOWNED_SYMLINKS" $TMP_INST_LOG > $INST_LOG
+  fi
+
+  temp_destroy $TMP_INST_LOG
+}
+
+
+create_md5sum_log()  {
+  debug_msg "create_md5sum_log ($@)"
+
+  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
+  
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+
+  files < $INSTALL_LOGS/$MODULE-$VERSION | while read FILE ; do
+    md5sum $FILE >> $MD5SUM_LOGS/$MODULE-$VERSION
+  done
+
+}
+
+create_install_cache() {
+  debug_msg "create_install_cache($@)"
+
+  if [ "$ARCHIVE" == "off" ] ; then
+    return
+  fi
+
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2${DEFAULT_COLOR}"
+  tar cPjf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
+
+}
+
+
+boost()	{
+  debug_msg "boost ($@)"
+
+  create_install_log    &&
+  create_md5sum_log     &&
+  create_install_cache  &&
+  
+  add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+  verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+
+  rm  -f  $BOOST_LOCK
+
+}
+
+

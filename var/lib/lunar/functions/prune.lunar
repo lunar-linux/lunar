@@ -1,0 +1,48 @@
+#!/bin/bash
+#                                                          #
+# prune.lunar - Lunar prune code                           #
+#                                                          #
+############################################################
+#                                                          #
+# this WAS the subroutines of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2001 by Kyle Sallee                            #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+# function : generate_keep_list
+# usage    : generate_keep_list
+# purpose  : generated a list of files which will not be deleted with prune
+generate_keep_list() {
+  debug_msg "generate_keep_list ($@)"
+  for MODULE in $(list_moonbase | sort);  do
+    show_fancy_progress "Processing: $MODULE"
+    sources $MODULE >> $KEEP
+    VERSION=$(installed_version $MODULE)
+    if [ -z "$VERSION" ] ; then
+      VERSION=$(run_details $MODULE ; echo $VERSION)
+    fi
+    echo $MODULE-$VERSION-$BUILD.tar.bz2 >> $KEEP
+  done
+  
+  echo  README >> $KEEP
+}
+
+
+
+

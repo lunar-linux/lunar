@@ -1,0 +1,576 @@
+#!/bin/bash
+#                                                          #
+# subroutines - Lunar subroutines                          #
+#                                                          #
+############################################################
+#                                                          #
+# this WAS the subroutines of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2001 by Kyle Sallee                            #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+save_libraries()  {
+  debug_msg "save_libraries ($@)"
+
+  [ "$MODULE" == "glibc" ] && return 0
+
+  OLD_VERSION=`installed_version  $MODULE`
+  OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
+
+  [ -e "$OLD_LOG" ] || return 0      
+
+  OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+  mkdir  -p  $OLD_LIBS
+
+  SAVED=$OLD_LIBS/$MODULE.saved.libraries
+  rm  -rf  $SAVED
+
+  grep   "/lib/"  $OLD_LOG  |
+  while  read  LINE;  do
+
+    if [ -f "$LINE"  ]  &&
+         file  -bL  $LINE   |
+         grep  -q   "shared object"
+    then
+      verbose_msg "saving library \"$LINE\""
+      if  [  -h  $LINE  ];  then
+        DEST=$(  basename  $(  ls   -la  "$LINE"  |
+                               cut  -d  '>'  -f2  |
+                               cut  -c  2-
+                            )
+              )
+        ln  -sf  $DEST  $OLD_LIBS/`basename  $LINE`
+      else
+        cp  $LINE  $OLD_LIBS
+      fi
+      echo  $OLD_LIBS/`basename  $LINE`  >>  $SAVED
+    fi
+  done
+
+  ldconfig  $OLD_LIBS
+
+  if  [  -z   "$LD_LIBRARY_PATH"  ]
+  then  export  LD_LIBRARY_PATH="$OLD_LIBS"
+  else  export  LD_LIBRARY_PATH="$OLD_LIBS:$LD_LIBRARY_PATH"
+  fi
+}
+
+
+release_saved_libraries()  {
+  debug_msg "release_saved_libraries ($@)"
+   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+   SAVED=$OLD_LIBS/$MODULE.saved.libraries
+
+   [  -f  $SAVED  ]    &&
+   cat    $SAVED       |
+   while  read  FILE;  do
+     verbose_msg "releasing library \"$FILE\""
+     rm  -f   "$FILE"
+   done
+
+   ldconfig  $OLD_LIBS
+}
+
+
+prepare_install() {
+  debug_msg "prepare_install ($@)"
+  if  module_installed $MODULE  || module_held $MODULE ; then
+    message  "${MESSAGE_COLOR}Preparing to install"  \
+             "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+    while  boost_locked;  do
+      sleep  5
+    done
+
+    echo  $$  >  $BOOST_LOCK
+
+    save_libraries
+    verbose_msg "calling \"lrm --keepconfig --nosustain $MODULE\""
+    lrm  --keepconfig  --nosustain  $MODULE
+    true
+  fi
+}
+
+
+rm_source_dir() {
+  debug_msg "rm_source_dir ($@)"
+
+  [ "$KEEP_SOURCE" == "on" ] && return 0
+
+  cd  $BUILD_DIRECTORY
+
+  DEAD_DIR=$1
+  DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "destroying building dir \"$DEAD_DIR\""
+
+  if [ "$TMPFS" != "off" ]; then
+    umount     $DEAD_DIR  2>  /dev/null
+    rmdir      $DEAD_DIR  2>  /dev/null
+  else
+    rm   -rf   $DEAD_DIR  2>  /dev/null
+  fi
+
+  rm     -f  $BOOST_LOCK
+
+}
+
+
+mk_source_dir() {
+  debug_msg "mk_source_dir ($@)"
+
+  cd  $BUILD_DIRECTORY
+
+  NEW_DIR=$1
+  NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "creating building dir \"$NEW_DIR\""
+
+  if [ "$TMPFS" != "off" ]; then 
+    umount  $NEW_DIR  2>/dev/null
+    rmdir   $NEW_DIR  2>/dev/null
+    mkdir  -p  $NEW_DIR  &&
+    mount  -o  size=1g,nr_inodes=1m  -t  tmpfs  tmpfs  $NEW_DIR
+  else
+    rm -rf  $NEW_DIR  2>/dev/null
+    mkdir  -p  $NEW_DIR
+  fi
+
+}
+
+
+validate_source_dir()  {
+  debug_msg "validate_source_dir ($@)"
+
+  verbose_msg "validating \"$SOURCE_DIRECTORY\""
+  if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
+      [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
+      echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
+  then
+    true
+  else
+    message  "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."
+    message  "\$SOURCE_DIRECTORY must not be empty."
+    message  "\$SOURCE_DIRECTORY must be a subdirectory of \$BUILD_DIRECTORY"
+    false
+  fi
+
+}
+
+
+default_pre_build() {
+  debug_msg "default_pre_build ($@)"
+  verbose_msg "running \"default_pre_build\""
+  validate_source_dir  $SOURCE_DIRECTORY 
+  if [[ -d $SOURCE_DIRECTORY ]] &&
+     [[ $KEEP_SOURCE == "on" ]]; then
+    cd $SOURCE_DIRECTORY && 
+    make clean
+  else
+    mk_source_dir        $SOURCE_DIRECTORY &&
+    unpack               $SOURCE
+  fi
+}
+
+
+default_config() {
+  debug_msg "default_config ($@)"
+  verbose_msg "running \"default_config\""
+
+  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+  verbose_msg "OPTS=\"$OPTS\""                &&
+  verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+
+  ./configure  --build=$BUILD            \
+               --prefix=/usr             \
+               --sysconfdir=/etc         \
+               --localstatedir=/var      \
+               --infodir=/usr/share/info \
+               --mandir=/usr/share/man   \
+               $OPTS
+} > $C_FIFO 2>&1
+
+
+default_cvs_config() {
+  debug_msg "default_cvs_config ($@)"
+  verbose_msg "running \"default_cvs_config\""
+
+  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
+  verbose_msg "OPTS=\"$OPTS\""                &&
+  verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+
+  ./autogen.sh --build=$BUILD            \
+               --prefix=/usr             \
+               --sysconfdir=/etc         \
+               --localstatedir=/var      \
+               --infodir=/usr/share/info \
+               --mandir=/usr/share/man   \
+               $OPTS
+} > $C_FIFO 2>&1
+
+
+default_make() {
+  debug_msg "default_make ($@)"
+  verbose_msg "running \"default_make\""
+  make                               &&
+  prepare_install                    &&
+  make    install
+} > $C_FIFO 2>&1
+
+
+default_build() {
+  debug_msg "default_build ($@)"
+  verbose_msg "running \"default_build\""
+  default_config  &&
+  default_make
+} > $C_FIFO 2>&1
+
+
+default_cvs_build() {
+  debug_msg "default_cvs_build ($@)"
+  verbose_msg "running \"default_cvs_build\""
+  default_cvs_config  &&
+  default_make
+} > $C_FIFO 2>&1
+
+
+default_post_build() {
+  debug_msg "default_post_build ($@)"
+  {
+    gather_docs
+
+    install_pam_confs
+    install_services
+    install_xinetd_confs
+    install_initd
+    install_bashmisc
+  } | tee -a $C_LOG
+
+  devoke_installwatch
+  ldconfig
+  release_saved_libraries
+  cd  /
+}
+
+
+# function : remove_module
+# usage    : remove_module; but $MODULE must be defined earlier
+# purpose  : removed a module from the MODULE_STATUS files, no source removal
+remove_module() {
+  debug_msg "remove_module ($@)"
+
+  verbose_msg "updating lunar state files after module removal"
+  lock_file $MODULE_STATUS                                     && 
+  lock_file $MODULE_STATUS_BACKUP                              &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
+  cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
+  unlock_file $MODULE_STATUS_BACKUP                            &&
+  unlock_file $MODULE_STATUS 
+
+  if [ -n "$EXILE" ] ; then
+     lock_file $MODULE_STATUS                            && 
+     lock_file $MODULE_STATUS_BACKUP                     &&
+     echo  "$1::exiled:0.0"  >>  $MODULE_STATUS          &&
+     cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP   &&
+     unlock_file $MODULE_STATUS_BACKUP                   &&
+     unlock_file $MODULE_STATUS 
+
+     lock_file $DEPENDS_STATUS                           &&
+     lock_file $DEPENDS_STATUS_BACKUP                    &&
+     grep  -v  ":$1:" $DEPENDS_STATUS_BACKUP  >   $DEPENDS_STATUS  &&
+     cat $DEPENDS_STATUS >  $DEPENDS_STATUS_BACKUP       &&
+     unlock_file $DEPENDS_STATUS                         &&
+     unlock_file $DEPENDS_STATUS_BACKUP
+  fi
+}
+
+
+# function: add_module
+# usage   : add_module <module_name>
+# purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
+add_module()  {
+  debug_msg "add_module ($@)"
+  verbose_msg "updating lunar state files after module installation"
+  lock_file $MODULE_STATUS                                    && 
+  lock_file $MODULE_STATUS_BACKUP                             &&
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP   >   $MODULE_STATUS 2>/dev/null  &&
+  echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
+  cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP           &&
+  unlock_file $MODULE_STATUS_BACKUP                           &&
+  unlock_file $MODULE_STATUS 
+}
+
+
+push_install_queue() {
+  debug_msg "push_install_queue ($@)"
+  remove_queue   $REMOVE_QUEUE    "$1"
+  remove_queue   $INSTALL_QUEUE   "$1"
+  !  module_installed             "$1"  &&
+  add_queue  $INSTALL_QUEUE       "$1"
+}
+
+
+push_remove_queue() {
+  debug_msg "push_remove_queue ($@)"
+
+  remove_queue   $INSTALL_QUEUE  "$1"
+  remove_queue   $REMOVE_QUEUE   "$1"
+  module_installed               "$1"  &&
+  add_queue  $REMOVE_QUEUE       "$1"
+}
+
+
+# function : sort_install_queue
+# usage    : sort_install_queue
+# purpose  : sorts the install queue according to the dependencies
+sort_install_queue() {
+  debug_msg "sort_install_queue ($@)"
+   for MODULE in $@; do
+     QUEUE="$QUEUE $MODULE"
+     show_fancy_progress "Processing: $MODULE"
+     for DEP in $(find_depends $MODULE) ; do
+       if $(echo "$@" | grep -qw "$DEP") ; then
+         QUEUE="$DEP $QUEUE"
+       fi
+     done
+   done
+
+   echo $QUEUE | tsort
+}
+
+
+# function : purge_modules
+# usage    : purge_modules
+# purpose  : purge modules that were removed from moonbase
+purge_modules() {
+  debug_msg "purge_modules ($@)"
+  verbose_msg "Discovering modules that were removed from moonbase"
+  for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+  (
+    if ! run_details $MODULE &> /dev/null ; then
+      message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+      if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
+        lrm $MODULE
+        continue
+      else
+        message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
+      fi
+    fi
+  )
+  done 
+}
+
+
+# function : list_expired_modules
+# usage    : list_expired_modules
+# purpose  : return a list of modules that need to be updated
+list_expired_modules() {
+  debug_msg "list_expired_modules ($@)"
+  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
+  (
+    MODULE=$(echo "$LINE" | cut -d: -f1)
+    IDATE=$(echo "$LINE" | cut -d: -f2)
+    STATUS=$(echo "$LINE" | cut -d: -f3)
+    IVERSION=$(echo "$LINE" | cut -d: -f4)
+    if run_details $MODULE &> /dev/null ; then
+      if [ "$STATUS" == "installed" ] ; then
+        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
+          (( "$UPDATED" > "$IDATE" )) ; then
+          if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
+            echo $MODULE
+          fi
+	fi
+      fi
+    fi
+  )
+  done
+}
+
+
+# function : sort_by_dependency
+# usage    : LIST=$(sort_by_dependency $LIST)
+# purpose  : return a LIST sorted by dependency
+sort_by_dependency() {
+  debug_msg "sort_by_dependency ($@)"
+  LIST=$@
+  for MODULE in $LIST ; do
+    unset DEPS
+    for DEP in $(find_depends $MODULE) ; do
+      if $(echo $LIST | grep -qw $DEP) ; then
+        DEPS="$DEPS $DEP"
+      fi
+    done
+    TMP_LIST="$TMP_LIST $DEPS $MODULE"
+  done
+  
+  for MODULE in $TMP_LIST ; do
+    if ! $(echo $QUEUE | grep -qw $MODULE) ; then
+      QUEUE="$QUEUE $MODULE"
+    fi
+  done
+
+  echo $QUEUE
+}
+
+
+# function : update_modules
+# usage    : update_modules
+# purpose  : update all installed modules that need to be updated
+update_modules() {
+  debug_msg "update_modules ($@)"
+
+  export IFS="$STANDARD_IFS"
+
+  verbose_msg "Searching for modules to update"
+  LIST=$(list_expired_modules)
+  
+  if [ -z "$LIST" ] ; then
+    verbose_msg "Nothing to update!"
+    return
+  fi
+  
+  verbose_msg "Sorting update queue"
+  QUEUE=$(sort_by_dependency $LIST)
+
+  message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
+  TMP_QUEUE=$(temp_create "update-queue")
+  for MODULE in $QUEUE ; do
+    echo $MODULE >> $TMP_QUEUE
+    echo $MODULE
+  done
+
+  unset MODULE
+  if query "Do you wish to edit the update queue ? " n ; then
+    edit_file $TMP_QUEUE
+  fi
+  QUEUE=$(cat $TMP_QUEUE)
+  temp_destroy $TMP_QUEUE
+
+  if [ -n "$QUEUE" ] ; then
+    lin -c $QUEUE
+  fi
+}
+
+
+
+log_list()  {
+  debug_msg "log_list ($@)"
+
+   echo `cat  $MODULE_STATUS_BACKUP                | \
+         cut  -d  :  -f1,4 --output-delimiter="-"`
+
+}
+
+
+clean_logs()  {
+  debug_msg "clean_logs ($@)"
+
+  LOGS=`log_list`
+
+  for  FILE  in  `ls  $INSTALL_LOGS`;  do
+    if  !  echo  -e  "$LOGS"  |  grep  -q  $FILE;  then
+      message  "Removing stale log  :  $INSTALL_LOGS/$FILE"
+      rm                               $INSTALL_LOGS/$FILE
+    fi
+  done
+
+  for  FILE  in  `ls  $COMPILE_LOGS | sed  "s/\.bz2//"`;  do
+    if  !  echo  -e  "$LOGS"  |  grep  -q  $FILE;  then
+      message  "Removing stale log  :  $COMPILE_LOGS/$FILE.bz2"
+      rm                               $COMPILE_LOGS/$FILE.bz2
+    fi
+  done
+
+  for  FILE  in  `ls  $MD5SUM_LOGS`;  do
+    if  !  echo  -e  "$LOGS"  |  grep  -q  $FILE;  then
+      message  "Removing stale log  :  $MD5SUM_LOGS/$FILE"
+      rm                               $MD5SUM_LOGS/$FILE
+    fi
+  done
+
+}
+
+activity_log()  {
+  debug_msg "activity_log ($@)"
+
+    DATE=`date  -u  +%Y%m%d-%T`
+  COMMAND=$1
+   MODULE=$2
+  VERSION=$3
+  OUTCOME=$4
+     INFO=$5
+
+  lock_file $ACTIVITY_LOG &&
+  echo "$DATE	$COMMAND	$MODULE	$VERSION	$OUTCOME	$INFO"  >> $ACTIVITY_LOG &&
+  unlock_file $ACTIVITY_LOG
+}
+
+
+syms_not_owned()  {
+  debug_msg "syms_not_owned ($@)"
+
+  cat  $1  |
+  while read ITEM ; do
+
+    if  [  -h  "$ITEM"  ]   &&
+        [  -f  "$ITEM"  ];  then
+
+      DEST=$(  basename  $(  ls   -la  "$ITEM"  |
+                             cut  -d  '>'  -f2  |
+                             cut  -c  2-
+                          )
+            )
+
+      if  !  grep  -q  "$DEST"  "$1"
+      then   echo  -n  "$ITEM\|"
+             echo      "$ITEM"  >>  /tmp/$MODULE.rejected.symlinks
+      fi
+
+    fi
+
+  done
+
+}
+
+
+find_pam_aware()  {
+  debug_msg "find_pam_aware ($@)"
+
+  cat  $MODULE_STATUS_BACKUP  |
+  while  read  LINE;  do
+                        
+    MODULE="`echo  $LINE  |  cut  -d  :  -f1`"
+    STATUS="`echo  $LINE  |  cut  -d  :  -f3`"
+                                              
+    if  [  "$STATUS"  ==  "installed"  ]   ||
+        [  "$STATUS"  ==  "held"       ];  then
+
+      SECTION=`find_section  $MODULE`
+                                    
+      if    [  -d  "$MOONBASE/$SECTION/$MODULE/pam.d"  ]  &&
+            [  "$MODULE"  !=  "Linux-PAM"              ]
+      then  echo  $MODULE
+      fi
+
+    fi
+  done
+
+}
+
+

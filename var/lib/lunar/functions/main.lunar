@@ -1,0 +1,180 @@
+#!/bin/bash
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/main.lunar                                    #
+# contains all main handling code, aka the long complex    #
+# functions like renew, update, fix, etc. One day they all #
+# will be in here.                                         #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Auke Kok 2003 under GPLv2                    #
+#                                                          #
+############################################################
+
+# function : renew
+# usage    : renew
+# purpose  : frontend function that includes all renewing code
+renew() {
+  debug_msg "renew ($@)"
+  message "${MESSAGE_COLOR}Starting update of installed modules${DEFAULT_COLOR}"
+
+  purge_modules
+  
+  export TMP_LIN_SUCCESS=$(temp_create "successfull")
+  export TMP_LIN_FAIL=$(temp_create "failed")
+      
+  update_modules
+
+  if [ "$AUTOFIX" == "on" ] ; then
+    message "${MESSAGE_COLOR}Executing AUTOFIX : lin --fix${DEFAULT_COLOR}"
+    lin --fix
+  fi
+
+  if [ "$AUTOPRUNE" == "on" ] ; then
+    message "${MESSAGE_COLOR}Executing AUTOPRUNE : lunar prune${DEFAULT_COLOR}"
+    prune
+  fi
+
+  display_update_log
+
+  temp_destroy $TMP_LIN_SUCCESS
+  temp_destroy $TMP_LIN_FAIL
+
+}
+
+
+update() {
+  debug_msg "update ($@)"
+  if  ps  -C  lin  >  /dev/null;  then
+    echo    "Unable to update lunar concurrently while installing."
+    sleep   5
+    return  1
+  fi
+
+  lin moonbase
+  if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
+  then
+    lin $LUNAR_MODULE && lunar renew
+  else
+    lunar renew
+  fi
+
+}
+
+
+rebuild()  {
+  debug_msg "rebuild ($@)"
+  rm  -f  $INSTALL_QUEUE
+
+  message  "To do a non recursive rebuild"
+  message  "all installed modules must be fixed first."
+  sleep  3
+  $LIN  --fix
+
+  for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
+     MODULE=`echo  "$LINE"  |  cut  -d : -f1`
+     STATUS=`echo  "$LINE"  |  cut  -d : -f3`
+    if  [  "$STATUS"   ==  "installed"  ]   &&
+        [  "$MODULE"  !=  "$LUNAR_MODULE"      ];  then
+      echo  $MODULE  >>  $INSTALL_QUEUE
+    fi
+  done
+
+  message  "Sorting the dependencies, that may take some time"
+  sort_install_queue
+
+  unset  MODULE
+  if    query  "Edit Rebuild/Install Queue?" n
+  then  edit_file  $INSTALL_QUEUE
+  fi
+
+  $LIN  --compile  `cat  $INSTALL_QUEUE`
+  rm -f                  $INSTALL_QUEUE
+}
+
+
+# function : prune
+# usage    : prune
+# purpose  : prune all old logs, source copy's, install caches
+prune() {
+  debug_msg "prune ($@)"
+  message  "${MESSAGE_COLOR}Generating a keep list..." \
+           "${DEFAULT_COLOR}"
+
+  KEEP="/tmp/prune.keep.$$"
+  trap "rm -f $KEEP 2>/dev/null; exit" INT QUIT TERM
+  generate_keep_list
+
+  message  "${MESSAGE_COLOR}Now pruning $SOURCE_CACHE..." \
+           "${DEFAULT_COLOR}"
+  ls  $SOURCE_CACHE  |
+  while  read  FILE;  do
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $SOURCE_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $INSTALL_CACHE..." \
+           "${DEFAULT_COLOR}"
+  ls  $INSTALL_CACHE  |
+  while  read  FILE;  do
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $INSTALL_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$INSTALL_CACHE/$FILE\""
+      }	
+  done
+
+  KEEP2="/tmp/prune.instlist.$$"
+  trap "rm -f $KEEP2 2>/dev/null; exit" INT QUIT TERM
+  cat $MODULE_STATUS | cut -d: -f1,4 | sed 's/:/-/' > $KEEP2
+
+  message  "${MESSAGE_COLOR}Now pruning $INSTALL_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $INSTALL_LOGS  |
+  while  read  FILE;  do
+      grep -q "^$FILE$"   $KEEP2 || {
+        rm $INSTALL_LOGS/$FILE
+	verbose_msg "rm \"$INSTALL_LOGS/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $COMPILE_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $COMPILE_LOGS  | sed 's/.bz2$//' |
+  while  read  FILE;  do
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $COMPILE_LOGS/$FILE.bz2
+	verbose_msg "rm \"$COMPILE_LOGS/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $MD5SUM_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $MD5SUM_LOGS  |
+  while  read  FILE;  do
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $MD5SUM_LOGS/$FILE
+	verbose_msg "rm \"$MD5SUM_LOGS/$FILE\""
+      }
+  done
+
+  rm  -f  $KEEP 2>/dev/null
+  rm  -f  $KEEP2 2>/dev/null
+  trap INT QUIT TERM
+}
+
+
+resurrect_modules() {
+  debug_msg "resurrect_modules ($@)"
+  for MODULE in $@ ; do
+    if run_details $MODULE ; then
+      resurrect $MODULE
+    fi
+  done
+}

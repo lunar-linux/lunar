@@ -1,0 +1,82 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# download.lunar - get sources from the net                #
+#                                                          #
+############################################################
+# leach is part of the sorcery spell management utility    #
+# Copyright 2001 by Kyle Sallee                            #
+############################################################
+#                                                          #
+# this WAS the leach script of a source based Linux distro,#
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+# This secondly was lget mostly, and has been moved into   #
+# a separate lunar functions file handling all the generic #
+# downloading functionality for lunar                      #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted  Jason Johnston  2002 under GPLv2      #
+#                                                          #
+# Parts Copyrighted  Kagan Kongar  2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted  Auke Kok  2002 under GPLv2            #
+#                                                          #
+############################################################
+
+
+connect()  {
+  debug_msg "connect ($@)"
+
+  if  !  ifconfig  |  grep  -q  "^eth"   &&
+      !  ifconfig  |  grep  -q  "^wlan"  &&
+      !  ifconfig  |  grep  -q  "^ppp"   &&
+      !  ifconfig  |  grep  -q  "^tun";  then
+    pon
+
+    # Timeout in deciseconds to wait for Interface to come up.
+    TIMEOUT=30
+
+    until  ifconfig  |  grep  -q  eth   ||
+           ifconfig  |  grep  -q  ppp   ||
+           [  $TIMEOUT == 0  ]
+    do
+      sleep  10
+      (( TIMEOUT-- ))
+    done
+    disconnect
+
+  fi
+
+}
+
+
+disconnect()  {
+  debug_msg "disconnect ($@)"
+  if    ps  -C disconnect  >  /dev/null
+  then  return
+  fi
+
+  rm  -f           /tmp/disconnect
+  cat  <<  EOF  >  /tmp/disconnect
+#!/bin/sh
+
+while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
+poff
+rm  -f  /tmp/disconnect
+EOF
+
+chmod  a+x  /tmp/disconnect
+            /tmp/disconnect  &
+
+}
+
+
