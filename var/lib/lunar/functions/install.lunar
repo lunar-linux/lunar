@@ -214,7 +214,7 @@ run_post_install() {
       mkdir /var/state/lunar/module_history
     fi
     mod_v_safe_edit $MODULE                             &&
-    SCRIPT_DATE=$(date -u +%Y%m%d)                 &&
+    SCRIPT_DATE=$(date -u +%Y%m%d)                      &&
     MH_NAME=$MOD_V_SNAME-$VERSION-$SCRIPT_DATE.tar.bz2  &&
     cd $MOONBASE/$SECTION                               &&
     tar -cjf /var/state/lunar/module_history/$MH_NAME $MODULE

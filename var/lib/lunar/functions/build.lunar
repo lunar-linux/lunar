@@ -187,10 +187,9 @@ default_pre_build() {
   if [[ -d $SOURCE_DIRECTORY ]] &&
      [[ $KEEP_SOURCE == "on" ]]; then
     cd $SOURCE_DIRECTORY && 
-    make clean 
+    make clean
     if [ $? -ne 0 ]; then
-      message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}The source for \
-${MODULE_COLOR}$MODULE${DEFUALT_COLOR}: could not be made clean for build."
+      message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}The source for ${MODULE_COLOR}$MODULE${DEFUALT_COLOR}: could not be made clean for build."
       # Thoughts on forcing a new source directory?
       # More of how should we handle this, currently we will bail out
       # A vast majority of the moonbase will fail,  (w/o: make clean)
@@ -284,7 +283,22 @@ default_cpan_build() {
 	quit" | /usr/bin/cpan
   RESULT=$?
   rm_source_dir $SOURCE_DIRECTORY
-  return $RESULT
+
+  # some crude checking is done here:
+  debug_msg "verifying installed version of \"$MODULE\""
+  CHECK=$(echo "o conf cpan_root /var/state/lunar 
+  m $CPAN_MODULE" | cpan | grep INST_VERSION | awk '{print $2}')
+  if [ -z "$CHECK" ] ; then
+    message "${PROBLEM_COLOR}Error: nothing was installed!${DEFAULT_COLOR}"
+    return 1
+  elif [ "$CHECK" == "$VERSION" ] ; then
+    message "${MESSAGE_COLOR}CPAN module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${VERSION_COLOR}$VERSION${DEFAULT_COLOR}${MESSAGE_COLOR} installed OK${DEFAULT_COLOR}"
+    return 0
+  else 
+    message "${PROBLEM_COLOR}Warning: ${DEFAULT_COLOR}${MESSAGE_COLOR}Wrong version ${DEFAULT_COLOR}${VERSION_COLOR}$CHECK${DEFAULT_COLOR}${MESSAGE_COLOR}, expected ${DEFAULT_COLOR}${VERSION_COLOR}$VERSION${DEFAULT_COLOR}${MESSAGE_COLOR} for CPAN module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+    return 0
+  fi
+  
 } > $C_FIFO 2>&1
 
 
