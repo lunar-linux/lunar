@@ -1,3 +1,8 @@
+2004-06-04 12:21  sofar
+
+	* var/lib/lunar/functions/postbuild.lunar: Same permissions but
+	changed code so it's actually not rediculous
+
 2004-05-26 11:28  prox
 
 	* var/lib/lunar/functions/depends.lunar: correction
