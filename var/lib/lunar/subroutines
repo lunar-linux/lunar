@@ -632,8 +632,10 @@ remove_depends()
   if    [  -n  "$2"  ]
   then  
      grep  -v  "^$1:$2"  $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
+     [ "$VERBOSE" == "on" ] && echo "+ removing depends for \"$1\" on \"$2\""
   else  
      grep  -v  "^$1:"    $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
+     [ "$VERBOSE" == "on" ] && echo "+ removing depends for \"$1\""
   fi
   cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
   
@@ -646,6 +648,8 @@ add_depends()
 {
   remove_depends  "$1"  "$2"
 
+  [ "$VERBOSE" == "on" ] && echo "+ adding depends for \"$1\" on \"$2\""
+
   lock_file $DEPENDS_STATUS_BACKUP                       &&
   lock_file $DEPENDS_STATUS                              &&
   echo  "$1:$2:$3:$4:$5:$6"  >>  $DEPENDS_STATUS         &&
@@ -657,7 +661,6 @@ add_depends()
 
 
 conflicts() {
-
   if  module_installed  $1;  then
     lrm $1
   fi
@@ -790,6 +793,8 @@ run_depends() {
 
   # local definitions of depends and optional_depends!
   depends()  {
+    [ "$VERBOSE" == "on" ] && echo "+ \"$MODULE\" depends on \"$1\""
+
     grep -q "^"$1"\$" $PREPD 2>/dev/null && return 0
     if  ! module_installed  $1   &&
         ! module_held       $1 
@@ -816,6 +821,7 @@ run_depends() {
     #              $4 = description of why to use this module.
 
 
+    [ "$VERBOSE" == "on" ] && echo "+ \"$MODULE\" optionally depends on \"$1\""
     if  !  in_depends  "$MODULE"  "$1";  then
 
       if    module_exiled  $1
