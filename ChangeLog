@@ -1,3 +1,9 @@
+2004-11-19 14:42  sofar
+
+	* var/lib/lunar/functions/kernel.lunar: Pretty format lilo config
+	  lines: empty line between images and use human-readable output
+	  abit.
+
 2004-11-18 14:10  sofar
 
 	* var/lib/lunar/functions/locking.lunar: The color needs to be
@@ -266,8 +272,4 @@
 2004-09-21 13:54  sofar
 
 	* usr/share/man/man8/lrm.8: Adding purge to man page
-
-2004-09-20 16:00  sofar
-
-	* var/lib/lunar/protected: Smacking courier in here
 
