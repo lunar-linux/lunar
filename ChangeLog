@@ -1,9 +1,24 @@
+2002-11-26 14:49  kc8apf
+
+	* lib/lsb/init-functions: Fix pgrep so it only finds processes that
+	start with PROCESS.  It was previously finding any process which
+	contained PROCESS, so kapmd was found when apmd was the process
+	being searched for.
+
 2002-11-21 05:31  hardkrash
 
-	* var/lib/lunar/functions/optimize.lunar: Added PPC and Power options to lunar optomization functions
-	
+	* var/lib/lunar/functions/optimize.lunar: Added PPC and Power
+	options to lunar optomization functions
+
 2002-11-21 05:29  hardkrash
 
-	* var/lib/lunar/menu/optimize.menu: Added PPC and Power processors to menus
-	corrected menu prompts
-	
+	* var/lib/lunar/menu/optimize.menu: Added PPC and Power processors
+	to menus corrected menu prompts
+
+2002-11-09 13:46  elaine
+
+	* var/lib/lunar/functions/updatelog.lunar: 
+	fixed typo MOUDLE caught by Lurch, and added "" to the variables --
+	this (variable quoting) probably needs to be done for all lunar
+	code
+
