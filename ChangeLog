@@ -1,3 +1,15 @@
+2003-12-28 17:46  sofar
+
+	* var/lib/lunar/functions/install.lunar: Call lrm when doing an
+	explicit resurrect! (overwriting is not bad per se, but this is
+	more decent)
+
+2003-12-28 14:35  sofar
+
+	* var/lib/lunar/functions/: build.lunar, connect.lunar,
+	install.lunar, sources.lunar: Cleanups and some slight adjustments
+	towards CPAN code, md5sum checkings.
+
 2003-12-22 18:33  sofar
 
 	* var/lib/lunar/functions/check.lunar: minor adjustment to make it
