@@ -1,3 +1,8 @@
+2003-03-24 16:21  kc8apf
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	Clean up options for Alpha CPUs
+
 2003-03-24 08:20  sofar
 
 	* sbin/lin: wheps
