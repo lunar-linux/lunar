@@ -1,105 +1,119 @@
-.TH LUNAR 8 March 2002 Lunar Linux LUNAR
-.SH NAME
-lunar - menu-driven software package management utility
-.SH SYNTAX
+.TH "LUNAR" "8" "March" "Lunar-Linux.org" "Lunar"
+.SH "NAME"
+lunar \- menu\-driven software package management utility
+.SH "SYNTAX"
 .I lunar
-[update|renew|rebuild|optimize|prune]
-.SH COPYRIGHT
-.if n lunar(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
-.if t lunar(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+[update|renew|rebuild|optimize|prune|resurrect|install|remove|hold|unhold|exile|unexile]
+.SH "COPYRIGHT"
+.if n lunar(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if t lunar(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .SH "DESCRIPTION"
-.I lunar
-is an easy-to-use menu-driven (dialog-based) interface to the
-.I lunar
-source-based package management system.
+.I lunar is an easy\-to\-use menu\-driven (dialog\-based) interface to the .I lunar source\-based package management system.
 .SH "OPTIONS"
 .I lunar
-without options will start the menu-driven package management utility.
-.PP
+without options will start the menu\-driven package management utility.
+.PP 
 .I update
-.IP
-automatically updates all installed software packages. This option is
-non-interactive and does not start up the menu-driven interface. It is
-suitable for use in cron jobs.
-.PP
+.IP 
+automatically updates all installed software packages. This option is non\-interactive and does not start up the menu\-driven interface. It is suitable for use in cron jobs.
+.PP 
 .I renew
-.IP
-check installed versions of sources against the moonbase, and recompile
-where necessary. This is the same as the final stage of a lunar update.
-.PP
-.I optimize
-.IP
-jump straight into the compiler optimizations menu.
-.PP
+.IP 
+check installed versions of sources against the moonbase, and recompile where necessary. This is the same as the final stage of a lunar update.
+.PP 
 .I rebuild
-.IP
-automatically rebuilds all installed software packages. This option
-is non-interactive and does not start up the menu-driven interface.
-It is suitable for use in cron jobs and is useful for rebuilding
-distributed binaries from source.
-.PP
-.O prune
-.IP
-Removes all old source code and old backups. Since the number of sources
-on the system grows steadily on a running system, you will need to clean
-some of the kept copies of sources and compile caches. The source code
-from previous versions are kept so that the packages can be rolled back
-to older versions. This does not delete sources that are up to date,
+.IP 
+automatically rebuilds all installed software packages. This option is non\-interactive and does not start up the menu\-driven interface. It is suitable for use in cron jobs and is useful for rebuilding distributed binaries from source.
+<pp>
+.I optimize
+.IP 
+jump straight into the compiler optimizations menu.
+.PP 
+.I prune
+.IP 
+Removes all old source code and old backups. Since the number of sources on the system grows steadily on a running system, you will need to clean some of the kept copies of sources and compile caches. The source code from previous versions are kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date,
 but not installed.
+<pp>
+.I resurrect
+.IP 
+Reinstalls a module which has been removed but still has the compiled version available.
+<pp>
+.I install
+.IP 
+Installs a module.
+<pp>
+.I remove
+.IP 
+Removes a module.
+<pp>
+.I hold
+.IP 
+Places a module on hold so it cannot be built/rebuilt.
+<pp>
+.I unhold
+.IP 
+Removes a module from hold status so it can be built/rebuilt.
+<pp>
+.I exile
+.IP 
+Prevents a module from being installed or resurrected. Perhaps because you've installed a customized module.
+<pp>
+.I unexile
+.IP 
+Removes a module from exiled status.
+<pp>
 .SH "REQUIREMENTS"
 .I lunar
 requires a connection to the Internet
-.PP
+.PP 
 .I Bash
 version 2 or higher
-.PP
+.PP 
 .I Dialog
 version 0.9a or higher
-.PP
+.PP 
 .I Linux
-kernel version 2.4.x
+kernel version 2.4.x or higher.
 .SH "NOTES"
 Options on the
 .I Package Menu
-add or remove software packages to/from installation and removal queues.
-The actual installation and/or removal of the packages will not be
-performed until either
+add or remove software packages to/from installation and removal queues. The actual installation and/or removal of the packages will not be performed until either
 .I Foreground Execution
 or
 .I Background Execution
 are selected from the main menu.
 .SH "OPERATION"
 .I Navigating the Menus
-.PP
+.PP 
 To return to a previous menu press
 .I <Esc>
 or use the
-.I Cancel
-button
-.PP
+.I Cancel button
+.PP 
 To exit the program from the main menu press
 .I <Esc>
 or use the
-.I Cancel
-button
-.PP
+.I Cancel button
+.PP 
 To toggle between buttons press
 .I <Tab>
-.PP
+.PP 
 To select whichever button is highlighted press
 .I <Enter>
-.PP
+.PP 
 To select/deselect items from a checklist press
 .I <Space>
 .SH "AUTHOR"
 Kyle Sallee
-.PP
+.PP 
 Updated Thomas Stewart 01/15/2002
-.PP
+.PP 
 Converted to Lunar by Terry Chan 03/23/2002
-.PP
+.PP 
+Updated by Chuck Mead 07/17/2003
+<pp>
 .SH "REPORTING BUGS"
-Report bugs to <maintainer@lunar-penguin.org>
+Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
 moonbase(1), lin(8), lvu(1), lget(8), lrm(8), lcrash(8)
 .SH "WARRANTY"
