@@ -1,3 +1,15 @@
+2004-05-24 13:20  sofar
+
+	* bin/lvu: Proper directory handling that allows both passing
+	absolute and relative filenames of the snapshot.
+
+2004-05-24 13:12  sofar
+
+	* bin/lvu: Fixing export/import scripts. It now includes a copy of
+	'packages' and sorts the queue according to dependency as well,
+	which should make things easier (note some things still don't work
+	that way correctly).
+
 2004-05-21 19:51  sofar
 
 	* sbin/lrm, var/lib/lunar/functions/depends.lunar: Feature: lrm
