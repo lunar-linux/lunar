@@ -1679,7 +1679,7 @@ rework_module() {
 
   # fetch new depend data:
   run_depends
-  cat $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MODULE
+  grep "^$MODULE:" $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MODULE
   
   if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE &> /dev/null ) ; then
     echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed depends:${DEFAULT_COLOR}"
@@ -1780,45 +1780,41 @@ fix_depends () {
   if [ -n "$CHANGED_MODULES" ] ; then
 
     for MODULE in $CHANGED_MODULES ; do
-      add_queue $INSTALL_QUEUE $MODULE
-    done
-    # we need to trick the system into thinking it has the new depends
-    # if we want to do one module at a time:
-    if (( $(cat $INSTALL_QUEUE | wc -l) > 1 )) ; then
-      lock_file $DEPENDS_STATUS
-      cp $DEPENDS_STATUS $TMP/depends
-      while read LINE ; do
-        grep -v $(echo $LINE | cut -d: -f1) $TMP/depends > $DEPENDS_STATUS
-      done < $TMP/depends
-      cat $TMP/depends.new-* | sort | uniq >> $DEPENDS_STATUS
-      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      sort_install_queue
-      cat $TMP/depends > $DEPENDS_STATUS
-      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      unlock_file $DEPENDS_STATUS
-      unset MODULE
-      if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
-        edit_file  $INSTALL_QUEUE
+      if [ ! -e $TMP/depends.new.$MODULE ] ; then
+        rework_module $MODULE
       fi
-    fi
-    for MODULE in $(cat $INSTALL_QUEUE) ; do
-      # this ensures the bastard doesn't recheck it:
-      cp $DEPENDS_STATUS $TMP/depends
-      cat $TMP/depends | grep -v "^$MODULE:" > $DEPENDS_STATUS
-      cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
-      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      OLD_FIX=$FIX ; unset FIX
-      OLD_lin_PASS=$lin_PASS; export lin_PASS=three
-      if ! lin $MODULE ; then
+    done
+    
+    # this ensures the bastard doesn't recheck it:
+    mv $DEPENDS_STATUS $TMP/depends
+    cp $TMP/depends $TMP/depends.filter
+    for MODULE in $CHANGED_MODULES ; do
+      grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+      mv $TMP/depends.filter~ $TMP/depends.filter
+    done
+    mv $TMP/depends.filter $DEPENDS_STATUS 
+    cat $TMP/depends.new.* >> $DEPENDS_STATUS
+    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+
+    OLD_FIX=$FIX ; unset FIX
+    OLD_lin_PASS=$lin_PASS; export lin_PASS=three
+
+    for MODULE in $CHANGED_MODULES ; do
+      if ! lin -c $MODULE ; then
 	# put back the faulty depends so we know fixing this failed
 	# and will be found again on the next run
 	cat $TMP/depends > $DEPENDS_STATUS
 	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       else
 	# sometimes after lin all depends are gone! force it down it's throat
-	cat $TMP/depends | grep -v "^$MODULE:" > $DEPENDS_STATUS
-	cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
-	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+        cp $TMP/depends $TMP/depends.filter
+        for MODULE in $CHANGED_MODULES ; do
+          grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+          mv $TMP/depends.filter~ $TMP/depends.filter
+        done
+        mv $TMP/depends.filter $DEPENDS_STATUS 
+        cat $TMP/depends.new.* >> $DEPENDS_STATUS
+        cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       fi
       FIX=$OLD_FIX ; unset OLD_FIX
       export lin_PASS=$OLD_lin_PASS
@@ -1827,16 +1823,6 @@ fix_depends () {
   fi
 
   rm -rf $TMP
-
-}
-
-# run_depends_fix : wrapper to run fix_depends multiple times
-run_depends_fix () {
-
-  for PASS in 1 2 3 ; do
-    fix_depends $*
-    [ -n "$CHANGED_MODULES" ] || break
-  done  
 
 }
 
