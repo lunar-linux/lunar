@@ -449,7 +449,8 @@ default_pre_build() {
     validate_source_dir  $SOURCE_DIRECTORY
   else
     validate_source_dir  $SOURCE_DIRECTORY 
-    if [[ -d $SOURCE_DIRECTORY ]]; then
+    if [[ -d $SOURCE_DIRECTORY ]] &&
+       [[ $KEEP_SOURCE == "on" ]]; then
       cd $SOURCE_DIRECTORY && 
       make clean
     else
