@@ -18,7 +18,7 @@
 ############################################################
 
 mirror_list()  {
-  sort -r $MIRRORS/$1 | tr -s "\t"
+  sort -r $MIRRORS/$1 | tr -s "\t" | tr "\t" "\n" | tac
 }
 
 select_mirror()  {
