@@ -179,10 +179,3 @@
 	* var/lib/lunar/menu/mirrors.menu: Explicitly split by tabs and
 	break up options, also reversing the order per element. (#462)
 
-2004-03-24 12:33  sofar
-
-	* etc/lunar/config, var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/modules.lunar: * Adding preliminary _PREFIX
-	work (works!) * Fixing mosrun caller to check for openmosix-tools
-	instead of linux-openmosix.
-
