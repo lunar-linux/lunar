@@ -185,15 +185,3 @@
 	better logging which shows the failed section. (all devs shout "we
 	always wanted that!") * turned my alarm on and went to bed
 
-2003-02-20 21:36  sofar
-
-	* bin/lvu: echo .......... echo
-
-2003-02-20 00:24  sofar
-
-	* sbin/lin, var/lib/lunar/subroutines: Fix #247:
-	
-	- .iw file was being remove too much (only needed prior to starting
-	and after finishing) - compile log was being viewed before it was
-	generated.
-
