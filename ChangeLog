@@ -1,3 +1,8 @@
+2003-12-06 20:39  elaine
+
+	* var/lib/lunar/functions/kernel.lunar: fixing a squeaky wheel no
+	grease
+
 2003-12-05 10:56  sofar
 
 	* var/lib/lunar/functions/moonbase.lunar: Adding more proper
@@ -121,17 +126,4 @@
 2003-10-10 21:36  hardkrash
 
 	* var/lib/lunar/protected: added another config file to the list
-
-2003-10-07 05:24  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: corrected variable case
-	typo
-
-2003-10-07 05:18  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: Changed backup_mods_krnl to
-	only take kernel name and bootconfig functions to sycronize with
-	bkup assuming in all places to use convention
-	<kernel-version>-<module-identifier> where this string should match
-	the version-extraversion id in the kernl Makefile
 
