@@ -97,3 +97,4 @@
 /usr/X11R6/lib/X11/fonts/Speedo/fonts.dir
 /usr/X11R6/lib/X11/fonts/TTF/fonts.dir
 /usr/X11R6/lib/X11/fonts/Type1/fonts.dir
+/etc/X11/gdm/gdm.conf
