@@ -60,18 +60,6 @@ update_lilo()  {
   IMAGE_NAME=$1
   BOOT_LABEL=$2
 
-  LILO_IMAGE_ENTRY="
-image                   =       /boot/$IMAGE_NAME 
-        label           =       $BOOT_LABEL 
-        read-only
-"
-
-  LILO_OLD_IMAGE_ENTRY="
-image                   =       /boot/$IMAGE_NAME.old
-        label           =       $BOOT_LABEL.old
-        read-only 
-"
-
   if ! ( grep -q "$IMAGE_NAME" /etc/lilo.conf && grep -q "$IMAGE_NAME.old" /etc/lilo.conf ) ; then
     IFS_OLD=$IFS
     export IFS="
@@ -82,12 +70,13 @@ image                   =       /boot/$IMAGE_NAME.old
     (( IMAGE_COUNT=0  ))
     for LINE in $(cat /etc/lilo.conf) ; do
       if echo $LINE | grep -q "image" || echo $LINE | grep -q "other" ; then
+	echo >> /etc/lilo.conf.new
         if (( IMAGE_COUNT == 0 )) ; then
           if ! grep -q "$IMAGE_NAME" /etc/lilo.conf ; then
-            echo -e "$LILO_IMAGE_ENTRY" >> /etc/lilo.conf.new
+            printf "\nimage = %s\n    label = %s\n    read-only\n\n" "/boot/$IMAGE_NAME" "$BOOT_LABEL" >> /etc/lilo.conf.new
           fi
-          if [ -f /boot/"$IMAGE_NAME.old" ] && ! grep -q "$IMAGE_NAME.old" /etc/lilo.conf ; then
-            echo -e "$LILO_OLD_IMAGE_ENTRY" >> /etc/lilo.conf.new
+          if [ -f "/boot/$IMAGE_NAME.old" ] && ! grep -q "$IMAGE_NAME.old" /etc/lilo.conf ; then
+            printf "\nimage = %s\n    label = %s\n    read-only\n\n"  "/boot/$IMAGE_NAME.old" "$BOOT_LABEL.old" >> /etc/lilo.conf.new
           fi
         fi
         (( IMAGE_COUNT++ ))
@@ -99,11 +88,12 @@ image                   =       /boot/$IMAGE_NAME.old
     done
 
     if (( IMAGE_COUNT == 0 )) ; then
+      echo >> /etc/lilo.conf.new
       if ! grep -q "$IMAGE_NAME" /etc/lilo.conf ; then
-        echo -e "$LILO_IMAGE_ENTRY" >> /etc/lilo.conf.new
+        printf "\nimage = %s\n    label = %s\n    read-only\n\n" "/boot/$IMAGE_NAME" "$BOOT_LABEL" >> /etc/lilo.conf.new
       fi
       if [ -f /boot/"$IMAGE_NAME.old" ] && ! grep -q "$IMAGE_NAME.old" /etc/lilo.conf ; then
-        echo -e "$LILO_OLD_IMAGE_ENTRY" >> /etc/lilo.conf.new
+        printf "\nimage = %s\n    label = %s\n    read-only\n\n"  "/boot/$IMAGE_NAME.old" "$BOOT_LABEL.old" >> /etc/lilo.conf.new
       fi
     fi
 
