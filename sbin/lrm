@@ -149,7 +149,7 @@ lrm_module() {
   fi
 
   # init.d scripts stop before rm phase, but only if ! upgrading
-  if [ "$KEEPCONFIG" != "on" -o "$UPGRADE" == "on" ] ; then
+  if [ "$KEEPCONFIG" != "on" -a "$UPGRADE" != "on" ] ; then
     # pre-read these variables!
     SERVICES=$(get_module_config "SERVICES")
     XINETD=$(get_other_module_config "xinetd" "INITDSCRIPTS")
@@ -212,7 +212,7 @@ check_status() {
     return 1
   fi
 
-  if [ "$NOSUSTAIN" != "on" -o "$UPGRADE" != "on" ] ; then
+  if [ "$NOSUSTAIN" != "on" -a "$UPGRADE" != "on" ] ; then
     debug_msg "checking if \"$1\" is sustained"
     if grep -q -w "$MODULE" "$SUSTAINED" ; then
       message  "${MODULE_COLOR}${MODULE}"       \
