@@ -124,11 +124,15 @@ fuzzy_wget()  {
           sed  "s/\.tar\.bz2$//"`
 
   if    erase  &&  call_wget  $URL;            then  FILE="$FILE"
-  elif  [  "$FUZZY"  ==  "off"  ];             then  return 1
+  elif  [  "$FUZZY"  ==  "off"  ];             then
+    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
+    return 1
   elif  erase  &&  call_wget  $S_URL.tar.bz2;  then  FILE="$S_FILE.tar.bz2"
   elif  erase  &&  call_wget  $S_URL.tar.gz;   then  FILE="$S_FILE.tar.gz"
   elif  erase  &&  call_wget  $S_URL.tgz;      then  FILE="$S_FILE.tgz"
-  else  false
+  else
+    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
+    false
   fi
 
 
