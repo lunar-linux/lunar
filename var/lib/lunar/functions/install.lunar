@@ -354,6 +354,7 @@ show_downloading() {
 lin_module()  {
 (
   debug_msg "lin_module ($@)"
+  xterm_msg "lin: Processing $1"
   # make sure we got all the info
   if ! run_details $1 ; then
     return 1
