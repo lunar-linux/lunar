@@ -1,3 +1,44 @@
+2005-03-25 11:11  sofar
+
+	* var/lib/lunar/plugins/unpack-generic.plugin: Adding plain tar
+	  files too =^)
+
+2005-03-25 10:47  sofar
+
+	* bin/lvu, var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/plugins/unpack-generic.plugin,
+	  var/lib/lunar/plugins/unpack-rpm.plugin,
+	  var/lib/lunar/plugins/unpack-zip.plugin: Fix lvu urls: now lists
+	  ALL urls!!! Migrate unpack() to use plugins for all types (allows
+	  zip and rpm code to be migrated out of core later)
+
+2005-03-24 16:38  sofar
+
+	* bin/lvu, sbin/lget, sbin/lin, usr/share/man/man8/lin.8,
+	  usr/share/man/man8/lrm.8, var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/check.lunar,
+	  var/lib/lunar/functions/depends.lunar,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/edit.lunar,
+	  var/lib/lunar/functions/logging.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/modules.lunar,
+	  var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/functions/sizes.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/functions/temp.lunar,
+	  var/lib/lunar/functions/tracking.lunar,
+	  var/lib/lunar/plugins/download-generic.plugin,
+	  var/lib/lunar/plugins/verify-gpg.plugin,
+	  var/lib/lunar/plugins/verify-md5.plugin,
+	  var/lib/lunar/plugins/verify-sha1.plugin: Mega merge:
+
+	  * source verification is now a plugin too * rewrote gpg
+	  verification a bit * removed versioned modules (only one remains:
+	  gcc/3.4.3) * Implemented nested sections: moonbase/gnome/apps is
+	  now possible
+
 2005-03-23 16:18  sofar
 
 	* var/lib/lunar/: functions/download.lunar,
