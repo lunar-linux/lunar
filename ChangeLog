@@ -1,3 +1,8 @@
+2004-10-06 15:27  sofar
+
+	* lib/lsb/init-functions: AAARGH important bugfix that affects
+	  /etc/init.d/network!
+
 2004-10-06 12:43  sofar
 
 	* sbin/lin, var/lib/lunar/functions/modules.lunar,
