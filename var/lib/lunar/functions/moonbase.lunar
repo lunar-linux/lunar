@@ -41,6 +41,10 @@ get_moonbase () {
 
   push_uniq_id
 
+  # Cache our module index before moonbase is removed.
+  TMP_MODULE_INDEX=$(temp_create "module-index")
+  cp $MODULE_INDEX $TMP_MODULE_INDEX
+
   if download_module $MODULE ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
@@ -70,8 +74,6 @@ get_moonbase () {
       add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
    
       # get ready to regenerate the module index cache file
-      TMP_MODULE_INDEX=$(temp_create "module-index")
-      cp $MODULE_INDEX $TMP_MODULE_INDEX
       if [ -f "$MODULE_INDEX" ]; then
         rm -f $MODULE_INDEX
       fi
