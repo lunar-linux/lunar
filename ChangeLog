@@ -63,8 +63,3 @@
 
 	* var/lib/lunar/protected: see theedge. (adding dirname)
 
-2003-03-25 17:04  niki
-
-	* var/lib/lunar/menu/dmodule.menu: Corrected a typo to make Moe
-	happy...
-
