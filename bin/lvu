@@ -89,7 +89,7 @@ section     [section]      display moonbase sections
 moonbase                   display text listing of the moonbase
 html                       display html listing of the moonbase
 updatelog                  display summary log of previous lunar update
-activity                   display main log file
+activity    [module]       display main log file
 
 newer       20030801       display available modules newer than Aug 01, 2003
 older       20030101       display modules installed before Jan 01, 2003
@@ -718,7 +718,7 @@ show_info() {
     fi
  
     echo ""
-    ACTIVITY="`view_file $ACTIVITY_LOG | grep "[	 ]${1}[	 ]"`"
+	ACTIVITY=$(view_file $ACTIVITY_LOG | awk "(\$3 == \"$1\")")
    
     if [ `echo "$ACTIVITY" | wc -l` -gt 10 ]; then
       ACTIVITY="`echo "$ACTIVITY" | tail -n10`"
@@ -795,7 +795,11 @@ main()  {
 
     activity)
       if [ -e $ACTIVITY_LOG ]; then
-        view_file $ACTIVITY_LOG
+        if [ -z "$2" ]; then
+          view_file $ACTIVITY_LOG
+        else
+         view_file $ACTIVITY_LOG | awk "(\$3 == \"$2\")"
+       fi
       else
         echo "No update log available."
       fi
