@@ -50,6 +50,7 @@ Please note that anything in brackets [ ] is optional.
 Command     Arguments      Description
 
 what        module         display a module's description
+short       module         display a module's short description
 where       module         display a module's section
 cd          module         change directory to module and execs a new shell
 alien                      discover untracked files
@@ -879,6 +880,14 @@ main()  {
      if [ ! -z "$2" ] ; then
        if run_details $2 ; then
          run_module_file $2 DETAILS
+       fi
+     fi
+     ;;
+
+   short)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         echo "$SHORT"
        fi
      fi
      ;;
