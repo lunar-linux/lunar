@@ -398,13 +398,3 @@
 
 	* sbin/lget: CVS dir fixes.
 
-2003-01-24 21:12  sofar
-
-	* var/lib/lunar/subroutines: more trapdoors removed from cvs
-	handling code.
-
-2003-01-24 21:00  sofar
-
-	* sbin/lget: Last modifications to cvs/lget - better source tree
-	management, trapdoors removed.
-
