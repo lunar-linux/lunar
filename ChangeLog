@@ -1,3 +1,12 @@
+2003-02-26 22:43  sofar
+
+	* sbin/lrm, var/lib/lunar/subroutines,
+	var/lib/lunar/functions/modules.lunar: Fixing the 'double module'
+	bug I've been having and that might have occurred on some systems
+	unnoticed. All module functions have been armed against possible
+	packages corruption by a crashed lrm (where the packages file
+	wasn't updated correctly).
+
 2003-02-25 23:52  sofar
 
 	* var/lib/lunar/subroutines: bugfix #199: remove_depends $MODULE
