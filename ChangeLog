@@ -216,13 +216,3 @@
 	* var/lib/lunar/functions/init.lunar: Working around the readonly
 	variables sothat enviro_check won't complain during iso/install
 
-2003-12-09 20:03  hardkrash
-
-	* var/lib/lunar/functions/connect.lunar: added ath type of
-	interface
-
-2003-12-09 02:56  hardkrash
-
-	* var/lib/lunar/functions/build.lunar: added error message to make
-	clean failing in default_pre_build
-
