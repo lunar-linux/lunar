@@ -1,3 +1,5 @@
+export            PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
 export        DIALOGRC=/etc/lunar/dialogrc
 
           CONFIG_CACHE=/etc/lunar/local
@@ -47,7 +49,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
 #  Override the following variables in /etc/lunar/local/config
 #  Or by exporting them before installing or removing.
 
-                 LIN=lin
               ARCHIVE=${ARCHIVE:=on}
               AUTOFIX=${AUTOFIX:=on}
             AUTOPRUNE=${AUTOPRUNE:=off}
