@@ -1,3 +1,7 @@
+2004-03-09 16:13  sofar
+
+	* sbin/lin: run_configure was called double. No more!
+
 2004-03-09 11:22  sofar
 
 	* var/lib/lunar/functions/download.lunar: The ultimate attempt to
@@ -224,26 +228,4 @@
 2004-01-11 22:25  hardkrash
 
 	* sbin/lin: first of 2 parts to fix make alias in the lunar scripts
-
-2004-01-09 15:38  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Reverting this back since
-	it'll lopp indefinately... BAH, sorry, perhaps someone wants to dig
-	into this look, I didn't have enough time to track the problem
-	down.
-
-2004-01-09 15:16  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Falling back to proper
-	dependency tracking for sort_by_dependency, this makes it a bit
-	slower but should now be a correct solution, which it really
-	wasn't.
-
-2004-01-09 14:05  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Fixing the dependency tree
-	sorter bug that caused 'lunar update' to keep showing already
-	updated modules and rebuild queue's to miss modules ( I hope ;^) ).
-	If needed someone has to tag -F STABLE this to propagate this to
-	lunar.
 
