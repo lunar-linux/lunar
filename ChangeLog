@@ -340,12 +340,3 @@
 	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC: Update
 	blacklists for new architectures
 
-2003-05-31 12:30  jasper
-
-	* var/lib/lunar/functions/download.lunar: Make NUM_RETRY=0 work as
-	infinity for CVS, well 1000 actually
-
-2003-05-31 02:24  tchan
-
-	* bin/lvu: Fixed the lvu section bug reported by kc8apf.
-
