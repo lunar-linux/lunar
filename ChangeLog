@@ -1,3 +1,10 @@
+2003-04-28 18:57  sofar
+
+	* var/lib/lunar/functions/moonbase.lunar: fix for old
+	moonbase.tar.bz2 flying around in /tmp (we really need to move
+	everything out of /tmp), and better consistent install log creation
+	(with neat trick)
+
 2003-04-27 23:13  sofar
 
 	* sbin/lin, var/lib/lunar/functions/optimize.lunar: narrowing this
