@@ -386,7 +386,7 @@ download_module() {
       fi
 
       # quit if we did get it
-      if [ -f "$SOURCE_CACHE/$SRC)" ] ; then
+      if [ -f "$SOURCE_CACHE/$SRC" ] ; then
         if [ "${URL:0:6}" == "cvs://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SOURCE_CACHE/$SRC && break
