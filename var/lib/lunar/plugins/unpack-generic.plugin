@@ -17,7 +17,7 @@ plugin_unpack_generic() {
 			debug_msg "Unpacking tar.bz2 file \"$1\""
 			tar jxf $1 --no-same-owner --no-same-permissions || return 1
 			;;
-		*.tar.gz|*.tgz)
+		*.tar.gz|*.tgz|*.tar.Z)
 			debug_msg "Unpacking tar.gz file \"$1\""
 			tar zxf $1 --no-same-owner --no-same-permissions || return 1
 			;;
