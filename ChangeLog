@@ -1,3 +1,12 @@
+2004-03-30 20:52  sofar
+
+	* var/lib/lunar/functions/depends.lunar: Prevent RECONFIGURE from
+	propagating.
+
+2004-03-30 12:56  sofar
+
+	* var/lib/lunar/menu/optimize.menu: Thanks Victor.
+
 2004-03-29 22:24  sofar
 
 	* var/lib/lunar/functions/depends.lunar: This is a bit more
