@@ -385,7 +385,7 @@ optimize_cpu()  {
       ev68)    CFLAGS="$CFLAGS -mcpu=ev67"
                CXXFLAGS="$CXXFLAGS -mcpu=ev67"
 	       BUILD="alpha-linux"
-
+               ;;
 # Begin SPARC options
       v7)            CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
