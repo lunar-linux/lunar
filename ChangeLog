@@ -59,13 +59,3 @@
 	some reason it gets deleted when you remove evolution which is bad!
 	bad! bad!
 
-2003-09-19 21:26  sofar
-
-	* var/lib/lunar/functions/install.lunar: Fix for the double DL bug:
-	running lget instead provides proper locking, download_module
-	shouldn't be called by scripts
-
-2003-09-19 20:48  sofar
-
-	* usr/share/man/man8/lfirsttime.8: talk about cosmetics, eh?
-
