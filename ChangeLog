@@ -1,3 +1,37 @@
+2003-08-10 01:18  csm
+
+	* var/lib/lunar/functions/: build.lunar, check.lunar,
+	connect.lunar, init.lunar, install.lunar, main.lunar, misc.lunar,
+	prune.lunar, temp.lunar, tracking.lunar: these are the adds to
+	complete the merge
+
+2003-08-10 01:16  csm
+
+	* bin/lvu, etc/lunar/config, etc/lunar/mirrors/SFORGE, sbin/lget,
+	sbin/lin, sbin/lrm, sbin/lsh, sbin/lunar, usr/share/man/man1/lvu.1,
+	usr/share/man/man8/lget.8, usr/share/man/man8/lin.8,
+	usr/share/man/man8/lrm.8, usr/share/man/man8/lunar.8,
+	var/lib/lunar/subroutines, var/lib/lunar/functions/config.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/edit.lunar,
+	var/lib/lunar/functions/locking.lunar,
+	var/lib/lunar/functions/messages.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/moonbase.lunar,
+	var/lib/lunar/functions/optimize.lunar,
+	var/lib/lunar/functions/postbuild.lunar,
+	var/lib/lunar/functions/queue.lunar,
+	var/lib/lunar/functions/recovery.lunar,
+	var/lib/lunar/functions/sizes.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/uniqid.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/functions/useradd.lunar,
+	var/lib/lunar/functions/view.lunar,
+	var/lib/lunar/menu/optimize.menu: merging theedge into lunar and
+	removing subroutines
+
 2003-08-08 15:29  tchan
 
 	* usr/share/man/man8/: lcrash.8, lfirsttime.8: Updating manpages in
