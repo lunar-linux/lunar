@@ -359,15 +359,3 @@
 
 	* var/lib/lunar/excluded: some more additions
 
-2003-02-03 22:18  csm
-
-	* var/lib/lunar/excluded: adding critical postfix files
-
-2003-02-03 14:29  elaine
-
-	* lib/lsb/init-functions: Added 'mk_spid()' function, to be used on
-	starting a daemon and modified 'mk_pid()' and 'pidok()' functions
-	to prevent lunar from wiping out the /var/run/*.pid files of
-	daemons which create these files on thier own.	This allows sshd to
-	be restarted remotely, killing only the server process.
-
