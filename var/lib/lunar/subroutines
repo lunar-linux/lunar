@@ -434,14 +434,22 @@ bad_flags() {
 # Usage: patch_it location/name level 
 # Example: patch_it $SOURCE_CACHE/foo.bz2 1
 patch_it() {
-  if [[ `echo $1 | grep .bz2` ]] ||
-     [[ `echo $1 | grep .tbz2` ]]; then
-    bzcat $1 | patch -N -p$2
-  elif [[ `echo $1 | grep .gz` ]] ||
-       [[ `echo $1 | grep .tgz` ]]; then
-    zcat $1 | patch -N -p$2
+  if [[ `echo $1 | grep .tar` ]]; then
+    if [[ `echo $1 | grep .bz2` ]]; then
+      bzcat $1 | tar x -O | patch -N -p$2
+    elif  [[ `echo $1 | grep .gz` ]]; then
+      zcat $1 | tar x -O | patch -N -p$2
+    else
+      cat $1 | tar x -O | patch -N -p$2
+    fi      
   else
-    cat $1 | patch -N -p$2 
+    if [[ `echo $1 | grep .bz2` ]]; then
+      bzcat $1 | patch -N -p$2
+    elif [[ `echo $1 | grep .gz` ]]; then
+      zcat $1 | patch -N -p$2
+    else
+      cat $1 | patch -N -p$2 
+    fi
   fi
 }
 
