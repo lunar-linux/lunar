@@ -81,31 +81,22 @@ gcc_checklist() {
    if ! [[ $PLATFORM ]]; then
       PLATFORM=x86
    fi
-   if [[ $GCCVER == "3" ]]; then
-      if [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
-          BLKLST=`grep $1 /var/state/lunar/gcc.$PLATFORM`
-          if [[ $BLKLST == $1 ]]; then
-               export PATH=$KDEDIR/bin:$QTDIR/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-               GCCVER=2
-          else
-               export PATH=$KDEDIR/bin:$QTDIR/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-          fi
-      else
-         touch /var/state/lunar/gcc.$PLATFORM
-      fi
-   elif ! [[ $GCCVER == "3" ]]; then
-      if ! [[ $GCCVER ]]; then
-         echo GCCVER=2 >> /etc/lunar/local/config
-      fi
-      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/X11
-      if ! [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
-         touch /var/state/lunar/gcc.$PLATFORM
-      fi
+   if [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
+     BLKLST=`grep $1 /var/state/lunar/gcc.$PLATFORM`
+     if [[ $BLKLST == $1 ]]; then
+       echo "Module $1 is blacklisted."
+     else
+       echo "Module $1 is NOT blacklisted."
+     fi
+   else
+     touch /var/state/lunar/gcc.$PLATFORM
    fi
-   if [ "$GCCWRAPPERS" == "on" ] ; then
-     export PATH=/var/lib/lunar/compilers:${PATH}
-   fi
-   
+}
+
+use_wrappers() {
+  if [ "$GCCWRAPPERS" == "on" ] ; then
+    export PATH=/var/lib/lunar/compilers:${PATH}
+  fi  
 }
 
 run_conflicts() {
@@ -767,8 +758,10 @@ lin_module()  { (
       !     solo_locked
   then
     echo  $$  >  $linING        &&
-    gcc_checklist $MODULE       &&
-    optimize_platform $GCCVER   &&
+    if ! [[ $CFLAGS ]]; then
+      optimize_platform $GCCVER &&
+      use_wrappers
+    fi
     run_pre_build               &&
     run_build                   &&
     run_post_build              &&

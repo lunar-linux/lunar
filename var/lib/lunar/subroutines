@@ -563,7 +563,8 @@ install_bashmisc () { (
 
   if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
     [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
-    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/* /etc/profile.d
+    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
+    message "\n${MESSAGE_COLOR}Please log out and log in again to make changes in your shell\nenvironment take effect.${DEFAULT_COLOR}\n"
   fi
   if [ -d $SCRIPT_DIRECTORY/skel ]; then
     [ -d /etc/skel ] || mkdir -p /etc/skel
