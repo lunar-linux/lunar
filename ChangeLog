@@ -1,3 +1,12 @@
+2004-05-26 11:28  prox
+
+	* var/lib/lunar/functions/depends.lunar: correction
+
+2004-05-26 09:33  prox
+
+	* var/lib/lunar/functions/depends.lunar: added is_depended <module>
+	<depend>, will return 1 if the depend for the module given is on
+
 2004-05-24 13:20  sofar
 
 	* bin/lvu: Proper directory handling that allows both passing
@@ -185,9 +194,4 @@
 2004-03-29 15:18  sofar
 
 	* sbin/lrm: Adding REAP back, somehow it had disappeared.
-
-2004-03-26 19:40  sofar
-
-	* var/lib/lunar/menu/mirrors.menu: Explicitly split by tabs and
-	break up options, also reversing the order per element. (#462)
 
