@@ -90,11 +90,13 @@ is_depends()  {
   return $(grep -q ":$1:on:" $DEPENDS_STATUS)
 }
 
-is_depended()  {
-  debug_msg "is_depended ($@)"
-  # Is $1 a previously selected dependency of any module.
-  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
-}
+
+# dont use until agreed on dev mailinglist
+#is_depended()  {
+#  debug_msg "is_depended ($@)"
+#  # Is $1 a previously selected dependency of any module.
+#  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
+#}
                                                                                 
                                                                                 
 in_depends()  {
