@@ -771,6 +771,7 @@ main_menu()  {
 		     "N"  "Maintenance Menu"     "$N_HELP"  \
                      "F"  "Foreground  Execute"  "$F_HELP"  \
                      "B"  "Background  Execute"  "$B_HELP"`
+  do
     case  $COMMAND in
       M)  module_menu         ;;
       O)  option_menu         ;;
