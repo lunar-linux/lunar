@@ -527,7 +527,7 @@ add_depends()
 {
   remove_depends  "$1"  "$2"
 
-  verbose_msg "adding depends for \"$1\" on \"$2\""
+  verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\""
 
   lock_file $DEPENDS_STATUS_BACKUP                       &&
   lock_file $DEPENDS_STATUS                              &&
