@@ -46,6 +46,7 @@ Optional Parameters:
    -h | --help                  Displays this help text
    -u | --url     URL           Specify an alternate download URL
    -v | --verbose               Increases the level of message output
+   -V | --Version               Select specific Version of module to install
 EOF
 
   exit  1
@@ -57,6 +58,16 @@ main() {
   cd /tmp
   
   MODULES="$@"
+
+  if [ -n "$MOD_VERSION" ] ; then
+    if  [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+      message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
+      exit 1
+    else
+      MODULES="$MODULES/$MOD_VERSION"
+      message "module = $MODULES"
+    fi
+  fi
 
   if [ -z "$MODULES" ] ; then
     verbose_msg "downloading entire moonbase"
@@ -86,7 +97,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lget -o "df:hu:v" -l "debug,from:,help,url:,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "df:hu:vV:" -l "debug,from:,help,url:,verbose,Version:" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -104,6 +115,8 @@ else
       -h|--help    ) help ;                                     exit  1 ;;
       -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
       -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
+      -V|--Version ) export MOD_VERSION=$2 ;                    shift 2 ;;
+
       --) shift ; break ;;
       *) help ; exit ;;
     esac

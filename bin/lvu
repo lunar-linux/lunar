@@ -787,6 +787,10 @@ main()  {
         if run_details $2 ; then
   	  echo "main-version $VERSION"
 	fi
+	if  [ $(echo $MOONBASE/*/$2/*/DETAILS | wc -w) -lt 2 ] ; then
+	  message "${MESSAGE_COLOR} This module has no alt-versions${DEFAULT_COLOR}"
+	  exit 1
+	fi
 	for i in $MOONBASE/*/$2/*/DETAILS ; do
 	  x=`echo $i | sed 's:/DETAILS::'`
 	  run_details $2/`basename $x`
