@@ -26,6 +26,7 @@ usage: lrm [options] [module ...]
    -h | --help          Displays this help text
    -k | --keepconfig    remove module(s) but keep dependencies and config
    -n | --nosustain     removes module(s) even if they are sustained
+   -u | --upgrade       remove the module but do not run scripts etc.
    -v | --verbose       Increases the level of message output
    -p | --purge         Delete all modules that depend on the module(s)
                           being removed as well
@@ -143,10 +144,12 @@ lrm_module() {
   MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
 
   # time-out 1: PRE_REMOVE
-  run_module_file $MODULE PRE_REMOVE
+  if [ "$UPGRADE" != "on" ]; then
+    run_module_file $MODULE PRE_REMOVE
+  fi
 
   # init.d scripts stop before rm phase, but only if ! upgrading
-  if [ "$KEEPCONFIG" != "on" ] ; then
+  if [ "$KEEPCONFIG" != "on" -o "$UPGRADE" == "on" ] ; then
     # pre-read these variables!
     SERVICES=$(get_module_config "SERVICES")
     XINETD=$(get_other_module_config "xinetd" "INITDSCRIPTS")
@@ -175,8 +178,10 @@ lrm_module() {
   fi
 
   # time-out 2: POST_REMOVE
-  run_module_file $MODULE POST_REMOVE
-  if [ "$KEEPCONFIG" == "on" ] ; then
+  if [ "$UPGRADE" != "on" ] ; then
+    run_module_file $MODULE POST_REMOVE
+  fi
+  if [ "$KEEPCONFIG" == "on" -o "$UPGRADE" == "on" ] ; then
     debug_msg "skipping removal of dependency listing and configs"
   else
     verbose_msg "removing module from dependency listing and configs"
@@ -207,7 +212,7 @@ check_status() {
     return 1
   fi
 
-  if [ "$NOSUSTAIN" != "on" ] ; then
+  if [ "$NOSUSTAIN" != "on" -a "$UPGRADE" != "on" ] ; then
     debug_msg "checking if \"$1\" is sustained"
     if grep -q -w "$MODULE" "$SUSTAINED" ; then
       message  "${MODULE_COLOR}${MODULE}"       \
@@ -313,6 +318,7 @@ else
      -k|--keepconfig ) export KEEPCONFIG="on" ; shift ;;
      -n|--nosustain  ) export NOSUSTAIN="on" ; shift ;;
      -v|--verbose    ) export VERBOSE="on" ; shift ;;
+     -u|--upgrade    ) export UPGRADE="on" ; shift ;;
      -p|--purge      ) export PURGE="on" ; shift ;;
      --) shift; break ;;
       *) help;  break ;;

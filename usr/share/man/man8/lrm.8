@@ -7,9 +7,10 @@ lrm \- removes Lunar software modules
 .PP
 .B lrm -h|--help
 .PP
-.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-p|--purge|-v|--verbose <module>
+.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-p|--purge|-u|--upgrade|-v|--verbose <module(s)>
 .PP
 .B lrm -D|--downgrade <module> <version>
+.PP
 .SH COPYRIGHT
 .if n lrm(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .if t lrm(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
@@ -42,6 +43,10 @@ remove module(s) but keep dependencies and config info
 .TP
 .B "-n, --nosustain"
 emoves module(s) even if they are sustained
+.TP
+.B "-u, --upgrade"
+perform an upgrade-removal. This skips running of pre/post-removal scripts
+and implies -n and -k
 .TP
 .B "-v, --verbose"
 increases the level of message output

@@ -308,8 +308,8 @@ lin_module()  {
       return 1
     fi  
 
-    if ! boost ; then
-      LIN_ERROR="boost"
+    if ! finish_install ; then
+      LIN_ERROR="POST_BUILD"
     else
       if ! run_post_install ; then
         LIN_ERROR="POST_INSTALL"

@@ -109,16 +109,9 @@ prepare_install() {
   if  module_installed $MODULE  || module_held $MODULE ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-    while  boost_locked;  do
-      sleep  5
-    done
-
-    echo  $$  >  $BOOST_LOCK
-
     save_libraries
-    verbose_msg "calling \"lrm --keepconfig --nosustain $MODULE\""
-    lrm  --keepconfig  --nosustain  $MODULE
+    verbose_msg "calling \"lrm --upgrade $MODULE\""
+    lrm --upgrade $MODULE
     true
   fi
   # turn on tracking now

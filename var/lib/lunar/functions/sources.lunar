@@ -281,8 +281,6 @@ rm_source_dir() {
   else
     rm -rf $DEAD_DIR 2> /dev/null
   fi
-
-  rm -f $BOOST_LOCK
 }
 
 

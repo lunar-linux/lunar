@@ -25,12 +25,6 @@
 ############################################################
 
 
-boost_locked() {
-  debug_msg "boost_locked ($@)"
-  [ -f $BOOST_LOCK ] && ps `cat $BOOST_LOCK` | grep -q lin
-}
-
-
 # function : invoke_installwatch
 # usage    : invoke_installwatch
 # purpose  : start logging all disk accesses with installwatch
@@ -125,8 +119,8 @@ create_install_cache() {
 }
 
 
-boost()	{
-  debug_msg "boost ($@)"
+finish_install() {
+  debug_msg "finish_install ($@)"
 
   create_install_log    &&
   create_md5sum_log     &&
@@ -134,9 +128,6 @@ boost()	{
   
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
-
-  rm  -f  $BOOST_LOCK
-
 }
 
 
