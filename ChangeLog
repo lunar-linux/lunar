@@ -1,3 +1,30 @@
+2004-12-14 15:38  sofar
+
+	* sbin/lrm: I just forgot to add the option to getopt()... meh
+
+2004-12-14 15:31  sofar
+
+	* sbin/lrm: I'm losing it here
+
+2004-12-14 15:25  sofar
+
+	* sbin/lrm: More typo's
+
+2004-12-14 15:21  sofar
+
+	* sbin/lrm: needed... logic
+
+2004-12-14 15:05  sofar
+
+	* etc/lunar/config, sbin/lrm, usr/share/man/man8/lrm.8,
+	  var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/functions/tracking.lunar: deleting BOOST_LOCK from
+	  existance. Also adding lrm --upgrade to explicitly NOT run
+	  PRE_|POST_remove scripts since this causes deadlocks. lrm man
+	  page adjusted
+
 2004-12-14 06:11  tchan
 
 	* etc/lunar/config: Removing the .se mirror as requested by bkw.
