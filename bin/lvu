@@ -642,13 +642,15 @@ parse()  {
 	      fi
 	      ;;
 
-    compile)  run_details && [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] &&
-                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2  ||
-              VERSION=$(installed_version $MODULE) &&
-                [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] &&
-                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2  \
+    compile)  run_details 
+              if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
+	        display  $COMPILE_LOGS/$MODULE-$VERSION.bz2
+	      else
+                VERSION=$(installed_version $MODULE)
+                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
                 "Compile log for $MODULE does not exist"
-              ;;
+              fi
+	      ;;
     install)  display  $INSTALL_LOGS/$MODULE-$VERSION   \
               "Install log for $MODULE does not exist"
               ;;
