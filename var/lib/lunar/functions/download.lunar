@@ -339,7 +339,7 @@ download_module() { (
 	  get_url $URL $SRC
 	else
 	  verbose_msg "skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
-	  continue 
+	  continue 2
 	fi
       else
         message  "${MESSAGE_COLOR}Downloading source file"  \
