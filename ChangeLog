@@ -1,3 +1,21 @@
+2003-03-15 18:53  sofar
+
+	* bin/lvu, etc/lunar/config, lib/lsb/init-functions, sbin/lget,
+	sbin/lin, sbin/lrm, sbin/lsh, sbin/lunar, var/lib/lunar/excluded,
+	var/lib/lunar/subroutines, var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/edit.lunar,
+	var/lib/lunar/functions/locking.lunar,
+	var/lib/lunar/functions/messages.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/moonbase.lunar,
+	var/lib/lunar/functions/postbuild.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/functions/useradd.lunar,
+	var/lib/lunar/menu/optimize.menu: Merging theedge with changes from
+	theedge, in order to facilitate lunar-1.3
+
 2003-03-13 05:03  nhudson
 
 	* var/lib/lunar/sustained: 
