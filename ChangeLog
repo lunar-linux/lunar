@@ -1,3 +1,11 @@
+2004-12-07 12:12  sofar
+
+	* sbin/lin, var/lib/lunar/functions/download.lunar: Implemented
+	  Moe's download idea: separate lget processes and logs for each
+	  downloaded file. The dl manager passes the PID on later and
+	  before a module is compiled ONLY that relevant download info is
+	  displayed.
+
 2004-11-29 06:16  sofar
 
 	* sbin/lunar: cleaned up a whee bit too much
@@ -268,9 +276,4 @@
 	  var/lib/lunar/functions/modules.lunar: Bugfix for the 'unexpected
 	  error' message. Added 'lunar unset' and generic
 	  unset_config/unset_module_config code.
-
-2004-10-07 14:40  sofar
-
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	  Merging linker optimizations
 
