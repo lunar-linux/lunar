@@ -61,6 +61,7 @@ orphans                    display installed modules that are missing
                                dependencies
 held                       display held modules
 exiled                     display exiled modules
+info        module         display terse summary information about module
 
 search      "phrase"       searches all modules long descriptions for phrase.
 service     port|acronym   displays modules that provide that service
@@ -667,6 +668,74 @@ show_urls() { (
 ) }
 
 
+show_info() {
+  if run_details $1 ; then
+    echo "General Module Info"
+    echo "  Name:          $MODULE"
+    echo "  Description:   $SHORT"
+    echo "  Website:       $WEB_SITE"
+    echo "  Lunar Version: $VERSION"
+    echo "  Last Updated:  $UPDATED"
+    echo "  Section:       $SECTION"
+    echo -n "  Restrictions:  "
+    if module_held $1 ; then
+      echo -n "held "
+    fi
+    if module_exiled $1 ; then
+      echo -n "exiled "
+    fi
+    if grep -qw $1 $SUSTAINED ; then
+      echo -n "sustained "
+    fi
+    if grep -qw $1 $SOLO ; then
+      echo -n "solo "
+    fi
+    echo 
+    if [ -e $MOONBASE/$SECTION/$MODULE/services ] ; then
+      LINES="`wc -l $MOONBASE/$SECTION/$MODULE/services | cut -d' ' -f1`"
+      echo -n "  Provides Service"
+      if [ 1 -lt $LINES ]; then
+        echo "s:"
+        echo "`cat $MOONBASE/$SECTION/$MODULE/services | sed "s:\t: :g" | sed 's:^:    :g'`"
+      else
+        echo -n ": "
+        echo "`cat $MOONBASE/$SECTION/$MODULE/services`"
+      fi
+    fi
+
+    echo ""
+    echo "Installation Info"
+    if module_installed $1 ; then
+      echo -n "  Installed Version: $(installed_version $1)"
+      if module_is_expired $1 ; then
+        echo "  (updated module available!)"
+      else
+        echo ""
+      fi
+      echo "  Approx. Size:      $(main size $1)"
+      echo -n "  Files Installed:   "
+      echo "`echo "$(main install $1)" | wc -l`"
+    else
+      echo "  Module not installed."
+    fi
+ 
+    echo ""
+    ACTIVITY="`view_file $ACTIVITY_LOG | grep "$1"`"
+   
+    if [ `echo "$ACTIVITY" | wc -l` -gt 10 ]; then
+      ACTIVITY="`echo "$ACTIVITY" | tail -n10`"
+      echo "Module Activity History (last 10)"
+    else
+      echo "Module Activity History"
+    fi
+    if [ -n "$ACTIVITY" ]; then
+      echo "$ACTIVITY" | sed 's:^:  :g'
+    else
+      echo "  No past activity recorded for this module."
+    fi
+  fi
+}
+
 main()  {
   case $1 in
     html)
@@ -1015,6 +1084,14 @@ main()  {
        if run_details $2 ; then
          cd $MOONBASE/$(find_section $2)/$2
          $SHELL
+       fi
+     fi
+     ;;
+
+   info)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         show_info $2
        fi
      fi
      ;;
