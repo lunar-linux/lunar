@@ -13,8 +13,3 @@
 	* var/lib/lunar/functions/connect.lunar: added ath type of
 	interface to lunar
 
-2003-11-15 14:53  elaine
-
-	* var/lib/lunar/functions/depends.lunar: Just pushing around the
-	formatting
-
