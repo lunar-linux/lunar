@@ -7,3 +7,4 @@ sparc-utils
 egcs64
 binutils-sparc64
 bin86
+uClibc
