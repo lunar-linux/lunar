@@ -1,3 +1,14 @@
+2004-02-16 20:59  sofar
+
+	* etc/lunar/: config, mirrors/LRESORT: Refurbishing again...
+	hopefully Moe keeps the mirror up ;^)
+
+2004-02-16 15:36  tchan
+
+	* etc/lunar/mirrors/LRESORT: The master cache does not resolve to
+	the same address as www.lunar-linux.org, so I changed the USA
+	master cache to become www.lunar-linux.org/lunar/cache
+
 2004-02-15 11:25  sofar
 
 	* etc/lunar/config: Grrr mispaste
