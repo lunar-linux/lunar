@@ -1,3 +1,19 @@
+2005-03-13 21:56  sofar
+
+	* var/lib/lunar/functions/connect.lunar: this is much more
+	  consistent. also adding raX interface type, which is kind of
+	  uncommon.
+
+2005-03-13 18:19  sofar
+
+	* sbin/lin: Proposed consistency fix for lin/download queue
+	  creation: use find_depends()
+
+2005-03-13 17:08  sofar
+
+	* var/lib/lunar/functions/check.lunar: Removing obsolete call to
+	  show_owner.
+
 2005-03-09 19:11  moe
 
 	* usr/share/man/man8/lfirsttime.8: Some tweaks. Two new hints.
@@ -67,10 +83,4 @@
 2005-01-19 11:32  sofar
 
 	* bin/lvu: removed bolding of modules
-
-2005-01-12 17:17  striker
-
-	* var/lib/lunar/functions/optimize.lunar: adding opts for amd64's
-	  (note that this can only be used by manually changing
-	  /etc/lunar/local/optimizations )
 
