@@ -14,9 +14,9 @@
 #
 # when a handler is called, it should use the following return codes
 #
-# 0 - executed OK, do not process other plugins
-# 1 - failed to run, stop executing plugins and report an error
-# 2 - failed to run but try other plugins
+# 0 - OK AND HALT, do not process other plugins
+# 1 - FAIL, stop executing plugins and report an error
+# 2 - OK AND CONTINUE or CONTINUE, run other plugins
 #
 
 plugin_register() {
@@ -27,6 +27,7 @@ plugin_register() {
 	# 2 - SOURCE_NEEDREFRESH - source exists but needs refresh
     # 3 - SOURCE_VERIFY - perform intergity verification on a file
 	# 4 - SOURCE_UNPACK - unpack a certain file to $(PWD)
+	# 5 - MODULE_CHECK - perform integrity checking on installed modules
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
 }
@@ -51,7 +52,7 @@ plugin_call() {
 			fi
 		fi
 	done
-	debug_msg "Could not find a suitable plugin for type \"$1\""
+	debug_msg "Finished running all plugins for type \"$1\""
 	return 2
 }
 
