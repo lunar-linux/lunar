@@ -86,7 +86,7 @@ update() {
 rebuild()  {
   debug_msg "rebuild ($@)"
 
-  message  "${MESSAGE_COLOR}Startings non-recursive rebuild${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Starting non-recursive rebuild${DEFAULT_COLOR}"
   message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
   echo run_fix
 
@@ -194,7 +194,7 @@ resurrect()  {
       report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
       sound SUCCESS
       activity_log  "lin"  "$MODULE"  "$VERSION"  "success"  "resurrected"
-      message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}succesfully${DEFAULT_COLOR}"
+      message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}successfully${DEFAULT_COLOR}"
     else
       sound FAILURE
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
@@ -231,7 +231,7 @@ lin_module()  {
     return 1
   fi
 
-  # resurrect if we can, but not is -c was issued
+  # resurrect if we can, but not if -c was issued
   if [ "$AUTORESURRECT" == "on" -a -z "$COMPILE" ] ; then
     # we also do not resurrect if $MODULE is currently installed!
     if ! module_installed $MODULE ; then
