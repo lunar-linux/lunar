@@ -491,8 +491,10 @@ install_xinetd_confs()  { (
 
     for  SERVICE  in  $SERVICES;  do
       for  FILE  in  `ls`;  do
-        if    grep  -q  "service $SERVICE"   $FILE
-        then  /usr/bin/install -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
+        if    grep  -q  "service $SERVICE"   $FILE  ; then
+	  if [ ! -f /etc/xinetd.d/$FILE ] ; then
+            /usr/bin/install --backup=numbered -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
+	  fi
         fi
       done
     done
@@ -1652,14 +1654,6 @@ rework_module() {
     done
   fi
 
-  # This hack was added by Terry Chan to allow power users to repair their
-  #   /var/state/lunar/depends and depends.backup files.
-  # Once you've run lin --nofix, you may use depends.updated to edit/repair
-  #   your broken /var/state/lunar/depends file.
-  if [ -n "$NOFIX" ] ; then
-    cat $DEPENDS_STATUS >> /tmp/depends.updated
-  fi  
-
   # clean up
   rm $DEPENDS_STATUS
   rm $DEPENDS_STATUS_BACKUP
@@ -1722,22 +1716,34 @@ fix_depends () {
     OLD_lin_PASS=$lin_PASS; export lin_PASS=three
 
     for MODULE in $CHANGED_MODULES ; do
-      if [ -z "$NOFIX" ] ; then
-        if ! lin -c $MODULE ; then
-	  # put back the faulty depends so we know fixing this failed
-	  # and will be found again on the next run
-	  cat $TMP/depends > $DEPENDS_STATUS
-	  cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-        else
-	  # sometimes after lin all depends are gone! force it down it's throat
-          cp $TMP/depends $TMP/depends.filter
-          for MODULE in $CHANGED_MODULES ; do
-            grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-            mv $TMP/depends.filter~ $TMP/depends.filter
-          done
-          mv $TMP/depends.filter $DEPENDS_STATUS 
-          cat $TMP/depends.new.* >> $DEPENDS_STATUS
-          cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      if [ -n "$FIXDEPENDS" ] ; then
+        # special case: when called with --fixdepends, skip recompile!
+	cp $TMP/depends $TMP/depends.filter
+	for MODULE in $CHANGED_MODULES ; do
+	  grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+	  mv $TMP/depends.filter~ $TMP/depends.filter
+	done
+        mv $TMP/depends.filter $DEPENDS_STATUS
+	cat $TMP/depends.new.* >> $DEPENDS_STATUS
+	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      else
+        if [ -z "$NOFIX" ] ; then
+          if ! lin -c $MODULE ; then
+	    # put back the faulty depends so we know fixing this failed
+	    # and will be found again on the next run
+	    cat $TMP/depends > $DEPENDS_STATUS
+	    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+          else
+	    # sometimes after lin all depends are gone! force it down it's throat
+            cp $TMP/depends $TMP/depends.filter
+            for MODULE in $CHANGED_MODULES ; do
+              grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+              mv $TMP/depends.filter~ $TMP/depends.filter
+            done
+            mv $TMP/depends.filter $DEPENDS_STATUS 
+            cat $TMP/depends.new.* >> $DEPENDS_STATUS
+            cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+	  fi
 	fi
       fi
       remove_queue $INSTALL_QUEUE $MODULE

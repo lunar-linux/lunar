@@ -57,6 +57,10 @@ Downloads bash and compiles fileutils.
 Configures the modules and determines their dependencies, but they are not
 compiled or installed.
 .TP
+.B "--fixdepends"
+Reconstructs the depends database without recompiling modules. This might help
+if your depends database is missing or corrupted.
+.TP
 .B "-c, --compile"
 Compiles module even if there is a compile cache in /var/cache/lunar.
 .TP

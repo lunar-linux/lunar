@@ -37,6 +37,8 @@ Optional Parameters:
 
 -f  |  --fix			Discover and fix broken modules
 -n  |  --nofix			Discover, but do not fix broken modules
+-d  |  --fixdepends             Discover and fix dependancy problems, but
+                                do not recompile modules
 
 -s				Download 1st, lin 2nd
     |  --deps			Configure modules and determine dependencies, 
@@ -571,15 +573,6 @@ run_fix()  { (
     export_ld $EXPORT_LD_PATH
   fi
 
-  # This hack was added by Terry Chan to allow power users to repair their
-  #   /var/state/lunar/depends and depends.backup files.
-  if [ -n "$NOFIX" ] ; then
-    if [ -e /tmp/depends.updated ] ; then
-      rm /tmp/depends.updated
-    fi
-  touch /tmp/depends.updated
-  fi
-  
   until  [  "$FIXED"     ==  "yes"  ]   ||
          [  "$HOPELESS"  ==  "yes"  ];  do
 
@@ -589,6 +582,11 @@ run_fix()  { (
     for  MODULE  in  $MODULES;  do
 
       fix_depends $MODULE
+
+      # if we were called with --fixdepends then we may skip the rest
+      if [ -n "$FIXDEPENDS" ] ; then
+        continue
+      fi        
 
       if  status_okay  $MODULE                         &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
@@ -649,6 +647,8 @@ process_parameters()  {
                 -f|--fix)  export  FIX="$1";            shift 1  ;;
               -n|--nofix)  export  FIX="--fix"
                            export  NOFIX="$1";          shift 1  ;;
+	 -d|--fixdepends)  export  FIXDEPENDS="$1";
+	 		   export  FIX="$1";            shift 1  ;;
                       -s)  SEPARATE="$1";               shift 1  ;;
                    --url)  export  BASE_URL="$2";       shift 2  ;;
                    --pam)  lin  -c  `find_pam_aware`;   shift 1  ;;
@@ -669,6 +669,7 @@ strip_parameters()  {
                 --silent)  shift 1  ;;
                 -f|--fix)  shift 1  ;;
               -n|--nofix)  shift 1  ;;
+         -d|--fixdepends)  shift 1  ;;
             -c|--compile)  shift 1  ;;
 	      -p|--probe)  shift 1  ;;
                       -s)  shift 1  ;;
