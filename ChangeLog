@@ -168,8 +168,3 @@
 	  closed off at the end... otherwise all subsequent lines will be
 	  colored too
 
-2004-11-16 15:02  sofar
-
-	* var/lib/lunar/functions/modules.lunar: A little bit faster, still
-	  the awk call is slow I wish there was something faster than that
-
