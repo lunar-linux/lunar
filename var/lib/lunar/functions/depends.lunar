@@ -337,7 +337,7 @@ create_depends_cache() {
     }
 
     # speedups for system moonbases:
-    if [ "$MOONASE" == "/var/lib/lunar/moonbase" ] ; then
+    if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
       DEPFILES=$(grep "/DEPENDS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase))
       # don't forget zlocal:
       DEPFILES="$DEPFILES $(find $MOONBASE/zlocal -type f -name DEPENDS)"
