@@ -11,8 +11,19 @@
 ############################################################
 
 # we really need to do this:
-trap    ":" INT QUIT TSTP SEGV
+trap    ":" QUIT TSTP SEGV
 export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
+
+#
+# work notes:
+#
+# Need to install status() and other return codes
+# Need to rectify daemon-restart test and script deletion of /var/run/<prog>.pid
+# Need to assess impact of the above changes elswehere
+#
+# 
+#
+# 
 
 #
 # for whoever called us, we would like to know the follofing data,
@@ -105,16 +116,22 @@ prload ()  {
 	[ -e $PIDFILE ] || return -1
 	kill -$SIGRELOAD `cat $PIDFILE` >& /dev/null && return 0 || return -1
 }
+mk_spid() {
+        /bin/pgrep -P 1 $PROCESS_BASE > $PIDFILE || return -1
+	echo "broken_pid" > /var/run/$PROCESS_BASE.bd && return 0 || return -1
+}
+
 mkpid () {
-	/bin/pgrep -P 1 $PROCESS_BASE > $PIDFILE && return 0 || return -1
+        if [ -e /var/run/$PROCESS_BASE.bd ]; then
+	  /bin/pgrep -P 1 $PROCESS_BASE > $PIDFILE && return 0 || return -1
+	else 
+	  return 
+	fi
 }
 pidok () {
 	[ -e $PIDFILE ] && pgrep && 
-	  [ "X`/bin/pgrep -P 1 $PROCESS_BASE`" == "X`cat $PIDFILE`" ] &&
+#	  [ "X`/bin/pgrep -P 1 $PROCESS_BASE`" == "X`cat $PIDFILE`" ] &&
 	  return 0 || return -1
-}
-pidofproc () {
-	return `/bin/pgrep -P 1 $PROCESS_BASE`
 }
 log_success_msg () {
 	echo -e "$1 $RESULT_OK"
@@ -149,7 +166,9 @@ default_start () {
 		    if pgrep ; then
 		      # make if none exists
 		      if [ ! -e $PIDFILE ] ; then
-			mkpid
+			echo -n "broken daemon: "
+			mk_spid && echo "created /var/run/$PROCESS_BASE.pid" || 
+			echo "could not create /var/run/$PROCESS_BASE.pid"
 		      fi
 		      echo -e $RESULT_OK
 		    else 
