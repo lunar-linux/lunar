@@ -151,7 +151,7 @@ get_cvs() {(
   fi
 
   for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [ ! -d $CVSMODULE/CVS ] ; then
+    if [ -d $(basename $CVSMODULE)/CVS ] ; then
       verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
       cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
     else 
