@@ -9,7 +9,7 @@ alien|leafs|orphans|pam
 what|where|website|sources|maintainer <module>
 .PP 
 .B lvu
-compile|compiler|install|sum|md5sum <module>
+compile|compiler|links|install|sum|md5sum <module>
 .PP 
 .B lvu
 export|import [snapshot]
@@ -107,7 +107,12 @@ show the compiler output generated when the module was built
 module
 .IP 
 display the version of compiler used for creating the ELF files in modules
-.PP 
+.PP
+.B links
+module
+.IP
+display the modules that this module's ELF binary files actually links to
+.PP
 .B install
 module
 .IP 
