@@ -76,6 +76,7 @@ EOF
 
 . /var/lib/lunar/functions/optimize.lunar
 
+
 # Useage check_checklist $MODULES
 check_blacklist() {
   if ! [[ $PLATFORM ]]; then
@@ -88,13 +89,12 @@ check_blacklist() {
               "Module $MODULE is blacklisted and will not be installed." \
 	      "${DEFALUT_COLOR}"
       exit 0
-    # else
-    #   echo "Module $MODULE is NOT blacklisted, continuing the install."
     fi
   else
     touch /var/state/lunar/blacklist.$PLATFORM
   fi
 }
+
 
 use_wrappers() {
   if [ "$GCCWRAPPERS" == "on" ] ; then
@@ -102,17 +102,20 @@ use_wrappers() {
   fi  
 }
 
+
 run_conflicts() {
     if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
              . $SCRIPT_DIRECTORY/CONFLICTS
     fi
 }
 
+
 # create the dependency files if they do not exist
 prepare_depends_status()  {
    [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
    [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
+
 
 prepare_module_config()  {
   MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
@@ -121,6 +124,7 @@ prepare_module_config()  {
     chmod  a+x  $MODULE_CONFIG
   fi
 }
+
 
 use_xinetd()  { (
   if  [  -d  $SCRIPT_DIRECTORY/xinetd.d  ]  &&
@@ -163,8 +167,8 @@ use_xinetd()  { (
   fi
 ) }
 
-use_initd()  { (
 
+use_initd()  { (
   if  [  -d  $SCRIPT_DIRECTORY/init.d  ] ; then
     cd $SCRIPT_DIRECTORY/init.d
     SCRIPTS=$(find . -type f -maxdepth 1 )
@@ -187,8 +191,8 @@ use_initd()  { (
 
     echo   "INITDSCRIPTS=\"$INSTALLED_INIDSCRIPTS\"" >> $MODULE_CONFIG
   fi
-
 ) }
+
 
 run_configure() {
   if  [  -n  "$RECONFIGURE"  ];  then
@@ -227,19 +231,36 @@ run_pre_build() {
 }
 
 
-rack()  {
+stop_logging() {
   message  "${MESSAGE_COLOR}Creating"                        \
            "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
 
   bzip2  -9f  <  $C_LOG  >  $COMPILE_LOGS/$MODULE-$VERSION.bz2
-  rm             $C_LOG
-  rm             $C_FIFO
+  rm $C_LOG $C_FIFO
+  unset C_LOG C_FIFO
 }
+
+
 view_compile_log()  {
     sleep   1
     report              $C_LOG  "Compile log"
 }
+
+
+start_logging () {
+  export C_LOG=/tmp/$MODULE.compile.log
+  export C_FIFO=/tmp/$MODULE.compile.fifo
+
+  rm  -f $C_FIFO
+  mknod  $C_FIFO p
+  rm  -f $C_LOG
+  echo  "Compile log for $MODULE  $VERSION  Built on `date  -u`"  >  $C_LOG
+
+  activate_voyeur
+}
+
+
 activate_voyeur()  {
   if  [  -z  "$SILENT"  ];  then
     case  $VOYEUR  in
@@ -249,17 +270,9 @@ activate_voyeur()  {
   else     tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &
   fi
 }
+
+
 run_build()  {
-   C_LOG=/tmp/$MODULE.compile.log
-  C_FIFO=/tmp/$MODULE.compile.fifo
-
-  rm  -f $C_FIFO
-  mknod  $C_FIFO p
-  rm  -f $C_LOG
-  echo  "Compile log for $MODULE  $VERSION  Built on `date  -u`"  >  $C_LOG
-
-  activate_voyeur
-
   [  -d  "$SOURCE_DIRECTORY"  ]  &&
   cd      $SOURCE_DIRECTORY
 
@@ -305,22 +318,9 @@ run_build()  {
     default_build
   fi
 
-  if  [  "$?"  ==  0  ];  then
-    rack
-  else
-    devoke_installwatch
-    rm $INSTALLWATCHFILE
-    sound  FAILURE
-    message  "${PROBLEM_COLOR}"      \
-             "! Problem Detected !"  \
-             "${DEFAULT_COLOR}"
-    rm  -f  $linING
-    view_compile_log
-    rack
-    activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors"
-    false
-  fi
 }
+
+
 run_post_build() {
   if  [  -x  $SCRIPT_DIRECTORY/POST_BUILD  ];  then
            . $SCRIPT_DIRECTORY/POST_BUILD
@@ -328,11 +328,15 @@ run_post_build() {
     default_post_build
   fi
 }
+
+
 run_post_install() {
   if  [  -x  $SCRIPT_DIRECTORY/POST_INSTALL  ];  then
            . $SCRIPT_DIRECTORY/POST_INSTALL
   fi
 }
+
+
 export_ld()  {
   for  DIRECTORY  in  $*;  do
     if  file  -b  $DIRECTORY/*.so*  |
@@ -345,6 +349,7 @@ export_ld()  {
     fi
   done
 }
+
 
 ldd_check()  {  (
   if  [  "$LDD_CHECK"  ==  "off"    ] ;  then
@@ -386,6 +391,7 @@ ldd_check()  {  (
   fi
   return  $LDD_STATUS
 ) }
+
 
 find_check()  { (
   if  [  "$FIND_CHECK"  ==  "off"             ]   ||
@@ -432,6 +438,7 @@ find_check()  { (
   return  $FIND_STATUS
 ) }
 
+
 show_owner()  {
   OWNER=`grep  $TARGET  $INSTALL_LOGS/*  |
          cut  -d :  -f1                  |
@@ -440,6 +447,8 @@ show_owner()  {
                            else  echo  "nobody"
   fi
 }
+
+
 remove_line()  {
   F_TMP=/tmp/`basename  $I_LOG`.`uuidgen`
 
@@ -453,6 +462,7 @@ remove_line()  {
   message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by `show_owner`"
   message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
 }
+
 
 sym_check()  { (
   if  [  "$SYM_CHECK"  ==  "off"  ];  then
@@ -485,6 +495,7 @@ sym_check()  { (
     done
   fi
 ) }
+
 
 md5sum_check()  { (
   if  [  "$MD5SUM_CHECK"  ==  "off"  ];  then
@@ -541,10 +552,12 @@ md5sum_check()  { (
   return  $MD5SUM_STATUS
 ) }
 
+
 status_okay()  {
   module_installed  $1  ||
   module_held       $1
 }
+
 
 run_checks()  {
      sym_check  $1
@@ -552,6 +565,7 @@ run_checks()  {
      ldd_check  $1  &&
   md5sum_check  $1
 }
+
 
 run_fix()  { (
   MODULES=$*
@@ -631,6 +645,7 @@ run_fix()  { (
   rm  -f  /tmp/LD_LIBRARY_PATH_FILE
 ) }
 
+
 process_parameters()  {
   while  [  -n  "$1"  ];  do
     if  echo  "" $1  |  grep  -q  "^ -";  then
@@ -656,6 +671,8 @@ process_parameters()  {
    fi
   done
 }
+
+
 strip_parameters()  {
   while  [  -n  "$1"  ];  do
     if  echo  "" $1  |  grep  -q  "^ -";  then
@@ -680,6 +697,8 @@ strip_parameters()  {
    fi
   done
 }
+
+
 resurrect()  {  (  
   run_details      &&
   run_conflicts    &&
@@ -729,19 +748,24 @@ show_download_progress()  {
     fi
   fi
 }
+
+
 show_downloading()  {
-#  COMPILE="y"
   while  !  lget  $MODULE;  do
     show_download_progress
     sleep 1
   done
     show_download_progress
 }
+
+
 report_install()  {
   rm  -f  $BOOST_LOCK
   INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
   report  $INST_LOG  "Install log"
 }
+
+
 lin_module()  { (
   if [ $MODULE == "moonbase" ]
   then
@@ -767,10 +791,12 @@ lin_module()  { (
     if ! [[ $CFLAGS ]]; then
       optimize_platform $GCCVER &&
       use_wrappers
-    fi
+    fi                          &&
+    start_logging               &&
     run_pre_build               &&
     run_build                   &&
     run_post_build              &&
+    stop_logging                &&
     run_post_install            &&
     if [[ $KEEP_SOURCE != "on" ]]; then 
       rm_source_dir               
@@ -779,13 +805,29 @@ lin_module()  { (
     rm  -f  $linING             &&
     sound  SUCCESS              &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
+
+    if  [  "$?"  !=  0  ];  then
+      devoke_installwatch
+      rm $INSTALLWATCHFILE
+      sound  FAILURE
+      message  "${PROBLEM_COLOR}! Problem Detected !${DEFAULT_COLOR}"
+      rm  -f  $linING
+      view_compile_log
+      stop_logging
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors"
+      false
+    fi
   fi
 ) }
+
+
 lin_locked()  {
   [     -f        /var/lock/installing.$1  ]  &&
   ps        `cat  /var/lock/installing.$1`    |
   grep  -q  "lin"
 }
+
+
 solo_locked()  {
   for  SOLO_MODULE  in  `cat  $SOLO`;  do
     if  lin_locked  $SOLO_MODULE;  then
@@ -798,6 +840,8 @@ solo_locked()  {
   done
   false
 }
+
+
 current_locked()  {
   if  lin_locked  $MODULE;  then
     message  "${PROBLEM_COLOR}Detected lin lock file:"  \
@@ -811,6 +855,8 @@ current_locked()  {
     false
   fi
 }
+
+
 lin_modules()  {
   for  MODULE  in  $MODULES;  do
   
@@ -840,10 +886,14 @@ lin_modules()  {
     exit  1
   fi
 }
+
+
 current_sources()  {
   module_installed  $MODULE  &&
   [  "$VERSION"  ==  "`installed_version  $MODULE`"  ]
 }
+
+
 run_lget()  {
   if  !  module_installed  $MODULE  ||
       !  current_sources          ||
@@ -853,8 +903,8 @@ run_lget()  {
   rm  -f  $D_LOG   2> /dev/null
 }
 
-build_depends()  {
 
+build_depends()  {
   for  MODULE  in  $MODULES;  do
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
       ( 

@@ -103,7 +103,7 @@ sedit()  {
   SEDIT=$1
   shift
   for FILE in $@ ; do
-    message "${MESSAGE_COLOR}Editing ${FILE_COLOR}${FILE}${DEFAULT_COLOR}"
+    [ "$VERBOSE" == "on" ] && echo "+ Editing ${FILE}"
     sed -i "$SEDIT" "$FILE"
   done
 }
@@ -278,27 +278,29 @@ boost_locked()  {
 
 save_libraries()  {
 
-   [ "$MODULE" == "glibc" ] && return 0
+  [ "$MODULE" == "glibc" ] && return 0
 
-    OLD_VERSION=`installed_version  $MODULE`
-        OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
+  [ "$VERBOSE" == "on" ] && echo "+ saving libraries if any"
+
+  OLD_VERSION=`installed_version  $MODULE`
+  OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
 
   [ -e "$OLD_LOG" ] || return 0      
 
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
   mkdir  -p  $OLD_LIBS
 
-            SAVED=$OLD_LIBS/$MODULE.saved.libraries
+  SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-
   grep   "/lib/"  $OLD_LOG  |
-  while  read        LINE;  do
+  while  read  LINE;  do
 
     if   [  -f      $LINE   ]  &&
          file  -bL  $LINE   |
          grep  -q   "shared object"
     then
+      [ "$VERBOSE" == "on" ] && echo "++ saving $LINE"
       if  [  -h  $LINE  ];  then
         DEST=$(  basename  $(  ls   -la  "$LINE"  |
                                cut  -d  '>'  -f2  |
@@ -309,12 +311,9 @@ save_libraries()  {
       else
         cp  $LINE  $OLD_LIBS
       fi
-      echo       $OLD_LIBS/`basename  $LINE`  >>  $SAVED
+      echo  $OLD_LIBS/`basename  $LINE`  >>  $SAVED
     fi
-
-
   done
-
 
   ldconfig  $OLD_LIBS
 
@@ -327,15 +326,19 @@ save_libraries()  {
 
 release_saved_libraries()  {
 
-       OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
-          SAVED=$OLD_LIBS/$MODULE.saved.libraries
-  [  -f  $SAVED  ]    &&
-  cat    $SAVED       |
-  while  read  FILE;  do
-    rm  -f   "$FILE"    
-  done
+   [ "$VERBOSE" == "on" ] && echo "+ releasing saved libraries if any"
+   
+   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+   SAVED=$OLD_LIBS/$MODULE.saved.libraries
 
-  ldconfig  $OLD_LIBS
+   [  -f  $SAVED  ]    &&
+   cat    $SAVED       |
+   while  read  FILE;  do
+     [ "$VERBOSE" == "on" ] && echo "++ $FILE"
+     rm  -f   "$FILE"
+   done
+
+   ldconfig  $OLD_LIBS
 
 }
 
@@ -351,15 +354,11 @@ prepare_install() {
 
   echo  $$  >  $BOOST_LOCK
 
-  if  module_installed  $MODULE   ||
-      module_held       $MODULE;  then
-
+  if  module_installed $MODULE  || module_held $MODULE ; then
     save_libraries
-    cp -a /usr/share/info/dir /tmp/info_dir.saved
+    [ "$VERBOSE" == "on" ] && echo "+ calling \"lrm --keepconfig --nosustain $MODULE\""
     lrm  --keepconfig  --nosustain  $MODULE
-    mv /tmp/info_dir.saved /usr/share/info/dir
     true
-
   fi
 
   rm  -f  /tmp/$MODULE.iw
@@ -373,6 +372,8 @@ rm_source_dir() {
 
   DEAD_DIR=$1
   DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
+
+  [ "$VERBOSE" == "on" ] && echo "+ destroying building dir \"$DEAD_DIR\""
 
   if [ "$TMPFS" != "off" ]; then
     umount     $DEAD_DIR  2>  /dev/null
@@ -393,6 +394,8 @@ mk_source_dir() {
   NEW_DIR=$1
   NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
 
+  [ "$VERBOSE" == "on" ] && echo "+ creating building dir \"$NEW_DIR\""
+
   if [ "$TMPFS" != "off" ]; then 
     umount  $NEW_DIR  2>/dev/null
     rmdir   $NEW_DIR  2>/dev/null
@@ -408,6 +411,7 @@ mk_source_dir() {
 
 validate_source_dir()  {
 
+  [ "$VERBOSE" == "on" ] && echo "+ validating \"$SOURCE_DIRECTORY\""
   if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
       [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
       echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
@@ -422,9 +426,12 @@ validate_source_dir()  {
 
 }
 
+
 # Usage: bad_flags "list of flags to remove"
 # Example: bad_flags -ffast-math -funroll-loops
 bad_flags() {
+
+  [ "$VERBOSE" == "on" ] && echo "+ bad_flags \"$@\""
   if [[ $1 == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
   elif [[ $1 == "compiler" ]]; then
@@ -441,9 +448,11 @@ bad_flags() {
   fi
 }
 
+
 # Usage: patch_it location/name level 
 # Example: patch_it $SOURCE_CACHE/foo.bz2 1
 patch_it() {
+  [ "$VERBOSE" == "on" ] && echo "+ patch_it \"$1\" \"$2\""
   if [[ `echo $1 | grep .tar` ]]; then
     if [[ `echo $1 | grep .bz2` ]]; then
       bzcat $1 | tar x -O | patch -N -p$2
@@ -463,7 +472,9 @@ patch_it() {
   fi
 }
 
+
 default_pre_build() {
+  [ "$VERBOSE" == "on" ] && echo "+ running default_pre_build"
   if [[ $CVS_SERVER ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
     if [[ -d $SOURCE_DIRECTORY ]] &&
@@ -488,8 +499,10 @@ default_pre_build() {
   fi
 }
 
+
 default_config() 
 {
+   [ "$VERBOSE" == "on" ] && echo "+ running default_config"
 
    [ "$VERBOSE" == "on" ] && {
       echo "+ CFLAGS=$CFLAGS"                &&
@@ -506,44 +519,46 @@ default_config()
                 $OPTS
 } > $C_FIFO 2>&1
 
+
 default_make()
 {
+   [ "$VERBOSE" == "on" ] && echo "+ running default_make"
    make                               &&
    prepare_install                    &&
    make    install
 } > $C_FIFO 2>&1
 
+
 default_build() 
 {
+   [ "$VERBOSE" == "on" ] && echo "+ running default_build"
    default_config  &&
-   #activate_voyeur &&   
    default_make
 } > $C_FIFO 2>&1
 
 
 gather_docs()  {
+  [ "$GARBAGE" == "on" ] || return 0
 
   DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
+  [ "$VERBOSE" == "on" ] && echo "+ installing standard documentation into \"$DOC_DIR\" if any"
   mkdir  -p  $DOC_DIR
-  cp         $SOURCE_DIRECTORY/README*     $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/INSTALL*    $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/FAQ*        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/CHAN*       $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/doc*        $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/DOC*        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/*doc        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/*rc         $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/conf        $DOC_DIR  2>/dev/null
-  cp     -r  $SOURCE_DIRECTORY/SETUP       $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/NEWS        $DOC_DIR  2>/dev/null
-  cp         $SOURCE_DIRECTORY/Change*     $DOC_DIR  2>/dev/null
 
+  ( cd $SOURCE_DIRECTORY && for FILE in \
+    README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
+    conf SETUP NEWS Change* manual* Manual* ; do
+      [ -e $FILE ] && {
+        [ "$VERBOSE" == "on" ] && echo "++ $DOC_DIR/$FILE"
+        cp -ar $FILE $DOC_DIR 2> /dev/null
+      }
+    done
+  )
 }
 
 
 install_pam_confs()  {
-
   if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
+    [ "$VERBOSE" == "on" ] && echo "+ handling pam config files"
     cd       "$SCRIPT_DIRECTORY/pam.d"
 
     [ -d /etc/pam.d ] || mkdir  -p  /etc/pam.d
@@ -554,14 +569,11 @@ install_pam_confs()  {
         cp  $FILE   /etc/pam.d
       fi
     done
-
   fi
-
-}
+} 
 
 
 install_xinetd_confs()  { (
-
   if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
     cd       "$SCRIPT_DIRECTORY/xinetd.d"
 
@@ -586,8 +598,8 @@ install_xinetd_confs()  { (
 
 ) }
 
-install_initd()  { (
 
+install_initd()  { (
   [ -d /etc/init.d ] || mkdir -p /etc/init.d
 
   if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
@@ -618,24 +630,20 @@ install_initd()  { (
     fi
 
   done
-
 ) }
 
+
 install_services()  { (
-
-
   if  [  -f  $SCRIPT_DIRECTORY/services  ];  then
-
-  export  IFS="$ENTER_IFS"
-
+    export  IFS="$ENTER_IFS"
     cat  $SCRIPT_DIRECTORY/services  |
     while  read  LINE;  do
       grep  -q  "$LINE"      /etc/services  ||
       echo      "$LINE"  >>  /etc/services
     done
   fi
-
 ) }
+
 
 install_bashmisc () { (
 
@@ -652,17 +660,17 @@ install_bashmisc () { (
 
 ) }
 
+
 default_post_build() {
 
-  install_pam_confs
-  install_services
-  install_xinetd_confs
-  install_initd
-  install_bashmisc
-  
-  if [  "$GARBAGE"  ==  "on"  ];  then
-      gather_docs
-  fi
+  {
+    install_pam_confs
+    install_services
+    install_xinetd_confs
+    install_initd
+    install_bashmisc
+    gather_docs
+  } | tee -a $C_LOG
 
   devoke_installwatch
   ldconfig
@@ -672,55 +680,20 @@ default_post_build() {
 
 }
 
-module_installed() 
-{
-
-      if  grep  -q  "^$1\:"         $MODULE_STATUS 2>/dev/null ;  then
-    STAT=`grep      "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`;  else
-    STAT=`grep      "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`
-  fi
-  [  "$STAT"  ==  "installed"  ]
-}
-
-module_held() {
-
-  STAT=`grep  "^$1\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`  &&
-  [  "$STAT"  ==  "held"  ]
-
-}
-
-module_exiled()  {
-
-  STAT=`grep  "^$1\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d : -f3`  &&
-  [  "$STAT"  ==  "exiled"  ]
-
-}
-
-
-installed_version()  
-{
-  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
-     echo  `grep  "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
-  else  
-     echo  `grep  "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
-  fi
-}
 
 
 # function : remove_module
 # usage    : remove_module; but $MODULE must be defined earlier
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
-remove_module()
-{
-##  ! module_installed $MODULE && return 0
+remove_module() {
 
+  [ "$VERBOSE" == "on" ] && echo "+ updating lunar state files after module removal"
   lock_file $MODULE_STATUS                                     && 
   lock_file $MODULE_STATUS_BACKUP                              &&
   grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
   cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
   unlock_file $MODULE_STATUS_BACKUP                            &&
   unlock_file $MODULE_STATUS 
-
 
   if  [  -n  "$EXILE"  ];  
   then
@@ -744,7 +717,7 @@ remove_module()
 # usage   : add_module <module_name>
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
-  remove_module  $1
+  [ "$VERBOSE" == "on" ] && echo "+ updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&
   echo  "$1:`date  -u  +%Y%m%d`:$2:$3:$4"  >>  $MODULE_STATUS &&
@@ -756,35 +729,26 @@ add_module()  {
 
 is_depends()  {  (
   #  Is $1 a previously selected dependency of any module.
-
   EXIT_STATUS="false"
-
   for  DEP  in  `cut  -d :  -f2-  $DEPENDS_STATUS  |
                  grep  "^$1:"`
   do
-
     DEP_STATUS=`echo  "$DEP"  |  cut  -d :  -f2`
-
     if    [  "$DEP_STATUS"  ==  "on"  ]
     then  EXIT_STATUS="true"
           break
     fi
-
   done
-
   $EXIT_STATUS
-
 )  }
 
 
 in_depends()  {
   #  Was $2 presented as a depenency for module $1
-
   if    grep  -q  "^$1:$2"  $DEPENDS_STATUS
   then  true
   else  false
   fi
-
 }
 
 
@@ -1414,7 +1378,6 @@ boost()	{ (
 
   track    &&
   archive  &&
-#find_module_size is in functions/sizes
   add_module  $MODULE installed $VERSION `find_module_size $MODULE $VERSION`
 
 ) }

@@ -10,7 +10,9 @@
 #          list_sections, list_modules                     #
 #          get_moonbase_md5, set_moonbase_md5,             #
 #          check_module_index, run_details                 #
+#          module_installed, module_held, module_exiled    #
 # 20020528                                                 #
+# 20030113 merging more functions in here - sofar          #
 #                                                          #
 ############################################################
 #                                                          #
@@ -110,9 +112,7 @@ create_module_index()
 
    echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
    for  SECTION  in  $(list_sections) ; do
-      for  MODULE  in  $(list_modules $SECTION) ;  do
-         echo $MODULE:$SECTION >> $MODULE_INDEX
-       done
+      list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
     done
    unlock_file $MODULE_INDEX
 }  
@@ -158,10 +158,11 @@ run_details() {
    [ -z "$MODULE" ] && [ -z "$1" ] && return 1
    [ -n "$1" ] && MODULE="$1"
 
-   local SECTION=$(find_section $MODULE) || {
+   local SECTION=$(find_section $MODULE)
+   [ -d "$MOONBASE/$SECTION/$MODULE" ] || {
       message  "${PROBLEM_COLOR}Unable to find module"    \
                "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-               "${MESSAGE_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
+               "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
       return 1
    }
 
@@ -196,4 +197,37 @@ run_module_file()
    }
    [ "$TEST" != "on" ] && . $SCRIPT_DIRECTORY/$1 > /dev/null
 }
+
+
+module_installed()
+{
+   if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
+     STAT=`grep "^$1\:"         $MODULE_STATUS 2>/dev/null | cut -d : -f3`
+   else
+     STAT=`grep "^$1-custom\:"  $MODULE_STATUS 2>/dev/null | cut -d : -f3`
+   fi
+   [  "$STAT"  ==  "installed"  ]
+}
+
+
+module_held() {
+   STAT=`grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f3` &&
+   [ "$STAT" == "held" ]
+}
+
+
+module_exiled()  {
+   STAT=`grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f3` &&
+   [ "$STAT" == "exiled" ]
+}
+
+
+installed_version() {
+   if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
+     echo `grep "^$1\:" $MODULE_STATUS 2>/dev/null | cut -d : -f4`
+   else  
+     echo `grep "^$1-custom\:" $MODULE_STATUS 2>/dev/null | cut -d : -f4`
+   fi
+}
+
 

@@ -505,6 +505,7 @@ feature_menu()  {
   T_HELP="Disallow lrm of modules that would cause terrible malfunctions?"
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
+  W_HELP="Verbose display of compilation process?"
 
          ARCHIVE=${ARCHIVE:=on}
          AUTOFIX=${AUTOFIX:=on}
@@ -520,6 +521,7 @@ feature_menu()  {
           VOYEUR=${VOYEUR:=on}
             REAP=${REAP:=on}
          GARBAGE=${GARBAGE:=on}
+	 VERBOSE=${VERBOSE:off}
 
         if [ -z $TMPFS ]; then
           TMPFS=on;
@@ -546,7 +548,8 @@ feature_menu()  {
       "VIEW_REPORTS"  "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
       "VOYEUR"        "Toggle"  "$VOYEUR"        "$V_HELP"   \
       "REAP"          "Toggle"  "$REAP"          "$E_HELP"   \
-      "TMPFS"         "Toggle"  "$TMPFS"         "$D_HELP"`
+      "TMPFS"         "Toggle"  "$TMPFS"         "$D_HELP"   \
+      "VERBOSE"       "Toggle"  "$VERBOSE"       "$W_HELP"`
 
   then
   
@@ -565,6 +568,7 @@ feature_menu()  {
             REAP=off
          GARBAGE=off
            TMPFS=off
+	 VERBOSE=off
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -583,6 +587,7 @@ feature_menu()  {
                 REAP)          REAP=on  ;;
              GARBAGE)       GARBAGE=on  ;;
                TMPFS)         TMPFS=on  ;;
+	     VERBOSE)       VERBOSE=on  ;;
       esac
     done
 
@@ -601,7 +606,8 @@ feature_menu()  {
           grep  -v  "REAP="          |
           grep  -v  "GARBAGE="       |
           grep  -v  "color"          |
-          grep  -v  "TMPFS="`
+          grep  -v  "TMPFS="         |
+	  grep  -v  "VERBOSE="`
 
     echo  "$TEMP"                       >   $LOCAL_CONFIG
     echo  "     ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
@@ -617,8 +623,9 @@ feature_menu()  {
     echo  "      VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
     echo  "        REAP=$REAP"          >>  $LOCAL_CONFIG
     echo  "     GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "color  $COLOR"               >>  $LOCAL_CONFIG
+    echo  "       color $COLOR"         >>  $LOCAL_CONFIG
     echo  "       TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
+    echo  "     VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
   fi
 }
 
