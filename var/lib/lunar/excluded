@@ -36,6 +36,9 @@
 /etc/postfix/main.cf
 /etc/postfix/master.cf
 /etc/postfix/aliases
+/etc/postfix/access
+/etc/postfix/virtuals
+/etc/postfix/lists
 /etc/printcap
 /etc/procmailrc
 /etc/proftpd.conf
