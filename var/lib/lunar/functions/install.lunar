@@ -106,8 +106,12 @@ run_pre_build() {
     if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
       run_module_file $MODULE PRE_BUILD
     else
-      default_pre_build
+      if ! default_pre_build ; then
+        return 1
+      fi
     fi
+  else
+    return 1
   fi
 }
 
@@ -412,19 +416,22 @@ lin_module()  { (
   run_conflicts               &&
   satisfy_depends             &&
   show_downloading            &&
- 
+
   # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
-    echo $$ > $linING          &&
-    if ! [[ $CFLAGS ]] ; then
-      optimize
-    fi                         &&
-    start_logging
+    echo $$ > $linING  &&
+    start_logging  &&
 
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"
     else
-      invoke_installwatch
+
+      # important stuff here!!!
+      invoke_installwatch &&
+      if ! [[ $CFLAGS ]] ; then
+        optimize
+      fi  &&
+      
       if ! run_build ; then
         LIN_ERROR="BUILD"
       else

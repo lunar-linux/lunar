@@ -6,7 +6,8 @@
 ############################################################
 #                                                          #
 # $FUNCTIONS/sources                                       #
-# includes sources, md5_verify_source                      #
+# includes sources, md5_verify_source, verify_sources      #
+# verify_source                                            #
 #                                                          #
 # 20020604                                                 #
 #                                                          #
@@ -17,9 +18,28 @@
 ############################################################
 
 
+verify_source() {
+  VERIFIED="true"
+  for SOURCE_FILE in $@ ; do
+    if ! guess_filename $SOURCE_CACHE/$1 >/dev/null ; then
+      message "${PROBLEM_COLOR}Missing ${FILE_COLOR}${1}${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}Lunar Install aborting.${DEFAULT_COLOR}"
+      activity_log "lin" "$MODULE" "$VERSION" "failed" "because it was missing source:  $1"
+      return 1
+    fi
+  done
+}
+
+
+verify_sources() {
+  md5_verify_source $(sources $MODULE MD5)
+}
+
+
 # function : sources
-# usage    : sources <module_name> {MD5}
-# purpose  : displays the filenames and md5sums of sources for a given module
+# usage    : sources <module_name> {MD5|VFY|
+# purpose  : displays the filenames and md5sums or VFY part of sources
+#            for a given module
 sources() { (
   MAX_SOURCES=${MAX_SOURCES:=100}
 
@@ -37,6 +57,11 @@ sources() { (
       if [ -z "$SRC_MD5" ] ; then
         SRC_MD5=0
       fi
+    elif [ "$2" == "VFY" ] ; then
+      eval SRC_VFY=\$${TEMP}_VFY
+      if [ -z "$SRC_VFY" ] ; then
+        SRC_VFY=0
+      fi
     fi
 
     eval SRC2=\$SOURCE$((CNT+1))
@@ -46,6 +71,8 @@ sources() { (
       echo $SRC1
       if [ "$2" == "MD5" ] ; then
         echo $SRC_MD5
+      elif [ "$2" == "VFY" ] ; then
+        echo $SRC_VFY
       fi
     fi
 
@@ -92,16 +119,16 @@ md5_verify_source() {
 
 unpack() {
 
-    FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
-  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
+    FILENAME=$(guess_filename $SOURCE_CACHE/$1)
 
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
-  case  $COMPRESSOR  in
-        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
-         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-          Zip)  unzip  -q    $FILENAME                  ;;
+  case $(file -b $FILENAME | cut -d' ' -f1) in
+        bzip2)  tar jxf $FILENAME ;;
+         gzip)  tar zxf $FILENAME ;;
+	  tar)  tar xf $FILENAME ;;
+    compress*)  tar zxf $FILENAME ;;
+          Zip)  unzip -q $FILENAME ;;
           RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
                                         |  cpio  -idm   ;;
             *)  false                                   ;;
