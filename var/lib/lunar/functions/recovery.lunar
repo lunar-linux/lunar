@@ -54,8 +54,8 @@ rebuild_status_files() {
         lock_file $MODULE_STATUS &&
         lock_file $MODULE_STATUS_BACKUP &&
         # adjusted add_module code that echos the DATE field ;^)
-        grep -v "^$1:" $MODULE_STATUS_BACKUP >$MODULE_STATUS 2>/dev/null &&
-        echo "$1:$DATE:$2:$3:$4" >>$MODULE_STATUS &&
+        grep -v "^$REAL_NAME:" $MODULE_STATUS_BACKUP >$MODULE_STATUS 2>/dev/null &&
+        echo "$REAL_NAME:$DATE:installed:$VERSION:$SIZE" >>$MODULE_STATUS &&
         cat $MODULE_STATUS >$MODULE_STATUS_BACKUP &&
         unlock_file $MODULE_STATUS_BACKUP &&
         unlock_file $MODULE_STATUS
