@@ -150,11 +150,3 @@
 	known problem modules across several architectures.  Getting ready
 	for the SPARC64 iso.
 
-2003-10-19 04:36  tchan
-
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	Updated the SPARC sections of optimize.lunar and optimize.menu. 
-	Still needs some work in the CPU hint section as "cat
-	/proc/cpuinfo" does NOT return a "model type" string -- instead it
-	returns a "type" string and a "cpu" string.
-
