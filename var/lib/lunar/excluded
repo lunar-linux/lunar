@@ -81,6 +81,7 @@
 /var/lib/mysql
 /var/lock
 /var/log
+/var/mailman/Mailman/mm_cfg.py
 /var/named
 /var/nis
 /var/run
