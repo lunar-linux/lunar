@@ -1061,14 +1061,14 @@ update_installed()  {
   message  "${MESSAGE_COLOR}Searching installed modules for upgrade..." \
            "${DEFAULT_COLOR}"
   rm  -f  $INSTALL_QUEUE
-  for  LINE  in  `cat  $MODULE_STATUS`;  do
+  for  LINE  in  $(cat $MODULE_STATUS | sort);  do
 
       MODULE=`echo  "$LINE"  |  cut  -d : -f1`
        IDATE=`echo  "$LINE"  |  cut  -d : -f2`
       STATUS=`echo  "$LINE"  |  cut  -d : -f3`
     IVERSION=`echo  "$LINE"  |  cut  -d : -f4`
 
-    show_fancy_progress "Processing: $MODULE-$VERSION          "
+    show_fancy_progress "Processing: $MODULE"
 
     if  [  "$STATUS"  ==  "installed"  ];  then
 
