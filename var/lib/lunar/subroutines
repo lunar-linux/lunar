@@ -1784,7 +1784,7 @@ fix_depends () {
     done
     # we need to trick the system into thinking it has the new depends
     # if we want to do one module at a time:
-    if (( $# > 1 )) ; then
+    if (( $(cat INSTALL_QUEUE | wc -l) > 1 )) ; then
       cp $DEPENDS_STATUS $TMP/depends
       cat $TMP/depends.new-all > $DEPENDS_STATUS
       cat $TMP/depends.new-all > $DEPENDS_STATUS_BACKUP
