@@ -135,9 +135,3 @@
 	<kernel-version>-<module-identifier> where this string should match
 	the version-extraversion id in the kernl Makefile
 
-2003-10-06 02:08  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: Added installwatch
-	frobbing, hacked and added grub and lilo stanza makers (w/
-	whitespace now) and fixed copyright info.
-
