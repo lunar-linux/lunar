@@ -1,3 +1,13 @@
+2003-02-21 00:00  sofar
+
+	* sbin/lin, var/lib/lunar/subroutines: Multiple fixes:
+	
+	* KEEP_SOURCE implemented in rm_source_dir for transparancy *
+	verbose error handling of multiple stages within lin (more needed
+	but this covers pretty much all cutomizable scripts) * adding
+	better logging which shows the failed section. (all devs shout "we
+	always wanted that!") * turned my alarm on and went to bed
+
 2003-02-20 21:36  sofar
 
 	* bin/lvu: echo .......... echo
@@ -384,10 +394,4 @@
 
 	* sbin/lget: Last modifications to cvs/lget - better source tree
 	management, trapdoors removed.
-
-2003-01-21 11:53  sofar
-
-	* var/lib/lunar/subroutines: Code change: sedit now handles
-	multiple files in one sedit statement, and in place backups are no
-	longer made.
 
