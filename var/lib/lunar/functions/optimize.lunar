@@ -42,38 +42,7 @@ optimize_make() {
     alias make="make -j$MAKES"
   fi
 }
-
-optimize_cc() {
-  if [[ $CC ]]; then
-    unset CC
-  fi
-  
-  CC="gcc"
-  case $1 in
-    Normal) CC="$CC"
-            ;;
-      Pipe) CC="$CC -pipe"
-            ;;
-  esac
-}
-
-optimize_ccc() {
-  if [[ $CCC ]]; then
-    unset CCC
-  fi
-
-  CCC="g++"
-  CXX="$CCC"
-  case $1 in
-    Normal) CCC="$CCC"
-            CXX="$CXX"
-            ;;
-      Pipe) CCC="$CCC -pipe"
-            CXX="$CXX -pipe"
-            ;;
-  esac
-}
-   
+ 
 optimize_base() {
    if ! [[ $1 ]]; then
       BOPT="None"
@@ -683,31 +652,31 @@ optimize_platform() {
 
    case $PLATFORM in
       x86)      optimize_make  $MAKES      &&
-                optimize_cc    $CC         &&
-                optimize_ccc   $CCC        &&
                 optimize_base  $BOPT       &&
                 optimize_cpu   $CPU        &&
                 optimize_speed ${SPD[@]}   &&
                 optimize_extra $XTRA       &&
                 optimize_fp    $FPM        &&
-                optimize_ld    ${LDF[@]}   &&
-                optimize_addon ${ADDON[@]} 
+                optimize_ld    ${LDF[@]}   
                 ;;
-      Alpha)    optimize_base  $BOPT      &&
+      Alpha)    optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}
                 ;;
-      PowerPC)  optimize_base  $BOPT      &&
+      PowerPC)  optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}
                 ;;
-      SPARC)    optimize_base  $BOPT      &&
+      SPARC)    optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
@@ -716,9 +685,9 @@ optimize_platform() {
                 ;;
    esac
 
-export CC
-export CCC
-export CXX
+export CC="lunar-gcc"
+export CCC="lunar-g++"
+export CXX="lunar-g++"
 export CFLAGS
 export COPT="$CFLAGS"
 export CCOPT="$CXXFLAGS -Wno-deperecated"
@@ -745,67 +714,61 @@ optimize_architecture()  {
 # if it exists it will allow more options.
   TITLE="Lunar Optimizations"
 
-  #if module_installed gcc3; then
-    help compiler_help          &&
-    compiler_options            &&
-    menu                        &&
-    COMPILER=$RESULT
-  #fi
+  help compiler_help          &&
+  compiler_options            &&
+  menu                        &&
+  COMPILER=$RESULT
   
-  help cc_help                  &&
-  cc_options                    &&
-  menu                          &&
+  help cc_help                &&
+  cc_options                  &&
+  menu                        &&
   CC=$RESULT
 
-  help ccc_help                 &&
-  ccc_options                   &&
-  menu                          &&
+  help ccc_help               &&
+  ccc_options                 &&
+  menu                        &&
   CCC=$RESULT
 
-  help platform_help            &&
-  platform_options              &&
-  menu                          &&
+  help platform_help          &&
+  platform_options            &&
+  menu                        &&
   PLATFORM=$RESULT
 
-  help bopt_help                &&
-  bopt_options                  &&
-  menu                          &&
+  help bopt_help              &&
+  bopt_options                &&
+  menu                        &&
   BOPT=$RESULT
 
-  help cpu_help $PLATFORM       &&
-  cpu_options $PLATFORM         &&
-  menu                          &&
+  help cpu_help $PLATFORM     &&
+  cpu_options $PLATFORM       &&
+  menu                        &&
   CPU=$RESULT
-  optimize_cpu $CPU             &&
+  optimize_cpu $CPU           &&
   BUILD=$BUILD
 
-  help spd_help                 &&
-  spd_options                   &&
-  menu checklist                &&
+  help spd_help               &&
+  spd_options                 &&
+  menu checklist              &&
   SPD=( $RESULT )
 
-  #if module_installed gcc3; then
-    help xtra_help              &&
-    xtra_options                &&
-    menu checklist              &&
-    XTRA=$RESULT
-  #fi
+  help xtra_help              &&
+  xtra_options                &&
+  menu checklist              &&
+  XTRA=$RESULT
 
-  #if module_installed gcc3; then
-    help fpm_help               &&
-    fpm_options                 &&
-    menu                        &&
-    FPM=$RESULT
-  #fi
+  help fpm_help               &&
+  fpm_options                 &&
+  menu                        &&
+  FPM=$RESULT
 
-  help ldf_help                 &&
-  ldf_options                   &&
-  menu checklist                &&
+  help ldf_help               &&
+  ldf_options                 &&
+  menu checklist              &&
   LDF=( $RESULT )
   
-  help addon_help               &&
-  addon_options                 &&
-  menu checklist                &&
+  help addon_help             &&
+  addon_options               &&
+  menu checklist              &&
   ADDON=( $RESULT )
 
   optimize
