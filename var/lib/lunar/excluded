@@ -90,3 +90,12 @@
 /var/state/dhcpd.leases~
 /var/tmp
 /var/yp
+/usr/share/fonts/truetype/fonts.dir
+/usr/X11R6/lib/X11/fonts/100dpi/fonts.dir
+/usr/X11R6/lib/X11/fonts/75dpi/fonts.dir
+/usr/X11R6/lib/X11/fonts/CID/fonts.dir
+/usr/X11R6/lib/X11/fonts/local/fonts.dir
+/usr/X11R6/lib/X11/fonts/misc/fonts.dir
+/usr/X11R6/lib/X11/fonts/Speedo/fonts.dir
+/usr/X11R6/lib/X11/fonts/TTF/fonts.dir
+/usr/X11R6/lib/X11/fonts/Type1/fonts.dir
