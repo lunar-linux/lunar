@@ -341,7 +341,9 @@ prepare_install() {
       module_held       $MODULE;  then
 
     save_libraries
+    cp -a /usr/share/info/dir /tmp/info_dir.saved
     lrm  --nosustain  $MODULE
+    mv /tmp/info_dir.saved /usr/share/info/dir
     true
 
   fi
@@ -404,6 +406,20 @@ validate_source_dir()  {
 
 }
 
+
+# Usage: patch_it location/name level 
+# Example: patch_it $SOURCE_CACHE/foo.bz2 1
+patch_it() {
+  if [[ `echo $1 | grep .bz2` ]] ||
+     [[ `echo $1 | grep .tbz2` ]]; then
+    bzcat $1 | patch -N -p$2
+  elif [[ `echo $1 | grep .gz` ]] ||
+       [[ `echo $1 | grep .tgz` ]]; then
+    zcat $1 | patch -N -p$2
+  else
+    cat $1 | patch -N -p$2 
+  fi
+}
 
 default_pre_build() {
 
@@ -621,8 +637,7 @@ module_exiled()  {
 
 installed_version()  
 {
-  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null 
-  then  
+  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
      echo  `grep  "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
   else  
      echo  `grep  "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
@@ -1104,7 +1119,7 @@ clean_logs()  {
 
 activity_log()  { (
 
-    DATE=`date  -u  +%Y%m%d`
+    DATE=`date  -u  +%Y%m%d-%T`
   COMMAND=$1
    MODULE=$2
   VERSION=$3
@@ -1522,7 +1537,14 @@ get_moonbase() {
   rm -f $SOURCE_CACHE/$SOURCE
   message  "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
 
-  activity_log "lin" "$MODULE" "$VERSION" "$OUTCOME" "$INFO"
+  echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
+    	    "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
+  if [ -f $MODULE_INDEX ]; then
+    rm $MODULE_INDEX                 
+  fi
+  create_module_index
+  
+  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
 
 }
 
