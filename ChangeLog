@@ -1,3 +1,16 @@
+2003-10-07 05:24  elaine
+
+	* var/lib/lunar/functions/kernel.lunar: corrected variable case
+	typo
+
+2003-10-07 05:18  elaine
+
+	* var/lib/lunar/functions/kernel.lunar: Changed backup_mods_krnl to
+	only take kernel name and bootconfig functions to sycronize with
+	bkup assuming in all places to use convention
+	<kernel-version>-<module-identifier> where this string should match
+	the version-extraversion id in the kernl Makefile
+
 2003-10-06 02:08  elaine
 
 	* var/lib/lunar/functions/kernel.lunar: Added installwatch
@@ -223,61 +236,4 @@
 	* bin/lvu: Added some fixes to the help() function for lvu. 
 	Brought it upto date with sofar's latest standardized command line
 	options.
-
-2003-08-07 23:52  sofar
-
-	* sbin/lin, var/lib/lunar/functions/install.lunar: fix as of
-	request tchan: $BUILD was unset during resurrect, and hooking up
-	the code in lunar. Both approaches (lin -R or lunar resurrect)
-	tested thorougly.
-
-2003-08-07 18:01  sofar
-
-	* sbin/lin: Muchos gracias a tchan.
-
-2003-08-07 16:12  sofar
-
-	* sbin/lin: Slightly goofed up lin --deps code handling...
-
-2003-08-07 10:29  sofar
-
-	* usr/share/man/man8/lfirsttime.8: small adjustments
-
-2003-08-07 10:21  sofar
-
-	* usr/share/man/man8/lcrash.8: Updating this page to make it a bit
-	more recent.
-
-2003-08-07 09:48  sofar
-
-	* bin/lvu, sbin/lunar, var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/install.lunar: Adding uniform parameter
-	passing to lvu, fixing up lvu urls to ignore testpack() and
-	connect(), hooking up --help to lunar, also making it call the
-	proper fix/nofix/fixdepends code. Last merged fixing code into
-	check.lunar, so this is all together in one file and not in
-	install.lunar.
-
-2003-08-07 07:35  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Reverted tchans patch
-	since that killed the optimizations on compile. Adding a line where
-	the optimizations are read just before the menu's are run, so we're
-	all happy now.
-
-2003-08-07 05:56  tchan
-
-	* sbin/: lget, lin, lrm, lunar: Added/corrected help() function
-	text in all four coretools.  Still needs work by sofar.
-
-2003-08-07 04:24  tchan
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed the bug in theedge
-	of "lunar optimize" not loading up the settings from
-	/etc/lunar/local/optimizations.  sofar had moved the sourcing of
-	the optimizations file into the optimize() which is too late.  I
-	moved it to the top of the optimize_architecture().  Older code
-	just had the sourcing of optimizations at the top of optimize.lunar
-	script.
 
