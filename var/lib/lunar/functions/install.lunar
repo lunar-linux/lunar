@@ -283,8 +283,10 @@ resurrect()  {
   STATUS=installed &&
 
   if module_held $MODULE ; then
-    VERSION=`installed_version $MODULE`
+    VERSION=$(installed_version $MODULE)
     STATUS=held
+    lrm --keepconfig $MODULE
+  elif module_installed $MODULE ; then
     lrm --keepconfig $MODULE
   fi &&
 
