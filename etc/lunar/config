@@ -84,7 +84,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
           XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
           LRESORT_URL=http://www.lunar-linux.org/lunar/cache
 
-      MOONBASE_URL[0]=http://www.luar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[0]=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[1]=http://dk.lunar-linux.org/lunar/moonbase.tar.bz2
 	 
             PATCH_URL=http://www.lunar-linux.org/lunar/patches
