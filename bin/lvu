@@ -61,7 +61,8 @@ installed   [module]       display installed modules/version of module
 compile     module         display a compile log
 compiler    module         display the compiler version used
 links       module         display a list of modules that this module links to
-sources     module         display source files for a module
+sources     [module]       display source files for a module
+urls        [module]       display all URLs for a module
 maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
 
@@ -612,6 +613,41 @@ function show_tree() {
         fi
 }
 
+show_urls() { (
+  # function overrides:
+  call_wget() {
+    echo $@
+  }
+  guess_filename() {
+    false
+  }
+  file() {
+    return
+  }
+  mv() {
+    return
+  }
+  get_cvs() {
+    return
+  }
+ 
+  SILENT=on
+  VERBOSE=off
+  FUZZY=off
+  EXHAUSTIVE=off
+  CLEAR_CACHE=off
+
+  if [ -z "$1" ] ; then
+    MODULES=$(list_moonbase|sort)
+  else
+    MODULES=$1
+  fi
+  
+  for MODULE in $MODULES ; do
+    download_module
+  done
+) }
+
 
 parse()  {
   case $1 in
@@ -680,12 +716,12 @@ parse()  {
       ;;
 
     installed)
-      if [ -z "$MODULE" ] ; then
+      if [ -z "$2" ] ; then
         view_file $MODULE_STATUS
-      elif [ -n "$VERSION" ] ; then
-        echo "$VERSION"
+      elif [ -n "$(installed_version $2)" ] ; then
+        echo "$(installed_version $2)"
       else
-        message "$MODULE is not installed"
+        message "$2 is not installed"
 	false
       fi
       ;;
@@ -695,49 +731,38 @@ parse()  {
       ;;
 		
     sum)
-      if [ -n "$MODULE" ] ; then
-        if ! checksum  "$INSTALL_LOGS/$MODULE-$VERSION" ; then
+      if [ -n "$2" ] ; then
+        if ! checksum  "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
           checksum  "$INSTALL_LOGS/*"
 	fi
       fi
       ;;
 	  
     md5sum)
-      if [ -n "$MODULE" ] ; then
-        if ! md5sum_files "$INSTALL_LOGS/$MODULE-$VERSION" ; then
+      if [ -n "$2" ] ; then
+        if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
 	  md5sum_files  "$INSTALL_LOGS/*"
         fi
       fi
       ;;
 
-   voyeur)
-     shift 1
-     activate_voyeur $@
-     ;;
+    voyeur)
+      shift 1
+      activate_voyeur $@
+      ;;
 
-   pam)
-     find_pam_aware
-     ;;
+    pam)
+      find_pam_aware
+      ;;
      
-  esac
-
-  if [ -z "$2" ] ; then
-    help
-  fi
- 
-    #
-    # stuff that takes a MODULE as $2
-    #
-
-  MODULE=$2
-  ( if run_details $2 ; then
-
-   case $1 in
-
     sources)
       sources $2
       ;;
-      
+
+    urls)
+      show_urls $2
+      ;;
+
     maintainer)
       maintainer $2
       ;;
@@ -799,7 +824,10 @@ parse()  {
       ;;
       
     version)
-      show_version "$2"
+      if [ -n "$2" ] ; then (
+        run_details $2 
+	echo $VERSION
+      ) fi
       ;;
       
     size)
@@ -817,43 +845,43 @@ parse()  {
 
     compile)
       run_details 
-      if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
-        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2
+      if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
+        view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
       else
-        VERSION=$(installed_version $MODULE)
-        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
-            "Compile log for $MODULE does not exist"
+        VERSION=$(installed_version $2)
+        view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+           "Compile log for $2 does not exist"
       fi
       ;;
 	      
-    install)
-      view_file $INSTALL_LOGS/$MODULE-$VERSION \
-          "Install log for $MODULE does not exist"
-      ;;
+   install)
+     view_file $INSTALL_LOGS/$2-$(installed_version $2) \
+         "Install log for $2 does not exist"
+     ;;
 
-    compiler)
-      if [ -z "$MODULE" ] ; then
-        return 1
-      else
-        if [ ! -e $INSTALL_LOGS/$MODULE-$VERSION ] ; then 
-          echo "Install log for $MODULE does not exist" 
-          return 1
-	else
-          cat $INSTALL_LOGS/$MODULE-$VERSION | while read LINE ; do
-            if file $LINE | grep -q "ELF " ; then
-              echo -n "$LINE "
-              strings -a $LINE | grep GCC: | sort -r | head -n 1
-            fi  
-          done
-        fi
-      fi
-      ;;
-
-   links)
-     if [ -z "$MODULE" ] ; then
+   compiler)
+     if [ -z "$2" ] ; then
        return 1
      else
-       for FILE in $(lvu install $MODULE) ; do
+       if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then 
+         echo "Install log for $2 does not exist" 
+         return 1
+       else
+         cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
+           if file $LINE | grep -q "ELF " ; then
+             echo -n "$LINE "
+             strings -a $LINE | grep GCC: | sort -r | head -n 1
+           fi  
+         done
+       fi
+     fi
+     ;;
+
+   links)
+     if [ -z "$2" ] ; then
+       return 1
+     else
+       for FILE in $(lvu install $2) ; do
          TYPE=$(file $FILE | cut -d' ' -f2)
          if [[ "$TYPE" == "ELF" ]] ; then
            BINARIES="$BINARIES $FILE"
@@ -869,43 +897,43 @@ parse()  {
      fi
      ;;
      
-    what)
-      if [ ! -z "$MODULE" ] ; then
-        (
-        if run_details && SECTION=$(find_section $MODULE) ; then
-	  . $MOONBASE/$SECTION/$MODULE/DETAILS
-	fi
-	)
-      fi
-      ;;
-	   
-    where)
-      if SECTION=`find_section $MODULE` ; then
-        echo "$SECTION"
-      else
-        message "$MODULE not found"
-      fi
-      ;;
-
-     cd)
-       if [ -z "$MODULE" ] ; then
-         return 1
-       else
-         if SECTION=`find_section $MODULE` ; then
-           cd $MOONBASE/$SECTION/$MODULE
-	   $SHELL
-	 else
-           return 1
-	 fi
+   what)
+     if [ ! -z "$2" ] ; then
+       (
+       if run_details && SECTION=$(find_section $2) ; then
+         . $MOONBASE/$SECTION/$2/DETAILS
        fi
-       ;;
+       )
+     fi
+     ;;
+	   
+   where)
+     if SECTION=`find_section $2` ; then
+       echo "$SECTION"
+     else
+       message "$2 not found"
+     fi
+     ;;
 
-    *)
-      help
-      ;;
+   cd)
+     if [ -z "$2" ] ; then
+       return 1
+     else
+       if SECTION=`find_section $2` ; then
+         cd $MOONBASE/$SECTION/$2
+         $SHELL
+       else
+         return 1
+       fi
+     fi
+     ;;
+
+   *)
+     help
+     ;;
 
    esac
-  fi )
+ 
 }
 
 
