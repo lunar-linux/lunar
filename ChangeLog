@@ -1,3 +1,49 @@
+2003-01-24 21:12  sofar
+
+	* var/lib/lunar/subroutines: more trapdoors removed from cvs
+	handling code.
+
+2003-01-24 21:00  sofar
+
+	* sbin/lget: Last modifications to cvs/lget - better source tree
+	management, trapdoors removed.
+
+2003-01-21 11:53  sofar
+
+	* var/lib/lunar/subroutines: Code change: sedit now handles
+	multiple files in one sedit statement, and in place backups are no
+	longer made.
+
+2003-01-20 15:23  sofar
+
+	* var/lib/lunar/sustained: Sorry for the gpm fans, but gpm is *NOT*
+	a vital package for the correct functioning of lunar. Removing it
+	here.
+
+2003-01-19 23:14  sofar
+
+	* etc/lunar/mirrors/LRESORT: Popping in DNS names!
+
+2003-01-17 14:22  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Bugfix: fix for missing
+	'ChangeLog' module when running lget without a module name. Rewrote
+	all fcuntions to use base functions instead of rewriting
+	list_sections 4 times. Code cleanups. Added ChangeLog to ignore
+	list in list_modules and list_sections.
+
+2003-01-17 14:04  sofar
+
+	* var/lib/lunar/subroutines: Simplified sedit.
+
+2003-01-05 20:31  sofar
+
+	* etc/lunar/config: New default LRESORT URL.
+
+2003-01-05 20:29  sofar
+
+	* etc/lunar/mirrors/LRESORT: Putting new source caches in here.
+
 2003-01-02 22:27  sofar
 
 	* sbin/lget: Fix for broken cvs update being stored in
@@ -235,26 +281,4 @@
 2002-11-08 04:17  xoritor
 
 	* sbin/lin: Fixed scripting error.
-
-2002-10-14 19:32  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Adding gecc support to
-	optimizations.
-
-2002-10-14 19:29  xoritor
-
-	* sbin/lget, sbin/lin, var/lib/lunar/subroutines: Adding support
-	for CVS co/up to lget.	Adding support for building sources from
-	CVS to lin.  Adding KEEP_SOURCE var to allow needed sources to be
-	kept.  Adding support for checking CVS source dirs in subroutines.
-
-2002-10-14 14:02  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Adding input box for
-	$MAKES
-
-2002-10-08 04:32  tchan
-
-	* var/state/lunar/blacklist.x86: Removed ddd from the blacklist. 
-	It now correctly compiles with gcc-3.2.
 
