@@ -1,3 +1,23 @@
+2005-03-30 13:10  sofar
+
+	* var/lib/lunar/sustained: These are no longer needed in here (the
+	  less the better)
+
+2005-03-30 11:25  sofar
+
+	* etc/lunar/config, sbin/lrm, var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/plugins/bootloader-grub.plugin,
+	  var/lib/lunar/plugins/bootloader-lilo.plugin,
+	  var/lib/lunar/plugins/download-cvs.plugin,
+	  var/lib/lunar/plugins/download-svn.plugin,
+	  var/lib/lunar/plugins/unpack-rpm.plugin,
+	  var/lib/lunar/plugins/unpack-zip.plugin,
+	  var/lib/lunar/plugins/verify-gpg.plugin: Merging in moonbase
+	  plugins: some plugins are moved to moonbase, a few base plugins
+	  are left behind.
+
 2005-03-28 23:53  v3rt1g0
 
 	* sbin/lsh: Just a little typo that has been bugging me.
