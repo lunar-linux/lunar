@@ -1,3 +1,79 @@
+2003-07-14 07:33  jasper
+
+	* sbin/lin: Make lin properly fetch moonbase again
+
+2003-07-13 21:57  sofar
+
+	* var/lib/lunar/functions/download.lunar: cosmetic fix, this is the
+	right text.
+
+2003-07-13 20:58  sofar
+
+	* usr/share/man/man1/lvu.1: removing 4 more mis-merged lines...
+
+2003-07-13 20:52  sofar
+
+	* var/lib/lunar/excluded: restoring this one... 2399 lines instead
+	of 2400!
+
+2003-07-13 20:49  sofar
+
+	* bin/lvu, sbin/lget, sbin/lin, sbin/lrm, sbin/lunar,
+	usr/share/man/man1/lvu.1, var/lib/lunar/excluded,
+	var/lib/lunar/functions/build.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/install.lunar,
+	var/lib/lunar/functions/main.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/moonbase.lunar,
+	var/lib/lunar/functions/optimize.lunar,
+	var/lib/lunar/functions/prune.lunar,
+	var/lib/lunar/functions/sizes.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/tracking.lunar,
+	var/lib/lunar/functions/uniqid.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/menu/optimize.menu: 
+	Hi,
+	
+	this is not a mailbox flood, but rather something I've been working
+	on for about 3.4 weeks now. Some fundamental things have changed in
+	the code and from the outside not much may have changed, but this
+	is a 2400 line merge!
+	
+	Biggest differences is in the function calling and temporary file
+	generation, which now has a complete unique ID and gets cleaned up
+	better. All major functions have been rewritten to handle $@ and
+	return data over STDOUT.
+	
+	Upgrading and installing multiple modules has been rewritten, all
+	frontends are now true frontends (no standard code in there
+	anymore).
+	
+	I added some gadgets for CVS options thanks to jol, and there's a
+	framework for downloading code from SVN:// urls, which I haven't
+	been able to check yet... someone please try.
+	
+	some gaps still remain, this *IS* theedge. I suspect resurrect
+	behaviour to be broken, as well as the download monitoring (but at
+	least it works). At least I'll be able to track most of the bugs
+	now pretty fast, as I know where there still is more work to do...
+	
+	Noted also that md5sum checking was down in theedge up to this one,
+	as for quite some few other bugs... should be all fixed I hope.
+	
+	Please make sure that you run the theedge code for testing, I
+	really need the feedback on this in the coming 2 weeks.
+	
+	Thanks,
+	
+	sofar
+	
+	PS fortune of the day: Live fast, die young, and leave a flat patch
+	of fur on the highway!		       -- The Squirrels' Motto (The
+	"Hell's Angels of Nature")
+
 2003-06-26 15:25  niki
 
 	* var/lib/lunar/excluded: Now all the SSH host keys are also
