@@ -1,3 +1,25 @@
+2004-03-29 22:24  sofar
+
+	* var/lib/lunar/functions/depends.lunar: This is a bit more
+	experimental patch: - ask for a confirmation before removing a
+	conflicting module (break if no) - added opt_dep bypass in case
+	there is no need to ask the user since he really has no choice
+	anyway.
+
+2004-03-29 21:14  sofar
+
+	* var/lib/lunar/functions/postbuild.lunar: Make garbage *not*
+	install doc/Makefile directories!!!
+
+2004-03-29 20:58  sofar
+
+	* etc/lunar/mirrors/GNOME: quotes, ugly. tab separation works now,
+	much nicer
+
+2004-03-29 15:18  sofar
+
+	* sbin/lrm: Adding REAP back, somehow it had disappeared.
+
 2004-03-26 19:40  sofar
 
 	* var/lib/lunar/menu/mirrors.menu: Explicitly split by tabs and
