@@ -848,11 +848,7 @@ main()  {
       ;;
       
     search)
-      cat $MODULE_INDEX | while read ENTRY ; do
-        MOD=$(echo $ENTRY | cut -d: -f1)
-	SEC=$(echo $ENTRY | cut -d: -f2)
-        echo $MOONBASE/$SEC/$MOD/DETAILS
-      done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
+      grep -irle $2 "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
       
     service)
