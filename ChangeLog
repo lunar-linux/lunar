@@ -1,3 +1,35 @@
+2005-03-18 11:01  sofar
+
+	* bin/lvu, var/lib/lunar/unset.sh,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/misc.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/menu/download.menu: W00t, the end of FUZZY!!!
+
+2005-03-18 10:01  sofar
+
+	* var/lib/lunar/functions/check.lunar: Moo, this should fix that
+	  too
+
+2005-03-18 09:58  sofar
+
+	* var/lib/lunar/functions/main.lunar: Fix for the missing install
+	  log after a resurrect.
+
+2005-03-18 00:52  v3rt1g0
+
+	* var/lib/lunar/functions/main.lunar: Misc typos
+
+2005-03-18 00:40  v3rt1g0
+
+	* var/lib/lunar/menu/dmodule.menu: Typo
+
+2005-03-18 00:35  v3rt1g0
+
+	* var/lib/lunar/menu/optimize.menu: Typos
+
 2005-03-16 08:02  sofar
 
 	* var/lib/lunar/functions/messages.lunar: meh, silly
