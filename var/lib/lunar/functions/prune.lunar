@@ -23,37 +23,35 @@ prune() {
   TMP_CACHE_KEEP=$(temp_create "cache-keep")
 
   message "${MESSAGE_COLOR}Generating keep lists...${DEFAULT_COLOR}"
-  for MODULE in $(list_moonbase) ; do
+  for MODULE in $(list_installed) ; do
     # spool:
-    for SOURCE in $(sources $MODULE) ; do
-      echo $SOURCE >> $TMP_SPOOL_KEEP
-    done
-    
+    if [ ! "$MODULE" == "moonbase" ]; then
+      for SOURCE in $(sources $MODULE) ; do
+        echo $SOURCE >> $TMP_SPOOL_KEEP
+      done
     # cache:
-    if module_installed $MODULE ; then
       VERSION=$(installed_version $MODULE)
-    else
-      VERSION=$(module_version $MODULE)
+    
+      echo "$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_CACHE_KEEP
     fi
-    echo "$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_CACHE_KEEP
   done
   echo "README" >> $TMP_SPOOL_KEEP
   echo "cpan" >> $TMP_SPOOL_KEEP
 
   verbose_msg "finding stale source files"
-  ls $SOURCE_CACHE | while read FILE ; do
-    if ! grep -q $FILE $TMP_SPOOL_KEEP ; then
-      message "Removing stale source: $SOURCE_CACHE/$FILE"
-      rm $SOURCE_CACHE/$FILE      
+  for FILE in $(ls -1 $SOURCE_CACHE); do
+    if ! grep -q $(basename $FILE) $TMP_SPOOL_KEEP ; then
+      message "Removing stale source: $FILE"
+      rm -f $FILE      
     fi
   done
   temp_destroy $TMP_SPOOL_KEEP
 
   verbose_msg "finding stale install caches"
-  ls $INSTALL_CACHE | while read FILE ; do
-    if ! grep -q $FILE $TMP_CACHE_KEEP ; then
-      message "Removing stale install cache: $INSTALL_CACHE/$FILE"
-      rm $INSTALL_CACHE/$FILE
+  for FILE in $(ls -1 $INSTALL_CACHE); do
+    if ! grep -q $(basename $FILE) $TMP_CACHE_KEEP ; then
+      message "Removing stale install cache: $FILE"
+      rm -f $FILE
     fi
   done
   temp_destroy $TMP_CACHE_KEEP
@@ -62,7 +60,7 @@ prune() {
   LOGS=$(cat $MODULE_STATUS | cut -d: -f1,4 --output-delimiter="-")
 
   verbose_msg "finding stale install logs"
-  for FILE in $(ls $INSTALL_LOGS) ; do
+  for FILE in $(ls -1 $INSTALL_LOGS) ; do
     if ! echo -e "$LOGS" | grep -q $FILE ; then
       message "Removing stale log: $INSTALL_LOGS/$FILE"
       rm $INSTALL_LOGS/$FILE
@@ -70,7 +68,7 @@ prune() {
   done
 
   verbose_msg "finding stale compile logs"
-  for FILE in $(ls $COMPILE_LOGS | sed "s/\.bz2//") ; do
+  for FILE in $(ls -1 $COMPILE_LOGS | sed "s/\.bz2//") ; do
     if ! echo -e "$LOGS" | grep -q $FILE ; then
       message "Removing stale log: $COMPILE_LOGS/$FILE.bz2"
       rm $COMPILE_LOGS/$FILE.bz2
@@ -78,12 +76,10 @@ prune() {
   done
 
   verbose_msg "finding stale md5sum logs"
-  for FILE in $(ls $MD5SUM_LOGS) ; do
+  for FILE in $(ls -1 $MD5SUM_LOGS) ; do
     if ! echo -e "$LOGS" | grep -q $FILE ; then
       message  "Removing stale log: $MD5SUM_LOGS/$FILE"
       rm $MD5SUM_LOGS/$FILE
     fi
   done
 }
-
-
