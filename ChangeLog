@@ -1,3 +1,12 @@
+2003-01-01 23:24  sofar
+
+	* sbin/lin: Removing autopatch scheme
+
+2003-01-01 21:31  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: This should fix the
+	weird messages after a lunar update/renew
+
 2002-12-30 22:19  hardkrash
 
 	* sbin/lget: Added ability to use tun devices for internet
