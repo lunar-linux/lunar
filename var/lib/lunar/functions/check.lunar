@@ -404,47 +404,17 @@ fix_depends () {
       cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
     fi
                                                                                 
-    OLD_FIX=$FIX
-    unset FIX
-    OLD_lin_PASS=$lin_PASS; export lin_PASS=three
-                                                                                
     for MODULE in $CHANGED_MODULES ; do
-      if [ -n "$FIXDEPENDS" ] ; then
-        # special case: when called with --fixdepends, skip recompile!
-        cp $TMP/depends $TMP/depends.filter
-        for MODULE in $CHANGED_MODULES ; do
-          grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-          mv $TMP/depends.filter~ $TMP/depends.filter
-        done
-        mv $TMP/depends.filter $DEPENDS_STATUS
-        cat $TMP/depends.new.* >> $DEPENDS_STATUS
-        cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      else
-        if [ -z "$NOFIX" ] ; then
-          if ! lin -c $MODULE ; then
-            # put back the faulty depends so we know fixing this failed
-            # and will be found again on the next run
-            cat $TMP/depends > $DEPENDS_STATUS
-            cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-          else
-            # sometimes after lin all depends are gone! force it down it's throat
-            cp $TMP/depends $TMP/depends.filter
-            for MODULE in $CHANGED_MODULES ; do
-              grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-              mv $TMP/depends.filter~ $TMP/depends.filter
-            done
-            mv $TMP/depends.filter $DEPENDS_STATUS
-            cat $TMP/depends.new.* >> $DEPENDS_STATUS
-            cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-          fi
-        fi
-      fi
-      remove_queue $INSTALL_QUEUE $MODULE
+      # special case: when called with --fixdepends, skip recompile!
+      cp $TMP/depends $TMP/depends.filter
+      for MODULE in $CHANGED_MODULES ; do
+        grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+        mv $TMP/depends.filter~ $TMP/depends.filter
+      done
+      mv $TMP/depends.filter $DEPENDS_STATUS
+      cat $TMP/depends.new.* >> $DEPENDS_STATUS
+      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
     done
-                                                                                
-    FIX=$OLD_FIX
-    unset OLD_FIX
-    export lin_PASS=$OLD_lin_PASS
                                                                                 
   fi
                                                                                 

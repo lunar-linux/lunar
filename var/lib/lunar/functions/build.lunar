@@ -258,9 +258,10 @@ default_post_build() {
     install_pam_confs
     install_services
     install_xinetd_confs
-    install_initd
     install_bashmisc
   } | tee -a $C_LOG
+  
+  install_initd
 
   devoke_installwatch
   ldconfig

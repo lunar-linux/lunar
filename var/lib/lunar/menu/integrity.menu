@@ -6,7 +6,7 @@
 ############################################################
 #                                                          #
 # $MENUS/integrity                                         #
-# includes menu for lunar fix integrity checking options   #
+# includes menu for lin --fix integrity checking options   #
 #                                                          #
 # 20020714                                                 #
 #                                                          #
@@ -19,7 +19,7 @@
 
 integrity_menu()  {
     INT_TITLE="Integrity Checking Selection Menu"
-     INT_HELP="Please select the tests which lunar fix should execute."
+     INT_HELP="Please select the tests which lin --fix should execute."
     FIND_HELP="Discover missing  binary executables, libraries, and header files"
      LDD_HELP="Discover broken   binary executables, and libraries"
      SYM_HELP="Discover misowned symbolic links to files"
