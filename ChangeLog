@@ -229,15 +229,3 @@
 
 	* bin/lvu: Fix for broken lvu leert.
 
-2004-03-14 21:43  sofar
-
-	* bin/lvu, sbin/lrm, var/lib/lunar/excluded,
-	var/lib/lunar/protected, var/lib/lunar/solo,
-	var/lib/lunar/unset.sh, var/lib/lunar/functions/tracking.lunar:
-	Major lrm/exluded/protected rewrite: - allow re's in
-	excluded/protected - true protected directories with recursion -
-	excluded ONLY contains stuff that we DO NOT WANT TO SEE in the
-	install logs - lvu alien adjusted too - track() function adjusted
-	and simplified - removed unneeded lrm tmpfiles and loops,
-	simplified
-
