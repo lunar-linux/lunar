@@ -204,7 +204,7 @@ main() {
 	  elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
 	    # probe install where module is expired
 	    verbose_msg "module \"$MODULE\" needs to be updated"
-	    if ! lin_module $MODULE ; then
+	    if ! SINGLE_MODULE= lin_module $MODULE ; then
 	      temp_destroy $TEMP_PREPAREDDEPS
 	      exit 1
 	    fi	    
