@@ -1,3 +1,46 @@
+2002-12-23 00:49  sofar
+
+	* sbin/lin: Added auto-patching: scan for subdir 'patch' and apply
+	all regular files in that directory before BUILD/default_build.
+	Note patch order is equal to 'ls'.
+
+2002-12-22 17:40  tchan
+
+	* sbin/lunar: Fixed the help message for KEEP_SOURCE to make sure
+	its clear why you would turn this flag on.
+
+2002-12-22 17:04  tchan
+
+	* sbin/lunar: Better explanation of the KEEP_SOURCE option in Lunar
+	help message.  KEEP_SOURCE toggles the default behavior in Lunar
+	core tools of removing /usr/src/module code after a SUCCESSFUL
+	compile.  Default behavior has always been to remove the module
+	source after a succesful compile and KEEP the source after a failed
+	compile.  Xoritor added the KEEP_SOURCE flag for developers using
+	the gcc profiling tools as the tools need access to the source code
+	even after a good compile.  This option is not to be used for
+	removing source code after a failed compile.  Someone else can add
+	another flag for always removing source code but that will probably
+	break this option flag for the developers using the profiling code.
+
+2002-12-22 07:02  tchan
+
+	* sbin/lin: Reverted the lin code to the old behavior of NOT
+	deleting source code when a compile fails.  It IS necessary to keep
+	source code around for failed compiles as the compile log does NOT
+	contain all the necessary information to fix a failed compile --
+	especially when debugging failed GNU autotools type problems. 
+	Having to run Lunar menu to turn on the keep source option and then
+	recompile a failed module is a BIG waste of time.  Please leave
+	this behavior alone!  Keep failed source code around.
+
+2002-12-21 22:49  sofar
+
+	* sbin/lin: Default compile fail will remove the sources from
+	/usr/src. Since logging of compiles and activity is now in order,
+	this is no longer needed, and prevent a big mess from happening in
+	case your lunar rebuild goes booboo.
+
 2002-12-16 10:48  sofar
 
 	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Better wrappers: sed
@@ -246,75 +289,4 @@
 	* sbin/lin, usr/share/man/man8/lin.8, var/lib/lunar/subroutines:
 	Adding proper fix for lin --fix: lin --fixdepends will ONLY rebuild
 	your depends database, without recompiling modules!
-
-2002-09-23 21:03  sofar
-
-	* var/lib/lunar/subroutines: Incremental numbered backups removed:
-	they might confuse xinetd! Just don't cp a new version if it
-	already exists, since most likely the SA modified it and we should
-	leave it alone.
-
-2002-09-23 12:03  kongar
-
-	* var/lib/lunar/subroutines: 
-	now backing up /etc/xinet.d/module files, numbered backups.
-
-2002-09-22 07:05  tchan
-
-	* var/lib/lunar/subroutines: Hacked subroutines to support the
-	creation of /tmp/depends.updated to aide in edit/repair of
-	/var/state/lunar/depends.  This will prevent massive recompiling of
-	the entire lunar box when the depends file gets out of whack.
-
-2002-09-22 07:03  tchan
-
-	* sbin/lin: Hacked lin to support /var/state/lunar/depends
-	editing/repair using the file /tmp/depends.updated.
-
-2002-09-20 23:21  kc8apf
-
-	* var/lib/lunar/functions/optimize.lunar: 
-	More optimization fixes for alpha
-
-2002-09-20 23:07  kc8apf
-
-	* var/lib/lunar/functions/optimize.lunar: 
-	Add proper build types for alpha
-
-2002-09-20 21:51  kc8apf
-
-	* etc/lunar/mirrors/GNOME, var/lib/lunar/menu/optimize.menu: 
-	Apply patches from lunar to theedge
-
-2002-09-20 16:07  tchan
-
-	* var/state/lunar/gcc.x86: Removed several SDL* modules as they
-	have been compiling and working with gcc-3.2 for a while now.
-
-2002-09-20 15:36  tchan
-
-	* var/state/lunar/gcc.x86: Removed smpeg from this list as it
-	compiles correctly now with gcc-3.2, after applying wyatt_earp's
-	fix.
-
-2002-09-20 15:20  tchan
-
-	* bin/lvu: Fixed the spacing in the help section for the new "lvu
-	cd" sub-command.
-
-2002-09-20 11:17  kongar
-
-	* bin/lvu: 
-	implemented "lvu cd <module>" functionality
-
-2002-09-18 21:35  sofar
-
-	* var/lib/lunar/menu/optimize.menu: preserve $MAKES
-
-2002-09-18 09:26  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Fixing order of distcc
-	(ccache distcc gcc and not distcc ccache gcc), and adding distcc to
-	the c++ compiler addons, since mozilla and others compiled fine
-	with it.
 
