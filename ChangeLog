@@ -1,3 +1,8 @@
+2003-04-21 17:48  sofar
+
+	* bin/lvu: Fixes, adding support to check out URL's from a module
+	(or all!)
+
 2003-04-18 19:44  sofar
 
 	* bin/lvu: Cleanups, cleanups, looks like spring cleanup over
