@@ -58,7 +58,17 @@ get_cvs() {(
 
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting old CVS source tarball"
-    tar xjf $SOURCE_CACHE/$2
+    # unpacking in last component dir of $CVSMODULE
+    CD=$(pwd)
+    mkdir -p $(dirname $CVSMODULE)
+    cd $(dirname $CVSMODULE)
+    if ! tar xjf $SOURCE_CACHE/$2 ; then
+      message "${WARNING_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
+      
+      rm_source_dir /tmp/$MODULE-$VERSION
+      mk_source_dir /tmp/$MODULE-$VERSION
+    fi
+    cd $CD
   fi
 
   verbose_msg "CVSROOT=\"$CVSROOT\""
@@ -73,7 +83,10 @@ get_cvs() {(
   
   if [[ "$GOT_CVS" == "yes" ]]; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-    tar cjf $SOURCE_CACHE/$SOURCE $CVSMODULE
+    # pack in last component dir of $CVSMODULE
+    cd $(dirname $CVSMODULE)
+    tar cjf $SOURCE_CACHE/$2 $(basename $CVSMODULE)
+    cd $CD
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
   fi
@@ -81,60 +94,6 @@ get_cvs() {(
   cd /tmp
   rm_source_dir /tmp/$MODULE-$VERSION
 
-)}
-
-
-use_cvs() {(
-  run_details && if [[ $CVS_SERVER ]]; then
-
-    if ! module_installed cvs ; then
-      message "${PROBLEM_COLOR}Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
-      exit 1
-    fi
-    
-    message  "${MESSAGE_COLOR}Downloading CVS module"                      \
-             "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
-             "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-	     
-    mk_source_dir
-    cd $SOURCE_DIRECTORY
-
-    export CVSROOT=$CVS_SERVER
-
-    [ -f ~/.cvspass ] || touch ~/.cvspass
-
-    if [[ $CVS_LOGIN ]]; then
-      echo "$CVS_LOGIN" | cvs login
-    fi
-
-    if ! [[ $CVS_MODULE ]]; then
-      CVS_MODULE=`echo $MODULE | sed s/-cvs//`
-    fi
-
-    if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
-      verbose_msg "Extracting old CVS source tarball"
-      tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
-    fi
-
-    if [[ -d $CVS_MODULE/CVS ]]; then
-      verbose_msg "cvs -qz3 up -PAd $CVS_MODULE"
-      cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
-    elif ! [[ -d CVS ]]; then
-      verbose_msg "cvs -qz3 co $CVS_MODULE"
-      cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
-    fi
-
-    if [[ "$GOT_CVS" == "yes" ]]; then
-      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
-      tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
-    else
-      activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVS_MODULE"
-    fi
-
-    cd $BUILD_DIRECTORY
-    rm_source_dir
-
-  fi
 )}
 
 
@@ -250,7 +209,18 @@ get_url() {
   if  [  -n  "$1"  ] ;  then
     if [ "${1:0:6}" == "cvs://" ] ; then
       # cvs urls
-      get_cvs $1 $2
+      CVS_THRESHOLD=${CVS_THRESHOLD:-10}
+      if [ "$CVS_THRESHOLD" > 0 ] ; then
+        if [ ! -f $SOURCE_CACHE/$2 ] ; then
+	  get_cvs $1 $2
+        elif [ "$(find $SOURCE_CACHE/$2 -amin +$CVS_THRESHOLD)" == "$SOURCE_CACHE/$2" ] ; then
+	  get_cvs $1 $2
+	else
+	  verbose_msg "skipping cvs update (less than $CVS_THRESHOLD mins old)"
+	fi
+      else
+        get_cvs $1 $2
+      fi
     elif [ "$1:0:7}" == "cpan://" ] ; then
       # no way, this cannot be tru
       #
@@ -301,6 +271,8 @@ lget_unlock()  {
 
 
 download_module() { (
+
+  run_details $1 || exit 1
 
   MAX_SOURCES=${MAX_SOURCES:=100}
 

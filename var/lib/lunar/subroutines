@@ -40,17 +40,6 @@ fi
   echo "Set your optimization preferences via lunar"
 #
 
-# function : edit_file
-# usage    : edit_file FILENAME
-# purpose  : to edit a file
-edit_file()  {  ${EDITOR:-nano}  $1;  }
-
-
-# function : view_file
-# usage    : view_file FILENAME
-# purpose  : to view a file
-view_file()  {  ${PAGER:-less}  $1;  }
-
 
 # function : directories
 # usage    : VARIABLE=`directories < dirlistfile`
@@ -374,8 +363,24 @@ default_config()
 } > $C_FIFO 2>&1
 
 
-default_make()
-{
+default_cvs_config() {
+   verbose_msg "running default_cvs_config"
+
+   verbose_msg "CFLAGS=$CFLAGS"                &&
+   verbose_msg "OPTS=$OPTS"                    &&
+   verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+
+   ./autogen.sh --build=$BUILD            \
+                --prefix=/usr             \
+                --sysconfdir=/etc         \
+                --localstatedir=/var      \
+                --infodir=/usr/share/info \
+                --mandir=/usr/share/man   \
+                $OPTS
+} > $C_FIFO 2>&1
+
+
+default_make() {
    verbose_msg "running default_make"
    make                               &&
    prepare_install                    &&
@@ -383,10 +388,16 @@ default_make()
 } > $C_FIFO 2>&1
 
 
-default_build() 
-{
+default_build() {
    verbose_msg "running default_build"
    default_config  &&
+   default_make
+} > $C_FIFO 2>&1
+
+
+default_cvs_build() {
+   verbose_msg "running default_cvs_build"
+   default_cvs_config  &&
    default_make
 } > $C_FIFO 2>&1
 
@@ -404,7 +415,7 @@ default_post_build() {
 
   devoke_installwatch
   ldconfig
-  # release_saved_libraries
+  release_saved_libraries
   cd  /
 }
 
@@ -701,7 +712,7 @@ upgrade_install_queue()  {
   fi
 
   if  [  "$AUTOPRUNE"  ==  "on"  ];  then
-    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lvu  prune${DEFAULT_COLOR}"
+    message  "${MESSAGE_COLOR}Executing AUTOPRUNE :  lunar prune${DEFAULT_COLOR}"
     prune
   fi
 

@@ -32,15 +32,17 @@ gather_docs()  {
   verbose_msg "installing standard documentation into \"$DOC_DIR\" if any"
   mkdir  -p  $DOC_DIR
 
-  ( cd $SOURCE_DIRECTORY && for FILE in \
-    README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
-    conf SETUP NEWS Change* manual* Manual* ; do
-      [ -e $FILE ] && {
-        verbose_msg "installing docs: \"$DOC_DIR/$FILE\""
-        cp -ar $FILE $DOC_DIR 2> /dev/null
-      }
-    done
-  )
+  if [ -d $SOURCE_DIRECTORY ] ; then
+    ( cd $SOURCE_DIRECTORY && for FILE in \
+      README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
+      conf SETUP NEWS Change* manual* Manual* ; do
+        [ -e $FILE ] && {
+          verbose_msg "installing docs: \"$DOC_DIR/$FILE\""
+          cp -ar $FILE $DOC_DIR 2> /dev/null
+        }
+      done
+    )
+  fi
 }
 
 

@@ -102,27 +102,20 @@ main() {
 
   if  [  -z  "$MODULES"  ];  then
     verbose_msg "downloading entire moonbase"
-    MODULES=$(list_moonbase)
+    MODULES=$(list_moonbase | sort)
   fi
 
   for MODULE in $MODULES; do
-   (
-    run_details &&
     if ! lget_locked ; then
       lget_lock
     
-      if [ -n "$CVS_MODULE" ] && [ "$GOT_CVS" != "yes" ] ; then
-        use_cvs $MODULE
-      else
-        [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
-        download_module
-      fi
+      [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
+      download_module
     
       lget_unlock
     else
       false
     fi
-   )
   done
 
 }

@@ -40,23 +40,24 @@ display_success_info()  {
   touch /tmp/success_$LOGTMP /tmp/fail_$LOGTMP
 
   NUMSUCCESS=`cat /tmp/success_$LOGTMP | wc -l` 
-  NUMFAILURES=`cat /tmp/fail_$LOGTMP | wc -l `  
+  NUMFAILURES=`cat /tmp/fail_$LOGTMP | wc -l`  
 
-  echo  "Lunar $1 completed at `date`"  
-  echo  "Successful ${1}s : " $NUMSUCCESS
-  echo  "Failed ${1}s     : " $NUMFAILURES  
-  echo  
+  message
+  message  "${MESSAGE_COLOR}Lunar $1 completed at `date`${DEFAULT_COLOR}"
+  message  "Successful ${1}s : " $NUMSUCCESS
+  message  "Failed ${1}s     : " $NUMFAILURES  
+  message  
   
-  if  [  "$NUMSUCCESS" != "0"  ]; then   
-    echo  "Successful Packages:"  
+  if  [  "$NUMSUCCESS" -gt "0"  ]; then   
+    message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"  
     cat  /tmp/success_$LOGTMP  
-    echo  
+    message  
   fi  
  
-  if  [  "$NUMFAILURES" != "0"  ]; then    
-    echo  "Failed Packages:"   
+  if  [  "$NUMFAILURES" -gt "0"  ]; then    
+    message  "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
     cat  /tmp/fail_$LOGTMP   
-    echo   
+    message   
   fi   
 
   if [  "$1" == "update" ]; then 
@@ -78,15 +79,15 @@ display_moonbase_changes()  {
     DEL_MODULES=`diff -I MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | wc -l`
   
     if [ "$NEW_MODULES" != "0" ]; then
-      echo "New Modules:"
-      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | cut -d \  -f 2 -
-      echo
+      message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
+      diff -I "MOONBASE_MD5:" $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | cut -d \  -f 2 -
+      message
     fi
 
     if [ "$DEL_MODULES" != "0" ]; then
-      echo "Removed Modules:"
-      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
-      echo
+      message "Removed modules:${DEFAULT_COLOR}"
+      diff -I "MOONBASE_MD5:" $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
+      message
     fi
 
     rm -f $MODULE_INDEX_BACKUP

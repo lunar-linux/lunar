@@ -28,7 +28,7 @@ readline
 rpmunpack
 sed
 shadow
-tar               
+tar
 theedge
 unzip
 util-linux

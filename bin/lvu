@@ -24,9 +24,11 @@
 #                                                          #
 ############################################################
 #                                                          #
-# Parts Copyrighted Jason Johnston  2002 under GPLv2       #
+# Parts Copyrighted Jason Johnston 2002 under GPLv2        #
 #                                                          #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+# Parts Copyrighted Auke Kok 2003 under GPLv2              #
 #                                                          #
 ############################################################
 
@@ -37,57 +39,60 @@ Please note that anything in brackets [ ] is optional.
 
 Command     Arguments      Description
 
-what        module         print the module's description
-where       module         print the module's section
+what        module         display a module's description
+where       module         display a module's section
 cd          module         change directory to module and execs a new shell
-alien       <empty>        discover untracked files
+alien                      discover untracked files
 from        path/file      discover what installed a file
-leafs       <empty>        Display installed modules that have no explicit dependencies on them.
-orphans     <empty>        Display installed modules that are missing dependancies
+leafs                      display installed modules that have no explicit
+                               dependencies on them
+orphans                    display installed modules that are missing
+                               dependancies
 
-search      "phrase"       Searches modules' long descriptions for phrase.
-service     port|acronym   Displays modules that provide that service
+search      "phrase"       searches module's long descriptions for phrase.
+service     port|acronym   displays module's that provide that service
 
-website     module         print the module's website
-install     module         view an install log
-size        [module]       find and show installed size of a module or ALL (slow)
-installed   [module]       view/query installed modules
-compile     module         view a compile log
-compiler    module         display the version of compiler used for modules ELF files.
-sources     module         List the source files for a module.
-maintainer  module         List the maintainer for a module.
-version     module         Show version of module in moonbase
+website     module         display a module's website
+install     module         display an install log
+size        [module]       find and show installed size of a module
+                               or ALL (slow)
+installed   [module]       display installed modules/version of module
+compile     module         display a compile log
+compiler    module         display the compiler version used
+links       module         display a list of modules that this module links to
+sources     module         display source files for a module
+maintainer  module         display maintainer for a module
+version     module         display version of module in moonbase
 
-sum         [module]       prints checksums
-md5sum      [module]       prints md5sums
+sum         [module]       display checksums
+md5sum      [module]       display md5sums
 
 export                     make snapshot of box's configuration.
 import                     snapshot restore snapshot.
 
-section     [section]      list moonbase sections
-moonbase                   view a text listing of the moonbase
-html                       view a html listing of the moonbase
-updatelog                  view summary log of previous lunar update
-activity                   view main log file
+section     [section]      display moonbase sections
+moonbase                   display text listing of the moonbase
+html                       display html listing of the moonbase
+updatelog                  display summary log of previous lunar update
+activity                   display main log file
 
-newer       20020521       Show available modules newer than May 21, 2002
-older       20010521       Show modules installed before May 21, 2001
+newer       20020521       display available modules newer than May 21, 2002
+older       20010521       display modules installed before May 21, 2001
 
-prune       <empty>        Removes all old sources from $SOURCE_CACHE
-                           Removes all old backups from $INSTALL_CACHE
+voyeur      [delay|module] peak into module compilation
 
-voyeur      [delay or module]  Peak into module compilation
+pam                        display installed modules that are Linux-PAM aware
 
-pam         <empty>        Display installed or held modules that are Linux-PAM aware
+depends     module         displays the modules that explicitly or
+                               recursively depend on this module.
+tree        module         displays a tree of the module's dependencies
+eert        module         displays a tree of the module's reverse dependencies
 
-
-depends     module         Displays the modules that explicitly or recursively depend on this module.
-tree        module         Displays a tree of the module's dependencies
-eert        module         Displays a tree of the module's reverse dependencies
-
-\$MODULE_SCRIPT module  will print the module script for that module
+\$MODULE_SCRIPT module      will print the module script for that module
 EOF
 }
+
+
 export_snapshot()  {
   SOURCE_DIRECTORY=$BUILD_DIRECTORY/snapshot
   mk_source_dir          $SOURCE_DIRECTORY
@@ -110,6 +115,7 @@ export_snapshot()  {
   rm_source_dir          $SOURCE_DIRECTORY
   echo  "$SNAPSHOT created."
 }
+
 
 import_snapshot()  {
           SNAPSHOT=$1
@@ -138,9 +144,21 @@ import_snapshot()  {
     false
   fi
 }
-checksum()      { for FILE in `cat $1 | files`; do sum -s  $FILE; done; }
 
-md5sum_files()  { for FILE in `cat $1 | files`; do md5sum  $FILE; done; }
+
+checksum() {
+  for FILE in `cat $1 | files` ; do
+    sum -s  $FILE
+  done
+}
+
+
+md5sum_files() {
+  for FILE in `cat $1 | files` ; do
+    md5sum  $FILE
+  done
+}
+
 
 alien()  {
 
@@ -169,6 +187,7 @@ alien()  {
 
 }
 
+
 lvu_catalog()  {
   echo  "Lunar Moonbase for `date  -u`"
 
@@ -188,6 +207,7 @@ lvu_catalog()  {
   echo
   echo  "Total modules:  $COUNT"
 }
+
 
 lvu_catalog_html()  {
 
@@ -276,17 +296,6 @@ lvu_catalog_html()  {
   echo  "</table></body></html>"
 }
 
-display()  {
-  if  [  -f  "$1"  ];  then
-    case  `file  -b  $1  |  cut -d ' ' -f1`  in
-      ASCII)    cat  $1  |  view_file  ;;
-      bzip2)  bzcat  $1  |  view_file  ;;
-    esac
-  else
-    message  "$2"
-    false
-  fi
-}
 
 newer()  {
   [ -z "$1" ] && return 1      
@@ -303,6 +312,7 @@ newer()  {
   done
 }
 
+
 older()  {
   [ -z "$1" ] && return 1      
   DATE=$1
@@ -317,6 +327,7 @@ older()  {
     fi
   done
 }
+
 
 maintainer()  {
   run_details $1
@@ -333,6 +344,7 @@ show_from()  {
   grep  $1  *
 }
 
+
 show_module_component()  {
   COMPONENT=$1
      MODULE=$2
@@ -341,6 +353,7 @@ show_module_component()  {
     cat      $MOONBASE/$SECTION/$MODULE/$COMPONENT
   fi
 }
+
 
 long_search()  {
   for  SECTION  in  `list_sections`;  do
@@ -356,6 +369,7 @@ long_search()  {
   done
 }
 
+
 service()  {
   for  SECTION  in  `list_sections`;  do
     for  MODULE  in  `list_modules $SECTION`;  do
@@ -367,6 +381,7 @@ service()  {
   done
 }
 
+
 find_lining()  {
   for  FILE in `ls  /var/lock/lining*  2>/dev/null`;  do
     if  ps  `cat  $FILE  2>/dev/null`  |  grep  -q  lin;  then
@@ -376,6 +391,7 @@ find_lining()  {
   done
   false
 }
+
 
 peak_lining()  {
   if  [  -f     /var/lock/lining.$1   ]            &&
@@ -389,6 +405,8 @@ peak_lining()  {
           --pid=`cat /var/lock/lining.$1`  2>/dev/null
   fi
 }
+
+
 activate_voyeur()  {
   if  [  -n  "$1"  ]  &&
       !  find_section  $1  >  /dev/null
@@ -424,6 +442,7 @@ activate_voyeur()  {
   done
 }
 
+
 show_leafs()  {
   for  MODULE  in  `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
     if    !  cut  -d :  -f2-  $DEPENDS_STATUS  |
@@ -433,6 +452,7 @@ show_leafs()  {
     fi
   done
 }
+
 
 show_orphans()  {
   for MODULE in `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
@@ -448,6 +468,7 @@ show_orphans()  {
     done
   done
 }
+
 
 show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
@@ -466,6 +487,7 @@ show_depends()  {
   fi
 }
 
+
 old_show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
@@ -479,6 +501,7 @@ old_show_depends()  {
   fi
 }
 
+
 show_website()  {
   [ -z "$MODULE" ] && return 1
   run_details $1
@@ -489,6 +512,7 @@ show_website()  {
   fi
 }
 
+
 show_version()  {  
   [ -z "$MODULE" ] && return 1
   run_details $1
@@ -498,6 +522,7 @@ show_version()  {
     echo "$MODULE does not exist or has no version."  
   fi  
 }  
+
 
 # show the size of installed module, if no module name given, 
 # show sizes of all installed modules
@@ -515,6 +540,7 @@ show_size() {
    echo `find_module_size $MODULE` ||
    message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
 }
+
 
 # function: show_tree
 # usage: show_tree <module>
@@ -603,7 +629,6 @@ parse()  {
             from)  show_from   $2                         ;;
            newer)  newer       $2                         ;;
            older)  older       $2                         ;;
-           prune)  prune                                  ;;
          sources)  sources     $MODULE                    ;;
       maintainer)  maintainer  $MODULE                    ;;
         moonbase)  lvu_catalog  |  view_file              ;;
@@ -644,14 +669,15 @@ parse()  {
 
     compile)  run_details 
               if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
-	        display  $COMPILE_LOGS/$MODULE-$VERSION.bz2
+	        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2
 	      else
                 VERSION=$(installed_version $MODULE)
-                display  $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
+                view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
                 "Compile log for $MODULE does not exist"
               fi
 	      ;;
-    install)  display  $INSTALL_LOGS/$MODULE-$VERSION   \
+	      
+    install)  view_file  $INSTALL_LOGS/$MODULE-$VERSION   \
               "Install log for $MODULE does not exist"
               ;;
 
@@ -678,20 +704,24 @@ parse()  {
                 else  message  "$MODULE is not installed";  false
                 fi
                 ;;
+		
     sum)  [  -n  "$MODULE"  ]                         &&
           checksum  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
           checksum  "$INSTALL_LOGS/*"
           ;;
+	  
     md5sum)  [  -n  "$MODULE"  ]                             &&
              md5sum_files  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
              md5sum_files  "$INSTALL_LOGS/*"
              ;;
+	     
     what)  SECTION=`find_section  $MODULE`             &&
            DETAILS=$MOONBASE/$SECTION/$MODULE/DETAILS  &&
            [  -x  $DETAILS  ]                           &&
                .  $DETAILS                              ||
            message  "Details for $MODULE not found"
            ;;
+	   
     where)  SECTION=`find_section  $MODULE`  &&
             echo     "$SECTION"             ||
             message  "$MODULE not found"
@@ -710,5 +740,16 @@ parse()  {
         *)  help  ;;
   esac
 }
-. /etc/lunar/config
-if  [  $#  == 0  ];  then  help | view_file ;  else  parse  $@;  fi
+
+
+  # main program loop
+  . /etc/lunar/config
+
+  if [ $# == 0 ] ; then
+    help | view_file
+  else
+    parse $@
+  fi
+
+
+
