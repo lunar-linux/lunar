@@ -1,3 +1,21 @@
+2005-03-25 17:56  sofar
+
+	* var/lib/lunar/: functions/check.lunar, functions/plugins.lunar,
+	  plugins/check-find.plugin, plugins/check-ldd.plugin,
+	  plugins/check-md5sum.plugin, plugins/check-symlinks.plugin:
+	  Rewriting fix code: - now plugins instead of one large file -
+	  lunar fix/nofix now runs better per-module - global lunar
+	  fix/nofix doesn't perform expensive ld_export overhead
+
+2005-03-25 15:54  sofar
+
+	* var/lib/lunar/functions/depends.lunar: Optimize performance of
+	  depends code a bit more
+
+2005-03-25 15:53  sofar
+
+	* bin/lvu: Remove remainder of versioned modules
+
 2005-03-25 11:11  sofar
 
 	* var/lib/lunar/plugins/unpack-generic.plugin: Adding plain tar
