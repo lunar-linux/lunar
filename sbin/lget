@@ -301,7 +301,7 @@ lget_moonbase()  {
 
   for  SECTION  in  `list_sections`;  do
     for  MODULE  in  `list_modules $SECTION`;  do
-      (  LGETING=/var/lock/lgeting.$MODULE
+      (  LGETING=/var/lock/lgetting.$MODULE
          run_details  &&
          download
       )
@@ -322,7 +322,7 @@ main() {
   else
 
     for  MODULE  in  $MODULES;  do
-      (  LGETING=/var/lock/lgeting.$MODULE
+      (  LGETING=/var/lock/lgetting.$MODULE
          run_details  &&
          download
       )
