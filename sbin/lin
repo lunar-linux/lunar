@@ -760,7 +760,6 @@ show_downloading()  {
 
 
 report_install()  {
-  rm  -f  $BOOST_LOCK
   INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
   report  $INST_LOG  "Install log"
 }
@@ -797,8 +796,8 @@ lin_module()  { (
     run_build                   &&
     run_post_build              &&
     stop_logging                &&
-    run_post_install            &&
     boost                       &&
+    run_post_install            &&
     if [[ $KEEP_SOURCE != "on" ]]; then 
       rm_source_dir               
     fi                          &&

@@ -1379,6 +1379,8 @@ boost()	{ (
   archive  &&
   add_module  $MODULE installed $VERSION `find_module_size $MODULE $VERSION`
 
+  rm  -f  $BOOST_LOCK
+
 ) }
 
 
@@ -1455,16 +1457,20 @@ prune()
            "${DEFAULT_COLOR}"
   ls  $SOURCE_CACHE  |
   while  read  FILE;  do
-      grep  -q  "^$FILE$"  $KEEP  ||
-      rm  $SOURCE_CACHE/$FILE 2>/dev/null
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $SOURCE_CACHE/$FILE 2>/dev/null
+	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $INSTALL_CACHE..." \
            "${DEFAULT_COLOR}"
   ls  $INSTALL_CACHE  |
   while  read  FILE;  do
-      grep  -q  "^$FILE$"  $KEEP  ||
-      rm  $INSTALL_CACHE/$FILE 2>/dev/null
+      grep  -q  "^$FILE$"  $KEEP  || {
+        rm  $INSTALL_CACHE/$FILE 2>/dev/null
+	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+      }	
   done
 
   KEEP2="/tmp/prune.instlist.$$"
@@ -1475,24 +1481,30 @@ prune()
              "${DEFAULT_COLOR}"
   ls  $INSTALL_LOGS  |
   while  read  FILE;  do
-      grep -q "^$FILE$"   $KEEP2 ||
-      rm $INSTALL_LOGS/$FILE
+      grep -q "^$FILE$"   $KEEP2 || {
+        rm $INSTALL_LOGS/$FILE
+	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $COMPILE_LOGS..." \
              "${DEFAULT_COLOR}"
   ls  $COMPILE_LOGS  | sed 's/.bz2$//' |
   while  read  FILE;  do
-      grep -q "^$FILE$"    $KEEP2 ||
-      rm $COMPILE_LOGS/$FILE.bz2
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $COMPILE_LOGS/$FILE.bz2
+	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   message  "${MESSAGE_COLOR}Now pruning $MD5SUM_LOGS..." \
              "${DEFAULT_COLOR}"
   ls  $MD5SUM_LOGS  |
   while  read  FILE;  do
-      grep -q "^$FILE$"    $KEEP2 ||
-      rm $MD5SUM_LOGS/$FILE
+      grep -q "^$FILE$"    $KEEP2 || {
+        rm $MD5SUM_LOGS/$FILE
+	[ "$VERBOSE" == "on" ] && echo "+ rm \"$SOURCE_CACHE/$FILE\""
+      }
   done
 
   rm  -f  $KEEP 2>/dev/null
