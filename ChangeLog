@@ -190,7 +190,3 @@
 	* var/lib/lunar/functions/depends.lunar: Better handling of
 	depends: avoid unnecesary messages and edits
 
-2003-03-27 17:41  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: These 2 got left out...
-
