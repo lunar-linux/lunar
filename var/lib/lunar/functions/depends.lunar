@@ -71,21 +71,12 @@ sort_by_dependency() {
   debug_msg "sort_by_dependency ($@)"
 
   recurse() {
-    depends () {
-      echo $1
-    }
-    optional_depends() {
-      # we really don't care about optional or not here
-      echo $1
-    }
     for MOD in $* ; do
-      LIST=$(run_module_file $MOD DEPENDS)
-      if [ -n "$LIST" ] ; then
-        for DEP in $LIST ; do
-	  echo $MOD $DEP
-	done
-        recurse $LIST
-      fi
+      LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
+      for DEP in $LIST ; do
+        echo $MOD $DEP
+      done
+      recurse $LIST
     done
   }
 
