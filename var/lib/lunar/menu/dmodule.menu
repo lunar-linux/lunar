@@ -22,7 +22,7 @@ set_default_module(){
  PROMPT="Please select the master Lunar module.
 
 This setting permits the SA to track different base
-scripts via selecting the aprropriate module. There 
+scripts via selecting the appropriate module. There 
 are at least two base modules at the time of writing. 
 
 Regardless of the number of modules listed here, 
