@@ -18,8 +18,8 @@ optimize() {
   fi
   echo -e PLATFOM=$PLATFORM     '\n'    \
           BUILD=$BUILD          '\n'    \
-          CC=$CC                '\n'    \
-          CCC=$CCC              '\n'    \
+          COPT=$COPT            '\n'    \
+          CCOPT=$CCOPT          '\n'    \
           BOPT=$BOPT            '\n'    \
           CPU=$CPU              '\n'    \
           SPD=( ${SPD[@]} )     '\n'    \
@@ -225,10 +225,10 @@ compiler_options() {
 }
 
 cc_options(){
-  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  "off"   "$Pipe_HELP" )
 }
 ccc_options(){
-  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  "off"   "$Pipe_HELP" )
 }
 
 platform_options() {

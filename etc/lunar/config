@@ -65,6 +65,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
                VOYEUR=${VOYEUR:=on}
               GARBAGE=${GARBAGE:=on}
          PROMPT_DELAY=${PROMPT_DELAY:=150}
+ 	  GCCWRAPPERS=${GCCWRAPPERS:=on}
            MAX_COLONYS=16
         LUNAR_PRIORITY="+10"
 

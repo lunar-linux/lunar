@@ -25,9 +25,9 @@ if [[ -s /etc/lunar/local/optimizations ]]; then
 else
   echo -e PLATFOM=x86             '\n'    \
           BUILD=i386-pc-linux-gnu '\n'    \
-	  MAKES=
-          CC=                     '\n'    \
-          CCC=                    '\n'    \
+	  MAKES=                  '\n'    \
+	  COPT=                   '\n'    \
+	  CCOPT=                  '\n'    \
           BOPT=-O0                '\n'    \
           CPU=i386                '\n'    \
           SPD=( )                 '\n'    \
@@ -629,23 +629,19 @@ optimize_addon() {
   for A in ${ADDON[@]}; do
     case $A in
       DistCC) if module_installed distcc; then
-                CC="distcc $CC"
-                CCC="distcc $CXX"
-                CXX="distcc $CXX"
+                CC_EXT="distcc $CC_EXT"
+                CXX_EXT="$CXX_EXT"  # g++ and distcc don't work!
               else
-                CC="$CC"
-                CCC="$CXX"
-                CXX="$CXX"
+                CC_EXT="$CC_EXT"
+                CXX_EXT="$CXX_EXT"
               fi
               ;;
       CCache) if module_installed ccache; then
-                CC="ccache $CC"
-                CCC="ccache $CXX"
-                CXX="ccache $CXX"
+                CC_EXT="ccache $CC_EXT"
+                CXX_EXT="ccache $CXX_EXT"
               else
-                CC="$CC"
-                CCC="$CXX"
-                CXX="ccache $CXX"
+                CC_EXT="$CC_EXT"
+                CXX_EXT="$CXX_EXT"
               fi
               ;;
     esac
@@ -657,46 +653,49 @@ optimize_platform() {
    GCCVER="$1"
 
    case $PLATFORM in
-      x86)      optimize_make  $MAKES      &&
-                optimize_base  $BOPT       &&
-                optimize_cpu   $CPU        &&
-                optimize_speed ${SPD[@]}   &&
-                optimize_extra $XTRA       &&
-                optimize_fp    $FPM        &&
-                optimize_ld    ${LDF[@]}   
-                ;;
-      Alpha)    optimize_make  $MAKES      &&
+      x86)      optimize_make  $MAKES     &&
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
                 optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
+                optimize_ld    ${LDF[@]}  &&
+		optimize_addon
                 ;;
-      PowerPC)  optimize_make  $MAKES      &&
+      Alpha)    optimize_make  $MAKES     &&
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
                 optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
+                optimize_ld    ${LDF[@]}  &&
+		optimize_addon
                 ;;
-      SPARC)    optimize_make  $MAKES      &&
+      PowerPC)  optimize_make  $MAKES     &&
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
                 optimize_extra $XTRA      &&
                 optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
+                optimize_ld    ${LDF[@]}  &&
+		optimize_addon
+                ;;
+      SPARC)    optimize_make  $MAKES     &&
+                optimize_base  $BOPT      &&
+                optimize_cpu   $CPU       &&
+                optimize_speed ${SPD[@]}  &&
+                optimize_extra $XTRA      &&
+                optimize_fp    $FPM       &&
+                optimize_ld    ${LDF[@]}  &&
+		optimize_addon
                 ;;
    esac
 
-export CC="lunar-gcc"
-export CCC="lunar-g++"
-export CXX="lunar-g++"
+export CC_EXT
+export CXX_EXT
 export CFLAGS
-export COPT="$CFLAGS"
-export CCOPT="$CXXFLAGS -Wno-deperecated"
+export COPT
+export CCOPT
 export CXXFLAGS="$CXXFLAGS -Wno-deprecated"
 export LDFLAGS
 
@@ -728,12 +727,12 @@ optimize_architecture()  {
   help cc_help                &&
   cc_options                  &&
   menu checklist              &&
-  CC=$RESULT
+  COPT=$RESULT
 
   help ccc_help               &&
   ccc_options                 &&
   menu checklist              &&
-  CCC=$RESULT
+  CCOPT=$RESULT
 
   help platform_help          &&
   platform_options            &&
