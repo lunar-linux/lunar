@@ -1,3 +1,8 @@
+2003-06-26 15:25  niki
+
+	* var/lib/lunar/excluded: Now all the SSH host keys are also
+	preserved.
+
 2003-06-17 14:23  elaine
 
 	* var/lib/lunar/functions/moonbase.lunar: adjusted script location
@@ -92,23 +97,4 @@
 	moonbase.tar.bz2 flying around in /tmp (we really need to move
 	everything out of /tmp), and better consistent install log creation
 	(with neat trick)
-
-2003-04-27 23:13  sofar
-
-	* sbin/lin, var/lib/lunar/functions/optimize.lunar: narrowing this
-	down to the absolute minimum, making the code much more simple.
-
-2003-04-27 17:24  sofar
-
-	* bin/lvu, etc/lunar/config, sbin/lget, sbin/lin, sbin/lrm,
-	sbin/lsh, sbin/lunar, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/check.lunar,
-	var/lib/lunar/functions/init.lunar,
-	var/lib/lunar/functions/misc.lunar,
-	var/lib/lunar/functions/optimize.lunar,
-	var/lib/lunar/functions/sources.lunar,
-	var/lib/lunar/functions/tracking.lunar: Huge sunday cleanup: -
-	removed subroutines, moving stuff around to .lunar function files,
-	updating all core programs, uniformizing them as well.
 
