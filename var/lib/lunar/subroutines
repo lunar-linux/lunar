@@ -1788,36 +1788,40 @@ fix_depends () {
     done
     
     # this ensures the bastard doesn't recheck it:
-    mv $DEPENDS_STATUS $TMP/depends
-    cp $TMP/depends $TMP/depends.filter
-    for MODULE in $CHANGED_MODULES ; do
-      grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-      mv $TMP/depends.filter~ $TMP/depends.filter
-    done
-    mv $TMP/depends.filter $DEPENDS_STATUS 
-    cat $TMP/depends.new.* >> $DEPENDS_STATUS
-    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+    if [ -z "$NOFIX" ] ; then
+      mv $DEPENDS_STATUS $TMP/depends
+      cp $TMP/depends $TMP/depends.filter
+      for MODULE in $CHANGED_MODULES ; do
+        grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+        mv $TMP/depends.filter~ $TMP/depends.filter
+      done
+      mv $TMP/depends.filter $DEPENDS_STATUS 
+      cat $TMP/depends.new.* >> $DEPENDS_STATUS
+      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+    fi
 
     OLD_FIX=$FIX
     unset FIX
     OLD_lin_PASS=$lin_PASS; export lin_PASS=three
 
     for MODULE in $CHANGED_MODULES ; do
-      [ -n "$NOFIX" ] || if ! lin -c $MODULE ; then
-	# put back the faulty depends so we know fixing this failed
-	# and will be found again on the next run
-	cat $TMP/depends > $DEPENDS_STATUS
-	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-      else
-	# sometimes after lin all depends are gone! force it down it's throat
-        cp $TMP/depends $TMP/depends.filter
-        for MODULE in $CHANGED_MODULES ; do
-          grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
-          mv $TMP/depends.filter~ $TMP/depends.filter
-        done
-        mv $TMP/depends.filter $DEPENDS_STATUS 
-        cat $TMP/depends.new.* >> $DEPENDS_STATUS
-        cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      if [ -z "$NOFIX" ] ; then
+        if ! lin -c $MODULE ; then
+	  # put back the faulty depends so we know fixing this failed
+	  # and will be found again on the next run
+	  cat $TMP/depends > $DEPENDS_STATUS
+	  cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+        else
+	  # sometimes after lin all depends are gone! force it down it's throat
+          cp $TMP/depends $TMP/depends.filter
+          for MODULE in $CHANGED_MODULES ; do
+            grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+            mv $TMP/depends.filter~ $TMP/depends.filter
+          done
+          mv $TMP/depends.filter $DEPENDS_STATUS 
+          cat $TMP/depends.new.* >> $DEPENDS_STATUS
+          cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+	fi
       fi
       remove_queue $INSTALL_QUEUE $MODULE
     done
