@@ -22,6 +22,14 @@ operation.<br>
  style="text-align: left; width: 100%;">
   <tbody>
     <tr>
+      <td style="vertical-align: top;">
+      <h3>Define</h3>
+      </td>
+      <td style="vertical-align: top;">
+      <h3>Explanation</h3>
+      </td>
+    </tr>
+    <tr>
       <td style="vertical-align: top;">DIALOGRC=/etc/lunar/dialogrc </td>
       <td style="vertical-align: top;">Configuration file for the
 dialog binary used by the lunar core tools.<br>
@@ -42,6 +50,14 @@ throughout the Lunar tool set. These are used by /sbin/lget&nbsp;
  style="text-align: left; width: 100%;">
   <tbody>
     <tr>
+      <td style="vertical-align: top;">
+      <h3>Define</h3>
+      </td>
+      <td style="vertical-align: top;">
+      <h3>Explanation</h3>
+      </td>
+    </tr>
+    <tr>
       <td style="vertical-align: top;">CONFIG_CACHE=/etc/lunar/local</td>
       <td style="vertical-align: top;">Directory containing configs
 which are system specific.</td>
@@ -57,8 +73,7 @@ local defines.<br>
       <td style="vertical-align: top;">DEPENDS_CONFIG=/etc/lunar/local/depends<br>
       </td>
       <td style="vertical-align: top;">Each file in this directory
-contains information about how the module was configured at install
-time.<br>
+contains information about how the module was configured at install time.<br>
       </td>
     </tr>
     <tr>
@@ -124,8 +139,8 @@ compiled while other modules are being installed.<br>
       <td style="vertical-align: top;">SUBROUTINES=/var/lib/lunar/subroutines<br>
       </td>
       <td style="vertical-align: top;">File containing core subroutines
-which are used by many of the core tools. It sources all of the files
-in $FUNCTIONS.<br>
+which are used by many of the core tools. It sources all of the files in
+$FUNCTIONS.<br>
       </td>
     </tr>
     <tr>
@@ -139,8 +154,7 @@ in separate files<br>
       <td style="vertical-align: top;">MENUS=/var/lib/lunar/menu<br>
       </td>
       <td style="vertical-align: top;">Directory containing shell
-scripts which generate menus used by dialog for the lunar menuing
-system.<br>
+scripts which generate menus used by dialog for the lunar menuing system.<br>
       </td>
     </tr>
     <tr>
@@ -290,8 +304,8 @@ MD5SUM_CHECK=${MD5SUM_CHECK:=on}<br>
 SYM_CHECK=${SYM_CHECK:=off}<br>
       </td>
       <td style="vertical-align: top;">A comprehensive list of
-variables which may be locally assigned in /etc/lunar/local/config or
-by using the lunar tool.<br>
+variables which may be locally assigned in /etc/lunar/local/config or by
+using the lunar tool.<br>
       </td>
     </tr>
     <tr>
