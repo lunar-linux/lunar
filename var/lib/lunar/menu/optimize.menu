@@ -205,7 +205,7 @@ help() {
       ldf_help)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
-      Debug_HELP="Strip debug symbols only"
+#     Debug_HELP="Strip debug symbols only"
   Combreloc_HELP="Combreloc"
                ;;
 
@@ -372,7 +372,7 @@ ccc_warn_options() {
 
 ldf_options() {
    OPTIONS=( "Strip"       "-s"            "$LDF1"  "$Strip_HELP"
-             "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
+#            "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
              "Combreloc"   "-z combreloc"  "$LDF3"  "$Combreloc_HELP" )
 
 }
