@@ -2,6 +2,7 @@
 /bin/cat
 /bin/cp
 /bin/date
+/bin/grep
 /bin/mv
 /bin/rm
 /bin/rmdir
