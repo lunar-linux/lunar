@@ -42,87 +42,78 @@ exit 1
 }
 
 
-exit_proc() {
-  debug_msg "exit_proc ($@)"
-  temp_destroy $LRM_QUEUE
-  temp_destroy $LRM_TEMP
-  temp_destroy $TEMP_FILE
-  temp_destroy $TEMP2_FILE
-  exit
-}
-
-
-trap_proc() {
-  verbose_msg "Trapped a signal! "
-  exit_proc
-}
-
-
 handle_config_files() {
   debug_msg "handle_config_files ($@)"
-  TARGET="$1"
-  if dirname "$TARGET" | grep -q "^/etc" ; then
-    verbose_msg "Examining config file \"$TARGET\""
+  if dirname "$1" | grep -q "^/etc" ; then
+    # we can safely delete symlinks without md5sum checks
+    if [ -L "$1" ] ; then
+      return 0
+    fi
 
-    TARGET_MD5=$(md5sum "$TARGET" | cut -d " " -f 1-1)
-    OLD_MD5=$(grep -w "$TARGET\$" $MD5_LOG | cut -d " " -f 1-1)
+    debug_msg "considering config file \"$1\""
+
+    TARGET_MD5=$(md5sum "$1" | cut -d " " -f 1-1)
+    OLD_MD5=$(grep -w "$1\$" $MD5_LOG | cut -d " " -f 1-1)
 
     if [ -z "$TARGET_MD5" ] ; then
-      verbose_msg "Skipping removal of \"$TARGET\" due to problem with md5sum"
-      continue
+      verbose_msg "Skipping removal of \"$1\" due to problem with md5sum"
+      return 1
     fi
 
     if [ -z "$OLD_MD5" ] ; then
-      verbose_msg "Skipping removal of \"$TARGET\" due to missing original md5sum"
-      continue
+      verbose_msg "Skipping removal of \"$1\" due to missing original md5sum"
+      return 1
     fi
 
     if [ "$TARGET_MD5" == "$OLD_MD5" ] ; then
-      verbose_msg "Removing \"$TARGET\""
-      rm -f $TARGET
-      continue
+      debug_msg "removing \"$1\""
+      return 1
     fi
 
     if [ "$TARGET_MD5" != "$OLD_MD5" ] ; then
-      verbose_msg "Skipping removal of \"$TARGET\" due to md5sum mismatch"
+      verbose_msg "Skipping removal of \"$1\" due to md5sum mismatch"
       if [ "$PRESERVE" == "on" ] ; then
-         verbose_msg "PRESERVE=on, keeping \"$TARGET\""
-         continue
+         debug_msg "PRESERVE=on, keeping \"$1\""
+         return 1
       else
-         verbose_msg "PRESERVE=off, archiving \"$TARGET\""
-         mv $TARGET $TARGET.`date +%Y%m%d%H%M`
-         continue
+         verbose_msg "PRESERVE=off, archiving \"$1\""
+         mv $1 $1.$(date +%Y%m%d%H%M)
+         return 1
       fi
+    fi
+  fi
+  return 0
+}
+
+
+remove_something() {
+  debug_msg "remove_something ($@)"
+  if [ -z "$1" ]; then
+    verbose_msg "remove_something: Nothing to remove!"
+    return 1
+  fi
+
+  if ! [ -e "$1" ] && ! [ -L "$1" ] ; then
+    verbose_msg "remove_something: no such file \"$1\"!"
+    return 1
+  fi
+
+  if [ -d "$1" ] ; then
+    if rmdir "$1" 2> /dev/null ; then
+      debug_msg "ok    : rmdir \"$1\""
+    else
+      debug_msg "failed: rmdir \"$1\""
+    fi
+  else
+    if rm -f "$1" 2> /dev/null ; then
+      debug_msg   "ok    : rm -f \"$1\""
+    else
+      # this might be problematic so verbose_msg:
+      verbose_msg "failed: rm -f \"$1\""
     fi
   fi
 }
 
-remove_something() {
-  debug_msg "remove_something ($@)"
-   if [ -z "$1" ]; then
-     debug_msg "remove_something: No args, exiting"
-     return 1
-   fi
-
-   if ! [ -e "$1" ] && ! [ -L "$1" ] ; then
-     debug_msg "remove_something: no such file $1, exiting"
-     return 1
-   fi
-
-   TARGET="$1"
-
-   if [ -d "$TARGET" ] ; then
-     rmdir $TARGET 2> /dev/null
-   else
-     rm -f $TARGET 2>/dev/null
-   fi
-
-   if [ "$?" == "0" ] ; then
-     debug_msg "remove_something: removed $TARGET succesfully"
-   else
-     debug_msg "remove_something: removed $TARGET not succesful"
-   fi
-}
 
 process_directories() {
   debug_msg "process_directories ($@)"
@@ -138,93 +129,72 @@ process_directories() {
 }
 
 
-process_lrm_queue() {
-  debug_msg "process_lrm_queue ($@)"
+lrm_module() {
+  debug_msg "lrm_module ($@)"
 
-  export TEMP_FILE=$(temp_create "lrm")
-  export TEMP2_FILE=$(temp_create "lrm")
+  export TMP_DIRS=$(temp_create "$1.directories")
 
-  while [ -s "$LRM_QUEUE" ]
-  do   
-    MODULE=$(remove_queue $LRM_QUEUE)
-    verbose_msg "${TEMP}removing \"$MODULE\""
+  run_details $1 &> /dev/null
 
-    run_details $MODULE &> /dev/null
+  VERSION=$(installed_version $MODULE)
+  INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
+  MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
 
-    VERSION=$(installed_version $MODULE)
-    INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-    MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
+  # time-out 1: PRE_REMOVE
+  run_module_file $MODULE PRE_REMOVE
 
-    # time-out 1: PRE_REMOVE
-    run_module_file $MODULE PRE_REMOVE 
-
-    while read TARGET ; do
-      if ! [ -e "$TARGET" ] ; then
-        continue
-      fi
-
-      if grep -q -x "$TARGET" $PROTECTED $EXCLUDED ; then
-        verbose_msg "\"$TARGET\" is protected or excluded!!"
-        continue
-      elif grep -q -x "$(dirname $TARGET)" $PROTECTED $EXCLUDED ; then
-        verbose_msg "\"$TARGET\" is in a protected or excluded directory!"
-	continue
-      fi
-
+  # grep -v the install logs over the protected stuff, this
+  # yields the files that may be removed
+  cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
+    if [ -e "$TARGET" ] ; then
       if [ -d "$TARGET" ] ; then
-        echo "$TARGET" >> $TEMP_FILE
-        continue
+        echo "$TARGET" >> $TMP_DIRS
+      else
+        handle_config_files $TARGET &&
+        remove_something $TARGET
       fi
-
-      handle_config_files $TARGET
-
-      remove_something $TARGET
-
-    done < $INST_LOG
-
-    process_directories $TEMP_FILE $TEMP2_FILE
-
-    # time-out 2: POST_REMOVE
-    run_module_file $MODULE POST_REMOVE
-
-    if [ "$KEEPCONFIG" == "on" ] ; then
-      verbose_msg "skipping removal of dependency listing and configs"
-    else
-      verbose_msg "removing module from dependency listing and configs"
-      remove_depends  $MODULE
     fi
-
-    # administration duty time:
-    verbose_msg "removing module from installed list.. "
-    remove_module $MODULE
-
-    message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
-             "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-    activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
   done
+
+  process_directories $TMP_DIRS
+
+  # time-out 2: POST_REMOVE
+  run_module_file $MODULE POST_REMOVE
+  if [ "$KEEPCONFIG" == "on" ] ; then
+    debug_msg "skipping removal of dependency listing and configs"
+  else
+    verbose_msg "removing module from dependency listing and configs"
+    remove_depends $MODULE
+  fi
+
+  # administration duty time:
+  remove_module $MODULE
+
+  message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
+           "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+  activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
+
+temp_destroy $TMP_DIRS
 }
 
 
 check_status() {
-   module_installed $MODULE || {
-      message  "${MODULE_COLOR}${MODULE}"  \
-      "${PROBLEM_COLOR}is not installed."  \
-      "${DEFAULT_COLOR}"
-      [ "$EXILE"   == "on" ] || return 1
-   } 
+  if ! module_installed $MODULE ; then
+    message  "${MODULE_COLOR}${MODULE}"  \
+    "${PROBLEM_COLOR}is not installed."  \
+    "${DEFAULT_COLOR}"
+    return 1
+  fi
 
-   [ "$NOSUSTAIN" == "on" ] && return 0 || {
-
-      verbose_msg "checking if \"$1\" is sustained"
-      grep -q -w "$MODULE" "$SUSTAINED" && {
-             message  "${MODULE_COLOR}${MODULE}"         \
-                      "${PROBLEM_COLOR}is sustained."  \
-                      "${DEFAULT_COLOR}"
-            return 1 
-      } || return 0 
-   }
-   true
+  if [ "$NOSUSTAIN" != "on" ] ; then
+    debug_msg "checking if \"$1\" is sustained"
+    if grep -q -w "$MODULE" "$SUSTAINED" ; then
+      message  "${MODULE_COLOR}${MODULE}"       \
+               "${PROBLEM_COLOR}is sustained."  \
+               "${DEFAULT_COLOR}"
+      return 1
+    fi
+  fi
 }
 
 
@@ -237,18 +207,18 @@ downgrade() {
     exit 1
   }
    
-  root_check || exit 1
+  root_check
 
   verbose_msg "running \"$MODULE\" DETAILS file"
   run_details $MODULE &> /dev/null || return 1
 
   if [ -z "$1" ] ; then
-    echo "No version is entered. The below is the list of available files."
+    message "No version is entered. The below is the list of available files."
     list_available_cache   
   fi
 
   if [ ! -s $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 ] ; then 
-    echo "Desired version is not available. Here is the available files"
+    message "Desired version is not available. Here is the available files"
     list_available_cache
   fi
 
@@ -258,8 +228,8 @@ downgrade() {
     verbose_msg "\"$(installed_version $MODULE)\" of \"$MODULE\" is installed at the moment"
 
     if [ "$1" == "$I_VERSION" ] ; then
-      echo "The downgrade version is the same as the installed version"
-      echo "Here is the available files." 
+      message "The downgrade version is the same as the installed version"
+      message "Here is the available files." 
       list_available_cache
     fi
 
@@ -292,43 +262,8 @@ downgrade() {
   exit
 }
 
-create_lrm_queue() {
-
-  [ "$#" == "0" ] && help;
-
-   if [ "$TEST" != "on" ]; then 
-      root_check || exit 1
-   fi
-
-   [ -e "$EXCLUDED" ] || {
-      message  "${PROBLEM_COLOR} $EXCLUDED can't be found!!."  \
-               "\nTouching it to create, but this is just a "  \
-               "workaround!! \nDo a lunar update ASAP\n"       \
-               "${DEFAULT_COLOR}"
-      touch $EXCLUDED 
-    }
-
-   [ -e "$PROTECTED" ] || {
-      message  "${PROBLEM_COLOR} $PROTECTED can't be found!!." \
-               "\nTouching it to create, but this is just a "  \
-               "workaround!! \nDo a lunar update ASAP\n"       \
-               "${DEFAULT_COLOR}"
-      touch $PROTECTED 
-    }
-
-  export LRM_QUEUE=$(temp_create "lrm-queue")
-  export LRM_TEMP=$(temp_create "lrm")
-                       
-   MODULE_LIST="$@"
-   for MODULE in $MODULE_LIST
-   do
-      check_status $MODULE  || continue
-      add_queue $LRM_QUEUE $MODULE
-   done      
-}
 
 . /etc/lunar/config
-
 
 
 GETOPT_ARGS=$(getopt -q -n lrm -o "dD:hknv" -l "debug,downgrade:,help,keepconfig,nosustain,verbose" -- "$@")
@@ -361,11 +296,13 @@ else
    esac
   done
 
-  verbose_msg "signals TERM, INT and QUIT are trapped"
-  trap "trap_proc" INT QUIT TERM
-
-  create_lrm_queue "${@#-}"
-  process_lrm_queue
-  exit_proc
+  for MODULE in "${@#-}" ; do
+    if check_status "$MODULE" ; then
+      LIST="$LIST $MODULE"
+    fi
+  done
+  for MODULE in $LIST ; do
+    lrm_module $MODULE
+  done
 fi
 

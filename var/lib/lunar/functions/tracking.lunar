@@ -56,11 +56,10 @@ devoke_installwatch() {
 # purpose  : remove unwanted accesses from the installwatch file
 parse_iw() {
   debug_msg "parse_iw ($@)"
-  OMIT="^/dev\|^/tmp\|^/usr/src"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
-  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v "$OMIT"
-  cat                $INSTALLWATCHFILE | cut -f4 | grep -v "$OMIT" | grep "^/"
+  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v -f $EXCLUDED
+  cat                $INSTALLWATCHFILE | cut -f4 | grep -v -f $EXCLUDED | grep "^/"
 }
 
 
@@ -80,13 +79,7 @@ create_install_log() {
 
   export IFS="$TAB_ENTER_IFS"
 
-  parse_iw                   |
-  sort                       |
-  uniq                       |
-  filter  "$EXCLUDED"        |
-  filter  "$LOCAL_EXCLUDED"  |
-  exists                     >  $TMP_INST_LOG
-
+  parse_iw | sort | uniq | filter  "$LOCAL_EXCLUDED" | exists > $TMP_INST_LOG
   echo "$INSTALL_LOGS/$MOD_V_SNAME-$VERSION"                 >> $TMP_INST_LOG
   echo "$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"             >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MOD_V_SNAME-$VERSION"                  >> $TMP_INST_LOG

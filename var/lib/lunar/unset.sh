@@ -95,8 +95,8 @@ unset SPD
 unset SUBROUTINES
 unset SUSTAIN
 unset SUSTAINED
-unset SYMLINK_COLOR
 unset SYM_CHECK
+unset SYMLINK_COLOR
 unset TMPFS
 unset TRACKED
 unset UNIQID

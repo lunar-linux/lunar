@@ -177,30 +177,23 @@ md5sum_files() {
 
 
 alien() {
+  message "In a few minutes I will print files found on this disk that were not"
+  message "installed by lunar. This is not a security feature! Files could still"
+  message "be lurking undetected on this box."
 
-  message  "In a few minutes I will print files found on this disk"
-  message  "that were not installed by lunar.  This is not a"
-  message  "security feature!  Files could still be lurking"
-  message  "undetected on this box."
-
-  rm    -f  /tmp/lvu.found
-  rm    -f  /tmp/lvu.known
+  TMP_FOUND=$(temp_create "lvu.found")
+  TMP_KNOWN=$(temp_create "lvu.known")
 
   message  "Discovering ambient files..."
-  find  $TRACKED  |  files  |  filter  "$EXCLUDED"  |  sort  >/tmp/lvu.found
- 
+  find $TRACKED | files | grep -v -f "$EXCLUDED" | grep -v -f "$PROTECTED" | sort | uniq > $TMP_FOUND
   message  "Discovering installed files..."
-  cat  $INSTALL_LOGS/*  |  files  |  sort  >  /tmp/lvu.known
+  cat $INSTALL_LOGS/* | files | sort | uniq > $TMP_KNOWN
 
-  diff  -B  -a  -d  /tmp/lvu.found  /tmp/lvu.known  |
-  grep  -v  "^> "                                     |
-  grep      "^< "                                     |
-  cut  -c  3-                                         |
-  filter  "$PROTECTED"
+  diff -B -a -d $TMP_FOUND $TMP_KNOWN | grep -e "^< " | cut -c 3-
 
-  rm  -f  /tmp/lvu.found
-  rm  -f  /tmp/lvu.known
-
+read
+  temp_destroy $TMP_FOUND
+  temp_destroy $TMP_KNOWN
 }
 
 
