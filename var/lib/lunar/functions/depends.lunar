@@ -81,7 +81,7 @@ sort_by_dependency() {
         for DEP in $LIST ; do
           echo $MOD $DEP
         done
-        INCLUDED=$INCLUDED'\n'$MOD
+        INCLUDED=$INCLUDED$'\n'$MOD
         recurse $LIST
       fi
     done
