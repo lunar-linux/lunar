@@ -329,12 +329,3 @@
 	* etc/lunar/config: changing the last resort URL to .org instead of
 	.com
 
-2003-02-06 10:08  sofar
-
-	* sbin/lrm: heh, got scared?
-
-2003-02-06 00:00  sofar
-
-	* var/lib/lunar/subroutines: Adding --keepconfig in here to get
-	lunar renew working again, see lrm commit.
-
