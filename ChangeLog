@@ -1,3 +1,8 @@
+2003-11-15 14:53  elaine
+
+	* var/lib/lunar/functions/depends.lunar: Just pushing around the
+	formatting
+
 2003-11-02 15:31  elaine
 
 	* var/lib/lunar/functions/depends.lunar: Mod opt-depends prompt to
@@ -63,8 +68,4 @@
 2003-09-19 20:48  sofar
 
 	* usr/share/man/man8/lfirsttime.8: talk about cosmetics, eh?
-
-2003-09-16 21:21  sofar
-
-	* var/lib/lunar/functions/main.lunar: Bugfix #372
 
