@@ -629,8 +629,8 @@ optimize_addon() {
   for A in ${ADDON[@]}; do
     case $A in
       DistCC) if module_installed distcc; then
-                CC_EXT="distcc $CC_EXT"
-                CXX_EXT="$CXX_EXT"  # g++ and distcc don't work!
+                CC_EXT="$CC_EXT distcc"
+                CXX_EXT="$CXX_EXT distcc"
               else
                 CC_EXT="$CC_EXT"
                 CXX_EXT="$CXX_EXT"
