@@ -492,7 +492,7 @@ install_xinetd_confs()  { (
     for  SERVICE  in  $SERVICES;  do
       for  FILE  in  `ls`;  do
         if    grep  -q  "service $SERVICE"   $FILE
-        then  /usr/bin/install -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
+        then  /usr/bin/install --backup=numbered -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
         fi
       done
     done
