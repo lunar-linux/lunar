@@ -1,3 +1,10 @@
+2003-03-16 17:45  sofar
+
+	* bin/lvu, sbin/lunar, var/lib/lunar/subroutines,
+	var/lib/lunar/functions/edit.lunar,
+	var/lib/lunar/functions/view.lunar: prune moved to lunar, moved
+	code out of lvu.
+
 2003-03-15 21:47  sofar
 
 	* var/lib/lunar/functions/download.lunar: cosmetic fix for complete
