@@ -315,6 +315,7 @@ run_build()  {
     rm  -f  $linING
     view_compile_log
     rack
+    rm_source_dir
     activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors"
     false
   fi
