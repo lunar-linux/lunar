@@ -229,22 +229,3 @@
 	* var/lib/lunar/functions/modules.lunar: Emergency fix:
 	module.index was broken
 
-2004-03-08 22:57  sofar
-
-	* var/lib/lunar/functions/: download.lunar, main.lunar: This
-	supposedly should fix the double-download bug. It was acutally
-	caused by old cruft lying around. The show_dl_progress was the
-	culprit. To make sure, all references to lget have been removed,
-	except for the download_manager call from lin. This works for
-	normal modules, ones with ERASE (theedge) and cvs stuff.
-
-2004-03-08 21:54  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Ewps, lin moonase
-
-2004-03-08 21:33  sofar
-
-	* var/lib/lunar/functions/: depends.lunar, modules.lunar: Speedups
-	for people running with system moonbases, up to 5x faster
-	regeneration of module.index and depends.cache
-
