@@ -1,3 +1,8 @@
+2003-10-17 10:23  jasper
+
+	* sbin/lget, usr/share/man/man8/lget.8: Updating lget and manpage
+	for -a/--all option
+
 2003-10-09 15:57  elaine
 
 	* var/lib/lunar/functions/kernel.lunar: Adding kernel backup and
