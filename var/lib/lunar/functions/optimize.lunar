@@ -495,8 +495,10 @@ optimize_speed() {
         Profiling) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
-		     if ! [[ `grep KEEP_SOURCE=yes /etc/lunar/local/config` ]]; then
+		     if ! [[ `grep KEEP_SOURCE=on /etc/lunar/local/config` ]]; then
 		       echo "KEEP_SOURCE=yes" >> /etc/lunar/local/config
+		     elif [[ `grep KEEP_SOURCE=off /etc/lunar/local/config` ]]; then
+		       sedit "s/KEEP_SOURCE=off/KEEP_SOURCE=on/" /etc/lunar/local/config
 		     fi
                    else
                      CFLAGS="$CFLAGS"
@@ -504,9 +506,6 @@ optimize_speed() {
                    fi
                  ;;
         Branching) if [[ $GCCVER == "3" ]] ; then
-	             if [[ `grep KEEP_SOURCE=yes /etc/lunar/local/config` ]]; then
-		       sedit "s/KEEP_SOURCE=yes/KEEP_SOURCE=no/" /etc/lunar/local/config
-		     fi
                      CFLAGS="$CFLAGS -fbranch-probabilities"
                      CXXFLAGS="$CXXFLAGS -fbranch-probabilities"
                    else

@@ -248,8 +248,13 @@ unpack() {
             *)  false                                      ;;
   esac
   [ -n "$SOURCE_DIRECTORY" ] &&
-  [ -d "$SOURCE_DIRECTORY" ] &&
-  chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null   
+  [ -d "$SOURCE_DIRECTORY" ]
+  
+  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
+    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
+  else
+    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
+  fi
 }
 
 
@@ -406,13 +411,47 @@ validate_source_dir()  {
 
 }
 
+# Usage: bad_flags "list of flags to remove"
+# Example: bad_flags -ffast-math -funroll-loops
+bad_flags() {
+  if [[ $1 == "ALL" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  else
+    for BAD_FLAG in $@; do
+      CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
+      CXXFLAGS=`echo $CXXFLAGS | sed s/$BAD_FLAG//`
+      CPPFLAGS=`echo $CPPFLAGS | sed s/$BAD_FLAG//`
+      LDFLAGS=`echo $LDFLAGS | sed s/$BAD_FLAG//`
+    done
+  fi
+}
+
+# Usage: patch_it location/name level 
+# Example: patch_it $SOURCE_CACHE/foo.bz2 1
+patch_it() {
+  if [[ `echo $1 | grep .bz2` ]] ||
+     [[ `echo $1 | grep .tbz2` ]]; then
+    bzcat $1 | patch -N -p$2
+  elif [[ `echo $1 | grep .gz` ]] ||
+       [[ `echo $1 | grep .tgz` ]]; then
+    zcat $1 | patch -N -p$2
+  else
+    cat $1 | patch -N -p$2 
+  fi
+}
+
 default_pre_build() {
   if [[ `echo $MODULE | grep -e -cvs` ]]; then
     validate_source_dir  $SOURCE_DIRECTORY
   else
-    validate_source_dir  $SOURCE_DIRECTORY  &&
-    mk_source_dir        $SOURCE_DIRECTORY  &&
-    unpack               $SOURCE
+    validate_source_dir  $SOURCE_DIRECTORY 
+    if [[ -d $SOURCE_DIRECTORY ]]; then
+      cd $SOURCE_DIRECTORY && 
+      make clean
+    else
+      mk_source_dir        $SOURCE_DIRECTORY &&
+      unpack               $SOURCE
+    fi
   fi
 }
 
@@ -624,8 +663,9 @@ module_exiled()  {
 
 installed_version()  
 {
-  if    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null 
-  then  
+  if [[ $1 == "linux" ]]; then
+    echo `uname -r`
+  elif    grep  -q     "^$1\:"      $MODULE_STATUS 2>/dev/null; then  
      echo  `grep  "^$1\:"         $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
   else  
      echo  `grep  "^$1-custom\:"  $MODULE_STATUS 2>/dev/null   |  cut  -d :  -f4`
