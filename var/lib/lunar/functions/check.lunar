@@ -249,9 +249,10 @@ rework_module() {
   run_depends() {
   debug_msg "  run_depends ($@)"
    (
-    run_details $1
-    if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
+    if run_details $1 &> /dev/null ; then
+      if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
       run_module_file $MODULE DEPENDS
+      fi
     fi
    ) 
   }
