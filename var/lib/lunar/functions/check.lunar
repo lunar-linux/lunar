@@ -328,7 +328,8 @@ run_fix()  {
     HOPELESS="no"
 
     for  MODULE  in  $MODULES ;  do
-
+     # ENV separation required here!
+     (
       fix_depends $MODULE
 
       # if we were called with --fixdepends then we may skip the rest
@@ -379,6 +380,7 @@ run_fix()  {
           fi
         fi
       fi
+     )
     done
   done
 }
