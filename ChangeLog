@@ -1,3 +1,12 @@
+2003-03-06 23:39  sofar
+
+	* var/lib/lunar/excluded: protect the whole dir instead of 4 files.
+
+2003-03-06 22:44  sofar
+
+	* var/lib/lunar/functions/useradd.lunar: this is badly needed,
+	considering adding this to lunar ASAP...
+
 2003-03-05 23:19  sofar
 
 	* var/lib/lunar/: subroutines, functions/depends.lunar: More
