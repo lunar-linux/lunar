@@ -148,16 +148,16 @@ unpack() {
     FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
   COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
 
-  verbose_msg "Unpacking $FILENAME in $(pwd)" && V=v
+  verbose_msg "Unpacking $FILENAME in $(pwd)"
 
   case  $COMPRESSOR  in
-        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -x${V}f  -  ;;
-         gzip)  gzip   -cdf  $FILENAME  |  tar  -x${V}f  -  ;;
-    compress*)  gzip   -cdf  $FILENAME  |  tar  -x${V}f  -  ;;
-          Zip)  unzip  -q    $FILENAME                      ;;
-          RPM)  rpmunpack  < $FILENAME  |  gzip  -d         \
-                                        |  cpio  -idm       ;;
-            *)  false                                       ;;
+        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
+         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
+          Zip)  unzip  -q    $FILENAME                  ;;
+          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
+                                        |  cpio  -idm   ;;
+            *)  false                                   ;;
   esac
   [ -n "$SOURCE_DIRECTORY" ] &&
   [ -d "$SOURCE_DIRECTORY" ]
