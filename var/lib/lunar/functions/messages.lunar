@@ -52,12 +52,28 @@ verbose_msg() {
 
 debug_msg() {
   if [ -n "$LUNAR_DEBUG" ] ; then
-    echo "++ $@" > /dev/stderr
-    if [ "$LUNAR_DEBUG" -ge "2" ] ; then
+    if [ "$LUNAR_DEBUG" -ge "4" ] ; then
+      PLUSSES="+++++++++++++++++++++++++*"
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename $0)[$$]: $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" > /dev/stderr
+      unset PLUSSES
+    elif [ "$LUNAR_DEBUG" -ge "3" ] ; then
+      PLUSSES="+++++++++++++++++++++++++*"
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" > /dev/stderr
+      unset PLUSSES
+    elif [ "$LUNAR_DEBUG" -ge "2" ] ; then
+      PLUSSES="+++++++++++++++++++++++++*"
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} ${FUNCNAME[1]} ($@)" > /dev/stderr
+      unset PLUSSES
+    else
+      echo "++ $@" > /dev/stderr
+    fi
+    if [ "$LUNAR_DEBUG" -ge "5" ] ; then
       echo "++ $@" >> $TMPDIR/lp_debuglog.$$
       if [ -f $TMPDIR/l_debug_var.$$ ] ; then
         mv $TMPDIR/l_debug_var.$$ $TMPDIR/l_debug_var.$$.old
-      fi 
+      else
+        return
+      fi
       set | grep '^[A-Z]' | sed 's/^/VAR /' > $TMPDIR/l_debug_var.$$
       diff -U0 $TMPDIR/l_debug_var.$$.old $TMPDIR/l_debug_var.$$ | \
           grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ > /dev/stderr
