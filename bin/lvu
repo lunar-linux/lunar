@@ -347,10 +347,10 @@ show_module_component()  {
 }
 
 
-find_lining()  {
-  for  FILE in $(ls  /var/lock/lining*  2>/dev/null);  do
-    if  ps  $(cat  $FILE  2>/dev/null)  |  grep  -q  lin;  then
-      echo  $FILE  |  sed  "s:/var/lock/lining.::"
+find_active_lin()  {
+  for FILE in $(ls /var/lock/installing.* 2>/dev/null) ; do
+    if [ -d /proc/$(cat $FILE) ] ; then
+      echo $FILE | sed "s:/var/lock/installing.::"
       return  0
     fi
   done
@@ -358,41 +358,32 @@ find_lining()  {
 }
 
 
-peak_lining()  {
-  if  [  -f     /var/lock/lining.$1   ]            &&
-      ps  $(cat  /var/lock/lining.$1  2>/dev/null)  |
-      grep  -q  lin                                &&
-      [  -f  /tmp/$1.compile.log  ]
-  then
-    nice  -n  +20                  \
-    tail  -f  /tmp/$1.compile.log  \
-          --follow=name            \
-          --pid=$(cat /var/lock/lining.$1)  2>/dev/null
+follow_active_lin()  {
+  if [ -f /var/lock/installing.$1 -a -d /proc/$(cat /var/lock/installing.$1) ] ; then
+    if  [ -f /tmp/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* ] ; then
+      tail -f /tmp/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* --follow=name --pid=$(cat /var/lock/installing.$1)  2>/dev/null
+    fi
   fi
 }
 
 
-activate_voyeur()  {
-  if  [  -n  "$1"  ]  &&
-      !  find_section  $1  >  /dev/null
-  then  ((  DEFAULT_DELAY  =  $1  *  60  ))
-        shift  1
+voyeur()  {
+  if [ -n "$1" ] && ! find_section $1 > /dev/null ; then
+    (( DEFAULT_DELAY = $1 * 60 ))
+    shift  1
   fi
 
-  for  MODULE  in  $@;  do
-    peak_lining  $MODULE
+  for MODULE in $@ ; do
+    follow_active_lin $MODULE
   done
 
   DEFAULT_DELAY=${DEFAULT_DELAY:=60}
 
-  while  true;  do
-    if    !  ACTIVE_MODULE=$(find_lining) ;  then
-      message  "${MESSAGE_COLOR}Waiting"       \
-               "${DEFAULT_DELAY}"              \
-               "seconds for a lin to begin."  \
-               "${DEFAULT_COLOR}"
-      for  ((  DELAY=DEFAULT_DELAY  ;  DELAY > 0  ;  DELAY--  )); do
-        if  ACTIVE_MODULE=$(find_lining);  then
+  while true ; do
+    if ! ACTIVE_MODULE=$(find_active_lin) ; then
+      message  "${MESSAGE_COLOR}Waiting ${DEFAULT_DELAY} seconds for a lin to begin.${DEFAULT_COLOR}"
+      for (( DELAY=DEFAULT_DELAY ; DELAY > 0 ; DELAY-- )); do
+        if ACTIVE_MODULE=$(find_active_lin) ; then
           break
         else
           sleep 1
@@ -400,9 +391,10 @@ activate_voyeur()  {
       done
     fi
 
-    if    [  -z  "$ACTIVE_MODULE"  ];  
-    then  break
-    else  peak_lining  $ACTIVE_MODULE
+    if [ -z "$ACTIVE_MODULE" ] ; then
+      break
+    else
+      follow_active_lin $ACTIVE_MODULE
     fi
   done
 }
@@ -669,7 +661,7 @@ main()  {
 
     voyeur)
       shift 1
-      activate_voyeur $@
+      voyeur $@
       ;;
 
     pam)
