@@ -788,24 +788,23 @@ current_locked()  {
 lin_modules()  {
   for  MODULE  in  $MODULES;  do
   
-    if [ -n "$PROBE" ] ; then
-      module_installed $MODULE && continue
-    fi
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
 
-    linING="/var/lock/installing.$MODULE"
+      linING="/var/lock/installing.$MODULE"
 
-    if  [  -n  "$COMPILE"      ]  ||
-        [  -n  "$RECONFIGURE"  ]  ||
-        module_installed  $MODULE   ||
-        !  resurrect     $MODULE;  then
-      if  !  lin_module;  then
-        if  [  -n  "$LOGTMP"  ];  then
-          echo  "$MODULE"  >>  /tmp/fail_$LOGTMP
-        fi
-        lin_EXIT_STATUS=1;  
-      else
-        if  [  -n  "$LOGTMP"  ];  then
-          echo  "$MODULE"  >>  /tmp/success_$LOGTMP
+      if  [  -n  "$COMPILE"      ]  ||
+          [  -n  "$RECONFIGURE"  ]  ||
+          module_installed  $MODULE   ||
+          !  resurrect     $MODULE;  then
+        if  !  lin_module;  then
+          if  [  -n  "$LOGTMP"  ];  then
+            echo  "$MODULE"  >>  /tmp/fail_$LOGTMP
+          fi
+          lin_EXIT_STATUS=1;  
+        else
+          if  [  -n  "$LOGTMP"  ];  then
+            echo  "$MODULE"  >>  /tmp/success_$LOGTMP
+          fi
         fi
       fi
     fi
@@ -831,16 +830,14 @@ run_lget()  {
 build_depends()  {
 
   for  MODULE  in  $MODULES;  do
-    ( 
-      if [ -n "$PROBE" ] ; then
-        module_installed $MODULE && continue
-      fi
-      
-      run_details    &&
-      run_configure  &&
-      run_depends    &&
-      satisfy_depends
-    )
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      ( 
+        run_details    &&
+        run_configure  &&
+        run_depends    &&
+        satisfy_depends
+      )
+    fi
   done
 
 }
@@ -852,15 +849,13 @@ pass_one()  {
 }
 build_sources()  {
   for  MODULE  in  $MODULES;  do
-    (
-      if [ -n "$PROBE" ] ; then
-        module_installed $MODULE && continue
-      fi
-
-      run_details      &&
-      satisfy_depends  &&
-      run_lget
-    )
+    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+      (
+        run_details      &&
+        satisfy_depends  &&
+        run_lget
+      )
+    fi
   done
 }
 pass_two()  {
