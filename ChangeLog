@@ -20,7 +20,3 @@
 	blacklisted entries for yaboot and aboot in x86 Added lilo, grub,
 	e3 to PowerPC blacklist
 
-2003-04-26 22:53  sofar
-
-	* sbin/lin: 10 points for tchan
-
