@@ -1758,9 +1758,6 @@ rework_list() {
     module_exiled $MODULE || rework_module $MODULE
   done
 
-  [ -e "$TMP/depends.new.*" ] &&
-    cat $TMP/depends.new.* | sort | uniq > $TMP/depends.new-all
-
 }
 
 # fix_depends : single pass to fix depends database
@@ -1770,6 +1767,9 @@ fix_depends () {
   [ -d $TMP ] || mkdir -p $TMP
 
   CHANGED_MODULES=
+  # we NEED this
+  rm $INSTALL_QUEUE
+  touch $INSTALL_QUEUE
   
   if [ -n "$1" ] ; then
     rework_list $*
@@ -1784,13 +1784,15 @@ fix_depends () {
     done
     # we need to trick the system into thinking it has the new depends
     # if we want to do one module at a time:
-    if (( $(cat INSTALL_QUEUE | wc -l) > 1 )) ; then
+    if (( $(cat $INSTALL_QUEUE | wc -l) > 1 )) ; then
+      lock_file $DEPENDS_STATUS
       cp $DEPENDS_STATUS $TMP/depends
-      cat $TMP/depends.new-all > $DEPENDS_STATUS
-      cat $TMP/depends.new-all > $DEPENDS_STATUS_BACKUP
+      cat $TMP/depends.new-* | sort | uniq > $DEPENDS_STATUS
+      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       sort_install_queue
       cat $TMP/depends > $DEPENDS_STATUS
-      cat $TMP/depends > $DEPENDS_STATUS_BACKUP
+      cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+      unlock_file $DEPENDS_STATUS
       unset MODULE
       if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
         edit_file  $INSTALL_QUEUE
