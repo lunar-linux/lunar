@@ -1,3 +1,9 @@
+2004-05-21 19:51  sofar
+
+	* sbin/lrm, var/lib/lunar/functions/depends.lunar: Feature: lrm
+	--purge $MODULES / lrm -p $MODULES. for instance: lrm -p qt3
+	removes qt3 and all apps that require (*REQUIRE*) qt3
+
 2004-05-21 10:27  sofar
 
 	* bin/lvu, etc/lunar/config, etc/lunar/mirrors/LRESORT, sbin/lrm,
