@@ -231,8 +231,3 @@
 	* var/state/lunar/blacklist.Alpha: Removed e3, as it now works
 	(non-asm version)
 
-2003-12-06 20:39  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: fixing a squeaky wheel no
-	grease
-
