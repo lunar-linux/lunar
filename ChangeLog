@@ -1,3 +1,21 @@
+2003-11-06 22:34  sofar
+
+	* var/lib/lunar/compilers/gcc: Missed one
+
+2003-11-06 22:29  sofar
+
+	* sbin/lin, var/lib/lunar/compilers/cc,
+	var/lib/lunar/compilers/gcc, var/lib/lunar/functions/install.lunar,
+	var/lib/lunar/functions/main.lunar,
+	var/lib/lunar/functions/moonbase.lunar: Syncing some fixes:
+	
+	 - compiler wrappers showed wrong compile call
+	 - get_moonbase breakage detection
+	 - cpan:// module installing native supported (need to commit
+	example modules, please be patient)
+	 - autoresurrect logging disabled (too much noise in logs,
+	especially with sound on).
+
 2003-11-02 15:27  elaine
 
 	* var/lib/lunar/functions/depends.lunar: Minor tweak to prompt,
