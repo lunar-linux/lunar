@@ -1,3 +1,19 @@
+2002-09-25 22:01  sofar
+
+	* sbin/lin: REALLY fixing linewrap errors
+	
+2002-09-25 18:32  sofar
+
+	* sbin/lin: re-adding wrappers to normal installation
+	
+2002-09-25 18:04  sofar
+
+	* var/lib/lunar/subroutines: Adding message when a .rc file is installed!
+	
+2002-09-25 17:35  sofar
+
+	* var/lib/lunar/subroutines: Fix for CVS moonbases
+	
 2002-09-24 20:49  xoritor
 
 	* sbin/lin: Fixing linewrap/editor errors... thx niki :-)
