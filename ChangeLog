@@ -1,3 +1,15 @@
+2004-01-21 16:56  tchan
+
+	* usr/share/doc/lunar/CREDITS: Fixed another typo.  Added Erik
+	Sorenson to the file for his depends code contribution.
+
+2004-01-21 16:32  hardkrash
+
+	* var/lib/lunar/functions/depends.lunar: making algorithim
+	improvments proposed by Erik Søe Sørensen
+	
+	thankyou sir
+
 2004-01-14 20:42  tchan
 
 	* var/lib/lunar/functions/optimize.lunar: Fixing the dialog box for
