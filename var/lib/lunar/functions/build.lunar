@@ -187,7 +187,14 @@ default_pre_build() {
   if [[ -d $SOURCE_DIRECTORY ]] &&
      [[ $KEEP_SOURCE == "on" ]]; then
     cd $SOURCE_DIRECTORY && 
-    make clean
+    make clean 
+    if [ $? -ne 0 ]; then
+      message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}The source for \
+${MODULE_COLOR}$MODULE${DEFUALT_COLOR}: could not be made clean for build."
+      # Thoughts on forcing a new source directory?
+      # More of how should we handle this, currently we will bail out
+      # A vast majority of the moonbase will fail,  (w/o: make clean)
+    fi
   else
     mk_source_dir        $SOURCE_DIRECTORY &&
     unpack               $SOURCE
