@@ -48,7 +48,7 @@ list_sections() {
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {
-  if [ -z "$1" ] then
+  if [ -z "$1" ] ; then
     message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
     exit 1
   fi
