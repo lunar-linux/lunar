@@ -1,0 +1,78 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/uid.lunar                                     #
+# includes add_priv_user add_priv_group                    #
+# 20030306                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Auke Kok 2003 under GPLv2                    #
+#                                                          #
+############################################################
+
+
+# function: add_priv_user
+# usage   : add_priv_user username:groupname [adduseropts [adduseropts]...]
+# info    : adds username:groupname and passes adduseropts to 'adduser'
+function add_priv_user() {
+
+  USERNAME=$(echo $1 | cut -d: -f1)
+  GROUPNAME=$(echo $1 | cut -d: -f2)
+
+  if [ -z "$USERNAME" ] ; then
+    message "${PROBLEM_COLOR}add_priv_user: no username specified${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  if [ -z "$GROUPNAME" ] ; then
+    message "${PROBLEM_COLOR}add_priv_user: no groupname specified${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  if id $USERNAME &> /dev/null ; then
+    verbose_msg "user \"$USERNAME\" already exists, not creating or modifying"
+  else
+    if grep -q "^$GROUPNAME:" /etc/group ; then
+      verbose_msg "group \"$GROUPNAME\" already exists, not creating"
+    else
+    
+      # add the group:
+      for (( N=0 ; N<100 ; N++)) ; do
+        if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
+	  break
+	fi
+      done
+      if [ "$N" == "100" ] ; then
+        message "${PROBLEM_COLOR}add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
+	exit 1
+      fi
+      verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
+      groupadd -g $N $GROUPNAME
+      
+    fi
+    
+    # add the user:
+    for (( N=0 ; N<100 ; N++)) ; do
+      if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$" )" ] ; then
+        break
+      fi
+    done
+    if [ "$N" == "100" ] ; then
+      message "${PROBLEM_COLOR}add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
+      exit 1
+    fi
+    
+    shift
+    
+    verbose_msg "creating user \"$USERNAME\" (opts=\"-u $N -g $GROUPNAME $@\")"
+    useradd -u $N -g $GROUPNAME $USERNAME $@
+    
+  fi
+
+}
+
