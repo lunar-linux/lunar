@@ -1,3 +1,13 @@
+2003-04-12 19:52  sofar
+
+	* usr/share/man/man1/lvu.1: updating this.
+
+2003-04-12 19:44  sofar
+
+	* bin/lvu: adding an option that allows you to look against which
+	modules a binary from another module is linked. Usage: lvu links
+	MODULE
+
 2003-04-12 16:12  sofar
 
 	* sbin/lrm, var/lib/lunar/functions/depends.lunar: lrm fixes,
@@ -177,10 +187,4 @@
 	this works for everyone. Maybe tomorrow I'll look how this can be
 	used for the xfce cvs modules, but this new scheme does not
 	obliviate the old cvs handling code!!!
-
-2003-03-13 05:03  nhudson
-
-	* var/lib/lunar/sustained: 
-	Ok this is a start of adding coreutils to Lunar.  I removed
-	fileutils, sh-utils, and textutils and added in coreutils
 
