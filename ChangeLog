@@ -1,3 +1,9 @@
+2003-08-11 02:23  elaine
+
+	* var/lib/lunar/unset.sh: Scattershot, unset all variables not
+	needed for external programs (e.g. ./configure; make; make install 
+	 Usage: ( source /var/lib/lunar/unset.sh && ./configure [opts] )
+
 2003-08-10 01:18  csm
 
 	* var/lib/lunar/functions/: build.lunar, check.lunar,
