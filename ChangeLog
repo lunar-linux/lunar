@@ -1,213 +1,306 @@
-2002-09-02 02:38  tchan
+2002-09-02 17:22  sofar
 
-	* var/lib/lunar/functions/optimize.lunar: Okay, this version of optimize.lunar incorporates sofar's "menu checklist"
-	fix but does NOT include his nowrap code which is still broken.  This version
-	correctly has niki's fix for the Debug strip optimization.  sofar needs to
-	check the sense of his [ -n $NOWRAP ] test.  If I do NOT have $NOWRAP set,
-	then I obviously want the lunar gcc wrappers but his code will NOT export
-	the CC,CXX,CCC variables correctly.
+	* usr/share/man/man8/lunar.8: Updated man page for functionality
 	
-2002-09-02 02:04  csm
+2002-09-02 14:00  csm
 
-	* var/lib/lunar/functions/optimize.lunar: reverting to version 1.6 optimize.lunar.sofar is 1.8
+	* README, install, etc/lunar/config, etc/lunar/dialogrc,
+	etc/lunar/local/README, etc/lunar/local/depends/README,
+	etc/lunar/mirrors/GNOME, etc/lunar/mirrors/GNU,
+	etc/lunar/mirrors/KDE, etc/lunar/mirrors/KERNEL,
+	etc/lunar/mirrors/LAST_RESORT, etc/lunar/mirrors/SOURCEFORGE,
+	etc/lunar/mirrors/XFREE86, lib/lsb/init-functions, usr/sbin/colony,
+	usr/share/doc/lunar/COPYING-2.0, usr/share/doc/lunar/README,
+	usr/share/doc/lunar/gpl.html,
+	usr/share/doc/lunar/contributions/alan,
+	usr/share/doc/lunar/contributions/alex,
+	usr/share/doc/lunar/contributions/anders,
+	usr/share/doc/lunar/contributions/andrew,
+	usr/share/doc/lunar/contributions/artit,
+	usr/share/doc/lunar/contributions/arwed,
+	usr/share/doc/lunar/contributions/atani,
+	usr/share/doc/lunar/contributions/auke,
+	usr/share/doc/lunar/contributions/barak,
+	usr/share/doc/lunar/contributions/bfinch,
+	usr/share/doc/lunar/contributions/bjorn,
+	usr/share/doc/lunar/contributions/brian,
+	usr/share/doc/lunar/contributions/cal,
+	usr/share/doc/lunar/contributions/chris,
+	usr/share/doc/lunar/contributions/christoph,
+	usr/share/doc/lunar/contributions/christopher,
+	usr/share/doc/lunar/contributions/chuck,
+	usr/share/doc/lunar/contributions/csm,
+	usr/share/doc/lunar/contributions/daniel,
+	usr/share/doc/lunar/contributions/darookee,
+	usr/share/doc/lunar/contributions/david,
+	usr/share/doc/lunar/contributions/dnielsen,
+	usr/share/doc/lunar/contributions/doubletwist,
+	usr/share/doc/lunar/contributions/eric,
+	usr/share/doc/lunar/contributions/fasa,
+	usr/share/doc/lunar/contributions/ftbee,
+	usr/share/doc/lunar/contributions/gareth,
+	usr/share/doc/lunar/contributions/gerall,
+	usr/share/doc/lunar/contributions/hangman,
+	usr/share/doc/lunar/contributions/harley,
+	usr/share/doc/lunar/contributions/hendrik,
+	usr/share/doc/lunar/contributions/hgr,
+	usr/share/doc/lunar/contributions/jan,
+	usr/share/doc/lunar/contributions/jason,
+	usr/share/doc/lunar/contributions/jcr,
+	usr/share/doc/lunar/contributions/jean-michel,
+	usr/share/doc/lunar/contributions/jeff,
+	usr/share/doc/lunar/contributions/jim,
+	usr/share/doc/lunar/contributions/jjackson,
+	usr/share/doc/lunar/contributions/joel,
+	usr/share/doc/lunar/contributions/johan,
+	usr/share/doc/lunar/contributions/johnson,
+	usr/share/doc/lunar/contributions/jon,
+	usr/share/doc/lunar/contributions/jonathan,
+	usr/share/doc/lunar/contributions/joshua,
+	usr/share/doc/lunar/contributions/jyp,
+	usr/share/doc/lunar/contributions/kagan,
+	usr/share/doc/lunar/contributions/krisse,
+	usr/share/doc/lunar/contributions/kyle,
+	usr/share/doc/lunar/contributions/ladislav,
+	usr/share/doc/lunar/contributions/lasar,
+	usr/share/doc/lunar/contributions/livewire,
+	usr/share/doc/lunar/contributions/madar,
+	usr/share/doc/lunar/contributions/manolis,
+	usr/share/doc/lunar/contributions/marc,
+	usr/share/doc/lunar/contributions/mark,
+	usr/share/doc/lunar/contributions/mike,
+	usr/share/doc/lunar/contributions/nazadus,
+	usr/share/doc/lunar/contributions/newton,
+	usr/share/doc/lunar/contributions/nick,
+	usr/share/doc/lunar/contributions/nils,
+	usr/share/doc/lunar/contributions/paul,
+	usr/share/doc/lunar/contributions/paulo,
+	usr/share/doc/lunar/contributions/philippe,
+	usr/share/doc/lunar/contributions/pmartin,
+	usr/share/doc/lunar/contributions/richard,
+	usr/share/doc/lunar/contributions/robert,
+	usr/share/doc/lunar/contributions/robin,
+	usr/share/doc/lunar/contributions/rodzilla,
+	usr/share/doc/lunar/contributions/russel,
+	usr/share/doc/lunar/contributions/sasha,
+	usr/share/doc/lunar/contributions/seppo,
+	usr/share/doc/lunar/contributions/shawn,
+	usr/share/doc/lunar/contributions/sja8rd,
+	usr/share/doc/lunar/contributions/steve,
+	usr/share/doc/lunar/contributions/steven,
+	usr/share/doc/lunar/contributions/svolli,
+	usr/share/doc/lunar/contributions/target,
+	usr/share/doc/lunar/contributions/terry,
+	usr/share/doc/lunar/contributions/thomas,
+	usr/share/doc/lunar/contributions/toby,
+	usr/share/doc/lunar/contributions/tom,
+	usr/share/doc/lunar/contributions/torgeir,
+	usr/share/doc/lunar/contributions/trick,
+	usr/share/doc/lunar/contributions/vaino,
+	usr/share/doc/lunar/contributions/wes,
+	usr/share/doc/lunar/module-example/BUILD,
+	usr/share/doc/lunar/module-example/CONFIGURE,
+	usr/share/doc/lunar/module-example/CONFLICTS,
+	usr/share/doc/lunar/module-example/DEPENDS,
+	usr/share/doc/lunar/module-example/DETAILS,
+	usr/share/doc/lunar/module-example/POST_BUILD,
+	usr/share/doc/lunar/module-example/POST_INSTALL,
+	usr/share/doc/lunar/module-example/POST_REMOVE,
+	usr/share/doc/lunar/module-example/PRE_BUILD,
+	usr/share/doc/lunar/module-example/PRE_INSTALL,
+	usr/share/doc/lunar/module-example/PRE_REMOVE,
+	usr/share/doc/lunar/module-example/README,
+	usr/share/doc/lunar/module-example/services,
+	usr/share/doc/lunar/module-example/init.d/README,
+	usr/share/doc/lunar/module-example/init.d/ntp,
+	usr/share/doc/lunar/module-example/init.d/pure-ftpd,
+	usr/share/doc/lunar/module-example/init.d/sshd,
+	usr/share/doc/lunar/module-example/pam.d/README,
+	usr/share/doc/lunar/module-example/pam.d/chfn,
+	usr/share/doc/lunar/module-example/pam.d/chsh,
+	usr/share/doc/lunar/module-example/pam.d/ftp,
+	usr/share/doc/lunar/module-example/pam.d/gdm,
+	usr/share/doc/lunar/module-example/pam.d/passwd,
+	usr/share/doc/lunar/module-example/pam.d/samba,
+	usr/share/doc/lunar/module-example/pam.d/shadow,
+	usr/share/doc/lunar/module-example/pam.d/su,
+	usr/share/doc/lunar/module-example/profile.d/example.rc,
+	usr/share/doc/lunar/module-example/xinetd.d/README,
+	usr/share/doc/lunar/module-example/xinetd.d/exim,
+	usr/share/doc/lunar/module-example/xinetd.d/proftpd,
+	usr/share/doc/lunar/module-example/xinetd.d/pure-ftpd,
+	usr/share/man/man1/lvu.1, usr/share/man/man1/moonbase.1,
+	usr/share/man/man8/lcrash.8, usr/share/man/man8/lfirsttime.8,
+	usr/share/man/man8/lget.8, usr/share/man/man8/lin.8,
+	usr/share/man/man8/lrm.8, usr/share/man/man8/lunar.8,
+	var/lib/lunar/excluded, var/lib/lunar/protected,
+	var/lib/lunar/solo, bin/lvu, sbin/lget, sbin/lin, sbin/lrm,
+	sbin/lrm2, var/lib/lunar/subroutines, var/lib/lunar/sustained,
+	var/lib/lunar/functions/README,
+	var/lib/lunar/functions/config.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/locking.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/optimize.lunar,
+	var/lib/lunar/functions/optimize.lunar.sofar,
+	var/lib/lunar/functions/queue.lunar,
+	var/lib/lunar/functions/recovery.lunar,
+	var/lib/lunar/functions/sizes.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/menu/dmodule.menu, var/lib/lunar/menu/download.menu,
+	var/lib/lunar/menu/integrity.menu, var/lib/lunar/menu/mirrors.menu,
+	var/lib/lunar/menu/optimize.menu, var/state/lunar/gcc.x86,
+	sbin/lunar, sbin/lvis: updating lunar to theedge
 	
-2002-09-02 01:53  csm
+2002-09-02 14:00  csm
 
-	* var/lib/lunar/functions/optimize.lunar.sofar: adding in this file after reverting optimize.lunar
-	
-2002-09-01 16:32  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: set NOWRAP=yes in /etc/lunar/local/config to bypass the compile wrappers
-	
-2002-09-01 16:18  sofar
-
-	* var/lib/lunar/: menu/optimize.menu, functions/optimize.lunar: Misc fixes
-	
-2002-09-01 15:14  sofar
-
-	* var/lib/lunar/menu/download.menu: Even better explanation (used from man wget)
-	
-2002-09-01 15:10  sofar
-
-	* var/lib/lunar/menu/download.menu: Fixed proper explanation of values in dl rate.
-	
-2002-09-01 04:24  niki
-
-	* var/lib/lunar/functions/optimize.lunar: The bug that is discribed in bug no. 75, has some how been reactivated,
-	which i have disabled again. See the text in the file, or contact me
-	Niki Guldbrand <nikig@vip.cybercity.dk> for further info.
-	
-2002-08-31 04:42  tchan
-
-	* var/state/lunar/gcc.x86: Alphabetized the list and fixed a few entries. gcc does compile with
-	gcc-3.2 !  :-)
-	
-2002-08-30 15:08  sofar
-
-	* usr/share/man/man8/lin.8: Removed apprentice
-	
-2002-08-30 15:07  sofar
-
-	* sbin/lunar: Cleaning up apprentice
-	
-2002-08-30 15:05  sofar
-
-	* bin/lvu, etc/lunar/config, sbin/lin, sbin/lrm,
-	var/lib/lunar/apprentice, var/lib/lunar/subroutines: Eradicated apprentice, still looking for lose body parts...
-	
-2002-08-30 11:16  sofar
-
-	* sbin/lget: Bugfix: #130
-	
-2002-08-29 16:28  sofar
-
-	* var/lib/lunar/subroutines: now --nofix also leaves dependancy file untouched
-	
-2002-08-29 15:30  sofar
-
-	* var/lib/lunar/subroutines: Final fixes ot lin --nofix (tested && confirmed working fix)
-	
-2002-08-29 11:16  sofar
-
-	* var/lib/lunar/subroutines: Fix for the --nofix case
-	
-2002-08-29 10:12  sofar
-
-	* var/lib/lunar/subroutines: Small fix that possibly fixes the --nofix bug
-	
-2002-08-29 08:28  kongar
-
-	* var/lib/lunar/protected: added smtpd.conf from cyrus-sasl
-	
-2002-08-28 21:48  sofar
-
-	* var/lib/lunar/subroutines: Typo fix
-	
-2002-08-28 19:02  sofar
-
-	* var/lib/lunar/subroutines: Fixed removal of install_queue with test
-	
-2002-08-28 18:12  sofar
-
-	* var/lib/lunar/subroutines: Final fixes to fix_depends
-	
-2002-08-28 15:59  sofar
-
-	* var/lib/lunar/subroutines: Fix for missing depends
-	
-2002-08-28 11:07  sofar
-
-	* var/lib/lunar/subroutines: More fixes
-	
-2002-08-28 09:55  sofar
-
-	* var/lib/lunar/subroutines: Fix for queue length > 1 in fix_depends
-	
-2002-08-28 09:40  sofar
-
-	* var/lib/lunar/subroutines: More fix_depends fixes
-	
-2002-08-28 09:17  kongar
-
-	* bin/lvu, usr/share/man/man1/lvu.1: 
-	new feature, "lvu compiler module" to display the compiler version
-	used to create the ELF files of a modules.
-	
-	manpage is amended to reflect the changes.
-	
-2002-08-28 09:12  sofar
-
-	* var/lib/lunar/subroutines: Fix for exiled modules
-	
-2002-08-28 08:47  sofar
-
-	* var/lib/lunar/subroutines: Bugfixes.
-	
-2002-08-27 15:16  sofar
-
-	* var/lib/lunar/subroutines: Visual fix
-	
-2002-08-27 14:22  sofar
-
-	* var/lib/lunar/functions/modules.lunar: uniform layout
-	
-2002-08-27 14:14  sofar
-
-	* var/lib/lunar/subroutines: Bugfix #49
-	
-2002-08-27 14:13  xoritor
-
-	* var/lib/lunar/menu/optimize.menu: Removed Normal option for CC and CCC in menu.
-	
-2002-08-27 12:32  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: Let it work if the wrappers are missing
-	
-2002-08-26 23:46  sofar
-
-	* var/lib/lunar/subroutines: more fixes
-	
-2002-08-26 23:18  sofar
-
-	* var/lib/lunar/subroutines: Typo fix
-	
-2002-08-26 23:11  sofar
-
-	* var/lib/lunar/subroutines: One more fix for single module calls to fix_depends
-	
-2002-08-26 23:07  sofar
-
-	* var/lib/lunar/subroutines: Fix for single module list in run_depends
-	
-2002-08-26 22:44  sofar
-
-	* sbin/lin, var/lib/lunar/subroutines: Code merge: lfix -> theedge
-	
-2002-08-26 18:36  sofar
-
-	* usr/share/man/man8/lin.8: Added -p option to man page
-	
-2002-08-26 18:33  sofar
-
-	* sbin/lin: Added --probe|-p functionality to lin!
-	
-2002-08-26 17:11  sofar
-
-	* var/lib/lunar/subroutines: Fixes for cvs moonbase problems
-	
-2002-08-26 14:15  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: This should fix it permanently.
-	
-2002-08-25 20:47  sofar
-
-	* var/lib/lunar/subroutines: Some visual fixes
-	
-2002-08-25 19:30  sofar
-
-	* sbin/lin: Some visual and speed improvements
-	
-2002-08-25 13:12  sofar
-
-	* sbin/lget: Better english
-	
-2002-08-25 12:45  sofar
-
-	* etc/lunar/mirrors/SOURCEFORGE: New mirror in chechia
-	
-2002-08-23 11:39  sofar
-
-	* sbin/lin: Added compile fail log msg
-	
-2002-08-23 11:34  sofar
-
-	* sbin/lin: Fixed installwatchfile cleanup on failed compiles
-	
-2002-08-23 10:30  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: Suspect this was a typo!
-	
-2002-08-23 10:18  sofar
-
-	* sbin/lunar: Fix: wasn't installing LUNAR_MODULE conditionally
+	* README, install, etc/lunar/config, etc/lunar/dialogrc,
+	etc/lunar/local/README, etc/lunar/local/depends/README,
+	etc/lunar/mirrors/GNOME, etc/lunar/mirrors/GNU,
+	etc/lunar/mirrors/KDE, etc/lunar/mirrors/KERNEL,
+	etc/lunar/mirrors/LAST_RESORT, etc/lunar/mirrors/SOURCEFORGE,
+	etc/lunar/mirrors/XFREE86, lib/lsb/init-functions, usr/sbin/colony,
+	usr/share/doc/lunar/COPYING-2.0, usr/share/doc/lunar/README,
+	usr/share/doc/lunar/gpl.html,
+	usr/share/doc/lunar/contributions/alan,
+	usr/share/doc/lunar/contributions/alex,
+	usr/share/doc/lunar/contributions/anders,
+	usr/share/doc/lunar/contributions/andrew,
+	usr/share/doc/lunar/contributions/artit,
+	usr/share/doc/lunar/contributions/arwed,
+	usr/share/doc/lunar/contributions/atani,
+	usr/share/doc/lunar/contributions/auke,
+	usr/share/doc/lunar/contributions/barak,
+	usr/share/doc/lunar/contributions/bfinch,
+	usr/share/doc/lunar/contributions/bjorn,
+	usr/share/doc/lunar/contributions/brian,
+	usr/share/doc/lunar/contributions/cal,
+	usr/share/doc/lunar/contributions/chris,
+	usr/share/doc/lunar/contributions/christoph,
+	usr/share/doc/lunar/contributions/christopher,
+	usr/share/doc/lunar/contributions/chuck,
+	usr/share/doc/lunar/contributions/csm,
+	usr/share/doc/lunar/contributions/daniel,
+	usr/share/doc/lunar/contributions/darookee,
+	usr/share/doc/lunar/contributions/david,
+	usr/share/doc/lunar/contributions/dnielsen,
+	usr/share/doc/lunar/contributions/doubletwist,
+	usr/share/doc/lunar/contributions/eric,
+	usr/share/doc/lunar/contributions/fasa,
+	usr/share/doc/lunar/contributions/ftbee,
+	usr/share/doc/lunar/contributions/gareth,
+	usr/share/doc/lunar/contributions/gerall,
+	usr/share/doc/lunar/contributions/hangman,
+	usr/share/doc/lunar/contributions/harley,
+	usr/share/doc/lunar/contributions/hendrik,
+	usr/share/doc/lunar/contributions/hgr,
+	usr/share/doc/lunar/contributions/jan,
+	usr/share/doc/lunar/contributions/jason,
+	usr/share/doc/lunar/contributions/jcr,
+	usr/share/doc/lunar/contributions/jean-michel,
+	usr/share/doc/lunar/contributions/jeff,
+	usr/share/doc/lunar/contributions/jim,
+	usr/share/doc/lunar/contributions/jjackson,
+	usr/share/doc/lunar/contributions/joel,
+	usr/share/doc/lunar/contributions/johan,
+	usr/share/doc/lunar/contributions/johnson,
+	usr/share/doc/lunar/contributions/jon,
+	usr/share/doc/lunar/contributions/jonathan,
+	usr/share/doc/lunar/contributions/joshua,
+	usr/share/doc/lunar/contributions/jyp,
+	usr/share/doc/lunar/contributions/kagan,
+	usr/share/doc/lunar/contributions/krisse,
+	usr/share/doc/lunar/contributions/kyle,
+	usr/share/doc/lunar/contributions/ladislav,
+	usr/share/doc/lunar/contributions/lasar,
+	usr/share/doc/lunar/contributions/livewire,
+	usr/share/doc/lunar/contributions/madar,
+	usr/share/doc/lunar/contributions/manolis,
+	usr/share/doc/lunar/contributions/marc,
+	usr/share/doc/lunar/contributions/mark,
+	usr/share/doc/lunar/contributions/mike,
+	usr/share/doc/lunar/contributions/nazadus,
+	usr/share/doc/lunar/contributions/newton,
+	usr/share/doc/lunar/contributions/nick,
+	usr/share/doc/lunar/contributions/nils,
+	usr/share/doc/lunar/contributions/paul,
+	usr/share/doc/lunar/contributions/paulo,
+	usr/share/doc/lunar/contributions/philippe,
+	usr/share/doc/lunar/contributions/pmartin,
+	usr/share/doc/lunar/contributions/richard,
+	usr/share/doc/lunar/contributions/robert,
+	usr/share/doc/lunar/contributions/robin,
+	usr/share/doc/lunar/contributions/rodzilla,
+	usr/share/doc/lunar/contributions/russel,
+	usr/share/doc/lunar/contributions/sasha,
+	usr/share/doc/lunar/contributions/seppo,
+	usr/share/doc/lunar/contributions/shawn,
+	usr/share/doc/lunar/contributions/sja8rd,
+	usr/share/doc/lunar/contributions/steve,
+	usr/share/doc/lunar/contributions/steven,
+	usr/share/doc/lunar/contributions/svolli,
+	usr/share/doc/lunar/contributions/target,
+	usr/share/doc/lunar/contributions/terry,
+	usr/share/doc/lunar/contributions/thomas,
+	usr/share/doc/lunar/contributions/toby,
+	usr/share/doc/lunar/contributions/tom,
+	usr/share/doc/lunar/contributions/torgeir,
+	usr/share/doc/lunar/contributions/trick,
+	usr/share/doc/lunar/contributions/vaino,
+	usr/share/doc/lunar/contributions/wes,
+	usr/share/doc/lunar/module-example/BUILD,
+	usr/share/doc/lunar/module-example/CONFIGURE,
+	usr/share/doc/lunar/module-example/CONFLICTS,
+	usr/share/doc/lunar/module-example/DEPENDS,
+	usr/share/doc/lunar/module-example/DETAILS,
+	usr/share/doc/lunar/module-example/POST_BUILD,
+	usr/share/doc/lunar/module-example/POST_INSTALL,
+	usr/share/doc/lunar/module-example/POST_REMOVE,
+	usr/share/doc/lunar/module-example/PRE_BUILD,
+	usr/share/doc/lunar/module-example/PRE_INSTALL,
+	usr/share/doc/lunar/module-example/PRE_REMOVE,
+	usr/share/doc/lunar/module-example/README,
+	usr/share/doc/lunar/module-example/services,
+	usr/share/doc/lunar/module-example/init.d/README,
+	usr/share/doc/lunar/module-example/init.d/ntp,
+	usr/share/doc/lunar/module-example/init.d/pure-ftpd,
+	usr/share/doc/lunar/module-example/init.d/sshd,
+	usr/share/doc/lunar/module-example/pam.d/README,
+	usr/share/doc/lunar/module-example/pam.d/chfn,
+	usr/share/doc/lunar/module-example/pam.d/chsh,
+	usr/share/doc/lunar/module-example/pam.d/ftp,
+	usr/share/doc/lunar/module-example/pam.d/gdm,
+	usr/share/doc/lunar/module-example/pam.d/passwd,
+	usr/share/doc/lunar/module-example/pam.d/samba,
+	usr/share/doc/lunar/module-example/pam.d/shadow,
+	usr/share/doc/lunar/module-example/pam.d/su,
+	usr/share/doc/lunar/module-example/profile.d/example.rc,
+	usr/share/doc/lunar/module-example/xinetd.d/README,
+	usr/share/doc/lunar/module-example/xinetd.d/exim,
+	usr/share/doc/lunar/module-example/xinetd.d/proftpd,
+	usr/share/doc/lunar/module-example/xinetd.d/pure-ftpd,
+	usr/share/man/man1/lvu.1, usr/share/man/man1/moonbase.1,
+	usr/share/man/man8/lcrash.8, usr/share/man/man8/lfirsttime.8,
+	usr/share/man/man8/lget.8, usr/share/man/man8/lin.8,
+	usr/share/man/man8/lrm.8, usr/share/man/man8/lunar.8,
+	var/lib/lunar/excluded, var/lib/lunar/protected,
+	var/lib/lunar/solo, bin/lvu, sbin/lget, sbin/lin, sbin/lrm,
+	sbin/lrm2, var/lib/lunar/subroutines, var/lib/lunar/sustained,
+	var/lib/lunar/functions/README,
+	var/lib/lunar/functions/config.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/locking.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/optimize.lunar,
+	var/lib/lunar/functions/optimize.lunar.sofar,
+	var/lib/lunar/functions/queue.lunar,
+	var/lib/lunar/functions/recovery.lunar,
+	var/lib/lunar/functions/sizes.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/menu/dmodule.menu, var/lib/lunar/menu/download.menu,
+	var/lib/lunar/menu/integrity.menu, var/lib/lunar/menu/mirrors.menu,
+	var/lib/lunar/menu/optimize.menu, var/state/lunar/gcc.x86,
+	sbin/lunar, sbin/lvis: Initial revision
 	
