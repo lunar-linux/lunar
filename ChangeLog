@@ -1,3 +1,8 @@
+2004-06-23 13:24  prox
+
+	* var/lib/lunar/menu/optimize.menu: display one row on multi cpu
+	systems
+
 2004-06-23 11:40  sofar
 
 	* var/lib/lunar/menu/optimize.menu: Jerry prolly already had this
@@ -129,15 +134,4 @@
 
 	* var/lib/lunar/functions/check.lunar: Fixing run_fix: it would fix
 	only held modules. Also cleaned up quite a bit.
-
-2004-04-24 19:08  sofar
-
-	* var/lib/lunar/functions/main.lunar: Env var pollution pro bono,
-	get your env var pollution!!!
-
-2004-04-24 15:45  sofar
-
-	* var/lib/lunar/functions/main.lunar: Moe: I really don't like the
-	workaround you used for the download procedure .. theedge is
-	lget'ed twice f.e. [FIXED]
 
