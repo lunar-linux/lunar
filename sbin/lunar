@@ -26,6 +26,7 @@
 #                                                          #
 ############################################################
 
+
 show_modules()	
 { 
   for  MODULE in `list_modules "$1"`;  do
@@ -44,6 +45,7 @@ show_modules()
   done
 }
 
+
 show_sections()  {
   for SECTION in $(list_sections);  do
     [ -z "$(list_modules $SECTION)" ] || {
@@ -52,6 +54,8 @@ show_sections()  {
     }
   done
 }
+
+
 select_section() {
   $DIALOG  --title "Section Selection Menu"  \
            --default-item  "$SECTION"        \
@@ -62,6 +66,8 @@ select_section() {
            0 0 10                            \
            `show_sections`
 }
+
+
 add_pkgs()  { (
   while
     SECTION=`select_section`
@@ -89,6 +95,8 @@ add_pkgs()  { (
     done
   done
 ) }
+
+
 show_file()	{
   if  [  -f  $1  ];  then
     if  [  "`file  -b  $1  |  cut  -d ' '  -f1`"  == "bzip2" ];  then
@@ -101,6 +109,8 @@ show_file()	{
     return  1
   fi
 }
+
+
 file_list() {
   LIST=`ls  $1`
   for  LINE  in  $LIST;  do
@@ -108,12 +118,16 @@ file_list() {
     echo  `file  -b  $1/$LINE  |  cut  -d ' ' -f1`
   done
 }
+
+
 file_menu() {
   FILE_LIST=`file_list $1`
   echo  $1/`$DIALOG  --title  "Please select a file."  \
                      --menu  "" 0 0 0                  \
                      $FILE_LIST`
 }
+
+
 show_installed_modules()  {
   for  LINE  in  `sort  $MODULE_STATUS_BACKUP`;  do
      MODULE=`echo  "$LINE"    |  cut  -d : -f1`
@@ -138,6 +152,8 @@ show_installed_modules()  {
     fi
   done
 }
+
+
 remove_pkgs()	{
   while
     if  [  -z  "$INSTALLED_MODULES"  ];  then
@@ -168,6 +184,8 @@ remove_pkgs()	{
     fi
   done
 }
+
+
 update_pkgs() {
 
   if  ps  -C  lin  >  /dev/null;  then
@@ -185,6 +203,8 @@ update_pkgs() {
   fi
 
 }
+
+
 rebuild()  {
   rm  -rf  $INSTALL_QUEUE
 
@@ -214,6 +234,7 @@ rebuild()  {
   rm                      $INSTALL_QUEUE
 }
 
+
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
     SHORT="Short Description Unavailable"
@@ -235,6 +256,7 @@ make_checklist()  {
   done
 }
 
+
 process_section()  {
      KEEP_LIST=$2
 
@@ -246,6 +268,7 @@ process_section()  {
     fi
   done
 }
+
 
 select_pkgs()  {
   SELECT_TITLE="Module Toggle Selection Menu"
@@ -267,6 +290,8 @@ select_pkgs()  {
     fi
   done
 }
+
+
 make_hold_checklist()  {
   for  LINE in `sort  $MODULE_STATUS_BACKUP`;  do
      MODULE=`echo  "$LINE"  |  cut  -d : -f1`
@@ -292,6 +317,8 @@ make_hold_checklist()  {
     fi
   done
 }
+
+
 hold_pkgs()  {
    CHECKLIST=`make_hold_checklist`
   HOLD_TITLE="Select modules to hold or unhold"
@@ -327,6 +354,8 @@ hold_pkgs()  {
   fi
 
 }
+
+
 module_menu() {
   while
     U_HELP="Current software hinders crackers' attempts to infiltrate your box"
@@ -363,6 +392,8 @@ module_menu() {
     esac
   done
 }
+
+
 grep_install_logs() {
   if  WHAT=`$DIALOG  --inputbox                                \
                     "Please enter full path and name of file"  \
@@ -373,6 +404,7 @@ grep_install_logs() {
   fi
 }
 
+
 set_email()  {
   if  ADMIN=`$DIALOG  --ok-label  "Commit"         \
                          --inputbox                   \
@@ -382,6 +414,8 @@ set_email()  {
     write_config "ADMIN=" "    ADMIN=$ADMIN"
   fi
 }
+
+
 set_delay()  {
   if  PROMPT_DELAY=`$DIALOG  --ok-label  "Commit"  \
                              --inputbox            \
@@ -391,6 +425,7 @@ set_delay()  {
     write_config "PROMPT_DELAY=" "PROMPT_DELAY=$PROMPT_DELAY"
   fi
 }
+
 
 queue_menu()  {
   while
@@ -428,6 +463,7 @@ queue_menu()  {
     esac
   done
 }
+
 
 maintenance_menu() {
   while
@@ -489,6 +525,8 @@ log_menu()  {
     esac
   done
 }
+
+
 feature_menu()  {
   A_HELP="Create convenient auto-install scripts for common executables?"
   B_HELP="Administrate groups of Unix/Linux boxes?"
@@ -630,6 +668,7 @@ feature_menu()  {
   fi
 }
 
+
 option_menu()  {
   while
     P_HELP="Enter the default delay time for prompts"
@@ -670,10 +709,14 @@ option_menu()  {
     esac
   done
 }
+
+
 goodbye() {
   echo  "Have a good day."
   exit
 }
+
+
 background_execute() {
   $DIALOG  --msgbox  "Processing queues in the background."  0 0
 
@@ -690,6 +733,8 @@ background_execute() {
 
   goodbye
 }
+
+
 foreground_execute() {
   [  -f         $REMOVE_QUEUE  ]  &&
   lrm  `cat  $REMOVE_QUEUE`
@@ -701,6 +746,8 @@ foreground_execute() {
 
   goodbye
 }
+
+
 main_menu()  {
   while
     M_HELP="Easy module management"
@@ -757,8 +804,9 @@ main_menu()  {
     esac
   done
 }
+
+
 main() {
-  rm  -f  $UPDATE_SCRIPT
   case  $1  in
       renew)  update_installed
               upgrade_install_queue    ;;
@@ -768,6 +816,8 @@ main() {
           *)  main_menu                ;;
   esac
 }
+
+
 DIALOG="dialog
 --backtitle
 Lunar Module Management Utility
@@ -794,4 +844,6 @@ LUNAR_SECTION=`find_section  $LUNAR_MODULE`
 LUNAR_DETAILS="$MOONBASE/$LUNAR_SECTION/$LUNAR_MODULE/DETAILS"
 LUNAR_VERSION=`grep  "UPDATED="  $LUNAR_DETAILS  | 
 sed  "s/UPDATED=//"`
+
 main  $*
+
