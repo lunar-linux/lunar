@@ -1,3 +1,8 @@
+2004-09-27 21:41  sofar
+
+	* var/lib/lunar/functions/main.lunar: #452: force double checking
+	  on $LUNAR_MODULE with some msgs.
+
 2004-09-26 20:47  sofar
 
 	* var/lib/lunar/functions/main.lunar: #341: explicitly omit core
