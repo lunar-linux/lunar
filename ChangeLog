@@ -1,3 +1,13 @@
+2005-03-23 08:42  sofar
+
+	* bin/lvu: Wanna get nitpicking? eat this!
+
+2005-03-23 00:23  hardkrash
+
+	* bin/lvu: Cleaning up the activity log so that it only finds the
+	  actual module Not other modules with the string of module name in
+	  it
+
 2005-03-20 16:53  sofar
 
 	* var/lib/lunar/functions/: check.lunar, modules.lunar,
