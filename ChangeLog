@@ -52,10 +52,3 @@
 	downloads now default to OFF <sofar> and gpg: syntax has changed a
 	bit
 
-2003-09-24 12:11  nhudson
-
-	* var/lib/lunar/excluded: 
-	Adding /etc/bonobo-activation and its file to excluded because for
-	some reason it gets deleted when you remove evolution which is bad!
-	bad! bad!
-
