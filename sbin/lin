@@ -74,11 +74,12 @@ process_parameters()  {
                 -f|--fix)  export FIX="$1";            shift 1  ;;
               -n|--nofix)  export FIX="--fix"
                            export NOFIX="$1";          shift 1  ;;
-	 -d|--fixdepends)  export FIXDEPENDS="$1";
+	 -d|--fixdepends)  export FIXDEPENDS="$1"
 	 		   export FIX="$1";            shift 1  ;;
                       -s)  export SEPARATE="$1";       shift 1  ;;
                    --url)  export BASE_URL="$2";       shift 2  ;;
-                 --debug)  export LUNAR_DEBUG=on;      shift    ;;
+                 --debug)  (( LUNAR_DEBUG++ )) 
+		           export LUNAR_DEBUG;         shift 1  ;;
                    --pam)  lin -c $(find_pam_aware);   shift 1  ;;
                        *)  help                                 ;;
       esac
@@ -94,6 +95,7 @@ strip_parameters()  {
     if  echo  "" $1  |  grep  -q  "^ -";  then
       case  $1  in
                   --deps)  shift 1  ;;
+ 		 --debug)  shift 1  ;;
         -r|--reconfigure)  shift 1  ;;
                   --from)  shift 2  ;;
                 --silent)  shift 1  ;;

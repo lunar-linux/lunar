@@ -140,71 +140,67 @@ process_directories() {
 process_lrm_queue() {
   debug_msg "process_lrm_queue ($@)"
 
-   export TEMP_FILE=$(temp_create "lrm")
-   export TEMP2_FILE=$(temp_create "lrm")
+  export TEMP_FILE=$(temp_create "lrm")
+  export TEMP2_FILE=$(temp_create "lrm")
 
-   [ "$LUNAR_DEBUG" == "on" ] && 
-   [ -s "$LRM_QUEUE" ]    && 
-      echo -e "\nWill process the modules: `cat $LRM_QUEUE | xargs`"
+  while [ -s "$LRM_QUEUE" ]
+  do   
+    MODULE=$(remove_queue $LRM_QUEUE)
+    verbose_msg "${TEMP}removing \"$MODULE\""
 
-   while [ -s "$LRM_QUEUE" ]
-   do   
-      MODULE=`remove_queue $LRM_QUEUE`
-      [ "$TEST" == "on" ] && TEMP="-- TEST MODE -- : "
-      verbose_msg "${TEMP}removing \"$MODULE\""
+    run_details $MODULE &> /dev/null
 
-      run_details $MODULE &> /dev/null
+    VERSION=$(installed_version $MODULE)
+    INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
+    MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
 
-       VERSION=`installed_version  $MODULE`
-      INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-       MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
+    # time-out 1: PRE_REMOVE
+    run_module_file $MODULE PRE_REMOVE 
 
-      run_module_file $MODULE PRE_REMOVE 
-
-      while read TARGET ; do
-         if ! [ -e "$TARGET" ] ; then
-            continue
-         fi
-
-         if grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED ; then
-            verbose_msg "\"$TARGET\" is protected or excluded!!"
-            continue
-         fi
-
-         if [ -d "$TARGET" ] ; then
-            echo "$TARGET" >> $TEMP_FILE
-            continue
-         fi
-
-         handle_config_files $TARGET
-
-         remove_something $TARGET
-
-      done < $INST_LOG
-
-      process_directories $TEMP_FILE $TEMP2_FILE
-
-      run_module_file $MODULE POST_REMOVE
-
-      if [ "$KEEPCONFIG" == "on" ] ; then
-        verbose_msg "skipping removal of dependency listing and configs"
-      else
-        verbose_msg "removing module from dependency listing and configs"
-        remove_depends  $MODULE
+    while read TARGET ; do
+      if ! [ -e "$TARGET" ] ; then
+        continue
       fi
 
-      verbose_msg "removing module from installed list.. "
-      
-      [ "$TEST" != "on" ] && remove_module  $MODULE
+      if grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED ; then
+        verbose_msg "\"$TARGET\" is protected or excluded!!"
+        continue
+      fi
 
-      message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
-                "${MODULE_COLOR}${MODULE}"    \
-                "${DEFAULT_COLOR}"
+      if [ -d "$TARGET" ] ; then
+        echo "$TARGET" >> $TEMP_FILE
+        continue
+      fi
 
-      [ "$TEST" != "on" ] &&
-      activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
-   done
+      handle_config_files $TARGET
+
+      remove_something $TARGET
+
+    done < $INST_LOG
+
+    process_directories $TEMP_FILE $TEMP2_FILE
+
+    # time-out 2: POST_REMOVE
+    run_module_file $MODULE POST_REMOVE
+
+    if [ "$KEEPCONFIG" == "on" ] ; then
+      verbose_msg "skipping removal of dependency listing and configs"
+    else
+      verbose_msg "removing module from dependency listing and configs"
+      remove_depends  $MODULE
+    fi
+
+    # administration duty time:
+    verbose_msg "removing module from installed list.. "
+    remove_module $MODULE
+
+    message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
+             "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+    activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
+  done
 }
+
 
 check_status() {
    module_installed $MODULE || {
@@ -229,90 +225,67 @@ check_status() {
 
 
 downgrade() {
-   # a local function for listing the contents of install cache
-   list_available_cache()
-   {
-      ls -1 $INSTALL_CACHE/$MODULE-* |
-      while read LINE
-      do
-         echo "  $LINE"
-      done
-      exit 1
-   }
+  # a local function for listing the contents of install cache
+  list_available_cache() {
+    ls -1 $INSTALL_CACHE/$MODULE-* | while read LINE ; do
+      echo "$LINE"
+    done
+    exit 1
+  }
    
-   if [ "$TEST" != "on" ]; then 
-      root_check || exit 1
-   fi
+  root_check || exit 1
 
-   verbose_msg "running \"$MODULE\" DETAILS file"
-   run_details $MODULE &> /dev/null || return 1
+  verbose_msg "running \"$MODULE\" DETAILS file"
+  run_details $MODULE &> /dev/null || return 1
 
-   [ -z "$1" ] && {
-      echo "No version is entered. The below is the list of available files."
-      list_available_cache   
-   }
+  if [ -z "$1" ] ; then
+    echo "No version is entered. The below is the list of available files."
+    list_available_cache   
+  fi
 
-   local FILENAME="$MODULE-$1-$BUILD.tar.bz2"
-   [ -s $INSTALL_CACHE/$FILENAME ] || {
-      echo "Desired version is not available. Here is the available files"
+  if [ ! -s $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 ] ; then 
+    echo "Desired version is not available. Here is the available files"
+    list_available_cache
+  fi
+
+  verbose_msg "checking if \"$MODULE\" is installed"
+
+  if [ -n "$(installed_version $MODULE)" ] ; then 
+    verbose_msg "\"$(installed_version $MODULE)\" of \"$MODULE\" is installed at the moment"
+
+    if [ "$1" == "$I_VERSION" ] ; then
+      echo "The downgrade version is the same as the installed version"
+      echo "Here is the available files." 
       list_available_cache
-   }
+    fi
 
-   verbose_msg "checking if \"$MODULE\" is installed"
-   local I_VERSION=`installed_version $MODULE`
-   [ -n "$I_VERSION" ] && 
-   {
-      verbose_msg "\"$I_VERSION\" of \"$MODULE\" is installed at the moment"
+    verbose_msg "removing \"$MODULE-$(installed_version $MODULE)\""
+    lrm -ts $MODULE || lrm -s $MODULE
 
-      [ "$LUNAR_DEBUG" == "on" ] && 
-         echo -n "  Checking if desired version is the installed version..."
+  else
+    verbose_msg "\"$MODULE\" is NOT installed at the moment"
+  fi
 
-      [ "$1" == "$I_VERSION" ] && 
-      {
-         [ "$LUNAR_DEBUG" == "on" ] && echo "YES!!"
-         echo "The downgrade version is the same as the installed version"
-         echo "Here is the available files." 
-         list_available_cache
-      } || 
-      {
-         [ "$LUNAR_DEBUG" == "on" ] && echo "NO"
-      }
+  verbose_msg "installing \"$MODULE-$1\""
+  verbose_msg "extracting cached install file..."
+  
+  bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
+  verbose_msg "adding module to installed list"
 
-      verbose_msg "removing \"$MODULE-$I_VERSION\""
-      [ "$TEST" == "on" ] && lrm -ts $MODULE || lrm -s $MODULE
+  bzcat $INSTALL_CACHE/$FILENAME | 
+  tar -kx $TAR_P -C / 2>/dev/null >/dev/null
+  verbose_msg "adding module to installed list"
+  add_module $MODULE installed  $1
+  activity_log  "lrm downgrade"  "$MODULE"  "$1"  "success"
 
-   } || {
-      verbose_msg "\"$MODULE\" is NOT installed at the moment"
-   }
-
-   verbose_msg "installing \"$MODULE-$1\""
-   verbose_msg "extracting cached install file..."
-   [ "$TEST" == "on" ] && 
-   {
-      [ "$LUNAR_DEBUG" == "on" ] &&
-      bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C /  ||
-      bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
-      verbose_msg "adding module to installed list"
-   }
-
-   [ "$TEST" != "on" ] && 
-   {
-      [ "$LUNAR_DEBUG" == "on" ] &&
-      bzcat $INSTALL_CACHE/$FILENAME | tar -kx $TAR_P -C / ||
-      bzcat $INSTALL_CACHE/$FILENAME | 
-      tar -kx $TAR_P -C / 2>/dev/null >/dev/null
-      verbose_msg "adding module to installed list"
-      add_module $MODULE installed  $1
-      activity_log  "lrm downgrade"  "$MODULE"  "$1"  "success"
-   }
-    message  "${RESURRECT_COLOR}Downgraded module:"  \
-             "${MODULE_COLOR}${MODULE}"              \
-             "${DEFAULT_COLOR}"                      \
-             "version"                               \
-             "${VERSION_COLOR}${1}"                  \
-             "${DEFAULT_COLOR}" 
+  message  "${RESURRECT_COLOR}Downgraded module:"  \
+           "${MODULE_COLOR}${MODULE}"              \
+           "${DEFAULT_COLOR}"                      \
+           "version"                               \
+           "${VERSION_COLOR}${1}"                  \
+           "${DEFAULT_COLOR}" 
    
-   exit
+  exit
 }
 
 create_lrm_queue() {
@@ -378,7 +351,8 @@ while true ; do
       -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
       -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
       -t|--test       ) export TEST=on;        shift ;;
-      --debug         ) export LUNAR_DEBUG=on; shift;;
+         --debug      ) (( LUNAR_DEBUG++ ))
+		        export LUNAR_DEBUG;    shift ;;
       --) shift; break ;;
        *) help;  break ;;
    esac

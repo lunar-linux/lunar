@@ -60,6 +60,7 @@ process_parameters()  {
          --from)  SOURCE_CACHE=$2;  shift 2  ;;
          --help)  help;             exit  1  ;;
           --url)  BASE_URL="$2";    shift 2  ;;
+        --debug)  (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG; shift 1 ;;
               *)  help                       ;;
       esac
 
@@ -72,24 +73,20 @@ process_parameters()  {
 
 
 strip_parameters()  {
-
-  while  [  -n  "$1"  ];  do
-
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-
-      case  $1  in
+  while [ -n "$1" ] ; do
+    if echo "" $1 | grep -q "^ -" ; then
+      case $1 in
         --from)  shift 2  ;;
         --help)  shift 1  ;;
          --url)  shift 2  ;;
+       --debug)  shift 1  ;;
              *)  shift 1  ;;
       esac
-
-    else  echo  $1
-          shift 
+    else
+      echo $1
+      shift 
     fi
-
   done
-
 }
 
 

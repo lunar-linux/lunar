@@ -84,9 +84,6 @@ create_install_log() {
   filter  "$LOCAL_EXCLUDED"  |
   exists                     >  $TMP_INST_LOG
 
-  if [ "$ARCHIVE" == "on" ] ; then
-    echo "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_INST_LOG
-  fi
   echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
   echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
