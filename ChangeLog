@@ -1,3 +1,15 @@
+2003-11-26 20:52  sofar
+
+	* bin/lvu, var/lib/lunar/functions/build.lunar,
+	var/lib/lunar/functions/download.lunar: lvu eert fix, adding
+	prototype cpan module handling (ugly, yes)
+
+2003-11-26 16:59  tchan
+
+	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
+	blacklist.SPARC: Added uml to the blacklist.  Its an x86 module
+	ONLY.
+
 2003-11-25 23:22  sofar
 
 	* var/lib/lunar/functions/uniqid.lunar: Fixes moonbase downloads
