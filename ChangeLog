@@ -1,3 +1,12 @@
+2002-12-16 10:48  sofar
+
+	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Better wrappers: sed
+	off wrapper path to make ccache work again.
+
+2002-12-11 21:39  xoritor
+
+	* var/lib/lunar/subroutines: Fixed KEEP_SOURCE bug.
+
 2002-12-09 21:24  xoritor
 
 	* sbin/lget: Adding quiet opton to cvs update and checkout, now
@@ -308,8 +317,4 @@
 	(ccache distcc gcc and not distcc ccache gcc), and adding distcc to
 	the c++ compiler addons, since mozilla and others compiled fine
 	with it.
-
-2002-09-12 23:53  sofar
-
-	* var/lib/lunar/compilers/c++: Adding c++ wrapper
 
