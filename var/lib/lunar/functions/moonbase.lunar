@@ -30,7 +30,7 @@ get_moonbase () {(
   export FUZZY=off PARTIAL=off
   rm -f $SOURCE_CACHE/$SOURCE /tmp/$SOURCE
 
-  wget -O - >/dev/null "www.lunar-linux.org/houston?loc=$UNIQID"
+  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID"
 
   if get_url "$MOONBASE_URL" $(basename $MOONBASE_URL) ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
