@@ -113,6 +113,8 @@ create_module_index() {
   # silently fail if we cannot write to $MODULE_INDEX, it is okay
   # for this to fail in case we are a mere user using lvu's search
   # functionality
+  touch $MODULE_INDEX &> /dev/null
+
   if [ ! -w $MODULE_INDEX ] ; then
     return 0
   fi
