@@ -78,7 +78,7 @@ get_cvs() {(
   
   if [[ "$GOT_CVS" == "yes" ]]; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-    tar cjf $SOURCE_CACHE/$SOURCE $CVSMODULE
+    tar cjf $SOURCE_CACHE/$2 $CVSMODULE
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
   fi
