@@ -280,9 +280,9 @@ rework_module() {
 
   # remove whatever depends was residing in the depends state file and
   # append the new output:
+  remove_depends $MOD_V_SNAME                              &&
   lock_file $DEPENDS_STATUS                                &&
   lock_file $DEPENDS_STATUS_BACKUP                         &&
-  grep -v "^$MOD_V_SNAME:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS  &&
   run_depends $MOD_V_SNAME >> $DEPENDS_STATUS              &&
   cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP             &&
   unlock_file $DEPENDS_STATUS                              &&
