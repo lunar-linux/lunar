@@ -359,22 +359,6 @@ run_build()  {
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
-  if [ -x ./configure ] || [ -x ./src/configure ] ; then
-    if [ -f /var/lib/lunar/localsaconfig ]; then
-      if [ -f /var/cache/config/$MODULE ] ; then
-        message "${MESSAGE_COLOR}These are your current -- config options for module ${MODULE_COLOR}$MODULE"
-        message "${FILE_COLOR}(/var/cache/config/$MODULE)"
-        cat /var/cache/config/$MODULE
-      fi
-	  
-      if query "Do you wish to add -- options to ./configure?" n ; then
-        edit_file /var/cache/config/$MODULE
-        OPTS="$OPTS $(cat /var/cache/config/$MODULE)"
-        message "${MESSAGE_COLOR} OPTS= ${MODULE_COLOR}$OPTS"
-      fi
-    fi
-  fi
-
   if [ -s $SCRIPT_DIRECTORY/BUILD ] ; then
     run_module_file $MODULE BUILD
   else

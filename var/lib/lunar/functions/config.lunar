@@ -26,7 +26,7 @@ set_config() {
   if [ "$1" == "$LOCAL_CONFIG" ] ; then
     NEW=$(printf "%16s=%s" "$2" "$3")
   else
-    NEW="$2=$3"
+    NEW="$2=\"$3\""
   fi
 
   # on-demand creation
