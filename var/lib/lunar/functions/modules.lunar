@@ -99,7 +99,7 @@ create_module_index() {
   TMP_INDEX=$(temp_create "module.index")
 
   # here we have two options: system moonbase or custom:
-  if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
+  if [ "$MOONBASE" == "/var/lib/lunar/moonbase" -a -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ] ; then
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
