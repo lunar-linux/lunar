@@ -49,7 +49,7 @@ set_config() {
 
 get_config() {
   if [ -f $1 ] ; then
-    cat $1 | grep -w "$2=.*" | cut -d= -f2- | sed 's/"//g'
+    cat $1 | grep -w "$2=.*" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
   fi
 }
 
