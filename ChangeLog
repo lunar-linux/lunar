@@ -234,8 +234,3 @@
 	time-outing if dbguin is down... we prolly have to merge this into
 	lunar ASAP.
 
-2003-11-19 01:20  elaine
-
-	* var/lib/lunar/functions/modules.lunar: Providing for ARCH
-	specific script files *note* all x86 = <SCRIPT>.i386
-
