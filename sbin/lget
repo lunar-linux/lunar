@@ -164,7 +164,8 @@ connect()  {
 
   if  !  ifconfig  |  grep  -q  "^eth"   &&
       !  ifconfig  |  grep  -q  "^wlan"  &&
-      !  ifconfig  |  grep  -q  "^ppp";  then
+      !  ifconfig  |  grep  -q  "^ppp"   &&
+      !  ifconfig  |  grep  -q  "^tun";  then
     pon
 
     # Timeout in deciseconds to wait for Interface to come up.
