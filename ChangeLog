@@ -164,12 +164,3 @@
 	* var/lib/lunar/functions/config.lunar: fixed issue with list of
 	initscript being return with quotes
 
-2004-03-30 20:52  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Prevent RECONFIGURE from
-	propagating.
-
-2004-03-30 12:56  sofar
-
-	* var/lib/lunar/menu/optimize.menu: Thanks Victor.
-
