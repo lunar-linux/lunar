@@ -1,3 +1,11 @@
+2003-04-01 18:33  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: BAH
+
+2003-04-01 18:25  wizfactor
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed typo
+
 2003-03-31 20:32  sofar
 
 	* var/lib/lunar/functions/download.lunar: Did not spot this typo
