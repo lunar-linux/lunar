@@ -1,0 +1,86 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# bootloader-grub.plugin - plugin that performs grub        #
+#                          maintenance                      #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_kernel_updatebootloader_grub() {
+	# preferred? - master switch for experienced users
+	if [ -n "$BOOTLOADER" -a "$BOOTLOADER" != "grub" ]; then
+		return 2
+	fi
+	debug_msg "plugin_kernel_updatebootloader_grub ($@)"
+
+	if ! ( grep -q "$1" /boot/grub/menu.lst && grep -q "$1.old" /boot/grub/menu.lst ) ; then
+		IFS_OLD=$IFS
+		export IFS="
+"
+
+		rm -rf /boot/grub/menu.lst.new
+		cp /boot/grub/menu.lst /boot/grub/menu.lst.old
+
+		(( IMAGE_COUNT=0 ))
+		for LINE in $(cat /boot/grub/menu.lst) ; do
+			if echo $LINE | grep -q "title" ; then
+				# To create a separating line between entries
+				echo "" >> /boot/grub/menu.lst.new
+
+				if (( IMAGE_COUNT == 0 )) ; then
+					if ! grep -q "$1" /boot/grub/menu.lst ; then
+						printf "title   %s\nkernel  %s\nroot    %s\n\n" $2 $GRUB_BOOT/$1 $GRUB_ROOT "$GRUB_IMAGE_ENTRY" >> /boot/grub/menu.lst.new
+					fi
+				 if [ -f /boot/"$1.old" ] && ! grep -q "$1.old" /boot/grub/menu.lst ; then
+						printf "title   %s\nkernel  %s\nroot    %s\n\n" $2.old $GRUB_BOOT/$1.old $GRUB_ROOT "$GRUB_IMAGE_ENTRY" >> /boot/grub/menu.lst.new
+					fi
+				fi
+				(( IMAGE_COUNT++ ))
+			fi
+			if (( IMAGE_COUNT == 14 )) ; then
+				break
+			fi
+			echo $LINE >> /boot/grub/menu.lst.new
+		done
+
+		if (( IMAGE_COUNT == 0 )) ; then
+			if ! grep -q "$1" /boot/grub/menu.lst ; then
+				printf "title   %s\nkernel  %s\nroot    %s\n\n" $2 $GRUB_BOOT/$1 $GRUB_ROOT "$GRUB_IMAGE_ENTRY" >> /boot/grub/menu.lst.new
+			fi
+			if [ -f /boot/"$1.old" ] && ! grep -q "$1.old" /boot/grub/menu.lst ; then
+				printf "title   %s\nkernel  %s\nroot    %s\n\n" $2.old $GRUB_BOOT/$1.old $GRUB_ROOT "$GRUB_IMAGE_ENTRY" >> /boot/grub/menu.lst.new
+			fi
+		fi
+
+		cp /boot/grub/menu.lst.new /boot/grub/menu.lst
+		export IFS=$IFS_OLD
+	fi
+
+	if query "Edit grub configuration manually ?" n ; then
+		edit_file /boot/grub/menu.lst
+	fi
+
+cat << EOF
+* * * * * * * * * * * * * * * * * * * * * * * *
+*                                             *
+*              W A R N I N G                  *
+*                                             *
+*  Do not forget to install grub to your MBR  *
+*  if you haven't done so before rebooting    *
+*                                             *
+* * * * * * * * * * * * * * * * * * * * * * * *
+EOF
+
+	# right now we want to have it run all bootloaders?
+	return 2
+}
+
+
+plugin_register KERNEL_UPDATEBOOTLOADER plugin_kernel_updatebootloader_grub
+
+

@@ -28,6 +28,7 @@ plugin_register() {
     # 3 - SOURCE_VERIFY - perform intergity verification on a file
 	# 4 - SOURCE_UNPACK - unpack a certain file to $(PWD)
 	# 5 - MODULE_CHECK - perform integrity checking on installed modules
+	# 6 - KERNEL_UPDATEBOOTLOADER - automate bootloader maintenance
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
 }
