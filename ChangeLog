@@ -168,8 +168,3 @@
 	var/lib/lunar/functions/sources.lunar: Same bugfixes as in lunar
 	core.
 
-2003-10-02 04:58  niki
-
-	* bin/lvu: Elaine forgot to change 3 occations of mv_edit to
-	mod_v_safe_edit
-
