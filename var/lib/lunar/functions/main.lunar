@@ -74,7 +74,7 @@ rebuild()  {
   message  "To do a non recursive rebuild"
   message  "all installed modules must be fixed first."
   sleep  3
-  $LIN  --fix
+  run_fix
 
   for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
      MODULE=`echo  "$LINE"  |  cut  -d : -f1`
