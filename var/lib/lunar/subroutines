@@ -344,7 +344,6 @@ release_saved_libraries()  {
 
 
 prepare_install() {
-
   message  "${MESSAGE_COLOR}Preparing to install"  \
            "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
@@ -360,9 +359,6 @@ prepare_install() {
     lrm  --keepconfig  --nosustain  $MODULE
     true
   fi
-
-  rm  -f  /tmp/$MODULE.iw
-
 }
 
 
@@ -957,7 +953,7 @@ upgrade_install_queue()  {
     if  [  -n  "`cat  $INSTALL_QUEUE`"  ];  then
       export  LOGTMP=$$_`date +%s`
       lin      `cat  $INSTALL_QUEUE`         
-      rm              $INSTALL_QUEUE
+      rm             $INSTALL_QUEUE
     fi
 
   fi
@@ -1098,22 +1094,15 @@ color()  {
 
 
 invoke_installwatch()  {
-
   if  [  -e  /usr/lib/installwatch.so  ];  then
-    if [ -z "$INSTALLWATCHFILE" ] ; then
-      rm  -rf  /tmp/$MODULE.iw
-    fi
     export  INSTALLWATCHFILE=/tmp/$MODULE.iw
     export  LD_PRELOAD=/usr/lib/installwatch.so
   fi
-
 }
 
 
 devoke_installwatch()  {
-
   unset  LD_PRELOAD
-
 }
 
 
@@ -1181,6 +1170,7 @@ track()  {
   else  grep  -v  "$MISOWNED_SYMLINKS"  $TMP_LOG  >  $INST_LOG
   fi
 
+  [ "$VERBOSE" == "on" ] && echo "+ removing \"$IW_LOG\""
   rm  -f  $IW_LOG  $TMP_LOG
 }
 
@@ -1242,11 +1232,11 @@ boost()	{ (
    MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
     IW_LOG="/tmp/$MODULE.iw"
 
-  rm  -rf  $CACHE
-  rm  -rf  $INST_LOG
+  rm  -f   $CACHE
+  rm  -f   $INST_LOG
   touch    $INST_LOG
-  rm  -rf  $TMP_LOG
-  rm  -rf  $MD5_LOG
+  rm  -f   $TMP_LOG
+  rm  -f   $MD5_LOG
   touch    $MD5_LOG
 
   track    &&

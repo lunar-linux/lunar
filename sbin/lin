@@ -148,6 +148,11 @@ run_configure() {
 
 
 run_pre_build() {
+  if  [  -f  /tmp/$MODULE.iw ] ; then
+    [ "$VERBOSE" == "on" ] && echo "+ removing \"/tmp/$MODULE.iw\""
+    rm /tmp/$MODULE.iw
+  fi
+
   message  "${MESSAGE_COLOR}Building"  \
            "${MODULE_COLOR}${MODULE}"    \
            "${DEFAULT_COLOR}"
@@ -739,12 +744,12 @@ lin_module()  { (
 
     if  [  "$?"  !=  0  ];  then
       devoke_installwatch
-      rm $INSTALLWATCHFILE
+      stop_logging
+      rm /tmp/$MODULE.iw
       sound  FAILURE
       message  "${PROBLEM_COLOR}! Problem Detected !${DEFAULT_COLOR}"
       rm  -f  $linING
       view_compile_log
-      stop_logging
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors"
       false
     fi
