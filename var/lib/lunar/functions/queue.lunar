@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -26,7 +26,9 @@
 # purpose : adds an item to the end of a queue
 
 add_queue() {
+  debug_msg "add_queue ($@)"
    in_queue() {
+  debug_msg "   in_queue ($@)"
       grep -q "^"$2"\$" $1 && return 0 || return 1
    }
 
@@ -44,6 +46,7 @@ add_queue() {
 # purpose : removes an item from a queue OR pops the first element from a queue
 
 remove_queue() {
+  debug_msg "remove_queue ($@)"
 
    [ -f "$1" ] || return 1
 

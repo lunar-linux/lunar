@@ -1,4 +1,4 @@
-####################################################################
+#!/bin/bash
 #                                                                  #
 #  display.lunar - functions to view files                         #
 #                                                                  #
@@ -9,6 +9,7 @@
 # usage    : view_file FILENAME
 # purpose  : to view a file
 view_file()  {
+  debug_msg "view_file ($@)"
   if [ -n "$1" ] ; then
     # show a file $1
     case $(file -b $1 | cut -d' ' -f1) in

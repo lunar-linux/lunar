@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lunar - Lunar module management utility                  #
@@ -27,8 +27,43 @@
 ############################################################
 
 
-show_modules()	
-{ 
+help()	{
+  cat  <<  EOF
+Lunar -- a menu-driven software package management utility
+
+Example:        lunar
+  This invokes the full-screen interface
+  
+Usage:		lunar [general options] [command [command parameters]]
+
+General options:
+
+-d  |  --debug                  Enables debug messages
+-h  |  --help                   Displays this help text
+-v  |  --verbose                Increases the level of message output
+
+Commands:
+
+prune                   Removes old sources and install/compile logs
+renew                   Checks ver. against moonbase & recompiles if necessary
+update                  Fetches latest moonbase and then does a "renew"
+rebuild                 Recompiles all installed modules
+optimize                Shortcut to the optimization menu
+fix                     Check and fix all modules and internal state of lunar
+nofix                   Check but do not fix modules and internal state
+fixdepends              Check and fix the dependency database of lunar
+resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
+install    modulename(s)  Install a checklist of modules
+remove     modulename(s)  Remove a checklist of modules
+hold       modulename(s)  Place a hold on a checklist of modules
+unhold     modulename(s)  Remove a hold on a checklist of modules
+exile      modulename(s)  Remove a module and prevent it from being resurrected
+unexile    modulename(s)  Allows a module to be compiled|resurrected again
+EOF
+  exit  1
+}
+
+show_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
         !  module_held       $MODULE  &&
@@ -36,7 +71,7 @@ show_modules()
     then
       SHORT="Short Description Unavailable"
       (
-        run_details
+        run_details $MODULE
         echo  $MODULE
         echo  $VERSION
         echo  $SHORT
@@ -63,7 +98,7 @@ select_section() {
            --cancel-label  "Exit"            \
            --menu                            \
            ""                                \
-           0 0 10                            \
+           0 40 15                           \
            `show_sections`
 }
 
@@ -129,27 +164,22 @@ file_menu() {
 
 
 show_installed_modules()  {
-  for  LINE  in  `sort  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"    |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"    |  cut  -d : -f3`
-    VERSION=`echo  "$LINE"    |  cut  -d : -f4`
-       SIZE=`echo  "$LINE"    |  cut  -d : -f5`
+  for LINE in $(sort  $MODULE_STATUS_BACKUP) ; do
+  (
+     MODULE=`echo "$LINE" | cut -d : -f1`
+     STATUS=`echo "$LINE" | cut -d : -f3`
+    VERSION=`echo "$LINE" | cut -d : -f4`
+       SIZE=`echo "$LINE" | cut -d : -f5`
 	
-    if  [  "$STATUS"  ==  "installed"  ]  ||
-        [  "$STATUS"  ==  "held"       ];  then
-		
-       [ -n "$SIZE" ] && SIZE=", $SIZE"
-
-        SHORT="Short Description Unavailable"
-      SECTION=`find_section  $MODULE`
-
-      [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-           . $MOONBASE/$SECTION/$MODULE/DETAILS  >  /dev/null
-
-      echo  "$MODULE"
-      echo  "$VERSION$SIZE"
-      echo  "$SHORT"
+    # TODO THIS IS BROKEN
+    if module_installed $MODULE ; then
+      SHORT="Short Description Unavailable"
+      run_module_file $MODULE DETAILS &> /dev/null
+      echo -e "$MODULE\n"
+      echo -e "$VERSION,$SIZE\n"
+      echo -e "\"$SHORT\"\n"
     fi
+  )
   done
 }
 
@@ -158,10 +188,10 @@ remove_pkgs()	{
   while
     if  [  -z  "$INSTALLED_MODULES"  ];  then
       echo  "Discovering installed modules..."
-      INSTALLED_MODULES=`show_installed_modules`
+      INSTALLED_MODULES=$(show_installed_modules)
     fi
 
-    MODULE=`$DIALOG  --title "Select module to remove please."  \
+    MODULE=`$DIALOG --title "Select module to remove please." \
                     --item-help                               \
                     --ok-label      "Select"                  \
                     --cancel-label  "Exit"                    \
@@ -169,10 +199,7 @@ remove_pkgs()	{
                     $INSTALLED_MODULES`
   do
     DESCRIPTION="Description unavailable"
-    SECTION=`find_section  $MODULE`  &&
-    if  [  -x      $MOONBASE/$SECTION/$MODULE/DETAILS  ];  then
-      DESCRIPTION=`$MOONBASE/$SECTION/$MODULE/DETAILS`
-    fi
+    run_module_file $MODULE DETAILS
 
     if  $DIALOG  --title      "Removal $MODULE"  \
                  --yesno      "$DESCRIPTION"    \
@@ -186,60 +213,12 @@ remove_pkgs()	{
 }
 
 
-update_pkgs() {
-
-  if  ps  -C  lin  >  /dev/null;  then
-    echo    "Unable to update lunar concurrently while installing."
-    sleep   5
-    return  1
-  fi
-
-  lin moonbase
-  if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
-  then
-    lin $LUNAR_MODULE && lunar renew
-  else
-    lunar renew
-  fi
-
-}
-
-
-rebuild()  {
-  rm  -f  $INSTALL_QUEUE
-
-  message  "To do a non recursive rebuild"
-  message  "all installed modules must be fixed first."
-  sleep  3
-  $LIN  --fix
-
-  for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-    if  [  "$STATUS"   ==  "installed"  ]   &&
-        [  "$MODULE"  !=  "$LUNAR_MODULE"      ];  then
-      echo  $MODULE  >>  $INSTALL_QUEUE
-    fi
-  done
-
-  message  "Sorting the dependencies, that may take some time"
-  sort_install_queue
-
-  unset  MODULE
-  if    query  "Edit Rebuild/Install Queue?" n
-  then  edit_file  $INSTALL_QUEUE
-  fi
-
-  $LIN  --compile  `cat  $INSTALL_QUEUE`
-  rm -f                  $INSTALL_QUEUE
-}
-
 
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
     SHORT="Short Description Unavailable"
     (
-    run_details
+    run_details $MODULE
     STATUS="OFF"
 
     if    module_installed  $MODULE  ||
@@ -293,28 +272,22 @@ select_pkgs()  {
 
 
 make_hold_checklist()  {
-  for  LINE in `sort  $MODULE_STATUS_BACKUP`;  do
-     MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-     STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-    VERSION=`echo  "$LINE"  |  cut  -d : -f4`
-
-    if  [  "$STATUS"  ==  "installed"  ]   ||
-        [  "$STATUS"  ==  "held"       ];  then
-
-      [  "$STATUS"  ==  "held"  ]  &&
-      HELD="on"                    ||
-      HELD="off"
-
-      if  SECTION=`find_section  $MODULE`;  then
-        SHORT="Short Description Unavailable"
-        .  $MOONBASE/$SECTION/$MODULE/DETAILS  >  /dev/null
-
-        echo  $MODULE
-        echo  $VERSION
-        echo  $HELD
-        echo  $SHORT
+  for LINE in $(sort $MODULE_STATUS_BACKUP) ; do
+  (
+    MODULE=$(echo "$LINE" | cut -d: -f1)
+    STATUS=$(echo "$LINE" | cut -d: -f3)
+    VERSION=$(echo "$LINE" | cut -d: -f4)
+    if [ "$STATUS" == "installed" ] || [ "$STATUS" == "held" ] ; then
+      [ "$STATUS" == "held" ] && HELD="on" || HELD="off"
+      SHORT="Short description unavailable"
+      if run_details $MODULE &> /dev/null ; then
+        echo $MODULE
+        echo $VERSION
+        echo $HELD
+        echo $SHORT
       fi
     fi
+  )
   done
 }
 
@@ -382,7 +355,7 @@ module_menu() {
                       "U"  "Update"   "$U_HELP"`
   do
     case  $COMMAND in
-      U)  update_pkgs  ;;
+      U)  update       ;;
       S)  select_pkgs  ;;
       A)  add_pkgs     ;;
       R)  remove_pkgs  ;;
@@ -467,10 +440,10 @@ queue_menu()  {
 
 maintenance_menu() {
   while
-    F_HELP="lin --fix: Check and fix all modules and internal state of lunar"
-    N_HELP="lin --nofix: Check all modules but do not fix the internal state"
-    D_HELP="lin --fixdepends: Check and fix the dependancy database of lunar"
-    P_HELP="lunar prune: Prune old sources and install/compile logs"
+    F_HELP="Check and fix all modules and internal state of lunar"
+    N_HELP="Check all modules but do not fix the internal state"
+    D_HELP="Check and fix the dependency database of lunar"
+    P_HELP="Prune old sources and install/compile logs"
     
     COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
                       --ok-label      "Select"                           \
@@ -482,14 +455,14 @@ maintenance_menu() {
                       0 40 6                                             \
                       "F"     "Fix everything"                 "$F_HELP" \
                       "N"     "Check everything but don't fix" "$N_HELP" \
-                      "D"     "Fix dependancies"               "$D_HELP" \
+                      "D"     "Fix dependencies"               "$D_HELP" \
 		      "P"     "Prune old sources and logs"     "$P_HELP"`
   do
     case $COMMAND in
-     F)  lin --fix        ;;
-     N)  lin --nofix      ;;
-     D)  lin --fixdepends ;;
-     P)  lunar prune      ;;
+     F)  lunar fix          ;;
+     N)  lunar nofix        ;;
+     D)  lunar fixdepends   ;;
+     P)  lunar prune        ;;
     esac
     message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
     read
@@ -538,6 +511,7 @@ feature_menu()  {
   E_HELP="Remove files when lrm?"
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
+  H_HELP="Automatically resurrect modules instead of compiling them?"
   I_HELP="Create archives of installed software?"
   K_HELP="Keep source code in /usr/src on good compiles? (gcc profiling needs it)"
   M_HELP="Email reports?"
@@ -548,8 +522,10 @@ feature_menu()  {
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
   W_HELP="Verbose display of compilation process?"
+  Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
 
          ARCHIVE=${ARCHIVE:=on}
+   AUTORESURRECT=${AUTORESURRECT:=on}
          AUTOFIX=${AUTOFIX:=on}
        AUTOPRUNE=${AUTOPRUNE:=off}
            CABAL=${CABAL:=off}
@@ -576,26 +552,29 @@ feature_menu()  {
                         --checklist             \
                         ""                      \
                         0 40 14                 \
-      "ARCHIVE"       "Toggle"  "$ARCHIVE"       "$I_HELP"   \
-      "AUTOFIX"       "Toggle"  "$AUTOFIX"       "$F_HELP"   \
-      "AUTOPRUNE"     "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
-      "CABAL"         "Toggle"  "$CABAL"         "$B_HELP"   \
-      "COLOR"         "Toggle"  "$COLOR"         "$C_HELP"   \
-      "KEEP_SOURCE"   "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
-      "GARBAGE"       "Toggle"  "$GARBAGE"       "$G_HELP"   \
-      "MAIL_REPORTS"  "Toggle"  "$MAIL_REPORTS"  "$M_HELP"   \
-      "PRESERVE"      "Toggle"  "$PRESERVE"      "$P_HELP"   \
-      "SOUND"         "Toggle"  "$SOUND"         "$S_HELP"   \
-      "SUSTAIN"       "Toggle"  "$SUSTAIN"       "$T_HELP"   \
-      "VIEW_REPORTS"  "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
-      "VOYEUR"        "Toggle"  "$VOYEUR"        "$V_HELP"   \
-      "REAP"          "Toggle"  "$REAP"          "$E_HELP"   \
-      "TMPFS"         "Toggle"  "$TMPFS"         "$D_HELP"   \
-      "VERBOSE"       "Toggle"  "$VERBOSE"       "$W_HELP"`
+      "ARCHIVE"          "Toggle"  "$ARCHIVE"       "$I_HELP"   \
+      "AUTORESURRECT"    "Toggle"  "$AUTORESURRECT" "$H_HELP"   \
+      "AUTOFIX"          "Toggle"  "$AUTOFIX"       "$F_HELP"   \
+      "AUTOPRUNE"        "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
+      "CABAL"            "Toggle"  "$CABAL"         "$B_HELP"   \
+      "COLOR"            "Toggle"  "$COLOR"         "$C_HELP"   \
+      "KEEP_SOURCE"      "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
+      "GARBAGE"          "Toggle"  "$GARBAGE"       "$G_HELP"   \
+      "MAIL_REPORTS"     "Toggle"  "$MAIL_REPORTS"  "$M_HELP"   \
+      "PRESERVE"         "Toggle"  "$PRESERVE"      "$P_HELP"   \
+      "SOUND"            "Toggle"  "$SOUND"         "$S_HELP"   \
+      "SUSTAIN"          "Toggle"  "$SUSTAIN"       "$T_HELP"   \
+      "VIEW_REPORTS"     "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
+      "VOYEUR"           "Toggle"  "$VOYEUR"        "$V_HELP"   \
+      "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
+      "TMPFS"            "Toggle"  "$TMPFS"         "$D_HELP"   \
+      "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
+      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP"`
 
   then
   
          ARCHIVE=off
+   AUTORESURRECT=off
          AUTOFIX=off
        AUTOPRUNE=off
            CABAL=off
@@ -611,10 +590,12 @@ feature_menu()  {
          GARBAGE=off
            TMPFS=off
 	 VERBOSE=off
+ZLOCAL_OVERRIDES=off
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
              ARCHIVE)       ARCHIVE=on  ;;
+       AUTORESURRECT) AUTORESURRECT=on  ;;
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                CABAL)         CABAL=on  ;;
@@ -630,11 +611,13 @@ feature_menu()  {
              GARBAGE)       GARBAGE=on  ;;
                TMPFS)         TMPFS=on  ;;
 	     VERBOSE)       VERBOSE=on  ;;
+    ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
       esac
     done
 
     TEMP=`cat       $LOCAL_CONFIG    |
           grep  -v  "ARCHIVE="       |
+	  grep  -v  "AUTORESURRECT=" |
           grep  -v  "AUTOFIX="       |
           grep  -v  "AUTOPRUNE="     |
           grep  -v  "CABAL="         |
@@ -649,25 +632,28 @@ feature_menu()  {
           grep  -v  "GARBAGE="       |
           grep  -v  "color"          |
           grep  -v  "TMPFS="         |
-	  grep  -v  "VERBOSE="`
+	  grep  -v  "VERBOSE="       |
+	  grep  -v  "ZLOCAL_OVERRIDES="`
 
-    echo  "$TEMP"                       >   $LOCAL_CONFIG
-    echo  "     ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
-    echo  "     AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
-    echo  "   AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
-    echo  "       CABAL=$CABAL"         >>  $LOCAL_CONFIG
-    echo  " KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
-    echo  "MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "    PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
-    echo  "       SOUND=$SOUND"         >>  $LOCAL_CONFIG
-    echo  "     SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
-    echo  "VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "      VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
-    echo  "        REAP=$REAP"          >>  $LOCAL_CONFIG
-    echo  "     GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "       color $COLOR"         >>  $LOCAL_CONFIG
-    echo  "       TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
-    echo  "     VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
+    echo  "$TEMP"                        >   $LOCAL_CONFIG
+    echo  "      ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
+    echo  "AUTORESURRECT=$AUTORESURRECT" >>  $LOCAL_CONFIG
+    echo  "      AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
+    echo  "    AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
+    echo  "        CABAL=$CABAL"         >>  $LOCAL_CONFIG
+    echo  "  KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
+    echo  " MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
+    echo  "     PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
+    echo  "        SOUND=$SOUND"         >>  $LOCAL_CONFIG
+    echo  "      SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
+    echo  " VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
+    echo  "       VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
+    echo  "         REAP=$REAP"          >>  $LOCAL_CONFIG
+    echo  "      GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
+    echo  "        color $COLOR"         >>  $LOCAL_CONFIG
+    echo  "        TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
+    echo  "      VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
+    echo  "ZLOCAL_OVERRIDES=$ZLOCAL_OVERRIDES" >> $LOCAL_CONFIG
   fi
 }
 
@@ -809,45 +795,68 @@ main_menu()  {
 }
 
 
-main() {
-  case  $1  in
-      prune)  prune                    ;;
-      renew)  update_installed
-              upgrade_install_queue    ;;
-     update)  update_pkgs  autoupdate  ;;
-    rebuild)  rebuild                  ;;
-   optimize)  optimize_architecture    ;;
-          *)  main_menu                ;;
-  esac
-}
-
 
 DIALOG="dialog
 --backtitle
 Lunar Module Management Utility
 --stdout"
 
+main() {
+  #lets load the menu code
+  if [ -n "$MENUS" ]; then
+    for FILE in $(echo $MENUS/*.menu) ; do
+      [ -s "$FILE" ] && . "$FILE"
+    done
+  fi
+
+  export IFS="$TAB_ENTER_IFS"
+
+  LUNAR_MODULE=${LUNAR_MODULE:=lunar}
+  LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
+
+  main_menu
+}
+  
 . /etc/lunar/config
 
-#lets load the menu code
-if [ -n "$MENUS" ]; then
-   for FILE in `echo $MENUS/*.menu`
-   do
-      [ -s "$FILE" ] && . "$FILE"
-   done
+GETOPT_ARGS=$(getopt -q -n lunar -o "dhv" -l "debug,help,verbose" -- "$@")
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  root_check 
+  enviro_check 
+  set_priority
+
+  while true ; do
+    case "$1" in
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -h|--help        ) help ;                                     exit 1  ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
+
+  case "$1" in
+    prune      ) prune                                  ;;
+    renew      ) renew                                  ;;
+    update     ) update                                 ;;
+    rebuild    ) rebuild                                ;;
+    optimize   ) optimize_architecture                  ;;
+    fix        ) shift && run_fix $@                    ;;
+    nofix      ) shift && export NOFIX=on && run_fix $@ ;;
+    fixdepends ) shift && fix_depends $@                ;;
+    resurrect  ) shift && resurrect_modules $@          ;;
+    install    ) shift && lin $@                        ;;
+    remove     ) shift && lrm $@                        ;;
+    hold       ) shift && hold_modules $@               ;;
+    unhold     ) shift && unhold_modules $@             ;;
+    exile      ) shift && exile_modules $@              ;;
+    unexile    ) shift && unexile_modules $@            ;;
+    *) main ;; 
+  esac
 fi
-root_check || exit
-
-LUNAR_PRIORITY=${LUNAR_PRIORITY:="+10"}
-renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
-
-LUNAR_MODULE=${LUNAR_MODULE:=lunar}
-export  IFS="$TAB_ENTER_IFS"
-# LUNAR_VERSION=`installed_version lunar`
-LUNAR_SECTION=`find_section  $LUNAR_MODULE`
-LUNAR_DETAILS="$MOONBASE/$LUNAR_SECTION/$LUNAR_MODULE/DETAILS"
-LUNAR_VERSION=`grep  "UPDATED="  $LUNAR_DETAILS  | 
-sed  "s/UPDATED=//"`
-
-main  $*
 

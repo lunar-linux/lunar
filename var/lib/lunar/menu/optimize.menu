@@ -169,6 +169,7 @@ help() {
         Align_HELP="Align functions, loops, and jumps"
     Expensive_HELP="Perform expensive optimizations"
       Doubles_HELP="Align double, long double, and long long on two word boundries"
+       Tracer_HELP="Perform tail duplication to enlarge superblock size."
                ;;
 
    # Help for extra options
@@ -210,12 +211,6 @@ help() {
                   unset CPUINFO EXT FLAGS
                ;;
    # Warn help
-  cc_warn_help)
-           MENU="Enable/Disable C compiler warnings"
-Deprecated_HELP="Disable warnings of deprecated..."
-
-              ;;
-              
  ccc_warn_help)
           MENU="Enable/Disable C++ compiler warnings"
      Deprecated_HELP="Disable warnings of deprecated..."
@@ -357,8 +352,8 @@ spd_options() {
              "Address"   "-fforce-addr"              $( echo ${SPD[@]} | grep -q "Address" && echo "on" || echo "off" )   "$Address_HELP"
              "Align"     "-ffalign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
              "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
-             "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP" )
-
+             "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP"
+             "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP" ) 
 }
 
 xtra_options() {
@@ -375,10 +370,6 @@ fpm_options() {
              "SSE"       ""   $([ "$FPM" == "SSE" ] && echo "on" || echo "off" )      "$SSE_HELP"
              "Both"      ""   $([ "$FPM" == "Both" ] && echo "on" || echo "off" )     "$Both_HELP"
              "Altivec"   ""   $([ "$FPM" == "Altivec" ] && echo "on" || echo "off" )  "$Altivec_HELP" )
-}
-
-cc_warn() { 
-  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
 }
 
 ccc_warn() { 

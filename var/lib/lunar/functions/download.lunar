@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # download.lunar - get sources from the net                #
@@ -33,42 +33,28 @@
 ############################################################
 
 
-get_cvs() {(
-  if ! module_installed cvs ; then
-    message "${PROBLEM_COLOR}Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
+get_svn() {
+  debug_msg "get_svn ($@)"
+  if ! module_installed subversion ; then
+    message "${PROBLEM_COLOR}! Cannot fetch SVN sources without \"subversion\" installed${DEFAULT_COLOR}"
     exit 1
   fi
 
-  [ -f ~/.cvspass ] || touch ~/.cvspass
+  SVN_URL=$(echo $1 | cut -d: -f1-2)
+  SVN_DIR=$(echo $1 | cut -d: -f3)
 
-  CVSURL=$(echo $1 | sed "s:^cvs\://::")
-  CVSARGS=$(echo $CVSURL | cut -d@ -f1)
-  CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
-  CVSSPATH=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f2)
-  CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
-  CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
-
-  if [ ! -z $CVSRELEASE ]; then
-    CVSRELEASE="-r $CVSRELEASE"
-  fi
-
-  export CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
-
-  message  "${MESSAGE_COLOR}Downloading CVS module"                      \
-           "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
- 	   "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Downloading SVN module for" \
+ 	   "module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
   mk_source_dir /tmp/$MODULE-$VERSION
   cd /tmp/$MODULE-$VERSION
 
-  if [[ -f $SOURCE_CACHE/$2 ]]; then
-    verbose_msg "Extracting local CVS copy"
-    # unpacking in last component dir of $CVSMODULE
-    CD=$(pwd)
-    mkdir -p $(dirname $CVSMODULE)
-    cd $(dirname $CVSMODULE)
-    if ! tar xjf $SOURCE_CACHE/$2 ; then
-      message "${WARNING_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
+  if [ -f "$2" ] ; then
+    verbose_msg "Extracting local SVN copy"
+    # unpacking in last component dir of $SVN_DIR
+    CD=$(pwd -P)
+    if ! tar xjf $2 ; then
+      message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
       
       rm_source_dir /tmp/$MODULE-$VERSION
       mk_source_dir /tmp/$MODULE-$VERSION
@@ -76,21 +62,119 @@ get_cvs() {(
     cd $CD
   fi
 
+  NUM_RETRY=${NUM_RETRY:-5}
+  if [ "$NUM_RETRY" -eq 0 ]; then
+      NUM_RETRY=1000
+  fi
+
+  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
+    if [ -d "${SVN_DIR}/.svn" ] ; then
+      cd ${SVN_DIR}
+      verbose_msg "[${TRY}] svn up"
+      svn up && GOT_SVN="yes" 
+      cd ${CD}
+    else
+      verbose_msg "[${TRY}] svn co $SVN_URL $SVN_DIR"
+      svn co $SVN_URL $SVN_DIR && GOT_SVN="yes"
+    fi
+
+    if [ "$?" == "0" ] ; then
+      break
+    fi
+
+    sleep 2
+  done
+  
+  if [ "$GOT_SVN" == "yes" ] ; then
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$2${DEFAULT_COLOR}"
+    # pack in last component dir of $SVN_DIR
+    tar cjf $2 $SVN_DIR
+  else
+    activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $1"
+  fi
+
+  cd /tmp
+  rm_source_dir /tmp/$MODULE-$VERSION
+
+}
+
+
+get_cvs() {
+  debug_msg "get_cvs ($@)"
+  if ! module_installed cvs ; then
+    message "${PROBLEM_COLOR}! Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  [ -f ~/.cvspass ] || touch ~/.cvspass
+  CVSURL=$(echo $1 | sed "s:^cvs\://::")
+  CVSARGS=$(echo $CVSURL | cut -d@ -f1)
+  CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
+  CVSSPATH=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f2)
+  CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
+  CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
+  CVSOPTIONS=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f5)
+
+  if [ ! -z "$CVSRELEASE" ]; then
+    CVSRELEASE="-r $CVSRELEASE"
+  fi
+
+  CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
+
+  message  "${MESSAGE_COLOR}Downloading CVS module"                      \
+           "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
+ 	   "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+  mk_source_dir /tmp/$MODULE-$VERSION
+  cd /tmp/$MODULE-$VERSION
+  
+  if [ -f "$2" ] ; then
+    verbose_msg "Extracting local CVS copy"
+    # unpacking in last component dir of $CVSMODULE
+    CD=$(pwd -P)
+    debug_msg "get_cvs: PWD=$PWD mkdir -p $(dirname $CVSMODULE)"
+    mkdir -p $(dirname $CVSMODULE)
+    cd $(dirname $CVSMODULE)
+    debug_msg "get_cvs: PWD=$PWD tar xjf $2"
+    if ! tar xjf $2 ; then
+      message "${PROBLEM_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
+      
+      rm_source_dir /tmp/$MODULE-$VERSION
+      mk_source_dir /tmp/$MODULE-$VERSION
+      cd /tmp/$MODULE-$VERSION
+    else
+      cd /tmp/$MODULE-$VERSION/$CVSMODULE
+    fi
+  fi
+
   verbose_msg "CVSROOT=\"$CVSROOT\""
 
-  if [[ -d $CVSMODULE/CVS ]]; then
-    verbose_msg "cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE"
-    cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE && GOT_CVS="yes" 
-  elif ! [[ -d CVS ]]; then
-    verbose_msg "cvs -qz3 co $CVSRELEASE $CVSMODULE"
-    cvs -qz3 co $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
+  NUM_RETRY=${NUM_RETRY:-5}
+  if [ "$NUM_RETRY" -eq 0 ]; then
+    NUM_RETRY=1000
   fi
+
+  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
+    if [ -d CVS ] ; then
+      verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
+      cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
+    else 
+      verbose_msg "[${TRY}] cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE"
+      CVSROOT=$CVSROOT cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
+    fi
+
+    if [ "$?" == "0" ] ; then
+      break
+    fi
+
+    sleep 2
+  done
   
-  if [[ "$GOT_CVS" == "yes" ]]; then
-    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
+  if [ "$GOT_CVS" == "yes" ] ; then
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
     # pack in last component dir of $CVSMODULE
-    cd $(dirname $CVSMODULE)
-    tar cjf $SOURCE_CACHE/$2 $(basename $CVSMODULE)
+    cd /tmp/$MODULE-$VERSION/$(dirname $CVSMODULE)
+    tar cjf $2 $(basename $CVSMODULE)
     cd $CD
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
@@ -99,11 +183,12 @@ get_cvs() {(
   cd /tmp
   rm_source_dir /tmp/$MODULE-$VERSION
 
-)}
+}
 
 
 erase()  {
-  if [ -z "$PARTIAL" ]; then
+  debug_msg "erase ($@)"
+  if [ "$PARTIAL" == "off" ]; then
     verbose_msg "erase: deleting \"$(guess_filename $1)\""
     rm -f $(guess_filename $1)
   fi
@@ -111,120 +196,116 @@ erase()  {
 
 
 call_wget()  {  
+  debug_msg "call_wget ($@)"
    [ -n "$http_proxy" ] && export http_proxy=$http_proxy
    [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
    [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-   verbose_msg "calling \"wget $CACHE $RATE $FTP_CONNECTION $RETRIES $PARTIAL $1\""
-   wget $CACHE $RATE $FTP_CONNECTION $RETRIES $PARTIAL $1
+   debug_msg "call_wget: PWD=$PWD"
+   verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1\""
+   wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1
 }
 
 
+# fuzzy_wget is a wrapper that tries to call possible mis-finenamed 
+# source tarballs (ie .tar.gz instead of .tar.bz2)
 fuzzy_wget()  {
+  debug_msg "fuzzy_wget ($@)"
 
-  FTP_CONNECTION="--passive-ftp"
-  [ "$FTP_ACTIVE"  == "on"   ] || 
-  [ "$FTP_PASSIVE" == "off"  ] && 
-  unset FTP_CONNECTION 
+  # this is what the download will be stored as initially:
+  TMP_FILE=/tmp/$(basename $2)
 
-  PARTIAL="-c"
-  [ "$CONTINUE" == "off" ] && unset PARTIAL
+  if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
+    WGET_FTP_CONNECTION="--passive-ftp"
+  fi
 
-  CACHE="--cache=on"
-  [ "$USE_CACHE" == "off" ] && CACHE="--cache=off"
+  if [ "$CONTINUE" == "off" ] ; then
+    erase $(guess_filename $TMP_FILE) 
+  else
+    WGET_PARTIAL="--continue"
+  fi
 
-  NUM_RETRY=${NUM_RETRY:=5}
-  RETRIES="--tries=${NUM_RETRY}"
+  if [ "$USE_CACHE" == "off" ] ; then
+    WGET_CACHE="--cache=off"
+  else
+    WGET_CACHE="--cache=on"
+  fi
 
-  [  -n  "$DOWNLOAD_RATE"  ] && RATE="--limit-rate=${DOWNLOAD_RATE}"
+  if [ -n "$DOWNLOAD_RATE" ] ; then
+    WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
+  fi
 
+  WGET_NUM_RETRY=${NUM_RETRY:=5}
+  WGET_RETRIES="--tries=${WGET_NUM_RETRY}"
   FUZZY=${FUZZY:=on}
 
-  S_FILE=`echo $2                 |
-          sed  "s/\.tar\.gz$//"   |
-          sed  "s/\.tgz$//"       |
-          sed  "s/\.tar\.bz2$//"`
+  S_FILE=$(basename $2 | sed -e "s/\.tar\.gz$//" -e "s/\.tgz$//" -e  "s/\.tar\.bz2$//")
 
-  if erase $1 && call_wget $1 ; then
-    FILE="$2"
+  if erase $2 && call_wget $1 ; then
+    FILE="$(basename $2)"
   elif [ "$FUZZY" == "off" ] ; then
     activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
     return 1
-  elif erase $1 && call_wget $(dirname $1)/$S_FILE.tar.bz2 ; then
+  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tar.bz2 ; then
     FILE="$S_FILE.tar.bz2"
-  elif erase $1 && call_wget $(dirname $1)/$S_FILE.tar.gz ; then
+  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tar.gz ; then
     FILE="$S_FILE.tar.gz"
-  elif erase $1 && call_wget $(dirname $1)/$S_FILE.tgz ; then
+  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tgz ; then
     FILE="$S_FILE.tgz"
   else
     activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
-    false
+    return 1
   fi
 
+  TMP_RESULTFILE=$(guess_filename $TMP_FILE)
+  if testpack $TMP_RESULTFILE ; then
+    install -m644 $TMP_RESULTFILE $(dirname $2)/$(basename $TMP_RESULTFILE)
+    rm $(guess_filename $TMP_RESULTFILE)
+    verbose_msg "download of \"$1\" successfull"
+  else
+    rm -f $(guess_filename $TMP_RESULTFILE)
+  fi
 }
 
 
-disconnect()  {
-
-  if    ps  -C disconnect  >  /dev/null
-  then  return
-  fi
-
-  rm  -f           /tmp/disconnect
-  cat  <<  EOF  >  /tmp/disconnect
-#!/bin/sh
-
-while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
-poff
-rm  -f  /tmp/disconnect
-EOF
-
-chmod  a+x  /tmp/disconnect
-            /tmp/disconnect  &
-
-}
-
-
-connect()  {
-
-  if  !  ifconfig  |  grep  -q  "^eth"   &&
-      !  ifconfig  |  grep  -q  "^wlan"  &&
-      !  ifconfig  |  grep  -q  "^ppp"   &&
-      !  ifconfig  |  grep  -q  "^tun";  then
-    pon
-
-    # Timeout in deciseconds to wait for Interface to come up.
-    TIMEOUT=30
-
-    until  ifconfig  |  grep  -q  eth   ||
-           ifconfig  |  grep  -q  ppp   ||
-           [  $TIMEOUT == 0  ]
-    do
-      sleep  10
-      (( TIMEOUT-- ))
-    done
-    disconnect
-
-  fi
-
-}
-
-
+# function: get_url
+# usage   : get_url URL DESTINATION
+#
+#   if left blank, destination defaults to $SOURCE_CACHE/$(filename URL)
+#   if specified, the remainder will be copied to $DESTINATION
+#
 get_url() {
-  if  [  -n  "$1"  ] ;  then
+(
+  cd /tmp
+  debug_msg "get_url ($@)"
+  if [ -n "$1" ] ; then
     if [ "${1:0:6}" == "cvs://" ] ; then
       # cvs urls
       CVS_THRESHOLD=${CVS_THRESHOLD:-10}
       if [ "$CVS_THRESHOLD" > 0 ] ; then
-        if [ ! -f $SOURCE_CACHE/$2 ] ; then
+        if [ ! -f "$2" ] ; then
 	  get_cvs $1 $2
-        elif [ "$(find $SOURCE_CACHE/$2 -amin +$CVS_THRESHOLD)" == "$SOURCE_CACHE/$2" ] ; then
+        elif [ "$(find $2 -amin +$CVS_THRESHOLD)" == "$2" ] ; then
 	  get_cvs $1 $2
 	else
-	  verbose_msg "skipping cvs update (less than $CVS_THRESHOLD mins old)"
+	  verbose_msg "Skipping cvs update (less than $CVS_THRESHOLD mins old)"
 	fi
       else
         get_cvs $1 $2
+      fi
+    elif [ "${1:0:6}" == "svn://" ] ; then
+      # svn urls
+      SVN_THRESHOLD=${SVN_THRESHOLD:-10}
+      if [ "SVN_THRESHOLD" > 0 ] ; then
+        if [ ! -f "$2" ] ; then
+	  get_svn $1 $2
+	elif [ "$(find $2 -amin +$SVN_THRESHOLD)" == "$2" ] ; then
+	  get_svn $1 $2
+	else
+	  verbose_msg "Skipping svn update (less than $SVN_THRESHOLD mins old)"
+	fi
+      else
+        get_svn $1 $2
       fi
     elif [ "$1:0:7}" == "cpan://" ] ; then
       # no way, this cannot be tru
@@ -233,36 +314,41 @@ get_url() {
       # fetching sources and possibly have 'CPAN' do all the work for us
       # thereby not opposing the normal perl module modules (like File-Tail)
       #
+      # TODO play with this
       :
+    elif [ "{$1:0:5}" == "file:" ] ; then
+      # adding this since wget is a bitch and will not fetch this... sigh
+      # this will copy file to $2... so you may use it as you like
+      cp ${1/file:/} $2
     else
       # ordinary URL's handled by fuzzy_wget
-      if  [  -n  "$BASE_URL"  ];  then
-        URL=$BASE_URL/$2
+      if [ -n "$BASE_URL" ] ; then
+        URL=$BASE_URL/$(basename 2)
       fi
       connect          &&
       if [ -n "$BASE_URL" ] ; then
-        fuzzy_wget $BASE_URL/$2 $2
+        fuzzy_wget $BASE_URL/$(basename $2) $2
       elif ! fuzzy_wget $1 $2 ; then
         if [ -n "$LRESORT_URL" ] ; then
-          fuzzy_wget $LRESORT_URL/$2 $2
+          fuzzy_wget $LRESORT_URL/$(basename 2) $2
         fi
-      fi               &&
-      testpack  $2     &&
-      mv        $2  $SOURCE_CACHE &&
-      verbose_msg "download of \"$1\" successfull"
+      fi
     fi
   fi
+)
 }
 
 
 lget_lock()  {
-  echo $$ > /var/lock/lgetting.$MODULE
+  debug_msg "lget_lock ($@)"
+  echo $$ > /var/lock/lgetting.$1
 }
 
 
 lget_locked()  {
-  if [ -f "/var/lock/lgetting.$MODULE" ] &&
-        ps `cat /var/lock/lgetting.$MODULE` | grep  -q  "lget" ; then
+  debug_msg "lget_locked ($@)"
+  if [ -f "/var/lock/lgetting.$1" ] &&
+        ps `cat /var/lock/lgetting.$1` | grep  -q  "lget" ; then
     true
   else
     false
@@ -271,21 +357,25 @@ lget_locked()  {
 
 
 lget_unlock()  {
-  rm -f /var/lock/lgetting.$MODULE &> /dev/null
+  debug_msg "lget_unlock ($@)"
+  rm -f /var/lock/lgetting.$1 &> /dev/null
 }
 
 
-download_module() { (
-
-  run_details $1 || exit 1
+download_module() {
+(
+  debug_msg "download_module ($@)"
+  if ! run_details $1 ; then
+    exit 1
+  fi
 
   MAX_SOURCES=${MAX_SOURCES:=100}
 
   # loop over all sources
   for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
     # get the URL part
-    eval  SRC=\$$(echo SOURCE$N          | sed s/SOURCE0/SOURCE/  )
-    eval URLS=\${$(echo SOURCE${N}_URL    | sed s/SOURCE0/SOURCE/  )[@]}
+    eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
+    eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
 
     # continue (to next) if empty once, break if empty tiwce
     if [ -z "$SRC" ] ; then
@@ -310,12 +400,15 @@ download_module() { (
       fi
 
       # quit if we did get it
-      if `guess_filename $SOURCE_CACHE/$SRC > /dev/null` ; then
-        if [ ${URL:0:6} == "cvs://" ] ; then
+      if [ -f "$(guess_filename $SOURCE_CACHE/$SRC)" ] ; then
+        if [ "${URL:0:6}" == "cvs://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
-	  get_url $URL $SRC
+	  get_url $URL $SOURCE_CACHE/$SRC
+	elif [ "${URL:0:6}" == "svn://" ] ; then
+	  verbose_msg "trying to download \"$URL\""
+	  get_url $URL $SOURCE_CACHE/$SRC
 	else
-	  verbose_msg "skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
+	  verbose_msg "Skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
 	  continue 2
 	fi
       else
@@ -324,19 +417,22 @@ download_module() { (
                  "${MESSAGE_COLOR}for module"               \
                  "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
         verbose_msg "trying to download \"$URL\""
-	get_url $URL $SRC
+	get_url $URL $SOURCE_CACHE/$SRC
       fi
       
     done
   done
-  
-) }
+
+  return 0
+) 
+}
 
 
 testpack () {
-  FILENAME=`guess_filename $1` || FILENAME=`guess_filename $SOURCE_CACHE/$1`
-  if [ -f $FILENAME ] ; then
-    COMPRESSOR=`file -b $FILENAME | cut -d ' ' -f1`
+  debug_msg "testpack ($@)"
+  FILENAME=$(guess_filename $1) || FILENAME=$(guess_filename $SOURCE_CACHE/$1)
+  if [ -f "$FILENAME" ] ; then
+    COMPRESSOR=$(file -b $FILENAME | cut -d ' ' -f1)
     case $COMPRESSOR in
       bzip2)     bzip2 -tf  $FILENAME           >/dev/null 2>&1   ;;
       gzip)      gzip  -tf  $FILENAME           >/dev/null 2>&1   ;;

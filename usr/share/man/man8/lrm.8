@@ -1,15 +1,18 @@
-.TH LRM 8 "March 2002" "Lunar Linux" LUNAR
+.TH LRM 8 "August 2003" "Lunar\-Linux" LUNAR
 .SH NAME
-lrm \- removes software packages
+lrm \- removes Lunar software modules
 .SH SYNOPSIS
 .B lrm
-[options] [package1] ... [package2] ...
+[options] [module1] ... [module2] ...
 .PP
-.B lrm -e|--exile|-d|--downgrade
-<package> <version>
+.B lrm -h|--help
+.PP
+.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-v|--verbose <module>
+.PP
+.B lrm -D|--downgrade <module> <version>
 .SH COPYRIGHT
-.if n lrm(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
-.if t lrm(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if n lrm(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t lrm(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .SH "EXAMPLE"
 To uninstall emacs type:
 .IP
@@ -18,22 +21,30 @@ emacs
 .SH "DESCRIPTION" 
 .I lrm
 is part of the
-.SM lunar
+.SM Lunar\-Linux
 source-code package management suite. It is a command-line tool
-for automatically uninstalling a package and its associated
+for automatically uninstalling a module and its associated
 files. 
 .SH "OPTIONS"
 .TP
-.B "-d, --downgrade"
+.B "-d, --debug"
+enables debug messages, very useful when emailing a bug report
+.TP
+.B "-D, --downgrade"
 downgrade is an option for removing the selected module and restoring
 a previously installed version
 .TP
-.B "-e, --exile"
-removes software package and sets package status to 'exile'. This prevents
-it from being installed again automatically
-.TP
 .B "-h, --help"
 outputs short help
+.TP
+.B "-k, --keepconfig"
+remove module(s) but keep dependencies and config info
+.TP
+.B "-n, --nosustain"
+emoves module(s) even if they are sustained
+.TP
+.B "-v, --verbose"
+increases the level of message output
 .SH "FILES"
 .TP
 .I /var/lib/lunar/excluded
@@ -53,17 +64,11 @@ List of solo modules.
 List of modules that are essential to system, and lrm of these modules is not permitted.
 Installing and upgrading is fine.
 .TP
-.I /var/lib/lunar/subroutines
+.I /var/lib/lunar/functions/*.lunar
 .IP
 Contains functions used by 
 .B lrm
 .SH ADVANCED USAGE
-Protecting a file from updates
-.IP
-lrm
-.B --exile
-glibc
-.PP
 Rolling back to a previous version of a package 
 .IP
 lrm
@@ -87,8 +92,9 @@ Updated Thomas Stewart 01/15/2002
 .PP
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
+Updated by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
-Report bugs to <maintainer@lunar-penguin.org>
+Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
 lunar(8), lin(8), lvu(1), lget(8)
 .SH "WARRANTY"

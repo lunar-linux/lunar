@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -7,40 +7,44 @@
 #                                                          #
 # $FUNCTIONS/modules                                       #
 # includes create_module_index, find_section               #
-#          list_sections, list_modules                     #
-#          get_moonbase_md5, set_moonbase_md5,             #
+#          list_sections, list_modules, list_installed     #
 #          check_module_index, run_details                 #
 #          module_installed, module_held, module_exiled    #
+#          hold_modules, unhold_modules                    #
 # 20020528                                                 #
 # 20030113 merging more functions in here - sofar          #
+# 20030417 adding hold routines - sofar                    #
 #                                                          #
 ############################################################
 #                                                          #
 # Copyrighted Kagan Kongar 2002 under GPLv2                #
 # Portions Copyrighted Chuck Mead 2002 under GPLv2         #
+# Portions Copyrighted Auke Kok 2003 under GPLv2           #
 #                                                          #
 ############################################################
+
 
 # function : list_sections
 # usage    : list_sections
 # purpose  : list the moonbase sections, filter out the specific files
 list_sections() {
-   check_module_index                                        &&
-   SECTIONS=`grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
-             cut -d : -f 2-2                                  | \
-             sort                                             | \
-             uniq`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+  debug_msg "list_sections ($@)"
+  check_module_index
+  SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
+             cut -d : -f 2-2 | sort | uniq)
+  if [ -n "$SECTIONS" ] ; then
+    echo "$SECTIONS"
+    return 0
+  fi
 
-   SECTIONS=`ls  $MOONBASE       | \
-             grep -v "ChangeLog" | \
-             grep -v "CVS"       | \
-             grep -v "COPYING"   | \
-             grep -v "LICENSE"   | \
-             grep -v "README"`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+  SECTIONS=$(ls $MOONBASE | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" \
+            -e "LICENSE" -e "README")
+  if [ -n "$SECTIONS" ] ; then
+    echo "$SECTIONS"
+    return 0
+  fi
 
-   return 1
+  return 1
 }
 
 
@@ -48,101 +52,101 @@ list_sections() {
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {
+  debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
     message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
     exit 1
   fi
 
-   for  MODULE  in  `ls $MOONBASE/$1 2>/dev/null | \
-                     grep -v "ChangeLog"               | \
-                     grep -v "CVS"                     | \
-                     grep -v "COPYING"                 | \
-                     grep -v "LICENSE"                 | \
-                     grep -v "README"`
-   do
-      echo "$MODULE" 
-   done
-   return 0
+  for MODULE in $(ls $MOONBASE/$1 2>/dev/null | \
+      grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README")
+  do
+    echo "$MODULE" 
+  done
+  return 0
 }
+
 
 # function : list_moonbase
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
-list_moonbase()
-{
-  for  SECTION  in  $(list_sections) ;  do
+list_moonbase() {
+  debug_msg "list_moonbase ($@)"
+  for SECTION in $(list_sections) ; do
     list_modules $SECTION
   done				
 }
 
 
-# function : set_moonbase_md5
-# usage    : set_moonbase_md5
-# purpose  : creates the md5 value of overall moonbase
-set_moonbase_md5()
-{
-   MOONBASE_MD5=`echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1`
-   echo $MOONBASE_MD5
+# function : list_installed
+# usage    : list_installed
+# purpose  : return a list of installed (or held) modules
+list_installed() {
+  debug_msg "list_installed ($@)"
+  grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
 }
 
-
-# function : get_moonbase_md5
-# usage    : get_moonbase_md5
-# purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
-get_moonbase_md5() 
-{
-   MOONBASE_MD5=`grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
-                 cut -d : -f 2-2`
-   [ -z "$MOONBASE_MD5" ] && MOONBASE_MD5="0"
-   echo "$MOONBASE_MD5"
-}
 
 # function: create_module_index
 # usage   : create_module_index
 # purpose : created an index file of module:section pair list
-create_module_index()
-{
-   remove_module_index()
-   {
-      lock_file $MODULE_INDEX
-      [ -f "$MODULE_INDEX" ] && cp $MODULE_INDEX /tmp && rm -f $MODULE_INDEX 2>/dev/null
-      unlock_file $MODULE_INDEX
-   }
+create_module_index() {
+  debug_msg "create_module_index ($@)"
+  # make sure it exists before trying to see it's writeable
+  touch $MODULE_INDEX &> /dev/null
+  
+  # silently fail if we cannot write to $MODULE_INDEX, it is okay
+  # for this to fail in case we are a mere user using lvu's search
+  # functionality
+  if [ ! -w "$MODULE_INDEX" ] ; then
+    return 0
+  fi
 
-   MODULE_INDEX=${MODULE_INDEX:=/var/state/lunar/module.index}
-   remove_module_index
+  lock_file $MODULE_INDEX || return 1
 
-   lock_file $MODULE_INDEX || return 1
+  rm -f $MODULE_INDEX 2>/dev/null
 
-   echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
-   for  SECTION  in  $(list_sections) ; do
-      list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
-    done
-   unlock_file $MODULE_INDEX
+  echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
+  for SECTION in $(list_sections) ; do
+    list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
+  done
+
+  unlock_file $MODULE_INDEX
 }  
+
 
 # function: check_module_index
 # usage   : check_module_index
 # purpose : checks if the index is up-to-date regarding to moonbase
-function check_module_index()
-{
-  [ `get_moonbase_md5` != `set_moonbase_md5` ] &&
-  [ "$UID" == "0" ]                            &&
-  create_module_index                          &&
-  return 0
-  return 1
+function check_module_index() {
+  debug_msg "function check_module_index ($@)"
+  if [ $(get_moonbase_md5) != $(set_moonbase_md5) ] ; then
+    create_module_index
+    return 0
+  else
+    return 1
+  fi
 }
+
 
 # function : find_section
 # usage    : find_section "module name"
 # purpose  : finds the section of a given module as parameter
-find_section()  
-{
-  local SECTION
+# returns  : (0) on success, (1) on failure, errors on stdout
+find_section() {
+  debug_msg "find_section ($@)"
 
-  SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2`
+  ZLOCAL_OVERRIDES=${ZLOCAL_OVERRIDES:=off}
+  if [ "$ZLOCAL_OVERRIDES" == "on" ] ; then
+    if [ -d "$MOONBASE/zlocal/$1" ] ; then
+      echo "zlocal"
+      return 0
+    fi
+  fi
+
+  SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
-    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+    if [ -d "$MOONBASE/$SECTION/$1" ] ; then
       echo "$SECTION"
       return 0
     fi
@@ -150,15 +154,15 @@ find_section()
 
   check_module_index
 
-  SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2` 
+  SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
-    if [ -d $MOONBASE/$SECTION/$1 ] ; then
+    if [ -d "$MOONBASE/$SECTION/$1" ] ; then
       echo "$SECTION"
       return 0
     fi
   fi
            
-  for  SECTION  in  $(list_sections) ; do
+  for SECTION in $(list_sections) ; do
     if [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] ; then
       echo "$SECTION"
       return 0
@@ -168,77 +172,171 @@ find_section()
   return 1
 }
 
+
 # function : run_details
-# usage    : run_details |module_name| ($MODULE is pre-defined or param)
+# usage    : run_details module_name ($MODULE is pre-defined or param)
 # purpose  : runs the DETAILS file of a module
+# returns  : (0) on success, (1) on failure, error messages on stdout
 run_details() {
+  debug_msg "run_details ($@)"
+  # Note: run_details doesn't EXIT the code, but merely drops a warning
+  # (return 1), which means that the calling code needs to decide 
+  # if this is a problem or not... -sofar
 
-   [ -z "$MODULE" ] && [ -z "$1" ] && return 1
-   [ -n "$1" ] && MODULE="$1"
-
-   local SECTION=$(find_section $MODULE)
-   [ -d "$MOONBASE/$SECTION/$MODULE" ] || {
-      message  "${PROBLEM_COLOR}Unable to find module"    \
-               "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-               "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
-      return 1
-   }
-
-   [ -f "$MOONBASE/$SECTION/$MODULE/DETAILS" ] || {
-      message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${MODULE}" \
+  if ! SECTION=$(find_section $1) ; then
+    message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
+             "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
+    return 1
+  else
+    if [ ! -f "$MOONBASE/$SECTION/$1/DETAILS" ] ; then
+      message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
-	       "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
+               "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
       return 1
-   }
+    fi
    
-   SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-   . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
-   SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$MODULE-$VERSION}
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
+    run_module_file $1 DETAILS &> /dev/null &&
+    SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
+    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$1}
 
-   return 0        
+    return 0
+  fi
 }
+
 
 # function : run_module_file
-# usage    : run_module_file <script_name> SCRIPT_DIRECTORY MUST be predefined
+# usage    : run_module_file $MODULE $SCRIPTNAME 
 # purpose  : runs the given script for a pre-defined module
-run_module_file()
-{
-   [ -z "$SCRIPT_DIRECTORY" ]  && return 1
-   [ -s "$SCRIPT_DIRECTORY/$1" ] || return 1
-   verbose_msg "running \"$MODULE\" \"$1\" file"
-   [ "$TEST" != "on" ] && . $SCRIPT_DIRECTORY/$1 > /dev/null
+run_module_file() {
+  debug_msg "run_module_file ($@)"
+  if [ -z "$SCRIPT_DIRECTORY" ] ; then
+    if ! run_details $1 &> /dev/null ; then
+      return 1
+    fi
+  fi
+  if [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
+    . $SCRIPT_DIRECTORY/$2
+  fi    
 }
 
 
-module_installed()
-{
-   if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
-     STAT=`grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3`
-   else
-     STAT=`grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3`
-   fi
-   [  "$STAT"  ==  "installed"  ]
+# function : module_installed
+# usage    : module_installed $MODULE
+# purpose  : check if $MODULE is installed (or held)
+module_installed() {
+  $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q -e "^$1:installed" -e "^$1:held")
 }
 
 
+# function : module_held
+# usage    : module_held $MODULE
+# purpose  : check if $MODULE is held
 module_held() {
-   STAT=`grep "^$1\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3` &&
-   [ "$STAT" == "held" ]
+  debug_msg "module_held ($@)"
+  $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q "^$1:held")
 }
 
 
-module_exiled()  {
-   STAT=`grep "^$1\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f3` &&
-   [ "$STAT" == "exiled" ]
+# function : module_exiled
+# usage    : module_exiled $MODULE
+# purpose  : check if $MODULE is exiled
+module_exiled() {
+  debug_msg "module_exiled ($@)"
+  $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q "^$1:exiled")
 }
 
 
+# function : installed_version
+# usage    : installed_version $MODULE
+# purpose  : return the installed version of $MODULE
 installed_version() {
-   if grep -q "^$1\:" $MODULE_STATUS 2>/dev/null ; then
-     echo `grep "^$1\:"        $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
-   else  
-     echo `grep "^$1-custom\:" $MODULE_STATUS | tail -1 2>/dev/null | cut -d : -f4`
-   fi
+  debug_msg "installed_version ($@)"
+  grep "^$1:" $MODULE_STATUS | cut -d: -f4
 }
 
 
+# function : hold_modules
+# usage    : hold_modules $MODULE [$MODULE....]
+# purpose  : put modules on hold
+hold_modules() {
+  debug_msg "hold_modules ($@)"
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:held:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+# function : unhold_modules
+# usage    : unhold_modules $MODULE [$MODULE....]
+# purpose  : put modules on hold back to normal
+unhold_modules () {
+  debug_msg "unhold_modules  ($@)"
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:held:installed:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+# function : exile_modules
+# usage    : exile_modules $MODULE [$MODULE....]
+# purpose  : put modules on exile
+exile_modules() {
+  debug_msg "exile_modules ($@)"
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:exiled:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+# function : unexile_modules
+# usage    : unexile_modules $MODULE [$MODULE....]
+# purpose  : put modules on exile back to normal
+unexile_modules () {
+  debug_msg "unexile_modules  ($@)"
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP
+    lock_file $MODULE_STATUS
+    for MODULE in "$@" ; do
+      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep "^$MODULE:" $MODULE_STATUS | sed "s:exiled:installed:" >> $MODULE_STATUS_BACKUP
+      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+module_needs_update () {
+  debug_msg "module_needs_update  ($@)"
+  if [ -n "$1" ] ; then
+    :
+  else
+    return 1
+  fi
+}

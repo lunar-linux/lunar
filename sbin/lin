@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lin - install Lunar modules                              #
@@ -35,926 +35,178 @@ Usage:		lin  [parameters]  [module]
 
 Optional Parameters:
 
--f  |  --fix			Discover and fix broken modules
--n  |  --nofix			Discover, but do not fix broken modules
--d  |  --fixdepends             Discover and fix dependancy problems, but
-                                do not recompile modules
-
--s				Download 1st, lin 2nd
-    |  --deps			Configure modules and determine dependencies, 
-				but do not lin.
-
--p  |  --probe                  Only lin if not already installed
-
 -c  |  --compile		Ignore $INSTALL_CACHE and compiles
+-d  |  --debug                  Enables debug messages
+       --deps			Configure modules and determine dependencies, 
+-f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
+-h  |  --help                   Displays this help text
+-p  |  --probe                  Only lin if not already installed
 -r  |  --reconfigure		Select new dependencies for modules
-
-       --from	directory	Specify an alternate for $SOURCE_CACHE
-       --url	URL		Specify an alternate download URL
-
-       --pam			re-lins all installed modules that
-				can use Linux-PAM
-
+-R  |  --resurrect              Force module to be unpacked from /var/cache/lunar
+-s  |  --silent			Decreases the level of message output
+-v  |  --verbose                Increases the level of message output
 EOF
   exit  1
 }
 
-#Copyrighted Jason Johnston  2002 under GPLv2
 
-# This checks the /var/state/lunar/gcc.<platform>
-# file to see if it exists.  If it does exist then
-# we grep it to see the names of the modules that
-# DO NOT compile with gcc 3x.  If the module is
-# on the list, we set the path so that gcc 3x is
-# NOT used.
-
-# If you find a module that does not compile with
-# gcc 3x please email your findings to
-# maintainer@lunar-linux.org.
-
-# quick hack to fix a bug where optimize_platform was being called but there is no such function
-
-. /var/lib/lunar/functions/optimize.lunar
-
-
-# Useage check_checklist $MODULES
-check_blacklist() {
-  if ! [[ $PLATFORM ]]; then
-    PLATFORM=x86
-  fi
-  if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
-    BLKLST=`grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM`
-    if [[ $BLKLST == $MODULE ]]; then
-      message "${PROBLEM_COLOR}" \
-              "Module $MODULE is blacklisted and will not be installed." \
-	      "${DEFAULT_COLOR}"
-      exit 0
-    fi
-  else
-    touch /var/state/lunar/blacklist.$PLATFORM
-  fi
-}
-
-
-use_wrappers() {
-  if [ "$GCCWRAPPERS" == "on" ] ; then
-    export PATH=/var/lib/lunar/compilers:${PATH}
-  fi  
-}
-
-
-run_conflicts() {
-    if  [  -x  $SCRIPT_DIRECTORY/CONFLICTS  ];  then
-             . $SCRIPT_DIRECTORY/CONFLICTS
-    fi
-}
-
-
-# create the dependency files if they do not exist
-prepare_depends_status()  {
-   [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
-   [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
-}
-
-
-prepare_module_config()  {
-  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
-  if  [  !  -x  $MODULE_CONFIG  ];  then
-    touch       $MODULE_CONFIG
-    chmod  a+x  $MODULE_CONFIG
-  fi
-}
-
-
-run_configure() {
-  if  [  -n  "$RECONFIGURE"  ];  then
-    rm  -f  $DEPENDS_CONFIG/$MODULE
-    remove_depends  $MODULE
-  fi
-
-  prepare_module_config
-  use_xinetd || {
-  if  [  -n  "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ;  then
-    use_initd
-  fi
-  }
-
-  grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
-
-  if  [  -x  $SCRIPT_DIRECTORY/CONFIGURE  ];  then
-    . $SCRIPT_DIRECTORY/CONFIGURE
-  fi
-}
-
-
-run_pre_build() {
-  if  [  -f  /tmp/$MODULE.iw ] ; then
-    verbose_msg echo "removing \"/tmp/$MODULE.iw\""
-    rm -f /tmp/$MODULE.iw
-  fi
-
-  message  "${MESSAGE_COLOR}Building"  \
-           "${MODULE_COLOR}${MODULE}"    \
-           "${DEFAULT_COLOR}"
-
-  cd  $BUILD_DIRECTORY
-
-  verify_sources  &&
-  if  [  -x  $SCRIPT_DIRECTORY/PRE_BUILD  ];  then
-           . $SCRIPT_DIRECTORY/PRE_BUILD
-  else
-    default_pre_build
-  fi
-}
-
-
-stop_logging() {
-  message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
-           "${DEFAULT_COLOR}"
-
-  bzip2  -9f  <  $C_LOG  >  $COMPILE_LOGS/$MODULE-$VERSION.bz2
-  rm -f $C_LOG $C_FIFO
-  unset C_LOG C_FIFO
-}
-
-
-view_compile_log()  {
-    sleep   1
-    report              $C_LOG  "Compile log"
-}
-
-
-start_logging () {
-  export C_LOG=/tmp/$MODULE.compile.log
-  export C_FIFO=/tmp/$MODULE.compile.fifo
-
-  rm  -f $C_FIFO
-  mknod  $C_FIFO p
-  rm  -f $C_LOG
-  echo  "Compile log for $MODULE  $VERSION  Built on `date  -u`"  >  $C_LOG
-
-  activate_voyeur
-}
-
-
-activate_voyeur()  {
-  if  [  -z  "$SILENT"  ];  then
-    case  $VOYEUR  in
-      on)  tee  -a  $C_LOG  <  $C_FIFO              &  ;;
-       *)  tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &  ;;
-    esac
-  else     tee  -a  $C_LOG  <  $C_FIFO  >/dev/null  &
-  fi
-}
-
-
-run_build()  {
-  [  -d  "$SOURCE_DIRECTORY"  ]  &&
-  cd      $SOURCE_DIRECTORY
-
-  invoke_installwatch
-
-  verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
-  
-  if [ -x ./configure ] || [ -x ./src/configure ] ; then
-    if [ -f /var/lib/lunar/localsaconfig ]; then
-      if [ -f /var/cache/config/$MODULE ] ; then
-        message "${MESSAGE_COLOR}These are your current -- config options for module ${MODULE_COLOR}$MODULE"
-        message "${FILE_COLOR}(/var/cache/config/$MODULE)"
-        cat /var/cache/config/$MODULE
-      fi
-	  
-      if    query  "Do you wish to add -- options to ./configure?"  n ;  then
-        if [ $EDITOR ]; then
-          if    [ $EDITOR == /usr/bin/emacs ] || \
-                [ $EDITOR == /usr/bin/vi ]    || \
-                [ $EDITOR == /usr/bin/jed ]   || \
-                [ $EDITOR == /usr/bin/ed ]    || \
-                [ $EDITOR == /usr/bin/nano ]   ;    then
-             if [ ! -x $EDITOR ]; then
-               EDITOR=/usr/bin/nano
-             fi
-             else
-               EDITOR=/usr/bin/nano
-           fi
-           else
-           EDITOR=/usr/bin/nano
-         fi
-         $EDITOR /var/cache/config/$MODULE
-         OPTS="$OPTS `cat /var/cache/config/$MODULE`"
-         message "${MESSAGE_COLOR} OPTS= ${MODULE_COLOR}$OPTS"
-      fi
-    fi
-  fi
-
-  if  [  -x  $SCRIPT_DIRECTORY/BUILD  ];  then
-          .  $SCRIPT_DIRECTORY/BUILD
-  else
-    default_build
-  fi
-
-}
-
-
-run_post_build() {
-  if  [  -x  $SCRIPT_DIRECTORY/POST_BUILD  ];  then
-           . $SCRIPT_DIRECTORY/POST_BUILD
-  fi
-  default_post_build
-}
-
-
-run_post_install() {
-  if  [  -x  $SCRIPT_DIRECTORY/POST_INSTALL  ];  then
-           . $SCRIPT_DIRECTORY/POST_INSTALL
-  fi
-}
-
-
-export_ld()  {
-  for  DIRECTORY  in  $*;  do
-    if  file  -b  $DIRECTORY/*.so*  |
-        grep  -q  "shared object"
-    then
-      if  [  -z  "$LD_LIBRARY_PATH"  ]
-      then  export  LD_LIBRARY_PATH="$DIRECTORY"
-      else  export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIRECTORY"
-      fi
-    fi
-  done
-}
-
-
-ldd_check()  {  (
-  if  [  "$LDD_CHECK"  ==  "off"    ] ;  then
-    return
-  fi
-     MODULE=$1
-     VERSION=`installed_version  $MODULE`
-       I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  LDD_STATUS=0
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG                               |
-         grep      "/bin/\|/games/\|/lib/\|/sbin/"  |
-         grep  -v  "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/"`
-
-    for  FILE  in  $LOG;  do
-      if  [     -f  "$FILE"  ]     &&
-          [  !  -h  "$FILE"  ]     &&
-          file  -b  "$FILE"        |
-          grep  -q  "ELF"          &&
-          ldd       "$FILE"  2>&1  |
-          grep  -q  "not found"
-      then
-        (  export  IFS="$IFS_OLD"
-           message  "${FILE_COLOR}${FILE}"        \
-                    "${DEFAULT_COLOR}of"          \
-                    "${MODULE_COLOR}${MODULE}"    \
-                    "${PROBLEM_COLOR}is broken."  \
-                    "${DEFAULT_COLOR}"
-           ldd      "$FILE" 2>&1 | grep  "not found"
-        )
-        LDD_STATUS=1
-      fi
-    done
-  fi
-  return  $LDD_STATUS
-) }
-
-
-find_check()  { (
-  if  [  "$FIND_CHECK"  ==  "off"             ]   ||
-      [  "$1"           ==  "xfree86"         ]   ||
-      [  "$1"           ==  "xfree86-custom"  ];  then
-    return
-  fi
-      MODULE=$1
-      VERSION=`installed_version  $MODULE`
-        I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  FIND_STATUS=0
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG                                          |
-         grep      "/bin/\|/games/\|/include/\|/lib/\|/sbin/"  |
-         grep  -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/"`
-
-    for  ITEM  in  $LOG;  do
-      if  [  -e  "$ITEM"  ];  then
-        true
-      else
-        (  export  IFS="$IFS_OLD"
-           message  "${FILE_COLOR}${ITEM}"         \
-                    "${DEFAULT_COLOR}of"           \
-                    "${MODULE_COLOR}${MODULE}"       \
-                    "${PROBLEM_COLOR}is missing."  \
-                    "${DEFAULT_COLOR}"
-        )
-        FIND_STATUS=1
-      fi
-    done
-  else
-    (  export  IFS="$IFS_OLD"
-       message  "${MODULE_COLOR}${MODULE} "                     \
-                "${PROBLEM_COLOR}is missing an install log."  \
-                "${DEFAULT_COLOR}"
-    )
-    FIND_STATUS=1
-  fi
-  return  $FIND_STATUS
-) }
-
-
-show_owner()  {
-  OWNER=`grep  $TARGET  $INSTALL_LOGS/*  |
-         cut  -d :  -f1                  |
-         sed  -n  1p`
-  if  [  -n  "$OWNER"  ];  then  echo  "`basename  $OWNER`"
-                           else  echo  "nobody"
-  fi
-}
-
-
-remove_line()  {
-  F_TMP=/tmp/`basename  $I_LOG`.`uuidgen`
-
-  cp         $I_LOG  $F_TMP
-  grep  -v   $ITEM   $F_TMP  >  $I_LOG
-  rm    -f           $F_TMP
-
-  message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
-           "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-  message  "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
-  message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by `show_owner`"
-  message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
-}
-
-
-sym_check()  { (
-  if  [  "$SYM_CHECK"  ==  "off"  ];  then
-    return
-  fi
-      MODULE=$1
-	  VERSION=`installed_version  $MODULE`
-        I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-
-  if  [  -e  $I_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    LOG=`cat   $I_LOG`
-
-    for  ITEM  in  $LOG;  do
-      if  [  -h  "$ITEM"  ]  &&
-          [  -f  "$ITEM"  ]
-      then
-      TARGET=$(  basename  $(  ls   -la  "$ITEM"  |
-                               cut  -d  '>'  -f2  |
-                               cut  -c  2-
-                            )
-              )
-        if  !  grep  -q  "$TARGET"  $I_LOG
-        then  (  export  IFS="$IFS_OLD";  remove_line  )
-        fi
-      fi
-    done
-  fi
-) }
-
-
-md5sum_check()  { (
-  if  [  "$MD5SUM_CHECK"  ==  "off"  ];  then
-    return
-  fi
-
-  MODULE=$1
-  VERSION=`installed_version  $MODULE`
-  MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
-
-  MD5SUM_STATUS=0
-
-  if  [  -e  $MD5_LOG  ];  then
-    IFS_OLD="$IFS"
-    export  IFS="	
-"
-
-    OUTPUT=`cat  $MD5_LOG                                         |
-            grep      "/bin/\|/games/\|/include/\|/lib/\|/sbin/"  |
-            grep  -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/"       |
-            md5sum  --check  2>/dev/null                          |    
-            grep   -v       ": OK"                                |
-            cut    -d :  -f1`
-
-    if  [  -n  "$OUTPUT"  ];  then
-      for  FILE  in  $OUTPUT;  do
-        if  [     -f  "$FILE"  ]  &&
-            [  !  -h  "$FILE"  ]  &&
-            file  -b  "$FILE"     |
-            egrep  -q  "executable|shared object|current ar archive"
-        then
-          MD5SUM=`md5sum  $FILE`
-          if  !  grep  -q  "$MD5SUM"  $MD5SUM_LOGS/*;  then
-            (  export  IFS="$IFS_OLD"
-               message  "${FILE_COLOR}${FILE}"               \
-                        "${DEFAULT_COLOR}of"                 \
-                        "${MODULE_COLOR}${MODULE}"           \
-                        "${PROBLEM_COLOR}has wrong md5sum."  \
-                        "${DEFAULT_COLOR}"
-            )
-            MD5SUM_STATUS=1
-          fi
-        fi
-      done
-    fi
-  else
-    (  export  IFS="$IFS_OLD"  
-       message  "${MODULE_COLOR}${MODULE} "                 \
-                "${PROBLEM_COLOR}is missing a md5sum log."  \
-                "${DEFAULT_COLOR}"
-    )
-    MD5SUM_STATUS=1
-  fi
-  return  $MD5SUM_STATUS
-) }
-
-
-status_okay()  {
-  module_installed  $1  ||
-  module_held       $1
-}
-
-
-run_checks()  {
-     sym_check  $1
-    find_check  $1  &&
-     ldd_check  $1  &&
-  md5sum_check  $1
-}
-
-
-run_fix()  { (
-  MODULES=$*
-
-  if  [  -z  "$MODULES"  ];  then
-    MODULES=$(cat $MODULE_STATUS_BACKUP | cut  -d: -f1 | sort)
-  fi
-
-  PASSED=":"
-
-  [ -n "$EXPORT_LD_PATH" ] ||
-    export EXPORT_LD_PATH=$(find /usr/lib -type d ! -empty)
-  if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
-    LD_LIBRARY_PATH_OLD="$LD_LIBRARY_PATH"
-    export_ld $EXPORT_LD_PATH
-  fi
-
-  until  [  "$FIXED"     ==  "yes"  ]   ||
-         [  "$HOPELESS"  ==  "yes"  ];  do
-
-       FIXED="yes"
-    HOPELESS="no"
-
-    for  MODULE  in  $MODULES;  do
-
-      fix_depends $MODULE
-
-      # if we were called with --fixdepends then we may skip the rest
-      if [ -n "$FIXDEPENDS" ] ; then
-        continue
-      fi        
-
-      if  status_okay  $MODULE                         &&
-          [  "$MODULE"  !=  "lunar"  ]                 &&
-          [  "$MODULE"  !=  "j2sdk"    ]               &&
-	  module_held $MODULE                          &&
-          !  echo  $PASSED  |  grep  -q  ":$MODULE:";  then
-
-        if    run_checks     $MODULE  ||
-              [  -n  "$NOFIX"  ]
-        then
-          PASSED="$PASSED$MODULE:"
-        else
-          FIXED="no"
-          (  run_details
-             satisfy_depends
-             unset  FIX
-             satisfy_depends
-          )
-
-          if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
-            export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
-            export_ld $EXPORT_LD_PATH
-          fi
-
-          if    run_checks     $MODULE  ||
-                [  -n  "$NOFIX"  ]
-          then
-
-            PASSED="$PASSED$MODULE:"
-            if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
-              export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
-              export_ld $EXPORT_LD_PATH 
-            fi
-
-          else
-            unset  FIX
-            if    !  lin  --compile  $MODULE;  then  HOPELESS="yes"
-            elif  !  run_checks      $MODULE;  then  HOPELESS="yes"
-            fi
-            export  FIX="--fix"
-          fi
-        fi
-      fi
-    done
-  done
-  rm  -f  /tmp/LD_LIBRARY_PATH_FILE
-) }
-
-
-process_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  export  DEPS_ONLY="$1";      shift 1  ;;
-        -r|--reconfigure)  RECONFIGURE="$1";            shift 1  ;;
-            -c|--compile)  COMPILE="$1";                shift 1  ;;
-	      -p|--probe)  PROBE="yes";                 shift 1  ;;
-                  --from)  export  SOURCE_CACHE=$2;     shift 2  ;;
-                --silent)  SILENT="$1";                 shift 1  ;;
-                -f|--fix)  export  FIX="$1";            shift 1  ;;
-              -n|--nofix)  export  FIX="--fix"
-                           export  NOFIX="$1";          shift 1  ;;
-	 -d|--fixdepends)  export  FIXDEPENDS="$1";
-	 		   export  FIX="$1";            shift 1  ;;
-                      -s)  SEPARATE="$1";               shift 1  ;;
-                   --url)  export  BASE_URL="$2";       shift 2  ;;
-                   --pam)  lin  -c  `find_pam_aware`;   shift 1  ;;
-                       *)  help                                  ;;
-      esac
-    else
-      shift
-   fi
-  done
-}
-
-
-strip_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  shift 1  ;;
-        -r|--reconfigure)  shift 1  ;;
-                  --from)  shift 2  ;;
-                --silent)  shift 1  ;;
-                -f|--fix)  shift 1  ;;
-              -n|--nofix)  shift 1  ;;
-         -d|--fixdepends)  shift 1  ;;
-            -c|--compile)  shift 1  ;;
-	      -p|--probe)  shift 1  ;;
-                      -s)  shift 1  ;;
-                   --url)  shift 2  ;;
-                   --pam)  shift 1  ;;
-                       *)  shift 1  ;;
-      esac
-    else
-      echo  $1
-      shift
-   fi
-  done
-}
-
-
-resurrect()  {  (  
-  run_details      &&
-  run_conflicts    &&
-  satisfy_depends  &&
-
-  STATUS=installed
-
-  if  module_held  $MODULE;  then
-    VERSION=`installed_version  $MODULE`
-     STATUS=held
-     lrm --keepconfig $MODULE
-  fi
-
-  CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
-
-  if  [      -f   $CACHE_BZ  ]  &&
-      bzip2  -tf  $CACHE_BZ;    then
-
-    bzip2         -cd   $CACHE_BZ  |  tar  -Pkx  1>/dev/null  2>&1
-    add_module     $MODULE  $STATUS  $VERSION
-    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
-    message  "${RESURRECT_COLOR}Resurrected module:"  \
-             "${MODULE_COLOR}${MODULE}"                \
-             "${DEFAULT_COLOR}"                      \
-             "version"                               \
-             "${VERSION_COLOR}${VERSION}"            \
-             "${DEFAULT_COLOR}"
-    lin  --fix  $SILENT  $MODULE
-  else
-    false
-  fi
-)  }
-
-
-show_download_progress()  {
-  if  [  -f  "$D_LOG"  ];  then
-    if  [  -z  "$LC_OLD"  ];  then
-      LC_OLD=0
-    fi
-
-    LC=`cat  $D_LOG  2>/dev/null  |  wc  -l  |  tr  -d ' '`
-
-    if  [  "$LC"  !=  "$LC_OLD"  ];  then
-      ((  LC_OLD++  ))
-      sed  -n ${LC_OLD},${LC}p  $D_LOG
-      LC_OLD=$LC
-    fi
-  fi
-}
-
-
-show_downloading()  {
-  while  !  lget  $MODULE;  do
-    show_download_progress
-    sleep 1
-  done
-    show_download_progress
-}
-
-
-report_install()  {
-  INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
-  report  $INST_LOG  "Install log"
-}
-
-
-lin_module()  { (
-  if [ $MODULE == "moonbase" ]
-  then
-    if  !  current_locked       &&
-        !     solo_locked
-    then
-      linING="/var/lock/installing.$MODULE"
-      echo  $$  >  $linING    &&
-      get_moonbase            &&
-      rm  -f  $linING
-      return
-    fi
-  fi
-  check_blacklist             &&
-  run_details                 &&
-  run_conflicts               &&
-  satisfy_depends             &&
-  show_downloading            &&
-  if  !  current_locked       &&
-      !     solo_locked
-  then
-    echo  $$  >  $linING        &&
-    if ! [[ $CFLAGS ]]; then
-      optimize_platform $GCCVER &&
-      use_wrappers
-    fi                          &&
-    start_logging
-
-    if ! run_pre_build ; then
-      LIN_ERROR="PRE_BUILD"
-    else
-      if ! run_build ; then
-        LIN_ERROR="BUILD"
-      else
-        if ! run_post_build ; then
-          LIN_ERROR="POST_BUILD"
-	fi
-      fi
-    fi
-
-    devoke_installwatch
-    stop_logging
-    
-    if [ -n "$LIN_ERROR" ] ; then
-      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
-      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
-      return 1
-    fi  
-
-    if ! boost ; then
-      LIN_ERROR="boost"
-      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
-    else
-      if ! run_post_install ; then
-        LIN_ERROR="POST_INSTALL"
-      fi
-    fi
-
-    if [ -n "$LIN_ERROR" ] ; then
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
-      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
-      return 1
-    fi
-
-    rm_source_dir               &&
-    report_install              &&
-    rm  -f  $linING             &&
-    sound  SUCCESS              &&
-    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
-
-    if  [  "$?"  !=  0  ];  then
-      sound  FAILURE
-      message  "${PROBLEM_COLOR}! Problem detected !${DEFAULT_COLOR}"
-      rm  -f  $linING
-      view_compile_log
-      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
-      return 1
-    fi
-  fi
-) }
-
-
-lin_locked()  {
-  [     -f        /var/lock/installing.$1  ]  &&
-  ps        `cat  /var/lock/installing.$1`    |
-  grep  -q  "lin"
-}
-
-
-solo_locked()  {
-  for  SOLO_MODULE  in  `cat  $SOLO`;  do
-    if  lin_locked  $SOLO_MODULE;  then
-      message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}"  \
-               "of other modules is disabled during a"     \
-               "lin ${MODULE_COLOR}${SOLO_MODULE}"         \
-               "${DEFAULT_COLOR}"
-      return
-    fi
-  done
-  false
-}
-
-
-current_locked()  {
-  if  lin_locked  $MODULE;  then
-    message  "${PROBLEM_COLOR}Detected lin lock file:"  \
-             "${FILE_COLOR}${linING}${DEFAULT_COLOR}"
-    message  "Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-             "to finish installing or for the lock to clear."
-
-    while  lin_locked  $MODULE;  do  sleep  2;  done
-    false
-  else
-    false
-  fi
-}
-
-
-lin_modules()  {
-  for  MODULE  in  $MODULES;  do
-  
-    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-
-      linING="/var/lock/installing.$MODULE"
-
-      if  [  -n  "$COMPILE"      ]  ||
-          [  -n  "$RECONFIGURE"  ]  ||
-          module_installed  $MODULE   ||
-          !  resurrect     $MODULE;  then
-        if  !  lin_module;  then
-          if  [  -n  "$LOGTMP"  ];  then
-            echo  "$MODULE"  >>  /tmp/fail_$LOGTMP
-          fi
-          lin_EXIT_STATUS=1;  
-        else
-          if  [  -n  "$LOGTMP"  ];  then
-            echo  "$MODULE"  >>  /tmp/success_$LOGTMP
-          fi
-        fi
-      fi
-    fi
-  done
-
-  if  [  -n  "$lin_EXIT_STATUS"  ];  then
-    exit  1
-  fi
-}
-
-
-current_sources()  {
-  module_installed  $MODULE  &&
-  [  "$VERSION"  ==  "`installed_version  $MODULE`"  ]
-}
-
-
-run_lget()  {
-  if  !  module_installed  $MODULE  ||
-      !  current_sources          ||
-         [  -n  "$COMPILE"   ]
-  then  lget  $MODULE  >>  $D_LOG  2>&1
-  fi
-  rm  -f  $D_LOG   2> /dev/null
-}
-
-
-build_depends()  {
-  for  MODULE  in  $MODULES;  do
-    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-      ( 
-        run_details    &&
-        run_configure  &&
-        run_depends    &&
-        satisfy_depends
-      )
-    fi
-  done
-
-}
-
-pass_one()  {
-#  This pass does configuration and dependency identification.
-  build_depends  ||  exit  1
-  if  [  -n  "$DEPS_ONLY"  ];  then  exit  0;  fi
-}
-build_sources()  {
-  for  MODULE  in  $MODULES;  do
-    if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-      (
-        run_details      &&
-        satisfy_depends  &&
-        run_lget
-      )
-    fi
-  done
-}
-pass_two()  {
-#  This pass downloads required sources.
-  if  [  -z  "$SEPARATE"   ];  then  build_sources;  fi
-}
-pass_three()  {
-#  This pass compiles sources
-  lin_modules
-}
-pass_zero()  {
-  PASS_ZERO="y"
-  export  D_LOG="/tmp/lunar.downloading.`uuidgen`"
-  export  PREPD="/tmp/lunar.prepd.`uuidgen`"
-  export  lin_PASS="one";    pass_one
-  export  lin_PASS="two";    pass_two  &
-  export  lin_PASS="three";  pass_three
-  rm -f $PREPD 2>/dev/null
-}
-
-main()	{
-  process_parameters        $*
-  MODULES=`strip_parameters  $*`
+main() {
+  debug_msg "main ($@)"
+  MODULES="$@"
 
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
-    MODULE=moonbase
-    lin_module
+    get_moonbase
     # remove moonbase rofm MODULES and continue
-    MODULES=`echo $MODULES | sed 's/moonbase//g'`
+    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+    if [ -z "$MODULES" ] ; then
+      return
+    fi
   fi
 
-  if  [[  -n  "$FIX"  ]];  then
-    run_fix  $MODULES
-  else
-    case  $lin_PASS  in
-        one)  pass_one    $MODULES  ;;
-        two)  pass_two    $MODULES  ;;
-      three)  pass_three  $MODULES  ;;
-          *)  pass_zero   $MODULES  ;;
-    esac
+  if [ -z "$MODULES" ] ; then
+    message "${MESSAGE_COLOR}Nothing to do!${DEFAULT_COLOR}"
+    return
   fi
-  true
+
+  # different approaches for multiple modules (start up downloads first)
+  # and single modules (plain install)
+  if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+
+    if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
+      export TEMP_DOWNLOADLOG=$(temp_create "${MODULE}.download-log")
+    fi
+
+    if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
+      export TEMP_PREPAREDDEPS=$(temp_create "${MODULE}.prepared-depends")
+    fi
+
+    # pass 1 : run full dependency checking
+    # This pass does configuration and dependency identification.
+    if ! build_depends $MODULES ; then
+      temp_destroy $TEMP_DOWNLOADLOG
+      temp_destroy $TEMP_PREPAREDDEPS
+      verbose_msg "Unexpected errors, bailing out!"
+      exit 1
+    elif [ -n "$DEPS_ONLY" ] ; then
+      temp_destroy $TEMP_DOWNLOADLOG
+      temp_destroy $TEMP_PREPAREDDEPS
+      exit 0
+    fi
+
+    # pass 2 : hit the download manager button and grab a beer
+    # this runs as a background process, so we are off to step #3 right away
+    verbose_msg "Spawning download manager"
+    lget $MODULES >> $TEMP_DOWNLOADLOG 2>&1 &
+
+    # pass 3 : compile/install
+    # no strange stuff should happen here anymore
+    for MODULE in $MODULES ; do
+      verbose_msg "starting installation of \"$MODULE\""
+      if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+        if ! module_held $MODULE ; then
+          linING="/var/lock/installing.$MODULE"
+          if  [  -n  "$COMPILE"      ]  ||
+              [  -n  "$RECONFIGURE"  ]  ||
+              module_installed  $MODULE   ||
+              !  resurrect     $MODULE;  then
+            if ! lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
+              if [ -e "$TMP_LIN_FAIL" ] ; then
+                echo "$MODULE" >> $TMP_LIN_FAIL
+              fi
+              lin_EXIT_STATUS=1;  
+            else
+              if [ -e "$TMP_LIN_SUCCESS" ] ; then
+                echo "$MODULE" >> $TMP_LIN_SUCCESS
+              fi
+            fi
+          fi
+        else
+          verbose_msg "Skipping compile and install for held module \"$MODULE\""
+        fi
+      fi
+    done
+
+    # cleanups that we need to do
+    temp_destroy $TEMP_DOWNLOADLOG
+    temp_destroy $TEMP_PREPAREDDEPS
+
+  else
+    if [ -z "$TEMP_PREPAREDDEPS" ] ; then
+      FLAG_PREPAREDDEPS_SET=on
+      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+    fi
+    # we are only doing one module, drop down to:
+    MODULE=$MODULES
+    if ! module_held $MODULE ; then
+      if [ -n "$PROBE" ] ; then
+        if ! module_installed $MODULE ; then
+          build_depends $MODULE &&
+          if [ ! -n "$DEPS_ONLY" ] ; then
+            if ! lin_module $MODULE ; then
+              temp_destroy $TEMP_PREPAREDDEPS
+              exit 1
+            fi
+          fi
+        fi
+      else
+        build_depends $MODULE &&
+        if [ ! -n "$DEPS_ONLY" ] ; then
+          if ! lin_module $MODULE ; then
+            temp_destroy $TEMP_PREPAREDDEPS
+            exit 1
+          fi
+        fi
+      fi
+    else
+      verbose_msg "Skipping held module \"$MODULE\""
+    fi
+    if [ -n "$FLAG_PREPAREDDEPS_SET" ] ; then
+      temp_destroy $TEMP_PREPAREDDEPS
+      unset FLAG_PREPAREDDEPS_SET
+    fi
+  fi
+  
 }
+
+
 . /etc/lunar/config
 
-export  IFS="$STANDARD_IFS"
+GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsv" -l "compile,debug,deps,from:,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
 
-root_check || exit 1
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  export IFS="$STANDARD_IFS"
+  
+  root_check
+  enviro_check
+  set_priority
+  
+  while true ; do
+    case "$1" in
+      -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+         --deps        ) export DEPS_ONLY="$1" ;                    shift   ;;
+      -f|--from        ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
+      -h|--help        ) help ; exit                                        ;;
+      -p|--probe       ) export PROBE="$1" ;                        shift   ;;
+      -r|--reconfigure ) export RECONFIGURE="$1" ;                  shift   ;;
+      -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
+      -s|--silent      ) export SILENT="$1" ;                       shift   ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
 
-if    [  $#      ==  0  ];  then 
-   help  |  view_file
-   exit
+  if [ -n "$RESURRECT" ] ; then
+    resurrect_modules $@
+  else
+    main $@
+  fi
 fi
 
-  LUNAR_PRIORITY=${LUNAR_PRIORITY:="+10"}
-  renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
-  main  $*
+

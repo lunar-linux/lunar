@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 #  messages - lunar message display functions              #
 #                                                          #
@@ -30,36 +30,57 @@
 
 
 message() {
-  [ -n "$SILENT" ] || echo  -e  "$*"
+  if [ -z "$SILENT" ] ; then
+    echo -e "$*"
+  fi
 }
 
 
 verbose_msg() {
-  [ "$VERBOSE" != "on" ] || message "+ $*"
+  if [ "$VERBOSE" == "on" ] ; then
+    message "+ $*"
+  fi
 }
 
 
+debug_msg() {
+  if [ -n "$LUNAR_DEBUG" ] ; then
+    echo "++ $@" > /dev/stderr
+    if [ "$LUNAR_DEBUG" -ge "2" ] ; then
+      echo "++ $@" >> /tmp/lp_debuglog.$$
+      if [ -f /tmp/l_debug_var.$$ ] ; then
+        mv /tmp/l_debug_var.$$ /tmp/l_debug_var.$$.old
+      fi 
+      set | grep '^[A-Z]' | sed 's/^/VAR /' > /tmp/l_debug_var.$$
+      diff -U0 /tmp/l_debug_var.$$.old /tmp/l_debug_var.$$ | \
+          grep -v "^@@" | grep "VAR" | tee -a /tmp/lp_debuglog.$$ > /dev/stderr
+    fi
+  fi
+}
+
+
+# function : report FILE [description] MODULE VERSION
 report() {
-  if  [  ! -f  "$1"  ]; then
+  debug_msg "report ($@)"
+  if [ ! -f "$1" ] ; then
     return
   fi
 
-  if  [  "$VIEW_REPORTS"  ==  "on"  ];  then
-    VIEW_PROMPT="View $2 for ${MODULE_COLOR}${MODULE}-${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}?"
-    sound  REPORT
-    if  query  "$VIEW_PROMPT" n; then
+  if [ "$VIEW_REPORTS" == "on" ] ; then
+    sound REPORT
+    if query "View $2 for ${MODULE_COLOR}${3}-${VERSION_COLOR}${4}${DEFAULT_COLOR}${QUERY_COLOR} ?" n ; then
       view_file $1
     fi
   fi
 
-  if  [  "$MAIL_REPORTS"  ==  "on"  ];  then
-    MAILTEMP="/tmp/lunar.mail.`uuidgen`" 
-    date  -u  > $MAILTEMP
-    echo     >> $MAILTEMP
-    cat $1   >> $MAILTEMP
-    mail  -s  "Lunar Report from $HOSTNAME : $2 for $MODULE-$VERSION"  \
-              $ADMIN  < $MAILTEMP  2>/dev/null
-    rm -f $MAILTEMP 2>/dev/null
+  if [ "$MAIL_REPORTS" == "on" ] ; then
+    TMP_MAIL=$(temp_create "mailreport")
+    date -u > $TMP_MAIL
+    echo >> $TMP_MAIL
+    view_file $1 >> $TMP_MAIL
+    mail -s "Lunar Report from $HOSTNAME : $2 for $3-$4"  \
+              $ADMIN < $TMP_MAIL 2>/dev/null
+    temp_destroy $TMP_MAIL
   fi
 
   true
@@ -67,6 +88,7 @@ report() {
 
 
 query() {
+  debug_msg "query ($@)"
   #  2 arguments
   #  query  "what do you want?  "  DEFAULT
 
@@ -102,6 +124,7 @@ query() {
 
 
 color()  {
+  debug_msg "color ($@)"
   case  $1  in
     off)  unset  MODULE_COLOR
           unset  VERSION_COLOR
@@ -123,9 +146,10 @@ color()  {
 
 
 sound()  {
+  debug_msg "sound ($@)"
   case  $SOUND  in
     on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e  $SOUND_FILE  ];  then
+         if  [  -e "$SOUND_FILE" ] ; then
            (  cd  /  ;  play  $SOUND_FILE  & )
          fi
     ;;
@@ -137,6 +161,7 @@ sound()  {
 # usage    : show_fancy_progress <fancy_progress_var_string>
 # purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
 show_fancy_progress () {
+  debug_msg "show_fancy_progress  ($@)"
    echo -en "\r                                                                            \r$1\r"
 }
 

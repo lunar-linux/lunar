@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # moonbase.lunar - get moonbase from the net               #
 #                                                          #
@@ -9,50 +9,97 @@
 ############################################################
 
 
-get_moonbase () {(
+get_moonbase () {
+(
+  debug_msg "get_moonbase  ($@)"
 
-  cd /tmp
+  SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
-  if [ "$UNIQID" == "" ]; then
-    mk_uniqid;
+  # the following overrides run_details:
+  run_details() {
+  debug_msg "  run_details ($@)"
+        MODULE=moonbase
+       VERSION=`date -u +%Y%m%d.%H`
+        SOURCE=$(basename $MOONBASE_URL)
+    SOURCE_URL=${MOONBASE_URL[@]}
+         FUZZY=off
+       PARTIAL=off
+   CLEAR_CACHE=on
+  }
+
+  # make sure we set these values up front to be sure
+  run_details
+  rm -f /tmp/$SOURCE
+
+  if [ ! -d "$SYSTEM_MOONBASE" ] ; then
+    mkdir -p $SYSTEM_MOONBASE
+  fi
+  
+  if [ ! -d "$SYSTEM_MOONBASE/zlocal" ] ; then
+    mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
 
-  MODULE=moonbase
-  VERSION=`date -u +%Y%m%d.%H`
-  SOURCE=$(basename $MOONBASE_URL)
+  push_uniq_id
 
-  [ ! -d /var/lib/lunar/moonbase ] && mkdir -p /var/lib/lunar/moonbase
-  [ ! -d /var/lib/lunar/moonbase/zlocal ] && mkdir -p /var/lib/lunar/moonbase/zlocal
-  
-  echo -e "${MESSAGE_COLOR}Downloading ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-
-  export FUZZY=off PARTIAL=off
-  rm -f $SOURCE_CACHE/$SOURCE /tmp/$SOURCE
-
-  wget -O - >/dev/null "www.lunar-linux.org/cgi-bin/houston?loc=$UNIQID"
-
-  if get_url "$MOONBASE_URL" $(basename $MOONBASE_URL) ; then
+  if download_module $MODULE ; then
     echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
-    mv /var/lib/lunar/moonbase/zlocal/ /var/lib/lunar/.zlocal-backup    &&
-    rm -rf /var/lib/lunar/moonbase                                      &&
-    mkdir /var/lib/lunar/moonbase                                       &&
-    mv /var/lib/lunar/.zlocal-backup /var/lib/lunar/moonbase/zlocal     &&
+    mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
+    rm -rf $SYSTEM_MOONBASE                                      &&
+    mkdir $SYSTEM_MOONBASE                                       &&
+    mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
     echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
-    bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar               &&
+    bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
+          sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
+    echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
     OUTCOME=success || OUTCOME=failed
-    rm -f $SOURCE_CACHE/$SOURCE
-    message "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-    echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-    if [ -f $MODULE_INDEX ]; then
+
+    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+    add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+    
+    # get ready to regenerate the module index cache file
+    TMP_MODULE_INDEX=$(temp_create "module-index")
+    cp $MODULE_INDEX $TMP_MODULE_INDEX
+    if [ -f "$MODULE_INDEX" ]; then
       rm -f $MODULE_INDEX
     fi
     create_module_index
-    activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}${MODULE_INDEX}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+    display_moonbase_changes
   else
-    activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+    OUTCOME=failed
+    INFO="Could not download a fresh moonbase"
   fi
-)}
+  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+)
+}
+
+
+# function : set_moonbase_md5
+# usage    : set_moonbase_md5
+# purpose  : creates the md5 value of overall moonbase
+set_moonbase_md5() {
+  debug_msg "set_moonbase_md5 ($@)"
+  MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
+  echo $MOONBASE_MD5
+}
+
+
+# function : get_moonbase_md5
+# usage    : get_moonbase_md5
+# purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
+get_moonbase_md5() {
+  debug_msg "get_moonbase_md5 ($@)"
+  MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
+                cut -d : -f 2-2)
+  if [ -z "$MOONBASE_MD5" ] ; then
+    MOONBASE_MD5="0"
+  fi
+  echo "$MOONBASE_MD5"
+}
+
+
+

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lvu - view Lunar module information                      #
@@ -25,15 +25,25 @@
 ############################################################
 #                                                          #
 # Parts Copyrighted Jason Johnston 2002 under GPLv2        #
-#                                                          #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
-#                                                          #
 # Parts Copyrighted Auke Kok 2003 under GPLv2              #
 #                                                          #
 ############################################################
 
 help() {
 cat << EOF
+LVU -- Lunar View utility (for viewing just about everything in Lunar-Linux)
+
+Usage:		lvu [general options] [command [command parameters]]
+
+GENERAL OPTIONS:
+
+-d  |  --debug                  Enables debug messages
+-h  |  --help                   Displays this help text
+-v  |  --verbose                Increases the level of message output
+
+Commands:
+
 Invoke lvu with desired command followed by arguments.
 Please note that anything in brackets [ ] is optional.
 
@@ -43,14 +53,16 @@ what        module         display a module's description
 where       module         display a module's section
 cd          module         change directory to module and execs a new shell
 alien                      discover untracked files
-from        path/file      discover what installed a file
+from        path/file      discover what installed a given file
 leafs                      display installed modules that have no explicit
                                dependencies on them
 orphans                    display installed modules that are missing
-                               dependancies
+                               dependencies
+held                       display held modules
+exiled                     display exiled modules
 
-search      "phrase"       searches module's long descriptions for phrase.
-service     port|acronym   displays module's that provide that service
+search      "phrase"       searches all modules long descriptions for phrase.
+service     port|acronym   displays modules that provide that service
 
 website     module         display a module's website
 install     module         display an install log
@@ -60,7 +72,8 @@ installed   [module]       display installed modules/version of module
 compile     module         display a compile log
 compiler    module         display the compiler version used
 links       module         display a list of modules that this module links to
-sources     module         display source files for a module
+sources     [module]       display source files for a module
+urls        [module]       display all URLs for a module
 maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
 
@@ -68,7 +81,7 @@ sum         [module]       display checksums
 md5sum      [module]       display md5sums
 
 export                     make snapshot of box's configuration.
-import                     snapshot restore snapshot.
+import      snapshot       restores an exported snapshot.
 
 section     [section]      display moonbase sections
 moonbase                   display text listing of the moonbase
@@ -76,8 +89,8 @@ html                       display html listing of the moonbase
 updatelog                  display summary log of previous lunar update
 activity                   display main log file
 
-newer       20020521       display available modules newer than May 21, 2002
-older       20010521       display modules installed before May 21, 2001
+newer       20030801       display available modules newer than Aug 01, 2003
+older       20030101       display modules installed before Jan 01, 2003
 
 voyeur      [delay|module] peak into module compilation
 
@@ -99,15 +112,15 @@ export_snapshot()  {
   cp  -a  /etc           $SOURCE_DIRECTORY
   cp  -a  $CONFIG_CACHE  $SOURCE_DIRECTORY
 
-  for  LINE  in  `cat  $MODULE_STATUS`;  do
-    MODULE=`echo  $LINE  |  cut  -d  :  -f1`
-     STATUS=`echo  $LINE  |  cut  -d  :  -f2`
+  for  LINE  in  $(cat  $MODULE_STATUS) ;  do
+    MODULE=$(echo  $LINE  |  cut  -d  :  -f1)
+     STATUS=$(echo  $LINE  |  cut  -d  :  -f2)
     if  [  "$STATUS"  ==  "installed"  ];  then
       echo  $MODULE  >>  /usr/src/snapshot/install
     fi
   done
 
-  SNAPSHOT="/root/snapshot-$HOSTNAME-`date  -u  +%Y%m%d`.tar.bz2"
+  SNAPSHOT="/root/snapshot-$HOSTNAME-$(date  -u  +%Y%m%d).tar.bz2"
 
   cd  $BUILD_DIRECTORY
   tar    -c  snapshot     |
@@ -128,7 +141,7 @@ import_snapshot()  {
     bzcat $SNAPSHOT  |  tar  -x
     cd  $SOURCE_DIRECTORY
 
-    for  LINE  in  `cat  install`;  do
+    for  LINE  in  $(cat  install);  do
       push_install_queue  $LINE
     done
     report  $INSTALL_QUEUE  "Install Queue"
@@ -147,20 +160,20 @@ import_snapshot()  {
 
 
 checksum() {
-  for FILE in `cat $1 | files` ; do
+  for FILE in $(cat $1 | files) ; do
     sum -s  $FILE
   done
 }
 
 
 md5sum_files() {
-  for FILE in `cat $1 | files` ; do
+  for FILE in $(cat $1 | files) ; do
     md5sum  $FILE
   done
 }
 
 
-alien()  {
+alien() {
 
   message  "In a few minutes I will print files found on this disk"
   message  "that were not installed by lunar.  This is not a"
@@ -189,16 +202,16 @@ alien()  {
 
 
 lvu_catalog()  {
-  echo  "Lunar Moonbase for `date  -u`"
+  echo  "Lunar Moonbase for $(date  -u)"
 
   ((  COUNT=0  ))
 
-  for  SECTION  in  `list_sections`;  do
+  for  SECTION  in  $(list_sections);  do
     echo 
     echo  "-------------------------------------------------"
     echo  "SECTION:  $SECTION"  
     echo  "-------------------------------------------------"
-    for  MODULE  in  `list_modules $SECTION`;  do
+    for  MODULE  in  $(list_modules $SECTION);  do
       echo  $MODULE
       ((  COUNT++  ))
     done
@@ -211,16 +224,14 @@ lvu_catalog()  {
 
 lvu_catalog_html()  {
 
-  echo  "<html><head><title>Lunar Moonbase for `date  -u`</title>"
+  echo  "<html><head><title>Lunar Moonbase for $(date  -u)</title>"
   echo  "<meta http-equiv=\"Pragma\" content=\"no-cache\"></head>"
-  echo  "<body background=\"media/blackmarble.jpg\">"
+  echo  "<body>"
 
-  echo  "<table  align=\"center\""
-  echo  "        background=\"media/whitemarble.jpg\""
-  echo  "        border=5>"
+  echo  "<table align=\"center\" border=5>"
 
-  echo  "<tr><th colspan=5><font color=maroon  size=+1>"
-  echo  "Lunar Moonbase<br>`date  -u`"
+  echo  "<tr><th colspan=5><font color=maroon size=+1>"
+  echo  "Lunar Moonbase<br>$(date  -u)"
   echo  "</font></th></tr>"
 
   echo  "<tr>"
@@ -233,13 +244,12 @@ lvu_catalog_html()  {
 
   ((  COUNT=0  ))
 
-  for  SECTION  in  `list_sections`;  do
+  for  SECTION  in  $(list_sections);  do
     ((  SECTION_COUNT=0 ))
     echo  "<tr><th colspan=5><font color="maroon">$SECTION</font></th></tr>"
-    for  MODULE  in  `list_modules $SECTION`;  do
+    for  MODULE  in  $(list_modules $SECTION);  do
       (
-        [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-             . $MOONBASE/$SECTION/$MODULE/DETAILS  1>/dev/null
+        run_details $MODULE &> /dev/null
         echo  "<tr>"
         if  [  "$MODULE"  ==  "linux"  ]   ||
             [  "$MODULE"  ==  "glibc"  ];  then
@@ -264,7 +274,7 @@ lvu_catalog_html()  {
             SHRINK="<font size=-2>"
           UNSHRINK="</font>"
         else
-           WEBSITE="`echo  $WEB_SITE  |  cut  -c-30`..."
+           WEBSITE="$(echo  $WEB_SITE  |  cut  -c-30)..."
             SHRINK="<font size=-3>"
           UNSHRINK="</font>"
         fi
@@ -292,7 +302,7 @@ lvu_catalog_html()  {
     echo "<tr><th colspan=5>Modules in $SECTION section: $SECTION_COUNT</th></tr>"
   done
 
-  echo  "<tr><th colspan=5>Total modules:  $COUNT</th></tr>"
+  echo  "<tr><th colspan=5>Total modules: $COUNT</th></tr>"
   echo  "</table></body></html>"
 }
 
@@ -301,14 +311,12 @@ newer()  {
   [ -z "$1" ] && return 1      
   DATE=$1
   [ "$DATE" -lt "20010101" ] && return 1        
-  [ "$DATE" -gt "20310101" ] && return 1        
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-        run_details $MODULE
-        if  [  $ENTERED  -gt  $DATE  ];  then
-          echo  $MODULE
-        fi
-    done
+  [ "$DATE" -gt "20310101" ] && return 1
+  for MODULE in $(list_moonbase) ; do
+    run_details $MODULE
+    if [ $ENTERED -gt $DATE ] ; then
+      echo $MODULE
+    fi
   done
 }
 
@@ -318,8 +326,8 @@ older()  {
   DATE=$1
   [ "$DATE" -lt "20010101" ] && return 1        
   [ "$DATE" -gt "20310101" ] && return 1        
-  for  LINE  in `cat  $MODULE_STATUS_BACKUP`;  do
-    LIN_DATE=`echo  $LINE  |  cut  -d  :  -f2`
+  for  LINE  in $(cat $MODULE_STATUS_BACKUP) ; do
+    LIN_DATE=$(echo  $LINE  |  cut  -d  :  -f2)
     if  [  $LIN_DATE  -gt  $DATE  ]  2>/dev/null;  then
       true
     else
@@ -329,62 +337,19 @@ older()  {
 }
 
 
-maintainer()  {
-  run_details $1
-  if  [  -n  "$MAINTAINER"  ];  then  
-    echo  $MAINTAINER
-  else
-    echo  maintainer@lunar-linux.org
-  fi
-}
-
-
-show_from()  {
-  cd  $INSTALL_LOGS
-  grep  $1  *
-}
-
-
 show_module_component()  {
   COMPONENT=$1
      MODULE=$2
-    SECTION=`find_section  $MODULE`
-  if  [  -x  $MOONBASE/$SECTION/$MODULE/$COMPONENT  ];  then
-    cat      $MOONBASE/$SECTION/$MODULE/$COMPONENT
+    SECTION=$(find_section $MODULE)
+  if [ -e $MOONBASE/$SECTION/$MODULE/$COMPONENT ] ; then
+    cat $MOONBASE/$SECTION/$MODULE/$COMPONENT
   fi
-}
-
-
-long_search()  {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules  $SECTION`;  do
-      (   
-          SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE   &&
-          [  -x  $MOONBASE/$SECTION/$MODULE/DETAILS  ]  &&
-               . $MOONBASE/$SECTION/$MODULE/DETAILS     |
-          grep  -q  -i  "$1"                 &&
-          echo  "$SECTION/$MODULE"
-      )
-    done
-  done
-}
-
-
-service()  {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-      if    [  -f  $MOONBASE/$SECTION/$MODULE/services  ]  && 
-            grep  -q  -i  "$1"  $MOONBASE/$SECTION/$MODULE/services
-      then  echo  "$SECTION/$MODULE"
-      fi
-    done
-  done
 }
 
 
 find_lining()  {
-  for  FILE in `ls  /var/lock/lining*  2>/dev/null`;  do
-    if  ps  `cat  $FILE  2>/dev/null`  |  grep  -q  lin;  then
+  for  FILE in $(ls  /var/lock/lining*  2>/dev/null);  do
+    if  ps  $(cat  $FILE  2>/dev/null)  |  grep  -q  lin;  then
       echo  $FILE  |  sed  "s:/var/lock/lining.::"
       return  0
     fi
@@ -395,14 +360,14 @@ find_lining()  {
 
 peak_lining()  {
   if  [  -f     /var/lock/lining.$1   ]            &&
-      ps  `cat  /var/lock/lining.$1  2>/dev/null`  |
+      ps  $(cat  /var/lock/lining.$1  2>/dev/null)  |
       grep  -q  lin                                &&
       [  -f  /tmp/$1.compile.log  ]
   then
     nice  -n  +20                  \
     tail  -f  /tmp/$1.compile.log  \
           --follow=name            \
-          --pid=`cat /var/lock/lining.$1`  2>/dev/null
+          --pid=$(cat /var/lock/lining.$1)  2>/dev/null
   fi
 }
 
@@ -421,13 +386,13 @@ activate_voyeur()  {
   DEFAULT_DELAY=${DEFAULT_DELAY:=60}
 
   while  true;  do
-    if    !  ACTIVE_MODULE=`find_lining`;  then
+    if    !  ACTIVE_MODULE=$(find_lining) ;  then
       message  "${MESSAGE_COLOR}Waiting"       \
                "${DEFAULT_DELAY}"              \
                "seconds for a lin to begin."  \
                "${DEFAULT_COLOR}"
       for  ((  DELAY=DEFAULT_DELAY  ;  DELAY > 0  ;  DELAY--  )); do
-        if  ACTIVE_MODULE=`find_lining`;  then
+        if  ACTIVE_MODULE=$(find_lining);  then
           break
         else
           sleep 1
@@ -444,7 +409,7 @@ activate_voyeur()  {
 
 
 show_leafs()  {
-  for  MODULE  in  `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
+  for  MODULE  in  $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ;  do
     if    !  cut  -d :  -f2-  $DEPENDS_STATUS  |
              grep             "^$MODULE:"       |
              grep  -q         ":on:"
@@ -455,11 +420,11 @@ show_leafs()  {
 
 
 show_orphans()  {
-  for MODULE in `cat  $MODULE_STATUS  |  cut  -d :  -f1`;  do
-    for  LINE  in  `grep  "^${MODULE}:"  $DEPENDS_STATUS`;  do
-       DEPENDS=`echo  $LINE  |  cut  -d :  -f2`
-        STATUS=`echo  $LINE  |  cut  -d :  -f3`
-      OPTIONAL=`echo  $LINE  |  cut  -d :  -f4`
+  for MODULE in $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ; do
+    for  LINE  in  $(grep  "^${MODULE}:"  $DEPENDS_STATUS) ;  do
+       DEPENDS=$(echo  $LINE  |  cut  -d :  -f2)
+        STATUS=$(echo  $LINE  |  cut  -d :  -f3)
+      OPTIONAL=$(echo  $LINE  |  cut  -d :  -f4)
       if ! module_installed $DEPENDS ; then
         if [ "$OPTIONAL" == "required" ]; then
           echo "$MODULE: $DEPENDS is missing"
@@ -474,9 +439,9 @@ show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
 
-    for  LINE  in  `grep  ":$1:"  $DEPENDS_STATUS`;  do
-       MODULE=`echo  $LINE  |  cut  -d :  -f1`
-      STATUS=`echo  $LINE  |  cut  -d :  -f3`
+    for  LINE  in  $(grep  ":$1:"  $DEPENDS_STATUS) ; do
+       MODULE=$(echo  $LINE  |  cut  -d :  -f1)
+      STATUS=$(echo  $LINE  |  cut  -d :  -f3)
 
       if    [  "$STATUS"  ==  "on"  ]
       then  echo          $MODULE
@@ -488,286 +453,475 @@ show_depends()  {
 }
 
 
-old_show_depends()  {
-  if  !  echo  "$DONE"  |  grep  -q  "$1";  then
-    DONE="$DONE  $1"
-    cd  $DEPENDS_CONFIG
-    for  MODULE  in  `ls`;  do
-      if    grep  "$1"    $MODULE  |  grep  -q  " on "
-      then  echo          $MODULE
-            show_depends  $MODULE
-      fi
-    done
-  fi
-}
-
-
-show_website()  {
-  [ -z "$MODULE" ] && return 1
-  run_details $1
-  if  [  -n  "$WEB_SITE"  ] ; then
-    echo $WEB_SITE
-  else
-    echo "http://www.lunar-linux.org"
-  fi
-}
-
-
-show_version()  {  
-  [ -z "$MODULE" ] && return 1
-  run_details $1
-  if [  -n  "$VERSION"  ] ; then
-    echo $VERSION  
-  else
-    echo "$MODULE does not exist or has no version."  
-  fi  
-}  
-
-
-# show the size of installed module, if no module name given, 
-# show sizes of all installed modules
-show_size() {
-   show_all_sizes() {
-      MODULES=`cat  $MODULE_STATUS_BACKUP |  cut  -d : -f1 | sort`
-      for MODULE in $MODULES
-       do
-          echo $MODULE `find_module_size $MODULE`
-       done
-   }
-
-   [ -z "$MODULE" ] && show_all_sizes && return
-   [ -n "$VERSION" ]               && 
-   echo `find_module_size $MODULE` ||
-   message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
-}
-
-
 # function: show_tree
 # usage: show_tree <module>
 # purpose: show a tree of the module's dependencies (recursive)
 function show_tree() {
-        [[ -z "$1" ]] && help && exit 1
+  [[ -z "$1" ]] && help && exit 1
 
-        FORMATTED_MODULE="$1"
-        MODULE=`echo $1 | sed 's/[()]//g'`
-        MODULE_DIR="${MOONBASE}/`find_section ${MODULE}`/${MODULE}"
-        DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
+  FORMATTED_MODULE="$1"
+  MODULE=$(echo $1 | sed 's/[()]//g')
+  MODULE_DIR="${MOONBASE}/$(find_section ${MODULE})/${MODULE}"
+  DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
 
-        if [[ ! -x "${MODULE_DIR}/DETAILS" ]]; then
-                echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
-                return 1
-        fi
-
-        # purpose: Create the tree for displaying
-        set_tree() {
-                TREE=""
-                for (( i=0; i<${INDENT}; i++ )); do
-                        TREE="${TREE}|-->"
-                done
-                TREE=`echo ${TREE} | sed 's/-->|/   |/g'`
-                echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
-        }
-
-        # purpose: Retrieve all dependencies
-        get_depends() {
-                NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
-                OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
-                DEPENDS=`sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " "`
-                echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
-        }
-
-	# purpose: Get reverse dependencies
-        get_reverse_depends() {
-                DEPENDS=`grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " "`
-                [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
-        }
-
-        # purpose: recurse
-        recurse() {
-                (( INDENT++ ))
-                for i in ${DEPENDS}; do
-                        show_tree $i
-                done
-                (( INDENT-- ))
-        }
-
-        [[ -z "${INDENT}" ]] && INDENT=0
-
-        set_tree
-        if [[ -z "${REVERSE}" ]]; then
-	        if [[ -x "${DEPENDS_FILE}" ]]; then
-       	                get_depends
-                        recurse
-                else
-                        echo "No dependencies"
-                fi
-        else
-                get_reverse_depends
-                if [[ -z "${DEPENDS}" ]]; then
-                        echo "No reverse dependencies"
-                else
-                        recurse
-                fi
-        fi
-}
-
-
-parse()  {
-  MODULE=$2
-  SECTION=$2
-  VERSION=`installed_version  $MODULE`
-
-  case  $1  in
-            html)  lvu_catalog_html                       ;;
-          export)  export_snapshot                        ;;
-          import)  import_snapshot  $2                    ;;
-         section)  [ -n "$SECTION" ]       &&
-                   list_modules  $SECTION 
-                   [ -z "$SECTION" ]       &&
-                   list_sections                          ;;
-           alien)  alien                                  ;;
-            from)  show_from   $2                         ;;
-           newer)  newer       $2                         ;;
-           older)  older       $2                         ;;
-         sources)  sources     $MODULE                    ;;
-      maintainer)  maintainer  $MODULE                    ;;
-        moonbase)  lvu_catalog  |  view_file              ;;
-         DETAILS)  show_module_component $1 $2            ;;
-         DEPENDS)  show_module_component $1 $2            ;;
-       CONFIGURE)  show_module_component $1 $2            ;;
-       CONFLICTS)  show_module_component $1 $2            ;;
-       PRE_BUILD)  show_module_component $1 $2            ;;
-           BUILD)  show_module_component $1 $2            ;;
-      POST_BUILD)  show_module_component $1 $2            ;;
-    POST_INSTALL)  show_module_component $1 $2            ;;
-      PRE_REMOVE)  show_module_component $1 $2            ;;
-     POST_REMOVE)  show_module_component $1 $2            ;;
-          search)  long_search   "$2"                     ;;
-         service)  service       "$2"                     ;;
-         depends)  show_depends  "$2"  |  sort  |  uniq   ;;
-           leafs)  show_leafs          |  sort  |  uniq   ;;
-	 orphans)  show_orphans        |  sort  |  uniq   ;;
-         website)  show_website  "$2"                     ;;
-         version)  show_version  "$2"                     ;;
-            size)  show_size     "$2"                     ;;
-            tree)  show_tree     "$2"                     ;;
-            eert)  REVERSE="on"; show_tree "$2"           ;;
-
-    updatelog)  if [ -e /var/log/lunar/update ]; then
-                  view_file /var/log/lunar/update
-                else
-                  echo "No update log available."
-                fi
-                ;;
-
-    activity)  if [ -e $ACTIVITY_LOG ]; then
-                 view_file $ACTIVITY_LOG
-	       else
-	         echo "No update log available."
-	      fi
-	      ;;
-
-    compile)  run_details 
-              if [ -f $COMPILE_LOGS/$MODULE-$VERSION.bz2 ] ; then
-	        view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2
-	      else
-                VERSION=$(installed_version $MODULE)
-                view_file $COMPILE_LOGS/$MODULE-$VERSION.bz2 \
-                "Compile log for $MODULE does not exist"
-              fi
-	      ;;
-	      
-    install)  view_file  $INSTALL_LOGS/$MODULE-$VERSION   \
-              "Install log for $MODULE does not exist"
-              ;;
-
-    compiler) [ -z "$MODULE" ] && return 1
-              [ -e $INSTALL_LOGS/$MODULE-$VERSION ]         || {
-              echo "Install log for $MODULE does not exist" 
-              return 1
-              } && {
-              cat $INSTALL_LOGS/$MODULE-$VERSION |
-              while read LINE
-              do
-                    file $LINE | grep -q "ELF " && {
-                    echo -n "$LINE "
-                    strings -a $LINE | grep GCC: | sort -r | head -n 1
-                    }
-              done
-              }
-              ;;
-
-   links)     [ -z "$MODULE" ] && return 1
-              for FILE in $(lvu install $MODULE) ; do
-                TYPE=$(file $FILE | cut -d' ' -f2)
-                if [[ "$TYPE" == "ELF" ]] ; then
-                  BINARIES="$BINARIES $FILE"
-                  verbose_msg "found binary: \"$FILE\""
-                fi
-              done
-
-              for BINARY in $BINARIES ; do
-                LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
-              done
-
-              for LINK in $LINKSTO ; do
-                lvu from $LINK | cut -d: -f1
-              done | sort | uniq
-              ;;
-
-    installed)  if    [  -z  "$MODULE"    ]
-                then  view_file   $MODULE_STATUS
-                elif  [  -n  "$VERSION"  ]
-                then  echo   "$VERSION"
-                else  message  "$MODULE is not installed";  false
-                fi
-                ;;
-		
-    sum)  [  -n  "$MODULE"  ]                         &&
-          checksum  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
-          checksum  "$INSTALL_LOGS/*"
-          ;;
-	  
-    md5sum)  [  -n  "$MODULE"  ]                             &&
-             md5sum_files  "$INSTALL_LOGS/$MODULE-$VERSION"  ||
-             md5sum_files  "$INSTALL_LOGS/*"
-             ;;
-	     
-    what)  SECTION=`find_section  $MODULE`             &&
-           DETAILS=$MOONBASE/$SECTION/$MODULE/DETAILS  &&
-           [  -x  $DETAILS  ]                           &&
-               .  $DETAILS                              ||
-           message  "Details for $MODULE not found"
-           ;;
-	   
-    where)  SECTION=`find_section  $MODULE`  &&
-            echo     "$SECTION"             ||
-            message  "$MODULE not found"
-            ;;
-
-       cd) [ -z "$MODULE" ] && return 1
-           SECTION=`find_section $MODULE`
-           [ -z "$SECTION" ] &&  exit
-           cd $MOONBASE/$SECTION/$MODULE && $SHELL
-           ;;
-
-   voyeur)  shift  1;  activate_voyeur  $@  ;;
-
-      pam)  find_pam_aware  ;;
-
-        *)  help  ;;
-  esac
-}
-
-
-  # main program loop
-  . /etc/lunar/config
-
-  if [ $# == 0 ] ; then
-    help | view_file
-  else
-    parse $@
+  if [ ! -e "${MODULE_DIR}/DETAILS" ] ; then
+    echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
+    return 1
   fi
+
+  # purpose: Create the tree for displaying
+  set_tree() {
+    TREE=""
+    for (( i=0; i<${INDENT}; i++ )); do
+      TREE="${TREE}|-->"
+    done
+    TREE=$(echo ${TREE} | sed 's/-->|/   |/g')
+    echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
+  }
+
+  # purpose: Retrieve all dependencies
+  get_depends() {
+    NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
+    OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
+    DEPENDS=$(sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " ")
+    for dep in ${DEPENDS}
+    do
+      adep=$(echo ${dep} | tr -d "()")
+      if grep "^${adep}:.*:installed:" ${MODULE_STATUS} >/dev/null
+      then
+        echo -ne "${FILE_COLOR}${dep} "
+      elif grep "^${adep}:.*:held:" ${MODULE_STATUS} >/dev/null
+      then
+        echo -ne "${LRM_COLOR}${dep} "
+      else
+        echo -ne "${PROBLEM_COLOR}${dep} "
+      fi
+    done
+    echo -e "${DEFAULT_COLOR}"
+  }
+
+  # purpose: Get reverse dependencies
+  get_reverse_depends() {
+    DEPENDS=$(grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " ")
+    [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
+  }
+
+  # purpose: recurse
+  recurse() {
+    (( INDENT++ ))
+    for i in ${DEPENDS}; do
+      show_tree $i
+    done
+    (( INDENT-- ))
+  }
+
+  [[ -z "${INDENT}" ]] && INDENT=0
+
+  set_tree
+  if [[ -z "${REVERSE}" ]]; then
+    if [[ -x "${DEPENDS_FILE}" ]]; then
+      get_depends
+      recurse
+    else
+      echo "No dependencies"
+    fi
+  else
+    get_reverse_depends
+    if [[ -z "${DEPENDS}" ]]; then
+      echo "No reverse dependencies"
+    else
+      recurse
+    fi
+  fi
+}
+
+
+show_urls() { (
+  # function overrides:
+  call_wget() { echo $@ ; }
+  guess_filename() { false ; }
+  file() { return ; }
+  mv() { return ; }
+  get_cvs() { return ; }
+  testpack() { return ; }
+  connect() { return ; }
+ 
+  SILENT=on
+  VERBOSE=off
+  FUZZY=off
+  EXHAUSTIVE=off
+  CLEAR_CACHE=off
+
+  if [ -z "$1" ] ; then
+    MODULES=$(list_moonbase|sort)
+  else
+    MODULES=$1
+  fi
+  
+  for MODULE in $MODULES ; do
+    download_module $MODULE
+  done
+) }
+
+
+main()  {
+  case $1 in
+    html)
+      lvu_catalog_html
+      ;;
+      
+    export)
+      export_snapshot
+      ;;
+      
+    import)
+      import_snapshot $2
+      ;;
+      
+    section)
+      if [ -n "$2" ] ; then
+        list_modules $2
+      elif [ -z "$2" ] ; then
+	list_sections
+      fi
+      ;;
+      
+    alien)
+      alien
+      ;;
+
+    from)
+      cd $INSTALL_LOGS
+      grep $2 *
+      ;;
+      
+    newer)
+      newer $2
+      ;;
+      
+    older)
+      older $2
+      ;;
+      
+    moonbase)
+      lvu_catalog | view_file
+      ;;
+
+    leafs)
+      show_leafs | sort | uniq
+      ;;
+      
+    orphans)
+      show_orphans | sort | uniq
+      ;;
+      
+    updatelog)
+      if [ -e /var/log/lunar/update ]; then
+        view_file /var/log/lunar/update
+      else
+        echo "No update log available."
+      fi
+      ;;
+
+    activity)
+      if [ -e $ACTIVITY_LOG ]; then
+        view_file $ACTIVITY_LOG
+      else
+        echo "No update log available."
+      fi
+      ;;
+
+    installed)
+      if [ -z "$2" ] ; then
+        view_file $MODULE_STATUS
+      elif [ -n "$(installed_version $2)" ] ; then
+        echo "$(installed_version $2)"
+      else
+        message "$2 is not installed"
+	false
+      fi
+      ;;
+
+    held)
+      grep ":held:" $MODULE_STATUS | cut -d: -f1
+      ;;
+
+    exiled)
+      grep ":exiled:" $MODULE_STATUS | cut -d: -f1
+      ;;
+		
+    sum)
+      if [ -n "$2" ] ; then
+        if ! checksum  "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
+          checksum  "$INSTALL_LOGS/*"
+	fi
+      fi
+      ;;
+	  
+    md5sum)
+      if [ -n "$2" ] ; then
+        if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
+	  md5sum_files  "$INSTALL_LOGS/*"
+        fi
+      fi
+      ;;
+
+    voyeur)
+      shift 1
+      activate_voyeur $@
+      ;;
+
+    pam)
+      find_pam_aware
+      ;;
+     
+    sources)
+      sources $2
+      ;;
+
+    urls)
+      show_urls $2
+      ;;
+
+    maintainer)
+      if run_details $2 ; then
+        if [ -n "$MAINTAINER" ] ; then  
+          echo $MAINTAINER
+        else
+          echo maintainer@lunar-linux.org
+        fi
+      fi
+      ;;
+      
+    DETAILS)
+      show_module_component $1 $2
+      ;;
+      
+    DEPENDS)
+      show_module_component $1 $2
+      ;;
+      
+    CONFIGURE)
+      show_module_component $1 $2
+      ;;
+      
+    CONFLICTS)
+      show_module_component $1 $2
+      ;;
+      
+    PRE_BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    POST_BUILD)
+      show_module_component $1 $2
+      ;;
+      
+    POST_INSTALL)
+      show_module_component $1 $2
+      ;;
+      
+    PRE_REMOVE)
+      show_module_component $1 $2
+      ;;
+      
+    POST_REMOVE)
+      show_module_component $1 $2
+      ;;
+      
+    search)
+      for SECTION in $(list_sections) ; do
+        for MODULE in $(list_modules $SECTION) ; do
+        (
+          run_module_file $MODULE DETAILS | grep -q -i "$2" &&
+          echo "$SECTION/$MODULE"
+        )
+	done
+      done
+      ;;
+      
+    service)
+      for SECTION in $(list_sections) ; do
+        for MODULE in $(list_modules $SECTION) ; do
+          if [ -f $MOONBASE/$SECTION/$MODULE/services ] && 
+              grep -q -i "$2" $MOONBASE/$SECTION/$MODULE/services ; then
+            echo "$SECTION/$MODULE"
+          fi
+	done
+      done
+      ;;
+      
+    depends)
+      show_depends "$2" | sort | uniq
+      ;;
+      
+    website)
+      if [ -z "$2" ] ; then
+        return 1
+      else
+        if run_details $2 ; then
+          if [ -n "$WEB_SITE" ] ; then
+            echo $WEB_SITE
+          else
+            echo "http://www.lunar-linux.org"
+	  fi
+        fi
+      fi
+      ;;
+      
+    version)
+      if [ -n "$2" ] ; then
+        if run_details $2 ; then
+  	  echo $VERSION
+	fi
+      fi
+      ;;
+      
+    size)
+      if [ -z "$2" ] ; then
+        MODULES=$(cat $MODULE_STATUS | cut -d: -f1 | sort)
+        for MODULE in $MODULES ; do
+          echo $MODULE $(find_module_size $MODULE)
+        done
+      else
+        if module_installed $2 ; then
+          find_module_size $2
+        else
+          message "${PROBLEM_COLOR}$MODULE not installed${DEFAULT_COLOR}"
+        fi
+      fi
+      ;;
+      
+    tree)
+      show_tree "$2"
+      ;;
+      
+    eert)
+      REVERSE="on"
+      show_tree "$2"
+      ;;
+
+    compile)
+      if run_details $2 ; then
+        if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
+          view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
+        else
+          VERSION=$(installed_version $2)
+          view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+             "Compile log for $2 does not exist"
+        fi
+      fi
+      ;;
+	      
+   install)
+     if run_details $2 ; then
+       view_file $INSTALL_LOGS/$2-$(installed_version $2) \
+           "Install log for $2 does not exist"
+     fi
+     ;;
+
+   compiler)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then 
+           echo "Install log for $2 does not exist" 
+           return 1
+         else
+           cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
+             if file $LINE | grep -q "ELF " ; then
+               echo -n "$LINE "
+               strings -a $LINE | grep GCC: | sort -r | head -n 1
+             fi  
+           done
+         fi
+       fi
+     fi
+     ;;
+
+   links)
+     if [ -z "$2" ] ; then
+       return 1
+     else
+       for FILE in $(lvu install $2) ; do
+         TYPE=$(file $FILE | cut -d' ' -f2)
+         if [[ "$TYPE" == "ELF" ]] ; then
+           BINARIES="$BINARIES $FILE"
+           verbose_msg "found binary: \"$FILE\""
+         fi
+       done
+       for BINARY in $BINARIES ; do
+         LINKSTO=$(ldd $BINARY | cut -d' ' -f3)
+       done
+       for LINK in $LINKSTO ; do
+         lvu from $LINK | cut -d: -f1
+       done | sort | uniq
+     fi
+     ;;
+     
+   what)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         run_module_file $2 DETAILS
+       fi
+     fi
+     ;;
+	   
+   where)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         echo $(find_section $2)
+       fi
+     fi
+     ;;
+
+   cd)
+     if [ ! -z "$2" ] ; then
+       if run_details $2 ; then
+         cd $MOONBASE/$(find_section $2)/$2
+         $SHELL
+       fi
+     fi
+     ;;
+
+   *)
+     help
+     ;;
+
+   esac
+ 
+}
+
+
+
+. /etc/lunar/config
+
+GETOPT_ARGS=$(getopt -q -n lvu -o "dhv" -l "debug,help,verbose" -- "$@")
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  export IFS="$STANDARD_IFS"
+  
+  set_priority
+  
+  while true ; do
+    case "$1" in
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -h|--help        ) help ; exit                                        ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
+
+  main $@
+fi
 
 
 

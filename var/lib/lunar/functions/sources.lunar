@@ -1,3 +1,4 @@
+#!/bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -6,7 +7,8 @@
 ############################################################
 #                                                          #
 # $FUNCTIONS/sources                                       #
-# includes sources, md5_verify_source                      #
+# includes sources, md5_verify_source, verify_sources      #
+# verify_source                                            #
 #                                                          #
 # 20020604                                                 #
 #                                                          #
@@ -16,110 +18,104 @@
 #                                                          #
 ############################################################
 
-# function : sources
-# usage    : sources <module_name> {MD5}
-# purpose  : displays the filenames and md5sums of sources for a given module
-sources()  
-{ (
 
+verify_source() {
+  debug_msg "verify_source ($@)"
+  VERIFIED="true"
+  for SOURCE_FILE in $@ ; do
+    if ! guess_filename $SOURCE_CACHE/$1 >/dev/null ; then
+      message "${PROBLEM_COLOR}Missing ${FILE_COLOR}${1}${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}Lunar Install aborting.${DEFAULT_COLOR}"
+      activity_log "lin" "$MODULE" "$VERSION" "failed" "because it was missing source:  $1"
+      return 1
+    fi
+  done
+}
+
+
+# function : sources
+# usage    : sources <module_name> {MD5|VFY|
+# purpose  : displays the filenames and md5sums or VFY part of sources
+#            for a given module
+sources() {
+(
+  debug_msg "sources ($@)"
   MAX_SOURCES=${MAX_SOURCES:=100}
 
-  run_details $1 || return 1
-
-  if [ -z "$CVS_MODULE" ]; then
-    for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ )) ; do
-      TEMP1=`echo SOURCE$CNT | sed s/SOURCE0/SOURCE/`
-      TEMP2=`echo SOURCE$(( CNT+1))`
-      TEMP3=`echo SOURCE$(( CNT+2))`
-
-      eval TEMP=\$$TEMP1
-      eval TEMP2=\$$TEMP2
-      eval TEMP3=\$$TEMP3
-
-      TEMP1_MD5=${TEMP1}_MD5[@]
-      eval TEMP_MD5=\${$TEMP1_MD5}
-      TEMP_MD5=${TEMP_MD5:=0}
-
-      [ -n "$TEMP" ]         &&
-      echo  $TEMP            &&
-      [ "$2" == "MD5" ]      && 
-      echo  $TEMP_MD5 
-
-      #if two consequtive empty sources, then break
-      [ -z "$TEMP2" ] && [ -z "$TEMP3" ]  && {
-      #lets clear the array
-        for (( CNT1=0; CNT1<=$CNT; CNT1++ ))
-        do
-          TEMP1=`echo SOURCE$CNT1 | sed s/SOURCE0/SOURCE/`
-          unset $TEMP1
-        done   
-        break
-      }
-    done
-  else
-    echo $MODULE-$VERSION.tar.bz2
+  if ! run_details $1 ; then
+    return 1
   fi
-) }
+
+  for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ )) ; do
+    TEMP=SOURCE$((CNT))
+    TEMP=${TEMP/SOURCE0/SOURCE}
+
+    eval SRC1=\$${TEMP}
+    if [ "$2" == "MD5" ] ; then
+      eval SRC_MD5=\$${TEMP}_MD5
+      if [ -z "$SRC_MD5" ] ; then
+        SRC_MD5=0
+      fi
+    fi
+
+    eval SRC2=\$SOURCE$((CNT+1))
+    eval SRC3=\$SOURCE$((CNT+2))
+
+    if [ -n "$SRC1" ] ; then
+      echo $SRC1
+      if [ "$2" == "MD5" ] ; then
+        echo $SRC_MD5
+      fi
+    fi
+
+    #if two consequtive empty sources, then break
+    [ -z "$SRC2" ] && [ -z "$SRC3" ] && {
+      break
+    }
+  done
+)
+}
+
 
 # function : md5_verify_source
-# usage    : md5_verify_source filename_1 md5_1, filename_2 md52.....
+# usage    : md5_verify_source filename md5
 # purpose  : md5 verifies a filename
-md5_verify_source()
-{
-   ALL_OK=true   
-   while [ -n "$2" ]
-   do
-      verify_source $1 || return 1
+md5_verify_source() {
+  debug_msg "md5_verify_source ($@)"
+  if [ "$2" != "$(md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)" ] ; then
+     return 1
+  fi
 
-      verbose_msg "checking md5sum of \"$1\""
-
-      [ "$2" == "0" ]  && 
-      TEMP=0           || 
-      TEMP=`md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1`
-      
-      [ "$TEMP" == "$2" ] || {
-         message  "${PROBLEM_COLOR}Wrong md5 sum for ${FILE_COLOR}${1}" \
-                   "${DEFAULT_COLOR}"
-         message  "${PROBLEM_COLOR}Removing ${FILE_COLOR}${SOURCE_CACHE}/${1}" \
-                  "${DEFAULT_COLOR}"
-         rm -f $SOURCE_CACHE/$1 2>/dev/null                             &&
-         message  "${FILE_COLOR}Removed!!${DEFAULT_COLOR}"              ||
-         message  "${PROBLEM_COLOR}Unable to remove!!${DEFAULT_COLOR}" 
-         ALL_OK=false
-      }
-
-      shift 2
-   done
-   $ALL_OK
 }
 
 
 unpack() {
+  debug_msg "unpack ($@)"
 
-    FILENAME=`guess_filename  $SOURCE_CACHE/$1`          &&
-  COMPRESSOR=`file  -b  $FILENAME  |  cut  -d ' '  -f1`  &&
+    FILENAME=$(guess_filename $SOURCE_CACHE/$1)
 
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
-  case  $COMPRESSOR  in
-        bzip2)  bzip2  -cdf  $FILENAME  |  tar  -xf  -  ;;
-         gzip)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-    compress*)  gzip   -cdf  $FILENAME  |  tar  -xf  -  ;;
-          Zip)  unzip  -q    $FILENAME                  ;;
+  case $(file -b $FILENAME | cut -d' ' -f1) in
+        bzip2)  tar jxf $FILENAME ;;
+         gzip)  tar zxf $FILENAME ;;
+	  tar)  tar xf $FILENAME ;;
+    compress*)  tar zxf $FILENAME ;;
+          Zip)  unzip -q $FILENAME ;;
           RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
                                         |  cpio  -idm   ;;
             *)  false                                   ;;
   esac
 
-  if [ $? != 0 ] ; then
-    message "${PROBLEM_COLOR}Error while unpacking \"$1\", aborting $0!${DEFAULT_COLOR}"
-    exit 1
+  if [ "$?" != 0 ] ; then
+    message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
+    return 1
   fi
   
   [ -n "$SOURCE_DIRECTORY" ] &&
   [ -d "$SOURCE_DIRECTORY" ]
   
-  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
+  if [[ $(echo $CFLAGS | grep fbranch-probabilities) ]]; then
     chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
   else
     chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
@@ -127,4 +123,118 @@ unpack() {
 }
 
 
+
+# usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
+gpg_verify_source() {
+  debug_msg "gpg_verify_source($@)"
+  if [ ! -x /usr/bin/gpg ] ; then
+    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
+    return 1
+  fi
+
+  # do we need to download a keyset?
+  if [ -n "$3" ] ; then
+    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
+    verbose_msg "Downloading pub keys from \"$3\""
+    # TODO calling wget is a hack... we should accept file: urls too
+    if wget $3 -O $TMP_GPG_KEYS -q ; then
+      GNUPGHOME=/var/state/lunar/ gpg --import $TMP_GPG_KEYS
+    fi
+  fi
+  
+  # try to get the required key
+  TMP_GPG_SIG=$(temp_create "gpg-signature")
+  verbose_msg "Downloading signature \"$2\""
+  # TODO calling wget is a hack... we should accept file: urls too
+  if wget $2 -O $TMP_GPG_SIG -q ; then
+    verbose_msg "Verifying signature of \"$SOURCE_CACHE/$1\""
+    verbose_msg "GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1"
+    if ! GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1 ; then
+      verbose_msg "gpg exited with \"$?\""
+      temp_destroy $TMP_GPG_SIG
+      temp_destroy $TMP_GPG_KEYS
+      return 1
+    fi
+    temp_destroy $TMP_GPG_SIG
+    temp_destroy $TMP_GPG_KEYS
+  else
+    message "cannot download key!"
+    temp_destroy $TMP_GPG_SIG
+    temp_destroy $TMP_GPG_KEYS
+    return 1
+  fi
+
+}
+
+
+# usage: verify_all_sources $MODULE
+# check all sources regarding verification method
+verify_all_sources() {
+(
+  debug_msg "verify_all_sources ($@)"
+  MAX_SOURCES=${MAX_SOURCES:=100}
+
+  if ! run_details $1 ; then
+    return 1
+  fi
+
+  for (( C=0 ; C<=$MAX_SOURCES ; C++ )) ; do
+    TEMP=SOURCE$((C))
+    TEMP=${TEMP/SOURCE0/SOURCE}
+    eval SRC1=\$${TEMP}
+   
+    # it needs to exist prior before we can check it:
+    if ! verify_source $SRC1 ; then
+      return 1
+    fi
+
+    eval VFYS=\${${TEMP}_VFY[@]}
+
+    # cumulate result:
+    unset RESULT
+    if [ -n "$VFYS" ] ; then
+      # we need to check ALL args for validity... if one fails we should not
+      # trust the source
+      for VFY in $VFYS ; do
+        if [ "${VFY:0:4}" == "md5:" ] ; then
+	  if ! md5_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
+	    message "${PROBLEM_COLOR}!md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
+	    RESULT=1
+	  fi
+	elif [ "${VFY:0:4}" == "gpg:" ] ; then
+	  if ! gpg_verify_source $SRC1 $(echo $VFY | cut -d: -f2-3) $(echo $VFY | cut -d: -f4-5) ; then
+	    message "${PROBLEM_COLOR}!gpg signature check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
+	    RESULT=1
+	  fi
+        fi
+      # so what if?
+      if [ "$RESULT" == "1" ] ; then
+        # remove?
+	MODULE=$1
+	message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
+	
+	if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
+          rm -f $SOURCE_CACHE/$SRC1
+	fi
+      fi
+      done
+    fi
+
+    # our fallthrough as usual:
+    eval SRC2=\$SOURCE$((C+1));
+    eval SRC3=\$SOURCE$((C+2));
+    [ -z "$SRC2" ] && [ -z "$SRC3" ] && break
+  done    
+ 
+  # result?
+  if [ -n "$RESULT" ] ; then
+    return 1
+  fi
+
+  # if we removed something we better make sure we break:
+  if ! verify_source $(sources $1) ; then
+    return 1
+  fi
+)
+}
 

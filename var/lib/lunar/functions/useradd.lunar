@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -20,17 +20,18 @@
 # usage   : add_priv_user username:groupname [adduseropts [adduseropts]...]
 # info    : adds username:groupname and passes adduseropts to 'adduser'
 function add_priv_user() {
+  debug_msg "function add_priv_user ($@)"
 
   USERNAME=$(echo $1 | cut -d: -f1)
   GROUPNAME=$(echo $1 | cut -d: -f2)
 
   if [ -z "$USERNAME" ] ; then
-    message "${PROBLEM_COLOR}add_priv_user: no username specified${DEFAULT_COLOR}"
+    message "${PROBLEM_COLOR}!add_priv_user: no username specified${DEFAULT_COLOR}"
     exit 1
   fi
 
   if [ -z "$GROUPNAME" ] ; then
-    message "${PROBLEM_COLOR}add_priv_user: no groupname specified${DEFAULT_COLOR}"
+    message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
     exit 1
   fi
 
@@ -48,7 +49,7 @@ function add_priv_user() {
 	fi
       done
       if [ "$N" == "100" ] ; then
-        message "${PROBLEM_COLOR}add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
+        message "${PROBLEM_COLOR}!add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
 	exit 1
       fi
       verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
@@ -63,7 +64,7 @@ function add_priv_user() {
       fi
     done
     if [ "$N" == "100" ] ; then
-      message "${PROBLEM_COLOR}add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}!add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
       exit 1
     fi
     

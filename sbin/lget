@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ############################################################
 #                                                          #
 # lget - get sources from the net                          #
@@ -27,23 +27,25 @@
 ############################################################
 
 
-
 help() {
 
   cat  <<  EOF
 
 Lget downloads single or multiple module source files.
 
-Example: lget  nano hdparm sudo
-Usage:  lget  [parameters] [modules]
+Example : lget  nano hdparm sudo
+Usage   : lget  [parameters] [modules]
 
 Typing lget with no modules causes lget to download 
 every available source specified in the moonbase.
 
 Optional Parameters:
 
-       --from directory Specify an alternate for $SOURCE_CACHE
-       --url URL  Specify an alternate download URL
+   -d | --debug                 Enables debug messages
+   -f | --from  directory       Specify an alternate for $SOURCE_CACHE
+   -h | --help                  Displays this help text
+   -u | --url     URL           Specify an alternate download URL
+   -v | --verbose               Increases the level of message output
 EOF
 
   exit  1
@@ -51,68 +53,29 @@ EOF
 }
 
 
-process_parameters()  {
-
-  while  [  -n  "$1"  ];  do
-
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-
-      case  $1  in
-         --from)  SOURCE_CACHE=$2;  shift 2  ;;
-         --help)  help;             exit  1  ;;
-          --url)  BASE_URL="$2";    shift 2  ;;
-              *)  help                       ;;
-      esac
-
-    else  shift
-    fi
-
-  done
-
-}
-
-
-strip_parameters()  {
-
-  while  [  -n  "$1"  ];  do
-
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-
-      case  $1  in
-        --from)  shift 2  ;;
-        --help)  shift 1  ;;
-         --url)  shift 2  ;;
-             *)  shift 1  ;;
-      esac
-
-    else  echo  $1
-          shift 
-    fi
-
-  done
-
-}
-
-
 main() {
+  cd /tmp
+  
+  MODULES="$@"
 
-  cd  /tmp
-  process_parameters        $*
-  MODULES=`strip_parameters  $*`
-
-  if  [  -z  "$MODULES"  ];  then
+  if [ -z "$MODULES" ] ; then
     verbose_msg "downloading entire moonbase"
     MODULES=$(list_moonbase | sort)
   fi
 
+  if echo $MODULES | grep -qw moonbase ; then
+    # just update moonbase, no other modules
+    get_moonbase
+    # remove moonbase rofm MODULES and continue
+    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+  fi
+
   for MODULE in $MODULES; do
-    if ! lget_locked ; then
-      lget_lock
-    
-      [ "$VEBOSE" == "on" ] && echo "+ downloading module \"$MODULE\""
-      download_module
-    
-      lget_unlock
+    if ! lget_locked $MODULE ; then
+      lget_lock $MODULE
+      verbose_msg "downloading module \"$MODULE\""
+      download_module $MODULE
+      lget_unlock $MODULE
     else
       false
     fi
@@ -123,8 +86,28 @@ main() {
 
 . /etc/lunar/config
 
-root_check || exit 1
+GETOPT_ARGS=$(getopt -q -n lget -o "df:hu:v" -l "debug,from:,help,url:,verbose" -- "$@")
 
-renice +10 -p $$  >/dev/null
-main  $*
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  
+  root_check
+  enviro_check
+  set_priority
+  while true ; do
+    case "$1" in
+      -d|--debug   ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -f|--from    ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
+      -h|--help    ) help ;                                     exit  1 ;;
+      -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
+      -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; exit ;;
+    esac
+  done
 
+  main $@
+fi

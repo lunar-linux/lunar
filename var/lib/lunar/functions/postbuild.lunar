@@ -1,4 +1,4 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # postbuild.lunar - Lunar install extensions               #
 #                                                          #
@@ -26,12 +26,13 @@
 
 
 gather_docs()  {
+  debug_msg "gather_docs ($@)"
   [ "$GARBAGE" == "on" ] || return 0
 
   DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
   mkdir  -p  $DOC_DIR
 
-  if [ -d $SOURCE_DIRECTORY ] ; then
+  if [ -d "$SOURCE_DIRECTORY" ] ; then
     ( cd $SOURCE_DIRECTORY && for FILE in \
       README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
       conf SETUP NEWS Change* manual* Manual* ; do
@@ -46,6 +47,7 @@ gather_docs()  {
 
 
 install_pam_confs()  {
+  debug_msg "install_pam_confs ($@)"
   if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
     verbose_msg "handling pam config files"
     cd       "$SCRIPT_DIRECTORY/pam.d"
@@ -62,7 +64,8 @@ install_pam_confs()  {
 }
 
 
-install_xinetd_confs()  { (
+install_xinetd_confs()  {
+  debug_msg "install_xinetd_confs ($@)"
   if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
     cd       "$SCRIPT_DIRECTORY/xinetd.d"
     verbose_msg "handling xinetd config files"
@@ -85,10 +88,11 @@ install_xinetd_confs()  { (
       invoke_installwatch
     fi
   fi
-) }
+}
 
 
-use_xinetd()  { (
+use_xinetd()  {
+  debug_msg "use_xinetd ($@)"
   if  [  -d  $SCRIPT_DIRECTORY/xinetd.d  ]  &&
       !  grep  -q  "SERVICES="  $MODULE_CONFIG
   then
@@ -129,10 +133,11 @@ use_xinetd()  { (
   else
     return 1
   fi
-) }
+}
 
 
-install_initd()  { (
+install_initd()  {
+  debug_msg "install_initd ($@)"
   [ -d /etc/init.d ] || mkdir -p /etc/init.d
 
   if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
@@ -164,10 +169,11 @@ install_initd()  { (
     fi
 
   done
-) }
+}
 
 
-use_initd()  { (
+use_initd()  {
+  debug_msg "use_initd ($@)"
   if  [  -d  $SCRIPT_DIRECTORY/init.d  ] ; then
     cd $SCRIPT_DIRECTORY/init.d
 
@@ -191,10 +197,11 @@ use_initd()  { (
 
     echo   "INITDSCRIPTS=\"$INSTALLED_INIDSCRIPTS\"" >> $MODULE_CONFIG
   fi
-) }
+}
 
 
-install_services()  { (
+install_services()  {
+  debug_msg "install_services ($@)"
   if  [  -f  $SCRIPT_DIRECTORY/services  ];  then
     export  IFS="$ENTER_IFS"
     cat  $SCRIPT_DIRECTORY/services  |
@@ -203,10 +210,11 @@ install_services()  { (
       echo      "$LINE"  >>  /etc/services
     done
   fi
-) }
+}
 
 
-install_bashmisc () { (
+install_bashmisc () {
+  debug_msg "install_bashmisc  ($@)"
   if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
     [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
     install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
@@ -217,8 +225,5 @@ install_bashmisc () { (
     cp $SCRIPT_DIRECTORY/skel/[!CVS]* /etc/skel &> /dev/null
     cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
   fi
-) }
-
-
-
+}
 
