@@ -162,29 +162,3 @@
 	var/lib/lunar/functions/view.lunar: prune moved to lunar, moved
 	code out of lvu.
 
-2003-03-15 21:47  sofar
-
-	* var/lib/lunar/functions/download.lunar: cosmetic fix for complete
-	downloads.
-
-2003-03-15 18:23  sofar
-
-	* var/lib/lunar/: subroutines, functions/depends.lunar,
-	functions/download.lunar, functions/locking.lunar,
-	functions/modules.lunar, functions/moonbase.lunar,
-	functions/postbuild.lunar: Fixing all rm occurences.
-
-2003-03-15 18:16  sofar
-
-	* sbin/: lin, lrm, lunar: Fixing rm statements
-
-2003-03-15 01:29  sofar
-
-	* var/lib/lunar/: subroutines, functions/download.lunar,
-	functions/moonbase.lunar: New cvs handling code: uses SOURCE_URL
-	and SOURCE. see gaim-cvs for example,note SOURCE_DIRECTORY becomes
-	important. more vebosity and misc code cleanups elsewhere. Hope
-	this works for everyone. Maybe tomorrow I'll look how this can be
-	used for the xfce cvs modules, but this new scheme does not
-	obliviate the old cvs handling code!!!
-
