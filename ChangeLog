@@ -332,38 +332,3 @@
 	out all postbuild extensions (xinetd, init.d, pamd etc). Bugfix
 	#248.
 
-2003-02-15 23:47  sofar
-
-	* sbin/lunar: Fix for #221
-
-2003-02-15 23:17  sofar
-
-	* sbin/lin, var/lib/lunar/subroutines: verbose pruning and boost
-	problems GONE FOREVER
-
-2003-02-15 22:38  sofar
-
-	* sbin/lin: wheps
-
-2003-02-15 21:59  sofar
-
-	* sbin/lsh: Adding this little gadget: lsh, a 'shell' wrapper
-	around the lunar.
-
-2003-02-15 20:51  sofar
-
-	* sbin/lget: CVS fixed that were needed. let's not spend too much
-	time here.
-
-2003-02-15 20:09  sofar
-
-	* sbin/lin, sbin/lrm, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/modules.lunar: Fix for (1) tar error on
-	cache, removed --verbose from lrm, cleaned up more code, unified
-	verbose messages.
-	
-	Also, the remove_module which people assumed to be removed
-	incedentally was removed again, since the call is made by lrm
-	(l228,l296). PLEASE LEAVE IT OUT NOW, since doing this belongs in
-	the lrm code.
-
