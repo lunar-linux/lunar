@@ -124,8 +124,8 @@ stop_logging() {
 
 
 start_logging () {
-  export C_LOG=$(temp_create "${MODULE}_compilelog")
-  export C_FIFO=$(temp_create "${MODULE}_compilefifo")
+  export C_LOG=$(temp_create "${MODULE}.compile-log")
+  export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
 
   # just remaking this as FIFO
   rm -f $C_FIFO
@@ -221,7 +221,7 @@ show_owner()  {
 
 
 remove_line()  {
-  F_TMP=$(temp_create "remove-line")
+  F_TMP=$(temp_create "${MODULE}.remove-line")
   cp $I_LOG $F_TMP
   grep -v $ITEM $F_TMP > $I_LOG
   temp_destroy $F_TMP
@@ -392,8 +392,7 @@ lin_module()  { (
   download_module $MODULE
   
   # set the installwatchfile
-  export INSTALLWATCHFILE=$(temp_create "$MODULE-installwatch")
-  invoke_installwatch
+  export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
   # lock the module for installation, check for moonbase call
   linING="/var/lock/installing.$MODULE"
@@ -425,9 +424,11 @@ lin_module()  { (
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"
     else
+      invoke_installwatch
       if ! run_build ; then
         LIN_ERROR="BUILD"
       else
+        devoke_installwatch
         if ! run_post_build ; then
           LIN_ERROR="POST_BUILD"
 	fi

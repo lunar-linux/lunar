@@ -413,46 +413,44 @@ fix_depends () {
 # NOTE: this is where a missing dependency gets installed! IOW we really do
 # "satisfy" any dependencies here!
 satisfy_depends()  {
-                                                                                
-  [ -n "$DEPS_ONLY" ] && return 0
+  if [ -n "$DEPS_ONLY" ] ; then 
+    return 0
+  fi
+  
   unset OPTS
 
-  if  [  -s  $MODULE_CONFIG  ];  then
-          .  $MODULE_CONFIG
+  if [ -s $MODULE_CONFIG ] ; then
+    . $MODULE_CONFIG
   fi
-                                                                                
-  TMP_FILE="/tmp/satisfy_depends.`uuidgen`"
-  grep  "^$MODULE:"  $DEPENDS_STATUS > $TMP_FILE
+
+  TMP_FILE=$(temp_create "${MODULE}.satify-depends")
+  grep "^$MODULE:" $DEPENDS_STATUS > $TMP_FILE
 
   while read LINE; do
-    DEP_MODULE=`echo  $LINE  |  cut  -d :  -f2`
-    DEP_STATUS=`echo  $LINE  |  cut  -d :  -f3`
-        DEP_ON=`echo  $LINE  |  cut  -d :  -f5`
-       DEP_OFF=`echo  $LINE  |  cut  -d :  -f6`
+    DEP_MODULE=$(echo $LINE | cut -d: -f2)
+    DEP_STATUS=$(echo $LINE | cut -d: -f3)
+        DEP_ON=$(echo $LINE | cut -d: -f5)
+       DEP_OFF=$(echo $LINE | cut -d: -f6)
                                                                                 
-    if  [  -n  "$FIX"  ]
-    then  if  DEP_STATUS="on"
-          then  lin  $FIX  $DEP_MODULE
-          fi
-    elif  [  "$DEP_STATUS"  ==  "off"  ]  ||
-          module_exiled  $DEP_MODULE
-    then  OPTS="$OPTS  $DEP_OFF"
-                                                                                
-    elif  [  "$DEP_STATUS"  ==  "on"  ]   &&
-          !  module_installed  $DEP_MODULE  &&
-          !  module_held       $DEP_MODULE
-    then
-      if    lin  $SILENT  $COMPILE  $DEP_MODULE
-      then  OPTS="$OPTS  $DEP_ON"
-      else  exit  1
+    if [ -n "$FIX" ] ; then
+      if DEP_STATUS="on" ; then
+        lin $FIX $DEP_MODULE
       fi
-    else  OPTS="$OPTS  $DEP_ON"
+    elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
+      OPTS="$OPTS $DEP_OFF"
+    elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
+        ! module_held $DEP_MODULE ; then
+      if lin $SILENT $COMPILE $DEP_MODULE ; then
+        OPTS="$OPTS $DEP_ON"
+      else
+        exit 1
+      fi
+    else
+      OPTS="$OPTS $DEP_ON"
     fi
-                                                                                
   done < $TMP_FILE
-                                                                                
-  rm $TMP_FILE 2> /dev/null
-                                                                                
+                                                     
+  temp_destroy $TMP_FILE
 }
 
 

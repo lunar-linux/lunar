@@ -186,7 +186,7 @@ get_cvs() {(
 
 
 erase()  {
-  if [ -z "$PARTIAL" ]; then
+  if [ "$PARTIAL" = "off" ]; then
     verbose_msg "erase: deleting \"$(guess_filename $1)\""
     rm -f $(guess_filename $1)
   fi
