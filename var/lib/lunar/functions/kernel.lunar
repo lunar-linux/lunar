@@ -218,24 +218,21 @@ if  ! ( grep  -q  "$IMAGE_NAME"     /boot/grub/menu.lst &&
             $EDITOR  /boot/grub/menu.lst;  else
             nano     /boot/grub/menu.lst
           fi
+          message "Install GRUB into [M]BR of first drive, [A]lternative location, or [N]ot at all? [M|A|N]"
+          read GRUB_FIRST_DRIVE
+          case $GRUB_FIRST_DRIVE in
+            m|M) GRUB_BOOT_DEVICE="(hd0)";; 
+            a|A) message "Please specify, in GRUB notation, the desired drive/partition"
+                 message "Using parenthesis and NO spaces!"
+                 message "Samples: (hd1)    2nd drive MBR"
+                 message "         (hd1,0)  2nd drive with 1st partition"
+                 message "         (hd0,2)  1st drive with 3rd partition"
+                 echo -n "GRUB_BOOT_DEVICE=(hd#,#):  "
+                 read GRUB_BOOT_DEVICE
+                 /usr/sbin/grub-install "$GRUB_BOOT_DEVICE"
+                 sleep 4;;
+            n|N) ;;
+          esac
           ;;
   esac
-
-  message "Install GRUB into MBR of first drive? [y|Y]"
-  read GRUB_FIRST_DRIVE
-  case $GRUB_FIRST_DRIVE in
-    y|Y) GRUB_BOOT_DEVICE="(hd0)" ;; 
-    *  ) 
-         message "Otherwise please specify in GRUB notation the desired drive/partition"
-         message "Using parenthesis and NO spaces!"
-         message "Samples: (hd1)    2nd drive MBR"
-         message "         (hd1,0)  2nd drive with 1st partition"
-         message "         (hd0,2)  1st drive with 3rd partition"
-         echo -n "GRUB_BOOT_DEVICE=(hd#,#):  "
-         read GRUB_BOOT_DEVICE
-  esac
-
-  /usr/sbin/grub-install "$GRUB_BOOT_DEVICE"
-  sleep 4
-
 }
