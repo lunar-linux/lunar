@@ -3,7 +3,7 @@
 lunar - menu-driven software package management utility
 .SH SYNTAX
 .I lunar
-[update|rebuild]
+[update|renew|rebuild|optimize|prune]
 .SH COPYRIGHT
 .if n lunar(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
 .if t lunar(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
@@ -37,6 +37,15 @@ automatically rebuilds all installed software packages. This option
 is non-interactive and does not start up the menu-driven interface.
 It is suitable for use in cron jobs and is useful for rebuilding
 distributed binaries from source.
+.PP
+.O prune
+.IP
+Removes all old source code and old backups. Since the number of sources
+on the system grows steadily on a running system, you will need to clean
+some of the kept copies of sources and compile caches. The source code
+from previous versions are kept so that the packages can be rolled back
+to older versions. This does not delete sources that are up to date,
+but not installed.
 .SH "REQUIREMENTS"
 .I lunar
 requires a connection to the Internet
