@@ -1,0 +1,86 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# verify-gpg.plugin - plugin that performs gpg signature    #
+#                     checking                              #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_source_verify_gpg() {
+  # check if we can handle this type of VFY:
+  if [ "${2:0:4}" != "gpg:" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_verify_gpg ($@)"
+
+  if [ ! -x /usr/bin/gpg ] ; then
+    # warn but don't fail
+    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
+    return 2
+  fi
+  if [ ! -d /var/state/lunar/gpg ]; then
+    mkdir -p /var/state/lunar/gpg
+    chmod 700 /var/state/lunar/gpg
+  fi
+
+  GPG_SIG=$(echo $2 | sed 's/^gpg://' | cut -d, -f1)
+  GPG_KEY=$(echo $2 | sed 's/^gpg://' | cut -d, -f2-)
+  
+  # do we need to download a keyset?
+  if [ -n "$GPG_KEY" ] ; then
+    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
+    verbose_msg "Downloading pub keys from \"$GPG_KEY\""
+    # TODO calling wget is a hack... we should accept file: urls too
+    if download_url $GPG_KEY $TMP_GPG_KEYS -q ; then
+	  TMP_GPG_OUTPUT=$(temp_create "gpg-output")
+      GNUPGHOME=/var/state/lunar/gpg/ gpg --import $TMP_GPG_KEYS > $TMP_GPG_OUTPUT 2>&1
+	  grep -v 'not changed$' $TMP_GPG_OUTPUT | while read LINE; do
+        message "${MESSAGE_COLOR}$LINE${DEFAULT_COLOR}"
+	  done
+	  temp_destroy $TMP_GPG_OUTPUT
+    fi
+  fi
+
+  # try to get the required key
+  TMP_GPG_SIG=$(temp_create "gpg-signature")
+  verbose_msg "Downloading signature \"$GPG_SIG\""
+  # TODO calling wget is a hack... we should accept file: urls too
+  if download_url $GPG_SIG $TMP_GPG_SIG -q ; then
+    verbose_msg "Verifying signature of \"$SOURCE_CACHE/$1\""
+    verbose_msg "GNUPGHOME=/var/state/lunar/gpg/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1"
+	  TMP_GPG_OUTPUT=$(temp_create "gpg-output")
+    if ! GNUPGHOME=/var/state/lunar/gpg/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1 > $TMP_GPG_OUTPUT 2>&1 ; then
+      verbose_msg "gpg exited with \"$?\""
+      RESULT=1
+    fi
+	cat $TMP_GPG_OUTPUT | while read LINE; do
+	  if echo $LINE | grep -qw 'WARNING' ; then
+        message "${LRM_COLOR}$LINE${DEFAULT_COLOR}"
+      else
+        message "${MESSAGE_COLOR}$LINE${DEFAULT_COLOR}"
+      fi
+	done
+	temp_destroy $TMP_GPG_OUTPUT
+  else
+    message "cannot download key!"
+    RESULT=1
+  fi
+  temp_destroy $TMP_GPG_SIG
+  temp_destroy $TMP_GPG_KEYS
+
+  if [ "$RESULT" == 1 ]; then
+    message "${PROBLEM_COLOR}! gpg signature check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
+    return 1
+  else
+    # always return 'continue' plugin value
+    return 2
+  fi  
+}
+
+
+plugin_register SOURCE_VERIFY plugin_source_verify_gpg

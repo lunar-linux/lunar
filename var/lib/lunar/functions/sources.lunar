@@ -34,9 +34,8 @@ verify_source() {
 
 
 # function : sources
-# usage    : sources <module_name> {MD5|VFY|
-# purpose  : displays the filenames and md5sums or VFY part of sources
-#            for a given module
+# usage    : sources <module_name>
+# purpose  : displays the sources needed for a given module
 sources() {
 (
   debug_msg "sources ($@)"
@@ -51,21 +50,11 @@ sources() {
     TEMP=${TEMP/SOURCE0/SOURCE}
 
     eval SRC1=\$${TEMP}
-    if [ "$2" == "MD5" ] ; then
-      eval SRC_MD5=\$${TEMP}_MD5
-      if [ -z "$SRC_MD5" ] ; then
-        SRC_MD5=0
-      fi
-    fi
-
     eval SRC2=\$SOURCE$((CNT+1))
     eval SRC3=\$SOURCE$((CNT+2))
 
     if [ -n "$SRC1" ] ; then
       echo $SRC1
-      if [ "$2" == "MD5" ] ; then
-        echo $SRC_MD5
-      fi
     fi
 
     #if two consequtive empty sources, then break
@@ -74,34 +63,6 @@ sources() {
     }
   done
 )
-}
-
-
-# function : md5_verify_source
-# usage    : md5_verify_source filename md5
-# purpose  : md5 verifies a filename
-md5_verify_source() {
-  debug_msg "md5_verify_source ($@)"
-  TMP_MD5=$(md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
-  if [ "$2" != "$TMP_MD5" ] ; then
-    verbose_msg "offending md5sum: $TMP_MD5"
-    verbose_msg "should be md5sum: $2"
-    return 1
-  fi
-}
-
-
-# function : sha1_verify_source
-# usage    : sha1_verify_source filename sha1
-# purpose  : sha1 verifies a filename
-sha1_verify_source() {
-  debug_msg "sha1_verify_source ($@)"
-  TMP_SHA1=$(sha1sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
-  if [ "$2" != "$TMP_SHA1" ] ; then
-    verbose_msg "offending sha1sum: $TMP_SHA1"
-    verbose_msg "should be sha1sum: $2"
-    return 1
-  fi
 }
 
 
@@ -138,49 +99,6 @@ unpack() {
 }
 
 
-# usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
-gpg_verify_source() {
-  debug_msg "gpg_verify_source($@)"
-  if [ ! -x /usr/bin/gpg ] ; then
-    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
-    return 1
-  fi
-
-  # do we need to download a keyset?
-  if [ -n "$3" ] ; then
-    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
-    verbose_msg "Downloading pub keys from \"$3\""
-    # TODO calling wget is a hack... we should accept file: urls too
-    if wget $3 -O $TMP_GPG_KEYS -q ; then
-      GNUPGHOME=/var/state/lunar/ gpg --import $TMP_GPG_KEYS
-    fi
-  fi
-  
-  # try to get the required key
-  TMP_GPG_SIG=$(temp_create "gpg-signature")
-  verbose_msg "Downloading signature \"$2\""
-  # TODO calling wget is a hack... we should accept file: urls too
-  if wget $2 -O $TMP_GPG_SIG -q ; then
-    verbose_msg "Verifying signature of \"$SOURCE_CACHE/$1\""
-    verbose_msg "GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1"
-    if ! GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1 ; then
-      verbose_msg "gpg exited with \"$?\""
-      temp_destroy $TMP_GPG_SIG
-      temp_destroy $TMP_GPG_KEYS
-      return 1
-    fi
-    temp_destroy $TMP_GPG_SIG
-    temp_destroy $TMP_GPG_KEYS
-  else
-    message "cannot download key!"
-    temp_destroy $TMP_GPG_SIG
-    temp_destroy $TMP_GPG_KEYS
-    return 1
-  fi
-
-}
-
-
 # usage: verify_all_sources $MODULE
 # check all sources regarding verification method
 verify_all_sources() {
@@ -206,7 +124,6 @@ verify_all_sources() {
     if ! verify_source $SRC1 ; then
       return 1
     fi
-
     eval VFYS=\${${TEMP}_VFY[@]}
 
     # cumulate result:
@@ -215,40 +132,28 @@ verify_all_sources() {
       # we need to check ALL args for validity... if one fails we should not
       # trust the source
       for VFY in $VFYS ; do
-        if [ "${VFY:0:4}" == "md5:" ] ; then
-	  if ! md5_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
-	    message "${PROBLEM_COLOR}! md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
-	    RESULT=1
-	  fi
-	elif [ "${VFY:0:5}" == "sha1:" ] ; then
-	  if ! sha1_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
-	    message "${PROBLEM_COLOR}! sha1sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
-	    RESULT=1
-	  fi
-	elif [ "${VFY:0:4}" == "gpg:" ] ; then
-	  if ! gpg_verify_source $SRC1 $(echo $VFY | cut -d: -f2- | cut -f1) $(echo $VFY | cut d: -f2- | cut -f2) $(echo $VFY | cut -d: -f2- | cut -f3) ; then
-	    message "${PROBLEM_COLOR}! gpg signature check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
-	    RESULT=1
-	  fi
-        fi
+        plugin_call SOURCE_VERIFY $SRC1 $VFY
+		if [ $? == 1 ]; then
+		  RESULT=1
+		fi
+      done
       # so what if?
       if [ "$RESULT" == "1" ] ; then
         # remove?
-	MODULE=$1
-	message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
+        MODULE=$1
+        message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
 	
-	if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
+        if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
           rm -f $SOURCE_CACHE/$SRC1
-	fi
+        fi
       fi
-      done
     fi
 
     # our fallthrough as usual:
     eval SRC2=\$SOURCE$((C+1));
     eval SRC3=\$SOURCE$((C+2));
     [ -z "$SRC2" ] && [ -z "$SRC3" ] && break
-  done    
+  done
  
   # result?
   if [ -n "$RESULT" ] ; then

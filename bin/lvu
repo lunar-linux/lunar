@@ -833,7 +833,6 @@ main()  {
       ;;
 	  
     md5sum)
-      mod_v_safe_edit $2
       if [ -n "$2" ] ; then
         if ! md5sum_files "$INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2)" ; then
 	  md5sum_files  "$INSTALL_LOGS/*"
@@ -1000,7 +999,6 @@ main()  {
       ;;
 
     compile)
-      mod_v_safe_edit $2
       run_details $2 ; 
         if [ -f $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2 ] ; then
           view_file $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2
@@ -1013,7 +1011,6 @@ main()  {
       ;;
 	      
    install)
-     mod_v_safe_edit $2
      if run_details $2 ; then
        view_file $INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2) \
            "Install log for $2 does not exist"

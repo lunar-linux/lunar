@@ -63,10 +63,9 @@ parse_iw() {
 create_install_log() {
 
   debug_msg "create_install_log ($@)"
-  mod_v_safe_edit $MODULE
 
   TMP_INST_LOG=$(temp_create "install-log")
-  INST_LOG="$INSTALL_LOGS/$MOD_V_SNAME-$VERSION"
+  INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
   rm -f $INST_LOG &> /dev/null
 
   message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
@@ -74,9 +73,9 @@ create_install_log() {
   export IFS="$TAB_ENTER_IFS"
 
   parse_iw | sort | uniq | filter  "$LOCAL_EXCLUDED" | exists > $TMP_INST_LOG
-  echo "$INSTALL_LOGS/$MOD_V_SNAME-$VERSION"                 >> $TMP_INST_LOG
-  echo "$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"             >> $TMP_INST_LOG
-  echo "$MD5SUM_LOGS/$MOD_V_SNAME-$VERSION"                  >> $TMP_INST_LOG
+  echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
+  echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
   MISOWNED_SYMLINKS=$(syms_not_owned  $TMP_INST_LOG
                       echo  -n  "/dev/null")
@@ -93,28 +92,26 @@ create_install_log() {
 
 create_md5sum_log()  {
   debug_msg "create_md5sum_log ($@)"
- mod_v_safe_edit $MODULE
 
-  rm -f $MD5SUM_LOGS/$MOD_V_SNAME-$VERSION &> /dev/null
+  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
   
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MOD_V_SNAME-$VERSION${DEFAULT_COLOR}"
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-  files < $INSTALL_LOGS/$MOD_V_SNAME-$VERSION | while read FILE ; do
-    md5sum $FILE >> $MD5SUM_LOGS/$MOD_V_SNAME-$VERSION
+  files < $INSTALL_LOGS/$MODULE-$VERSION | while read FILE ; do
+    md5sum $FILE >> $MD5SUM_LOGS/$MODULE-$VERSION
   done
 
 }
 
 create_install_cache() {
   debug_msg "create_install_cache($@)"
- mod_v_safe_edit $MODULE 
 
   if [ "$ARCHIVE" == "off" ] ; then
     return
   fi
 
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MOD_V_SNAME-$VERSION-$BUILD.tar.bz2${DEFAULT_COLOR}"
-  tar cPjf "$INSTALL_CACHE/$MOD_V_SNAME-$VERSION-$BUILD.tar.bz2" --no-recursion -T $INSTALL_LOGS/$MOD_V_SNAME-$VERSION
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2${DEFAULT_COLOR}"
+  tar cPjf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
 
 }
 

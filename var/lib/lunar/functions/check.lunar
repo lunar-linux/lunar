@@ -259,14 +259,13 @@ rework_module() {
                                                                                 
   # here starts the real work:
   MODULE=$1
-  mod_v_safe_edit $1
 
   # remove whatever depends was residing in the depends state file and
   # append the new output:
-  remove_depends $MOD_V_SNAME                              &&
+  remove_depends $MODULE                              &&
   lock_file $DEPENDS_STATUS                                &&
   lock_file $DEPENDS_STATUS_BACKUP                         &&
-  run_depends $MOD_V_SNAME >> $DEPENDS_STATUS              &&
+  run_depends $MODULE >> $DEPENDS_STATUS              &&
   cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP             &&
   unlock_file $DEPENDS_STATUS                              &&
   unlock_file $DEPENDS_STATUS_BACKUP

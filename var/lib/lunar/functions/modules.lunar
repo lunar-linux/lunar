@@ -103,15 +103,19 @@ create_module_index() {
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
-        sed -e 's:/DETAILS$::' -e 's:/var/lib/lunar/moonbase/::' -e 's|/|:|' | \
-	awk -F: '{print $2":"$1}' > $TMP_INDEX
+        sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
     # we search zlocal locally to make sure they get found:
-    find $MOONBASE/zlocal -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
+    find $MOONBASE/zlocal -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' >> $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' > $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
   fi
   
   # this should be safe enough:
@@ -221,8 +225,7 @@ run_details() {
       temp_destroy $TMP_DETAILS
     fi
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
-    mod_v_safe_edit $1 
-    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MOD_V_SNAME}
+    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MODULE}
     MODULE_PREFIX=${MODULE_PREFIX:-$DEFAULT_PREFIX}
 
     return 0

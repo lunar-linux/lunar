@@ -220,7 +220,6 @@ run_depends() {
     fi
   }
                                                                                 
-  prepare_depends_status
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
     if [ -n "$SINGLE_MODULE" ] ; then
@@ -304,7 +303,7 @@ conflicts() {
       lrm $DEP
     else
       message "${PROBLEM_COLOR}ERROR: Cannot continue installing conflicting modules, exiting!${DEFAULT_COLOR}"
-      return 1
+      exit 1
     fi
   fi
 
@@ -315,14 +314,6 @@ conflicts() {
 run_conflicts() {
   debug_msg "run_conflicts ($@)"
   run_module_file $MODULE CONFLICTS
-}
-
-
-# create the dependency files if they do not exist
-prepare_depends_status()  {
-  debug_msg "prepare_depends_status ($@)"
-  [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
-  [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
 
 
@@ -398,7 +389,7 @@ create_depends_cache() {
 
     # fast method for re-creating the depends.cache, might take long though
     for DEPFILE in $DEPFILES ; do
-      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" | cut -d/ -f2-) . $DEPFILE
+      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" -e 's/.*\/\([^\/]*\)$/\1/') . $DEPFILE
     done > $TMP_DEP_CACHE &&
     install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
   

@@ -25,6 +25,7 @@ plugin_register() {
 	# Defined plugin types:
 	# 1 - SOURCE_DOWNLOAD - download some source code
 	# 2 - SOURCE_NEEDREFRESH - source exists but needs refresh
+    # 3 - SOURCE_VERIFY - perform intergity verification on a file
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
 }

@@ -50,8 +50,10 @@ plugin_source_download_generic()  {
   if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
-      install -m644 $TMP_FILE $(dirname $2)/$(basename $TMP_FILE)
-      rm $TMP_FILE
+      if [ "$TMP_FILE" != "$(dirname $2)/$(basename $TMP_FILE)" ]; then
+        install -m644 $TMP_FILE $(dirname $2)/$(basename $TMP_FILE)
+        rm $TMP_FILE
+      fi
       verbose_msg "download of \"$1\" successful"
     else
       rm -f $TMP_FILE
