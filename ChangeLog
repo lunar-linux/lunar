@@ -1,3 +1,9 @@
+2003-09-12 00:29  niki
+
+	* sbin/lunar, var/lib/lunar/functions/main.lunar,
+	var/lib/lunar/menu/integrity.menu: Moved the rest of the
+	depreciated "lin --fix" over to "lunar fix".
+
 2003-08-16 20:00  elaine
 
 	* var/lib/lunar/functions/postbuild.lunar: Merged fix to lunar
