@@ -311,7 +311,7 @@ run_fix()  {
   MODULES=$*
 
   if [ -z "$MODULES" ] ; then
-    MODULES=$(list_installed)
+    MODULES=$(list_installed | grep -v moonbase)
   fi
 
   if [ -z "$EXPORT_LD_PATH" ] ; then
