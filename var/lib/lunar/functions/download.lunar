@@ -314,15 +314,26 @@ get_url() {
       cp ${1/file:/} $2
     else
       # ordinary URL's handled by fuzzy_wget
+      connect &&
       if [ -n "$BASE_URL" ] ; then
-        URL=$BASE_URL/$(basename $2)
-      fi
-      connect          &&
-      if [ -n "$BASE_URL" ] ; then
+        # base url set means we don't touch the other possibilities:
         fuzzy_wget $BASE_URL/$(basename $2) $2
-      elif ! fuzzy_wget $1 $2 ; then
-        if [ -n "$LRESORT_URL" ] ; then
-          fuzzy_wget $LRESORT_URL/$(basename $2) $2
+      else
+        if [ -n "$FRESORT_URL" ] ; then
+          # try fresort first
+          if ! fuzzy_wget $FRESORT_URL/$(basename $2) $2 ; then
+            # normal url second
+            if ! fuzzy_wget $1 $2 ; then
+              # and failover
+              fuzzy_wget $LRESORT_URL/$(basename $2) $2
+            fi
+          fi
+        elif ! fuzzy_wget $1 $2 ; then
+          # just try the normal url
+          if [ -n "$LRESORT_URL" ] ; then
+            # and the failover url
+            fuzzy_wget $LRESORT_URL/$(basename $2) $2
+          fi
         fi
       fi
     fi
