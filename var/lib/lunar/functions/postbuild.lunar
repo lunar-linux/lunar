@@ -53,16 +53,17 @@ gather_docs()  {
 
 install_pam_confs()  {
   debug_msg "install_pam_confs ($@)"
-  if  [  -d  "$SCRIPT_DIRECTORY/pam.d"  ];  then
+  if [ -d "$SCRIPT_DIRECTORY/pam.d" ] ; then
     verbose_msg "handling pam config files"
-    cd       "$SCRIPT_DIRECTORY/pam.d"
+    cd "$SCRIPT_DIRECTORY/pam.d"
 
-    [ -d /etc/pam.d ] || mkdir  -p  /etc/pam.d
+    if [ ! -d /etc/pam.d ] ; then
+		  mkdir -p /etc/pam.d
+		fi
 
-    for  FILE  in  [!CVS]* ;  do
-      if  !  [  -f  /etc/pam.d/$FILE  ];  then
-        /usr/bin/install -g 0 -o 0 -m 600 $FILE /etc/pam.d
-        cp  $FILE   /etc/pam.d
+    for FILE in [!CVS]* ; do
+      if [ ! -f /etc/pam.d/$FILE ] ; then
+        /usr/bin/install -g 0 -o 0 -m 0600 $FILE /etc/pam.d
       fi
     done
   fi
