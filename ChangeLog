@@ -34,13 +34,3 @@
 	* var/lib/lunar/functions/tracking.lunar: Explicitly do not track
 	$SOURCE_DIRECTORY
 
-2004-06-23 13:24  prox
-
-	* var/lib/lunar/menu/optimize.menu: display one row on multi cpu
-	systems
-
-2004-06-23 11:40  sofar
-
-	* var/lib/lunar/menu/optimize.menu: Jerry prolly already had this
-	one
-
