@@ -151,14 +151,14 @@ default_config() {
 
   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
   verbose_msg "OPTS=\"$OPTS\""                &&
-  verbose_msg "./configure --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+  verbose_msg "./configure --build=$BUILD --prefix=$MODULE_PREFIX --sysconfdir=/etc --localstatedir=/var --infodir=$MODULE_PREFIX/share/info --mandir=$MODULE_PREFIX/share/man $OPTS"
 
-  ./configure  --build=$BUILD            \
-               --prefix=/usr             \
-               --sysconfdir=/etc         \
-               --localstatedir=/var      \
-               --infodir=/usr/share/info \
-               --mandir=/usr/share/man   \
+  ./configure  --build=$BUILD                      \
+               --prefix=$MODULE_PREFIX             \
+               --sysconfdir=/etc                   \
+               --localstatedir=/var                \
+               --infodir=$MODULE_PREFIX/share/info \
+               --mandir=$MODULE_PREFIX/share/man   \
                $OPTS
 } > $C_FIFO 2>&1
 
@@ -168,14 +168,14 @@ default_cvs_config() {
   verbose_msg "running \"default_cvs_config\""
   verbose_msg "CFLAGS=\"$CFLAGS\""            &&
   verbose_msg "OPTS=\"$OPTS\""                &&
-  verbose_msg "./autogen.sh --build=$BUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --infodir=/usr/share/info --mandir=/usr/share/man $OPTS"
+  verbose_msg "./autogen.sh --build=$BUILD --prefix=$MODULE_PREFIX --sysconfdir=/etc --localstatedir=/var --infodir=$MODULE_PREFIX/share/info --mandir=$MODULE_PREFIX/share/man $OPTS"
 
-  ./autogen.sh --build=$BUILD            \
-               --prefix=/usr             \
-               --sysconfdir=/etc         \
-               --localstatedir=/var      \
-               --infodir=/usr/share/info \
-               --mandir=/usr/share/man   \
+  ./autogen.sh --build=$BUILD                      \
+               --prefix=$MODULE_PREFIX             \
+               --sysconfdir=/etc                   \
+               --localstatedir=/var                \
+               --infodir=$MODULE_PREFIX/share/info \
+               --mandir=$MODULE_PREFIX/share/man   \
                $OPTS
 } > $C_FIFO 2>&1
 
@@ -185,7 +185,7 @@ default_make() {
   verbose_msg "running \"default_make\""
   # This code is simular to the optimize_make function from optimize.lunar
   # This is needed because bash does not expand aliases in functions
-  if module_installed linux-openmosix ; then
+  if module_installed openmosix-tools ; then
     if [[ "$MAKES" > 1 ]] ; then
       mosrun -h make -j$MAKES
     else

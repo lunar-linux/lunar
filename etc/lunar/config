@@ -11,6 +11,8 @@ export        DIALOGRC=/etc/lunar/dialogrc
        BUILD_DIRECTORY=/usr/src
     DOCUMENT_DIRECTORY=/usr/share/doc
 
+        DEFAULT_PREFIX=/usr
+
       COLONY_DIRECTORY=/etc/lunar/colony
           COLONY_NAMES=$COLONY_DIRECTORY/names
            COLONY_KEYS=$COLONY_DIRECTORY/keys
