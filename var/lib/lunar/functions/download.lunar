@@ -237,7 +237,7 @@ fuzzy_wget()  {
 
   WGET_NUM_RETRY=${NUM_RETRY:=5}
   WGET_RETRIES="--tries=${WGET_NUM_RETRY}"
-  FUZZY=${FUZZY:=on}
+  FUZZY=${FUZZY:=off}
 
   S_FILE=$(basename $2 | sed -e "s/\.tar\.gz$//" -e "s/\.tgz$//" -e  "s/\.tar\.bz2$//")
 

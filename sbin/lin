@@ -83,11 +83,11 @@ main() {
     fi
 
     if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
-      export TEMP_DOWNLOADLOG=$(temp_create "${MODULE}.download-log")
+      export TEMP_DOWNLOADLOG=$(temp_create "download-log")
     fi
 
     if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
-      export TEMP_PREPAREDDEPS=$(temp_create "${MODULE}.prepared-depends")
+      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
     fi
 
     # pass 1 : run full dependency checking
