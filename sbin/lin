@@ -691,7 +691,7 @@ resurrect()  {  (
   if  module_held  $MODULE;  then
     VERSION=`installed_version  $MODULE`
      STATUS=held
-     lrm $MODULE
+     lrm --keepconfig $MODULE
   fi
 
   CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
