@@ -111,52 +111,66 @@ EOF
 
 export_snapshot()  {
   SOURCE_DIRECTORY=$BUILD_DIRECTORY/snapshot
-  mk_source_dir          $SOURCE_DIRECTORY
-  cp  -a  /etc           $SOURCE_DIRECTORY
-  cp  -a  $CONFIG_CACHE  $SOURCE_DIRECTORY
+  mk_source_dir $SOURCE_DIRECTORY
+  cp -a /etc $SOURCE_DIRECTORY
+  cp -a $CONFIG_CACHE $SOURCE_DIRECTORY
 
-  for  LINE  in  $(cat  $MODULE_STATUS) ;  do
-    MODULE=$(echo  $LINE  |  cut  -d  :  -f1)
-     STATUS=$(echo  $LINE  |  cut  -d  :  -f2)
-    if  [  "$STATUS"  ==  "installed"  ];  then
-      echo  $MODULE  >>  /usr/src/snapshot/install
-    fi
-  done
+  cat $MODULE_STATUS >> /usr/src/snapshot/packages
 
-  SNAPSHOT="/root/snapshot-$HOSTNAME-$(date  -u  +%Y%m%d).tar.bz2"
+  SNAPSHOT="/root/snapshot-$HOSTNAME-$(date -u +%Y%m%d).tar.bz2"
 
-  cd  $BUILD_DIRECTORY
-  tar    -c  snapshot     |
-  bzip2  -9  >  $SNAPSHOT
-  rm_source_dir          $SOURCE_DIRECTORY
-  echo  "$SNAPSHOT created."
+  cd $BUILD_DIRECTORY
+  tar -c snapshot | bzip2  -9 > $SNAPSHOT
+  rm_source_dir $SOURCE_DIRECTORY
+  message "${MESSAGE_COLOR}Snapshot ${DEFAULT_COLOR}${FILE_COLOR}$SNAPSHOT${DEFAULT_COLOR}${MESSAGE_COLOR} created.${DEFAULT_COLOR}"
 }
 
 
 import_snapshot()  {
-          SNAPSHOT=$1
+  SNAPSHOT=$1
   SOURCE_DIRECTORY=$BUILD_DIRECTORY/snapshot
 
-  if  [  -f  "$1"  ];  then
-    cd  $BUILD_DIRECTORY
-    mk_source_dir          $SOURCE_DIRECTORY
+  if [ -f "$1" ] ; then
+    THERE=$(pwd -P)
+    cd $BUILD_DIRECTORY
+    mk_source_dir $SOURCE_DIRECTORY
 
-    bzcat $SNAPSHOT  |  tar  -x
-    cd  $SOURCE_DIRECTORY
+    bzcat $THERE/$SNAPSHOT | tar -x
+    cd $SOURCE_DIRECTORY
 
-    for  LINE  in  $(cat  install);  do
-      push_install_queue  $LINE
+    for LINE in $(cat packages) ; do
+      LIST="$LIST $(echo $LINE | cut -d: -f1)"
     done
-    report  $INSTALL_QUEUE  "Install Queue"
+    verbose_msg "Sorting update queue"
+    QUEUE=$(sort_by_dependency $LIST)
 
-    cp  -ai  local  /etc/lunar
-    cp  -ai  etc    /
+    message "${MESSAGE_COLOR}The following modules will be installed:${DEFAULT_COLOR}"
+    TMP_QUEUE=$(temp_create "install-queue")
+    for MOD in $QUEUE ; do
+      echo $MOD >>$TMP_QUEUE
+      echo $MOD
+    done
+    
+    if query "Do you wish to edit the install queue ? " n ; then
+      edit_file $TMP_QUEUE
+    fi
 
-    cd  /
-    rm_source_dir  $SOURCE_DIRECTORY
+    QUEUE=$(cat $TMP_QUEUE)
+    temp_destroy $TMP_QUEUE
+
+    message "${MESSAGE_COLOR}Restoring system configuration${DEFAULT_COLOR}"
+    cp -ai local /etc/lunar
+    cp -ai etc /
+
+    if [ -n "$QUEUE" ] ; then
+      lin -c $QUEUE
+    fi
+
+    cd /
+    rm_source_dir $SOURCE_DIRECTORY
 
   else
-    message  "Unable to find snapshot  \"$SNAPSHOT\""
+    message "${PROBLEM_COLOR}Unable to find snapshot ${DEFAULT_COLOR}${FILE_COLOR}\"$SNAPSHOT\"${DEFAULT_COLOR}"
     false
   fi
 }
