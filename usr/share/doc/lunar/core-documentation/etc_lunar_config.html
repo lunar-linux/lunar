@@ -39,65 +39,66 @@ dialog binary used by the lunar core tools<br>
     <tr>
       <td style="vertical-align: top;">CONFIG_CACHE=/etc/lunar/local</td>
       <td style="vertical-align: top;">Directory containing configs
-which are system specific</td>
+which are system specific.</td>
     </tr>
     <tr>
       <td style="vertical-align: top;">LOCAL_CONFIG=/etc/lunar/local/config<br>
       </td>
       <td style="vertical-align: top;">File containing system specific
-local defines<br>
+local defines.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">DEPENDS_CONFIG=/etc/lunar/local/depends<br>
       </td>
       <td style="vertical-align: top;">Each file in this directory
-contains information about how the module was configured at install time<br>
+contains information about how the module was configured at install
+time.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">LOCAL_EXCLUDED=/etc/lunar/local/excluded<br>
       </td>
       <td style="vertical-align: top;">Local list of files that are
-excluded during a lin or lrm<br>
+excluded during a lin or lrm.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">MIRRORS=/etc/lunar/mirrors<br>
       </td>
       <td style="vertical-align: top;">List of mirrors known to contain
-alternate download locations for sources<br>
+alternate download locations for sources.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">LUNAR_MODULES="lunar theedge"<br>
       </td>
-      <td style="vertical-align: top;">Two versions of Lunar core tools<br>
+      <td style="vertical-align: top;">Two versions of Lunar core tools.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">BUILD_DIRECTORY=/usr/src<br>
       </td>
       <td style="vertical-align: top;">The directory Lunar uses to
-build modules<br>
+build modules.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">DOCUMENT_DIRECTORY=/usr/share/doc<br>
       </td>
-      <td style="vertical-align: top;">Location used for documentation<br>
+      <td style="vertical-align: top;">Location used for documentation.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">EXCLUDED=/var/lib/lunar/excluded</td>
       <td style="vertical-align: top;">Default list of files that are
-excluded during a lin or lrm</td>
+excluded during a lin or lrm.</td>
     </tr>
     <tr>
       <td style="vertical-align: top;">MOONBASE=/var/lib/lunar/moonbase<br>
       </td>
       <td style="vertical-align: top;">Default location of the moonbase
-(may be over ridden in /etc/lunar/local/config)<br>
+(may be over ridden in /etc/lunar/local/config).<br>
       </td>
     </tr>
     <tr>
@@ -111,14 +112,45 @@ will not be removed.<br>
       <td style="vertical-align: top;">SOLO=/var/lib/lunar/solo<br>
       </td>
       <td style="vertical-align: top;">List of modules which cannot be
-compiled while other modules are being installed<br>
+compiled while other modules are being installed.<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">SUBROUTINES=/var/lib/lunar/subroutines<br>
       </td>
       <td style="vertical-align: top;">File containing core subroutines
-which are used by many of the core tools<br>
+which are used by many of the core tools. It sources all of the files
+in $FUNCTIONS.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">FUNCTIONS=/var/lib/lunar/functions<br>
+      </td>
+      <td style="vertical-align: top;">Directory containing subroutines
+in separate files<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">MENUS=/var/lib/lunar/menu<br>
+      </td>
+      <td style="vertical-align: top;">Directory containing menus used
+by dialog for the lunar menuing system.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">SUSTAINED=/var/lib/lunar/sustained<br>
+      </td>
+      <td style="vertical-align: top;">List of modules that are
+essential to system, and<br>
+removal of these modules is not permitted. Installing and upgrading is
+fine.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">SOUND_DIRECTORY=/var/lib/lunar/sound<br>
+      </td>
+      <td style="vertical-align: top;">Directory which stores sound
+themes for the lunar tools.<br>
       </td>
     </tr>
   </tbody>
