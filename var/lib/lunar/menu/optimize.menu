@@ -145,20 +145,20 @@ help() {
 
    # Help for speed options.
       spd_help)
-              MENU="Speed optimizatons"
+              MENU="Speed optimizations"
        Speedy_HELP="Optimize to increase performance of generated code"
         Risky_HELP="Optimize to increase performance ... by violating ANSI and IEEE FP rules"
-     Pointers_HELP="Optimize by omiting frame pointers"
+     Pointers_HELP="Optimize by omitting frame pointers"
      Siblings_HELP="Optimize sibling calls"
     Profiling_HELP="Generate profiles (For later use with Branching)"
     Branching_HELP="Predict branching (For using profiled sources)"
      Aliasing_HELP="Enable strict aliasing (enabled by default -O1 and above)"
-        Cprop_HELP="Reduce scheduling dependancies and remove copies"
+        Cprop_HELP="Reduce scheduling dependencies and remove copies"
         Float_HELP="Enable float store"
       Address_HELP="Force memory address"
         Align_HELP="Align functions, loops, and jumps"
     Expensive_HELP="Perform expensive optimizations"
-      Doubles_HELP="Align double, long double, and long long on two word boundries"
+      Doubles_HELP="Align double, long double, and long long on two word boundaries"
        Tracer_HELP="Perform tail duplication to enlarge superblock size."
                ;;
 
