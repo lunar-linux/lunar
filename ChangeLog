@@ -1,3 +1,9 @@
+2004-11-20 23:00  sofar
+
+	* var/lib/lunar/functions/download.lunar: Extremely horribly
+	  simplified show_download_progress. Nice thing is that it actually
+	  works too. SPend some time testing it and verified OK.
+
 2004-11-19 14:42  sofar
 
 	* var/lib/lunar/functions/kernel.lunar: Pretty format lilo config
@@ -268,8 +274,4 @@
 	  module name as intended.  This is because it was using the wrong
 	  variable to get the module name.  Now it should be using the
 	  right variable.
-
-2004-09-21 13:54  sofar
-
-	* usr/share/man/man8/lrm.8: Adding purge to man page
 
