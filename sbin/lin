@@ -51,6 +51,7 @@ EOF
 
 
 main() {
+  debug_msg "main ($@)"
   MODULES="$@"
 
   if echo $MODULES | grep -qw moonbase ; then
@@ -188,8 +189,8 @@ else
     case "$1" in
       -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
       -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
-         --deps        ) export DEPS_ONLY="$1"                      shift   ;;
-      -f|--from        ) export SOURCE_CACHE=$2;                    shift 2 ;;
+         --deps        ) export DEPS_ONLY="$1" ;                    shift   ;;
+      -f|--from        ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
       -h|--help        ) help ; exit                                        ;;
       -p|--probe       ) export PROBE="$1" ;                        shift   ;;
       -r|--reconfigure ) export RECONFIGURE="$1" ;                  shift   ;;
