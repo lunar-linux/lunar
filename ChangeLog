@@ -1,3 +1,21 @@
+2002-08-30 15:08  sofar
+
+	* usr/share/man/man8/lin.8: Removed apprentice
+
+2002-08-30 15:07  sofar
+
+	* sbin/lunar: Cleaning up apprentice
+
+2002-08-30 15:05  sofar
+
+	* bin/lvu, etc/lunar/config, sbin/lin, sbin/lrm,
+	var/lib/lunar/apprentice, var/lib/lunar/subroutines: Eradicated
+	apprentice, still looking for lose body parts...
+
+2002-08-30 11:16  sofar
+
+	* sbin/lget: Bugfix: #130
+
 2002-08-29 16:28  sofar
 
 	* var/lib/lunar/subroutines: now --nofix also leaves dependancy
