@@ -210,22 +210,3 @@
 	and simplified - removed unneeded lrm tmpfiles and loops,
 	simplified
 
-2004-03-09 16:13  sofar
-
-	* sbin/lin: run_configure was called double. No more!
-
-2004-03-09 11:22  sofar
-
-	* var/lib/lunar/functions/download.lunar: The ultimate attempt to
-	fix the double-download bug
-
-2004-03-09 09:53  sofar
-
-	* var/lib/lunar/functions/depends.lunar: Fixing the double-asking
-	bug! theedge is now ready for 1.4.0 !!!
-
-2004-03-09 08:56  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Emergency fix:
-	module.index was broken
-
