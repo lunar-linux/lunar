@@ -1,3 +1,25 @@
+2004-05-21 10:27  sofar
+
+	* bin/lvu, etc/lunar/config, etc/lunar/mirrors/LRESORT, sbin/lrm,
+	usr/share/doc/lunar/core-documentation/etc_lunar_config.html,
+	usr/share/man/man8/lfirsttime.8,
+	var/lib/lunar/functions/config.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/locking.lunar,
+	var/lib/lunar/functions/logging.lunar,
+	var/lib/lunar/functions/main.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/queue.lunar,
+	var/lib/lunar/functions/recovery.lunar,
+	var/lib/lunar/functions/sizes.lunar,
+	var/lib/lunar/functions/sources.lunar,
+	var/lib/lunar/functions/uniqid.lunar,
+	var/lib/lunar/functions/updatelog.lunar,
+	var/lib/lunar/functions/useradd.lunar,
+	var/lib/lunar/menu/dmodule.menu, var/lib/lunar/menu/download.menu,
+	var/lib/lunar/menu/integrity.menu, var/lib/lunar/menu/mirrors.menu:
+	Moving URL of server to 'lunar-linux.org'.
+
 2004-05-19 10:04  sofar
 
 	* var/lib/lunar/functions/moonbase.lunar: make 'moonbase'
@@ -168,18 +190,4 @@
 
 	* var/lib/lunar/functions/config.lunar: Properly escaping ':' signs
 	allows the mirrors to be set too :^o
-
-2004-03-21 22:17  sofar
-
-	* var/lib/lunar/functions/: config.lunar, modules.lunar: Adding all
-	round checking for the [sg]et_config_ functions.
-
-2004-03-21 20:51  sofar
-
-	* sbin/lin, sbin/lunar, var/lib/lunar/functions/depends.lunar:
-	Major bug(!) fixes: - remove write_config alltogether from lunar -
-	rewrite core algorithm, now truly adheres to the proper order:
-	depends, download (with smart download queue filler), install.
-	Should fix the multi-lget spawns and fix the install order (tho
-	that didn't really break, it was not just how I intended it to be).
 
