@@ -1652,6 +1652,14 @@ rework_module() {
     done
   fi
 
+  # This hack was added by Terry Chan to allow power users to repair their
+  #   /var/state/lunar/depends and depends.backup files.
+  # Once you've run lin --nofix, you may use depends.updated to edit/repair
+  #   your broken /var/state/lunar/depends file.
+  if [ -n "$NOFIX" ] ; then
+    cat $DEPENDS_STATUS >> /tmp/depends.updated
+  fi  
+
   # clean up
   rm $DEPENDS_STATUS
   rm $DEPENDS_STATUS_BACKUP

@@ -571,6 +571,15 @@ run_fix()  { (
     export_ld $EXPORT_LD_PATH
   fi
 
+  # This hack was added by Terry Chan to allow power users to repair their
+  #   /var/state/lunar/depends and depends.backup files.
+  if [ -n "$NOFIX" ] ; then
+    if [ -e /tmp/depends.updated ] ; then
+      rm /tmp/depends.updated
+    fi
+  touch /tmp/depends.updated
+  fi
+  
   until  [  "$FIXED"     ==  "yes"  ]   ||
          [  "$HOPELESS"  ==  "yes"  ];  do
 
