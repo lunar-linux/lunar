@@ -1081,57 +1081,6 @@ op_conflicts(){
 }
 
 
-# get_moonbase ()
-# function: get_moonbase
-# usage   : get_moonbase
-# purpose : fetches a fresh moonbase from lunar-linux.org/lunar and install it
-get_moonbase() {
-  # we could variableize this too:
-  MODULE=moonbase
-  VERSION=`date -u +%Y%m%d`
-  SOURCE=${MODULE}-${VERSION}.tar.bz2
-
-  # initialize the dirs in case of goof-up
-  [ ! -d /var/lib/lunar/moonbase ] &&
-    mkdir -p /var/lib/lunar/moonbase
-  [ ! -d /var/lib/lunar/moonbase/zlocal ] &&
-    mkdir -p /var/lib/lunar/moonbase/zlocal
-
-  echo -e "${MESSAGE_COLOR}Downloading ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-   wget -O /tmp/$SOURCE $MOONBASE_URL \
-     $RATE $FTP_CONNECTION $RETRIES $PARTIAL                        &&
-  echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
-  mv /tmp/$SOURCE $SOURCE_CACHE/$SOURCE                             &&
-
-  # here we clean up our moonbase while we're at it!
-  mv /var/lib/lunar/moonbase/zlocal /var/lib/lunar/.zlocal-backup   &&
-  rm -rf /var/lib/lunar/moonbase                                    &&
-  mkdir /var/lib/lunar/moonbase                                     &&
-  mv /var/lib/lunar/.zlocal-backup /var/lib/lunar/moonbase/zlocal   &&
-  
-  echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}"       \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"     &&
-  
-  bzcat $SOURCE_CACHE/$SOURCE | tar x -C /var/lib/lunar             &&
-  OUTCOME=success || OUTCOME=failed
-  
-  rm -f $SOURCE_CACHE/$SOURCE
-  message  "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-
-  echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
-    	    "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
-  if [ -f $MODULE_INDEX ]; then
-    rm $MODULE_INDEX                 
-  fi
-  create_module_index
-  
-  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
-
-}
-
-
 # function : enviro_check
 # usage    : enviro_check
 # purpose  : check if the environment is sane

@@ -99,7 +99,8 @@ call_wget()  {
    [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
    [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-   wget  $CACHE  $RATE  $FTP_CONNECTION $RETRIES  $PARTIAL  $1;  
+   verbose_msg "calling \"wget $CACHE $RATE $FTP_CONNECTION $RETRIES $PARTIAL $1\""
+   wget $CACHE $RATE $FTP_CONNECTION $RETRIES $PARTIAL $1
 }
 
 
