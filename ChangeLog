@@ -1,3 +1,15 @@
+2004-03-14 21:43  sofar
+
+	* bin/lvu, sbin/lrm, var/lib/lunar/excluded,
+	var/lib/lunar/protected, var/lib/lunar/solo,
+	var/lib/lunar/unset.sh, var/lib/lunar/functions/tracking.lunar:
+	Major lrm/exluded/protected rewrite: - allow re's in
+	excluded/protected - true protected directories with recursion -
+	excluded ONLY contains stuff that we DO NOT WANT TO SEE in the
+	install logs - lvu alien adjusted too - track() function adjusted
+	and simplified - removed unneeded lrm tmpfiles and loops,
+	simplified
+
 2004-03-09 16:13  sofar
 
 	* sbin/lin: run_configure was called double. No more!
@@ -195,9 +207,4 @@
 	improvments proposed by Erik Søe Sørensen
 	
 	thankyou sir
-
-2004-01-14 20:42  tchan
-
-	* var/lib/lunar/functions/optimize.lunar: Fixing the dialog box for
-	MAKES=.  The old message was just too confusing for most people.
 
