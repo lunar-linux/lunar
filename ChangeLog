@@ -1,3 +1,15 @@
+2005-01-19 12:09  moe
+
+	* var/lib/lunar/functions/view.lunar: There's also the type 'data'
+
+2005-01-19 11:37  sofar
+
+	* bin/lvu: indeed I missed it
+
+2005-01-19 11:32  sofar
+
+	* bin/lvu: removed bolding of modules
+
 2005-01-12 17:17  striker
 
 	* var/lib/lunar/functions/optimize.lunar: adding opts for amd64's
@@ -155,10 +167,4 @@
 	* var/lib/lunar/functions/download.lunar: Extremely horribly
 	  simplified show_download_progress. Nice thing is that it actually
 	  works too. SPend some time testing it and verified OK.
-
-2004-11-19 14:42  sofar
-
-	* var/lib/lunar/functions/kernel.lunar: Pretty format lilo config
-	  lines: empty line between images and use human-readable output
-	  abit.
 
