@@ -1,0 +1,33 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# unpack-rpm.plugin - generic plugin that unpacks rpmfiles  #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_unpack_rpm() {
+	case $1 in
+		*.rpm)
+			if [ ! -x /usr/bin/rpmunpack ]; then
+				message "${PROBLEM_COLOR}! Cannot unpack rpm files without ${MODULE_COLOR}rpmunpack${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}";
+				exit 1
+			fi
+			debug_msg "Unpacking rpm file \"$1\""
+			rpmunpack < $1 | gzip -d | cpio -idm || return 1
+			;;
+		*)
+			# fallback: we don't know what to do!
+			return 2
+			;;
+	esac
+	# return success!
+	return 0
+}
+
+
+plugin_register SOURCE_UNPACK plugin_unpack_rpm

@@ -1,0 +1,44 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# unpack-generic.plugin - generic plugin that unpacks       #
+#                         sources                           #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_unpack_generic() {
+	case $1 in
+		*.tar.bz2|*.tbz2)
+			debug_msg "Unpacking tar.bz2 file \"$1\""
+			tar jxf $1 --no-same-owner --no-same-permissions || return 1
+			;;
+		*.tar.gz|*.tgz)
+			debug_msg "Unpacking tar.gz file \"$1\""
+			tar zxf $1 --no-same-owner --no-same-permissions || return 1
+			;;
+		*.bz2)
+			debug_msg "Unpacking bz2 file \"$1\""
+			cp $1 . || return 1
+			bunzip2 $1 || return 1
+			;;
+		*.gz)
+			debug_msg "Unpacking gz file \"$1\""
+			cp $1 . || return 1
+			gunzip $1 || return 1
+			;;
+		*)
+			# fallback: we don't know what to do!
+			return 2
+			;;
+	esac
+	# return success!
+	return 0
+}
+
+
+plugin_register SOURCE_UNPACK plugin_unpack_generic

@@ -80,17 +80,7 @@ unpack() {
 
   FILENAME=$SOURCE_CACHE/$1
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
-
-  case $(file -b $FILENAME | cut -d' ' -f1) in
-        bzip2)  tar jxf $FILENAME --no-same-owner --no-same-permissions ;;
-         gzip)  tar zxf $FILENAME --no-same-owner --no-same-permissions ;;
-    compress*)  tar zxf $FILENAME --no-same-owner --no-same-permissions ;;
-	  tar)  tar xf $FILENAME --no-same-owner --no-same-permissions ;;
-          Zip)  unzip -q $FILENAME ;;
-          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
-                                        |  cpio  -idm   ;;
-            *)  false                                   ;;
-  esac
+  plugin_call SOURCE_UNPACK $SOURCE_CACHE/$1
 
   if [ "$?" != 0 ] ; then
     message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"

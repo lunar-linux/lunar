@@ -644,9 +644,7 @@ show_eert() {
 
 show_urls() { (
   # function overrides:
-  call_wget() { echo $1 ; return 0 ; }
-  get_cvs() { return 0 ; }
-  get_svn() { return 0 ; }
+  plugin_call() { echo $2 ; }
   connect() { return 0 ; }
  
   SILENT=on
@@ -661,7 +659,7 @@ show_urls() { (
   fi
   
   for MODULE in $MODULES ; do
-    download_module $MODULE
+    download_module $MODULE | uniq
   done
 ) }
 
