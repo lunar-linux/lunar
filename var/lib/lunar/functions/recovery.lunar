@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -20,6 +19,7 @@
 # usage    : rebuild_status_files
 # purpose  : rebuild the accidentally deleted status files
 rebuild_status_files() {
+  debug_msg "rebuild_status_files ($@)"
   message "${PROBLEM_COLOR} Unable to find MODULE_STATUS files\n"          \
           "${MODULE_COLOR}$MODULE_STATUS and $MODULE_STATUS_BACKUP"        \
           "${DEFAULT_COLOR}\n"                                             \
@@ -83,6 +83,7 @@ rebuild_status_files() {
 # usage    : replace_status_file
 # purpose  : cp $MODULE_STATUS_BACKUP $MODULE_STATUS via query
 replace_status_file() {
+  debug_msg "replace_status_file ($@)"
 
    if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; return; fi
     message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS file"   \
@@ -111,6 +112,7 @@ replace_status_file() {
 # usage    : check_status_files
 # purpose  : checks the avail of MODULE_STATUS and MODULE_STATUS_BACKUP files
 check_status_files() {
+  debug_msg "check_status_files ($@)"
    if ! [ -f "$MODULE_STATUS" ]; then replace_status_file; fi
    if ! [ -f "$MODULE_STATUS" ]; then echo "Unknown error!!!"; exit; fi
    if ! [ -f "$MODULE_STATUS_BACKUP" ]; then

@@ -1,4 +1,3 @@
-#!/bin/sh
 ############################################################
 #                                                          #
 # download.lunar - get sources from the net                #
@@ -34,6 +33,7 @@
 
 
 connect()  {
+  debug_msg "connect ($@)"
 
   if  !  ifconfig  |  grep  -q  "^eth"   &&
       !  ifconfig  |  grep  -q  "^wlan"  &&
@@ -59,6 +59,7 @@ connect()  {
 
 
 disconnect()  {
+  debug_msg "disconnect ($@)"
   if    ps  -C disconnect  >  /dev/null
   then  return
   fi

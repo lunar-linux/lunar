@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # moonbase.lunar - get moonbase from the net               #
 #                                                          #
@@ -10,11 +9,13 @@
 
 
 get_moonbase () {(
+  debug_msg "get_moonbase  ($@)"
 
   SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
   # the following overrides run_details:
   run_details() {
+  debug_msg "  run_details ($@)"
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
         SOURCE=$(basename $MOONBASE_URL)
@@ -78,6 +79,7 @@ get_moonbase () {(
 # usage    : set_moonbase_md5
 # purpose  : creates the md5 value of overall moonbase
 set_moonbase_md5() {
+  debug_msg "set_moonbase_md5 ($@)"
   MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
   echo $MOONBASE_MD5
 }
@@ -87,6 +89,7 @@ set_moonbase_md5() {
 # usage    : get_moonbase_md5
 # purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
 get_moonbase_md5() {
+  debug_msg "get_moonbase_md5 ($@)"
   MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
                 cut -d : -f 2-2)
   if [ -z "$MOONBASE_MD5" ] ; then

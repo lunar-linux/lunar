@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # check/lunar - checking functions                         #
 #                                                          #
@@ -26,6 +25,7 @@
 
 
 ldd_check()  {  (
+  debug_msg "ldd_check ($@)"
   if  [  "$LDD_CHECK"  ==  "off"    ] ;  then
     return
   fi
@@ -68,6 +68,7 @@ ldd_check()  {  (
 
 
 find_check()  { (
+  debug_msg "find_check ($@)"
   if  [  "$FIND_CHECK"  ==  "off"             ]   ||
       [  "$1"           ==  "xfree86"         ]   ||
       [  "$1"           ==  "xfree86-custom"  ];  then
@@ -114,6 +115,7 @@ find_check()  { (
 
 
 sym_check()  { (
+  debug_msg "sym_check ($@)"
   if  [  "$SYM_CHECK"  ==  "off"  ];  then
     return
   fi
@@ -147,6 +149,7 @@ sym_check()  { (
 
 
 md5sum_check()  { (
+  debug_msg "md5sum_check ($@)"
   if  [  "$MD5SUM_CHECK"  ==  "off"  ];  then
     return
   fi
@@ -203,6 +206,7 @@ md5sum_check()  { (
 
 
 run_checks() {
+  debug_msg "run_checks ($@)"
   sym_check    $1
   find_check   $1 &&
   ldd_check    $1 &&

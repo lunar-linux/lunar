@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -28,9 +27,11 @@
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {
+  debug_msg "function find_depends ($@)"
 
   # as always, use private depends() and optional_depends() functions
   depends () {
+  debug_msg "  depends  ($@)"
     if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
       export FOUND_DEPENDS="$FOUND_DEPENDS $1"
       find_depends $1
@@ -39,6 +40,7 @@ function find_depends() {
   }
 
   optional_depends() {
+  debug_msg "  optional_depends ($@)"
     if ! $(echo $FOUND_DEPENDS | grep -qw $1) ; then
       if module_installed $1 ; then
         export FOUND_DEPENDS="$FOUND_DEPENDS $1"
@@ -64,18 +66,21 @@ function find_depends() {
 
 
 is_depends()  {  (
+  debug_msg "is_depends ($@)"
   # Is $1 a previously selected dependency of any module.
   return $(cat $DEPENDS_STATUS | cut -d: -f2- | grep -q "^$1:on:")
 )  }
                                                                                 
                                                                                 
 in_depends()  {
+  debug_msg "in_depends ($@)"
   # Was $2 presented as a depenency for module $1
   return $(grep -q "^$1:$2:" $DEPENDS_STATUS)
 }
                                                                                 
                                                                                 
 remove_depends() {
+  debug_msg "remove_depends ($@)"
   lock_file $DEPENDS_STATUS_BACKUP &&
   lock_file $DEPENDS_STATUS        ||
   return 1
@@ -99,6 +104,7 @@ remove_depends() {
                                                                                 
 
 add_depends() {
+  debug_msg "add_depends ($@)"
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
 	  if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
 		  remove_depends "$1" "$2"
@@ -117,8 +123,10 @@ add_depends() {
                                                                                 
                                                                                 
 run_depends() {
+  debug_msg "run_depends ($@)"
   # local definitions of depends and optional_depends!
   depends()  {
+  debug_msg "  depends ($@)"
     grep -q "^"$1"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
 
     if ! module_installed $1 && ! module_held $1 ; then
@@ -137,6 +145,7 @@ run_depends() {
   }
                                                                                 
   optional_depends()  {
+  debug_msg "  optional_depends ($@)"
     # parameters:  $1 = module name
     #              $2 = configure parameter if module wanted
     #              $3 = configure parameter if module declined
@@ -177,9 +186,11 @@ run_depends() {
 
 # rework_module : check depends database for a module
 rework_module() {
+  debug_msg "rework_module ($@)"
                                                                                 
   # we declare these local to override the systems default ones:
   optional_depends()  {
+  debug_msg "  optional_depends ($@)"
     if    module_exiled  $1
     then  add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
     else
@@ -192,6 +203,7 @@ rework_module() {
   }
                                                                                 
   depends()  {
+  debug_msg "  depends ($@)"
     if  ! module_installed  $1   &&
         ! module_held       $1
     then
@@ -206,6 +218,7 @@ rework_module() {
     add_depends  "$MODULE"  "$1"  "on"  "required"  "$2"  "$3"
   }
   run_depends() {
+  debug_msg "  run_depends ($@)"
     if [ -s $SCRIPT_DIRECTORY/DEPENDS ] ; then
       show_fancy_progress "Processing: $MODULE"
       run_module_file $MODULE DEPENDS
@@ -310,6 +323,7 @@ rework_module() {
 
 # rework_list : rework a list of modules and save output
 rework_list() {
+  debug_msg "rework_list ($@)"
                                                                                 
   for MODULE in $* ; do
     module_exiled $MODULE || rework_module $MODULE
@@ -320,6 +334,7 @@ rework_list() {
 
 # fix_depends : single pass to fix depends database
 fix_depends () {
+  debug_msg "fix_depends  ($@)"
                                                                                 
   TMP=/tmp/lunar.fix
   [ -d $TMP ] || mkdir -p $TMP
@@ -413,6 +428,7 @@ fix_depends () {
 # NOTE: this is where a missing dependency gets installed! IOW we really do
 # "satisfy" any dependencies here!
 satisfy_depends()  {
+  debug_msg "satisfy_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then 
     return 0
   fi
@@ -456,6 +472,7 @@ satisfy_depends()  {
 
 # conflicts... remove conflicting modules
 conflicts() {
+  debug_msg "conflicts ($@)"
   if module_installed $1 ; then
     lrm $1
   fi

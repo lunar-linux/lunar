@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # subroutines - Lunar subroutines                          #
 #                                                          #
@@ -26,6 +25,7 @@
 
 
 boost_locked() {
+  debug_msg "boost_locked ($@)"
   [ -f $BOOST_LOCK ] && ps `cat $BOOST_LOCK` | grep -q lin
 }
 
@@ -34,6 +34,7 @@ boost_locked() {
 # usage    : invoke_installwatch
 # purpose  : start logging all disk accesses with installwatch
 invoke_installwatch() {
+  debug_msg "invoke_installwatch ($@)"
   if [ -e /usr/lib/installwatch.so ] ; then
     export LD_PRELOAD=/usr/lib/installwatch.so
   fi
@@ -44,6 +45,7 @@ invoke_installwatch() {
 # usage    : devoke_installwatch
 # purpose  : stop logging all disk accesses with installwatch
 devoke_installwatch() {
+  debug_msg "devoke_installwatch ($@)"
   unset LD_PRELOAD
 }
 
@@ -52,6 +54,7 @@ devoke_installwatch() {
 # usage    : parse_iw
 # purpose  : remove unwanted accesses from the installwatch file
 parse_iw() {
+  debug_msg "parse_iw ($@)"
   OMIT="^/dev\|^/tmp\|^/usr/src"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
@@ -64,6 +67,7 @@ parse_iw() {
 # usage    : track
 # purpose  : create an install log
 track() {
+  debug_msg "track ($@)"
   message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
 
   export IFS="$TAB_ENTER_IFS"

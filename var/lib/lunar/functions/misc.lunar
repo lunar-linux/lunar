@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # misc.lunar - Lunar subroutines                           #
 #                                                          #
@@ -30,6 +29,7 @@
 # usage    : VARIABLE=`directories < dirlistfile`
 # purpose  : to determine the directories from a given list
 directories() {
+  debug_msg "directories ($@)"
   while read ITEM ; do
     if [ -d "$ITEM" ] && [ ! -h "$ITEM" ] ; then
       echo "$ITEM"
@@ -42,6 +42,7 @@ directories() {
 # usage    : VARIABLE=`files < dirlistfile`
 # purpose  : to determine the ordinary files from a given list
 files() {
+  debug_msg "files ($@)"
   while read ITEM ; do
     if [ -f "$ITEM" ] && [ ! -h "$ITEM" ] ; then
       echo "$ITEM"
@@ -54,6 +55,7 @@ files() {
 # usage    : VARIABLE=`symlinks < dirlistfile`
 # purpose  : to determine the symbolic links from a given list
 symlinks() {
+  debug_msg "symlinks ($@)"
   while read ITEM ; do
     if [ -h "$ITEM" ] ; then
       echo "$ITEM"
@@ -66,6 +68,7 @@ symlinks() {
 # usage    : VARIABLE=`dirnames < dirlistfile`
 # purpose  : info about the real locations of symlinks
 dirnames() {
+  debug_msg "dirnames ($@)"
   while read FILE ; do
     dirname "$FILE"
   done
@@ -76,6 +79,7 @@ dirnames() {
 # usage    : VARIABLE=`exists < dirlistfile`
 # purpose  : filter out the non-existent files in a list
 exists() {
+  debug_msg "exists ($@)"
   while read ITEM ; do
     if [ -e "$ITEM" ] ; then
       echo $ITEM
@@ -88,6 +92,7 @@ exists() {
 # usage    : guess_filename <filename>
 # purpose  : fuzzy check for the existance of the filename
 guess_filename()  {
+  debug_msg "guess_filename ($@)"
   FILENAME=$1
   BASENAME=${FILENAME/.tar.gz/}
   BASENAME=${BASENAME/.tar.bz2/}
@@ -113,6 +118,7 @@ guess_filename()  {
 # usage    : filter $FILE
 # purpose  : filter stdin with files/dirs/symlinks provided in file $1.
 filter() {
+  debug_msg "filter ($@)"
   if [ -f $1 ] ; then
     grep -v $(
       for DIR in `directories < $1 2>/dev/null` ; do

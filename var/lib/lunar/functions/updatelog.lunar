@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -20,6 +19,7 @@
 # usage    : display_update_log update|rebuild 
 # purpose  : display a log describing update successes, failures, and summaries
 display_update_log() {
+  debug_msg "display_update_log ($@)"
   rm -f /var/log/lunar/update 
   { 
     if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then 
@@ -33,6 +33,7 @@ display_update_log() {
 # usage    : display_success_info update|rebuild
 # purpose  : display a list of update successes and failures
 display_success_info() {
+  debug_msg "display_success_info ($@)"
 
   NUMSUCCESS=$(cat $TMP_LIN_SUCCESS | wc -l)
   NUMFAILURES=$(cat $TMP_LIN_FAIL | wc -l)
@@ -61,6 +62,7 @@ display_success_info() {
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
 display_moonbase_changes()  {  
+  debug_msg "display_moonbase_changes ($@)"
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
     NEW_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '<' | wc -l)
     DEL_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '>' | wc -l)

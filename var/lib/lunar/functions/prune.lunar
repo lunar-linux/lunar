@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # prune.lunar - Lunar prune code                           #
 #                                                          #
@@ -29,6 +28,7 @@
 # usage    : generate_keep_list
 # purpose  : generated a list of files which will not be deleted with prune
 generate_keep_list() {
+  debug_msg "generate_keep_list ($@)"
   for MODULE in $(list_moonbase | sort);  do
     show_fancy_progress "Processing: $MODULE"
     sources $MODULE >> $KEEP

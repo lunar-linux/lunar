@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -20,6 +19,7 @@
 # usage    : renew
 # purpose  : frontend function that includes all renewing code
 renew() {
+  debug_msg "renew ($@)"
   message "${MESSAGE_COLOR}Starting update of installed modules${DEFAULT_COLOR}"
 
   purge_modules
@@ -48,6 +48,7 @@ renew() {
 
 
 update() {
+  debug_msg "update ($@)"
   if  ps  -C  lin  >  /dev/null;  then
     echo    "Unable to update lunar concurrently while installing."
     sleep   5
@@ -66,6 +67,7 @@ update() {
 
 
 rebuild()  {
+  debug_msg "rebuild ($@)"
   rm  -f  $INSTALL_QUEUE
 
   message  "To do a non recursive rebuild"
@@ -99,6 +101,7 @@ rebuild()  {
 # usage    : prune
 # purpose  : prune all old logs, source copy's, install caches
 prune() {
+  debug_msg "prune ($@)"
   message  "${MESSAGE_COLOR}Generating a keep list..." \
            "${DEFAULT_COLOR}"
 
@@ -167,6 +170,7 @@ prune() {
 
 
 resurrect_modules() {
+  debug_msg "resurrect_modules ($@)"
   for MODULE in $@ ; do
     if run_details $MODULE ; then
       resurrect $MODULE

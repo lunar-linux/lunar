@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -19,6 +18,7 @@
 
 
 verify_source() {
+  debug_msg "verify_source ($@)"
   VERIFIED="true"
   for SOURCE_FILE in $@ ; do
     if ! guess_filename $SOURCE_CACHE/$1 >/dev/null ; then
@@ -32,6 +32,7 @@ verify_source() {
 
 
 verify_sources() {
+  debug_msg "verify_sources ($@)"
   md5_verify_source $(sources $MODULE MD5)
 }
 
@@ -41,6 +42,7 @@ verify_sources() {
 # purpose  : displays the filenames and md5sums or VFY part of sources
 #            for a given module
 sources() { (
+  debug_msg "sources ($@)"
   MAX_SOURCES=${MAX_SOURCES:=100}
 
   if ! run_details $1 ; then
@@ -88,6 +90,7 @@ sources() { (
 # usage    : md5_verify_source filename_1 md5_1, filename_2 md52.....
 # purpose  : md5 verifies a filename
 md5_verify_source() {
+  debug_msg "md5_verify_source ($@)"
   ALL_OK=true   
   while [ -n "$2" ]
   do
@@ -118,6 +121,7 @@ md5_verify_source() {
 
 
 unpack() {
+  debug_msg "unpack ($@)"
 
     FILENAME=$(guess_filename $SOURCE_CACHE/$1)
 
@@ -149,43 +153,5 @@ unpack() {
   fi
 }
 
-
-
-# usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
-gpg_verify_source() {
-  if [ ! -x /usr/bin/gpg ] ; then
-    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
-    return 1
-  fi
-
-  # do we need to download a keyset?
-  if [ -n "$3" ] ; then
-    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
-    verbose_msg "Downloading pub keys from \"$3\""
-    if wget $3 -O $TMP_GPG_KEYS -q ; then
-      GNUPGHOME=/var/state/lunar/ gpg --import $TMP_GPG_KEYS
-    fi
-  fi
-  
-  # try to get the required key
-  TMP_GPG_SIG=$(temp_create "gpg-signature")
-  verbose_msg "Downloading signature \"$2\""
-  if wget $2 -O $TMP_GPG_SIG -q ; then
-    verbose_msg "Verifying signature of \"$1\""
-    verbose_msg "GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $1"
-    if GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $1 ; then
-      echo good!
-    else
-      echo bad!
-    fi
-#    temp_destroy $TMP_SIG
-    verbose_msg "result was \"$?\""
-  else
-    message "B()RK"
-    temp_destroy $TMP_SIG
-    exit 1
-  fi
-
-}
 
 

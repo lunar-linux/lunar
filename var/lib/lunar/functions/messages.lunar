@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 #  messages - lunar message display functions              #
 #                                                          #
@@ -30,17 +29,18 @@
 
 
 message() {
+  debug_msg "message ($@)"
   [ -n "$SILENT" ] || echo  -e  "$*"
 }
 
 
 verbose_msg() {
+  debug_msg "verbose_msg ($@)"
   [ "$VERBOSE" != "on" ] || message "+ $*"
 }
 
-
 debug_msg() {
-  if [ -n "$DEBUG" ] ; then
+  if [ -n "$LUNAR_DEBUG" ] ; then
     echo "++ $@" > /dev/stderr
   fi
 }
@@ -111,7 +111,7 @@ query() {
 
 
 color()  {
-  debug_msg "color($@)"
+  debug_msg "color ($@)"
   case  $1  in
     off)  unset  MODULE_COLOR
           unset  VERSION_COLOR
@@ -148,6 +148,7 @@ sound()  {
 # usage    : show_fancy_progress <fancy_progress_var_string>
 # purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
 show_fancy_progress () {
+  debug_msg "show_fancy_progress  ($@)"
    echo -en "\r                                                                            \r$1\r"
 }
 

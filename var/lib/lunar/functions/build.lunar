@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # subroutines - Lunar subroutines                          #
 #                                                          #
@@ -561,7 +560,7 @@ syms_not_owned()  {
 
 archive()  {
   debug_msg "archive ($@)"
-  
+
   LINES=`wc  -l  <  $INST_LOG`
   ((  CHUNKS     =  LINES  /  1024  ))
   ((  REMAINDER  =  LINES  %  1024  ))
@@ -608,7 +607,6 @@ archive()  {
 
 
 boost()	{ (
-  debug_msg "boost ($@)"
 
      CACHE="/tmp/$MODULE-$VERSION-$BUILD.tar"
   CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"

@@ -1,4 +1,3 @@
-############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
 # http://www.lunar-linux.org                               #
@@ -28,6 +27,7 @@
 # usage    : list_sections
 # purpose  : list the moonbase sections, filter out the specific files
 list_sections() {(
+  debug_msg "list_sections ($@)"
   check_module_index
   SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
              cut -d : -f 2-2 | sort | uniq)
@@ -51,6 +51,7 @@ list_sections() {(
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {(
+  debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
     message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
     exit 1
@@ -69,6 +70,7 @@ list_modules() {(
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
 list_moonbase() {(
+  debug_msg "list_moonbase ($@)"
   for SECTION in $(list_sections) ; do
     list_modules $SECTION
   done				
@@ -79,6 +81,7 @@ list_moonbase() {(
 # usage    : list_installed
 # purpose  : return a list of installed (or held) modules
 list_installed() {
+  debug_msg "list_installed ($@)"
   grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
 }
 
@@ -87,6 +90,7 @@ list_installed() {
 # usage   : create_module_index
 # purpose : created an index file of module:section pair list
 create_module_index() {
+  debug_msg "create_module_index ($@)"
   # make sure it exists before trying to see it's writeable
   touch $MODULE_INDEX &> /dev/null
   
@@ -114,6 +118,7 @@ create_module_index() {
 # usage   : check_module_index
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
+  debug_msg "function check_module_index ($@)"
   if [ `get_moonbase_md5` != `set_moonbase_md5` ] ; then
     create_module_index
     return 0
@@ -128,6 +133,7 @@ function check_module_index() {
 # purpose  : finds the section of a given module as parameter
 # returns  : (0) on success, (1) on failure, errors on stdout
 find_section() {(
+  debug_msg "find_section ($@)"
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
     if [ -d $MOONBASE/$SECTION/$1 ] ; then
@@ -162,6 +168,7 @@ find_section() {(
 # purpose  : runs the DETAILS file of a module
 # returns  : (0) on success, (1) on failure, error messages on stdout
 run_details() {
+  debug_msg "run_details ($@)"
   # Note: run_details doesn't EXIT the code, but merely drops a warning
   # (return 1), which means that the calling code needs to decide 
   # if this is a problem or not... -sofar
@@ -192,6 +199,7 @@ run_details() {
 # usage    : run_module_file $MODULE $SCRIPTNAME 
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
+  debug_msg "run_module_file ($@)"
   if [ -z "$SCRIPT_DIRECTORY" ] ; then
     if ! run_details $1 &> /dev/null ; then
       return 1
@@ -216,6 +224,7 @@ module_installed()
 # usage    : module_held $MODULE
 # purpose  : check if $MODULE is held
 module_held() {
+  debug_msg "module_held ($@)"
   $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q "^$1:held")
 }
 
@@ -224,6 +233,7 @@ module_held() {
 # usage    : module_exiled $MODULE
 # purpose  : check if $MODULE is exiled
 module_exiled() {
+  debug_msg "module_exiled ($@)"
   $(cat $MODULE_STATUS | cut -d: -f1,3 | grep -q "^$1:exiled")
 }
 
@@ -232,6 +242,7 @@ module_exiled() {
 # usage    : installed_version $MODULE
 # purpose  : return the installed version of $MODULE
 installed_version() {
+  debug_msg "installed_version ($@)"
   grep "^$1:" $MODULE_STATUS | cut -d: -f4
 }
 
@@ -240,6 +251,7 @@ installed_version() {
 # usage    : hold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold
 hold_modules() {
+  debug_msg "hold_modules ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP
     lock_file $MODULE_STATUS
@@ -258,6 +270,7 @@ hold_modules() {
 # usage    : unhold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold back to normal
 unhold_modules () {
+  debug_msg "unhold_modules  ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP
     lock_file $MODULE_STATUS
@@ -276,6 +289,7 @@ unhold_modules () {
 # usage    : exile_modules $MODULE [$MODULE....]
 # purpose  : put modules on exile
 exile_modules() {
+  debug_msg "exile_modules ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP
     lock_file $MODULE_STATUS
@@ -294,6 +308,7 @@ exile_modules() {
 # usage    : unexile_modules $MODULE [$MODULE....]
 # purpose  : put modules on exile back to normal
 unexile_modules () {
+  debug_msg "unexile_modules  ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP
     lock_file $MODULE_STATUS
@@ -309,6 +324,7 @@ unexile_modules () {
 
 
 module_needs_update () {
+  debug_msg "module_needs_update  ($@)"
   if [ -n "$1" ] ; then
     :
   else

@@ -1,4 +1,3 @@
-#!/bin/bash
 ############################################################
 #                                                          #
 # install.lunar - install Lunar modules                    #
@@ -135,7 +134,7 @@ stop_logging() {
 
 
 start_logging () {
-  debug_msg "start_logging ($@)"
+  debug_msg "start_logging  ($@)"
   export C_LOG=$(temp_create "${MODULE}.compile-log")
   export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
 

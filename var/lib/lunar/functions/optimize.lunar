@@ -1,4 +1,3 @@
-#Copyrighted Jason Johnston  2002 under GPLv2
 
 # All specified optimizations are system wide,
 #  and apply to any module built using lin.
@@ -53,6 +52,7 @@ fi
 # Usage   : bad_flags "list of flags to remove"
 # Example : bad_flags -ffast-math -funroll-loops
 bad_flags() {
+  debug_msg "bad_flags ($@)"
   verbose_msg "bad_flags \"$@\""
   if [[ $1 == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
@@ -72,6 +72,7 @@ bad_flags() {
 
 
 use_wrappers() {
+  debug_msg "use_wrappers ($@)"
   if [ "$GCCWRAPPERS" == "on" ] ; then
     verbose_msg "Enabling gcc wrapper scripts to force optimizations"
     export PATH=/var/lib/lunar/compilers:${PATH}
@@ -80,6 +81,7 @@ use_wrappers() {
 
 
 optimize_make() {
+  debug_msg "optimize_make ($@)"
   if [[ $PSAFE == "no" ]]; then
    unset MAKES
   fi
@@ -99,6 +101,7 @@ optimize_make() {
  
 
 optimize_base() {
+  debug_msg "optimize_base ($@)"
    if ! [[ $1 ]]; then
       BOPT="None"
    fi
@@ -128,6 +131,7 @@ optimize_base() {
 
 
 optimize_cpu()  {
+  debug_msg "optimize_cpu ($@)"
    if ! [[ $1 ]]; then
       if   [[ $PLATFORM == "Alpha" ]];   then
          CPU="ev4"
@@ -486,6 +490,7 @@ optimize_cpu()  {
 
 
 optimize_speed() {
+  debug_msg "optimize_speed ($@)"
    for A in ${SPD[@]}; do
       case $A in
              None) CFLAGS="$CFLAGS"
@@ -605,6 +610,7 @@ optimize_speed() {
 
 
 optimize_stack() {
+  debug_msg "optimize_stack ($@)"
   if [[ $STACK > 0 ]]; then
     if [[ $PLATFORM == "x86" ]]; then
       STACK="-mpreferred-stack-boundary=$STACK" 
@@ -617,6 +623,7 @@ optimize_stack() {
 
 
 optimize_extra() {
+  debug_msg "optimize_extra ($@)"
  for A in ${XTRA[@]}; do
    case $A in
      None)     CFLAGS="$CFLAGS"
@@ -654,6 +661,7 @@ optimize_extra() {
 
 # Set how floating point math is done
 optimize_fp() {
+  debug_msg "optimize_fp ($@)"
    case $1 in
       x387) if [[ $GCCVER == "3" ]];  then
               CFLAGS="$CFLAGS -mfpmath=387"
@@ -679,6 +687,7 @@ optimize_fp() {
 
 # Set up the Linker optimizations
 optimize_ld() {
+  debug_msg "optimize_ld ($@)"
    if [[ $LDFLAGS ]]; then
       unset LDFLAGS
    fi
@@ -703,6 +712,7 @@ optimize_ld() {
 
 
 optimize_addon() {
+  debug_msg "optimize_addon ($@)"
   if ! [[ `grep ADDON /etc/lunar/local/optimizations` ]]; then
     echo ADDON=( None ) >> /etc/lunar/local/optimizations
     ADDON=( None )
@@ -736,6 +746,7 @@ optimize_addon() {
 
 
 optimize_ccc_warn() {
+  debug_msg "optimize_ccc_warn ($@)"
   for W in ${CCC_WARN[@]}; do
     case $W in
     Deprecated)
@@ -748,6 +759,7 @@ optimize_ccc_warn() {
 
 
 optimize() {
+  debug_msg "optimize ($@)"
    unset CFLAGS CXXFLAGS LDFLAGS
 
    case $PLATFORM in
@@ -813,6 +825,7 @@ optimize() {
 
 # This is the flow control and error checking for the menus.
 optimize_architecture()  {
+  debug_msg "optimize_architecture ($@)"
   # Make sure optimizations file exists, if not create it.
   if ! [[ -f /etc/lunar/local/optimizations ]]; then
     touch /etc/lunar/local/optimizations

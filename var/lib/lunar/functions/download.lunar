@@ -1,4 +1,3 @@
-#!/bin/sh
 ############################################################
 #                                                          #
 # download.lunar - get sources from the net                #
@@ -400,7 +399,7 @@ download_module() { (
 
 
 testpack () {
-  debug_msg "testpack ($@)"
+  debug_msg "testpack  ($@)"
   FILENAME=`guess_filename $1` || FILENAME=`guess_filename $SOURCE_CACHE/$1`
   if [ -f $FILENAME ] ; then
     COMPRESSOR=`file -b $FILENAME | cut -d ' ' -f1`
