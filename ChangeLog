@@ -1,3 +1,8 @@
+2003-06-17 14:23  elaine
+
+	* var/lib/lunar/functions/moonbase.lunar: adjusted script location
+	to cgi-bin
+
 2003-06-17 02:20  elaine
 
 	* var/lib/lunar/functions/: moonbase.lunar, uniqid.lunar: Add a
