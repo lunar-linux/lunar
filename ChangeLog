@@ -199,8 +199,3 @@
 	* var/lib/lunar/protected: adding dirname, since an update of
 	coreutils shows lrm cannot find it.
 
-2003-03-25 22:25  sofar
-
-	* var/lib/lunar/menu/dmodule.menu: Merging back niki's typo fix
-	reported by Moe.
-
