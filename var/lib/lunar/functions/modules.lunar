@@ -45,12 +45,12 @@ list_modules() {
     exit 1
   fi
 
-  if ! grep -q ":$1" $MODULE_INDEX ; then
+  if ! grep -q ":$1$" $MODULE_INDEX ; then
     error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
     exit 1
   fi
 
-  grep ":$1" $MODULE_INDEX | cut -d: -f1
+  grep ":$1$" $MODULE_INDEX | cut -d: -f1
   return 0
 }
 
