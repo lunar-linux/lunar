@@ -1,3 +1,13 @@
+2005-03-31 13:09  sofar
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	  Adding a switch for -Wl,as-needed to reduce the amount of linked
+	  in libraries. Faster startups? possibly. Could prove useful.
+
+2005-03-31 08:09  sofar
+
+	* sbin/lrm: cosmetic warning fix
+
 2005-03-30 13:10  sofar
 
 	* var/lib/lunar/sustained: These are no longer needed in here (the
