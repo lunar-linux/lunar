@@ -309,13 +309,11 @@ run_fix()  {
   MODULES=$*
 
   if [ -z "$MODULES" ] ; then
-    MODULES=$(cat $MODULE_STATUS_BACKUP | cut  -d: -f1 | sort)
+    MODULES=$(list_installed)
   fi
 
-  PASSED=":"
-
-  verbose_msg "Saving LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
-  [ -n "$EXPORT_LD_PATH" ] ||
+  if [ -z "$EXPORT_LD_PATH" ] ; then
+    verbose_msg "Saving LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
     export EXPORT_LD_PATH=$(find /usr/lib -type d ! -empty)
   if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
     LD_LIBRARY_PATH_OLD="$LD_LIBRARY_PATH"
@@ -340,13 +338,13 @@ run_fix()  {
       if module_installed $MODULE                      &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
           [  "$MODULE"  !=  "j2sdk"    ]               &&
-	  module_held $MODULE                          &&
-          !  echo  $PASSED  |  grep  -q  ":$MODULE:";  then
+	  ! module_held $MODULE                        &&
+          !  echo  $PASSED  |  grep  -qw  "$MODULE";  then
 
         if    run_checks     $MODULE  ||
               [  -n  "$NOFIX"  ]
         then
-          PASSED="$PASSED$MODULE:"
+          PASSED="$PASSED $MODULE"
         else
           FIXED="no"
           (  
@@ -365,7 +363,7 @@ run_fix()  {
                 [  -n  "$NOFIX"  ]
           then
 
-            PASSED="$PASSED$MODULE:"
+            PASSED="$PASSED $MODULE"
             if  [  "$LDD_CHECK"  ==  "on"    ] ;  then
               export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH_OLD"
               export_ld $EXPORT_LD_PATH 
@@ -382,7 +380,6 @@ run_fix()  {
       fi
     done
   done
-  rm  -f  /tmp/LD_LIBRARY_PATH_FILE
 }
 
 
