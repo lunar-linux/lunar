@@ -1,3 +1,7 @@
+2003-02-01 23:32  sofar
+
+	* sbin/: lrm, lrm2: Lrm2 will replace lrm forever into eternity!
+	
 2003-02-01 19:33  csm
 
 	* usr/share/man/man8/lfirsttime.8: a few updates and cleanups
