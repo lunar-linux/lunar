@@ -74,6 +74,9 @@ get_moonbase () {
     INFO="Could not download a fresh moonbase"
   fi
   activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+  if [ "$OUTCOME" == "failed" ] ; then
+    return 1
+  fi
 )
 }
 

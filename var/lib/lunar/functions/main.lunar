@@ -56,12 +56,13 @@ update() {
     return  1
   fi
 
-  lin moonbase
-  if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
-  then
-    lin $LUNAR_MODULE && lunar renew
-  else
-    lunar renew
+  if lin moonbase ; then
+    if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
+    then
+      lin $LUNAR_MODULE && lunar renew
+    else
+      lunar renew
+    fi
   fi
 
 }

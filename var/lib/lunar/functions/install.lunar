@@ -42,10 +42,10 @@ check_blacklist() {
   # gcc 3x please email your findings to
   # maintainer@lunar-linux.org.
 
+  eval $(grep PLATFORM= /etc/lunar/local/optimizations)
+
   # Usage check_checklist $MODULES
-  if [ -z "$PLATFORM" ] ; then
-    PLATFORM=x86
-  fi
+  PLATFORM=${PLATFORM:-x86}
   if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
     BLKLST=$(grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM)
     if [ "$BLKLST" == "$MODULE" ] ; then
@@ -295,8 +295,12 @@ resurrect()  {
       false
     fi
   else
-    sound FAILURE
-    activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
+    # do not log an error in case we tried autoresurrect:
+    if [ "$AUTORESURRECT" == "off" -o -n "$COMPILE" ] ; then
+      sound FAILURE
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
+      false
+    fi
     false
   fi
 )
