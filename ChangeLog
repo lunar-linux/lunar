@@ -1,3 +1,13 @@
+2005-03-16 08:02  sofar
+
+	* var/lib/lunar/functions/messages.lunar: meh, silly
+
+2005-03-15 16:49  sofar
+
+	* var/lib/lunar/functions/check.lunar: Fix for AUTOFIX BREAKING
+	  MODULES: you can now use LDD_CHECK=off in DETAILS. please test &&
+	  verify
+
 2005-03-15 12:36  sofar
 
 	* bin/lvu: Adding 'info' ... slightly modified by chad's patch.
