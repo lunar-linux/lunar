@@ -390,12 +390,3 @@
 	cleanups that revealed problems... perhaps this solves Moe's
 	issues.
 
-2003-07-23 22:54  sofar
-
-	* var/lib/lunar/functions/: build.lunar, install.lunar,
-	sources.lunar: Fixing a bug that niki spotted, propagation of error
-	result now comes from missing downloads down to lin_module, which
-	exists before optimize now too. General order in pre-build stage
-	improved too. Moving verify_source code out of build into
-	sources.lunar.
-
