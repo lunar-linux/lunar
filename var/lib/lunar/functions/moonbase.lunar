@@ -46,6 +46,7 @@ get_moonbase () {
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
     rm -rf $SYSTEM_MOONBASE                                      &&
+    lrm moonbase                                                 &&
     mkdir $SYSTEM_MOONBASE                                       &&
     mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
     echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
@@ -55,20 +56,30 @@ get_moonbase () {
     echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
     OUTCOME=success || OUTCOME=failed
 
-    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
-    add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+    if [ "$OUTCOME" == "success" ] ; then
+      echo "$MD5SUM_LOGS/$MODULE-$VERSION" >> $INSTALL_LOGS/$MODULE-$VERSION
+      echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+  
+      # create an md5sum log
+      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+      for file in $(cat /var/log/lunar/install/moonbase-$VERSION) ; do
+        test -f "$file" && md5sum "$file"
+      done >> $MD5SUM_LOGS/$MODULE-$VERSION
     
-    # get ready to regenerate the module index cache file
-    TMP_MODULE_INDEX=$(temp_create "module-index")
-    cp $MODULE_INDEX $TMP_MODULE_INDEX
-    if [ -f "$MODULE_INDEX" ]; then
-      rm -f $MODULE_INDEX
+      add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+   
+      # get ready to regenerate the module index cache file
+      TMP_MODULE_INDEX=$(temp_create "module-index")
+      cp $MODULE_INDEX $TMP_MODULE_INDEX
+      if [ -f "$MODULE_INDEX" ]; then
+        rm -f $MODULE_INDEX
+      fi
+      create_module_index
+      echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}${MODULE_INDEX}" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+      display_moonbase_changes
     fi
-    create_module_index
-    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}${MODULE_INDEX}" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
-    display_moonbase_changes
   else
     OUTCOME=failed
     INFO="Could not download a fresh moonbase"
