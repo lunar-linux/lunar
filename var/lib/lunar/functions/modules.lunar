@@ -380,15 +380,6 @@ unexile_modules () {
 }
 
 
-module_needs_update () {
-  debug_msg "module_needs_update  ($@)"
-  if [ -n "$1" ] ; then
-    :
-  else
-    return 1
-  fi
-}
-
 # function : remove_module
 # usage    : remove_module; but $MODULE must be defined earlier
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
