@@ -256,9 +256,11 @@ satisfy_depends()  {
 
   # first recursively check if all required dependencies are installed
   for DEP_MODULE in $(find_depends $MODULE) ; do
-    if ! module_installed $DEP_MODULE ; then
-      if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
-        exit 1
+    if [ $DEP_MODULE != $MODULE ]; then
+      if ! module_installed $DEP_MODULE ; then
+        if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
+          exit 1
+        fi
       fi
     fi
   done
