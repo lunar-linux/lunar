@@ -1,4 +1,4 @@
-############################################################
+u###########################################################
 #                                                          #
 # subroutines - Lunar subroutines                          #
 #                                                          #
@@ -1755,6 +1755,9 @@ rework_list() {
 # fix_depends : single pass to fix depends database
 fix_depends () {
 
+  TMP=/tmp/.lfix.$$
+  [ -d $TMP ] || mkdir -p $TMP
+
   CHANGED_MODULES=
   
   if [ -n "$1" ] ; then
@@ -1809,19 +1812,18 @@ fix_depends () {
     done
   fi
 
+  rm -rf $TMP
+
 }
 
 # run_depends_fix : wrapper to run fix_depends multiple times
 run_depends_fix () {
-  TMP=/tmp/.lfix.$$
-  [ -d $TMP ] || mkdir -p $TMP
 
   for PASS in 1 2 3 ; do
     fix_depends $*
     [ -n "$CHANGED_MODULES" ] || break
   done  
 
-  rm -rf $TMP
 }
 
 
