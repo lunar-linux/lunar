@@ -21,8 +21,3 @@
 	that I had committed these fixes already before I was AFK. But
 	anyway, here's a proposed fix for when a moonbase lin crashes...
 
-2003-10-17 10:23  jasper
-
-	* sbin/lget, usr/share/man/man8/lget.8: Updating lget and manpage
-	for -a/--all option
-
