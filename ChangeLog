@@ -1,3 +1,8 @@
+2003-04-27 23:13  sofar
+
+	* sbin/lin, var/lib/lunar/functions/optimize.lunar: narrowing this
+	down to the absolute minimum, making the code much more simple.
+
 2003-04-27 17:24  sofar
 
 	* bin/lvu, etc/lunar/config, sbin/lget, sbin/lin, sbin/lrm,
