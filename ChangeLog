@@ -1,3 +1,14 @@
+2003-03-15 18:23  sofar
+
+	* var/lib/lunar/: subroutines, functions/depends.lunar,
+	functions/download.lunar, functions/locking.lunar,
+	functions/modules.lunar, functions/moonbase.lunar,
+	functions/postbuild.lunar: Fixing all rm occurences.
+
+2003-03-15 18:16  sofar
+
+	* sbin/: lin, lrm, lunar: Fixing rm statements
+
 2003-03-15 01:29  sofar
 
 	* var/lib/lunar/: subroutines, functions/download.lunar,
