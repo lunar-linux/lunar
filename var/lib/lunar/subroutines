@@ -416,6 +416,10 @@ validate_source_dir()  {
 bad_flags() {
   if [[ $1 == "ALL" ]]; then
     unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  elif [[ $1 == "compiler" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS
+  elif [[ $1 == "linker" ]]; then
+    unset LDFLAGS
   else
     for BAD_FLAG in $@; do
       CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
