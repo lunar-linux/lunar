@@ -60,8 +60,8 @@ mirror_menu()  {
                       "GNU"          ""  "$G_HELP"  \
                       "KDE"          ""  "$K_HELP"  \
                       "KERNEL"       ""  "$L_HELP"  \
-                      "SOURCEFORGE"  ""  "$SF_HELP" \
-                      "LAST_RESORT"  ""  "$LR_HELP" \
+                      "SFORGE"       ""  "$SF_HELP" \
+                      "LRESORT"      ""  "$LR_HELP" \
                       "XFREE86"      ""  "$X_HELP"`
 
   do
@@ -71,8 +71,8 @@ mirror_menu()  {
           KDE)      MIRROR="     KDE_URL"    ;;
           KERNEL)   MIRROR="  KERNEL_URL"    ;;
           XFREE86)  MIRROR=" XFREE86_URL"    ;;
-      SOURCEFORGE)  MIRROR="  SFORGE_URL"    ;;
-      LAST_RESORT)  MIRROR=" LRESORT_URL"    ;;
+          SFORGE)   MIRROR="  SFORGE_URL"    ;;
+          LRESORT)  MIRROR=" LRESORT_URL"    ;;
     esac
 
     if  MIRROR_URL=`select_mirror  $COMMAND`;  then
