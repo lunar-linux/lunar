@@ -1,5 +1,4 @@
-2004-11-11 02:26  v3rt1g0
+2005-03-08 10:58  moe
 
-	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC: memtest86+
-	  is not non-x86 friendly
+	* usr/share/man/man8/lfirsttime.8: Updating lfirsttime with lunar
 
