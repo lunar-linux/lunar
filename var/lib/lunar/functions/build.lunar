@@ -252,10 +252,10 @@ default_cpan_build() {
 default_post_build() {
   debug_msg "default_post_build ($@)"
 
-  if [ -z "$LD_PRELOAD" ]; then
-    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} never calls prepare_install!${DEFAULT_COLOR}"
+  if [ $(wc -l $INSTALLWATCHFILE | awk '{print$1}') == "0" ]; then
+    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
   fi
-  
+
   {
     gather_docs
 
