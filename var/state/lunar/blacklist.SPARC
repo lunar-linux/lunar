@@ -1,7 +1,8 @@
+bin86
+e3
 grub
 lilo
-e3
-yaboot
-bin86
+nasm
 uClibc
 uml
+yaboot

@@ -1,6 +1,6 @@
-yaboot
 aboot
+binutils-sparc64
+egcs64
 silo
 sparc-utils
-egcs64
-binutils-sparc64
+yaboot
