@@ -1,31 +1,190 @@
+2002-10-14 19:32  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Adding gecc support to
+	optimizations.
+
+2002-10-14 19:29  xoritor
+
+	* sbin/lget, sbin/lin, var/lib/lunar/subroutines: Adding support
+	for CVS co/up to lget.	Adding support for building sources from
+	CVS to lin.  Adding KEEP_SOURCE var to allow needed sources to be
+	kept.  Adding support for checking CVS source dirs in subroutines.
+
+2002-10-14 14:02  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: Adding input box for
+	$MAKES
+
 2002-10-08 04:32  tchan
 
-	* var/state/lunar/blacklist.x86: Removed ddd from the blacklist.  It now correctly compiles with gcc-3.2.
-	
+	* var/state/lunar/blacklist.x86: Removed ddd from the blacklist. 
+	It now correctly compiles with gcc-3.2.
+
 2002-10-05 05:39  tchan
 
-	* var/lib/lunar/subroutines: Fixed a long standing bug on why the /usr/share/info/dir file keeps getting
-	trashed.  prepare_install was not saving /usr/share/info/dir and that file
-	is being tracked by installwatch so it becomes part of the tar.bz2 file.
-	So inside prepare_install, if the module is already installed, it removes
-	the existing module before completing the install.  This would remove
-	the exisiting /usr/share/info/dir and then replace it with a very short
-	version of /usr/share/info/dir.
-	
+	* var/lib/lunar/subroutines: Fixed a long standing bug on why the
+	/usr/share/info/dir file keeps getting trashed.  prepare_install
+	was not saving /usr/share/info/dir and that file is being tracked
+	by installwatch so it becomes part of the tar.bz2 file.  So inside
+	prepare_install, if the module is already installed, it removes the
+	existing module before completing the install.	This would remove
+	the exisiting /usr/share/info/dir and then replace it with a very
+	short version of /usr/share/info/dir.
+
 2002-10-03 16:51  xoritor
 
 	* sbin/lin: Added the call to check_blacklist() that was left out.
-	
+
 2002-10-03 15:55  xoritor
 
-	* var/state/lunar/: blacklist.x86, gcc.x86: Removing gcc.x86 list (unused)
-	Adding blacklist.x86 with contents:
-	  ddd
-	  rythmbox
-	  gstreamer
-	
+	* var/state/lunar/: blacklist.x86, gcc.x86: Removing gcc.x86 list
+	(unused) Adding blacklist.x86 with contents:   ddd   rythmbox  
+	gstreamer
+
 2002-10-03 15:50  xoritor
 
-	* sbin/lin: Fixed the issue with --fix installing "held" modules.  this will no longer happen.
-	Added support for a "blacklist" again it is still in /var/state/lunar, but the aname has changed to blacklist.$PLATFORM (defaults to x86).  This will NOT let a blacklisted module install at all and terminates lin when a blacklisted module is encountered.  I realize this could cause issues, and I am looking for a better solution... feel free to post ideas.
-	
+	* sbin/lin: Fixed the issue with --fix installing "held" modules. 
+	this will no longer happen.  Added support for a "blacklist" again
+	it is still in /var/state/lunar, but the aname has changed to
+	blacklist.$PLATFORM (defaults to x86).	This will NOT let a
+	blacklisted module install at all and terminates lin when a
+	blacklisted module is encountered.  I realize this could cause
+	issues, and I am looking for a better solution... feel free to post
+	ideas.
+
+2002-10-01 17:34  sofar
+
+	* var/lib/lunar/subroutines: lin moonbase now explicitly rebuilds
+	the module.index
+
+2002-09-29 20:10  sofar
+
+	* var/lib/lunar/subroutines: Adding prune code for compile, install
+	and md5sum logsfiles
+
+2002-09-28 03:37  tchan
+
+	* var/state/lunar/gcc.x86: Removed cdrdao from the list.  It builds
+	just fine for me with gcc-3.2.
+
+2002-09-27 18:42  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed formatting errors.
+
+2002-09-25 22:01  sofar
+
+	* sbin/lin: REALLY fixing linewrap errors
+
+2002-09-25 18:32  sofar
+
+	* sbin/lin: re-adding wrappers to normal installation
+
+2002-09-25 18:04  sofar
+
+	* var/lib/lunar/subroutines: Adding message when a .rc file is
+	installed!
+
+2002-09-25 17:35  sofar
+
+	* var/lib/lunar/subroutines: Fix for CVS moonbases
+
+2002-09-24 20:49  xoritor
+
+	* sbin/lin: Fixing linewrap/editor errors... thx niki :-)
+
+2002-09-24 16:59  xoritor
+
+	* sbin/lin: Updating lin to not set PATH, other than to add for the
+	wrappers.  Added an echo to say wether a module is blacklisted or
+	not, but does not do anything but echo.  This is a placeholder for
+	future code that will allow a blacklist for gcc 2x or optimization
+	unfriendly modules to be easily identified.
+
+2002-09-24 16:52  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Adding PSAFE to
+	optimize_make().    PSAFE=no can be added to a DETAILS file to set
+	MAKES=1 so that multiple makes do not occur
+
+2002-09-24 02:51  tchan
+
+	* var/state/lunar/gcc.x86: unrar now compiles with gcc-3.2 or
+	greater.
+
+2002-09-23 23:59  sofar
+
+	* sbin/lin, usr/share/man/man8/lin.8, var/lib/lunar/subroutines:
+	Adding proper fix for lin --fix: lin --fixdepends will ONLY rebuild
+	your depends database, without recompiling modules!
+
+2002-09-23 21:03  sofar
+
+	* var/lib/lunar/subroutines: Incremental numbered backups removed:
+	they might confuse xinetd! Just don't cp a new version if it
+	already exists, since most likely the SA modified it and we should
+	leave it alone.
+
+2002-09-23 12:03  kongar
+
+	* var/lib/lunar/subroutines: 
+	now backing up /etc/xinet.d/module files, numbered backups.
+
+2002-09-22 07:05  tchan
+
+	* var/lib/lunar/subroutines: Hacked subroutines to support the
+	creation of /tmp/depends.updated to aide in edit/repair of
+	/var/state/lunar/depends.  This will prevent massive recompiling of
+	the entire lunar box when the depends file gets out of whack.
+
+2002-09-22 07:03  tchan
+
+	* sbin/lin: Hacked lin to support /var/state/lunar/depends
+	editing/repair using the file /tmp/depends.updated.
+
+2002-09-20 23:21  kc8apf
+
+	* var/lib/lunar/functions/optimize.lunar: 
+	More optimization fixes for alpha
+
+2002-09-20 23:07  kc8apf
+
+	* var/lib/lunar/functions/optimize.lunar: 
+	Add proper build types for alpha
+
+2002-09-20 21:51  kc8apf
+
+	* etc/lunar/mirrors/GNOME, var/lib/lunar/menu/optimize.menu: 
+	Apply patches from lunar to theedge
+
+2002-09-20 16:07  tchan
+
+	* var/state/lunar/gcc.x86: Removed several SDL* modules as they
+	have been compiling and working with gcc-3.2 for a while now.
+
+2002-09-20 15:36  tchan
+
+	* var/state/lunar/gcc.x86: Removed smpeg from this list as it
+	compiles correctly now with gcc-3.2, after applying wyatt_earp's
+	fix.
+
+2002-09-20 15:20  tchan
+
+	* bin/lvu: Fixed the spacing in the help section for the new "lvu
+	cd" sub-command.
+
+2002-09-20 11:17  kongar
+
+	* bin/lvu: 
+	implemented "lvu cd <module>" functionality
+
+2002-09-18 21:35  sofar
+
+	* var/lib/lunar/menu/optimize.menu: preserve $MAKES
+
+2002-09-18 09:26  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: Fixing order of distcc
+	(ccache distcc gcc and not distcc ccache gcc), and adding distcc to
+	the c++ compiler addons, since mozilla and others compiled fine
+	with it.
+
