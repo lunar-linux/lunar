@@ -13,7 +13,7 @@
 #
 # function backup_mods_krnl
 #
-# Usage backup_mods_krnl $MODULE-$EXTRAVERSION-$VERSION 
+# Usage backup_mods_krnl $MODULE-$VERSION-$EXTRAVERSION
 # Return value
 #
 
