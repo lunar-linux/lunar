@@ -1,3 +1,22 @@
+2004-08-27 08:51  sofar
+
+	* var/lib/lunar/functions/sources.lunar: foo /me fixes proper
+	comments
+
+2004-08-27 08:18  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Adding sha1: verify syntax
+	code that uses sha1sum, slightly better than md5sum (what is it
+	again, 160 bits against 128 hash size?). The code hooks up
+	seamlessly and as demonstrated the older core doesn't break if it
+	doesn't handle the sha1: syntax. sha1sum is provided by coreutils
+	BTW so must in any case be present on all boxes, I don't expect any
+	box to fail on that.
+
+2004-08-26 14:10  sofar
+
+	* etc/lunar/mirrors/LRESORT: badly needed update
+
 2004-08-22 11:34  perldude
 
 	* etc/lunar/mirrors/SFORGE: added german SF mirror. I'm using it
