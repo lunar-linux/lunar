@@ -1,3 +1,44 @@
+2003-07-18 03:08  tchan
+
+	* var/lib/lunar/functions/optimize.lunar: Again, fixed the typo of
+	"PLATFOM" to be "PLATFORM".  This was fixed in a previous version
+	of this code but was LOST in sofar's latest merge.
+
+2003-07-17 23:31  csm
+
+	* bin/lvu: fixing a typo. "ist_section" is not the same as
+	"list_section"
+
+2003-07-17 22:28  sofar
+
+	* var/lib/lunar/functions/depends.lunar: Error out when a
+	dependency is exiled with a proper message.
+
+2003-07-17 20:43  sofar
+
+	* var/lib/lunar/functions/: download.lunar, edit.lunar,
+	install.lunar, sources.lunar, useradd.lunar: Fixed some error
+	messages (trying to uniformize them) and a fix for a broken
+	download (unpack() croaking) error that resulted in unpack not
+	logging the broken lin to activity log.
+
+2003-07-17 20:19  sofar
+
+	* bin/lvu, sbin/lin, var/lib/lunar/functions/build.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/install.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/uniqid.lunar: Some minor cosmetic fixes,
+	run_details used better, especially in lvu, fixed a hang on
+	use_initd. Moved conflicts() to depends.lunar, changed ID so the
+	output of the wget command gets echoed to stdout (so we possibly
+	can send out a motd).
+
+2003-07-17 14:50  tchan
+
+	* usr/share/man/man8/lunar.8: Added spaces to the optional
+	parameters listing to make it format and read much better.
+
 2003-07-17 04:21  csm
 
 	* usr/share/man/man8/: lin.8, lunar.8: another coupld of updates
@@ -178,9 +219,4 @@
 	* var/state/lunar/: blacklist.PowerPC, blacklist.x86: Added yaboot
 	and aboot to x86 blacklist Added grub, lilo, and e3 to PowerPC
 	blacklist
-
-2003-05-18 11:24  jasper
-
-	* var/lib/lunar/functions/depends.lunar: Try to fix
-	optional_depends
 
