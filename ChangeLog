@@ -1,3 +1,15 @@
+2005-03-20 16:53  sofar
+
+	* var/lib/lunar/functions/: check.lunar, modules.lunar,
+	  recovery.lunar: Reworking some checks and code to be more
+	  consistent in using base functions, rewrite md5sum_check slightly
+
+2005-03-20 14:57  sofar
+
+	* var/lib/lunar/functions/: check.lunar, locking.lunar: This allows
+	  'lunar fixdepends' to rebuild the depends/depends.backup files if
+	  they are nonexistant, and thus empty too!
+
 2005-03-18 22:50  sofar
 
 	* sbin/lrm: oops!
@@ -140,16 +152,4 @@
 2005-02-02 12:12  sofar
 
 	* var/lib/lunar/functions/build.lunar: meh... suck
-
-2005-01-19 12:09  moe
-
-	* var/lib/lunar/functions/view.lunar: There's also the type 'data'
-
-2005-01-19 11:37  sofar
-
-	* bin/lvu: indeed I missed it
-
-2005-01-19 11:32  sofar
-
-	* bin/lvu: removed bolding of modules
 
