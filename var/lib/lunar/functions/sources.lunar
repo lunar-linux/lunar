@@ -121,10 +121,10 @@ unpack() {
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
   case $(file -b $FILENAME | cut -d' ' -f1) in
-        bzip2)  tar jxf $FILENAME -o --no-same-permissions ;;
-         gzip)  tar zxf $FILENAME -o --no-same-permissions ;;
-    compress*)  tar zxf $FILENAME -o --no-same-permissions ;;
-	  tar)  tar xf $FILENAME -o --no-same-permissions ;;
+        bzip2)  tar jxf $FILENAME --no-same-owner --no-same-permissions ;;
+         gzip)  tar zxf $FILENAME --no-same-owner --no-same-permissions ;;
+    compress*)  tar zxf $FILENAME --no-same-owner --no-same-permissions ;;
+	  tar)  tar xf $FILENAME --no-same-owner --no-same-permissions ;;
           Zip)  unzip -q $FILENAME ;;
           RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
                                         |  cpio  -idm   ;;
@@ -134,17 +134,6 @@ unpack() {
   if [ "$?" != 0 ] ; then
     message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
     return 1
-  fi
-
-  # I don't get this :
-  [ -n "$SOURCE_DIRECTORY" ] &&
-  [ -d "$SOURCE_DIRECTORY" ]
-  
-  # someone care to document this ???
-  if [[ $(echo $CFLAGS | grep fbranch-probabilities) ]]; then
-    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
-  else
-    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
   fi
 }
 
