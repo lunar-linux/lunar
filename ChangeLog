@@ -293,20 +293,3 @@
 	* var/lib/lunar/functions/tracking.lunar: Added chmod 644 after
 	temp_create to make install logs readable
 
-2003-07-29 20:49  elaine
-
-	* var/lib/lunar/functions/: build.lunar, check.lunar, config.lunar,
-	connect.lunar, depends.lunar, download.lunar, edit.lunar,
-	init.lunar, install.lunar, locking.lunar, main.lunar,
-	messages.lunar, misc.lunar, modules.lunar, moonbase.lunar,
-	optimize.lunar, postbuild.lunar, prune.lunar, queue.lunar,
-	recovery.lunar, sizes.lunar, sources.lunar, temp.lunar,
-	tracking.lunar, uniqid.lunar, updatelog.lunar, useradd.lunar,
-	view.lunar: Added #!/bin/bash to lib files for vim / emacs
-	highlighting
-
-2003-07-29 14:54  elaine
-
-	* var/lib/lunar/functions/download.lunar: grepping for syntax
-	error, found beer
-
