@@ -1,3 +1,28 @@
+2003-09-14 23:15  nhudson
+
+	* var/lib/lunar/excluded: 
+	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to
+	the excluded list because sometimes they get deleted if you remove
+	libglade2 or scrollkeeper
+
+2003-09-14 16:40  sofar
+
+	* var/lib/lunar/menu/integrity.menu: too much merged... reverted
+	this
+
+2003-09-14 14:31  sofar
+
+	* etc/lunar/config, etc/lunar/mirrors/LRESORT,
+	usr/share/man/man8/lcrash.8, usr/share/man/man8/lfirsttime.8,
+	var/lib/lunar/excluded, var/lib/lunar/functions/build.lunar,
+	var/lib/lunar/functions/check.lunar,
+	var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/install.lunar,
+	var/lib/lunar/functions/optimize.lunar,
+	var/lib/lunar/menu/integrity.menu: Bugfix merge... including
+	several bugfixes from theedge that needed to be merged back into
+	lunar
+
 2003-09-12 00:29  niki
 
 	* sbin/lunar, var/lib/lunar/functions/main.lunar,
