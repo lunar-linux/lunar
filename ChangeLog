@@ -1,3 +1,8 @@
+2003-03-08 22:40  dem
+
+	* var/lib/lunar/excluded: This anoys the f*** out of me everytime
+	it overwritters it
+
 2003-03-06 23:39  sofar
 
 	* var/lib/lunar/excluded: protect the whole dir instead of 4 files.
