@@ -121,10 +121,10 @@ unpack() {
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
   case $(file -b $FILENAME | cut -d' ' -f1) in
-        bzip2)  tar jxf $FILENAME ;;
-         gzip)  tar zxf $FILENAME ;;
-	  tar)  tar xf $FILENAME ;;
-    compress*)  tar zxf $FILENAME ;;
+        bzip2)  tar jxf $FILENAME -o --no-same-permissions ;;
+         gzip)  tar zxf $FILENAME -o --no-same-permissions ;;
+    compress*)  tar zxf $FILENAME -o --no-same-permissions ;;
+	  tar)  tar xf $FILENAME -o --no-same-permissions ;;
           Zip)  unzip -q $FILENAME ;;
           RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
                                         |  cpio  -idm   ;;
