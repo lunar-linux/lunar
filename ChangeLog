@@ -178,8 +178,3 @@
 	code out, several cosmetic and non-cosmetic prune fixes. Prune code
 	seems okay here. (slow but correct behaviour)
 
-2003-04-21 17:48  sofar
-
-	* bin/lvu: Fixes, adding support to check out URL's from a module
-	(or all!)
-
