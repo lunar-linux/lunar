@@ -248,8 +248,13 @@ unpack() {
             *)  false                                      ;;
   esac
   [ -n "$SOURCE_DIRECTORY" ] &&
-  [ -d "$SOURCE_DIRECTORY" ] &&
-  chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null   
+  [ -d "$SOURCE_DIRECTORY" ]
+  
+  if [[ `echo $CFLAGS | grep fbranch-probabilities` ]]; then
+    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
+  else
+    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
+  fi
 }
 
 
@@ -406,6 +411,24 @@ validate_source_dir()  {
 
 }
 
+# Usage: bad_flags "list of flags to remove"
+# Example: bad_flags -ffast-math -funroll-loops
+bad_flags() {
+  if [[ $1 == "ALL" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  elif [[ $1 == "compiler" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS
+  elif [[ $1 == "linker" ]]; then
+    unset LDFLAGS
+  else
+    for BAD_FLAG in $@; do
+      CFLAGS=`echo $CFLAGS | sed s/$BAD_FLAG//`
+      CXXFLAGS=`echo $CXXFLAGS | sed s/$BAD_FLAG//`
+      CPPFLAGS=`echo $CPPFLAGS | sed s/$BAD_FLAG//`
+      LDFLAGS=`echo $LDFLAGS | sed s/$BAD_FLAG//`
+    done
+  fi
+}
 
 # Usage: patch_it location/name level 
 # Example: patch_it $SOURCE_CACHE/foo.bz2 1
