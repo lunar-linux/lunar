@@ -1,3 +1,14 @@
+2004-03-23 10:10  sofar
+
+	* etc/lunar/mirrors/GNOME, var/lib/lunar/menu/mirrors.menu: Fixing
+	mirror file and algorithm.... we don't need to make our lives so
+	hard.
+
+2004-03-23 09:49  sofar
+
+	* var/lib/lunar/functions/config.lunar: Properly escaping ':' signs
+	allows the mirrors to be set too :^o
+
 2004-03-21 22:17  sofar
 
 	* var/lib/lunar/functions/: config.lunar, modules.lunar: Adding all
