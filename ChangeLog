@@ -273,14 +273,3 @@
 	* var/lib/lunar/functions/depends.lunar: Added the suggested speed
 	fix from Erie Sorenson.  INCLUDED=$INCLUDED$'\n'$MOD
 
-2004-03-03 21:51  sofar
-
-	* sbin/lin, var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/misc.lunar,
-	var/lib/lunar/functions/tracking.lunar: Some slight fixing of the
-	double-questions (not entirely correct still), adding support for a
-	better CPAN system (more work needed). speediefied the tracking
-	part with smart grep.
-
