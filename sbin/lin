@@ -304,6 +304,8 @@ run_build()  {
   if  [  "$?"  ==  0  ];  then
     rack
   else
+    devoke_installwatch
+    rm $INSTALLWATCHFILE
     sound  FAILURE
     message  "${PROBLEM_COLOR}"      \
              "! Problem Detected !"  \
