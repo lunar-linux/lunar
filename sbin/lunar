@@ -44,22 +44,23 @@ General options:
 
 Commands:
 
-prune                   Removes old sources and install/compile logs
-renew                   Checks ver. against moonbase & recompiles if necessary
-update                  Fetches latest moonbase and then does a "renew"
-rebuild                 Recompiles all installed modules
-optimize                Shortcut to the optimization menu
-fix                     Check and fix all modules and internal state of lunar
-nofix                   Check but do not fix modules and internal state
-fixdepends              Check and fix the dependency database of lunar
-set  [var [value]]      Check internal variable(s) and assign their values
-resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
-install    modulename(s)  Install a checklist of modules
-remove     modulename(s)  Remove a checklist of modules
-hold       modulename(s)  Place a hold on a checklist of modules
-unhold     modulename(s)  Remove a hold on a checklist of modules
-exile      modulename(s)  Remove a module a/o prevent it from being resurrected
-unexile    modulename(s)  Allows a module to be compiled|resurrected again
+prune                  Removes old sources and install/compile logs
+renew                  Checks ver. against moonbase & recompiles if necessary
+update                 Fetches latest moonbase and then does a "renew"
+rebuild                Recompiles all installed modules
+optimize               Shortcut to the optimization menu
+fix                    Check and fix all modules and internal state of lunar
+nofix                  Check but do not fix modules and internal state
+fixdepends             Check and fix the dependency database of lunar
+set  [var [value]]     Check internal variable(s) and assign their values
+unset var              Unsets an internal variable
+resurrect  module(s)   Force modulename(s) to be unpacked from /var/cache
+install    module(s)   Install a checklist of modules
+remove     module(s)   Remove a checklist of modules
+hold       module(s)   Place a hold on a checklist of modules
+unhold     module(s)   Remove a hold on a checklist of modules
+exile      module(s)   Remove a module a/o prevent it from being resurrected
+unexile    module(s)   Allows a module to be compiled|resurrected again
 EOF
   exit  1
 }
@@ -738,6 +739,13 @@ setvar() {
 }
 
 
+unsetvar() {
+  if [ ! -z "$*" ] ; then
+    unset_local_config "$1"
+  fi   
+}
+
+
 main_menu()  {
   while
     M_HELP="Easy module management"
@@ -848,6 +856,7 @@ else
     rebuild    ) rebuild                                ;;
     optimize   ) optimize_architecture                  ;;
     set        ) shift && setvar $@                     ;;
+    unset      ) shift && unsetvar $@                   ;;
     fix        ) shift && run_fix $@                    ;;
     nofix      ) shift && export NOFIX=on && run_fix $@ ;;
     fixdepends ) shift && fix_depends $@                ;;

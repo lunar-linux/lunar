@@ -131,8 +131,8 @@ create_module_index() {
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
   debug_msg "check_module_index ($@)"
-  if [ -w $MODULE_INDEX ] ; then
-    if [ -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
+  if [ -w $MODULE_INDEX -a -w $DEPENDS_CACHE ] ; then
+    if [ ! -e $MODULE_INDEX -o ! -e $DEPENDS_CACHE -o -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
       create_module_index
       create_depends_cache
       return 0
@@ -201,7 +201,8 @@ run_details() {
   # (return 1), which means that the calling code needs to decide 
   # if this is a problem or not... -sofar
 
-  if ! SECTION=$(find_section $1) ; then
+  SECTION=$(find_section $1)
+  if [ -z "$SECTION" ] ; then
     error_message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
              "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
     return 1
@@ -239,7 +240,7 @@ run_details() {
 run_module_file() {
   debug_msg "run_module_file ($@)"
   if [ -z "$SCRIPT_DIRECTORY" ] ; then
-    if ! run_details $1 &> /dev/null ; then
+    if ! run_details $1 > /dev/null ; then
       return 1
     fi
   fi
