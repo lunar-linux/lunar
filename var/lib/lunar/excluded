@@ -39,6 +39,7 @@
 /etc/postfix/aliases
 /etc/printcap
 /etc/procmailrc
+/etc/proftpd.conf
 /etc/protocols
 /etc/samba/SMBPASSWD
 /etc/samba/secrets.tdb
@@ -56,6 +57,7 @@
 /etc/sysctl.conf
 /etc/syslog.conf
 /etc/lunar/local
+/etc/vsftpd.conf
 /etc/X11/xinit/xinitrc
 /etc/X11/XF86Config
 /etc/X11/XftConfig
