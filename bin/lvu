@@ -194,7 +194,7 @@ lvu_catalog()  {
 
   ((  COUNT=0  ))
 
-  for  SECTION  in  $(ist_sections);  do
+  for  SECTION  in  $(list_sections);  do
     echo 
     echo  "-------------------------------------------------"
     echo  "SECTION:  $SECTION"  
