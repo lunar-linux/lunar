@@ -58,12 +58,17 @@ get_cvs() {(
 
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting old CVS source tarball"
+    # unpacking in last component dir of $CVSMODULE
+    CD=$(pwd)
+    mkdir -p $(dirname $CVSMODULE)
+    cd $(dirname $CVSMODULE)
     if ! tar xjf $SOURCE_CACHE/$2 ; then
       message "${WARNING_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
       
       rm_source_dir /tmp/$MODULE-$VERSION
       mk_source_dir /tmp/$MODULE-$VERSION
     fi
+    cd $CD
   fi
 
   verbose_msg "CVSROOT=\"$CVSROOT\""
@@ -78,7 +83,10 @@ get_cvs() {(
   
   if [[ "$GOT_CVS" == "yes" ]]; then
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
-    tar cjf $SOURCE_CACHE/$2 $CVSMODULE
+    # pack in last component dir of $CVSMODULE
+    cd $(dirname $CVSMODULE)
+    tar cjf $SOURCE_CACHE/$2 $(basename $CVSMODULE)
+    cd $CD
   else
     activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
   fi
@@ -257,7 +265,9 @@ get_url() {
       # cvs urls
       CVS_THRESHOLD=${CVS_THRESHOLD:-10}
       if [ "$CVS_THRESHOLD" > 0 ] ; then
-        if [ "$(find $SOURCE_CACHE/$2 -amin +$CVS_THRESHOLD)" == "$SOURCE_CACHE/$2" ] || [ ! -f $SOURCE_CACHE/$2 ] ; then
+        if [ ! -f $SOURCE_CACHE/$2 ] ; then
+	  get_cvs $1 $2
+        elif [ "$(find $SOURCE_CACHE/$2 -amin +$CVS_THRESHOLD)" == "$SOURCE_CACHE/$2" ] ; then
 	  get_cvs $1 $2
 	else
 	  verbose_msg "skipping cvs update (less than $CVS_THRESHOLD mins old)"
