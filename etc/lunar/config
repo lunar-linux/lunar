@@ -86,6 +86,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
           LRESORT_URL=http://www.lunar-linux.com/lunar/mirrors
 
 	 MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
+	    PATCH_URL=http://www.lunar-linux.org/lunar/patches
 
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
 
