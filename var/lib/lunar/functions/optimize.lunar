@@ -652,6 +652,9 @@ optimize_addon() {
                 CXX_EXT="$CXX_EXT"
               fi
               ;;
+        GECC) CC_EXT="gecc"
+              CXX_EXT="gecc"
+              ;;
     esac
   done
 }
