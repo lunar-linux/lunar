@@ -77,47 +77,60 @@ download_module() {
 			verbose_msg "clearing source cache copy of \"$SRC\""
 			rm -f $SOURCE_CACHE/$SRC 2>/dev/null
 		fi
-
-		# add source part if needed
-		for URL in $URLS ; do
-			if [ "${URL:((${#URL}-1)):1}" == "/" ] ; then
-				URL=${URL}${SRC}
-			fi
-			# check for cache?
-			if [ ! -f $SOURCE_CACHE/$SRC ] || plugin_call SOURCE_NEEDREFRESH $URL $SOURCE_CACHE/$SRC ; then
-				message "${MESSAGE_COLOR}Downloading source file" \
-					"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
-					"${MESSAGE_COLOR}for module" \
-					"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-				# ordinary URL's handled by call_wget
-				if [ -n "$BASE_URL" ] ; then
-					# base url set means we don't touch the other possibilities:
-					download_url $BASE_URL/$(basename $2) $SOURCE_CACHE/$SRC
-				else
-					if [ -n "$FRESORT_URL" ] ; then
-						# try fresort first
-						if ! download_url $FRESORT_URL/$(basename $SRC) $SOURCE_CACHE/$SRC ; then
-							# normal url second
-							if ! download_url $URL $SOURCE_CACHE/$SRC ; then
-								# and failover
-								download_url $LRESORT_URL/$(basename $SRC) $SOURCE_CACHE/$SRC
-							fi
-						fi
-					elif ! download_url $URL $SOURCE_CACHE/$SRC ; then
-						# just try the normal url
-						if [ -n "$LRESORT_URL" ] ; then
-							# and the failover url
-							download_url $LRESORT_URL/$(basename $SRC) $SOURCE_CACHE/$SRC
-						fi
-					fi
+		
+		add_url() {
+			if [ -n "$1" ]; then
+				if ! echo " $ALL_URLS " | grep -q " $1 "; then
+					ALL_URLS="$ALL_URLS $1"
 				fi
-			else
-				# break out of the loop if the cache has it:
-				verbose_msg "Skipping download of \"$SRC\" (in cache)"
-				break
 			fi
-		done
+		}
+
+		if [ ! -f $SOURCE_CACHE/$SRC ] || plugin_call SOURCE_NEEDREFRESH $URL $SOURCE_CACHE/$SRC ; then
+			# check for cache?
+			message "${MESSAGE_COLOR}Downloading source file" \
+				"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
+				"${MESSAGE_COLOR}for module" \
+				"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+			# compose a list of URLS
+			ALL_URLS=
+			add_url $FRESORT_URL
+			for URL in $URLS ; do
+				add_url $URL
+				if [ "$EXHAUSTIVE" == "on" ]; then
+					# scan for hits agains known clusters of mirrors
+					for MLIST in $MIRRORS/*; do
+						for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+							if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
+								# compose the list of valid mirrors
+								REST=${URL:${#ALT}}
+								for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+									add_url ${HIT}${REST}
+								done
+							fi
+						done
+					done
+				fi
+			done
+			add_url $LRESORT_URL
+		
+			for URL in $ALL_URLS; do
+				# add source part if needed
+				if [ "${URL:((${#URL}-1)):1}" == "/" ] ; then
+					URL=${URL}${SRC}
+				fi
+
+				# and download
+				if download_url $URL $SOURCE_CACHE/$SRC ; then
+					break
+				fi
+			done
+		else
+			# break out of the loop if the cache has it:
+			verbose_msg "Skipping download of \"$SRC\" (in cache)"
+			break
+		fi
 	done
 ) 
 }
@@ -158,24 +171,25 @@ testpack () {
 
 show_downloading()
 {
-		debug_msg "show_downloading ($@)"
-		DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
-		if [ -n "$DOWNLOAD_PID" ]; then
-				DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
-				if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
-						cat $DOWNLOAD_LOG
-				else
-						tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
-						sleep 1
-				fi
-				rm $DOWNLOAD_LOG
-		elif lget_locked $MODULE; then
-				message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
-				while lget_locked $MODULE; do
+	debug_msg "show_downloading ($@)"
+	DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
+	if [ -n "$DOWNLOAD_PID" ]; then
+		DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
+		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
+			cat $DOWNLOAD_LOG
+			rm -f $DOWNLOAD_LOG
+		elif [ -f "$DOWNLOAD_LOG" ]; then
+			tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+			sleep 1
+			rm -f $DOWNLOAD_LOG
+		fi
+	elif lget_locked $MODULE; then
+		message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
+		while lget_locked $MODULE; do
 			echo -n "."
 			sleep 5
-	done
-		fi
+		done
+	fi
 }
 
 

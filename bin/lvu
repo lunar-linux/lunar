@@ -644,7 +644,8 @@ show_eert() {
 
 show_urls() { (
   # function overrides:
-  plugin_call() { echo $2 ; }
+  plugin_call() { return 0 ; }
+  download_url() { echo $1 ; return 1 ; }
   connect() { return 0 ; }
  
   SILENT=on
