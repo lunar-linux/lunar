@@ -3,11 +3,14 @@
 /bin/cp
 /bin/date
 /bin/grep
+/bin/mkdir
 /bin/mv
 /bin/rm
 /bin/rmdir
 /bin/sed
 /bin/sh
+/bin/sort
+/bin/tr
 /bin/uname
 /boot
 /etc/X11/XF86Config
@@ -50,7 +53,6 @@
 /usr/bin/md5sum
 /usr/bin/ranlib
 /usr/bin/sleep
-/usr/bin/sort
 /usr/include/bits/syscall.h
 /usr/include/gnu/stubs.h
 /usr/lib/installwatch.so
