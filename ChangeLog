@@ -333,34 +333,3 @@
 	* var/lib/lunar/subroutines: Adding --keepconfig in here to get
 	lunar renew working again, see lrm commit.
 
-2003-02-05 23:53  sofar
-
-	* sbin/lin: adding --keepconfig so config files stay untouched.
-
-2003-02-05 23:52  sofar
-
-	* sbin/lrm: First couple of fixes:
-	
-	* no bailout when no DETAILS found (lrm should be possible afterall
-	the install log is there) * add --keepconfig in order
-	prepare_install functions normally * missing md5sum should PRESERVE
-	config files just in case, as we know lunar already makes good
-	md5sums, and in case that feature is off bad things go happen *
-	updated help.
-	
-	TODO:
-	
-	- add regex support for excluded/protected like /etc/.*\.conf -
-	speed profile removal queue processing: it is *SLOW*, consider
-	reimporting old lrm routine which constructs a large grep statement
-	(hazardous: command line chars are expensive and bash can only
-	handle so much) - test
-
-2003-02-05 14:17  sofar
-
-	* var/lib/lunar/excluded: and more
-
-2003-02-05 13:23  sofar
-
-	* var/lib/lunar/excluded: Adding some more in here
-
