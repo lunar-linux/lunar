@@ -17,8 +17,3 @@
 	client id, sent to lunar-linux.org with a null wget cmd unique id
 	by hashing the MAC addrs of the primary interface
 
-2003-06-05 07:38  kc8apf
-
-	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC: Update
-	blackblists for new architectures
-
