@@ -1,3 +1,8 @@
+2004-03-02 21:53  tchan
+
+	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
+	needed changes.
+
 2004-02-25 21:39  tchan
 
 	* var/lib/lunar/functions/edit.lunar: A temporary fix for grepping
@@ -228,13 +233,4 @@
 	Updated a few contributers files here.	BKW requested to be added
 	to the list.  We really need to update this section of the doc
 	sometime!  :-)
-
-2004-01-02 00:39  sofar
-
-	* bin/lvu: Reworked the following routines:
-	
-	tree: now soupah fast stree: even faster and abbreviated eert: does
-	what it did, but faster (installed mods only) leert: shows the
-	entire reverse tree (not installed modules too!) orphans: meuh
-	cleanup help: added hints to new functions
 
