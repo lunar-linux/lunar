@@ -19,8 +19,7 @@ start_logging () {
   # just remaking this as FIFO
   rm -f $C_FIFO
   mknod $C_FIFO p
-  echo "Compile log for \"$MODULE\"-\"$VERSION\" Built on \"$(date  -u)\"" > $C_LOG
-
+  echo "++ Mark Compile start  : \"$MODULE\" \"$VERSION\" \"$(date -u)\"" > $C_LOG
   activate_voyeur
 }
 
@@ -28,6 +27,7 @@ start_logging () {
 stop_logging() {
   debug_msg "stop_logging ($@)"
   mod_v_safe_edit $MODULE 
+  echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -u)\"" >> $C_LOG
   message  "${MESSAGE_COLOR}Creating"                        \
            "${FILE_COLOR}$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
