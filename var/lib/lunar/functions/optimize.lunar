@@ -31,7 +31,7 @@ else
           BOPT=-O0                '\n'    \
           CPU=i386                '\n'    \
           SPD=( )                 '\n'    \
-          XTRA=                   '\n'    \
+          XTRA=( )                '\n'    \
           FPM=                    '\n'    \
           LDF=( )                 '\n'    \
           ADDON=( ) > /etc/lunar/local/optimizations
@@ -657,7 +657,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -666,7 +666,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -675,7 +675,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -684,7 +684,7 @@ optimize_platform() {
                 optimize_base  $BOPT      &&
                 optimize_cpu   $CPU       &&
                 optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
+                optimize_extra ${XTRA[@]} &&
                 optimize_fp    $FPM       &&
                 optimize_ld    ${LDF[@]}  &&
 		optimize_addon
@@ -721,7 +721,7 @@ optimize_architecture()  {
 
   help compiler_help          &&
   compiler_options            &&
-  menu                        &&
+  menu radiolist              &&
   COMPILER=$RESULT
   
   help cc_help                &&
@@ -736,17 +736,17 @@ optimize_architecture()  {
 
   help platform_help          &&
   platform_options            &&
-  menu                        &&
+  menu radiolist              &&
   PLATFORM=$RESULT
 
   help bopt_help              &&
   bopt_options                &&
-  menu                        &&
+  menu radiolist              &&
   BOPT=$RESULT
 
   help cpu_help $PLATFORM     &&
   cpu_options $PLATFORM       &&
-  menu                        &&
+  menu radiolist              &&
   CPU=$RESULT
   optimize_cpu $CPU           &&
   BUILD=$BUILD
@@ -759,11 +759,11 @@ optimize_architecture()  {
   help xtra_help              &&
   xtra_options                &&
   menu checklist              &&
-  XTRA=$RESULT
+  XTRA=( $RESULT )
 
   help fpm_help               &&
   fpm_options                 &&
-  menu                        &&
+  menu radiolist              &&
   FPM=$RESULT
 
   help ldf_help               &&
