@@ -73,31 +73,3 @@
 	which should make things easier (note some things still don't work
 	that way correctly).
 
-2004-05-21 19:51  sofar
-
-	* sbin/lrm, var/lib/lunar/functions/depends.lunar: Feature: lrm
-	--purge $MODULES / lrm -p $MODULES. for instance: lrm -p qt3
-	removes qt3 and all apps that require (*REQUIRE*) qt3
-
-2004-05-21 10:27  sofar
-
-	* bin/lvu, etc/lunar/config, etc/lunar/mirrors/LRESORT, sbin/lrm,
-	usr/share/doc/lunar/core-documentation/etc_lunar_config.html,
-	usr/share/man/man8/lfirsttime.8,
-	var/lib/lunar/functions/config.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/locking.lunar,
-	var/lib/lunar/functions/logging.lunar,
-	var/lib/lunar/functions/main.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/queue.lunar,
-	var/lib/lunar/functions/recovery.lunar,
-	var/lib/lunar/functions/sizes.lunar,
-	var/lib/lunar/functions/sources.lunar,
-	var/lib/lunar/functions/uniqid.lunar,
-	var/lib/lunar/functions/updatelog.lunar,
-	var/lib/lunar/functions/useradd.lunar,
-	var/lib/lunar/menu/dmodule.menu, var/lib/lunar/menu/download.menu,
-	var/lib/lunar/menu/integrity.menu, var/lib/lunar/menu/mirrors.menu:
-	Moving URL of server to 'lunar-linux.org'.
-
