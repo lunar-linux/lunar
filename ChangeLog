@@ -1,3 +1,7 @@
+2003-03-17 23:56  sofar
+
+	* var/lib/lunar/subroutines: misc cosmetic fix.
+
 2003-03-16 22:23  sofar
 
 	* var/lib/lunar/functions/download.lunar: bugfix: always write the
