@@ -105,14 +105,14 @@ guess_filename()  {
   elif [ "$FUZZY" == "off" ] ; then
     return 1
   elif [ -f "$BASENAME.tar.gz" ] ; then
-    echo $BASENAME.tar.gz
     debug_msg "guess_filename: $BASENAME.tar.gz"
+    echo $BASENAME.tar.gz
   elif [ -f "$BASENAME.tar.bz2" ] ; then
-    echo $BASENAME.tar.bz2
     debug_msg "guess_filename: $BASENAME.tar.bz2"
+    echo $BASENAME.tar.bz2
   elif [ -f "$BASENAME.tgz" ] ; then
-    echo $BASENAME.tgz
     debug_msg "guess_filename: $BASENAME.tgz"
+    echo $BASENAME.tgz
   else
     return 1
   fi
