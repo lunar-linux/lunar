@@ -1768,7 +1768,7 @@ fix_depends () {
 
   CHANGED_MODULES=
   # we NEED this
-  if [ -f $INSTALL_QUEUE] ; then
+  if [ -f "$INSTALL_QUEUE" ] ; then
     rm $INSTALL_QUEUE
     touch $INSTALL_QUEUE
   fi
