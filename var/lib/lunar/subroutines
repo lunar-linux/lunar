@@ -393,7 +393,7 @@ default_post_build() {
 
   devoke_installwatch
   ldconfig
-  # release_saved_libraries
+  release_saved_libraries
   cd  /
 }
 
