@@ -1786,14 +1786,14 @@ fix_depends () {
     done
     # we need to trick the system into thinking it has the new depends
     # if we want to do one module at a time:
-    cp $DEPENDS_STATUS $TMP/depends
-    cat $TMP/depends.new-all > $DEPENDS_STATUS
-    cat $TMP/depends.new-all > $DEPENDS_STATUS_BACKUP
-    sort_install_queue
-    cat $TMP/depends > $DEPENDS_STATUS
-    cat $TMP/depends > $DEPENDS_STATUS_BACKUP
-    unset MODULE
     if (( $# > 1 )) ; then
+      cp $DEPENDS_STATUS $TMP/depends
+      cat $TMP/depends.new-all > $DEPENDS_STATUS
+      cat $TMP/depends.new-all > $DEPENDS_STATUS_BACKUP
+      sort_install_queue
+      cat $TMP/depends > $DEPENDS_STATUS
+      cat $TMP/depends > $DEPENDS_STATUS_BACKUP
+      unset MODULE
       if query "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n ; then
         edit_file  $INSTALL_QUEUE
       fi
@@ -1816,7 +1816,7 @@ fix_depends () {
 	cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
 	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       fi
-      FIX=OLD_FIX ; unset OLD_FIX
+      FIX=$OLD_FIX ; unset OLD_FIX
       remove_queue $INSTALL_QUEUE $MODULE
     done
   fi
