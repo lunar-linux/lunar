@@ -279,12 +279,21 @@ resurrect()  {
   if [ -f "$CACHE_BZ" ] && bzip2 -tf $CACHE_BZ ; then
     message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
     bzip2 -cd $CACHE_BZ | tar -Pkx 1>/dev/null 2>&1
-    add_module $MODULE $STATUS $VERSION
-    verbose_msg "running \"lunar fix $MODULE\""
-    run_fix $MODULE
-    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
-    message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}succesfully${DEFAULT_COLOR}"
+    add_module $MODULE $STATUS $VERSION &&
+    verbose_msg "running \"lunar fix $MODULE\"" &&
+    if run_fix $MODULE ; then
+      report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
+      sound SUCCESS
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "success"  "resurrected"
+      message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}succesfully${DEFAULT_COLOR}"
+    else
+      sound FAILURE
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
+      false
+    fi
   else
+    sound FAILURE
+    activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
     false
   fi
 )
