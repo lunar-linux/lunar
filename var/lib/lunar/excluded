@@ -1,5 +1,7 @@
 /boot/grub/menu.1st
 /dev
+/etc/bonobo-activation
+/etc/bonobo-activation/bonobo-activation-config.xml
 /etc/cron.daily
 /etc/cron.hourly
 /etc/cron.monthly
