@@ -504,18 +504,7 @@ old_show_depends()  {
 }
 
 
-show_website()  {
-  [ -z "$MODULE" ] && return 1
-  run_details $1
-  if  [  -n  "$WEB_SITE"  ] ; then
-    echo $WEB_SITE
-  else
-    echo "http://www.lunar-linux.org"
-  fi
-}
-
-
-show_version()  {  
+how_version()  {  
   [ -z "$MODULE" ] && return 1
   run_details $1
   if [  -n  "$VERSION"  ] ; then
@@ -820,7 +809,16 @@ parse()  {
       ;;
       
     website)
-      show_website "$2"
+      if [ -z "$2" ] ; then
+        return 1
+      else
+        run_details $2
+        if [ -n "$WEB_SITE" ] ; then
+          echo $WEB_SITE
+        else
+          echo "http://www.lunar-linux.org"
+        fi
+      fi
       ;;
       
     version)
