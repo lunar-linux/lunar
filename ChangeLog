@@ -1,3 +1,7 @@
+2002-11-08 04:17  xoritor
+
+	* sbin/lin: Fixed scripting error.
+	
 2002-10-14 19:32  xoritor
 
 	* var/lib/lunar/functions/optimize.lunar: Adding gecc support to optimizations.
