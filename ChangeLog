@@ -1,3 +1,74 @@
+2002-08-23 06:39  sofar
+
+	* sbin/lin: Added compile fail log msg
+
+2002-08-23 06:34  sofar
+
+	* sbin/lin: Fixed installwatchfile cleanup on failed compiles
+
+2002-08-23 05:30  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: Suspect this was a typo!
+
+2002-08-23 05:18  sofar
+
+	* sbin/lunar: Fix: wasn't installing LUNAR_MODULE conditionally
+
+2002-08-22 16:47  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Removed cc_optimize and
+	ccc_optimize functions in order to better implement the wrapper
+	method:   Enable calling of any ADDON, CC, CCC, and CXX options.   
+	Calls one program so libtool does not die.    Fixes many compile
+	issues with broken builds.    Enables ccache and distcc to work
+	transparently.
+	
+	Requires lunar-gcc and lunar-g++ to be installed in /usr/bin, they
+	will be in the installed by the gcc module.
+
+2002-08-21 23:37  tchan
+
+	* usr/sbin/: lget, lin, lrm, lrm2, lunar, lvis, lvu: Moved these
+	files to /sbin.  lvu moved to /bin.  This is for the people that
+	have /usr on a seperate partition.  The lunar tools have to be
+	available.
+
+2002-08-21 22:04  tchan
+
+	* install: Modified this to add the /bin and /sbin directories.
+
+2002-08-21 22:02  tchan
+
+	* bin/lvu: Moved this file from /usr/sbin to /bin.  This helps with
+	people who have /usr mounted as a seperate partition.  lvu is in
+	/bin because non-root users can use it too!
+
+2002-08-21 22:01  tchan
+
+	* sbin/: lget, lin, lrm, lrm2, lunar, lvis: Moved these files from
+	/usr/sbin to /sbin.  This helps with people who have /usr on a
+	seperate partition.
+
+2002-08-21 06:30  sofar
+
+	* var/lib/lunar/subroutines: Added fancy_progress for
+	sort_install_queue
+
+2002-08-20 22:22  tchan
+
+	* var/lib/lunar/solo: Fixed the entry for gcc3.  There is no gcc3,
+	only gcc and gcc2 modules now.
+
+2002-08-20 21:51  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Fixed type-o in
+	optimize_make (was optimaze_make).
+
+2002-08-20 20:39  xoritor
+
+	* var/lib/lunar/functions/optimize.lunar: Preliminary make
+	optimization support:	Allow make -jN to be set and used.
+
 2002-08-20 15:18  xoritor
 
 	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
