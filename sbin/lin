@@ -64,7 +64,7 @@ main() {
 
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
-    if ! get_moonbase ; then
+    if ! lget moonbase ; then
       exit 1
     fi
     # remove moonbase rofm MODULES and continue
@@ -128,7 +128,7 @@ main() {
           if ! module_held $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
-            if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
+            if ! SINGLE_MODULE=1 main $MODULE ; then
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
