@@ -1,3 +1,15 @@
+2003-06-12 22:45  sofar
+
+	* usr/share/man/man1/lvu.1: adding the exiled option in here
+
+2003-06-12 22:35  sofar
+
+	* bin/lvu: adding help line for exiled option
+
+2003-06-12 22:16  sofar
+
+	* bin/lvu: Adding support for "exiled" command
+
 2003-06-09 14:51  sofar
 
 	* var/lib/lunar/functions/modules.lunar: Fixes the disappearing
