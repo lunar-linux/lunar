@@ -1,3 +1,7 @@
+2003-02-24 20:01  kc8apf
+
+	* var/lib/lunar/excluded: Add mailman site config to excluded
+
 2003-02-05 18:05  sofar
 
 	* sbin/lrm: Rolling back lrm to assure people can avoid lrm(2)
