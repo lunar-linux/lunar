@@ -258,7 +258,7 @@ rework_module() {
                                                                                 
   # here starts the real work:
   MODULE=$1
- mod_v_safe_edit $MODULE 
+  mod_v_safe_edit $MODULE 
                                                                                 
   # base vars needed to execute DEPENDS
   SECTION=$(find_section $MODULE)
@@ -275,20 +275,20 @@ rework_module() {
   touch $DEPENDS_STATUS_BACKUP
                                                                                 
   # fetch old depend data:
-  grep "^$MODULE:" $OLD_DEPENDS_STATUS | sort | uniq > $TMP/depends.old.$MODULE
+  grep "^$MODULE:" $OLD_DEPENDS_STATUS | sort | uniq > $TMP/depends.old.$MOD_V_SNAME
                                                                                 
   # fetch new depend data:
   run_depends
-  grep "^$MODULE:" $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MODULE
+  grep "^$MODULE:" $DEPENDS_STATUS | sort | uniq > $TMP/depends.new.$MOD_V_SNAME
                                                                                 
-  if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE &> /dev/null
+  if $(! diff -q $TMP/depends.old.$MODULE $TMP/depends.new.$MOD_V_SNAME &> /dev/null
 ) ; then
     echo -e "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} has changed depends:${DEFAULT_COLOR}"
     CHANGED_MODULES="$CHANGED_MODULES $MODULE"
-    LIST=$(cat $TMP/depends.old.$MODULE $TMP/depends.new.$MODULE | cut -d: -f2 | sort | uniq )
+    LIST=$(cat $TMP/depends.old.$MOD_V_SNAME $TMP/depends.new.$MOD_V_SNAME | cut -d: -f2 | sort | uniq )
     for DEP in $LIST; do
-      OLDDEP=$(grep ":$DEP:" $TMP/depends.old.$MODULE)
-      NEWDEP=$(grep ":$DEP:" $TMP/depends.new.$MODULE)
+      OLDDEP=$(grep ":$DEP:" $TMP/depends.old.$MOD_V_SNAME)
+      NEWDEP=$(grep ":$DEP:" $TMP/depends.new.$MOD_V_SNAME)
       if [ "$OLDDEP" != "$NEWDEP" ] ; then
                                                                                 
         # diff style output for debugging:
@@ -367,10 +367,10 @@ rework_list() {
 # fix_depends : single pass to fix depends database
 fix_depends () {
   debug_msg "fix_depends  ($@)"
-                                                                                
+
   TMP=/tmp/lunar.fix
   [ -d $TMP ] || mkdir -p $TMP
-                                                                                
+
   CHANGED_MODULES=
   # we NEED this
   if [ -f "$INSTALL_QUEUE" ] ; then
@@ -383,21 +383,22 @@ fix_depends () {
   else
     rework_list $(cat $MODULE_STATUS | cut -d: -f1 | sort )
   fi
-                                                                                
+
   if [ -n "$CHANGED_MODULES" ] ; then
-                                                                                
-    for MODULE in $CHANGED_MODULES ; do
-      if [ ! -e "$TMP/depends.new.$MODULE" ] ; then
-        rework_module $MODULE
+
+    for REWORK_MODULE in $CHANGED_MODULES ; do
+      mod_v_safe_edit $REWORK_MODULE
+      if [ ! -e "$TMP/depends.new.$MOD_V_SNAME" ] ; then
+        rework_module $REWORK_MODULE
       fi
     done
-                                                                                
+
     # this ensures the bastard doesn't recheck it:
     if [ -z "$NOFIX" ] ; then
       mv $DEPENDS_STATUS $TMP/depends
       cp $TMP/depends $TMP/depends.filter
-      for MODULE in $CHANGED_MODULES ; do
-        grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+      for CH_MODULE in $CHANGED_MODULES ; do
+        grep -v "^$CH_MODULE:" $TMP/depends.filter > $TMP/depends.filter~
         mv $TMP/depends.filter~ $TMP/depends.filter
       done
       mv $TMP/depends.filter $DEPENDS_STATUS
@@ -405,11 +406,11 @@ fix_depends () {
       cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
     fi
                                                                                 
-    for MODULE in $CHANGED_MODULES ; do
+    for CH_MODULE in $CHANGED_MODULES ; do
       # special case: when called with --fixdepends, skip recompile!
       cp $TMP/depends $TMP/depends.filter
-      for MODULE in $CHANGED_MODULES ; do
-        grep -v "^$MODULE:" $TMP/depends.filter > $TMP/depends.filter~
+      for CH_MODULE in $CHANGED_MODULES ; do
+        grep -v "^$CH_MODULE:" $TMP/depends.filter > $TMP/depends.filter~
         mv $TMP/depends.filter~ $TMP/depends.filter
       done
       mv $TMP/depends.filter $DEPENDS_STATUS
