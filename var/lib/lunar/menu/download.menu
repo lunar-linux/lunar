@@ -123,6 +123,24 @@ Example: enter 8000 for downloading no faster then \
   fi
 }
 
+set_cvs_threshold()  {
+  PROMPT="Please enter the minimum time between CVS updates in minutes, \
+enter 0 for no threshold. Default threshold is 10 minutes"
+
+  if  CVS_THRESHOLD=`$DIALOG  --title "CVS threshold" \
+                              --ok-label  "Commit"    \
+                              --inputbox              \
+                              "$PROMPT"               \
+                               0 0  "$CVS_THRESHOLD"`
+  then
+    [  -z  "$CVS_THRESHOLD"          ]  ||
+    [      "$DOWNLOAD_RATE" ==  "0"  ]  ||
+    write_config "CVS_THRESHOLD=" "CVS_THRESHOLD=$CVS_THRESHOLD"
+  fi
+}
+
+
+
 set_ftp_active(){
 
    PROMPT="Please select the connection type for ftp downloads.
@@ -316,6 +334,7 @@ while
     R_HELP="Per process download rate"
     P_HELP="Proxy Settings"
     E_HELP="Test all mirrors available on download"
+    T_HELP="CVS update threshold time"
 
     COMMAND=`$DIALOG  --title "Download Options"               \
                       --item-help                              \
@@ -331,7 +350,8 @@ while
                       "N"  "Number of Retries"      "$N_HELP"  \
                       "P"  "Proxies"                "$P_HELP"  \
                       "R"  "Download Rate"          "$R_HELP"  \
-		      "E"  "Exhaustive mirrors"     "$E_HELP"`
+		      "E"  "Exhaustive mirrors"     "$E_HELP"  \
+		      "T"  "CVS update threshold"   "$T_HELP"`
 
   do
     case  $COMMAND in
@@ -343,6 +363,7 @@ while
       P)  proxy_menu             ;;
       R)  set_download_rate      ;;
       E)  set_exhaustive         ;;
+      T)  set_cvs_threshold      ;;
     esac
   done
 }

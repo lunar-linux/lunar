@@ -58,7 +58,12 @@ get_cvs() {(
 
   if [[ -f $SOURCE_CACHE/$2 ]]; then
     verbose_msg "Extracting old CVS source tarball"
-    tar xjf $SOURCE_CACHE/$2
+    if ! tar xjf $SOURCE_CACHE/$2 ; then
+      message "${WARNING_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
+      
+      rm_source_dir /tmp/$MODULE-$VERSION
+      mk_source_dir /tmp/$MODULE-$VERSION
+    fi
   fi
 
   verbose_msg "CVSROOT=\"$CVSROOT\""
@@ -250,7 +255,16 @@ get_url() {
   if  [  -n  "$1"  ] ;  then
     if [ "${1:0:6}" == "cvs://" ] ; then
       # cvs urls
-      get_cvs $1 $2
+      CVS_THRESHOLD=${CVS_THRESHOLD:-10}
+      if [ "$CVS_THRESHOLD" > 0 ] ; then
+        if [ "$(find $SOURCE_CACHE/$2 -amin +$CVS_THRESHOLD)" == "$SOURCE_CACHE/$2" ] || [ ! -f $SOURCE_CACHE/$2 ] ; then
+	  get_cvs $1 $2
+	else
+	  verbose_msg "skipping cvs update (less than $CVS_THRESHOLD mins old)"
+	fi
+      else
+        get_cvs $1 $2
+      fi
     elif [ "$1:0:7}" == "cpan://" ] ; then
       # no way, this cannot be tru
       #
