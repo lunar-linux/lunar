@@ -25,7 +25,7 @@
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {
-  debug_msg "function find_depends ($@)"
+  debug_msg "find_depends ($@)"
 
   find_depends_intern() {
     grep "^$1:" $DEPENDS_CACHE | while read LINE ; do
