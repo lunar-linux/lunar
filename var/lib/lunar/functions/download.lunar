@@ -149,7 +149,7 @@ fuzzy_wget()  {
     FILE="$S_FILE.tar.bz2"
   elif erase $1 && call_wget $(dirname $1)/$S_FILE.tar.gz ; then
     FILE="$S_FILE.tar.gz"
-  elif erase $1 && call_wget $(dirname $1)/$S_file.tgz ; then
+  elif erase $1 && call_wget $(dirname $1)/$S_FILE.tgz ; then
     FILE="$S_FILE.tgz"
   else
     activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
