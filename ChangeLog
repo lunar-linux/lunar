@@ -1,3 +1,11 @@
+2004-09-26 02:01  v3rt1g0
+
+	* bin/lvu: The error message received when doing 'lvu size
+	  AModuleThatIsNotInstalled' was not displaying the incorrect
+	  module name as intended.  This is because it was using the wrong
+	  variable to get the module name.  Now it should be using the
+	  right variable.
+
 2004-09-21 13:54  sofar
 
 	* usr/share/man/man8/lrm.8: Adding purge to man page
