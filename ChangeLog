@@ -1,3 +1,31 @@
+2004-12-10 11:00  sofar
+
+	* sbin/lin: bugfix: if lin_module ends up calling a recompile of
+	  another modules it may not leave SINGLE_MODULE=1. This would
+	  circumvent all dependency checking etc. and never call the dl
+	  manager on those modules either.
+
+2004-12-10 10:56  sofar
+
+	* var/lib/lunar/functions/download.lunar: Bugfix for the theedge dl
+	  problems: when we get to this code and a post-install triggered a
+	  recompile the _PID is never stored so it's empty... we can
+	  gracefully exit and ignore this usually. I added a fallback
+	  function when the module is locked so at least st is going on. I
+	  hope this calls all exceptions.
+
+2004-12-10 10:46  sofar
+
+	* bin/lvu, etc/lunar/config, sbin/lget,
+	  var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/connect.lunar,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/messages.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/queue.lunar,
+	  var/lib/lunar/functions/temp.lunar: define TMPDIR and use it
+	  globally. Its position is overwriteable by using lunar set TMPDIR
+
 2004-12-08 08:35  sofar
 
 	* var/lib/lunar/functions/build.lunar: Better check: this literally
