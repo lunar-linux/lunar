@@ -1,3 +1,10 @@
+2003-12-05 10:56  sofar
+
+	* var/lib/lunar/functions/moonbase.lunar: Adding more proper
+	handling of moonbase: - create md5sum log (just for kicks, not
+	really used) - proper install log - call lrm to clean up install
+	and md5sum logs on new update
+
 2003-11-26 20:52  sofar
 
 	* bin/lvu, var/lib/lunar/functions/build.lunar,
@@ -133,27 +140,4 @@
 	* var/lib/lunar/functions/kernel.lunar: Added installwatch
 	frobbing, hacked and added grub and lilo stanza makers (w/
 	whitespace now) and fixed copyright info.
-
-2003-10-05 19:55  sofar
-
-	* sbin/lget: Fix for miscalculation, thx HK.
-
-2003-10-05 19:29  niki
-
-	* var/lib/lunar/functions/kernel.lunar: Changed the kernel filename
-	format from using "-" to "_"
-
-2003-10-05 18:52  niki
-
-	* var/lib/lunar/functions/kernel.lunar: Added backup_mods_krnl
-	which makes backups of the installed kernels
-
-2003-10-05 16:31  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: change order :-)
-
-2003-10-05 16:28  elaine
-
-	* var/lib/lunar/functions/kernel.lunar: Initial import, moving
-	kernel build functions to core
 
