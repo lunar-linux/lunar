@@ -1,453 +1,64 @@
 2003-02-14 00:06  sofar
 
 	* sbin/lin, sbin/lunar, var/lib/lunar/excluded,
-	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar:
-	Major code update, including VERBOSE flag (default off, cos lin is
-	still noisy), lots and lots of core rewrites, optimizations,
-	formatting and spacing, removal of old and unused code, etc.
-
+	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar: Major code update, including VERBOSE flag (default off, cos lin is still noisy), lots and lots of core rewrites, optimizations, formatting and spacing, removal of old and unused code, etc.
+	
 2003-02-13 12:25  sofar
 
 	* var/lib/lunar/subroutines: more more cleanups
-
+	
 2003-02-13 12:13  sofar
 
 	* sbin/lin: more cleanups
-
+	
 2003-02-13 12:09  sofar
 
 	* var/lib/lunar/subroutines: More code cleanups.
-
+	
 2003-02-13 12:01  sofar
 
-	* var/lib/lunar/functions/modules.lunar: Code cleanups and
-	speedups.
-
+	* var/lib/lunar/functions/modules.lunar: Code cleanups and speedups.
+	
 2003-02-08 02:30  csm
 
-	* etc/lunar/config: changing the last resort URL to .org instead of
-	.com
-
+	* etc/lunar/config: changing the last resort URL to .org instead of .com
+	
 2003-02-06 10:08  sofar
 
 	* sbin/lrm: heh, got scared?
-
+	
 2003-02-06 00:00  sofar
 
-	* var/lib/lunar/subroutines: Adding --keepconfig in here to get
-	lunar renew working again, see lrm commit.
-
+	* var/lib/lunar/subroutines: Adding --keepconfig in here to get lunar renew working again, see lrm commit.
+	
 2003-02-05 23:53  sofar
 
 	* sbin/lin: adding --keepconfig so config files stay untouched.
-
+	
 2003-02-05 23:52  sofar
 
 	* sbin/lrm: First couple of fixes:
 	
-	* no bailout when no DETAILS found (lrm should be possible afterall
-	the install log is there) * add --keepconfig in order
-	prepare_install functions normally * missing md5sum should PRESERVE
-	config files just in case, as we know lunar already makes good
-	md5sums, and in case that feature is off bad things go happen *
-	updated help.
+	* no bailout when no DETAILS found (lrm should be possible afterall the install log is there)
+	* add --keepconfig in order prepare_install functions normally
+	* missing md5sum should PRESERVE config files just in case, as we know lunar already makes good md5sums, and in case that feature is off bad things go happen
+	* updated help.
 	
 	TODO:
 	
-	- add regex support for excluded/protected like /etc/.*\.conf -
-	speed profile removal queue processing: it is *SLOW*, consider
-	reimporting old lrm routine which constructs a large grep statement
-	(hazardous: command line chars are expensive and bash can only
-	handle so much) - test
-
+	- add regex support for excluded/protected like /etc/.*\.conf
+	- speed profile removal queue processing: it is *SLOW*, consider reimporting old lrm routine which constructs a large grep statement (hazardous: command line chars are expensive and bash can only handle so much)
+	- test
+	
 2003-02-05 14:17  sofar
 
 	* var/lib/lunar/excluded: and more
-
+	
 2003-02-05 13:23  sofar
 
 	* var/lib/lunar/excluded: Adding some more in here
-
+	
 2003-02-04 00:59  csm
 
 	* var/lib/lunar/excluded: some more additions
-
-2003-02-03 22:18  csm
-
-	* var/lib/lunar/excluded: adding critical postfix files
-
-2003-02-03 14:29  elaine
-
-	* lib/lsb/init-functions: Added 'mk_spid()' function, to be used on
-	starting a daemon and modified 'mk_pid()' and 'pidok()' functions
-	to prevent lunar from wiping out the /var/run/*.pid files of
-	daemons which create these files on thier own.	This allows sshd to
-	be restarted remotely, killing only the server process.
-
-2003-02-02 00:08  sofar
-
-	* var/lib/lunar/menu/optimize.menu: More info for the meek
-
-2003-02-01 23:31  sofar
-
-	* sbin/: lrm, lrm2: Lrm2 will replace lrm forever into eternity!
-
-2003-02-01 19:33  csm
-
-	* usr/share/man/man8/lfirsttime.8: a few updates and cleanups
-
-2003-02-01 16:27  sofar
-
-	* var/lib/lunar/functions/modules.lunar: I thought I added this
-	already
-
-2003-02-01 16:26  sofar
-
-	* sbin/lin: Cleaning up here: we don't really need that message
-	since blacklist.x86 is EMPTY.
-
-2003-02-01 14:55  sofar
-
-	* sbin/lget: Okay, here's the problem: you implement downloading
-	with locking, so lin can call lget without worrying wether it is
-	already downloading or now, now you add another download option,
-	but you forget to add locking to that feature. As you can guess,
-	when you try to install AND lin forces a download through that
-	other feature, it will start to download it, and then probe for it
-	again just before pre_build, because lin calls lget twice somehow.
-	Not at all a problem, unless you forget to add the locking
-	mechanism to the other feature, right? (short: implemented locking
-	where it is needed, should fix download/lin problems of CVS
-	modules)
-
-2003-02-01 05:18  wizfactor
-
-	* sbin/lin: Finished updating xinet (bug 232)
-
-2003-02-01 01:08  wizfactor
-
-	* sbin/lin: Fixed bug in the xinet.d services install. Should fix
-	bug 232.
-
-2003-01-30 05:22  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Fixed some punctuation.
-
-2003-01-30 05:17  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
-	more fixes.
-
-2003-01-29 20:26  sofar
-
-	* sbin/lunar: Fix for that nasty one bug.
-
-2003-01-29 19:34  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated the URL's and added a
-	bit more info.
-
-2003-01-29 12:27  sofar
-
-	* bin/lvu, sbin/lin, sbin/lrm, sbin/lunar, usr/sbin/colony,
-	var/lib/lunar/subroutines: Generalizing code: less is now replaced
-	with view_file(), which also handles stdin of course. It also will
-	use the $PAGER env variable for those who want to override it with
-	their default pager. Small effort, big gain.
-
-2003-01-29 10:28  sofar
-
-	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
-	the logfile easier: 'lvu activity'
-
-2003-01-25 23:17  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Nice going ;^)
-
-2003-01-25 22:01  sofar
-
-	* var/lib/lunar/subroutines: Last CVS commit for CVS problems.
-
-2003-01-25 22:00  sofar
-
-	* var/lib/lunar/functions/modules.lunar: This is niiiiice
-
-2003-01-25 21:59  sofar
-
-	* sbin/lget: CVS dir fixes.
-
-2003-01-24 21:12  sofar
-
-	* var/lib/lunar/subroutines: more trapdoors removed from cvs
-	handling code.
-
-2003-01-24 21:00  sofar
-
-	* sbin/lget: Last modifications to cvs/lget - better source tree
-	management, trapdoors removed.
-
-2003-01-21 11:53  sofar
-
-	* var/lib/lunar/subroutines: Code change: sedit now handles
-	multiple files in one sedit statement, and in place backups are no
-	longer made.
-
-2003-01-20 15:23  sofar
-
-	* var/lib/lunar/sustained: Sorry for the gpm fans, but gpm is *NOT*
-	a vital package for the correct functioning of lunar. Removing it
-	here.
-
-2003-01-19 23:14  sofar
-
-	* etc/lunar/mirrors/LRESORT: Popping in DNS names!
-
-2003-01-17 14:22  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Bugfix: fix for missing
-	'ChangeLog' module when running lget without a module name. Rewrote
-	all fcuntions to use base functions instead of rewriting
-	list_sections 4 times. Code cleanups. Added ChangeLog to ignore
-	list in list_modules and list_sections.
-
-2003-01-17 14:04  sofar
-
-	* var/lib/lunar/subroutines: Simplified sedit.
-
-2003-01-05 20:31  sofar
-
-	* etc/lunar/config: New default LRESORT URL.
-
-2003-01-05 20:29  sofar
-
-	* etc/lunar/mirrors/LRESORT: Putting new source caches in here.
-
-2003-01-02 22:27  sofar
-
-	* sbin/lget: Fix for broken cvs update being stored in
-	$SOURCE_CACHE, beautified, removed unset CVS_RSH.
-
-2003-01-02 16:18  sofar
-
-	* var/lib/lunar/subroutines: Adding support to handle TARred patch
-	sets!
-
-2003-01-02 14:32  sofar
-
-	* sbin/lunar: Adding "Maintenance" menu that allows you to run lin
-	--fix, --nofix, --fixdepends from the menu system.
-
-2003-01-01 23:24  sofar
-
-	* sbin/lin: Removing autopatch scheme
-
-2003-01-01 22:46  sofar
-
-	* sbin/lget, var/lib/lunar/subroutines: Adding code to store
-	CVS-sources after 'co' or 'up' into SOURCE_CACHE, so that the
-	source code is always clean when lin runs, and we still have the
-	possibility of doing incremental updates. Also added a small visual
-	message in sedit () to verbosely show that files are edited.
-
-2003-01-01 21:31  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: This should fix the
-	weird messages after a lunar update/renew
-
-2002-12-30 22:24  hardkrash
-
-	* sbin/lget: added ability to use tun devices for internet
-	connection -- Hardkrash
-
-2002-12-29 23:42  sofar
-
-	* etc/lunar/config: Added PATCH_URL to config, the new repository
-	for patches.
-
-2002-12-24 18:19  tchan
-
-	* var/lib/lunar/functions/updatelog.lunar: Synched a change from
-	lunar version of updatelog.lunar back into theedge.
-
-2002-12-24 18:00  xoritor
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed MAKES and PSAFE
-	issues.
-
-2002-12-23 01:10  sofar
-
-	* sbin/lin: okay this works now without CVS bullocking it.
-
-2002-12-23 01:07  sofar
-
-	* sbin/lin: leave out the * to omit subdirs in case of CVS.
-
-2002-12-23 01:00  sofar
-
-	* usr/share/doc/lunar/module-example/patch/example.patch: Adding
-	some descriptive text.
-
-2002-12-23 00:49  sofar
-
-	* sbin/lin: Added auto-patching: scan for subdir 'patch' and apply
-	all regular files in that directory before BUILD/default_build.
-	Note patch order is equal to 'ls'.
-
-2002-12-22 17:40  tchan
-
-	* sbin/lunar: Fixed the help message for KEEP_SOURCE to make sure
-	its clear why you would turn this flag on.
-
-2002-12-22 17:04  tchan
-
-	* sbin/lunar: Better explanation of the KEEP_SOURCE option in Lunar
-	help message.  KEEP_SOURCE toggles the default behavior in Lunar
-	core tools of removing /usr/src/module code after a SUCCESSFUL
-	compile.  Default behavior has always been to remove the module
-	source after a succesful compile and KEEP the source after a failed
-	compile.  Xoritor added the KEEP_SOURCE flag for developers using
-	the gcc profiling tools as the tools need access to the source code
-	even after a good compile.  This option is not to be used for
-	removing source code after a failed compile.  Someone else can add
-	another flag for always removing source code but that will probably
-	break this option flag for the developers using the profiling code.
-
-2002-12-22 07:02  tchan
-
-	* sbin/lin: Reverted the lin code to the old behavior of NOT
-	deleting source code when a compile fails.  It IS necessary to keep
-	source code around for failed compiles as the compile log does NOT
-	contain all the necessary information to fix a failed compile --
-	especially when debugging failed GNU autotools type problems. 
-	Having to run Lunar menu to turn on the keep source option and then
-	recompile a failed module is a BIG waste of time.  Please leave
-	this behavior alone!  Keep failed source code around.
-
-2002-12-21 22:49  sofar
-
-	* sbin/lin: Default compile fail will remove the sources from
-	/usr/src. Since logging of compiles and activity is now in order,
-	this is no longer needed, and prevent a big mess from happening in
-	case your lunar rebuild goes booboo.
-
-2002-12-16 10:48  sofar
-
-	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Better wrappers: sed
-	off wrapper path to make ccache work again.
-
-2002-12-11 21:39  xoritor
-
-	* var/lib/lunar/subroutines: Fixed KEEP_SOURCE bug.
-
-2002-12-09 21:24  xoritor
-
-	* sbin/lget: Adding quiet opton to cvs update and checkout, now
-	only important messages will be printed.
 	
-	Fixed CVS_LOGIN to behave better.
-
-2002-12-09 10:20  sofar
-
-	* sbin/lget: Adding download failure logging including URLS
-
-2002-12-08 19:16  xoritor
-
-	* var/lib/lunar/subroutines: Fixed installed_version when checking
-	version of "installed linux".
-
-2002-12-08 18:34  xoritor
-
-	* var/lib/lunar/subroutines: Added 2 keywords for bad_flags,
-	compiler and linker.
-	
-	  bad_flags compiler unsets all compiler flags set by CFLAGS,
-	CXXFLAGS, and CPPFLAGS.
-	
-	  bad_flags linker unsets all linker flags set by LDFLAGS.
-
-2002-12-08 18:04  xoritor
-
-	* var/lib/lunar/: subroutines, functions/optimize.lunar: Added 2
-	new subroutines (bad_flags and patch_it):
-	
-	  bad_flags is a subroutine to remove any known bad flags on a per
-	module basis, this effects system CFLAGS, CXXFLAGS, and CPPFLAGS as
-	well as optimizations chosen in lunar.	It is to be used as
-	follows:
-	
-	    bad_flags <list of bad CFLAGS and LDFLAGS>
-	
-	      Example:
-	      bad_flags -ffast-math -funroll-loops -s
-	
-	    Or to remove ALL optimizations use:
-	      bad_flags ALL (Case matters!)
-	
-	  patch_it is a subroutine to create a generic patching interface
-	for lunar modules it is to be used as follows:
-	
-	    patch_it <patch location/patch name> <patch level>
-	
-	      Example:
-		patch_it $SOURCE_CACHE/4.2.0-4.2.1.diff.gz 1
-	
-	Added more support for KEEP_SOURCE options into default_prebuild.
-
-2002-12-08 00:52  tchan
-
-	* sbin/: lin, lunar: Hacked in $KEEP_SOURCE into lunar menu and
-	fixed lin to use $KEEP_SOURCE.	This allows sysadmin to tell "lin"
-	to keep the source code in /usr/src and as opposed to the default
-	behavior of removing source code on successful builds.
-
-2002-12-07 20:47  xoritor
-
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	Updating optimizations:   Added C warnings options:    
-	-Wno-deprecated
-	
-	  Added C++ warnings options:
-	    -Wno-deprecated
-	
-	  Added Speed options:
-	    -fexpensive-optimizations
-	    -falign-double
-	
-	  Added framework for Stack optimization/manipulation, this can be
-	different for each platform. Currently only the x86 is supported
-	(-mpreferred-stack-boundary) but should allow others to be added
-	easily.
-
-2002-12-04 13:30  sofar
-
-	* bin/lvu: Fix for the '/levels-list: no such file...' bug.
-	(SCRIPT_DIRECTORY undeclared)
-
-2002-12-04 08:42  tchan
-
-	* var/lib/lunar/subroutines: Added to the activity_log function a
-	timestamp as part of the datestamp.
-
-2002-11-28 16:05  sofar
-
-	* var/lib/lunar/subroutines: Fix #189
-
-2002-11-28 15:41  sofar
-
-	* sbin/lin: Fix for doubly reporting a failed compile, once as
-	failed, once as success.
-
-2002-11-26 14:56  kc8apf
-
-	* lib/lsb/init-functions: Fix documented in Lunar
-
-2002-11-21 05:20  hardkrash
-
-	* var/lib/lunar/menu/optimize.menu: Added PPC and Power options to
-	lunar menu and corrected menu info for optizations
-
-2002-11-21 05:18  hardkrash
-
-	* var/lib/lunar/functions/optimize.lunar: Added PPC and power
-	options to lunar optimizations
-
