@@ -178,10 +178,3 @@
 	Should fix the multi-lget spawns and fix the install order (tho
 	that didn't really break, it was not just how I intended it to be).
 
-2004-03-18 12:16  sofar
-
-	* sbin/lrm, var/lib/lunar/functions/config.lunar,
-	var/lib/lunar/functions/postbuild.lunar: Bugfix: theedge wasnt
-	removing files from /etc/ at all, and added proper init.d script
-	shutdowns on plain 'lrm' commands, as well as xinetd restarts.
-
