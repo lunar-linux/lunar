@@ -142,6 +142,26 @@ query() {
 }
 
 
+# mquery is a wrapper to autodetect if a certain y/n parameter in a module
+# config is not set yet and handles the case in a single function
+# usage: mqeury USE_LILO "Use lilo instead of grub" ?
+# note : $MODULE must be set properly
+mquery()
+{
+    debug_msg "mquery ($@)"
+    if [ -n "$MODULE" ]; then
+        if [ -z "$(get_module_config $1)" ]; then
+            # it's not set yet... start the asking loop
+            if query "$2" "$3" ; then
+                set_module_config "$1" y
+            else
+                set_module_config "$1" n
+            fi
+        fi
+    fi
+}
+
+
 color()  {
   debug_msg "color ($@)"
   case  $1  in
