@@ -718,7 +718,7 @@ show_info() {
     fi
  
     echo ""
-    ACTIVITY="`view_file $ACTIVITY_LOG | grep "$1"`"
+    ACTIVITY="`view_file $ACTIVITY_LOG | grep "[	 ]${1}[	 ]"`"
    
     if [ `echo "$ACTIVITY" | wc -l` -gt 10 ]; then
       ACTIVITY="`echo "$ACTIVITY" | tail -n10`"
