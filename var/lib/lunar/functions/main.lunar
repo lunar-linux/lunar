@@ -31,8 +31,8 @@ renew() {
   update_modules
 
   if [ "$AUTOFIX" == "on" ] ; then
-    message "${MESSAGE_COLOR}Executing AUTOFIX : lin --fix${DEFAULT_COLOR}"
-    lin --fix
+    message "${MESSAGE_COLOR}Executing AUTOFIX : lunar fix${DEFAULT_COLOR}"
+    run_fix
   fi
 
   if [ "$AUTOPRUNE" == "on" ] ; then
