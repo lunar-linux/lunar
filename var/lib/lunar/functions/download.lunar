@@ -46,6 +46,11 @@ get_cvs() {(
   CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
   CVSSPATH=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f2)
   CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
+  CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
+
+  if [ ! -z $CVSRELEASE ]; then
+    CVSRELEASE="-r $CVSRELEASE"
+  fi
 
   export CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
 
@@ -74,11 +79,11 @@ get_cvs() {(
   verbose_msg "CVSROOT=\"$CVSROOT\""
 
   if [[ -d $CVSMODULE/CVS ]]; then
-    verbose_msg "cvs -qz3 up -PAd $CVSMODULE"
-    cvs -qz3 up -PAd $CVSMODULE && GOT_CVS="yes" 
+    verbose_msg "cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE"
+    cvs -qz3 up -PAd $CVSRELEASE $CVSMODULE && GOT_CVS="yes" 
   elif ! [[ -d CVS ]]; then
-    verbose_msg "cvs -qz3 co $CVSMODULE"
-    cvs -qz3 co $CVSMODULE && GOT_CVS="yes"
+    verbose_msg "cvs -qz3 co $CVSRELEASE $CVSMODULE"
+    cvs -qz3 co $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
   fi
   
   if [[ "$GOT_CVS" == "yes" ]]; then
