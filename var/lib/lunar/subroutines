@@ -515,6 +515,7 @@ install_initd()  { (
     ALL_INITDSCRIPTS=`grep -l "# chkconfig: " $SCRIPT_DIRECTORY/init.d/* | cut -d / -f 9`
 
     for INITDSCRIPT in $ALL_INITDSCRIPTS; do
+      [ -f $INITDSCRIPT ] || continue
       if [ ! -f /etc/init.d/$INITDSCRIPT ] ; then
         /usr/bin/install -g 0 -o 0 -m 700 $SCRIPT_DIRECTORY/init.d/$INITDSCRIPT /etc/init.d/
       fi
@@ -522,6 +523,7 @@ install_initd()  { (
   fi
 
   for INITDSCRIPT in $INITDSCRIPTS; do
+    [ -f $INITDSCRIPT ] || continue
     ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
     	rm /etc/rc?.d/???$INITDSCRIPT
     chkconfig --add $INITDSCRIPT
