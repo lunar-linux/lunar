@@ -103,7 +103,7 @@ create_module_index() {
     # short way out:
     echo MOONBASE_MD5:$(set_moonbase_md5) > $TMP_INDEX
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
-        sed -e 's:/DETAILS$::g' -e 's:/var/lib/lunar/moonbase/::g' | \
+        sed -e 's:/DETAILS$::' -e 's:/var/lib/lunar/moonbase/::' -e 's|/|:|' | \
 	awk -F: '{print $2":"$1}' >> $TMP_INDEX
     # we search zlocal locally to make sure they get found:
     find $MOONBASE/zlocal -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
