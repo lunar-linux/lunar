@@ -42,7 +42,10 @@ fi
 
 optimize_make() {
   if [[ $PSAFE == "no" ]]; then
-    MAKES=1
+   unset MAKES
+  fi
+  if [[ $MAKES == "1" ]]; then
+   unset MAKES
   fi
   if module_installed linux-openmosix; then
     alias make="mosrun -h make"
