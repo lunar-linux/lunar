@@ -112,6 +112,7 @@ query() {
   # query "what do you want?  "  DEFAULT
 
   if [ -z "$SILENT" ]; then
+    unset RESPONSE
     while [ -z "$RESPONSE" ]; do
       if [ -n "$MODULE" ]; then
         echo -e -n "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}: "
