@@ -165,7 +165,7 @@ get_cvs() {(
   done
   
   if [[ "$GOT_CVS" == "yes" ]]; then
-    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
     # pack in last component dir of $CVSMODULE
     cd $(dirname $CVSMODULE)
     tar cjf $SOURCE_CACHE/$2 $(basename $CVSMODULE)
