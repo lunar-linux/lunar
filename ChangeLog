@@ -125,8 +125,3 @@
 	adjustment of titlebar display (compile instead of processing,
 	added hostname, $0[$$]).
 
-2004-05-02 09:32  striker
-
-	* var/lib/lunar/functions/: download.lunar, main.lunar,
-	recovery.lunar: s/successfull/successful/ Spellchecker anyone? ;)
-
