@@ -177,10 +177,3 @@
 	* bin/lvu: Cleanups, cleanups, looks like spring cleanup over
 	here...
 
-2003-04-17 15:38  sofar
-
-	* bin/lvu, sbin/lunar, usr/share/man/man1/lvu.1,
-	var/lib/lunar/functions/modules.lunar: w00t w00t, found some time
-	to add "lvu held" , "lunar [hold|unhold] xxx", also added shortcuts
-	for "lunar [install|remove] xxxx".
-
