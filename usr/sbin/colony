@@ -195,8 +195,8 @@ colony_name_menu()  {
                      "E"  "Edit Cabal Names"  "$E_HELP"`
   do
     case  $COMMAND in
-      S)  print_colony_names  |  less  ;;
-      E)  name_colonys                 ;;
+      S)  print_colony_names  |  view_file  ;;
+      E)  name_colonys                      ;;
     esac
   done
 }
@@ -375,9 +375,9 @@ colony_enchantment_menu()  {
                      "S"  "Show"     "$S_HELP"`
   do
     case  $COMMAND in
-      C)  colony_copy             ;;
-      E)  colony_execute          ;;
-      S)  colony_output  |  less  ;;
+      C)  colony_copy                 ;;
+      E)  colony_execute              ;;
+      S)  colony_output  | view_file  ;;
     esac
   done
 }

@@ -164,6 +164,7 @@ run_details() {
 
    SCRIPT_DIRECTORY=$MOONBASE/`find_section $MODULE`/$MODULE
    . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
+   SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$MODULE-$VERSION}
    return 0        
 }
 

@@ -279,8 +279,8 @@ lvu_catalog_html()  {
 display()  {
   if  [  -f  "$1"  ];  then
     case  `file  -b  $1  |  cut -d ' ' -f1`  in
-      ASCII)    cat  $1  |  less  ;;
-      bzip2)  bzcat  $1  |  less  ;;
+      ASCII)    cat  $1  |  view_file  ;;
+      bzip2)  bzcat  $1  |  view_file  ;;
     esac
   else
     message  "$2"
@@ -617,7 +617,7 @@ parse()  {
            prune)  prune                                  ;;
          sources)  sources     $MODULE                    ;;
       maintainer)  maintainer  $MODULE                    ;;
-        moonbase)  lvu_catalog  |  less                   ;;
+        moonbase)  lvu_catalog  |  view_file              ;;
          DETAILS)  show_module_component $1 $2            ;;
          DEPENDS)  show_module_component $1 $2            ;;
        CONFIGURE)  show_module_component $1 $2            ;;
@@ -640,14 +640,14 @@ parse()  {
             eert)  REVERSE="on"; show_tree "$2"           ;;
 
     updatelog)  if [ -e /var/log/lunar/update ]; then
-                  less /var/log/lunar/update
+                  view_file /var/log/lunar/update
                 else
                   echo "No update log available."
                 fi
                 ;;
 
     activity)  if [ -e $ACTIVITY_LOG ]; then
-                 less $ACTIVITY_LOG
+                 view_file $ACTIVITY_LOG
 	       else
 	         echo "No update log available."
 	      fi
@@ -683,7 +683,7 @@ parse()  {
               ;;
 
     installed)  if    [  -z  "$MODULE"    ]
-                then  less   $MODULE_STATUS
+                then  view_file   $MODULE_STATUS
                 elif  [  -n  "$VERSION"  ]
                 then  echo   "$VERSION"
                 else  message  "$MODULE is not installed";  false
@@ -722,4 +722,4 @@ parse()  {
   esac
 }
 . /etc/lunar/config
-if  [  $#  == 0  ];  then  help | less ;  else  parse  $@;  fi
+if  [  $#  == 0  ];  then  help | view_file ;  else  parse  $@;  fi
