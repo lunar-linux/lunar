@@ -1,3 +1,7 @@
+2003-04-01 18:32  sofar
+
+	* var/lib/lunar/functions/optimize.lunar: BAH
+
 2003-03-31 20:32  sofar
 
 	* var/lib/lunar/functions/download.lunar: Did not spot this typo
