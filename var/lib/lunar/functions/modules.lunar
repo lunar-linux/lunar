@@ -45,18 +45,9 @@ list_sections() {
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {
-   [ -z "$1" ]        && return_error "no SECTION defined!"      $FUNCNAME
+   [ -z "$1" ]  &&  return_error "no SECTION defined!" $FUNCNAME  &&  return 1
 
-   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
-
-   [ -n "$MODULES" ] && echo "$MODULES" && return 0
-
-   check_module_index                                  &&
-   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
-
-   [ -n "$MODULES" ] && echo "$MODULES" && return 0
-
-   for  MODULE  in  `ls $MOONBASE/$SECTION 2>/dev/null | \
+   for  MODULE  in  `ls $MOONBASE/$1 2>/dev/null | \
                      grep -v "ChangeLog"               | \
                      grep -v "CVS"                     | \
                      grep -v "COPYING"                 | \
@@ -65,7 +56,7 @@ list_modules() {
    do
       echo "$MODULE" 
    done
-  return 0
+   return 0
 }
 
 # function : list_moonbase
@@ -73,10 +64,8 @@ list_modules() {
 # purpose  : returns the names of all modules in moonbase
 list_moonbase()
 {
-  for  SECTION  in  `list_sections`;  do
-    for  MODULE  in  `list_modules $SECTION`;  do
-      echo $MODULE
-    done
+  for  SECTION  in  $(list_sections) ;  do
+    list_modules $SECTION
   done				
 }
 
@@ -145,17 +134,18 @@ function check_module_index()
 # purpose  : finds the section of a given module as parameter
 find_section()  
 {
+  local SECTION
+
   SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2`
   [ -n "$SECTION" ] && echo "$SECTION" && return 0
 
-  check_module_index                                  &&
+  check_module_index                                 &&
   SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2` 
   [ -n "$SECTION" ] && echo "$SECTION"  && return 0 
            
   for  SECTION  in  $(list_sections) ; do
-     for  MODULE  in  $(list_modules $SECTION) ; do
-        [ "$1" == "$MODULE" ] && echo "$SECTION" && return 0
-     done
+     [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] &&
+        echo "$SECTION" && return 0
   done
   return 1
 }
@@ -168,16 +158,24 @@ run_details() {
    [ -z "$MODULE" ] && [ -z "$1" ] && return 1
    [ -n "$1" ] && MODULE="$1"
 
-   [ -s "$MOONBASE/`find_section $MODULE`/$MODULE/DETAILS" ] || {
+   local SECTION=$(find_section $MODULE) || {
       message  "${PROBLEM_COLOR}Unable to find module"    \
                "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
                "${MESSAGE_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
       return 1
    }
 
-   SCRIPT_DIRECTORY=$MOONBASE/`find_section $MODULE`/$MODULE
+   [ -f "$MOONBASE/$SECTION/$MODULE/DETAILS" ] || {
+      message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${MODULE}" \
+               "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
+	       "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
+      return 1
+   }
+   
+   SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
    . $SCRIPT_DIRECTORY/DETAILS &>/dev/null &&
    SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$MODULE-$VERSION}
+
    return 0        
 }
 
