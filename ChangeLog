@@ -1,3 +1,41 @@
+2004-10-25 20:28  sofar
+
+	* sbin/lunar: Adding menu toggle to PROBE_EXPIRED in the FEATURE
+	  menu
+
+2004-10-25 20:24  sofar
+
+	* etc/lunar/config: default PROBE_EXPIRED=on
+
+2004-10-25 20:21  sofar
+
+	* sbin/lin: Incorporate PROBE_EXPIRED code into lin: lin --probe
+	  will now check the module_is_expired status of a module an call a
+	  recompile if it is outdated and if PROBE_EXPIRED==on
+
+2004-10-25 19:44  sofar
+
+	* var/lib/lunar/functions/modules.lunar: generalizing the
+	  is_expired code into a per-module function and one that lists all
+	  the expired ones in moonbase.
+
+2004-10-25 19:33  sofar
+
+	* sbin/lrm, var/lib/lunar/functions/depends.lunar: #510 --purge
+	  really list all dependencies now
+
+2004-10-25 19:18  sofar
+
+	* var/lib/lunar/functions/main.lunar: Resurrect code fix: #510.
+	  This code gently unpacks parts of the tarball given certain
+	  conditions, pre-unpacks directories and symlinks too etc. and
+	  honors $EXCLUDED algorithms. Tested mildly with postfix etc.
+
+2004-10-25 19:15  sofar
+
+	* var/lib/lunar/functions/sources.lunar: Fix nonexistant
+	  $BUILD_DIRECTORY on clean boxes or when wiped by the user
+
 2004-10-18 10:32  sofar
 
 	* sbin/lin: Okay this works much better, I completely oversaw the
@@ -183,8 +221,4 @@
 	  doesn't handle the sha1: syntax. sha1sum is provided by coreutils
 	  BTW so must in any case be present on all boxes, I don't expect
 	  any box to fail on that.
-
-2004-08-26 14:10  sofar
-
-	* etc/lunar/mirrors/LRESORT: badly needed update
 
