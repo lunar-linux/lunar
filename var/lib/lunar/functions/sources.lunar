@@ -91,9 +91,9 @@ md5_verify_source() {
 }
 
 
-# function : md5_verify_source
-# usage    : md5_verify_source filename md5
-# purpose  : md5 verifies a filename
+# function : sha1_verify_source
+# usage    : sha1_verify_source filename sha1
+# purpose  : sha1 verifies a filename
 sha1_verify_source() {
   debug_msg "sha1_verify_source ($@)"
   TMP_SHA1=$(sha1sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
