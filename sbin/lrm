@@ -143,7 +143,7 @@ process_lrm_queue() {
    export TEMP_FILE=$(temp_create "lrm")
    export TEMP2_FILE=$(temp_create "lrm")
 
-   [ "$DEBUG" == "on" ] && 
+   [ "$LUNAR_DEBUG" == "on" ] && 
    [ -s "$LRM_QUEUE" ]    && 
       echo -e "\nWill process the modules: `cat $LRM_QUEUE | xargs`"
 
@@ -264,18 +264,18 @@ downgrade() {
    {
       verbose_msg "\"$I_VERSION\" of \"$MODULE\" is installed at the moment"
 
-      [ "$DEBUG" == "on" ] && 
+      [ "$LUNAR_DEBUG" == "on" ] && 
          echo -n "  Checking if desired version is the installed version..."
 
       [ "$1" == "$I_VERSION" ] && 
       {
-         [ "$DEBUG" == "on" ] && echo "YES!!"
+         [ "$LUNAR_DEBUG" == "on" ] && echo "YES!!"
          echo "The downgrade version is the same as the installed version"
          echo "Here is the available files." 
          list_available_cache
       } || 
       {
-         [ "$DEBUG" == "on" ] && echo "NO"
+         [ "$LUNAR_DEBUG" == "on" ] && echo "NO"
       }
 
       verbose_msg "removing \"$MODULE-$I_VERSION\""
@@ -289,7 +289,7 @@ downgrade() {
    verbose_msg "extracting cached install file..."
    [ "$TEST" == "on" ] && 
    {
-      [ "$DEBUG" == "on" ] &&
+      [ "$LUNAR_DEBUG" == "on" ] &&
       bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C /  ||
       bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
       verbose_msg "adding module to installed list"
@@ -297,7 +297,7 @@ downgrade() {
 
    [ "$TEST" != "on" ] && 
    {
-      [ "$DEBUG" == "on" ] &&
+      [ "$LUNAR_DEBUG" == "on" ] &&
       bzcat $INSTALL_CACHE/$FILENAME | tar -kx $TAR_P -C / ||
       bzcat $INSTALL_CACHE/$FILENAME | 
       tar -kx $TAR_P -C / 2>/dev/null >/dev/null
@@ -378,7 +378,7 @@ while true ; do
       -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
       -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
       -t|--test       ) export TEST=on;        shift ;;
-      --debug         ) export DEBUG=on; shift;;
+      --debug         ) export LUNAR_DEBUG=on; shift;;
       --) shift; break ;;
        *) help;  break ;;
    esac

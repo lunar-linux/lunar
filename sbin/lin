@@ -44,6 +44,7 @@ Optional Parameters:
     |  --deps			Configure modules and determine dependencies, 
 				but do not lin.
 
+       --debug                  show debug output
 -p  |  --probe                  Only lin if not already installed
 
 -c  |  --compile		Ignore $INSTALL_CACHE and compiles
@@ -77,6 +78,7 @@ process_parameters()  {
 	 		   export FIX="$1";            shift 1  ;;
                       -s)  export SEPARATE="$1";       shift 1  ;;
                    --url)  export BASE_URL="$2";       shift 2  ;;
+                 --debug)  export LUNAR_DEBUG=on;      shift    ;;
                    --pam)  lin -c $(find_pam_aware);   shift 1  ;;
                        *)  help                                 ;;
       esac
