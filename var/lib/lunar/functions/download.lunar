@@ -158,9 +158,14 @@ fuzzy_wget()  {
     FILE="$S_FILE.tgz"
   else
     activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
-    false
+    return 1
   fi
 
+  if testpack $(guess_filename $2) && mv $(guess_filename $2) $SOURCE_CACHE ; then
+    verbose_msg "download of \"$1\" successfull"
+  else
+    rm -f $(guess_filename $2)
+  fi
 }
 
 
@@ -246,10 +251,7 @@ get_url() {
         if [ -n "$LRESORT_URL" ] ; then
           fuzzy_wget $LRESORT_URL/$2 $2
         fi
-      fi               &&
-      testpack  $2     &&
-      mv        $2  $SOURCE_CACHE &&
-      verbose_msg "download of \"$1\" successfull"
+      fi
     fi
   fi
 }

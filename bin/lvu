@@ -480,69 +480,82 @@ show_depends()  {
 # usage: show_tree <module>
 # purpose: show a tree of the module's dependencies (recursive)
 function show_tree() {
-        [[ -z "$1" ]] && help && exit 1
+  [[ -z "$1" ]] && help && exit 1
 
-        FORMATTED_MODULE="$1"
-        MODULE=`echo $1 | sed 's/[()]//g'`
-        MODULE_DIR="${MOONBASE}/`find_section ${MODULE}`/${MODULE}"
-        DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
+  FORMATTED_MODULE="$1"
+  MODULE=`echo $1 | sed 's/[()]//g'`
+  MODULE_DIR="${MOONBASE}/`find_section ${MODULE}`/${MODULE}"
+  DEPENDS_FILE="${MODULE_DIR}/DEPENDS"
 
-        if [[ ! -x "${MODULE_DIR}/DETAILS" ]]; then
-                echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
-                return 1
-        fi
+  if [[ ! -x "${MODULE_DIR}/DETAILS" ]]; then
+    echo -e "${PROBLEM_COLOR}! ${MODULE} not found !${DEFAULT_COLOR}"
+    return 1
+  fi
 
-        # purpose: Create the tree for displaying
-        set_tree() {
-                TREE=""
-                for (( i=0; i<${INDENT}; i++ )); do
-                        TREE="${TREE}|-->"
-                done
-                TREE=`echo ${TREE} | sed 's/-->|/   |/g'`
-                echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
-        }
+  # purpose: Create the tree for displaying
+  set_tree() {
+    TREE=""
+    for (( i=0; i<${INDENT}; i++ )); do
+      TREE="${TREE}|-->"
+    done
+    TREE=`echo ${TREE} | sed 's/-->|/   |/g'`
+    echo -en "${TREE}${MODULE_COLOR}${FORMATTED_MODULE}${DEFAULT_COLOR}: "
+  }
 
-        # purpose: Retrieve all dependencies
-        get_depends() {
-                NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
-                OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
-                DEPENDS=`sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " "`
-                echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
-        }
+  # purpose: Retrieve all dependencies
+  get_depends() {
+    NON_OPTIONAL='/^[[:blank:]]*#/! s/.*\<depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/\1/p'
+    OPTIONAL='/^[[:blank:]]*#/! s/.*\<optional_depends\>[[:blank:]]*\([0-9a-zA-Z"+_-]*\).*/(\1)/p'
+    DEPENDS=`sed -n "${NON_OPTIONAL}"'; '"${OPTIONAL}" ${DEPENDS_FILE} | sed 's/"//g' | tr "\n" " "`
+    for dep in ${DEPENDS}
+    do
+      adep=$(echo ${dep} | tr -d "()")
+      if grep "^${adep}:.*:installed:" ${MODULE_STATUS} >/dev/null
+      then
+        echo -ne "${FILE_COLOR}${dep} "
+      elif grep "^${adep}:.*:held:" ${MODULE_STATUS} >/dev/null
+      then
+        echo -ne "${LRM_COLOR}${dep} "
+      else
+        echo -ne "${PROBLEM_COLOR}${dep} "
+      fi
+    done
+    echo -e "${DEFAULT_COLOR}"
+  }
 
-	# purpose: Get reverse dependencies
-        get_reverse_depends() {
-                DEPENDS=`grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " "`
-                [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
-        }
+  # purpose: Get reverse dependencies
+  get_reverse_depends() {
+    DEPENDS=`grep :${MODULE}: "$DEPENDS_STATUS" | cut -d':' -f1 | tr "\n" " "`
+    [[ -n "${DEPENDS}" ]] && echo -e "${FILE_COLOR}${DEPENDS}${DEFAULT_COLOR}"
+  }
 
-        # purpose: recurse
-        recurse() {
-                (( INDENT++ ))
-                for i in ${DEPENDS}; do
-                        show_tree $i
-                done
-                (( INDENT-- ))
-        }
+  # purpose: recurse
+  recurse() {
+    (( INDENT++ ))
+    for i in ${DEPENDS}; do
+      show_tree $i
+    done
+    (( INDENT-- ))
+  }
 
-        [[ -z "${INDENT}" ]] && INDENT=0
+  [[ -z "${INDENT}" ]] && INDENT=0
 
-        set_tree
-        if [[ -z "${REVERSE}" ]]; then
-	        if [[ -x "${DEPENDS_FILE}" ]]; then
-       	                get_depends
-                        recurse
-                else
-                        echo "No dependencies"
-                fi
-        else
-                get_reverse_depends
-                if [[ -z "${DEPENDS}" ]]; then
-                        echo "No reverse dependencies"
-                else
-                        recurse
-                fi
-        fi
+  set_tree
+  if [[ -z "${REVERSE}" ]]; then
+    if [[ -x "${DEPENDS_FILE}" ]]; then
+      get_depends
+      recurse
+    else
+      echo "No dependencies"
+    fi
+  else
+    get_reverse_depends
+    if [[ -z "${DEPENDS}" ]]; then
+      echo "No reverse dependencies"
+    else
+      recurse
+    fi
+  fi
 }
 
 

@@ -90,8 +90,8 @@ exists() {
 guess_filename()  {
   FILENAME=$1
   BASENAME=${FILENAME/.tar.gz/}
-  BASENAME=${BASENAME/.tar.bz2}
-  BASENAME=${BASENMAE/.tgz/}
+  BASENAME=${BASENAME/.tar.bz2/}
+  BASENAME=${BASENAME/.tgz/}
 
   if [ -f $FILENAME ] ; then
     echo $FILENAME
