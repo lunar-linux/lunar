@@ -1,3 +1,7 @@
+2003-02-01 05:18  wizfactor
+
+	* sbin/lin: Finished updating xinet (bug 232)
+	
 2003-02-01 01:08  wizfactor
 
 	* sbin/lin: Fixed bug in the xinet.d services install. Should fix bug 232.
