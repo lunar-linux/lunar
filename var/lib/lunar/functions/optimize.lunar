@@ -663,6 +663,8 @@ optimize_ld() {
       case $A in
          Strip)     LDFLAGS="$LDFLAGS -s"
                     ;;
+         Optimize)  LDFLAGS="$LDFLAGS -Wl,-O1"
+                    ;;
 # The Debug option breaks some modules (eg: tar and gzip, just to mention a
 # few), so this option should either be removed, or remain "deactivated"
 # untill this has been resolved but the hatch is that we don't know how many

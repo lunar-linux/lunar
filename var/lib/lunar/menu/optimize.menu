@@ -210,8 +210,9 @@ help() {
       ldf_help)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
-#     Debug_HELP="Strip debug symbols only"
+   Optimize_HELP="Optimize hash tables during linking"
   Combreloc_HELP="Combreloc"
+#     Debug_HELP="Strip debug symbols only"
                ;;
 
    # Addon help for extra programs
@@ -370,6 +371,7 @@ ccc_warn() {
 ldf_options() {
    OPTIONS=( "Strip"      "-s"            $( echo ${LDF[@]} | grep -q "Strip" && echo "on" || echo "off" )     "$Strip_HELP"
 #            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
+            "Optimize"      "-Wl,-O1"     $( echo ${LDF[@]} | grep -q "Optimize" && echo "on" || echo "off" )     "$Optimize_HELP"
              "Combreloc"  "-z combreloc"  $( echo ${LDF[@]} | grep -q "Combreloc" && echo "on" || echo "off" ) "$Combreloc_HELP" )
 
 }
