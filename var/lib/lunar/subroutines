@@ -508,11 +508,12 @@ remove_depends()
 
   if    [  -n  "$2"  ]
   then  
-     grep  -v  "^$1:$2"  $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
+     grep  -v  "^$1:$2:"  $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
      verbose_msg "removing depends for \"$1\" on \"$2\""
   else  
-     grep  -v  "^$1:"    $DEPENDS_STATUS_BACKUP  >  $DEPENDS_STATUS
-     verbose_msg "removing depends for \"$1\""
+     grep  -v  "^$1:"    $DEPENDS_STATUS_BACKUP  |   \
+     grep  -v  ":$1:on:optional:" >  $DEPENDS_STATUS
+     verbose_msg "removing all depends for and optional on \"$1\""
   fi
   cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
   
