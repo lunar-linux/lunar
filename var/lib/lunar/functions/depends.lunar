@@ -164,12 +164,12 @@ run_depends() {
         fi
 
 	if module_installed $1 ; then
-	  DEPMOD_AVAIL="Use ${MESSAGE_COLOR}(presently installed)${QUERY_COLOR}"
+	  DEPMOD_AVAIL="Use optional ${MESSAGE_COLOR}(presently installed) module${QUERY_COLOR} $1"
 	else
-	  DEPMOD_AVAIL="Install & use ${PROBLEM_COLOR}(not yet installed)${QUERY_COLOR}"
+	  DEPMOD_AVAIL="Install & use optional ${PROBLEM_COLOR}(not yet installed) ${MESSAGE_COLOR}module${QUERY_COLOR} $1"
 	fi
 	if query  "$DEPMOD_AVAIL 
-        optional dependency $1 $4? " $DEFAULT ; then
+        dependency - purpose: $4? " $DEFAULT ; then
           lin  --deps  $1
           add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
         else
