@@ -675,6 +675,10 @@ parse()  {
     held)
       grep ":held:" $MODULE_STATUS | cut -d: -f1
       ;;
+
+    exiled)
+      grep ":exiled:" $MODULE_STATUS | cut -d: -f1
+      ;;
 		
     sum)
       if [ -n "$2" ] ; then
