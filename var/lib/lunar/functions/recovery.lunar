@@ -50,33 +50,28 @@ rebuild_status_files() {
            "${PROBLEM_COLOR}DO NOT BREAK!!"            \
            "${DEFAULT_COLOR}"
 
-  trap ""  2
-  LOG_FILES=`ls -rt $INSTALL_LOGS`
+  LOG_FILES=$(ls -rt $INSTALL_LOGS)
   for MODULE_NAME in $LOG_FILES; do
-     let "COUNTS=3"
-     REAL_NAME=$MODULE_NAME
-     unset SECTION
-     while [ "$COUNTS" -gt "0" ]; do
-        REAL_NAME=`echo $REAL_NAME | cut -d "-" -f -"$COUNTS"`
-        SECTION=`find_section $REAL_NAME`
-        if [ -n "$SECTION" ]; then
-           let "COUNTS++"
-           VERSION=`echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-`
-           add_module  $REAL_NAME installed $VERSION 
-           OUTTEXT="Processing: $REAL_NAME-$VERSION          "
-           echo -en "$OUTTEXT"
-           for ((II=1; II<=${#OUTTEXT}; II++)); do echo -en "\b"; done
-           break;
-        fi
-        let "COUNTS--"
-     done
-   done
-   echo " "
-   cp $MODULE_STATUS $MODULE_STATUS_BACKUP
-   message  "${MESSAGE_COLOR}Success!!"   \
-            "${DEFAULT_COLOR}\n"
+    COUNTS=3
+    REAL_NAME=$MODULE_NAME
+    unset SECTION
+    while [ "$COUNTS" -gt "0" ]; do
+      REAL_NAME=$(echo $REAL_NAME | cut -d "-" -f -"$COUNTS")
+      SECTION=$(find_section $REAL_NAME)
+      if [ -n "$SECTION" ]; then
+        ((COUNTS++))
+        VERSION=$(echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-)
+        SIZE=$(find_module_size $REAL_NAME $VERSION)
+        add_module $REAL_NAME installed $VERSION $SIZE
+        message "Added: $REAL_NAME-$VERSION ($SIZE)"
+        break;
+      fi
+      ((COUNTS--))
+    done
+  done
 
-  trap 2
+  message  "${MESSAGE_COLOR}Success!!"   \
+           "${DEFAULT_COLOR}\n"
 }
 
 

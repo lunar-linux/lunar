@@ -238,6 +238,16 @@ satisfy_depends()  {
   TMP_FILE=$(temp_create "${MODULE}.satify-depends")
   grep "^$MODULE:" $DEPENDS_STATUS > $TMP_FILE
 
+  # first recursively check if all required dependencies are installed
+  for DEP_MODULE in $(find_depends $MODULE) ; do
+    if ! module_installed $DEP_MODULE ; then
+      if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
+        exit 1
+      fi
+    fi
+  done
+  
+  # then parse $OPTS
   while read LINE; do
     DEP_MODULE=$(echo $LINE | cut -d: -f2)
     DEP_STATUS=$(echo $LINE | cut -d: -f3)
@@ -261,7 +271,7 @@ satisfy_depends()  {
       OPTS="$OPTS $DEP_ON"
     fi
   done < $TMP_FILE
-                                                     
+                                            
   temp_destroy $TMP_FILE
 }
 

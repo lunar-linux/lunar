@@ -59,7 +59,7 @@ prune() {
   temp_destroy $TMP_CACHE_KEEP
 
   # the log files are easy:
-  LOGS=$(cat $MODULE_STATUS_BACKUP | cut -d: -f1,4 --output-delimiter="-")
+  LOGS=$(cat $MODULE_STATUS | cut -d: -f1,4 --output-delimiter="-")
 
   verbose_msg "finding stale install logs"
   for FILE in $(ls $INSTALL_LOGS) ; do
