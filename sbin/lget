@@ -51,14 +51,15 @@ EOF
 }
 
 use_cvs() {(
-  run_details &&
-  cd $BUILD_DIRECTORY
-  if [[ $CVS_SERVER ]]; then
+  run_details && if [[ $CVS_SERVER ]]; then
+
     message  "${MESSAGE_COLOR}Downloading CVS module"                      \
              "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
              "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-    mk_source_dir $CVS_MODULE
-    # unset CVS_RSH
+	     
+    mk_source_dir
+    cd $SOURCE_DIRECTORY
+
     export CVSROOT=$CVS_SERVER
     if [[ $CVS_LOGIN ]]; then
       echo "$CVS_LOGIN" | cvs login
@@ -78,7 +79,9 @@ use_cvs() {(
       message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
       tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
     fi
-    rm_source_dir $CVS_MODULE
+
+    cd $BUILD_DIRECTORY
+    rm_source_dir
   fi
 )}
 
