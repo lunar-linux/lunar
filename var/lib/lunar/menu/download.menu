@@ -277,6 +277,36 @@ NUM_RETRY=<n> in DETAILS file :=)"
   fi
 }
 
+set_exhaustive() {
+  PROMPT="If you want, lget may try downloading the file from all
+available mirrors, instead of the one you select from the mirror
+menu. All mirrors will be tried until the file is found.
+
+This is not recommended for normal downloads, broken downloads
+should be reported to maintainer@lunar-linux.org.
+"
+
+  EXHAUSTIVE=${EXHAUSTIVE:=off}
+
+  EXHAUSTIVE=`$DIALOG  --title "Exhaustive mirror testing: " \
+             --ok-label  "Commit" \
+             --checklist          \
+             "$PROMPT"            \
+              0 0 0               \
+             "Enable" "exhaustive mirror testing" $EXHAUSTIVE`
+
+  EXHAUSTIVE=`echo $EXHAUSTIVE | sed s/\"//g | tr -d " "`
+
+  if [ "$EXHAUSTIVE" == "Enable" ]; then
+    write_config "EXHAUSTIVE" "  EXHAUSTIVE=on"
+  else
+    write_config "EXHAUSTIVE" "  EXHAUSTIVE=off"
+  fi
+
+}
+
+
+
 while
     A_HELP="Active or passive connections while using ftp"
     C_HELP="Continue to get or re-get the partial downloads"
@@ -285,6 +315,7 @@ while
     H_HELP="Cache usage for http downloads"
     R_HELP="Per process download rate"
     P_HELP="Proxy Settings"
+    E_HELP="Test all mirrors available on download"
 
     COMMAND=`$DIALOG  --title "Download Options"               \
                       --item-help                              \
@@ -292,14 +323,15 @@ while
                       --cancel-label  "Exit"                   \
                       --menu                                   \
                       ""                                       \
-                      0 40 7                                   \
+                      0 40 8                                   \
                       "A"  "Ftp Active/Passive"     "$A_HELP"  \
                       "C"  "Partial Downloads"      "$C_HELP"  \
                       "F"  "Fuzzy Downloads"        "$F_HELP"  \
                       "H"  "Cache Usage"            "$H_HELP"  \
                       "N"  "Number of Retries"      "$N_HELP"  \
                       "P"  "Proxies"                "$P_HELP"  \
-                      "R"  "Download Rate"          "$R_HELP"`
+                      "R"  "Download Rate"          "$R_HELP"  \
+		      "E"  "Exhaustive mirrors"     "$E_HELP"`
 
   do
     case  $COMMAND in
@@ -310,6 +342,7 @@ while
       N)  set_retries            ;;
       P)  proxy_menu             ;;
       R)  set_download_rate      ;;
+      E)  set_exhaustive         ;;
     esac
   done
 }
