@@ -23,7 +23,7 @@ verify_source() {
   debug_msg "verify_source ($@)"
   VERIFIED="true"
   for SOURCE_FILE in $@ ; do
-    if ! guess_filename $SOURCE_CACHE/$1 >/dev/null ; then
+    if [ ! -f $SOURCE_CACHE/$1 ] ; then
       message "${PROBLEM_COLOR}Missing ${FILE_COLOR}${1}${DEFAULT_COLOR}"
       message "${PROBLEM_COLOR}Lunar Install aborting.${DEFAULT_COLOR}"
       activity_log "lin" "$MODULE" "$VERSION" "failed" "because it was missing source:  $1"
@@ -108,8 +108,8 @@ sha1_verify_source() {
 erase()  {
   debug_msg "erase ($@)"
   if [ "$PARTIAL" == "off" ]; then
-    debug_msg "erase: deleting \"$(guess_filename $1)\""
-    rm -f $(guess_filename $1)
+    debug_msg "erase: deleting \"$1\""
+    rm -f $1
   fi
 }
 
@@ -117,7 +117,7 @@ erase()  {
 unpack() {
   debug_msg "unpack ($@)"
 
-  FILENAME=$(guess_filename $SOURCE_CACHE/$1)
+  FILENAME=$SOURCE_CACHE/$1
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
 
   case $(file -b $FILENAME | cut -d' ' -f1) in

@@ -31,7 +31,6 @@ unset FIND_CHECK
 unset FPM
 unset FTP_ACTIVE
 unset FUNCTIONS
-unset FUZZY
 unset GARBAGE
 unset GCCVER
 unset GCCWRAPPERS

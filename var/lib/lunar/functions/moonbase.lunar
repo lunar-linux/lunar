@@ -26,7 +26,6 @@ get_moonbase () {
        VERSION=`date -u +%Y%m%d.%H`
         SOURCE=$(basename $MOONBASE_URL)
     SOURCE_URL=${MOONBASE_URL[@]}
-         FUZZY=off
        PARTIAL=off
    CLEAR_CACHE=on
   }

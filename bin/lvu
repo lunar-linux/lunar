@@ -644,15 +644,13 @@ show_eert() {
 
 show_urls() { (
   # function overrides:
-  fuzzy_wget() { echo $1 ; return 0 ; }
-  guess_filename() { false ; }
+  call_wget() { echo $1 ; return 0 ; }
   get_cvs() { return 0 ; }
   get_svn() { return 0 ; }
   connect() { return 0 ; }
  
   SILENT=on
   VERBOSE=off
-  FUZZY=off
   EXHAUSTIVE=off
   CLEAR_CACHE=off
 

@@ -89,36 +89,6 @@ exists() {
 }
 
 
-# function : guess_filename
-# usage    : guess_filename <filename>
-# purpose  : fuzzy check for the existance of the filename
-guess_filename()  {
-  debug_msg "guess_filename ($@)"
-  FILENAME=$1
-  BASENAME=${FILENAME/.tar.gz/}
-  BASENAME=${BASENAME/.tar.bz2/}
-  BASENAME=${BASENAME/.tgz/}
-
-  if [ -f "$FILENAME" ] ; then
-    debug_msg "guess_filename: $FILENAME"
-    echo $FILENAME
-  elif [ "$FUZZY" == "off" ] ; then
-    return 1
-  elif [ -f "$BASENAME.tar.gz" ] ; then
-    debug_msg "guess_filename: $BASENAME.tar.gz"
-    echo $BASENAME.tar.gz
-  elif [ -f "$BASENAME.tar.bz2" ] ; then
-    debug_msg "guess_filename: $BASENAME.tar.bz2"
-    echo $BASENAME.tar.bz2
-  elif [ -f "$BASENAME.tgz" ] ; then
-    debug_msg "guess_filename: $BASENAME.tgz"
-    echo $BASENAME.tgz
-  else
-    return 1
-  fi
-}
-
-
 # function : filter
 # usage    : filter $FILE
 # purpose  : filter stdin with files/dirs/symlinks provided in file $1.

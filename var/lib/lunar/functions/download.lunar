@@ -191,24 +191,8 @@ get_cvs() {
 }
 
 
-call_wget()  {  
+call_wget()  {
   debug_msg "call_wget ($@)"
-   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
-   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
-   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
-
-   S_FILE=$(basename $1)
-
-   debug_msg "call_wget: PWD=$PWD"
-   verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1 --output-document $S_FILE\""
-   wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$S_FILE"
-}
-
-
-# fuzzy_wget is a wrapper that tries to call possible mis-finenamed 
-# source tarballs (ie .tar.gz instead of .tar.bz2)
-fuzzy_wget()  {
-  debug_msg "fuzzy_wget ($@)"
 
   # this is what the download will be stored as initially:
   TMP_FILE=$TMPDIR/$(basename $2)
@@ -218,7 +202,7 @@ fuzzy_wget()  {
   fi
 
   if [ "$CONTINUE" == "off" ] ; then
-    erase $(guess_filename $TMP_FILE) 
+    erase $TMP_FILE
   else
     WGET_PARTIAL="--continue"
   fi
@@ -233,35 +217,25 @@ fuzzy_wget()  {
     WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
   fi
 
-  WGET_NUM_RETRY=${NUM_RETRY:=5}
-  WGET_RETRIES="--tries=${WGET_NUM_RETRY}"
-  FUZZY=${FUZZY:=off}
+  WGET_RETRIES="--tries=${WGET_NUM_RETRY:=5}"
 
-  S_FILE=$(basename $2 | sed -e "s/\.tar\.gz$//" -e "s/\.tgz$//" -e  "s/\.tar\.bz2$//")
+  [ -n "$http_proxy" ] && export http_proxy=$http_proxy
+  [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
+  [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  if erase $2 && call_wget $1 ; then
-    FILE="$(basename $2)"
-  elif [ "$FUZZY" == "off" ] ; then
-    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
-    return 1
-  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tar.bz2 ; then
-    FILE="$S_FILE.tar.bz2"
-  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tar.gz ; then
-    FILE="$S_FILE.tar.gz"
-  elif erase $2 && call_wget $(dirname $1)/$S_FILE.tgz ; then
-    FILE="$S_FILE.tgz"
+  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1 --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$TMP_FILE" ; then
+    # looks like it worked
+    if testpack $TMP_FILE ; then
+      install -m644 $TMP_FILE $(dirname $2)/$(basename $TMP_FILE)
+      rm $TMP_FILE
+      verbose_msg "download of \"$1\" successful"
+    else
+      rm -f $TMP_FILE
+    fi
   else
     activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
     return 1
-  fi
-
-  TMP_RESULTFILE=$(guess_filename $TMP_FILE)
-  if testpack $TMP_RESULTFILE ; then
-    install -m644 $TMP_RESULTFILE $(dirname $2)/$(basename $TMP_RESULTFILE)
-    rm $(guess_filename $TMP_RESULTFILE)
-    verbose_msg "download of \"$1\" successful"
-  else
-    rm -f $(guess_filename $TMP_RESULTFILE)
   fi
 }
 
@@ -319,26 +293,26 @@ get_url() {
       cp $(echo $1 | sed 's/file:\/\///') $2
 
     else
-      # ordinary URL's handled by fuzzy_wget
+      # ordinary URL's handled by call_wget
       connect &&
       if [ -n "$BASE_URL" ] ; then
         # base url set means we don't touch the other possibilities:
-        fuzzy_wget $BASE_URL/$(basename $2) $2
+        call_wget $BASE_URL/$(basename $2) $2
       else
         if [ -n "$FRESORT_URL" ] ; then
           # try fresort first
-          if ! fuzzy_wget $FRESORT_URL/$(basename $2) $2 ; then
+          if ! call_wget $FRESORT_URL/$(basename $2) $2 ; then
             # normal url second
-            if ! fuzzy_wget $1 $2 ; then
+            if ! call_wget $1 $2 ; then
               # and failover
-              fuzzy_wget $LRESORT_URL/$(basename $2) $2
+              call_wget $LRESORT_URL/$(basename $2) $2
             fi
           fi
-        elif ! fuzzy_wget $1 $2 ; then
+        elif ! call_wget $1 $2 ; then
           # just try the normal url
           if [ -n "$LRESORT_URL" ] ; then
             # and the failover url
-            fuzzy_wget $LRESORT_URL/$(basename $2) $2
+            call_wget $LRESORT_URL/$(basename $2) $2
           fi
         fi
       fi
@@ -402,7 +376,7 @@ download_module() {
     # silly that this exists:
     if [ "$CLEAR_CACHE" == "on" ] ; then
       verbose_msg "clearing source cache copy of \"$SRC\""
-      rm -f `guess_filename  $SOURCE_CACHE/$SRC` 2>/dev/null
+      rm -f $SOURCE_CACHE/$SRC 2>/dev/null
     fi
 
     # add source part if needed
@@ -412,7 +386,7 @@ download_module() {
       fi
 
       # quit if we did get it
-      if [ -f "$(guess_filename $SOURCE_CACHE/$SRC)" ] ; then
+      if [ -f "$SOURCE_CACHE/$SRC)" ] ; then
         if [ "${URL:0:6}" == "cvs://" ] ; then
 	  verbose_msg "trying to download \"$URL\""
 	  get_url $URL $SOURCE_CACHE/$SRC && break
@@ -445,7 +419,11 @@ download_module() {
 
 testpack () {
   debug_msg "testpack ($@)"
-  FILENAME=$(guess_filename $1) || FILENAME=$(guess_filename $SOURCE_CACHE/$1)
+  if [ -f "$1" ]; then
+    FILENAME=$1
+  else
+    FILENAME=$SOURCE_CACHE/$1
+  fi
   if [ -f "$FILENAME" ] ; then
     COMPRESSOR=$(file -b $FILENAME | cut -d ' ' -f1)
     case $COMPRESSOR in

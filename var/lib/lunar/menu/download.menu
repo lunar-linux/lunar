@@ -195,36 +195,6 @@ CONTINUE=off in DETAILS file :=) or vice-versa."
    fi
 }
 
-set_fuzzy_downloads(){
-
-   PROMPT="Please enable/disable the fuzzy download option.
-
-The default behaviour of lget is to skip all possible file
-extensions while downloading the files.  You may enable this
-behaviour if you want to search and download alternative filenames
-and extensions.
-
-This option can also be set per module basis. Add
-FUZZY=off in DETAILS file :=) or vice-versa."
-
-   FUZZY=${FUZZY:=off}
-
-   FUZZ=`$DIALOG  --title "Fuzzy Downloads" \
-                            --ok-label  "Commit" \
-                            --checklist          \
-                            "$PROMPT"            \
-                             0 0 0               \
-                  "Enable" "fuzzy downloads" $FUZZY`
-
-   #lets get rid of " and spaces in the variable
-   FUZZ=`echo $FUZZ | sed s/\"//g | tr -d " "`
-
-   if [ "$FUZZ" == "Enable" ] ; then
-     set_local_config "FUZZY" "on"
-   else
-     set_local_config "FUZZY" "off"
-   fi
-}
 
 set_cache_usage(){
 
@@ -311,7 +281,6 @@ should be reported to maintainer@lunar-linux.org.
 while
     A_HELP="Active or passive connections while using ftp"
     C_HELP="Continue to get or re-get the partial downloads"
-    F_HELP="Get the exact filename or try to find the other possible extensions"
     N_HELP="How many times will wget try to download the file?"
     H_HELP="Cache usage for http downloads"
     R_HELP="Per process download rate"
@@ -328,7 +297,6 @@ while
                       0 40 8                                   \
                       "A"  "Ftp Active/Passive"     "$A_HELP"  \
                       "C"  "Partial Downloads"      "$C_HELP"  \
-                      "F"  "Fuzzy Downloads"        "$F_HELP"  \
                       "H"  "Cache Usage"            "$H_HELP"  \
                       "N"  "Number of Retries"      "$N_HELP"  \
                       "P"  "Proxies"                "$P_HELP"  \
@@ -340,7 +308,6 @@ while
     case  $COMMAND in
       A)  set_ftp_active         ;;
       C)  set_partial_downloads  ;;
-      F)  set_fuzzy_downloads    ;;
       H)  set_cache_usage        ;;
       N)  set_retries            ;;
       P)  proxy_menu             ;;

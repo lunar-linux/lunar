@@ -235,7 +235,7 @@ lin_module()  {
     return 1
   fi
 
-  # resurrect if we can, but not if -c was issued
+  # resurrect if we can, but not is -c was issued
   if [ "$AUTORESURRECT" == "on" -a -z "$COMPILE" ] ; then
     # we also do not resurrect if $MODULE is currently installed!
     if ! module_installed $MODULE ; then
