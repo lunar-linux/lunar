@@ -148,6 +148,8 @@ lrm_module() {
     run_module_file $MODULE PRE_REMOVE
   fi
 
+  update_plugin $MODULE remove
+
   # init.d scripts stop before rm phase, but only if ! upgrading
   if [ "$KEEPCONFIG" != "on" -a "$UPGRADE" != "on" ] ; then
     # pre-read these variables!

@@ -73,6 +73,7 @@ get_moonbase () {
       add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
       # get ready to regenerate the module index cache file
       check_module_index
+      update_plugins
       display_moonbase_changes
     fi
   else

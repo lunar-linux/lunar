@@ -261,6 +261,7 @@ default_post_build() {
   } | tee -a $C_LOG
   
   install_initd
+  update_plugin $MODULE
 
   devoke_installwatch
   ldconfig

@@ -23,11 +23,10 @@ export        DIALOGRC=/etc/lunar/dialogrc
                  MENUS=/var/lib/lunar/menu
              SUSTAINED=/var/lib/lunar/sustained
                ALIASES=/var/lib/lunar/aliases
+            PLUGIN_DIR=/var/lib/lunar/plugins
 
        SOUND_DIRECTORY=/var/lib/lunar/sound
            SOUND_THEME=startrek
-
-            BOOST_LOCK=/var/lock/boost
 
           ACTIVITY_LOG=/var/log/lunar/activity
           INSTALL_LOGS=/var/log/lunar/install
@@ -136,3 +135,8 @@ fi
 
 sound $SOUND
 color $COLOR
+
+for LUNAR_PLUGIN in $PLUGIN_DIR/*.plugin; do
+  . $LUNAR_PLUGIN
+done
+

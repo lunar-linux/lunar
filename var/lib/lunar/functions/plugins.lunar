@@ -31,6 +31,7 @@ plugin_register() {
 	# 6 - KERNEL_UPDATEBOOTLOADER - automate bootloader maintenance
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
+	debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
 }
 
 
@@ -57,10 +58,46 @@ plugin_call() {
 	return 2
 }
 
-# source the plugins now:
-PLUGINS=/var/lib/lunar/plugins
-for LUNAR_PLUGIN in $PLUGINS/*.plugin; do
-	. $LUNAR_PLUGIN
-done
+
+update_plugin() {
+	debug_msg "update_plugin($@)"
+	# update plugins of all modules or a specific one
+	#
+	# $1 - module name
+	# $2 - forced removal of plugin
+	#
+	# scan module for plugins, and add/delete them as needed
+	if SECTION=$(find_section $1); then
+		if [ -d $MOONBASE/$SECTION/$1/plugin.d ]; then
+			if ! module_installed $1 ; then
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Removed \"$(basename $PLUGIN)\""
+					rm -f $PLUGIN_DIR/$(basename $PLUGIN)
+				done
+			elif [ -n "$2" ] ; then
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Removed \"$(basename $PLUGIN)\""
+					rm -f $PLUGIN_DIR/$(basename $PLUGIN)
+				done
+			else
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Installed \"$(basename $PLUGIN)\""
+					install -m644 $PLUGIN $PLUGIN_DIR/
+				done
+			fi
+		fi
+	fi
+}
+
+
+update_plugins() {
+	debug_msg "update_plugins($@)"
+	# rework all plugins	
+	verbose_msg "Updating plugins"
+	for MODULE in $(list_moonbase); do
+		update_plugin $MODULE
+	done
+}
+
 
 
