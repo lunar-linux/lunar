@@ -52,6 +52,7 @@
 /usr/include/bits/syscall.h
 /usr/include/gnu/stubs.h
 /usr/lib/installwatch.so
+/usr/lib/sasl/smtpd.conf
 /usr/share/httpd
 /usr/share/httpsd
 /var/named
