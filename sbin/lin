@@ -56,7 +56,9 @@ main() {
 
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
-    get_moonbase
+    if ! get_moonbase ; then
+      exit 1
+    fi
     # remove moonbase rofm MODULES and continue
     MODULES=$(echo $MODULES | sed 's/moonbase//g')
     if [ -z "$MODULES" ] ; then
