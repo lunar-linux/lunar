@@ -130,29 +130,3 @@
 	* var/lib/lunar/functions/download.lunar: Better put it in here
 	too...
 
-2003-04-23 21:19  sofar
-
-	* etc/lunar/config: Adding all safe lunar mirrors as MOONBASE_URL,
-	this allows dk.lunar-linux to take over in case the main site is
-	unreachable. (go niki!)
-
-2003-04-23 20:25  sofar
-
-	* var/lib/lunar/functions/check.lunar: errr, forgot to check this
-	one in.
-
-2003-04-23 19:54  sofar
-
-	* bin/lvu, sbin/lin, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/modules.lunar: more spring cleaning!
-	check_functions are now callable from lsh
-
-2003-04-23 15:44  sofar
-
-	* bin/lvu: Thx again Wiz
-
-2003-04-23 11:48  sofar
-
-	* bin/lvu: Fix for lvu what problem encountered by wizfactor.
-
