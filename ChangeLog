@@ -244,10 +244,3 @@
 	* var/lib/lunar/functions/depends.lunar: Just pushing around the
 	formatting again
 
-2003-11-14 17:37  tchan
-
-	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
-	blacklist.SPARC: The current module for uClibc will only compile on
-	x86.  uClibc does support other architectures, but the Lunar module
-	is currently setup for x86 ONLY!
-
