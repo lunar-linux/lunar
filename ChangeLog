@@ -450,21 +450,3 @@
 
 	* usr/share/man/man8/lunar.8: updating the lunar man page
 
-2003-07-14 22:38  sofar
-
-	* bin/lvu, sbin/lin, sbin/lrm, sbin/lunar,
-	var/lib/lunar/functions/build.lunar,
-	var/lib/lunar/functions/depends.lunar,
-	var/lib/lunar/functions/install.lunar,
-	var/lib/lunar/functions/messages.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/moonbase.lunar,
-	var/lib/lunar/functions/updatelog.lunar: Preliminary bugrelease,
-	fixing hopefully the wrong strings in the updatelog, fixing the
-	failed reports bug, and several other improvments that were quite
-	needed.
-
-2003-07-14 07:33  jasper
-
-	* sbin/lin: Make lin properly fetch moonbase again
-
