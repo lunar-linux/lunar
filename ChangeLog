@@ -1,3 +1,8 @@
+2003-08-19 20:06  sofar
+
+	* var/lib/lunar/excluded: Adding /root/.distcc and resorting it
+	alphabetically.
+
 2003-08-16 19:54  elaine
 
 	* var/lib/lunar/functions/postbuild.lunar: $IFS setting was causing
