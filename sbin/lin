@@ -45,6 +45,7 @@ Optional Parameters:
 -R  |  --resurrect              Force module to be unpacked from /var/cache/lunar
 -s  |  --silent			Decreases the level of message output
 -v  |  --verbose                Increases the level of message output
+-V  |  --Version                Select specific Version of module to install
 EOF
   exit  1
 }
@@ -54,7 +55,10 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
+  message "mod_v = $MOD_VERSION mod= $MODULES"
+
   if echo $MODULES | grep -qw moonbase ; then
+    
     # just update moonbase, no other modules
     get_moonbase
     # remove moonbase rofm MODULES and continue
@@ -72,6 +76,11 @@ main() {
   # different approaches for multiple modules (start up downloads first)
   # and single modules (plain install)
   if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+
+    if [ -n "$MOD_VERSION" ] ; then
+      message "${MESSAGE_COLOR} -V|--Version only allowed for single-mdoule install!${DEFAULT_COLOR}"
+      exit 1
+    fi
 
     if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
       export TEMP_DOWNLOADLOG=$(temp_create "${MODULE}.download-log")
@@ -132,6 +141,27 @@ main() {
     temp_destroy $TEMP_PREPAREDDEPS
 
   else
+    if [ -n "$MOD_VERSION" ] ; then
+
+      if  echo $MODULES | grep -q '/' ; then
+        if [ -d ${MOONBASE}/*/${MODULES} ] ; then
+	  unset MOD_VERSION
+        else
+          message "${PROBLEM_COLOR}No Moonbase module:${FILE_COLOR}$MODULES${MESSAGE_COLOR}\
+	            with $MODULES form, bailing!${DEFAULT_COLOR}"
+	  return 1
+        fi
+      else
+	if [ -d ${MOONBASE}/*/${MODULES}/${MOD_VERSION} ] ; then
+	  MODULES="${MODULES}/${MOD_VERSION}"
+	else
+          message "${MESSAGE_COLOR}$MODULES Passing${FILE_COLOR} $MOD_VERSION${MESSAGE_COLOR}\
+	          to module for processing${DEFAULT_COLOR}"
+        fi
+	message "Module = $MODULES"
+      fi
+    fi
+
     if [ -z "$TEMP_PREPAREDDEPS" ] ; then
       FLAG_PREPAREDDEPS_SET=on
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
@@ -172,7 +202,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsv" -l "compile,debug,deps,from:,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:" -l "compile,debug,deps,from:,help,probe,reconfigure,resurrect,silent,verbose,Version:" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -197,6 +227,7 @@ else
       -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
       -s|--silent      ) export SILENT="$1" ;                       shift   ;;
       -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      -V|--Version     ) export MOD_VERSION=$2 ;                    shift 2 ;;
       --) shift ; break ;;
       *) help ; break ;;
     esac

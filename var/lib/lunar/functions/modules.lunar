@@ -58,10 +58,12 @@ list_modules() {
     exit 1
   fi
 
-  for MODULE in $(ls $MOONBASE/$1 2>/dev/null | \
+  for MODULE in $(( ls $MOONBASE/$1 && ls -d $MOONBASE/$1/*/[0-9]* |
+        sed "s:$MOONBASE/$1/::" ) 2>/dev/null | \
       grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README")
   do
     echo "$MODULE" 
+    debug_msg "XXXX Module=$MODULE"
   done
   return 0
 }
@@ -198,7 +200,8 @@ run_details() {
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
     run_module_file $1 DETAILS &> /dev/null &&
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
-    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$1}
+   mv_edit $1 
+    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MOD_V_SNAME}
 
     return 0
   fi

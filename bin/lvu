@@ -659,8 +659,9 @@ main()  {
       ;;
 	  
     md5sum)
+      mv_edit $2
       if [ -n "$2" ] ; then
-        if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
+        if ! md5sum_files "$INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2)" ; then
 	  md5sum_files  "$INSTALL_LOGS/*"
         fi
       fi
@@ -780,7 +781,21 @@ main()  {
 	fi
       fi
       ;;
-      
+
+    versions)
+      if [ -n "$2" ] ; then
+        if run_details $2 ; then
+  	  echo "main-version $VERSION"
+	fi
+	for i in $MOONBASE/*/$2/*/DETAILS ; do
+	  x=`echo $i | sed 's:/DETAILS::'`
+	  run_details $2/`basename $x`
+	  echo "alt-version  $VERSION"
+	done
+
+      fi
+      ;;
+
     size)
       if [ -z "$2" ] ; then
         MODULES=$(cat $MODULE_STATUS | cut -d: -f1 | sort)
@@ -806,20 +821,22 @@ main()  {
       ;;
 
     compile)
-      if run_details $2 ; then
-        if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
-          view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
+      mv_edit $2
+      run_details $2 ; 
+        if [ -f $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2 ] ; then
+          view_file $COMPILE_LOGS/$MOD_V_SNAME-$(lvu version $2).bz2
         else
           VERSION=$(installed_version $2)
-          view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+          view_file $COMPILE_LOGS/$MOD_V_SNAME-$(installed_version $2).bz2 \
              "Compile log for $2 does not exist"
         fi
-      fi
+      #fi
       ;;
 	      
    install)
+     mv_edit $2
      if run_details $2 ; then
-       view_file $INSTALL_LOGS/$2-$(installed_version $2) \
+       view_file $INSTALL_LOGS/$MOD_V_SNAME-$(installed_version $2) \
            "Install log for $2 does not exist"
      fi
      ;;

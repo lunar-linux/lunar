@@ -124,11 +124,12 @@ run_pre_build() {
 
 stop_logging() {
   debug_msg "stop_logging ($@)"
+ mv_edit $MODULE 
   message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
+           "${FILE_COLOR}$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
 
-  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.bz2
+  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2
   temp_destroy $C_LOG
   temp_destroy $C_FIFO
 }
@@ -136,8 +137,9 @@ stop_logging() {
 
 start_logging () {
   debug_msg "start_logging  ($@)"
-  export C_LOG=$(temp_create "${MODULE}.compile-log")
-  export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
+ mv_edit $MODULE 
+  export C_LOG=$(temp_create "${MOD_V_SNAME}.compile-log")
+  export C_FIFO=$(temp_create "${MOD_V_SNAME}.compile-fifo")
 
   # just remaking this as FIFO
   rm -f $C_FIFO
@@ -358,7 +360,8 @@ lin_module()  {
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
   # lock the module for installation, check for moonbase call
-  linING="/var/lock/installing.$MODULE"
+ mv_edit $MODULE 
+  linING="/var/lock/installing.$MOD_V_SNAME"
   if [ "$MODULE" == "moonbase" ] ; then
     if ! current_locked && ! solo_locked ; then
       echo $$ > $linING       &&
@@ -410,7 +413,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi  
@@ -431,13 +434,13 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
 
     rm_source_dir               &&
-    report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
+    report $INSTALL_LOGS/$MOD_V_SNAME-$VERSION "install log" $MODULE $VERSION &&
     rm -f $linING               &&
     sound SUCCESS               &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
@@ -446,7 +449,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
       return 1
     fi

@@ -21,6 +21,7 @@
 # purpose : finds the installed size of module in KB
 find_module_size() {
    #this functions checks the modules file if there is already size entry
+   mv_edit $1
    module_size()
    {
       unset SIZE
@@ -40,14 +41,14 @@ find_module_size() {
    module_size $1 $VERSION && return
 
    # no :( lets dig through logs
-   [ -e "$INSTALL_LOGS/$1-$VERSION" ]  &&
+   [ -e "$INSTALL_LOGS/$MOD_V_SNAME-$VERSION" ]  &&
    while read LINE
    do
       [ -f "$LINE" ]            &&
       SIZE0=`du "$LINE"         | 
              cut -f 1-1`        &&
       SIZE=$((SIZE0+SIZE))
-   done <$INSTALL_LOGS/$1-$VERSION     &&
+   done <$INSTALL_LOGS/$MOD_V_SNAME-$VERSION     &&
    echo ${SIZE}KB                      ||
    message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
 }

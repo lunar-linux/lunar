@@ -258,11 +258,12 @@ rework_module() {
                                                                                 
   # here starts the real work:
   MODULE=$1
+ mv_edit $MODULE 
                                                                                 
   # base vars needed to execute DEPENDS
   SECTION=$(find_section $MODULE)
   SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-  MODULE_CONFIG=$DEPENDS_CONFIG/$MODULE
+  MODULE_CONFIG=$DEPENDS_CONFIG/$MOD_V_SNAME
                                                                                 
   # reroute depends output to our private files:
   OLD_DEPENDS_STATUS=$DEPENDS_STATUS

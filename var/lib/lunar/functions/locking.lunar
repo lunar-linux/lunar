@@ -20,6 +20,7 @@
 # usage   : lock_file <absolute file name>
 # purpose : locks a file or wait until. Better use as lock_file <file> && || etc
 function lock_file() {
+   debug_msg "lock_file ($@)"
    function file_lock() {
       #locking is disabled if ln or rm not found!!
       [ -x "/bin/ln" ] || return 0
@@ -27,6 +28,7 @@ function lock_file() {
 
       TEMPFILE="$1.$$"
       LOCKFILE="$1.lock"
+
       echo $$ > $TEMPFILE 2>/dev/null ||
       {
          message "${PROBLEM_COLOR}You don't have permission to access" \
@@ -70,6 +72,7 @@ function lock_file() {
 # usage   : unlock_file <absolute file name>
 # purpose : unlocks a file
 function unlock_file() {
+  debug_msg "unlock_file ($@)"
   #unlocking is disabled if rm not found!!
   [ -x "/bin/rm" ] || return 0
   rm -f $1.lock 2>/dev/null && return 0
