@@ -736,7 +736,7 @@ main()	{
   process_parameters        $*
   MODULES=`strip_parameters  $*`
 
-  if echo $MODULES | grep -q moonbase ; then
+  if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
     MODULE=moonbase
     lin_module
