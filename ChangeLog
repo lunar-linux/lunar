@@ -194,8 +194,3 @@
 
 	* var/lib/lunar/functions/updatelog.lunar: These 2 got left out...
 
-2003-03-26 08:46  sofar
-
-	* var/lib/lunar/protected: adding dirname, since an update of
-	coreutils shows lrm cannot find it.
-
