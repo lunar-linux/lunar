@@ -172,14 +172,3 @@
 	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
 	  blacklist.SPARC: memtest86+ is not non-x86 friendly
 
-2004-11-10 08:19  sofar
-
-	* var/lib/lunar/functions/useradd.lunar: Do not track changes to
-	  /etc/{passwd,group,shadow}
-
-2004-11-10 08:18  sofar
-
-	* var/lib/lunar/functions/modules.lunar: Adding an even more
-	  thorough check on create_module_index. If the install log is
-	  missing we *have* to use the slow method.
-
