@@ -68,13 +68,24 @@ function find_depends() {
 # usage    : LIST=$(sort_by_dependency $LIST)
 # purpose  : return a LIST sorted by dependency
 sort_by_dependency() {
- (
   debug_msg "sort_by_dependency ($@)"
-  MODULES=$@
-  for MODULE in $MODULES ; do
-    grep ^$MODULE: $DEPENDS_STATUS | grep ":on:" | awk -F: '{print $1,$2}'
-  done | tsort | tac
- )
+
+  recurse() {
+    for MOD in $* ; do
+      LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
+      for DEP in $LIST ; do
+        echo $MOD $DEP
+      done
+      recurse $LIST
+    done
+  }
+
+  ALL=$(recurse $* | tsort | tac)
+  for DEP in $ALL ; do
+    if echo " $* " | grep -q " $DEP " ; then
+      echo $DEP
+    fi
+  done
 }
 
 
