@@ -1,3 +1,22 @@
+2004-03-15 22:54  sofar
+
+	* var/lib/lunar/functions/: main.lunar, modules.lunar,
+	optimize.lunar, prune.lunar: Definitive fixes for missing PLATFORM
+	and/or BUILDs in theedge. Closing #392 with this one.
+
+2004-03-15 21:50  sofar
+
+	* bin/lvu: meep meep
+
+2004-03-15 21:41  sofar
+
+	* var/lib/lunar/functions/logging.lunar: Adding stop time marker.
+	Note this also includes the lrm stage in case that was needed.
+
+2004-03-15 21:24  sofar
+
+	* bin/lvu: Fix for broken lvu leert.
+
 2004-03-14 21:43  sofar
 
 	* bin/lvu, sbin/lrm, var/lib/lunar/excluded,
