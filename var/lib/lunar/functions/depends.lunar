@@ -373,7 +373,7 @@ create_depends_cache() {
 
     # you guessed it: local decls.
     depends() {
-      echo "$MODULE:$1:required:::"
+      echo "$MODULE:$1:required:$2:$3:"
     }
 
     optional_depends() {
