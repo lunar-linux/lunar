@@ -11,7 +11,6 @@ findutils
 gcc
 gettext
 glibc
-gpm
 grep
 gzip
 installwatch
