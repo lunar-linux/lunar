@@ -1,3 +1,9 @@
+2004-11-18 14:10  sofar
+
+	* var/lib/lunar/functions/locking.lunar: The color needs to be
+	  closed off at the end... otherwise all subsequent lines will be
+	  colored too
+
 2004-11-16 15:02  sofar
 
 	* var/lib/lunar/functions/modules.lunar: A little bit faster, still
