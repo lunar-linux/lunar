@@ -1,165 +1,64 @@
+2003-02-01 19:33  csm
+
+	* usr/share/man/man8/lfirsttime.8: a few updates and cleanups
+	
 2003-02-01 16:26  sofar
 
-	* sbin/lin: Cleaning up here: we don't really need that message
-	since blacklist.x86 is EMPTY.
-
+	* sbin/lin: Cleaning up here: we don't really need that message since blacklist.x86 is EMPTY.
+	
 2003-02-01 15:56  sofar
 
-	* var/state/lunar/: blacklist.x86, gcc.x86: Merging theedge in here
-	too: gcc.x86 is obsolete for 4 months already, tossing it out. Also
-	AFAIK most module in there compile anyway.
-
+	* var/state/lunar/: blacklist.x86, gcc.x86: Merging theedge in here too: gcc.x86 is obsolete for 4 months already, tossing it out. Also AFAIK most module in there compile anyway.
+	
 2003-02-01 14:55  sofar
 
-	* sbin/lget: Okay, here's the problem: you implement downloading
-	with locking, so lin can call lget without worrying wether it is
-	already downloading or now, now you add another download option,
-	but you forget to add locking to that feature. As you can guess,
-	when you try to install AND lin forces a download through that
-	other feature, it will start to download it, and then probe for it
-	again just before pre_build, because lin calls lget twice somehow.
-	Not at all a problem, unless you forget to add the locking
-	mechanism to the other feature, right? (short: implemented locking
-	where it is needed, should fix download/lin problems of CVS
-	modules)
-
+	* sbin/lget: Okay, here's the problem: you implement downloading with locking, so lin
+	can call lget without worrying wether it is already downloading or now,
+	now you add another download option, but you forget to add locking to that
+	feature. As you can guess, when you try to install AND lin forces a download
+	through that other feature, it will start to download it, and then probe
+	for it again just before pre_build, because lin calls lget twice somehow. Not
+	at all a problem, unless you forget to add the locking mechanism to the other
+	feature, right? (short: implemented locking where it is needed, should fix
+	download/lin problems of CVS modules)
+	
 2003-02-01 14:50  sofar
 
-	* var/lib/lunar/functions/modules.lunar: This will come back later
-	more.
-
+	* var/lib/lunar/functions/modules.lunar: This will come back later more.
+	
 2003-02-01 05:20  wizfactor
 
 	* sbin/lin: Updating xinet.d handling routine. Fixes bug 232
-
+	
 2003-01-30 05:21  tchan
 
 	* usr/share/man/man8/lfirsttime.8: Fixed some more punctuation.
-
+	
 2003-01-30 05:18  tchan
 
-	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
-	more fixes.
-
+	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some more fixes.
+	
 2003-01-29 20:26  sofar
 
 	* sbin/lunar: Fix for that nasty one bug.
-
+	
 2003-01-29 19:35  tchan
 
-	* usr/share/man/man8/lfirsttime.8: Updated the URLs and added a bit
-	more info.
-
+	* usr/share/man/man8/lfirsttime.8: Updated the URLs and added a bit more info.
+	
 2003-01-29 13:11  sofar
 
 	* bin/lvu, sbin/lget, sbin/lin, sbin/lrm, sbin/lunar,
 	usr/sbin/colony, var/lib/lunar/subroutines,
-	var/lib/lunar/functions/modules.lunar: Merging view_file and cvs
-	changes into lunar.
-
+	var/lib/lunar/functions/modules.lunar: Merging view_file and cvs changes into lunar.
+	
 2003-01-29 10:28  sofar
 
-	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view
-	the logfile easier: 'lvu activity'
-
+	* bin/lvu, usr/share/man/man1/lvu.1: Adding functionality to view the logfile easier: 'lvu activity'
+	
 2003-01-24 21:56  sofar
 
 	* bin/lvu, etc/lunar/config, sbin/lget, sbin/lin, sbin/lunar,
 	var/lib/lunar/subroutines, var/lib/lunar/functions/modules.lunar,
 	var/lib/lunar/menu/mirrors.menu: Merging theedge into lunar! =^D
-
-2003-01-20 15:23  sofar
-
-	* var/lib/lunar/sustained: Sorry for the gpm fans, but gpm is *NOT*
-	a vital package for the correct functioning of lunar. Removing it
-	here.
-
-2003-01-19 23:14  sofar
-
-	* etc/lunar/mirrors/LRESORT: Popping in DNS names!
-
-2003-01-16 00:09  sofar
-
-	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Merging theedge
-	compiler wrappers into lunar.
-
-2003-01-05 20:31  sofar
-
-	* etc/lunar/config: New default LRESORT URL.
-
-2003-01-05 20:29  sofar
-
-	* etc/lunar/mirrors/LRESORT: Putting new source caches in here.
-
-2003-01-01 23:24  sofar
-
-	* sbin/lin: Removing autopatch scheme
-
-2003-01-01 21:31  sofar
-
-	* var/lib/lunar/functions/updatelog.lunar: This should fix the
-	weird messages after a lunar update/renew
-
-2002-12-30 22:19  hardkrash
-
-	* sbin/lget: Added ability to use tun devices for internet
-	connections. -- Hardkrash
-
-2002-12-29 23:42  sofar
-
-	* etc/lunar/config: Added PATCH_URL to config, the new repository
-	for patches.
-
-2002-12-24 18:20  tchan
-
-	* var/lib/lunar/: subroutines, functions/optimize.lunar,
-	menu/optimize.menu: Synched some more important fixes from theedge
-	back into regular lunar core.
-
-2002-12-23 01:10  sofar
-
-	* sbin/lin: okay this works now without CVS bullocking it.
-
-2002-12-23 01:07  sofar
-
-	* sbin/lin: leave out the * to omit subdirs in case of CVS.
-
-2002-12-23 00:49  sofar
-
-	* sbin/lin: Added auto-patching: scan for subdir 'patch' and apply
-	all regular files in that directory before BUILD/default_build.
-	Note patch order is equal to 'ls'.
-
-2002-12-22 06:38  tchan
-
-	* var/lib/lunar/subroutines: Bringing some of the added
-	functionality from theedge back into lunar core.  Specifically the
-	patch_it function which is appearing in more of moonbase.  Also
-	added the fixes from theedge for the disappearing
-	/usr/share/info/dir file.  Added the timestamp feature in the
-	activity_log from theedge.
-
-2002-11-26 14:49  kc8apf
-
-	* lib/lsb/init-functions: Fix pgrep so it only finds processes that
-	start with PROCESS.  It was previously finding any process which
-	contained PROCESS, so kapmd was found when apmd was the process
-	being searched for.
-
-2002-11-21 05:31  hardkrash
-
-	* var/lib/lunar/functions/optimize.lunar: Added PPC and Power
-	options to lunar optomization functions
-
-2002-11-21 05:29  hardkrash
-
-	* var/lib/lunar/menu/optimize.menu: Added PPC and Power processors
-	to menus corrected menu prompts
-
-2002-11-09 13:46  elaine
-
-	* var/lib/lunar/functions/updatelog.lunar: 
-	fixed typo MOUDLE caught by Lurch, and added "" to the variables --
-	this (variable quoting) probably needs to be done for all lunar
-	code
-
+	
