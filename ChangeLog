@@ -1,3 +1,8 @@
+2003-11-02 02:25  elaine
+
+	* var/lib/lunar/functions/depends.lunar: Added install-status to
+	opt-deps query and clarified the query text
+
 2003-10-24 22:38  tchan
 
 	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
