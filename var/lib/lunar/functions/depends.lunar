@@ -70,18 +70,18 @@ function find_depends() {
 sort_by_dependency() {
   debug_msg "sort_by_dependency ($@)"
 
-  included=""
+  unset INCLUDED
 
   recurse() {
     for MOD in $* ; do
-      if echo "$included" | grep -qFx "$MOD" ; then
+      if echo "$INCLUDED" | grep -qFx "$MOD" ; then
         debug_msg "Cutoff: $MOD"
       else
         LIST=$(grep ^$MOD: $DEPENDS_STATUS | grep ":on:" | cut -d: -f2)
         for DEP in $LIST ; do
           echo $MOD $DEP
         done
-        included=$included$'\n'$MOD
+        INCLUDED=$INCLUDED'\n'$MOD
         recurse $LIST
       fi
     done
@@ -213,9 +213,12 @@ run_depends() {
   prepare_depends_status
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
-    message  "${CHECK_COLOR}Checking dependencies for"  \
-             "${MODULE_COLOR}${MODULE}"                   \
-             "${DEFAULT_COLOR}"
+    if [ -n "$SINGLE_MODULE" ] ; then
+      # we only need to show this once, but we get here twice per module
+      message  "${CHECK_COLOR}Checking dependencies for"  \
+               "${MODULE_COLOR}${MODULE}"                 \
+               "${DEFAULT_COLOR}"
+    fi
     run_module_file $MODULE DEPENDS
   fi
 }

@@ -369,6 +369,11 @@ module_needs_update () {
 remove_module() {
   debug_msg "remove_module ($@)"
 
+  # catch this on new boxes:
+  if [ ! -f $MODULE_STATUS ] ; then
+    touch $MODULE_STATUS $MODULE_STATUS_BACKUP $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  fi
+
   verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS                                     && 
   lock_file $MODULE_STATUS_BACKUP                              &&
@@ -400,6 +405,12 @@ remove_module() {
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
   debug_msg "add_module ($@)"
+
+  # catch this on new boxes:
+  if [ ! -f $MODULE_STATUS ] ; then
+    touch $MODULE_STATUS $MODULE_STATUS_BACKUP $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  fi
+
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS                                    && 
   lock_file $MODULE_STATUS_BACKUP                             &&

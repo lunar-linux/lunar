@@ -183,13 +183,12 @@ default_cvs_config() {
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
-  # This code is simular to the optimize_make
-  # function from optimize.lunar
+  # This code is simular to the optimize_make function from optimize.lunar
   # This is needed because bash does not expand aliases in functions
-  if module_installed linux-openmosix; then
+  if module_installed linux-openmosix ; then
     if [[ "$MAKES" > 1 ]] ; then
       mosrun -h make -j$MAKES
-      else
+    else
       mosrun -h make
     fi
   elif [[ $MAKES > 1 ]] ; then
@@ -198,7 +197,7 @@ default_make() {
     make
   fi                                 &&
   prepare_install                    &&
-  make    install
+  make install
 } > $C_FIFO 2>&1
 
 

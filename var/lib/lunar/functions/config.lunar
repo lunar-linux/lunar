@@ -14,10 +14,7 @@
 #                                                          #
 # Copyrighted Kagan Kongar 2002 under GPLv2                #
 #                                                          #
-# Parts copyrighted Steven Michalske 2004 under GPLv2      #
-#                                                          #
 ############################################################
-
 
 # function: write_config
 # usage   : write_config <line to remove> [<line to add>]
@@ -31,8 +28,7 @@ function write_config() {
    LOCAL_CONFIG_BACKUP="/tmp/lunar.localconfigbackup.$$"
    rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
 
-   function handle_trap()
-   {
+   function handle_trap() {
       cp $LOCAL_CONFIG_BACKUP $LOCAL_CONFIG 2>/dev/null     
       unlock_file $LOCAL_CONFIG        
       rm -f $TMP_LOCAL_CONFIG 2>/dev/null
@@ -79,24 +75,23 @@ function write_config() {
 
 get_module_configured(){
   debug_msg "module_configured ($@)"
-  if [ "$#" -ne "1" ]; then
+  if [ "$#" -ne "1" ] ; then
     message "${PROBLEM_COLOR}Configuration date missing, assuming unconfigured."
     message "${MESSAGE_COLOR}Please inform the lunar devlopers of this issue. ${DEFAULT_COLOR}"
     return false
   fi
 
-  # Check for file,  return false for missing
-  if [ ! -f "$MODULE_CONFIG" ]; then
+  # Check for file, return false for missing
+  if [ ! -f "$MODULE_CONFIG" ] ; then
     debug_msg "Config file for $MODULE not found"
     return false
   fi
 
   # Check for configured date flag
-  MC_CONFIG_DATE=`grep "CONFIGURED=" $MODULE_CONFIG | \
-                   sed "s:.*=\([0-9]*\)[^0-9]*:\1:"`
-  if [ -n "$MC_CONFIG_DATE" ]; then
-    if [ "$MC_CONFIG_DATE" -le "$1" ]; then
-      # the file is old,  reconfigure
+  MC_CONFIG_DATE=$(grep "CONFIGURED=" $MODULE_CONFIG | sed "s:.*=\([0-9]*\)[^0-9]*:\1:")
+  if [ -n "$MC_CONFIG_DATE" ] ; then
+    if [ "$MC_CONFIG_DATE" -le "$1" ] ; then
+      # the file is old, reconfigure
       return false
     else
       # configuration current
@@ -109,14 +104,11 @@ get_module_configured(){
 
 
 # function: set_module_configured
-#    usage: set_module_configured [<quoted list of lines to append to file>]
-#  purpose: to freshen the module configuration file with current config date
-
+#    usage: set_module_configured [<quoted list of lines to append to file>]   -#  purpose: to freshen the module configuration file with current config date
 set_module_configured() {
   debug_msg "set_module_configured ($@)"
-  echo "CONFIGURED=`date -u +%Y%m%d`" > $MODULE_CONFIG
-  for line in $@
-  do
-    echo $line >> $MODULE_CONFIG
+  echo "CONFIGURED=$(date -u +%Y%m%d)" > $MODULE_CONFIG
+  for line in $@ ; do
+    echo "$line" >> $MODULE_CONFIG
   done
 }

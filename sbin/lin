@@ -60,7 +60,7 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
-  message "mod_v = $MOD_VERSION mod= $MODULES"
+  verbose_msg "mod_v=\"$MOD_VERSION\" mod=\"$MODULES\""
 
   if echo $MODULES | grep -qw moonbase ; then
     
@@ -82,7 +82,7 @@ main() {
 
   # different approaches for multiple modules (start up downloads first)
   # and single modules (plain install)
-  if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+  if [ -z "$SINGLE_MODULE" ] ; then
 
     if [ -n "$MOD_VERSION" ] ; then
       message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
@@ -118,15 +118,12 @@ main() {
     # pass 3 : compile/install
     # no strange stuff should happen here anymore
     for MODULE in $MODULES ; do
-      verbose_msg "starting installation of \"$MODULE\""
       if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
         if ! module_held $MODULE ; then
           linING="/var/lock/installing.$MODULE"
-          if  [  -n  "$COMPILE"      ]  ||
-              [  -n  "$RECONFIGURE"  ]  ||
-              module_installed  $MODULE   ||
-              !  resurrect     $MODULE;  then
-            if ! lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
+          if [ -n "$COMPILE" ] || [ -n "$RECONFIGURE" ] || module_installed $MODULE || ! resurrect $MODULE ; then
+	    verbose_msg "starting lin \"$MODULE\""
+            if ! SINGLE_MODULE=1 lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
@@ -148,24 +145,24 @@ main() {
     temp_destroy $TEMP_PREPAREDDEPS
 
   else
-    if [ -n "$MOD_VERSION" ] ; then
+    # we are only doing one module, drop down to:
+    MODULE=$MODULES
 
-      if  echo $MODULES | grep -q '/' ; then
-        if [ -d ${MOONBASE}/*/${MODULES} ] ; then
+    if [ -n "$MOD_VERSION" ] ; then
+      if echo $MODULE | grep -q '/' ; then
+        if [ -d ${MOONBASE}/*/${MODULE} ] ; then
 	  unset MOD_VERSION
         else
-          message "${PROBLEM_COLOR}No Moonbase module:${FILE_COLOR}$MODULES${MESSAGE_COLOR}\
-	            with $MODULES form, bailing!${DEFAULT_COLOR}"
+          message "${PROBLEM_COLOR}No Moonbase module: ${FILE_COLOR}$MODULE${MESSAGE_COLOR} with \"$MODULE\" form, bailing!${DEFAULT_COLOR}"
 	  return 1
         fi
       else
-	if [ -d ${MOONBASE}/*/${MODULES}/${MOD_VERSION} ] ; then
-	  MODULES="${MODULES}/${MOD_VERSION}"
+	if [ -d ${MOONBASE}/*/${MODULE}/${MOD_VERSION} ] ; then
+	  MODULE="${MODULE}/${MOD_VERSION}"
 	else
-          message "${MESSAGE_COLOR}$MODULES Passing${FILE_COLOR} $MOD_VERSION${MESSAGE_COLOR}\
-	          to module for processing${DEFAULT_COLOR}"
+          debug_msg "${MESSAGE_COLOR}$MODULES Passing ${FILE_COLOR}$MOD_VERSION${MESSAGE_COLOR} to module for processing${DEFAULT_COLOR}"
         fi
-	message "Module = $MODULES"
+	message "Module=\"$MODULE\""
       fi
     fi
 
@@ -173,8 +170,7 @@ main() {
       FLAG_PREPAREDDEPS_SET=on
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
     fi
-    # we are only doing one module, drop down to:
-    MODULE=$MODULES
+
     if ! module_held $MODULE ; then
       if [ -n "$PROBE" ] ; then
         if ! module_installed $MODULE ; then
