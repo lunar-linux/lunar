@@ -1,3 +1,7 @@
+2004-09-20 16:00  sofar
+
+	* var/lib/lunar/protected: Smacking courier in here
+
 2004-08-27 08:51  sofar
 
 	* var/lib/lunar/functions/sources.lunar: foo /me fixes proper
