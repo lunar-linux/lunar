@@ -237,28 +237,30 @@ rework_module() {
   # we declare these local to override the systems default ones:
   optional_depends()  {
     debug_msg "  optional_depends ($@)"
-    if module_exiled $1 ; then
-      echo "$MODULE:$1:off:optional:$2:$3"
+    DEP=$(unalias $1)
+    if module_exiled $DEP ; then
+      echo "$MODULE:$DEP:off:optional:$2:$3"
     else
-      if module_installed $1 || module_held $1 ; then
-        echo "$MODULE:$1:on:optional:$2:$3"
+      if module_installed $DEP || module_held $DEP ; then
+        echo "$MODULE:$DEP:on:optional:$2:$3"
       else
-        echo "$MODULE:$1:off:optional:$2:$3"
+        echo "$MODULE:$DEP:off:optional:$2:$3"
       fi
     fi
   }
                                                                                 
   depends()  {
     debug_msg "  depends ($@)"
-    if ! module_installed $1 && ! module_held $1 ; then
-      if ! is_depends $1 && module_exiled $1 ; then
+    DEP=$(unalias $1)
+    if ! module_installed $DEP && ! module_held $DEP ; then
+      if ! is_depends $DEP && module_exiled $DEP ; then
         return  1
       else
-        CHANGED_MODULES="$CHANGED_MODULES $1"
+        CHANGED_MODULES="$CHANGED_MODULES $DEP"
       fi
     fi
 
-    echo "$MODULE:$1:on:required:$2:$3"
+    echo "$MODULE:$DEP:on:required:$2:$3"
   }
 
   run_depends() {
@@ -384,5 +386,4 @@ run_fix()  {
     done
   done
 }
-
 

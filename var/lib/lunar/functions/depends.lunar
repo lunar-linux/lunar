@@ -30,6 +30,7 @@ function find_depends() {
   find_depends_intern() {
     grep "^$1:" $DEPENDS_CACHE | while read LINE ; do
       DEP=$(echo $LINE | cut -d: -f2)
+      DEP=$(unalias $DEP)
       # this is our shortcut out:
       if ! grep -qx "$DEP" $TMP_FDEPS ; then
       debug_msg "$DEP"
@@ -47,7 +48,7 @@ function find_depends() {
   }
 
   TMP_FDEPS=$(temp_create "found.depends")
-  find_depends_intern $1
+  find_depends_intern $(unalias $1)
   temp_destroy $TMP_FDEPS
 }
 
@@ -66,7 +67,7 @@ sort_by_dependency() {
   done
 
   # tsort the existing dep relations in all of moonbase
-  cat $DEPENDS_CACHE | awk -F: '{print $1" "$2}' | tsort 2> /dev/null | tac > $TMP_ALL
+  cat $DEPENDS_CACHE | awk -F: '{print $1" "$2}' | while read A B ; do echo $A $(unalias $B) ; done | tsort 2> /dev/null | tac > $TMP_ALL
   # append all modules that do not have a DEPENDS file at all at the end
   # note that this is logically WRONG, but it actually will help with
   # unincluded depends, and therefore is *better* behaviour
@@ -152,21 +153,27 @@ add_depends() {
 run_depends() {
   debug_msg "run_depends ($@)"
   # local definitions of depends and optional_depends!
-  depends()  {
+  depends() {
     debug_msg "  depends ($@)"
-    grep -q "^"$1"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
+    DEP=$(unalias $1)
+    if grep -q "^$DEP\$" $TEMP_PREPAREDDEPS 2>/dev/null ; then
+      return 0
+    fi
 
-    if ! module_installed $1 && ! module_held $1 ; then
-      if ! is_depends $1 && module_exiled $1 ; then
-        message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}${1}${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
+    if module_installed $DEP ; then
+      add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
+      echo "$DEP" >> $TEMP_PREPAREDDEPS
+    elif ! module_installed $DEP && ! module_held $DEP ; then
+      if module_exiled $DEP ; then
+        message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
         return 1
       else
         message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
                 "Adding required dependency${FILE_COLOR}"   \
-                "$1 ${DEFAULT_COLOR}"
-        add_depends "$MODULE" "$1" "on" "required" "$2" "$3"
-        lin --deps $1
-        echo "$1" >> $TEMP_PREPAREDDEPS
+                "$DEP ${DEFAULT_COLOR}"
+        add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
+        lin --deps $DEP
+        echo "$DEP" >> $TEMP_PREPAREDDEPS
       fi
     fi
   }
@@ -176,37 +183,38 @@ run_depends() {
     # parameters:  $1 = module name
     #              $2 = configure parameter if module wanted
     #              $3 = configure parameter if module declined
-    #              $4 = description of why to use this module.
-                                                                                
-    if ! in_depends "$MODULE" "$1" ; then
+    #              $4 = description of why to use this module
+
+    DEP=$(unalias $1)
+    if ! in_depends "$MODULE" "$DEP" ; then
                                                                                
-      if module_exiled $1 ; then
-        verbose_msg "\"$MODULE\" optionally depends on exiled module \"$1\""
-        add_depends "$MODULE" "$1" "off" "optional" "$2" "$3"
+      if module_exiled $DEP ; then
+        verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
+        add_depends "$MODULE" "$DEP" "off" "optional" "$2" "$3"
       else
-        if module_installed $1 ; then
+        if module_installed $DEP ; then
           DEFAULT="y"
 	else
           DEFAULT="n"
         fi
 
-	if module_installed $1 ; then
-	  DEPMOD_AVAIL="Use optional ${MESSAGE_COLOR}(presently installed) module${QUERY_COLOR} $1"
+	if module_installed $DEP ; then
+	  DEPMOD_AVAIL="Use optional ${MESSAGE_COLOR}(presently installed) module${QUERY_COLOR} $DEP"
 	else
-	  DEPMOD_AVAIL="Install & use optional ${PROBLEM_COLOR}(not yet installed) ${MESSAGE_COLOR}module${QUERY_COLOR} $1"
+	  DEPMOD_AVAIL="Install & use optional ${PROBLEM_COLOR}(not yet installed) ${MESSAGE_COLOR}module${QUERY_COLOR} $DEP"
 	fi
 
         # this is shortcut case s1) as discussed in lunar-dev ML
-	if module_installed $1 && [ -z "$2" -a -z "$3" ] ; then
-	  verbose_msg "Auto-adding optional dependency \"$1\""
-          add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-	  lin --deps $1
+	if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
+	  verbose_msg "Auto-adding optional dependency \"$DEP\""
+          add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
+	  lin --deps $DEP
 	elif query  "$DEPMOD_AVAIL 
           dependency - purpose: $4? " $DEFAULT ; then
-          add_depends  "$MODULE"  "$1"  "on"   "optional"  "$2"  "$3"
-          lin --deps $1
+          add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
+          lin --deps $DEP
         else
-          add_depends  "$MODULE"  "$1"  "off"  "optional"  "$2"  "$3"
+          add_depends  "$MODULE"  "$DEP"  "off"  "optional"  "$2"  "$3"
 	fi
       fi
     fi
@@ -287,10 +295,11 @@ satisfy_depends()  {
 # conflicts... remove conflicting modules
 conflicts() {
   debug_msg "conflicts ($@)"
-  if module_installed $1 ; then
-    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${MODULE_COLOR}$1${DEFAULT_COLOR}${PROBLEM_COLOR} conflicts with module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
-    if query "Do you want to remove module ${DEFAULT_COLOR}${MODULE_COLOR}$1${DEFAULT_COLOR}${QUERY_COLOR} ? " n ; then
-      lrm $1
+  DEP=$1
+  if module_installed $DEP ; then
+    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${MODULE_COLOR}$DEP${DEFAULT_COLOR}${PROBLEM_COLOR} conflicts with module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+    if query "Do you want to remove module ${DEFAULT_COLOR}${MODULE_COLOR}$DEP${DEFAULT_COLOR}${QUERY_COLOR} ? " n ; then
+      lrm $DEP
     else
       message "${PROBLEM_COLOR}ERROR: Cannot continue installing conflicting modules, exiting!${DEFAULT_COLOR}"
       return 1

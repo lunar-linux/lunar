@@ -473,12 +473,14 @@ function show_tree() {
     # local definitions
     function depends() {
       debug_msg "depends ($@)"
-      echo "+$1"
+      DEP=$(unalias $1)
+      echo "+$DEP"
     }
 
     optional_depends() {
       debug_msg "optional_depends ($@)"
-      echo "-$1"
+      DEP=$(unalias $1)
+      echo "-$DEP"
     }
     
     debug_msg "run_depends ($@)"
