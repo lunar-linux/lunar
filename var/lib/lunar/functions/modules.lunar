@@ -129,14 +129,12 @@ create_module_index() {
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
   debug_msg "check_module_index ($@)"
-  if [ -w $MODULE_INDEX -a -w $DEPENDS_CACHE ] ; then
-    if [ ! -e $MODULE_INDEX -o ! -e $DEPENDS_CACHE -o -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
-      create_module_index
-      create_depends_cache
-      return 0
-    else
-      return 1
-    fi
+  if [ ! -e $MODULE_INDEX -o ! -e $DEPENDS_CACHE -o -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
+    create_module_index
+    create_depends_cache
+    return 0
+  else
+    return 1
   fi
 }
 
