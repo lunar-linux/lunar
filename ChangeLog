@@ -1,3 +1,18 @@
+2004-02-04 02:36  tchan
+
+	* usr/share/doc/lunar/CREDITS: Removing sofar's last commit as bkw
+	was already in the list.  He was added after his ibackup module was
+	committed to moonbase.	The CREDITS list is trying to be
+	alphabetical by "nickname".
+
+2004-02-03 23:12  sofar
+
+	* usr/share/doc/lunar/CREDITS: Before I forget... thanks!
+
+2004-02-03 18:41  cmak
+
+	* var/lib/lunar/functions/prune.lunar: fixed bug 439
+
 2004-01-21 16:56  tchan
 
 	* usr/share/doc/lunar/CREDITS: Fixed another typo.  Added Erik
@@ -220,11 +235,4 @@
 
 	* var/lib/lunar/functions/kernel.lunar: fixing a squeaky wheel no
 	grease
-
-2003-12-05 10:56  sofar
-
-	* var/lib/lunar/functions/moonbase.lunar: Adding more proper
-	handling of moonbase: - create md5sum log (just for kicks, not
-	really used) - proper install log - call lrm to clean up install
-	and md5sum logs on new update
 
