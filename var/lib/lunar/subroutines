@@ -341,7 +341,9 @@ prepare_install() {
       module_held       $MODULE;  then
 
     save_libraries
+    cp -a /usr/share/info/dir /tmp/info_dir.saved
     lrm  --nosustain  $MODULE
+    mv /tmp/info_dir.saved /usr/share/info/dir
     true
 
   fi
