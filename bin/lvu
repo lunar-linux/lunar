@@ -258,18 +258,10 @@ lvu_catalog_html()  {
       (
         run_details $MODULE &> /dev/null
         echo  "<tr>"
-        if  [  "$MODULE"  ==  "linux"  ]   ||
-            [  "$MODULE"  ==  "glibc"  ];  then
-            BOLD="<b>"
-          UNBOLD="</b>"
-        else
-          unset    BOLD
-          unset  UNBOLD
-        fi
         if  [  ${#MODULE}  -gt  15  ];  then
           MODULE="<font size=-1>$MODULE</font>"
         fi
-        echo  "<td>$BOLD $MODULE $UNBOLD</td>"
+        echo  "<td>$MODULE</td>"
         echo  "<td><font size=-1>$BOLD $VERSION $UNBOLD</font></td>"
         echo  "<td><font size=-1>$UPDATED</font></td>"
 
