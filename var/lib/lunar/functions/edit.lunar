@@ -18,15 +18,15 @@
 patch_it () { 
   verbose_msg "patch_it \"$1\" \"$2\"";
   
-  if [[ -n `echo $1 | grep "\.tar\$"` ]] ; then
+  if [[ -n `echo $1 | grep .tar` ]] ; then
     TARCMD="tar x -O"
   else
     TARCMD="cat"
   fi
 
-  if [[ -n `echo $1 | grep "\.bz2\$"` ]] ; then
+  if [[ -n `echo $1 | grep .bz2` ]] ; then
     GZCMD="bzcat"
-  elif [[ -n `echo $1 | grep "\.gz\$"` ]] ; then
+  elif [[ -n `echo $1 | grep .gz` ]] ; then
     GZCMD="zcat"
   else
     GZCMD="cat"
