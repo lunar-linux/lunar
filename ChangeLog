@@ -204,31 +204,3 @@
 	* var/lib/lunar/menu/dmodule.menu: Merging back niki's typo fix
 	reported by Moe.
 
-2003-03-24 20:55  kc8apf
-
-	* var/lib/lunar/menu/optimize.menu: Stupid bug #2
-
-2003-03-24 19:19  kc8apf
-
-	* var/lib/lunar/functions/optimize.lunar: Stupid mistake
-
-2003-03-24 16:21  kc8apf
-
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	Clean up options for Alpha CPUs
-
-2003-03-24 08:20  sofar
-
-	* sbin/lin: wheps
-
-2003-03-24 00:22  sofar
-
-	* var/lib/lunar/functions/modules.lunar: BIG BIG BIG bugfix: lunar
-	will now better find moved modules (umm, I say better, but I mean
-	actually that lunar now actually finds them. I dunno what is better
-	than that, so yeah, better).
-
-2003-03-24 00:13  sofar
-
-	* var/lib/lunar/functions/download.lunar: muuuuuch better
-
