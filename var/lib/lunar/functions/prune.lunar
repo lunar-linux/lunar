@@ -28,19 +28,97 @@
 # function : generate_keep_list
 # usage    : generate_keep_list
 # purpose  : generated a list of files which will not be deleted with prune
-generate_keep_list() {
+generate_keep_list() {(
+
+  if [ -z "$BUILD" ] ; then
+    optimize
+  fi
+
   debug_msg "generate_keep_list ($@)"
   for MODULE in $(list_moonbase | sort);  do
     show_fancy_progress "Processing: $MODULE"
-    sources $MODULE >> $KEEP
+    sources $MODULE >> $TMP_KEEPFILE
     VERSION=$(installed_version $MODULE)
     if [ -z "$VERSION" ] ; then
       VERSION=$(run_details $MODULE ; echo $VERSION)
     fi
-    echo $MODULE-$VERSION-$BUILD.tar.bz2 >> $KEEP
+    echo $MODULE-$VERSION-$BUILD.tar.bz2 >> $TMP_KEEPFILE
   done
   
-  echo  README >> $KEEP
+  echo  README >> $TMP_KEEPFILE
+)}
+
+
+# function : prune
+# usage    : prune
+# purpose  : prune all old logs, source copy's, install caches
+prune() {
+  debug_msg "prune ($@)"
+  message  "${MESSAGE_COLOR}Generating a keep list..." \
+           "${DEFAULT_COLOR}"
+
+  export TMP_KEEPFILE=$(temp_create "keep")
+  trap "rm -f $TMP_KEEPFILE 2>/dev/null; exit" INT QUIT TERM
+  generate_keep_list
+
+  message  "${MESSAGE_COLOR}Now pruning $SOURCE_CACHE..." \
+           "${DEFAULT_COLOR}"
+  ls  $SOURCE_CACHE  |
+  while  read  FILE;  do
+      grep  -q  "^$FILE$"  $TMP_KEEPFILE  || {
+        rm  $SOURCE_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$SOURCE_CACHE/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $INSTALL_CACHE..." \
+           "${DEFAULT_COLOR}"
+  ls  $INSTALL_CACHE  |
+  while  read  FILE;  do
+      grep  -q  "^$FILE$"  $TMP_KEEPFILE  || {
+        rm  $INSTALL_CACHE/$FILE 2>/dev/null
+	verbose_msg "rm \"$INSTALL_CACHE/$FILE\""
+      }	
+  done
+
+  export TMP_KEEPFILE2=$(temp_create "keep_installed")
+  trap "rm -f $TMP_KEEPFILE2 2>/dev/null; exit" INT QUIT TERM
+  cat $MODULE_STATUS | cut -d: -f1,4 | sed 's/:/-/' > $TMP_KEEPFILE2
+
+  message  "${MESSAGE_COLOR}Now pruning $INSTALL_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $INSTALL_LOGS  |
+  while  read  FILE;  do
+      grep -q "^$FILE$"  $TMP_KEEPFILE2 || {
+        rm $INSTALL_LOGS/$FILE
+	verbose_msg "rm \"$INSTALL_LOGS/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $COMPILE_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $COMPILE_LOGS  | sed 's/.bz2$//' |
+  while  read  FILE;  do
+      grep -q "^$FILE$"    $TMP_KEEPFILE2 || {
+        rm $COMPILE_LOGS/$FILE.bz2
+	verbose_msg "rm \"$COMPILE_LOGS/$FILE\""
+      }
+  done
+
+  message  "${MESSAGE_COLOR}Now pruning $MD5SUM_LOGS..." \
+             "${DEFAULT_COLOR}"
+  ls  $MD5SUM_LOGS  |
+  while  read  FILE;  do
+      grep -q "^$FILE$"    $TMP_KEEPFILE2 || {
+        rm $MD5SUM_LOGS/$FILE
+	verbose_msg "rm \"$MD5SUM_LOGS/$FILE\""
+      }
+  done
+
+  temp_destroy $TMP_KEEPFILE
+  temp_destroy $TMP_KEEPFILE2
+
+  trap INT QUIT TERM
 }
 
 
