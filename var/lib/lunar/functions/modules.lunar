@@ -239,6 +239,9 @@ run_details() {
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
   debug_msg "run_module_file ($@)"
+  if [ "$1" == "moonbase" ] ; then
+    return 0
+  fi
   if [ -z "$SCRIPT_DIRECTORY" ] ; then
     if ! run_details $1 > /dev/null ; then
       return 1
