@@ -38,7 +38,15 @@ else
 fi
 
 optimize_make() {
-  if [[ $MAKES > 1 ]]; then
+  if [[ $PSAFE == "no" ]]; then
+    MAKES=1
+  fi
+  if module_installed linux-mosix; then
+    alias make="mosrun -h make"
+    if [[ $MAKES > 1 ]]; then
+      alias make="mosrun -h make -j$MAKES"
+    fi
+  elif [[ $MAKES > 1 ]]; then
     alias make="make -j$MAKES"
   fi
 }
@@ -186,7 +194,8 @@ optimize_cpu()  {
                     ;;
       AthlonTBird) if [[ $GCCVER == "3" ]];  then
                        CFLAGS="$CFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-tbird 
+-march=athlon-tbird"
                        BUILD="i686-pc-linux-gnu"
                     else
                        CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
@@ -526,8 +535,10 @@ optimize_speed() {
                    fi
                  ;;
             Align) if [[ $GCCVER == "3" ]] ; then
-                     CFLAGS="$CFLAGS -falign-functions -falign-loops -falign-jumps"
-                     CXXFLAGS="$CXXFLAGS -falign-functions -falign-loops -falign-jumps"
+                     CFLAGS="$CFLAGS -falign-functions -falign-loops 
+-falign-jumps"
+                     CXXFLAGS="$CXXFLAGS -falign-functions -falign-loops 
+-falign-jumps"
                    else
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
