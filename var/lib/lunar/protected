@@ -18,6 +18,7 @@
 ^/etc/audit
 ^/etc/bonobo-activation/
 ^/etc/config.d/ospmd.conf
+^/etc/courier/
 ^/etc/cron.daily/
 ^/etc/cron.hourly/
 ^/etc/cron.monthly/
