@@ -122,12 +122,3 @@
 	in the lunar maintenance menu so people can use it (although it's
 	still mopping up after some other part goofs up)
 
-2004-05-09 12:08  sofar
-
-	* var/lib/lunar/functions/: depends.lunar, main.lunar,
-	messages.lunar, modules.lunar, prune.lunar, recovery.lunar: Some
-	bugfixes regarding locking, ordering of locks and return status of
-	locking, some fixes with missing depends (important one), visual
-	adjustment of titlebar display (compile instead of processing,
-	added hostname, $0[$$]).
-
