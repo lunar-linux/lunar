@@ -98,11 +98,3 @@
 	  var/lib/lunar/functions/temp.lunar: define TMPDIR and use it
 	  globally. Its position is overwriteable by using lunar set TMPDIR
 
-2004-12-08 08:35  sofar
-
-	* var/lib/lunar/functions/build.lunar: Better check: this literally
-	  looks how larege the installwatch file is. If it's zero then the
-	  module has not installed ANY file and thus the warning is legit.
-	  Most likely profile modules now only are a problem but we'll cope
-	  with them a different way.
-
