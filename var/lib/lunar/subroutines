@@ -1522,6 +1522,13 @@ get_moonbase() {
   rm -f $SOURCE_CACHE/$SOURCE
   message  "${MESSAGE_COLOR}Removed ${FILE_COLOR}${SOURCE}${DEFAULT_COLOR}"
 
+  echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
+    	    "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
+  if [ -f $MODULE_INDEX ]; then
+    rm $MODULE_INDEX                 
+  fi
+  create_module_index
+  
   activity_log "lin" "$MODULE" "$VERSION" "$OUTCOME" "$INFO"
 
 }
