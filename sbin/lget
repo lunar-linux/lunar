@@ -50,6 +50,38 @@ EOF
 
 }
 
+use_cvs() {(
+  run_details &&
+  cd $BUILD_DIRECTORY
+  if [[ $CVS_SERVER ]]; then
+    message  "${MESSAGE_COLOR}Downloading CVS module"                      \
+             "${FILE_COLOR}${CVS_MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"  \
+             "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+    mk_source_dir $CVS_MODULE
+    # unset CVS_RSH
+    export CVSROOT=$CVS_SERVER
+    if [[ $CVS_LOGIN ]]; then
+      echo "$CVS_LOGIN" | cvs login
+    fi 
+    if ! [[ $CVS_MODULE ]]; then
+      CVS_MODULE=`echo $MODULE | sed s/-cvs//`
+    fi
+    if [[ -f $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 ]]; then
+      tar xjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2
+    fi
+    if [[ -d $CVS_MODULE/CVS ]]; then
+      cvs -qz3 up -PAd $CVS_MODULE && GOT_CVS="yes" 
+    elif ! [[ -d CVS ]]; then
+      cvs -qz3 co $CVS_MODULE && GOT_CVS="yes"
+    fi
+    if [[ "$GOT_CVS" == "yes" ]]; then
+      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MODULE-$VERSION.tar.bz2${DEFAULT_COLOR}"
+      tar cjf $SOURCE_CACHE/$MODULE-$VERSION.tar.bz2 $CVS_MODULE
+    fi
+    rm_source_dir $CVS_MODULE
+  fi
+)}
+
 
 erase()  {
 
@@ -101,11 +133,15 @@ fuzzy_wget()  {
           sed  "s/\.tar\.bz2$//"`
 
   if    erase  &&  call_wget  $URL;            then  FILE="$FILE"
-  elif  [  "$FUZZY"  ==  "off"  ];             then  return 1
+  elif  [  "$FUZZY"  ==  "off"  ];             then
+    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
+    return 1
   elif  erase  &&  call_wget  $S_URL.tar.bz2;  then  FILE="$S_FILE.tar.bz2"
   elif  erase  &&  call_wget  $S_URL.tar.gz;   then  FILE="$S_FILE.tar.gz"
   elif  erase  &&  call_wget  $S_URL.tgz;      then  FILE="$S_FILE.tgz"
-  else  false
+  else
+    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $URL"
+    false
   fi
 
 
@@ -245,7 +281,7 @@ dl_source()  {
 
       message  "${MESSAGE_COLOR}Downloading source file"  \
                "${FILE_COLOR}${FILE}${DEFAULT_COLOR}"     \
-               "for module"                                \
+               "${MESSAGE_COLOR}for module"               \
                "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
       for  URL  in  $*;  do
@@ -321,29 +357,53 @@ main() {
   if  [  -z  "$MODULES"  ];  then
     for  SECTION  in  `list_sections`;  do
       for  MODULE  in  `list_modules $SECTION`;  do
-	MODULES=$(echo $MODULES $MODULE)
+	      MODULES=$(echo $MODULES $MODULE)
       done
     done
   fi
-		    
+    
   for  MODULE  in  $MODULES;  do
     SECTION=$(find_section $MODULE)
+    if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
+      TYPE="normal"
+    elif grep -q CVS_SERVER "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
+      TYPE="cvs"
+    fi   
     if [ "$EXHAUSTIVE" == "yes" ] ; then
-      if grep -q _URL "$MOONBASE/$SECTION/$MODULE/DETAILS" ; then
-	MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
-	if [ -f $MIRRORS/$MIRROR ] ; then
-	  for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
-	    eval ${MIRROR}_URL=$MIRROR_URL
-	    if download_module $MODULE ; then
-	      break
-	    fi
+      if [[ $TYPE == "normal" ]] ; then
+        MIRROR=$(grep SOURCE_URL $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+	      if [ -f $MIRRORS/$MIRROR ] ; then
+	        for MIRROR_URL in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	          eval ${MIRROR}_URL=$MIRROR_URL
+            if download_module $MODULE ; then
+	            break
+	          fi
           done 
-	else
-	  download_module $MODULE
-	fi
+	      else
+	        download_module $MODULE
+	      fi
+      elif [[ $TYPE == "cvs" ]] ; then
+        MIRROR=$(grep CVS_SERVER $MOONBASE/$SECTION/$MODULE/DETAILS | head -1 | cut -d$ -f2 | cut -d_ -f1)
+	      if [ -f $MIRRORS/$MIRROR ] ; then
+	        for CVS_MIRROR in $(cat $MIRRORS/$MIRROR | awk -F"\t" '{print $2$3$4$5}' ) ; do
+	          eval ${MIRROR}_URL=$CVS_MIRROR
+            if [[ $GOT_CVS == "yes" ]]; then
+	            break
+	          fi
+          done 
+	      else
+          if [[ $GOT_CVS != "yes" ]]; then
+	          use_cvs $MODULE
+          fi
+	      fi        
       fi
     else
-      download_module $MODULE
+      if [[ $TYPE == "cvs" ]] && 
+         [[ $GOT_CVS != "yes" ]]; then
+        use_cvs $MODULE
+      else
+        download_module $MODULE
+      fi
     fi
   done
 

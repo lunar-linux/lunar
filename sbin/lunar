@@ -413,11 +413,11 @@ queue_menu()  {
                       --menu                                         \
                       ""                                             \
                       0 40 6                                         \
-                      "I"     "View     install  queue"   "$I_HELP"  \
-                      "i"     "Edit     install  queue"   "$i_HELP"  \
-                      "R"     "View     removal  queue"   "$R_HELP"  \
-                      "r"     "Edit     removal  queue"   "$r_HELP"  \
-                      "M"     "View     module    status"  "$M_HELP"  \
+                      "I"     "View     install   queue"   "$I_HELP" \
+                      "i"     "Edit     install   queue"   "$i_HELP" \
+                      "R"     "View     removal   queue"   "$R_HELP" \
+                      "r"     "Edit     removal   queue"   "$r_HELP" \
+                      "M"     "View     module    status"  "$M_HELP" \
                       "m"     "Edit     module    status"  "$m_HELP"`
   do
     case  $COMMAND in
@@ -432,6 +432,36 @@ queue_menu()  {
     esac
   done
 }
+
+maintenance_menu() {
+  while
+    F_HELP="lin --fix: Check and fix all modules and internal state of lunar"
+    N_HELP="lin --nofix: Check all modules but do not fix the internal state"
+    D_HELP="lin --fixdepends: Check and fix the dependancy database of lunar"
+    
+    COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
+                      --ok-label      "Select"                           \
+                      --cancel-label  "Exit"                             \
+                      --default-item  $COMMAND                           \
+                      --item-help                                        \
+                      --menu                                             \
+                      ""                                                 \
+                      0 40 6                                             \
+                      "F"     "Fix everything"                 "$F_HELP" \
+                      "N"     "Check everything but don't fix" "$N_HELP" \
+                      "D"     "Fix dependancies"               "$D_HELP"`
+  do
+    case $COMMAND in
+     F)  lin --fix        ;;
+     N)  lin --nofix      ;;
+     D)  lin --fixdepends ;;
+    esac
+    message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
+    read
+  done
+}
+
+
 log_menu()  {
   while
     C_HELP="View compile logs of previously installed software"
@@ -472,6 +502,7 @@ feature_menu()  {
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
   I_HELP="Create archives of installed software?"
+  K_HELP="Keep source code in /usr/src on good compiles? (gcc profiling needs it)"
   M_HELP="Email reports?"
   P_HELP="Preserve modified files or backup them up and overwrite with defaults?"
   R_HELP="Prompt to view reports?"
@@ -485,6 +516,7 @@ feature_menu()  {
        AUTOPRUNE=${AUTOPRUNE:=off}
            CABAL=${CABAL:=off}
            COLOR=${COLOR:=on}
+     KEEP_SOURCE=${KEEP_SOURCE:=off}      
     MAIL_REPORTS=${MAIL_REPORTS:=off}
     VIEW_REPORTS=${VIEW_REPORTS:=off}
         PRESERVE=${PRESERVE:=on}
@@ -510,6 +542,7 @@ feature_menu()  {
       "AUTOPRUNE"     "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
       "CABAL"         "Toggle"  "$CABAL"         "$B_HELP"   \
       "COLOR"         "Toggle"  "$COLOR"         "$C_HELP"   \
+      "KEEP_SOURCE"   "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
       "GARBAGE"       "Toggle"  "$GARBAGE"       "$G_HELP"   \
       "MAIL_REPORTS"  "Toggle"  "$MAIL_REPORTS"  "$M_HELP"   \
       "PRESERVE"      "Toggle"  "$PRESERVE"      "$P_HELP"   \
@@ -527,6 +560,7 @@ feature_menu()  {
        AUTOPRUNE=off
            CABAL=off
            COLOR=off
+     KEEP_SOURCE=off    
     MAIL_REPORTS=off
         PRESERVE=off
            SOUND=off
@@ -544,6 +578,7 @@ feature_menu()  {
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                CABAL)         CABAL=on  ;;
                COLOR)         COLOR=on  ;;
+         KEEP_SOURCE)   KEEP_SOURCE=on  ;;      
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
             PRESERVE)      PRESERVE=on  ;;
                SOUND)         SOUND=on  ;;
@@ -561,6 +596,7 @@ feature_menu()  {
           grep  -v  "AUTOFIX="       |
           grep  -v  "AUTOPRUNE="     |
           grep  -v  "CABAL="         |
+          grep  -v  "KEEP_SOURCE="   |
           grep  -v  "MAIL_REPORTS="  |
           grep  -v  "VIEW_REPORTS="  |
           grep  -v  "PRESERVE="      |
@@ -577,6 +613,7 @@ feature_menu()  {
     echo  "     AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
     echo  "   AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
     echo  "       CABAL=$CABAL"         >>  $LOCAL_CONFIG
+    echo  " KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
     echo  "MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
     echo  "    PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
     echo  "       SOUND=$SOUND"         >>  $LOCAL_CONFIG
@@ -668,6 +705,7 @@ main_menu()  {
     L_HELP="View and edit lunar genreated log files."
     Q_HELP="View and edit lunar queues."
     F_HELP="Process queues while you watch and wait"
+    N_HELP="Discover and fix internal problems"
     B_HELP="Process queues in the background"
     E_HELP="Exit without processing queues"
         OK="Select"
@@ -681,12 +719,13 @@ main_menu()  {
                        --menu                                \
                        "$LUNAR_MODULE version: $LUNAR_VERSION"       \
                        0 0 0                                 \
-                       "M"  "Module     Menu"     "$M_HELP"  \
-                       "O"  "Option     Menu"     "$O_HELP"  \
-                       "L"  "Log        Menu"     "$L_HELP"  \
-                       "Q"  "Queue      Menu"     "$Q_HELP"  \
-                       "F"  "Foreground Execute"  "$F_HELP"  \
-                       "B"  "Background Execute"  "$B_HELP"`  
+                       "M"  "Module      Menu"     "$M_HELP"  \
+                       "O"  "Option      Menu"     "$O_HELP"  \
+                       "L"  "Log         Menu"     "$L_HELP"  \
+                       "Q"  "Queue       Menu"     "$Q_HELP"  \
+		       "N"  "Maintenance Menu"     "$N_HELP"  \
+                       "F"  "Foreground  Execute"  "$F_HELP"  \
+                       "B"  "Background  Execute"  "$B_HELP"`  
     else
       COMMAND=`$DIALOG --title "Main Menu"                   \
                        --item-help                           \
@@ -695,12 +734,13 @@ main_menu()  {
                        --menu                                \
                        "$LUNAR_MODULE version: $LUNAR_VERSION"       \
                        0 0 0                                 \
-                       "M"  "Module     Menu"     "$M_HELP"  \
-                       "O"  "Option     Menu"     "$O_HELP"  \
-                       "L"  "Log        Menu"     "$L_HELP"  \
-                       "Q"  "Queue      Menu"     "$Q_HELP"  \
-                       "F"  "Foreground Execute"  "$F_HELP"  \
-                       "B"  "Background Execute"  "$B_HELP"`
+                       "M"  "Module      Menu"     "$M_HELP"  \
+                       "O"  "Option      Menu"     "$O_HELP"  \
+                       "L"  "Log         Menu"     "$L_HELP"  \
+                       "Q"  "Queue       Menu"     "$Q_HELP"  \
+		       "N"  "Maintenance Menu"     "$N_HELP"  \
+                       "F"  "Foreground  Execute"  "$F_HELP"  \
+                       "B"  "Background  Execute"  "$B_HELP"`
     fi
   do
     case  $COMMAND in
@@ -708,6 +748,7 @@ main_menu()  {
       O)  option_menu         ;;
       L)  log_menu            ;;
       Q)  queue_menu          ;;
+      N)  maintenance_menu    ;;
       F)  foreground_execute  ;;
       B)  background_execute  ;;
     esac

@@ -19,6 +19,55 @@
 #                                                          #
 ############################################################
 
+# function : list_sections
+# usage    : list_sections
+# purpose  : list the moonbase sections, filter out the specific files
+list_sections() {
+   check_module_index                                        &&
+   SECTIONS=`grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
+             cut -d : -f 2-2                                  | \
+             sort                                             | \
+             uniq`
+   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+
+   SECTIONS=`ls  $MOONBASE       | \
+             grep -v "ChangeLog" | \
+             grep -v "CVS"       | \
+             grep -v "COPYING"   | \
+             grep -v "LICENSE"   | \
+             grep -v "README"`
+   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
+
+   return 1
+}
+
+# function : list_modules
+# usage    : list_modules $SECTION
+# purpose  : list the modules in a section, filter out the specific files
+list_modules() {
+   [ -z "$1" ]        && return_error "no SECTION defined!"      $FUNCNAME
+
+   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
+
+   [ -n "$MODULES" ] && echo "$MODULES" && return 0
+
+   check_module_index                                  &&
+   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
+
+   [ -n "$MODULES" ] && echo "$MODULES" && return 0
+
+   for  MODULE  in  `ls $MOONBASE/$SECTION 2>/dev/null | \
+                     grep -v "ChangeLog"               | \
+                     grep -v "CVS"                     | \
+                     grep -v "COPYING"                 | \
+                     grep -v "LICENSE"                 | \
+                     grep -v "README"`
+   do
+      echo "$MODULE" 
+   done
+  return 0
+}
+
 # function : set_moonbase_md5
 # usage    : set_moonbase_md5
 # purpose  : creates the md5 value of overall moonbase
@@ -58,18 +107,8 @@ create_module_index()
    lock_file $MODULE_INDEX || return 1
 
    echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
-   for  SECTION  in  `ls  $MOONBASE       | \
-                      grep -v "CVS"       | \
-                      grep -v "COPYING"   | \
-                      grep -v "LICENSE"   | \
-                      grep -v "README"`
-   do
-      for  MODULE  in  `ls $MOONBASE/$SECTION  | \
-                         grep -v "CVS"         | \
-                         grep -v "COPYING"     | \
-                         grep -v "LICENSE"     | \
-                         grep -v "README"`
-      do
+   for  SECTION  in  $(list_sections) ; do
+      for  MODULE  in  $(list_modules $SECTION) ;  do
          echo $MODULE:$SECTION >> $MODULE_INDEX
        done
     done
@@ -100,69 +139,12 @@ find_section()
   SECTION=`grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d : -f 2-2` 
   [ -n "$SECTION" ] && echo "$SECTION"  && return 0 
            
-  for  SECTION  in  `ls  $MOONBASE       | \
-                     grep -v "CVS"       | \
-                     grep -v "COPYING"   | \
-                     grep -v "LICENSE"   | \
-                     grep -v "README"`
-  do
-     for  MODULE  in  `ls $MOONBASE/$SECTION  | \
-                        grep -v "CVS"         | \
-                        grep -v "COPYING"     | \
-                        grep -v "LICENSE"     | \
-                        grep -v "README"`
-     do
+  for  SECTION  in  $(list_sections) ; do
+     for  MODULE  in  $(list_modules $SECTION) ; do
         [ "$1" == "$MODULE" ] && echo "$SECTION" && return 0
      done
   done
   return 1
-}
-
-# function : list_sections
-# usage    : list_sections
-# purpose  : list the moonbase sections, filter out the specific files
-list_sections() {
-   check_module_index                                        &&
-   SECTIONS=`grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
-             cut -d : -f 2-2                                  | \
-             sort                                             | \
-             uniq`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
-
-   SECTIONS=`ls  $MOONBASE       | \
-             grep -v "CVS"       | \
-             grep -v "COPYING"   | \
-             grep -v "LICENSE"   | \
-             grep -v "README"`
-   [ -n "$SECTIONS" ] && echo "$SECTIONS" && return 0
-
-   return 1
-}
-
-# function : list_modules
-# usage    : list_modules $SECTION
-# purpose  : list the modules in a section, filter out the specific files
-list_modules() {
-   [ -z "$1" ]        && return_error "no SECTION defined!"      $FUNCNAME
-
-   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
-
-   [ -n "$MODULES" ] && echo "$MODULES" && return 0
-
-   check_module_index                                  &&
-   MODULES=`grep ":$1\$" $MODULE_INDEX 2>/dev/null | cut -d : -f 1-1 | sort`
-
-   [ -n "$MODULES" ] && echo "$MODULES" && return 0
-
-   for  MODULE  in  `ls $MOONBASE/$SECTION 2>/dev/null | \
-                     grep -v "CVS"                     | \
-                     grep -v "COPYING"                 | \
-                     grep -v "LICENSE"                 | \
-                     grep -v "README"`
-   do
-      echo "$MODULE" 
-   done
-  return 0
 }
 
 # function : run_details

@@ -77,20 +77,23 @@ EOF
 . /var/lib/lunar/functions/optimize.lunar
 
 # Useage gcc_checklist $MODULES
-gcc_checklist() {
-   if ! [[ $PLATFORM ]]; then
-      PLATFORM=x86
-   fi
-   if [[ -f /var/state/lunar/gcc.$PLATFORM ]]; then
-     BLKLST=`grep $1 /var/state/lunar/gcc.$PLATFORM`
-     if [[ $BLKLST == $1 ]]; then
-       echo "Module $1 is blacklisted."
-     else
-       echo "Module $1 is NOT blacklisted."
-     fi
-   else
-     touch /var/state/lunar/gcc.$PLATFORM
-   fi
+check_blacklist() {
+  if ! [[ $PLATFORM ]]; then
+    PLATFORM=x86
+  fi
+  if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
+    BLKLST=`grep $MODULE /var/state/lunar/blacklist.$PLATFORM`
+    if [[ $BLKLST == $MODULE ]]; then
+      message "${PROBLEM_COLOR}" \
+              "Module $MODULE is blacklisted and will not be installed." \
+	      "${DEFALUT_COLOR}"
+      exit 0
+    else
+      echo "Module $MODULE is NOT blacklisted, continuing the install."
+    fi
+  else
+    touch /var/state/lunar/blacklist.$PLATFORM
+  fi
 }
 
 use_wrappers() {
@@ -293,7 +296,7 @@ run_build()  {
       fi
     fi
   fi
-  
+
   if  [  -x  $SCRIPT_DIRECTORY/BUILD  ];  then
           .  $SCRIPT_DIRECTORY/BUILD
   else
@@ -582,6 +585,7 @@ run_fix()  { (
       if  status_okay  $MODULE                         &&
           [  "$MODULE"  !=  "lunar"  ]                 &&
           [  "$MODULE"  !=  "j2sdk"    ]               &&
+	  module_held $MODULE                          &&
           !  echo  $PASSED  |  grep  -q  ":$MODULE:";  then
 
         if    run_checks     $MODULE  ||
@@ -749,7 +753,7 @@ lin_module()  { (
       return
     fi
   fi
-
+  check_blacklist             &&
   run_details                 &&
   run_conflicts               &&
   satisfy_depends             &&
@@ -766,7 +770,9 @@ lin_module()  { (
     run_build                   &&
     run_post_build              &&
     run_post_install            &&
-    rm_source_dir               &&
+    if [[ $KEEP_SOURCE != "on" ]]; then 
+      rm_source_dir               
+    fi                          &&
     report_install              &&
     rm  -f  $linING             &&
     sound  SUCCESS              &&
@@ -906,7 +912,7 @@ main()	{
     MODULES=`echo $MODULES | sed 's/moonbase//g'`
   fi
 
-  if  [  -n  "$FIX"  ];  then
+  if  [[  -n  "$FIX"  ]];  then
     run_fix  $MODULES
   else
     case  $lin_PASS  in
