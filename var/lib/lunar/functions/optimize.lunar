@@ -338,59 +338,59 @@ optimize_cpu()  {
 # Begin Alpha options
       ev4)     CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       ev45)    CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       a21064)  CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       ev5)     CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       a21164)  CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       ev56)    CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       a21164a) CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       pca56)   CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
      a21164pc) CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
      a21164PC) CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       ev6)     CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       a21264)  CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       ev67)    CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
       a21264a) CFLAGS="$CFLAGS"
                CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+               BUILD="alpha-linux"
                ;;
 
 # Begin SPARC options
