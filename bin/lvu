@@ -68,6 +68,7 @@ section     [section]      list moonbase sections
 moonbase                   view a text listing of the moonbase
 html                       view a html listing of the moonbase
 updatelog                  view summary log of previous lunar update
+activity                   view main log file
 
 newer       20020521       Show available modules newer than May 21, 2002
 older       20010521       Show modules installed before May 21, 2001
@@ -644,6 +645,13 @@ parse()  {
                   echo "No update log available."
                 fi
                 ;;
+
+    activity)  if [ -e $ACTIVITY_LOG ]; then
+                 less $ACTIVITY_LOG
+	       else
+	         echo "No update log available."
+	      fi
+	      ;;
 
     compile)  if  [  -z  "$VERSION"  ];  then
                 SECTION=`find_section  $MODULE`             &&
