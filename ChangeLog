@@ -1,3 +1,14 @@
+2003-10-04 20:19  sofar
+
+	* sbin/lget, sbin/lin, sbin/lunar,
+	var/lib/lunar/functions/build.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/download.lunar,
+	var/lib/lunar/functions/install.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/sources.lunar: Same bugfixes as in lunar
+	core.
+
 2003-10-02 04:58  niki
 
 	* bin/lvu: Elaine forgot to change 3 occations of mv_edit to
@@ -259,8 +270,4 @@
 
 	* var/lib/lunar/functions/install.lunar: Added a missing space in a
 	message.
-
-2003-08-05 07:52  sofar
-
-	* var/lib/lunar/functions/: download.lunar, misc.lunar: Fixes?
 
