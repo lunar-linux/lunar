@@ -1,0 +1,22 @@
+#!/bin/bash
+#                                                          #
+# subroutines - Lunar subroutines                          #
+#                                                          #
+############################################################
+#
+# kernel.lunar functions for managing kernel installation
+# and bootloaders
+#
+############################################################
+#
+
+#
+# function backup_mods_krnl
+#
+# Usage backup_mods_krnl $MODULE-$EXTRAVERSION-$VERSION 
+# Return value
+#
+
+backup_mods_krnl()  {
+
+}
