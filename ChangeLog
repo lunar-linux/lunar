@@ -1,3 +1,7 @@
+2003-12-30 13:11  sofar
+
+	* bin/lvu: Added 'lvu short' just because I like it
+
 2003-12-29 18:09  sofar
 
 	* var/lib/lunar/functions/: build.lunar, check.lunar,
