@@ -176,7 +176,13 @@ update_pkgs() {
     return  1
   fi
 
-  lin moonbase $LUNAR_MODULE && lunar renew
+  lin moonbase
+  if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
+  then
+    lin $LUNAR_MODULE && lunar renew
+  else
+    lunar renew
+  fi
 
 }
 rebuild()  {
