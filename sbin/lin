@@ -150,7 +150,7 @@ run_configure() {
 run_pre_build() {
   if  [  -f  /tmp/$MODULE.iw ] ; then
     verbose_msg echo "removing \"/tmp/$MODULE.iw\""
-    rm /tmp/$MODULE.iw
+    rm -f /tmp/$MODULE.iw
   fi
 
   message  "${MESSAGE_COLOR}Building"  \
@@ -174,7 +174,7 @@ stop_logging() {
            "${DEFAULT_COLOR}"
 
   bzip2  -9f  <  $C_LOG  >  $COMPILE_LOGS/$MODULE-$VERSION.bz2
-  rm $C_LOG $C_FIFO
+  rm -f $C_LOG $C_FIFO
   unset C_LOG C_FIFO
 }
 
@@ -389,7 +389,7 @@ remove_line()  {
 
   cp         $I_LOG  $F_TMP
   grep  -v   $ITEM   $F_TMP  >  $I_LOG
-  rm    -rf          $F_TMP
+  rm    -f           $F_TMP
 
   message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR}"  \
            "is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
@@ -744,7 +744,7 @@ lin_module()  { (
     stop_logging
     
     if [ -n "$LIN_ERROR" ] ; then
-      [ -f /tmp/$MODULE.iw ] && rm /tmp/$MODULE.iw
+      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
       sound  FAILURE
       message  "${PROBLEM_COLOR}! Problem detected during \"$LIN_ERROR\" !${DEFAULT_COLOR}"
       rm  -f  $linING
@@ -755,7 +755,7 @@ lin_module()  { (
 
     if ! boost ; then
       LIN_ERROR="boost"
-      [ -f /tmp/$MODULE.iw ] && rm /tmp/$MODULE.iw
+      [ -f /tmp/$MODULE.iw ] && rm -f /tmp/$MODULE.iw
     else
       if ! run_post_install ; then
         LIN_ERROR="POST_INSTALL"

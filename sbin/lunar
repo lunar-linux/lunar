@@ -206,7 +206,7 @@ update_pkgs() {
 
 
 rebuild()  {
-  rm  -rf  $INSTALL_QUEUE
+  rm  -f  $INSTALL_QUEUE
 
   message  "To do a non recursive rebuild"
   message  "all installed modules must be fixed first."
@@ -231,7 +231,7 @@ rebuild()  {
   fi
 
   $LIN  --compile  `cat  $INSTALL_QUEUE`
-  rm                      $INSTALL_QUEUE
+  rm -f                  $INSTALL_QUEUE
 }
 
 
@@ -521,7 +521,7 @@ log_menu()  {
       I)  show_file  `file_menu  $INSTALL_LOGS`  ;;
       i)  edit_file  `file_menu  $INSTALL_LOGS`  ;;
       C)  show_file  `file_menu  $COMPILE_LOGS`  ;;
-      c)  rm         `file_menu  $COMPILE_LOGS`  ;;
+      c)  rm -f      `file_menu  $COMPILE_LOGS`  ;;
     esac
   done
 }
@@ -724,10 +724,10 @@ background_execute() {
   lrm  `cat  $REMOVE_QUEUE`   1>/dev/null 2>&1
   rm  -f        $REMOVE_QUEUE
 
-  if  [  -f             $INSTALL_QUEUE  ];  then
+  if  [  -f            $INSTALL_QUEUE  ];  then
     lin  --deps  `cat  $INSTALL_QUEUE`
     (  lin       `cat  $INSTALL_QUEUE` 1>/dev/null 2>&1  &&
-         rm             $INSTALL_QUEUE
+         rm -f         $INSTALL_QUEUE
     )  &
   fi
 
