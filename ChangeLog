@@ -39,7 +39,3 @@
 	in $(PWD) && $SOURCE_CACHE, so you never have to explicitly specify
 	the location. uniform calling as with unpack() now.
 
-2004-06-29 07:12  sofar
-
-	* etc/lunar/config: Telia->unc
-
