@@ -1,3 +1,35 @@
+2003-01-02 22:27  sofar
+
+	* sbin/lget: Fix for broken cvs update being stored in
+	$SOURCE_CACHE, beautified, removed unset CVS_RSH.
+
+2003-01-02 16:18  sofar
+
+	* var/lib/lunar/subroutines: Adding support to handle TARred patch
+	sets!
+
+2003-01-02 14:32  sofar
+
+	* sbin/lunar: Adding "Maintenance" menu that allows you to run lin
+	--fix, --nofix, --fixdepends from the menu system.
+
+2003-01-01 23:24  sofar
+
+	* sbin/lin: Removing autopatch scheme
+
+2003-01-01 22:46  sofar
+
+	* sbin/lget, var/lib/lunar/subroutines: Adding code to store
+	CVS-sources after 'co' or 'up' into SOURCE_CACHE, so that the
+	source code is always clean when lin runs, and we still have the
+	possibility of doing incremental updates. Also added a small visual
+	message in sedit () to verbosely show that files are edited.
+
+2003-01-01 21:31  sofar
+
+	* var/lib/lunar/functions/updatelog.lunar: This should fix the
+	weird messages after a lunar update/renew
+
 2002-12-30 22:24  hardkrash
 
 	* sbin/lget: added ability to use tun devices for internet
@@ -225,36 +257,4 @@
 
 	* var/state/lunar/blacklist.x86: Removed ddd from the blacklist. 
 	It now correctly compiles with gcc-3.2.
-
-2002-10-05 05:39  tchan
-
-	* var/lib/lunar/subroutines: Fixed a long standing bug on why the
-	/usr/share/info/dir file keeps getting trashed.  prepare_install
-	was not saving /usr/share/info/dir and that file is being tracked
-	by installwatch so it becomes part of the tar.bz2 file.  So inside
-	prepare_install, if the module is already installed, it removes the
-	existing module before completing the install.	This would remove
-	the exisiting /usr/share/info/dir and then replace it with a very
-	short version of /usr/share/info/dir.
-
-2002-10-03 16:51  xoritor
-
-	* sbin/lin: Added the call to check_blacklist() that was left out.
-
-2002-10-03 15:55  xoritor
-
-	* var/state/lunar/: blacklist.x86, gcc.x86: Removing gcc.x86 list
-	(unused) Adding blacklist.x86 with contents:   ddd   rythmbox  
-	gstreamer
-
-2002-10-03 15:50  xoritor
-
-	* sbin/lin: Fixed the issue with --fix installing "held" modules. 
-	this will no longer happen.  Added support for a "blacklist" again
-	it is still in /var/state/lunar, but the aname has changed to
-	blacklist.$PLATFORM (defaults to x86).	This will NOT let a
-	blacklisted module install at all and terminates lin when a
-	blacklisted module is encountered.  I realize this could cause
-	issues, and I am looking for a better solution... feel free to post
-	ideas.
 
