@@ -164,28 +164,3 @@
 	* var/lib/lunar/functions/: depends.lunar, edit.lunar: bugfix #273,
 	also minor code cleanups
 
-2003-04-01 23:11  sofar
-
-	* lib/lsb/init-functions: This looks at the PID file rather than in
-	the process table, much more decent, no whining about PID's.
-	Cleaned up some bad code. Reformatted, sprinkled with cheese too.
-
-2003-04-01 22:25  sofar
-
-	* var/lib/lunar/functions/modules.lunar: wheps
-
-2003-04-01 22:24  sofar
-
-	* var/lib/lunar/: subroutines, functions/messages.lunar,
-	functions/modules.lunar, functions/optimize.lunar,
-	functions/sources.lunar: More moves, committing them in theedge
-	only for now....
-
-2003-04-01 18:33  sofar
-
-	* var/lib/lunar/functions/optimize.lunar: BAH
-
-2003-04-01 18:25  wizfactor
-
-	* var/lib/lunar/functions/optimize.lunar: Fixed typo
-
