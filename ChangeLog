@@ -1,3 +1,9 @@
+2003-03-13 05:03  nhudson
+
+	* var/lib/lunar/sustained: 
+	Ok this is a start of adding coreutils to Lunar.  I removed
+	fileutils, sh-utils, and textutils and added in coreutils
+
 2003-02-24 20:01  kc8apf
 
 	* var/lib/lunar/excluded: Add mailman site config to excluded
