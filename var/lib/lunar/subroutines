@@ -599,22 +599,22 @@ sort_install_queue() {
 # purpose  : add the packages which will be updated  into the INSTALL_QUEUE
 update_installed()  {
 
-  message  "${MESSAGE_COLOR}Searching installed modules for upgrade..." \
+  message "${MESSAGE_COLOR}Searching installed modules for upgrade..." \
            "${DEFAULT_COLOR}"
-  rm  -f  $INSTALL_QUEUE
-  for  LINE  in  $(cat $MODULE_STATUS | sort);  do
+  rm -f $INSTALL_QUEUE
+  for LINE in $(cat $MODULE_STATUS | grep -v "^moonbase" | sort) ; do
 
-      MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-       IDATE=`echo  "$LINE"  |  cut  -d : -f2`
-      STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-    IVERSION=`echo  "$LINE"  |  cut  -d : -f4`
+      MODULE=$(echo "$LINE" | cut -d : -f1)
+       IDATE=$(echo "$LINE" | cut -d : -f2)
+      STATUS=$(echo "$LINE" | cut -d : -f3)
+    IVERSION=$(echo "$LINE" | cut -d : -f4)
 
     show_fancy_progress "Processing: $MODULE"
 
-    if  [  "$STATUS"  ==  "installed"  ];  then
+    if [ "$STATUS" == "installed" ] ; then
 
-      if ! run_details $MODULE &> /dev/null  ; then
-      
+      if ! run_details $MODULE &> /dev/null ; then
+     
         message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       
         if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
@@ -627,12 +627,10 @@ update_installed()  {
 	
       else
 
-        if  [  "$VERSION"   !=  "$IVERSION"   ]  ||
-            [  -z  "$IDATE"                   ]  ||
-            ((  "$UPDATED"  >   "$IDATE"  ))
-        then
-          if    [  "$MODULE"  !=  "lunar"  ] && [  "$MODULE"  !=  "theedge"  ]
-          then  add_queue  $INSTALL_QUEUE $MODULE
+        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] || 
+	      (( "$UPDATED" > "$IDATE" )) ; then
+          if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
+            add_queue $INSTALL_QUEUE $MODULE
           fi
         fi
      
