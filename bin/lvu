@@ -462,6 +462,13 @@ show_depends()  {
 function show_tree() {
   debug_msg "show_tree ($@)"
 
+  # Make sure the module exists, print a message and return 1 if it doesn't
+  SECTION=$(find_section $1)
+  if [ -z "$SECTION" ] ; then
+      error_message "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${PROBLEM_COLOR} in ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+    return 1
+  fi
+  
   # create dependency tracking file if needed
   if [ -z "$TMP_SEEN" ] ; then
     export TMP_SEEN=$(temp_create "seen")
@@ -582,6 +589,15 @@ function show_tree() {
 
 
 show_eert() {
+  debug_msg "show_eert ($@)"
+
+  # Make sure the module exists, print a message and return 1 if it doesn't
+  SECTION=$(find_section $1)
+  if [ -z "$SECTION" ] ; then
+    error_message "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${PROBLEM_COLOR} in ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+    return 1
+  fi
+		        
   if [ -n "$SHORTTREE" ] ; then
     DEPENDS=$DEPENDS_STATUS
   else
