@@ -8,8 +8,3 @@
 	* sbin/lin: First in a series of patches to allow aliases to be
 	used in BUILD files ie alias for make
 
-2003-12-09 20:05  hardkrash
-
-	* var/lib/lunar/functions/connect.lunar: added ath type of
-	interface to lunar
-
