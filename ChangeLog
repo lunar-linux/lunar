@@ -116,17 +116,3 @@
 
 	* sbin/lin: 10 points for tchan
 
-2003-04-24 21:25  sofar
-
-	* etc/lunar/config: Geez that's a horrible one...
-
-2003-04-24 09:18  sofar
-
-	* bin/lvu: removing referral to media/marbleblabla.jpg since it's
-	nonexistant.
-
-2003-04-24 07:25  sofar
-
-	* var/lib/lunar/functions/download.lunar: Better put it in here
-	too...
-
