@@ -149,11 +149,10 @@ show_file()	{
 
 
 file_list() {
-  LIST=`ls  $1`
-  for  LINE  in  $LIST;  do
-    echo  $LINE 
-    echo  `file  -b  $1/$LINE  |  cut  -d ' ' -f1`
-  done
+  pushd $1 > /dev/null
+  file -N -F ' ' * | cut -d ' ' -f1,3 --output-delimiter='
+	'
+  popd > /dev/null
 }
 
 
