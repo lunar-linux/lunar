@@ -1,3 +1,8 @@
+2004-05-02 09:32  striker
+
+	* var/lib/lunar/functions/: download.lunar, main.lunar,
+	recovery.lunar: s/successfull/successful/ Spellchecker anyone? ;)
+
 2004-04-27 07:12  sofar
 
 	* etc/lunar/mirrors/GNOME: These files are TAB separated now.
@@ -278,9 +283,4 @@
 	double-questions (not entirely correct still), adding support for a
 	better CPAN system (more work needed). speediefied the tracking
 	part with smart grep.
-
-2004-03-02 21:53  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
-	needed changes.
 
