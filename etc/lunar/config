@@ -85,7 +85,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
       MOONBASE_URL[0]=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[1]=http://se.lunar-linux.org/lunar/moonbase.tar.bz2
-      MOONBASE_URL[2]=http://de.lunar-linux.org/~moe/lunar/lunar/moonbase.tar.bz2
+      MOONBASE_URL[2]=http://de.lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[3]=http://dk.lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/moonbase.tar.bz2
 	 
