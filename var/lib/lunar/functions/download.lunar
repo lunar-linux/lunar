@@ -272,6 +272,8 @@ lget_unlock()  {
 
 download_module() { (
 
+  run_details $1 || exit 1
+
   MAX_SOURCES=${MAX_SOURCES:=100}
 
   # loop over all sources
