@@ -159,13 +159,3 @@
 	normal users seeing garbage when the call lunar's core tools with
 	garbage. should clean up stuff a bit.
 
-2004-04-08 13:53  prox
-
-	* var/lib/lunar/functions/config.lunar: changed sed to cover
-	substrings
-
-2004-04-08 13:25  prox
-
-	* var/lib/lunar/functions/config.lunar: fixed issue with list of
-	initscript being return with quotes
-
