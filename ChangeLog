@@ -1,3 +1,11 @@
+2005-04-02 10:27  sofar
+
+	* bin/lvu, var/lib/lunar/functions/download.lunar: Much better
+	  implementation of the URL alternatives: this creates a decent
+	  picklist and insterts alternatives for known MIRROR clusters
+	  automatically in the list. Lvu urls needs some more work but is
+	  acceptable.
+
 2005-04-01 10:17  sofar
 
 	* var/lib/lunar/functions/messages.lunar: Extended debugging
