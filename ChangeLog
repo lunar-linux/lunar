@@ -26,7 +26,3 @@
 	* var/lib/lunar/functions/kernel.lunar: Adding kernel backup and
 	boot conifig functions to lunar
 
-2003-10-05 19:55  sofar
-
-	* sbin/lget: Slight miscalculation, cleanup
-
