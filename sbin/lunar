@@ -472,7 +472,7 @@ feature_menu()  {
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
   I_HELP="Create archives of installed software?"
-  K_HELP="Keep source code in /usr/src tree? (Defaults to remove)"
+  K_HELP="Keep source code in /usr/src tree on good compiles? (default remove)"
   M_HELP="Email reports?"
   P_HELP="Preserve modified files or backup them up and overwrite with defaults?"
   R_HELP="Prompt to view reports?"
