@@ -60,7 +60,3 @@
 
 	* etc/lunar/config: Removing the .se mirror as requested by bkw.
 
-2004-12-13 15:43  sofar
-
-	* var/lib/lunar/functions/locking.lunar: color fixes
-
