@@ -1,3 +1,14 @@
+2004-11-10 08:19  sofar
+
+	* var/lib/lunar/functions/useradd.lunar: Do not track changes to
+	  /etc/{passwd,group,shadow}
+
+2004-11-10 08:18  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Adding an even more
+	  thorough check on create_module_index. If the install log is
+	  missing we *have* to use the slow method.
+
 2004-11-04 09:31  sofar
 
 	* var/lib/lunar/functions/messages.lunar: Adding the 'mquery'
