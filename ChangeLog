@@ -65,12 +65,3 @@
 
 	* sbin/lin: Updating xinet.d handling routine. Fixes bug 232
 
-2003-01-30 05:21  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Fixed some more punctuation.
-
-2003-01-30 05:18  tchan
-
-	* usr/share/man/man8/lfirsttime.8: Updated lfirsttime with some
-	more fixes.
-
