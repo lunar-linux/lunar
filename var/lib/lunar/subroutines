@@ -1758,7 +1758,8 @@ rework_list() {
     module_exiled $MODULE || rework_module $MODULE
   done
 
-  cat $TMP/depends.new.* | sort | uniq > $TMP/depends.new-all
+  [ -e "$TMP/depends.new.*" ] &&
+    cat $TMP/depends.new.* | sort | uniq > $TMP/depends.new-all
 
 }
 
@@ -1778,9 +1779,6 @@ fix_depends () {
 
   if [ -n "$CHANGED_MODULES" ] ; then
 
-    # took me ages to think this out:
-    export lin_PASS=three
-    
     for MODULE in $CHANGED_MODULES ; do
       add_queue $INSTALL_QUEUE $MODULE
     done
@@ -1805,6 +1803,7 @@ fix_depends () {
       cat $TMP/depends.new.$MODULE >> $DEPENDS_STATUS
       cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       OLD_FIX=$FIX ; unset FIX
+      OLD_lin_PASS=$lin_PASS; export lin_PASS=three
       if ! lin $MODULE ; then
 	# put back the faulty depends so we know fixing this failed
 	# and will be found again on the next run
@@ -1817,6 +1816,7 @@ fix_depends () {
 	cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
       fi
       FIX=$OLD_FIX ; unset OLD_FIX
+      export lin_PASS=$OLD_lin_PASS
       remove_queue $INSTALL_QUEUE $MODULE
     done
   fi
