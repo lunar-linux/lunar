@@ -45,21 +45,3 @@
 
 	* var/lib/lunar/functions/updatelog.lunar: These 2 got left out...
 
-2003-03-26 23:20  sofar
-
-	* bin/lvu, sbin/lget, sbin/lin, sbin/lunar,
-	var/lib/lunar/subroutines, var/lib/lunar/sustained,
-	var/lib/lunar/functions/download.lunar,
-	var/lib/lunar/functions/edit.lunar,
-	var/lib/lunar/functions/modules.lunar,
-	var/lib/lunar/functions/optimize.lunar,
-	var/lib/lunar/functions/postbuild.lunar,
-	var/lib/lunar/functions/updatelog.lunar,
-	var/lib/lunar/functions/view.lunar,
-	var/lib/lunar/menu/download.menu, var/lib/lunar/menu/optimize.menu:
-	Merging in all the changes back in to lunar!!!
-
-2003-03-26 08:47  sofar
-
-	* var/lib/lunar/protected: see theedge. (adding dirname)
-
