@@ -558,13 +558,17 @@ install_services()  { (
 install_bashmisc () { (
 
   if [ -d $SCRIPT_DIRECTORY/profile.d ]; then
+    [ -f /etc/profile.d ] && mv /etc/profile.d /etc/profile.d.old
     [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
-    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/* /etc/profile.d
+    for FILE in $SCRIPT_DIRECTORY/profile.d/* ; do
+      [ -f $FILE ] && install -g 0 -o 0 -m 644 $FILE /etc/profile.d
+    done
   fi
   if [ -d $SCRIPT_DIRECTORY/skel ]; then
     [ -d /etc/skel ] || mkdir -p /etc/skel
-    cp $SCRIPT_DIRECTORY/skel/* /etc/skel &> /dev/null
-    cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
+    for FILE in $SCRIPT_DIRECTORY/skel/* $SCRIPT_DIRECTORY/skel/.* ; do
+      [ -f $FILE ] && cp $FILE /etc/skel
+    done
   fi
 
 ) }
