@@ -1,3 +1,19 @@
+2004-02-20 07:28  tchan
+
+	* var/lib/lunar/protected: Updated this file so coreutils-5.2.0
+	would install correctly.  Added /bin/mkdir /bin/sort /bin/tr and
+	removed /usr/bin/sort.
+
+2004-02-20 06:11  tchan
+
+	* var/state/lunar/: blacklist.Alpha, blacklist.PowerPC,
+	blacklist.SPARC, blacklist.x86: Updated all the blacklist.arch
+	files.
+
+2004-02-20 03:44  tchan
+
+	* usr/share/doc/lunar/CREDITS: Added Striker to the list of devs.
+
 2004-02-16 20:59  sofar
 
 	* etc/lunar/: config, mirrors/LRESORT: Refurbishing again...
