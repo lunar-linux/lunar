@@ -26,6 +26,11 @@
 #                                                          #
 ############################################################
 
+# This enables alias expansion within lin and its children
+# although this dosen't expand aliases within functions
+# That is a limitation of bash and aliases
+shopt -s expand_aliases
+
 help()	{
   cat  <<  EOF
 Lin installs single or multiple modules
