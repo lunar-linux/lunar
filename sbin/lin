@@ -126,18 +126,19 @@ use_xinetd()  { (
   if  [  -d  $SCRIPT_DIRECTORY/xinetd.d  ]  &&
       !  grep  -q  "SERVICES="  $MODULE_CONFIG
   then
-    ALL_SERVICES=`cat  $SCRIPT_DIRECTORY/xinetd.d/*  |
-                  grep  "service"                    |
+    ALL_SERVICES=`cat  $SCRIPT_DIRECTORY/xinetd.d/[!CVS]*  |
+                  grep  "service"                          |
                   sed   "s/service //"`
 
     for  SERVICE  in  $ALL_SERVICES;  do
       if    query  "Invoke $SERVICE via xinetd?"  y
       then  SERVICES="$SERVICE $SERVICES"
+      else return 1
       fi
     done
 
     for  SERVICE  in  $SERVICES;  do
-      for  FILE  in  `ls  $SCRIPT_DIRECTORY/xinetd.d/*`;  do
+      for  FILE  in  `ls  $SCRIPT_DIRECTORY/xinetd.d/[!CVS]*`;  do
 
          if  grep  -q   "service $SERVICE"  $FILE   &&
              grep  -q   "stunnel"           $FILE;  then
@@ -148,11 +149,14 @@ use_xinetd()  { (
 
     if    [  -n  "$SERVICES"  ]
     then  add_depends  "$MODULE"  "xinetd"  "on"   "optional"
-    else  add_depends  "$MODULE"  "xinetd"  "off"  "optional"
+    else  
+       add_depends  "$MODULE"  "xinetd"  "off"  "optional"
     fi
 
     echo  "SERVICES=\"$SERVICES\""  >>  $MODULE_CONFIG
-
+    return 0
+    else
+       return 1
   fi
 ) }
 
@@ -190,10 +194,11 @@ run_configure() {
   fi
 
   prepare_module_config
-  use_xinetd
+  use_xinetd || {
   if  [  -n  "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ;  then
     use_initd
   fi
+  }
 
   grep -q "^"$MODULE"\$" $PREPD 2>/dev/null && return 0
 
