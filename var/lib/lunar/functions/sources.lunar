@@ -88,7 +88,20 @@ md5_verify_source() {
     verbose_msg "should be md5sum: $2"
     return 1
   fi
+}
 
+
+# function : md5_verify_source
+# usage    : md5_verify_source filename md5
+# purpose  : md5 verifies a filename
+sha1_verify_source() {
+  debug_msg "sha1_verify_source ($@)"
+  TMP_SHA1=$(sha1sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
+  if [ "$2" != "$TMP_SHA1" ] ; then
+    verbose_msg "offending sha1sum: $TMP_SHA1"
+    verbose_msg "should be sha1sum: $2"
+    return 1
+  fi
 }
 
 
@@ -211,6 +224,11 @@ verify_all_sources() {
         if [ "${VFY:0:4}" == "md5:" ] ; then
 	  if ! md5_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
 	    message "${PROBLEM_COLOR}! md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
+	    RESULT=1
+	  fi
+	elif [ "${VFY:0:5}" == "sha1:" ] ; then
+	  if ! sha1_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
+	    message "${PROBLEM_COLOR}! sha1sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
 	    RESULT=1
 	  fi
 	elif [ "${VFY:0:4}" == "gpg:" ] ; then
