@@ -25,31 +25,66 @@
 ############################################################
 
 
-gather_docs()  {
+# function : gather_docs
+# usage 1  : gather_docs
+# usage 2  : gather_docs LIST OF FILES
+# purpose  : Installs extra documentation that came with the
+#            module's source package into the module's
+#            document directory (defined as Lunar's base
+#            document directory plus the module name).  This
+#            function is called from default_post_install as
+#            usage 1, which installs a default (read: common)
+#            set of docs.  If the developer is not happy with
+#            just those doc s/he can call this function from
+#            a module script (like BUILD) with a list of
+#            additional files (usage 2) to install into the
+#            module's document directory.
+# pre-conditions : user must have $GARBAGE="on" to have any
+#                  of this actually happen.
+gather_docs() {
   debug_msg "gather_docs ($@)"
+
+  # Bail if the user doesn't want to install any extra documentation
   if [ "$GARBAGE" != "on" ] ; then
     return
   fi
 
-  DOC_DIR=$DOCUMENT_DIRECTORY/$MODULE
+  DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
   mkdir -p $DOC_DIR
 
+  # This is the list of default extra documentation that is to be 
+  # installed automatically if the user has $GARBAGE=on.  Any other
+  # docs are left up to the module writer to get installed.
+  DEFAULT_DOCS="README* INSTALL* FAQ* CHAN* doc* DOC* *doc \
+                *sample* conf SETUP NEWS Change* manual* Manual*"
+
   if [ -d "$SOURCE_DIRECTORY" ] ; then
-    (
-      cd $SOURCE_DIRECTORY
-      for FILE in \
-        README* INSTALL* FAQ* CHAN* doc* DOC* *doc *sample* \
-        conf SETUP NEWS Change* manual* Manual* ; do
-	# copy all but prune stuff which obviously is code
-        if [ -e $FILE -a ! -f $FILE/Makefile ] ; then
-          verbose_msg "installing docs: \"$DOC_DIR/$FILE\""
-          cp -ar $FILE $DOC_DIR 2> /dev/null
+  (
+    cd $SOURCE_DIRECTORY
+
+    # Check if we are being called with parameters or not
+    if [ ${#} -gt 0 ] ; then
+      # For each parameter that is an existing file
+      for FILE in ${@}; do
+        if [ -e ${FILE} -a -f ${FILE} ] ; then
+          # copy it over to the doc directory creating directories as needed
+          verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
+          install -D -m 644 ${FILE} ${DOC_DIR}/${FILE}
         fi
       done
-    )
+    else
+      # No parameters were passed in, install the default docs
+      for FILE in ${DEFAULT_DOCS}; do
+        # copy all of the default docs (prune Makefiles)
+        if [ -e $FILE -a ! -f ${FILE}/Makefile ] ; then
+          verbose_msg "Installing default documentation to: ${DOC_DIR}/${FILE}"
+          cp -a $FILE $DOC_DIR 2> /dev/null
+	fi
+      done
+    fi
+  )
   fi
 }
-
 
 install_pam_confs()  {
   debug_msg "install_pam_confs ($@)"
