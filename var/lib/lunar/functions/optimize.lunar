@@ -721,7 +721,7 @@ optimize_architecture()  {
 
   help compiler_help          &&
   compiler_options            &&
-  menu                        &&
+  menu radiolist              &&
   COMPILER=$RESULT
   
   help cc_help                &&
@@ -736,17 +736,17 @@ optimize_architecture()  {
 
   help platform_help          &&
   platform_options            &&
-  menu                        &&
+  menu radiolist              &&
   PLATFORM=$RESULT
 
   help bopt_help              &&
   bopt_options                &&
-  menu                        &&
+  menu radiolist              &&
   BOPT=$RESULT
 
   help cpu_help $PLATFORM     &&
   cpu_options $PLATFORM       &&
-  menu                        &&
+  menu radiolist              &&
   CPU=$RESULT
   optimize_cpu $CPU           &&
   BUILD=$BUILD
@@ -763,7 +763,7 @@ optimize_architecture()  {
 
   help fpm_help               &&
   fpm_options                 &&
-  menu                        &&
+  menu radiolist              &&
   FPM=$RESULT
 
   help ldf_help               &&
