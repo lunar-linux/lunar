@@ -109,12 +109,10 @@ else
     esac
   done
 
-  if [ -n "$LGET_ALL" ] ; then
-    main
-  elif [ -z "$@" ] ; then
+  if [ -n "$LGET_ALL" -o -n "$1" ] ; then
+    main $@
+  else
     help
     exit 1
-  else
-    main $@
   fi
 fi
