@@ -202,7 +202,11 @@ else
     esac
   done
 
-  main $@
+  if [ -n "$RESURRECT" ] ; then
+    resurrect_modules $@
+  else
+    main $@
+  fi
 fi
 
 
