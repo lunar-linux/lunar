@@ -1,3 +1,13 @@
+2003-08-16 19:54  elaine
+
+	* var/lib/lunar/functions/postbuild.lunar: $IFS setting was causing
+	variables to be improperly set for 'grep'
+
+2003-08-16 17:04  sofar
+
+	* var/lib/lunar/compilers/: c++, cc, g++, gcc: Needed cos some
+	developers insist on passing spaces around within #defines.
+
 2003-08-14 21:27  sofar
 
 	* var/lib/lunar/functions/: build.lunar, postbuild.lunar: yeah I
@@ -490,15 +500,4 @@
 
 	* var/lib/lunar/excluded: Now all the SSH host keys are also
 	preserved.
-
-2003-06-17 14:23  elaine
-
-	* var/lib/lunar/functions/moonbase.lunar: adjusted script location
-	to cgi-bin
-
-2003-06-17 02:20  elaine
-
-	* var/lib/lunar/functions/: moonbase.lunar, uniqid.lunar: Add a
-	client id, sent to lunar-linux.org with a null wget cmd unique id
-	by hashing the MAC addrs of the primary interface
 
