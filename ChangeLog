@@ -1,3 +1,8 @@
+2003-11-19 01:20  elaine
+
+	* var/lib/lunar/functions/modules.lunar: Providing for ARCH
+	specific script files *note* all x86 = <SCRIPT>.i386
+
 2003-11-16 00:19  hardkrash
 
 	* var/lib/lunar/functions/: install.lunar, messages.lunar: added
@@ -162,9 +167,4 @@
 	* var/lib/lunar/excluded: 
 	Adding /etc/bonobo-activation and its file to excluded because it
 	gets deleted when you remove evolution which is a very bad! thing!
-
-2003-09-19 21:32  sofar
-
-	* var/lib/lunar/functions/install.lunar: This fixes the double DL
-	bug. see lunar for more info in commit msg
 
