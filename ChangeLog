@@ -376,17 +376,3 @@
 	
 	this should be the end of the resurrect rewrite.
 
-2003-07-24 22:04  sofar
-
-	* var/lib/lunar/functions/download.lunar: one more try....
-
-2003-07-24 21:40  sofar
-
-	* var/lib/lunar/functions/download.lunar: trying again!
-
-2003-07-24 21:28  sofar
-
-	* var/lib/lunar/functions/download.lunar: Some CVS handling code
-	cleanups that revealed problems... perhaps this solves Moe's
-	issues.
-
