@@ -337,8 +337,8 @@ depends:${DEFAULT_COLOR}"
   fi
                                                                                 
   # clean up
-  rm $DEPENDS_STATUS
-  rm $DEPENDS_STATUS_BACKUP
+  rm -f $DEPENDS_STATUS
+  rm -f $DEPENDS_STATUS_BACKUP
   DEPENDS_STATUS=$OLD_DEPENDS_STATUS
   DEPENDS_STATUS_BACKUP=$OLD_DEPENDS_STATUS_BACKUP
                                                                                 
@@ -364,7 +364,7 @@ fix_depends () {
   CHANGED_MODULES=
   # we NEED this
   if [ -f "$INSTALL_QUEUE" ] ; then
-    rm $INSTALL_QUEUE
+    rm -f $INSTALL_QUEUE
     touch $INSTALL_QUEUE
   fi
                                                                                 

@@ -42,7 +42,7 @@ get_moonbase () {(
     echo -e "${MESSAGE_COLOR}Creating ${FILE_COLOR}${MODULE_INDEX}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"
     if [ -f $MODULE_INDEX ]; then
-      rm $MODULE_INDEX
+      rm -f $MODULE_INDEX
     fi
     create_module_index
     activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"

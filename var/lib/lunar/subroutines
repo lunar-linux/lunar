@@ -216,7 +216,7 @@ release_saved_libraries()  {
    [  -f  $SAVED  ]    &&
    cat    $SAVED       |
    while  read  FILE;  do
-     verbose_msg "rm $FILE"
+     verbose_msg "rm -f \"$FILE\""
      rm  -f   "$FILE"
    done
 
@@ -260,7 +260,7 @@ rm_source_dir() {
     rmdir      $DEAD_DIR  2>  /dev/null
   else
     rm   -rf   $DEAD_DIR  2>  /dev/null
-  fi;
+  fi
 
   rm     -f  $BOOST_LOCK
 

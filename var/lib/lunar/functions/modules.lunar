@@ -101,7 +101,7 @@ create_module_index()
    remove_module_index()
    {
       lock_file $MODULE_INDEX
-      [ -f "$MODULE_INDEX" ] && cp $MODULE_INDEX /tmp && rm $MODULE_INDEX 2>/dev/null
+      [ -f "$MODULE_INDEX" ] && cp $MODULE_INDEX /tmp && rm -f $MODULE_INDEX 2>/dev/null
       unlock_file $MODULE_INDEX
    }
 
