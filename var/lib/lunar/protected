@@ -17,6 +17,7 @@
 /etc/X11/xinit/xinitrc
 /etc/aliases
 /etc/audit
+/etc/config.d/ospmd.conf
 /etc/exim.conf
 /etc/grsec
 /etc/httpd
