@@ -36,14 +36,14 @@
 connect()  {
   debug_msg "connect ($@)"
 
-  if ! ifconfig | grep -q -e "^eth" -e "^wlan" -e "^ppp" -e "^ath" -e "^tun"
+  if ! ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|ra[0-9]"
   then
     pon
 
     # Timeout in deciseconds to wait for Interface to come up.
     TIMEOUT=30
 
-    until ifconfig | grep -q -e eth -e wlan -e ath -e tun -e ppp || [ $TIMEOUT == 0  ]
+    until ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|ra[0-9]" || [ $TIMEOUT == 0  ]
     do
       sleep  10
       (( TIMEOUT-- ))
