@@ -304,32 +304,36 @@ lvu_catalog_html()  {
 
 
 newer()  {
-  [ -z "$1" ] && return 1      
-  DATE=$1
-  [ "$DATE" -lt "20010101" ] && return 1        
-  [ "$DATE" -gt "20310101" ] && return 1
-  for MODULE in $(list_moonbase) ; do
-    run_details $MODULE
-    if [ $ENTERED -gt $DATE ] ; then
-      echo $MODULE
+  if [ ! -z "$1" ] ; then
+    if [ -z `echo $1 | sed 's/[[:digit:]]//g'` ] ; then
+      if [ "$1" -gt "20010101" -a "$1" -lt "20310101" ] ; then
+        for MODULE in $(list_moonbase) ; do
+          run_details $MODULE
+          if [ "$ENTERED" -gt "$1" ] ; then
+            echo $MODULE
+          fi
+        done
+      fi
     fi
-  done
+  fi
 }
 
 
 older()  {
-  [ -z "$1" ] && return 1      
-  DATE=$1
-  [ "$DATE" -lt "20010101" ] && return 1        
-  [ "$DATE" -gt "20310101" ] && return 1        
-  for  LINE  in $(cat $MODULE_STATUS_BACKUP) ; do
-    LIN_DATE=$(echo  $LINE  |  cut  -d  :  -f2)
-    if  [  $LIN_DATE  -gt  $DATE  ]  2>/dev/null;  then
-      true
-    else
-      echo  $LINE  |  cut  -d  :  -f1
+  if [ ! -z "$1" ] ; then
+    if [ -z `echo $1 | sed 's/[[:digit:]]//g'` ] ; then
+      if [ "$1" -gt "20010101" -a "$1" -lt "20310101" ] ; then
+        for LINE in $(cat $MODULE_STATUS) ; do
+          LIN_DATE=$(echo $LINE | cut -d: -f2)
+          if [ "$LIN_DATE" -gt "$1" ] 2>/dev/null ; then
+            true
+          else
+            echo $LINE | cut -d: -f1
+          fi
+        done
+      fi
     fi
-  done
+  fi
 }
 
 
