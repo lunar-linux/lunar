@@ -20,7 +20,8 @@
 # usage    : sources <module_name> {MD5}
 # purpose  : displays the filenames and md5sums of sources for a given module
 sources()  
-{
+{ (
+
   MAX_SOURCES=${MAX_SOURCES:=100}
 
   run_details $1 || return 1
@@ -58,7 +59,7 @@ sources()
   else
     echo $MODULE-$VERSION.tar.bz2
   fi
-}
+) }
 
 # function : md5_verify_source
 # usage    : md5_verify_source filename_1 md5_1, filename_2 md52.....
