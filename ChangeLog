@@ -1,3 +1,20 @@
+2003-12-22 18:33  sofar
+
+	* var/lib/lunar/functions/check.lunar: minor adjustment to make it
+	more resistant against my imagination.
+
+2003-12-22 18:21  sofar
+
+	* var/lib/lunar/functions/check.lunar: Fixing lunar "fixdepends"
+	code, much more slick now... will need to be tested before merging
+	down to lunar though.
+
+2003-12-22 17:31  sofar
+
+	* bin/lvu: Fixed up lvu voyeur... it works now again!!! (note it's
+	a bit crude but quite effective at finding the right compile log
+	file, it should work for everyone)
+
 2003-12-13 20:58  elaine
 
 	* var/lib/lunar/functions/check.lunar: Fixed another /versioning
