@@ -1,40 +1,40 @@
 .TH "lfirsttime" "8" "Release $Revision$" "Kagan Kongar" "Lunar firsttime"
 .SH "NAME"
 .LP 
-\fBlfirsttime\fR \- Lunar after-boot manual
+\fBlfirsttime\fR \- Lunar after\-boot manual
 .SH "OVERVIEW"
 .LP 
 This manual page is written to ease the life of the System Administrators after the installation part of \fBLunar Linux\fR is finished.
 .SH "DO NOT PANIC"
 .LP 
-These are the suggested operations immediately after the first boot of a newly installed Lunar box. The operations described below follows some logic and you better check them as sequentially ie; from beginning to end :=) Please remember that the Lunar Install/Rescue ISO is not a full featured system.  You must install more software via the "lin" mechanism to get a fully functioning server and/or workstation.  See the moonbase/profiles section for some handy collections of Lunar Modules.  It should also be noted that you MUST "lin xfree86", BEFORE you try to "lin" any other module that requires X-Windows.  For some reason this is not obvious to quite a few Lunar users.
+These are the suggested tasks you should accomplish immediately after the first boot of a newly installed Lunar box.  The operations described below follow some logic and they should be executed in sequence ie; from beginning to end :=) Please remember that the Lunar Install/Rescue ISO is not a full featured system.  You must install more software via the "lin" mechanism to get a fully functioning server and/or workstation.  See the moonbase/profiles section for some handy collections of Lunar Modules.  It should also be noted that you MUST "lin xfree86", BEFORE you try to "lin" any other module that requires X\-Windows.  For some reason this is not obvious to quite a few Lunar users.
 
 \fB1. Check Networking: \fRBetter check networking first, try pinging out.
 .IP 
 Example : ping www.google.com
 .BR 
 
-The above may or may not work. If not working, try pinging to the IP address instead of name,
+The above may or may not work. If it's not working you may be having a name resolution problem, try pinging to the IP address instead of the name,
 .BR 
 
 Example: ping 216.239.37.101
 .BR 
 
-If pinging to IP is working but pinging to name fails, check /etc/resolv.conf file and see if the nameserver entries are there. You may also want to check the man-page, man resolv.conf if you are not familiar with the resolver library.
+If pinging to IP is working but pinging to name fails, check the \fB/etc/resolv.conf\fR file and see if the nameserver entries are there. You may also want to check the man page, \fBman resolv.conf\fR if you are not familiar with the entries which should be in that file.
 .BR 
 
-If pinging to IP fails, check if your interface is up and running. You may use the command \fBifconfig\fR to see the interface status. You must be able to see the details of your network interface in the output of ifconfig. If you can not, then check if your NIC (network interface card) module is loaded (assuming you are using a modular kernel); use the command \fBlsmod\fR to see the loaded modules. If you NIC module is there but your interface is not up, better reconfigure your networking with the command \fBlnet\fR and retry again. If your NIC module is not listed in the output of lsmod, the chances are mis-configured kernel and mis-configured networking. To check the kernel modules, try \fBls \-l /lib/modules/`uname \-r`/kernel/drivers/net\fR to see the available network modules in kernel. If you are unable to see your NIC module, re\-compile and re\-install your kernel with the command \fBlin linux\fR and retry again after reboot.
+If pinging the IP address fails, check to see if your network interface is up and running. You may use the command \fBifconfig\fR to see the interface status. You must be able to see the details of your network interface in the output of ifconfig. If you cannot, then check if your NIC (network interface card) module is loaded (assuming you are using a modular kernel); use the command \fBlsmod\fR to see the loaded modules. If you do not know for sure what type of network card you have try executing the command: \fBcat /proc/pci|grep Ethernet\fR.  This should output the manufacturer and model of your ethernet card.  If your NIC module is there but your interface is not up, reconfigure the interface with the command \fBlnet\fR and test again.  If your NIC module is still not listed in the output of lsmod, the chances are you have misconfigured the kernel or misconfigured networking.  To check the kernel modules, try \fBls \-l /lib/modules/`uname \-r`/kernel/drivers/net\fR to see the network modules available in the kernel.  If you are unable to see your NIC module, recompile and reinstall your kernel with the command \fBlin \-c linux\fR and try again after reboot.
 .BR 
 
-The network configuration of your box is under \fB/etc/config.d/network/<interface>\fR, ie; the configuration of your eth0 is written under \fB/etc/config.d/network/eth0\fR The configuration script you may use to set the configuration of your interfaces is called lnet. The init script to start/stop the networking is \fB/etc/init.d/network\fR. Hope you got the picture.
+The network configuration file for your Lunar installation may be found in \fB/etc/config.d/network/<interface>\fR, ie; the configuration of your eth0 is written under \fB/etc/config.d/network/eth0\fR The configuration script you may use to configure your interfaces is called \fBlnet\fR. Any time you adjust the configuration of your networking interface you must restart networking to implement any changes you have made. The init script used to start/stop/restart network is \fB/etc/init.d/network\fR.
 .BR 
 
-Good luck and please remember that you must be able to ping lunar\-linux.org in order to update your system.
+Good luck and please remember that you must be able to ping dbguin.lunar\-linux.org in order to update your system.
 .LP 
 
-\fB2. Update Your Moonbase: \fRSince Lunar Linux is a source based distribution, some of the binaries and/or modules in the CD may have been upgraded to newer versions already. 
+\fB2. Update the Moonbase: \fRSince Lunar Linux is a source based distribution, some of the binaries and/or modules on the CD may have been upgraded to newer versions already. 
 .IP 
-Install Perl with the command \fBlin perl\fR. Perl is a vital package for your system. Do not bypass this step.
+Install Perl with the command \fBlin perl\fR. Perl is a vital package for your system. \fBDo not bypass this step\fR.
 .BR 
 
 Do a \fBlin moonbase; lin lunar\fR. These commands will update the package collection (Moonbase) and the core package management tools.
@@ -51,19 +51,19 @@ Also, check \fBOption \-> Integrity Checking\fR and be sure that at least \fBFIN
 Do not forget to have a look at \fBOption \-> Feature Menu\fR
 .BR 
 
-Well, have a general look at the options and get acquainted with them :=)
+Beyond the mentioned tasks you should take the time to have a general look at the options available and get acquainted with them. :=)
 .LP 
 \fB
 4. Rebuild: \fRIn order to 1) be able to rollback your installations, you need a cache for the installed packages. 2) have the fastest Linux distro available.
 .BR 
 
-Just type \fBlunar rebuild\fR and go out for lunch. The rebuild process may take some time depending on your CPU power and available RAM.
+Just type \fBlunar rebuild\fR and go out for lunch. The rebuild process may take some time depending on the CPU power and available RAM on your machine.
 .BR 
 
-This process should be completed flawlessly. However, check \fB/usr/src\fR directory for unsuccessful installations. If a module is installed successfully, no garbage is left behind in /usr/src/<module>.
+This process should complete flawlessly. However, check the \fB/usr/src\fR directory for the remains of unsuccessful installations. If a module is installed successfully, nothing is left behind in /usr/src/<module_name>.  If an installation failed you will find a source directory for that module left behind in \fB/usr/src\fR.
 .BR 
 
-If there are any directories except the kernel, re\-lin those modules (lin \-c <module_name) and better check what is going on. Report bugs and annoyances to the lunar mailing list.
+If there are any directories except the kernel, re\-lin those modules (lin \-c <module_name) and watch carefully to see what is happening during the build. Report bugs at: http://bugs.lunar\-linux.org/ and you should also subscribe to the lunar mailing list which you may do at: http://lunar\-linux.org/mailman/listinfo/lunar.
 .LP 
 
 \fB5. Customize Your Box: \fRIMO no need to describe that step further.
@@ -96,10 +96,10 @@ clarifications.
 .SH "COPYRIGHT"
 .LP 
 This document is Copyrighted Kagan Kongar 2002. It may be reproduced and distributed in whole or in part, in any medium physical or electronic, as long as this copyright notice is retained on all copies.
-.LP
+.LP 
 Portions of this document Copyrighted (C) 2003 Terry Chan
 .SH "AUTHORS"
 .LP 
 Kagan Kongar <kongar@tsrsb.org.tr>
-.PP
-Terry Chan   <tchan@lunar-linux.org>
+.PP 
+Terry Chan   <tchan@lunar\-linux.org>
