@@ -182,9 +182,6 @@ lin_module()  {
     fi
   fi
 
-  # make sure we have the source code
-  lget $MODULE
-  
   # set the installwatchfile
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 

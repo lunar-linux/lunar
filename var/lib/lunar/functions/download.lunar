@@ -465,7 +465,7 @@ show_downloading() {
   debug_msg "show_downloading ($@)"
   if [ -e "$TEMP_DOWNLOADLOG" ] ; then
     verbose_msg "====== download progess:"
-    while ! lget $MODULE >> $TEMP_DOWNLOADLOG 2>&1 ; do
+    while lget_locked $MODULE ; do
       show_download_progress
       sleep 1
     done
