@@ -1128,7 +1128,7 @@ upgrade_install_queue()  {
     message  "The following modules will be updated:"
     cat  $INSTALL_QUEUE
     unset  MODULE
-    if    query  "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${DEFAULT_COLOR}?" n
+    if    query  "Do you wish to edit ${FILE_COLOR}$INSTALL_QUEUE${QUERY_COLOR} ?" n
     then  edit_file  $INSTALL_QUEUE
     fi
 
