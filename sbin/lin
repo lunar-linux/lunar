@@ -912,7 +912,7 @@ main()	{
     MODULES=`echo $MODULES | sed 's/moonbase//g'`
   fi
 
-  if  [  -n  "$FIX"  ];  then
+  if  [[  -n  "$FIX"  ]];  then
     run_fix  $MODULES
   else
     case  $lin_PASS  in
