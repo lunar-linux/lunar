@@ -325,47 +325,43 @@ create_lrm_queue() {
 
 . /etc/lunar/config
 
-root_check 
-enviro_check
-set_priority
 
-[ "$#" == "0" ] && help
 
-LRM_OPT=`getopt -q -o d:ehstvVk \
-         --long debug,downgrade:,help,nosustain,test,keepconfig \
-         -n lrm -- "$@"`
+GETOPT_ARGS=$(getopt -q -n lin -o "dD:hknv" -l "debug,downgrade:,help,keepconfig,nosustain,verbose" -- "$@")
 
-[ "$?" == "0" ] || help
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
 
-eval set -- "$LRM_OPT"
+  root_check 
+  enviro_check
+  set_priority
 
-while true ; do
+  while true ; do
    case "$1" in
-      -d|--downgrade  ) export DOWNGRADE=on; 
-                        export MODULE="$2"
-                        shift 3
-                        downgrade "${@#-}"
-                        exit
-                        break;;
-      -h|--help       ) help  ;;
-      -s|--nosustain  ) export NOSUSTAIN=on;   shift ;;
-      -k|--keepconfig ) export KEEPCONFIG=on;  shift ;;
-      -t|--test       ) export TEST=on;        shift ;;
-         --debug      ) (( LUNAR_DEBUG++ ))
-		        export LUNAR_DEBUG;    shift ;;
-      --) shift; break ;;
-       *) help;  break ;;
+     -d|--debug      ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift ;;
+     -D|--downgrade  ) export DOWNGRADE="on"
+                       export MODULE="$2"
+                       shift 3
+                       downgrade "${@#-}"
+                       exit
+                       break;;
+     -h|--help       ) help  ;;
+     -k|--keepconfig ) export KEEPCONFIG="on" ; shift ;;
+     -n|--nosustain  ) export NOSUSTAIN="on" ; shift ;;
+     -v|--verbose    ) export VERBOSE="on" ; shift ;;
+     --) shift; break ;;
+      *) help;  break ;;
    esac
-done
+  done
 
+  verbose_msg "signals TERM, INT and QUIT are trapped"
+  trap "trap_proc" INT QUIT TERM
 
-[ "$TEST" != "on" ] && {
-   trap "" INT QUIT TERM
-   verbose_msg "signals TERM, INT and QUIT are trapped"
-}
-
-[ "$TEST" == "on" ] && trap "trap_proc" INT QUIT TERM
-create_lrm_queue "${@#-}"
-process_lrm_queue
-exit_proc
+  create_lrm_queue "${@#-}"
+  process_lrm_queue
+  exit_proc
+fi
 

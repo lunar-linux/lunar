@@ -759,47 +759,67 @@ main_menu()  {
 }
 
 
-main() {
-  case  $1  in
-      prune)  prune                         ;;
-      renew)  renew                         ;;
-     update)  update                        ;;
-    rebuild)  rebuild                       ;;
-   optimize)  optimize_architecture         ;;
-  resurrect)  shift && resurrect_modules $@ ;;
-    install)  shift && lin $@               ;;
-     remove)  shift && lrm $@               ;;
-       hold)  shift && hold_modules $@      ;;
-     unhold)  shift && unhold_modules $@    ;;
-      exile)  shift && exile_modules $@     ;;
-    unexile)  shift && unexile_modules $@   ;;
-          *)  main_menu                     ;;
-  esac
-}
-
 
 DIALOG="dialog
 --backtitle
 Lunar Module Management Utility
 --stdout"
 
+main() {
+  #lets load the menu code
+  if [ -n "$MENUS" ]; then
+    for FILE in $(echo $MENUS/*.menu) ; do
+      [ -s "$FILE" ] && . "$FILE"
+    done
+  fi
+
+  export IFS="$TAB_ENTER_IFS"
+
+  LUNAR_MODULE=${LUNAR_MODULE:=lunar}
+  LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
+
+  main_menu
+}
+  
 . /etc/lunar/config
 
-#lets load the menu code
-if [ -n "$MENUS" ]; then
-  for FILE in $(echo $MENUS/*.menu) ; do
-    [ -s "$FILE" ] && . "$FILE"
+GETOPT_ARGS=$(getopt -q -n lunar -o "dv" -l "debug,verbose" -- "$@")
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  root_check 
+  enviro_check 
+  set_priority
+
+  while true ; do
+    case "$1" in
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -h|--help        ) help ;                                     exit 1  ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
   done
+
+  case "$1" in
+    prune    )  prune                         ;;
+    renew    )  renew                         ;;
+    update   )  update                        ;;
+    rebuild  )  rebuild                       ;;
+    optimize )  optimize_architecture         ;;
+    fix      )  shift && run_fix $@           ;;
+    fixdepends) shift && fix_depends $@       ;;
+    resurrect)  shift && resurrect_modules $@ ;;
+    install  )  shift && lin $@               ;;
+    remove   )  shift && lrm $@               ;;
+    hold     )  shift && hold_modules $@      ;;
+    unhold   )  shift && unhold_modules $@    ;;
+    exile    )  shift && exile_modules $@     ;;
+    unexile  )  shift && unexile_modules $@   ;;
+    *) main ;; 
+  esac
 fi
-
-root_check
-enviro_check
-set_priority
-
-export  IFS="$TAB_ENTER_IFS"
-
-LUNAR_MODULE=${LUNAR_MODULE:=lunar}
-LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
-
-main $*
 

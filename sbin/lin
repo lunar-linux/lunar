@@ -61,65 +61,8 @@ EOF
 }
 
 
-process_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  export DEPS_ONLY="$1";      shift 1  ;;
-        -r|--reconfigure)  export RECONFIGURE="$1";    shift 1  ;;
-            -c|--compile)  export COMPILE="$1";        shift 1  ;;
-	      -p|--probe)  export PROBE="$1";          shift 1  ;;
-                  --from)  export SOURCE_CACHE=$2;     shift 2  ;;
-                --silent)  export SILENT="$1";         shift 1  ;;
-                -f|--fix)  export FIX="$1";            shift 1  ;;
-              -n|--nofix)  export FIX="--fix"
-                           export NOFIX="$1";          shift 1  ;;
-	 -d|--fixdepends)  export FIXDEPENDS="$1"
-	 		   export FIX="$1";            shift 1  ;;
-                      -s)  export SEPARATE="$1";       shift 1  ;;
-                   --url)  export BASE_URL="$2";       shift 2  ;;
-                 --debug)  (( LUNAR_DEBUG++ )) 
-		           export LUNAR_DEBUG;         shift 1  ;;
-                   --pam)  lin -c $(find_pam_aware);   shift 1  ;;
-                       *)  help                                 ;;
-      esac
-    else
-      shift
-   fi
-  done
-}
-
-
-strip_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --deps)  shift 1  ;;
- 		 --debug)  shift 1  ;;
-        -r|--reconfigure)  shift 1  ;;
-                  --from)  shift 2  ;;
-                --silent)  shift 1  ;;
-                -f|--fix)  shift 1  ;;
-              -n|--nofix)  shift 1  ;;
-         -d|--fixdepends)  shift 1  ;;
-            -c|--compile)  shift 1  ;;
-	      -p|--probe)  shift 1  ;;
-                      -s)  shift 1  ;;
-                   --url)  shift 2  ;;
-                   --pam)  shift 1  ;;
-                       *)  shift 1  ;;
-      esac
-    else
-      echo  $1
-      shift
-   fi
-  done
-}
-
-
-main()	{
-  process_parameters $@
-  MODULES=$(strip_parameters $@)
+main() {
+  MODULES="$@"
 
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
@@ -136,122 +79,139 @@ main()	{
     return
   fi
 
-  if [ -n "$FIX" ] ; then
-    run_fix $MODULES
-  else
-    # different approaches for multiple modules (start up downloads first)
-    # and single modules (plain install)
-    if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+  # different approaches for multiple modules (start up downloads first)
+  # and single modules (plain install)
+  if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
 
-      if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
-        export TEMP_DOWNLOADLOG=$(temp_create "${MODULE}.download-log")
-      fi
+    if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
+      export TEMP_DOWNLOADLOG=$(temp_create "${MODULE}.download-log")
+    fi
 
-      if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
-        export TEMP_PREPAREDDEPS=$(temp_create "${MODULE}.prepared-depends")
-      fi
+    if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
+      export TEMP_PREPAREDDEPS=$(temp_create "${MODULE}.prepared-depends")
+    fi
 
-      # pass 1 : run full dependency checking
-      # This pass does configuration and dependency identification.
-      if ! build_depends $MODULES ; then
-        temp_destroy $TEMP_DOWNLOADLOG
-	temp_destroy $TEMP_PREPAREDDEPS
-	verbose_msg "Unexpected errors, bailing out!"
-        exit 1
-      elif [ -n "$DEPS_ONLY" ] ; then
-        temp_destroy $TEMP_DOWNLOADLOG
-	temp_destroy $TEMP_PREPAREDDEPS
-        exit 0
-      fi
-
-      # pass 2 : hit the download manager button and grab a beer
-      # this runs as a background process, so we are off to step #3 right away
-      verbose_msg "Spawning download manager"
-      lget $MODULES >> $TEMP_DOWNLOADLOG 2>&1 &
-
-      # pass 3 : compile/install
-      # no strange stuff should happen here anymore
-      for MODULE in $MODULES ; do
-        verbose_msg "starting installation of \"$MODULE\""
-        if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-          if ! module_held $MODULE ; then
-            linING="/var/lock/installing.$MODULE"
-            if  [  -n  "$COMPILE"      ]  ||
-                [  -n  "$RECONFIGURE"  ]  ||
-                module_installed  $MODULE   ||
-                !  resurrect     $MODULE;  then
-              if ! lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $FIX $NOFIX $FIXDEPENDS $SEPARATE $MODULE ; then
-                if [ -e "$TMP_LIN_FAIL" ] ; then
-                  echo "$MODULE" >> $TMP_LIN_FAIL
-                fi
-                lin_EXIT_STATUS=1;  
-              else
-                if [ -e "$TMP_LIN_SUCCESS" ] ; then
-                  echo "$MODULE" >> $TMP_LIN_SUCCESS
-                fi
-              fi
-            fi
-          else
-            verbose_msg "Skipping compile and install for held module \"$MODULE\""
-          fi
-        fi
-      done
-
-      # cleanups that we need to do
+    # pass 1 : run full dependency checking
+    # This pass does configuration and dependency identification.
+    if ! build_depends $MODULES ; then
       temp_destroy $TEMP_DOWNLOADLOG
       temp_destroy $TEMP_PREPAREDDEPS
+      verbose_msg "Unexpected errors, bailing out!"
+      exit 1
+    elif [ -n "$DEPS_ONLY" ] ; then
+      temp_destroy $TEMP_DOWNLOADLOG
+      temp_destroy $TEMP_PREPAREDDEPS
+      exit 0
+    fi
 
-    else
-      if [ -z "$TEMP_PREPAREDDEPS" ] ; then
-        FLAG_PREPAREDDEPS_SET=on
-        export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
-      fi
-      # we are only doing one module, drop down to:
-      MODULE=$MODULES
-      if ! module_held $MODULE ; then
-      	if [ -n "$PROBE" ] ; then
-	  if ! module_installed $MODULE ; then
-	    build_depends $MODULE &&
-	    if [ ! -n "$DEPS_ONLY" ] ; then
-	      if ! lin_module $MODULE ; then
-                temp_destroy $TEMP_PREPAREDDEPS
-	        exit 1
+    # pass 2 : hit the download manager button and grab a beer
+    # this runs as a background process, so we are off to step #3 right away
+    verbose_msg "Spawning download manager"
+    lget $MODULES >> $TEMP_DOWNLOADLOG 2>&1 &
+
+    # pass 3 : compile/install
+    # no strange stuff should happen here anymore
+    for MODULE in $MODULES ; do
+      verbose_msg "starting installation of \"$MODULE\""
+      if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
+        if ! module_held $MODULE ; then
+          linING="/var/lock/installing.$MODULE"
+          if  [  -n  "$COMPILE"      ]  ||
+              [  -n  "$RECONFIGURE"  ]  ||
+              module_installed  $MODULE   ||
+              !  resurrect     $MODULE;  then
+            if ! lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
+              if [ -e "$TMP_LIN_FAIL" ] ; then
+                echo "$MODULE" >> $TMP_LIN_FAIL
               fi
-	    fi
-	  fi
-	else
-	  build_depends $MODULE &&
-	  if [ ! -n "$DEPS_ONLY" ] ; then
+              lin_EXIT_STATUS=1;  
+            else
+              if [ -e "$TMP_LIN_SUCCESS" ] ; then
+                echo "$MODULE" >> $TMP_LIN_SUCCESS
+              fi
+            fi
+          fi
+        else
+          verbose_msg "Skipping compile and install for held module \"$MODULE\""
+        fi
+      fi
+    done
+
+    # cleanups that we need to do
+    temp_destroy $TEMP_DOWNLOADLOG
+    temp_destroy $TEMP_PREPAREDDEPS
+
+  else
+    if [ -z "$TEMP_PREPAREDDEPS" ] ; then
+      FLAG_PREPAREDDEPS_SET=on
+      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+    fi
+    # we are only doing one module, drop down to:
+    MODULE=$MODULES
+    if ! module_held $MODULE ; then
+      if [ -n "$PROBE" ] ; then
+        if ! module_installed $MODULE ; then
+          build_depends $MODULE &&
+          if [ ! -n "$DEPS_ONLY" ] ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
-	      exit 1
-	    fi
-	  fi
-	fi
+              exit 1
+            fi
+          fi
+        fi
       else
-        verbose_msg "Skipping held module \"$MODULE\""
+        build_depends $MODULE &&
+        if [ ! -n "$DEPS_ONLY" ] ; then
+          if ! lin_module $MODULE ; then
+            temp_destroy $TEMP_PREPAREDDEPS
+            exit 1
+          fi
+        fi
       fi
-      if [ -n "$FLAG_PREPAREDDEPS_SET" ] ; then
-        temp_destroy $TEMP_PREPAREDDEPS
-	unset FLAG_PREPAREDDEPS_SET
-      fi
+    else
+      verbose_msg "Skipping held module \"$MODULE\""
+    fi
+    if [ -n "$FLAG_PREPAREDDEPS_SET" ] ; then
+      temp_destroy $TEMP_PREPAREDDEPS
+      unset FLAG_PREPAREDDEPS_SET
     fi
   fi
+  
 }
 
 
 . /etc/lunar/config
 
-export IFS="$STANDARD_IFS"
+GETOPT_ARGS=$(getopt -q -n lin -o "cdfhprRsv" -l "compile,debug,deps,from,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
 
-root_check
-enviro_check
-set_priority
-
-if [ $# == 0 ] ; then 
+if [ -z "$?" ] ; then
   help | view_file
   exit
 else
+  eval set -- $GETOPT_ARGS
+  export IFS="$STANDARD_IFS"
+  
+  root_check
+  enviro_check
+  set_priority
+  
+  while true ; do
+    case "$1" in
+      -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+         --deps        ) export DEPS_ONLY="$1"                      shift   ;;
+      -f|--from        ) export SOURCE_CACHE=$2;                    shift 2 ;;
+      -h|--help        ) help ; exit                                        ;;
+      -p|--probe       ) export PROBE="$1" ;                        shift   ;;
+      -r|--reconfigure ) export RECONFIGURE="$1" ;                  shift   ;;
+      -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
+      -s|--silent      ) export SILENT="$1" ;                       shift   ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
+
   main $@
 fi
 
