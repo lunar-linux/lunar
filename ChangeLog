@@ -1,3 +1,10 @@
+2004-01-07 05:22  watryac04
+
+	* var/lib/lunar/functions/kernel.lunar: Added stub for
+	update_aboot.  Keeps the POST_INSTALL on alphas from failing.  Will
+	complete the function ASAP.  Added this now after tchan's
+	prompting.
+
 2004-01-05 05:13  tchan
 
 	* usr/share/doc/lunar/CREDITS: Corrected r0dzilla's real name.
