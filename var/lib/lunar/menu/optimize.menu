@@ -18,6 +18,7 @@ optimize() {
   fi
   echo -e PLATFORM=$PLATFORM    '\n'    \
           BUILD=$BUILD          '\n'    \
+	  MAKES=$MAKES          '\n'    \
           COPT=$COPT            '\n'    \
           CCOPT=$CCOPT          '\n'    \
           BOPT=$BOPT            '\n'    \
