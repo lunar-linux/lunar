@@ -43,7 +43,6 @@
 /usr/X11R6/lib/X11/app-defaults
 /usr/bin/basename
 /usr/bin/file
-/usr/bin/grep
 /usr/bin/install
 /usr/bin/make
 /usr/bin/md5sum
