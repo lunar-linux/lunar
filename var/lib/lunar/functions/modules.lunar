@@ -176,7 +176,7 @@ run_details() {
    [ -s "$MOONBASE/`find_section $MODULE`/$MODULE/DETAILS" ] || {
       message  "${PROBLEM_COLOR}Unable to find module"    \
                "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"  \
-               "in $MOONBASE"
+               "${MESSAGE_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
       return 1
    }
 
