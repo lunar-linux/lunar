@@ -365,14 +365,3 @@
 	http://www.sendmail.org/ftp/sendmail.8.12.9.tar.gz.sig
 	http://www.sendmail.org/ftp/PGPKEYS
 
-2003-07-25 08:52  sofar
-
-	* var/lib/lunar/functions/install.lunar: Polishing up resurrect:
-	
-	- it is now "autoresurrect" - lunar resurrect $MODULE is the way to
-	force a resurrect - resurrect is skipped with -c - resurrect is
-	skipped when the module is already installed, because	we rather
-	want a recompile then to make sure...
-	
-	this should be the end of the resurrect rewrite.
-
