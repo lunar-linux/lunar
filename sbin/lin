@@ -76,20 +76,20 @@ EOF
 
 . /var/lib/lunar/functions/optimize.lunar
 
-# Useage gcc_checklist $MODULES
+# Useage check_checklist $MODULES
 check_blacklist() {
   if ! [[ $PLATFORM ]]; then
     PLATFORM=x86
   fi
   if [[ -f /var/state/lunar/blacklist.$PLATFORM ]]; then
-    BLKLST=`grep $MODULE /var/state/lunar/blacklist.$PLATFORM`
+    BLKLST=`grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM`
     if [[ $BLKLST == $MODULE ]]; then
       message "${PROBLEM_COLOR}" \
               "Module $MODULE is blacklisted and will not be installed." \
 	      "${DEFALUT_COLOR}"
       exit 0
-    else
-      echo "Module $MODULE is NOT blacklisted, continuing the install."
+    # else
+    #   echo "Module $MODULE is NOT blacklisted, continuing the install."
     fi
   else
     touch /var/state/lunar/blacklist.$PLATFORM
