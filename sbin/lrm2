@@ -1,0 +1,517 @@
+#!/bin/sh
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# lrm is for removing installed packages                   # 
+#                                                          #
+# 20020610                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+help()
+{
+cat << END
+usage: lrm [options] [module ...]
+   -h  --help        displays this screen
+       --debug       debug output; implies verbose
+   -d  --downgrade   [module] [version] downgrades a module
+   -e  --exile       exiles modules
+   -s  --nosustain   removes module(s) even if they are sustained
+   -t  --test        test only, do not actually do anything
+   -v  --verbose     verbose operation
+   -V  --version     display version information and exit
+   
+lrm is a script for removing installed modules.
+   If invoked without options, lrm will remove all installed files 
+belonging to the module(s) and remove the module(s) from the list
+of installed modules. 
+   Downgrading a module means removing the current installed version
+of the module and installing a specific version; given that the 
+specific version is already in $INSTALL_CACHE/.
+   Exile is for removing the module and eliminating any possibilty
+for its re-installing via automatic processess. An exiled module can be
+un-exiled via linning it.
+   Some modules (such as bash and gcc)  are marked "non-removable" by the 
+system. In order to remove "sustained" modules, use the nosustain option.
+END
+exit 1
+}
+
+display_version()
+{
+   echo "lrm 1.0RC1"
+   echo "Copyright 2002, Kagan Kongar <kongar@tsrsb.org.tr> under GPL2"   
+   exit
+}
+exit_proc()
+{
+   [ "$DEBUG" == "on" ] && echo "Clearing temporary files.. "
+   rm -f $LRM_QUEUE  2>/dev/null
+   rm -f $LRM_TEMP   2>/dev/null
+   rm -f $TEMP_FILE  2>/dev/null
+   rm -f $TEMP2_FILE 2>/dev/null
+   exit
+}
+
+trap_proc()
+{
+   [ "$VERBOSE" == "on" ] && echo "Trapped a signal! "
+   exit_proc
+
+}
+handle_config_files()
+{
+   TARGET="$1"
+   dirname "$TARGET" | grep -q "^/etc"  && {
+      [ "$DEBUG" == "on" ] && {
+         echo "      $TARGET is a config file." 
+         echo -n "        calculating MD5SUM for $TARGET... " 
+      }
+
+   TARGET_MD5=`md5sum "$TARGET" 2>/dev/null | cut -d " " -f 1-1`
+   OLD_MD5=`grep -w "$TARGET\$" $MD5_LOG | cut -d " " -f 1-1`
+   [ "$DEBUG" == "on" ] && echo "DONE!" 
+
+   if [ -z "$TARGET_MD5" ]
+   then
+     [ "$DEBUG" == "on" ] && 
+     echo "          Problem calculating checksum of $TARGET" 
+     continue
+   fi
+
+   if [ -z "$OLD_MD5" ]
+   then
+      [ "$DEBUG" == "on" ] && 
+      echo "          No previous checksum! Deleting $TARGET" 
+      [ "$TEST" == "on" ] || rm -f $TARGET 
+      continue
+   fi
+
+   if [ "$TARGET_MD5" == "$OLD_MD5" ]
+   then
+      [ "$DEBUG" == "on" ] && 
+      echo "          MD5 checksums matched! Deleting $TARGET" 
+      [ "$TEST" == "on" ] || rm -f $TARGET
+      continue
+   fi
+
+   if [ "$TARGET_MD5" != "$OLD_MD5" ]
+   then
+      [ "$DEBUG" == "on" ] && 
+      echo "          MD5 checksums mismatched!"
+      if [ "$PRESERVE" == "on" ]
+      then
+         [ "$DEBUG" == "on" ] &&
+         echo "          PRESERVE=on, keeping $TARGET" 
+         continue
+      else
+         [ "$DEBUG" == "on" ] &&
+         echo "          PRESERVE=off, moving"
+         echo "            $TARGET to $TARGET.`date +%Y%m%d%H%M`"
+         [ "$TEST" == "on" ] ||
+         mv $TARGET $TARGET.`date +%Y%m%d%H%M`
+         continue
+      fi
+   fi
+  }
+}
+
+remove_something()
+{
+   if [ -z "$1" ]; then
+      [ "$DEBUG" == "on" ] && 
+         echo "    Target parameter not passed, exiting"
+      return 1
+   fi
+
+   if ! [ -e "$1" ] && ! [ -L "$1" ] ; then
+      [ "$DEBUG" == "on" ] && 
+         echo "    Target does not exist, exiting"
+      return 1
+   fi
+
+   TARGET="$1"
+
+   [ "$DEBUG" == "on" ] && echo -n "    removing $TARGET.. "
+
+   if [ "$TEST" == "on" ] 
+   then
+      if [ "$DEBUG" == "on" ]
+      then
+         [ -w "$TARGET" ] && 
+         echo "removed"   || 
+         echo "NOT removed!"
+      fi
+   fi
+
+   if [ "$TEST" != "on" ]
+   then
+      [ -d "$TARGET" ]           && 
+      rmdir $TARGET 2> /dev/null || 
+      rm -f $TARGET 2>/dev/null
+
+      TMP_VAR="$?"
+
+      if [ "$DEBUG" == "on" ]
+      then
+         [ "$TMP_VAR" == "0" ]   && 
+         echo "removed"          ||
+         echo "NOT removed!"
+      fi
+   fi
+}
+
+process_directories()
+{
+   [ "$VERBOSE" == "on" ] && echo "  Processing directories..."
+
+   if [ -z "$1" ]; then
+      [ "$DEBUG" == "on" ] && 
+         echo "    Filename parameter not passed, exiting"
+      return 1
+   fi
+
+   if ! [ -d "$1" ]; then
+      [ "$DEBUG" == "on" ] && 
+         echo "    Filename does not exist, exiting"
+      return 1
+   fi
+
+   cat $1 | sort -r > $2
+
+   while read LINE
+   do
+      remove_something "$LINE"
+   done < $2
+}
+
+process_lrm_queue()
+{
+   export TEMP_FILE="/tmp/lrm.temp.`uuidgen`"
+   rm -f $TEMP_FILE 2>/dev/null   
+
+   export TEMP2_FILE="/tmp/lrm.temp.`uuidgen`"
+   rm -f $TEMP2_FILE 2>/dev/null   
+
+   [ "$DEBUG" == "on" ] && 
+   [ -s "$LRM_QUEUE" ]    && 
+      echo -e "\nWill process the modules: `cat $LRM_QUEUE | xargs`"
+
+   while [ -s "$LRM_QUEUE" ]
+   do   
+      MODULE=`remove_queue $LRM_QUEUE`
+      [ "$TEST" == "on" ] && TEMP="-- TEST MODE -- : "
+      [ "$VERBOSE" == "on" ] && echo -e "\n${TEMP}Removing $MODULE"
+      [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
+
+      run_details $MODULE || continue
+
+      if ! module_installed $MODULE
+      then
+         if module_exiled $MODULE
+         then
+            message  "${MODULE_COLOR}${MODULE}"            \
+                     "${PROBLEM_COLOR}is already exiled."  \
+                     "${DEFAULT_COLOR}"
+            continue
+          fi
+
+         [ "$EXILE" == "on" ] && 
+         [ "$TEST" != "on"  ] &&
+         remove_module $MODULE
+
+         [ "$VERBOSE" == "on" ] && echo "  Module $MODULE is exiled"
+
+         message  "${LRM_COLOR}Exiled module:"  \
+                  "${MODULE_COLOR}${MODULE}"    \
+                  "${DEFAULT_COLOR}"
+         continue
+      fi
+
+       VERSION=`installed_version  $MODULE`
+      INST_LOG=$INSTALL_LOGS/$MODULE-$VERSION
+       MD5_LOG=$MD5SUM_LOGS/$MODULE-$VERSION
+
+      run_module_file PRE_REMOVE 
+
+      [ "$VERBOSE" == "on" ] && echo "  Removing files..."
+      while read TARGET
+      do
+         [ "$DEBUG" == "on" ] && echo -n "    checking $TARGET.. "
+         if ! [ -e "$TARGET" ]
+         then
+            [ "$DEBUG" == "on" ] && echo "Not found!"
+            continue
+         fi
+
+         [ "$DEBUG" == "on" ] && echo "Found!"
+
+
+         grep -q -w "$TARGET\$" $PROTECTED $EXCLUDED && {
+            [ "$VERBOSE" == "on" ] && 
+            echo "      $TARGET is protected or excluded!!" 
+            continue
+         }
+
+         [ -d "$TARGET" ] && {
+            [ "$DEBUG" == "on" ] &&
+            echo -e "      $TARGET will be processed later !!" 
+            echo "$TARGET" >> $TEMP_FILE
+            continue
+         }
+
+         remove_something $TARGET
+
+         handle_config_files $TARGET
+
+      done < $INST_LOG   
+
+      process_directories $TEMP_FILE $TEMP2_FILE
+
+      run_module_file POST_REMOVE
+
+      [ "$VERBOSE" == "on" ] &&
+      echo -n "  Removing module from dependencly listing.. "
+      [ "$TEST" != "on" ]     && 
+      remove_depends  $MODULE &&
+      [ "$VERBOSE" == "on" ]  && 
+      echo "removed"          || {
+         [ "$VERBOSE" == "on" ]  && 
+         echo "NOT removed!"
+      }
+
+      [ "$VERBOSE" == "on" ] &&
+      echo -n "  Removing module from installed list.. "
+      
+      [ "$TEST" != "on" ]     && 
+      remove_module  $MODULE  &&
+      [ "$VERBOSE" == "on" ]  && 
+      echo "removed"          || {
+         [ "$VERBOSE" == "on" ]  && 
+         echo "NOT removed!"
+      }
+
+      [ "$EXILE" == "on" ] && EXTEMP=" and exiled"
+
+      message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
+                "${MODULE_COLOR}${MODULE}"    \
+                "${DEFAULT_COLOR}"
+
+      [ "$TEST" != "on" ] &&
+      activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
+   done
+}
+
+check_status()
+{
+   [ "$VERBOSE" == "on" ] && echo -n "  Checking if $1 is installed.. "
+   module_installed $MODULE || {
+      message  "${MODULE_COLOR}${MODULE}"  \
+      "${PROBLEM_COLOR}is not installed."  \
+      "${DEFAULT_COLOR}"
+      [ "$VERBOSE" == "on" ] && echo -n "  Checking if $1 will be exiled.. "
+      [ "$EXILE"   == "on" ] || {
+            [ "$VERBOSE" == "on" ] && echo "NO!"
+            return 1
+         }
+   } 
+   [ "$VERBOSE" == "on" ] && echo "OK!"
+
+   [ "$NOSUSTAIN" == "on" ] && return 0 || {
+
+      [ "$VERBOSE" == "on" ] && echo -en "  Checking if $1 is sustained.. "
+      grep -q -w "$MODULE" "$SUSTAINED" && {
+             message  "${MODULE_COLOR}${MODULE}"         \
+                      "${PROBLEM_COLOR}is sustained."  \
+                      "${DEFAULT_COLOR}"
+            return 1 
+      } || {
+         [ "$VERBOSE" == "on" ] && echo  "NO!"
+         return 0
+      }
+   }
+   true
+}
+
+downgrade()
+{
+# a local function for listing the contents of install cache
+   list_available_cache()
+   {
+      ls -1 $INSTALL_CACHE/$MODULE-* |
+      while read LINE
+      do
+         echo "  $LINE"
+      done
+      exit 1
+   }
+#
+   
+   if [ "$TEST" != "on" ]; then 
+      root_check || exit 1
+   fi
+
+   [ "$VERBOSE" == "on" ] && echo "  Running $MODULE DETAILS file"
+   run_details $MODULE || return 1
+
+   [ -z "$1" ] && {
+      echo "No version is entered. The below is the list of available files."
+      list_available_cache   
+   }
+
+   local FILENAME="$MODULE-$1-$BUILD.tar.bz2"
+   [ -s $INSTALL_CACHE/$FILENAME ] || {
+      echo "Desired version is not available. Here is the available files"
+      list_available_cache
+   }
+
+   [ "$VERBOSE" == "on" ] && echo "  Checking if  $MODULE is installed"
+   local I_VERSION=`installed_version $MODULE`
+   [ -n "$I_VERSION" ] && 
+   {
+      [ "$VERBOSE" == "on" ] &&
+      echo "    $I_VERSION of $MODULE is installed at the moment"
+
+      [ "$DEBUG" == "on" ] && 
+         echo -n "  Checking if desired version is the installed version..."
+
+      [ "$1" == "$I_VERSION" ] && 
+      {
+         [ "$DEBUG" == "on" ] && echo "YES!!"
+         echo "The downgrade version is the same as the installed version"
+         echo "Here is the available files." 
+         list_available_cache
+      } || 
+      {
+         [ "$DEBUG" == "on" ] && echo "NO"
+      }
+
+      [ "$VERBOSE" == "on" ] && echo "  Removing $MODULE-$I_VERSION"
+      [ "$TEST" == "on" ] && lrm2 -ts $MODULE || lrm2 -s $MODULE
+
+   } || 
+   {
+      [ "$VERBOSE" == "on" ] &&
+      echo "    $MODULE is NOT installed at the moment"
+   }
+
+   [ "$VERBOSE" == "on" ] && echo "  Installing $MODULE-$1"
+   [ "$VERBOSE" == "on" ] && echo "    extracting cached install file..."
+   [ "$TEST" == "on" ] && 
+   {
+      [ "$DEBUG" == "on" ] &&
+      bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C /  ||
+      bzcat $INSTALL_CACHE/$FILENAME | tar -kt $TAR_P -C / >/dev/null
+      [ "$VERBOSE" == "on" ] && echo "  Adding module to installed list"
+   }
+
+   [ "$TEST" != "on" ] && 
+   {
+      [ "$DEBUG" == "on" ] &&
+      bzcat $INSTALL_CACHE/$FILENAME | tar -kx $TAR_P -C / ||
+      bzcat $INSTALL_CACHE/$FILENAME | 
+      tar -kx $TAR_P -C / 2>/dev/null >/dev/null
+      [ "$VERBOSE" == "on" ] && echo "  Adding module to installed list"
+      add_module $MODULE installed  $1
+      activity_log  "lrm downgrade"  "$MODULE"  "$1"  "success"
+   }
+    message  "${RESURRECT_COLOR}Downgraded module:"  \
+             "${MODULE_COLOR}${MODULE}"              \
+             "${DEFAULT_COLOR}"                      \
+             "version"                               \
+             "${VERSION_COLOR}${1}"                  \
+             "${DEFAULT_COLOR}" 
+   
+   exit
+}
+
+create_lrm_queue() 
+{
+
+  [ "$#" == "0" ] && help;
+
+   if [ "$TEST" != "on" ]; then 
+      root_check || exit 1
+   fi
+
+   [ -e "$EXCLUDED" ] || {
+      message  "${PROBLEM_COLOR} $EXCLUDED can't be found!!."  \
+               "\nTouching it to create, but this is just a "  \
+               "workaround!! \nDo a lunar update ASAP\n"       \
+               "${DEFAULT_COLOR}"
+      touch $EXCLUDED 
+    }
+
+   [ -e "$PROTECTED" ] || {
+      message  "${PROBLEM_COLOR} $PROTECTED can't be found!!." \
+               "\nTouching it to create, but this is just a "  \
+               "workaround!! \nDo a lunar update ASAP\n"       \
+               "${DEFAULT_COLOR}"
+      touch $PROTECTED 
+    }
+
+  export  LRM_QUEUE="/tmp/lrm.queue.$$"
+  export   LRM_TEMP="/tmp/lrm.temp.$$"
+  [ -f "$LRM_QUEUE"  ] && rm -f $LRM_QUEUE 2>/dev/null
+  [ -f "$LRM_TEMP"   ] && rm -f $LRM_TEMP  2>/dev/null
+                       
+   MODULE_LIST="$@"
+   for MODULE in $MODULE_LIST
+   do
+      run_details  $MODULE  || continue
+      check_status $MODULE  || continue
+      add_queue $LRM_QUEUE $MODULE
+   done      
+}
+
+. /etc/lunar/config
+
+
+[ "$#" == "0" ] && help
+
+LRM_OPT=`getopt -q -o d:ehstvV \
+         --long debug,downgrade:,exile,help,nosustain,verbose,version,test \
+         -n lrm -- "$@"`
+
+[ "$?" == "0" ] || help
+
+eval set -- "$LRM_OPT"
+
+while true ; do
+   case "$1" in
+      -d|--downgrade) export DOWNGRADE=on; 
+                      export MODULE="$2"
+                      shift 3
+                      downgrade "${@#-}"
+                      exit
+                      break;;
+      -e|--exile    ) export EXILE=on;     shift ;;
+      -h|--help     ) help  ;;
+      -s|--nosustain) export NOSUSTAIN=on; shift ;;
+      -t|--test     ) export TEST=on;      shift ;;
+      -V|--version  ) display_version;;
+      -v|--verbose  ) export VERBOSE=on;   shift;;
+      --debug       ) export VERBOSE=on; export DEBUG=on; shift;;
+      --) shift; break ;;
+       *) help;  break ;;
+   esac
+done
+
+
+[ "$TEST" != "on" ] && {
+   trap "" INT QUIT TERM
+   [ "$VERBOSE" == "on" ] && echo "Signals TERM, INT and QUIT are trapped!"
+}
+
+[ "$TEST" == "on" ] && trap "trap_proc" INT QUIT TERM
+create_lrm_queue "${@#-}"
+process_lrm_queue
+exit_proc

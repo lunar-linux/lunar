@@ -1,0 +1,108 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/updatelog                                     #
+# includes display_update_log                              #
+# 20020711                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Jason Jackson 2002 under GPLv2               #
+#                                                          #
+############################################################
+
+# function : display_update_log 
+# usage    : display_update_log update|rebuild 
+# purpose  : display a log describing update successes, failures, and summaries
+
+display_update_log()  { 
+ 
+  rm -f /var/log/lunar/update 
+ 
+  { 
+
+  display_success_info $1
+
+  if [  $1 = "update" ]; then  
+    display_moonbase_changes
+  fi  
+     
+  } | tee /var/log/lunar/update 
+ 
+  rm -f /tmp/fail_$LOGTMP /tmp/success_$LOGTMP
+ 
+}
+
+# function : display_success_info 
+# usage    : display_success_info update|rebuild
+# purpose  : display a list of update successes and failures
+display_success_info()  {
+
+  if  [  -e  /tmp/success_$LOGTMP  ]; then  
+    NUMSUCCESS=`wc -l /tmp/success_$LOGTMP | cut -d \  -f 7 -` 
+  else  
+    NUMSUCCESS=0  
+  fi  
+ 
+  if  [  -e  /tmp/fail_$LOGTMP  ]; then  
+    NUMFAILURES=`wc -l /tmp/fail_$LOGTMP | cut -d \  -f 7 -`  
+  else  
+    NUMFAILURES=0  
+  fi  
+
+  echo  "Lunar $1 completed at `date`"  
+  echo  "Successful ${1}s: $NUMSUCCESS  Failed ${1}s: $NUMFAILURES"  
+  echo  
+  
+  if  [  $NUMSUCCESS -ne 0  ]; then   
+    echo  "Successful Packages:"  
+    cat  /tmp/success_$LOGTMP  
+    echo  
+  fi  
+ 
+  if  [  $NUMFAILURES -ne 0  ]; then    
+    echo  "Failed Packages:"   
+    cat  /tmp/fail_$LOGTMP   
+    echo   
+  fi   
+
+  if [  $1 = "update" ]; then 
+    display_moonbase_changes 
+  fi 
+
+}
+
+# function : display_moonbase_changes
+# usage    : display_moonbase_changes
+# purpose  : display a list of modules added or removed during this update
+display_moonbase_changes()  {  
+
+  MODULE_INDEX_BACKUP=/tmp/`basename $MODULE_INDEX`
+  
+  if [ -e $MOUDLE_INDEX ] && [ -e $MODULE_INDEX_BACKUP ]; then
+
+    NEW_MODULES=`diff -I $MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | wc -l`
+    DEL_MODULES=`diff -I $MOONBASE_MD5 $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | wc -l`
+  
+    if [ $NEW_MODULES -ne 0 ]; then
+      echo "New Modules:"
+      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | cut -d \  -f 2 -
+      echo
+    fi
+
+    if [ $DEL_MODULES -ne 0 ]; then
+      echo "Removed Modules:"
+      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
+      echo
+    fi
+
+    rm -f $MODULE_INDEX_BACKUP
+
+  fi
+  
+}
+

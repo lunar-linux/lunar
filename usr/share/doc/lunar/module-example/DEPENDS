@@ -1,0 +1,31 @@
+#
+# DEPENDS example
+#
+
+# always end the line with && except for the last one!
+
+# single depends:
+#	depends moduleA
+
+# single optional depends:
+#	optional_depends  "moduleA" "" "" "For blabla support"
+
+# optional depends that use configure switches:
+# optional_depends  "moduleC" \
+#                       "--with-configure-option" \ 
+#                       "--without-configure-option" \ 
+#                       "for blabla support"
+
+# multiple depends:
+#	depends moduleA &&
+#	depends moduleB
+
+# or everything:
+# depends  moduleA &&
+# depends  moduleB &&
+# optional_depends  "moduleC" \
+#			"--with-configure-option" \
+#			"--without-configure-option" \
+#			"for blabla support" &&
+# optional_depends  "moduleD" "" "" "For blabla support"
+

@@ -1,0 +1,346 @@
+#!/bin/sh
+############################################################
+#                                                          #
+# lget - get sources from the net                          #
+#                                                          #
+############################################################
+# leach is part of the sorcery spell management utility    #
+# Copyright 2001 by Kyle Sallee                            #
+############################################################
+#                                                          #
+# this WAS the leach script of a source based Linux distro,#
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted Jason Johnston  2002 under GPLv2       #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+
+help() {
+
+  cat  <<  EOF
+
+Lget downloads single or multiple module source files.
+
+Example: lget  nano hdparm sudo
+Usage:  lget  [parameters] [modules]
+
+Typing lget with no modules causes lget to download 
+every available source specified in the moonbase.
+
+Optional Parameters:
+
+       --from directory Specify an alternate for $SOURCE_CACHE
+       --url URL  Specify an alternate download URL
+EOF
+
+  exit  1
+
+}
+
+
+erase()  {
+
+  if  [  -z  "$PARTIAL"  ];  then
+    rm  -f  $S_FILE.tar.gz  $S_FILE.tgz  $S_FILE.tar.bz2
+  fi
+
+}
+
+
+call_wget()  {  
+   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
+   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
+   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
+
+   wget  $CACHE  $RATE  $FTP_CONNECTION $RETRIES  $PARTIAL  $1;  
+}
+
+fuzzy_wget()  {
+
+  FTP_CONNECTION="--passive-ftp"
+  [ "$FTP_ACTIVE"  == "on"   ] || 
+  [ "$FTP_PASSIVE" == "off"  ] && 
+  unset FTP_CONNECTION 
+
+  
+  PARTIAL="-c"
+  [ "$CONTINUE" == "off" ] && unset PARTIAL
+
+  CACHE="--cache=on"
+  [ "$USE_CACHE" == "off" ] && CACHE="--cache=off"
+
+
+  NUM_RETRY=${NUM_RETRY:=5}
+  RETRIES="--tries=${NUM_RETRY}"
+
+  [  -n  "$DOWNLOAD_RATE"  ] && RATE="--limit-rate=${DOWNLOAD_RATE}"
+
+  FUZZY=${FUZZY:=on}
+
+  S_URL=`echo  $URL              |
+         sed  "s/\.tar\.gz$//"   |
+         sed  "s/\.tgz$//"       |
+         sed  "s/\.tar\.bz2$//"`
+
+  S_FILE=`echo  $FILE             |
+          sed  "s/\.tar\.gz$//"   |
+          sed  "s/\.tgz$//"       |
+          sed  "s/\.tar\.bz2$//"`
+
+  if    erase  &&  call_wget  $URL;            then  FILE="$FILE"
+  elif  [  "$FUZZY"  ==  "off"  ];             then  return 1
+  elif  erase  &&  call_wget  $S_URL.tar.bz2;  then  FILE="$S_FILE.tar.bz2"
+  elif  erase  &&  call_wget  $S_URL.tar.gz;   then  FILE="$S_FILE.tar.gz"
+  elif  erase  &&  call_wget  $S_URL.tgz;      then  FILE="$S_FILE.tgz"
+  else  false
+  fi
+
+
+}
+
+
+disconnect()  {
+
+  if    ps  -C disconnect  >  /dev/null
+  then  return
+  fi
+
+  rm  -rf          /tmp/disconnect
+  cat  <<  EOF  >  /tmp/disconnect
+#!/bin/sh
+
+while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
+poff
+rm  /tmp/disconnect
+EOF
+
+chmod  a+x  /tmp/disconnect
+            /tmp/disconnect  &
+
+}
+
+
+connect()  {
+
+  if  !  ifconfig  |  grep  -q  "^eth"   &&
+      !  ifconfig  |  grep  -q  "^wlan"  &&
+      !  ifconfig  |  grep  -q  "^ppp";  then
+    pon
+
+    # Timeout in deciseconds to wait for Interface to come up.
+    TIMEOUT=30
+
+    until  ifconfig  |  grep  -q  eth   ||
+           ifconfig  |  grep  -q  ppp   ||
+           [  $TIMEOUT == 0  ]
+    do
+      sleep  10
+      (( TIMEOUT-- ))
+    done
+    disconnect
+
+  fi
+
+}
+
+
+get() {
+
+  if  [  -n  "$1"  ] ;  then
+
+    FILE=`basename  $1`
+    if  [  -n  "$BASE_URL"  ];  then
+      URL=$BASE_URL/$FILE
+      connect          &&
+      fuzzy_wget       &&
+      testpack  $FILE  &&
+      mv        $FILE  $SOURCE_CACHE
+    else
+      URL=$1
+      connect          &&
+      fuzzy_wget       || {
+        FILE=`basename  $1`
+        [  -n  "$LRESORT_URL" ] && {
+          URL=$LRESORT_URL/$FILE
+          fuzzy_wget
+        }
+      } &&
+      testpack  $FILE  &&
+      mv        $FILE  $SOURCE_CACHE
+    fi
+
+  fi
+
+}
+
+
+process_parameters()  {
+
+  while  [  -n  "$1"  ];  do
+
+    if  echo  "" $1  |  grep  -q  "^ -";  then
+
+      case  $1  in
+         --from)  SOURCE_CACHE=$2;  shift 2  ;;
+         --help)  help;             exit  1  ;;
+          --url)  BASE_URL="$2";    shift 2  ;;
+              *)  help                       ;;
+      esac
+
+    else  shift
+    fi
+
+  done
+
+}
+
+
+strip_parameters()  {
+
+  while  [  -n  "$1"  ];  do
+
+    if  echo  "" $1  |  grep  -q  "^ -";  then
+
+      case  $1  in
+        --from)  shift 2  ;;
+        --help)  shirt 1  ;;
+         --url)  shift 2  ;;
+             *)  shift 1  ;;
+      esac
+
+    else  echo  $1
+          shift 
+    fi
+
+  done
+
+}
+
+
+dl_source()  {
+  if  [  -n  "$1"  ];  then
+
+    FILE="$1"
+    shift  1
+
+    [ "$CLEAR_CACHE" == "on" ] && 
+    rm `guess_filename  $SOURCE_CACHE/$FILE` 2>/dev/null
+    
+    if  !  `guess_filename  $SOURCE_CACHE/$FILE  > /dev/null`
+    then
+
+      message  "${MESSAGE_COLOR}Downloading source file"  \
+               "${FILE_COLOR}${FILE}${DEFAULT_COLOR}"     \
+               "for module"                                \
+               "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+      for  URL  in  $*;  do
+        if  get  $URL;  then  break;  fi
+      done
+
+    fi
+  fi
+
+}
+
+
+lget_locked()  {
+
+  [     -f        $LGETING  ]  &&
+  ps        `cat  $LGETING`    |
+  grep  -q  "lget"
+
+}
+
+
+download() {
+
+  if  !  lget_locked;  then
+
+    echo  $$  >  $LGETING
+
+# MAX_SOURCES is defined at /etc/lunar/config
+MAX_SOURCES=${MAX_SOURCES:=100}
+
+    for (( CNT=0; CNT<=MAX_SOURCES; CNT++ ))
+    do
+       TEMP1=`echo SOURCE$CNT | sed s/SOURCE0/SOURCE/`
+       TEMP2=`echo SOURCE$(( CNT+1))`
+       TEMP3=`echo SOURCE$(( CNT+2))`
+
+       eval TEMP=\$$TEMP1
+       eval TEMP2=\$$TEMP2
+       eval TEMP3=\$$TEMP3
+
+       TEMP1_URL=${TEMP1}_URL[@]
+       eval TEMP_URL=\${$TEMP1_URL}
+
+       [ -n "$TEMP" ] && dl_source  $TEMP   ${TEMP_URL[*]}
+
+#if two consequtive empty sources, then break
+       [ -z "$TEMP2" ] && [ -z "$TEMP3" ]  && break
+    done
+    rm  -f  $LGETING 2> /dev/null
+
+  else  false
+  fi
+
+}
+
+
+
+lget_moonbase()  {
+
+  for  SECTION  in  `list_sections`;  do
+    for  MODULE  in  `list_modules $SECTION`;  do
+      (  LGETING=/var/lock/lgetting.$MODULE
+         run_details  &&
+         download
+      )
+    done
+  done
+
+}
+
+
+main() {
+
+  cd  /tmp
+  process_parameters        $*
+  MODULES=`strip_parameters  $*`
+
+  if  [  -z  "$MODULES"  ];  then
+    lget_moonbase
+  else
+
+    for  MODULE  in  $MODULES;  do
+      (  LGETING=/var/lock/lgetting.$MODULE
+         run_details  &&
+         download
+      )
+    done
+
+  fi
+
+}
+
+
+. /etc/lunar/config
+
+root_check || exit 1
+
+renice +10 -p $$  >/dev/null
+main  $*

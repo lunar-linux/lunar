@@ -1,0 +1,55 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/sizes                                         #
+# includes find_module_size                                #
+#                                                          #
+# 20020527                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+# function: find_module_size
+# usage   : find_module_size <module> |version|
+# purpose : finds the installed size of module in KB
+find_module_size()
+{
+   #this functions checks the packages file if there is already size entry
+   module_size()
+   {
+      unset SIZE
+      [ -e "$MODULE_STATUS" ] &&
+      SIZE=`grep  "^$1\:" $MODULE_STATUS | cut -d ":" -f 5-5`
+      [ -n "$SIZE" ] && echo ${SIZE} || false
+   }
+
+   [ -z "$1" ] && return
+
+   [ -n "$2" ] && VERSION=$2 || VERSION=`installed_version $1`
+   [ -z "$VERSION" ] &&
+   message  "${PROBLEM_COLOR}$1 is not installed${DEFAULT_COLOR}" &&
+   return
+
+   # yes, there is a size entry
+   module_size $1 $VERSION && return
+
+   # no :( lets dig through logs
+   [ -e "$INSTALL_LOGS/$1-$VERSION" ]  &&
+   while read LINE
+   do
+      [ -f "$LINE" ]            &&
+      SIZE0=`du "$LINE"         | 
+             cut -f 1-1`        &&
+      SIZE=$((SIZE0+SIZE))
+   done <$INSTALL_LOGS/$1-$VERSION     &&
+   echo ${SIZE}KB                      ||
+   message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
+}
+

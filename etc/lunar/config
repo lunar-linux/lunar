@@ -1,0 +1,123 @@
+export        DIALOGRC=/etc/lunar/dialogrc
+
+          CONFIG_CACHE=/etc/lunar/local
+          LOCAL_CONFIG=/etc/lunar/local/config
+        DEPENDS_CONFIG=/etc/lunar/local/depends
+        LOCAL_EXCLUDED=/etc/lunar/local/excluded
+               MIRRORS=/etc/lunar/mirrors
+
+         UPDATE_SCRIPT=/tmp/lunar.update
+         LUNAR_MODULES="lunar theedge"
+
+       BUILD_DIRECTORY=/usr/src
+    DOCUMENT_DIRECTORY=/usr/share/doc
+
+      COLONY_DIRECTORY=/etc/lunar/colony
+          COLONY_NAMES=$COLONY_DIRECTORY/names
+           COLONY_KEYS=$COLONY_DIRECTORY/keys
+         COLONY_OUTPUT=/tmp/colony.output
+
+              EXCLUDED=/var/lib/lunar/excluded
+              MOONBASE=/var/lib/lunar/moonbase
+             PROTECTED=/var/lib/lunar/protected
+                  SOLO=/var/lib/lunar/solo
+           SUBROUTINES=/var/lib/lunar/subroutines
+             FUNCTIONS=/var/lib/lunar/functions
+                 MENUS=/var/lib/lunar/menu
+             SUSTAINED=/var/lib/lunar/sustained
+
+       SOUND_DIRECTORY=/var/lib/lunar/sound
+           SOUND_THEME=startrek
+
+            BOOST_LOCK=/var/lock/boost
+
+          ACTIVITY_LOG=/var/log/lunar/activity
+          INSTALL_LOGS=/var/log/lunar/install
+          COMPILE_LOGS=/var/log/lunar/compile
+           MD5SUM_LOGS=/var/log/lunar/md5sum
+         INSTALL_QUEUE=/var/log/lunar/queue/install
+          REMOVE_QUEUE=/var/log/lunar/queue/remove
+
+        DEPENDS_STATUS=/var/state/lunar/depends
+ DEPENDS_STATUS_BACKUP=/var/state/lunar/depends.backup
+         MODULE_STATUS=/var/state/lunar/packages
+  MODULE_STATUS_BACKUP=/var/state/lunar/packages.backup
+          MODULE_INDEX=/var/state/lunar/module.index
+
+         INSTALL_CACHE=/var/cache/lunar
+          SOURCE_CACHE=${SOURCE_CACHE:=/var/spool/lunar}
+
+#  Override the following variables in /etc/lunar/local/config
+#  Or by exporting them before installing or removing.
+
+                 LIN=lin
+              ARCHIVE=${ARCHIVE:=on}
+              AUTOFIX=${AUTOFIX:=on}
+            AUTOPRUNE=${AUTOPRUNE:=off}
+               COLONY=${COLONY:=off}
+         MAIL_REPORTS=${MAIL_REPORTS:=off}
+             PRESERVE=${PRESERVE:=on}
+                 REAP=${REAP:=on}
+                ADMIN=${ADMIN:=root}
+                SOUND=${SOUND:=off}
+              SUSTAIN=${SUSTAIN:=on}
+         VIEW_REPORTS=${VIEW_REPORTS:=on}
+               VOYEUR=${VOYEUR:=on}
+              GARBAGE=${GARBAGE:=on}
+         PROMPT_DELAY=${PROMPT_DELAY:=150}
+           MAX_COLONYS=16
+        LUNAR_PRIORITY="+10"
+
+#total number of sources for a module
+           MAX_SOURCES=100
+
+            LDD_CHECK=${LDD_CHECK:=on}
+           FIND_CHECK=${FIND_CHECK:=on}
+         MD5SUM_CHECK=${MD5SUM_CHECK:=on}
+            SYM_CHECK=${SYM_CHECK:=off}
+
+              GNU_URL=ftp://ftp.gnu.org/pub/gnu
+              KDE_URL=ftp://ftp.kde.org/pub/kde
+            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
+           KERNEL_URL=ftp://ftp.kernel.org
+           SFORGE_URL=http://telia.dl.sourceforge.net/sourceforge
+          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
+          LRESORT_URL=http://www.lunar-linux.com/lunar/mirrors
+
+	 MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
+
+              TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
+
+              DEFAULT="\e[0m"
+                 BOLD="\e[1m"
+                BLACK="\e[30m"
+                  RED="\e[31m"
+                GREEN="\e[32m"
+               YELLOW="\e[33m"
+                 BLUE="\e[34m"
+               VIOLET="\e[35m"
+                 CYAN="\e[36m"
+                WHITE="\e[37m"
+
+         MODULE_COLOR="${WHITE}${BOLD}\e[40m"
+        VERSION_COLOR="${WHITE}${BOLD}\e[40m"
+          QUERY_COLOR="${YELLOW}${BOLD}"
+            LRM_COLOR="${YELLOW}${BOLD}"
+          CHECK_COLOR="${CYAN}"
+      RESURRECT_COLOR="${GREEN}${BOLD}"
+           FILE_COLOR="${GREEN}${BOLD}"
+        SYMLINK_COLOR="${CYAN}${BOLD}"
+        PROBLEM_COLOR="${RED}${BOLD}"
+        MESSAGE_COLOR="${BLUE}${BOLD}"
+        MESSAGE_COLOR="${CYAN}"
+        DEFAULT_COLOR="${DEFAULT}"
+
+        TAB_ENTER_IFS="	
+"
+        ENTER_IFS="
+"
+	STANDARD_IFS=" 	
+"
+
+. $SUBROUTINES
+[ -s "$LOCAL_CONFIG" ] && . $LOCAL_CONFIG

@@ -1,0 +1,61 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $MENUS/integrity                                         #
+# includes menu for lin --fix integrity checking options   #
+#                                                          #
+# 20020714                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Portions Copyrighted Kyle Sallee under GPL               #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+integrity_menu()  {
+    INT_TITLE="Integrity Checking Selection Menu"
+     INT_HELP="Please select the tests which lin --fix should execute."
+    FIND_HELP="Discover missing  binary executables, libraries, and header files"
+     LDD_HELP="Discover broken   binary executables, and libraries"
+     SYM_HELP="Discover misowned symbolic links to files"
+  MD5SUM_HELP="Discover modified binary executables, and libraries"
+
+  if  INT_CHECKS=`$DIALOG  --title  "$INT_TITLE"  \
+                           --no-cancel            \
+                           --item-help            \
+                           --separate-output      \
+                           --checklist            \
+                           "$INT_HELP"            \
+                           0 0 0                  \
+        "FIND_CHECK"    ""  "$FIND_CHECK"    "$FIND_HELP"    \
+        "MD5SUM_CHECK"  ""  "$MD5SUM_CHECK"  "$MD5SUM_HELP"  \
+        "LDD_CHECK"     ""  "$LDD_CHECK"     "$LDD_HELP"     \
+        "SYM_CHECK"     ""  "$SYM_CHECK"     "$SYM_HELP"`
+  then
+        FIND_CHECK=off
+      MD5SUM_CHECK=off
+         LDD_CHECK=off
+         SYM_CHECK=off
+
+    for  CHECK  in  $INT_CHECKS;  do
+      case  $CHECK  in
+          FIND_CHECK)    FIND_CHECK=on  ;;
+        MD5SUM_CHECK)  MD5SUM_CHECK=on  ;;
+           LDD_CHECK)     LDD_CHECK=on  ;;
+           SYM_CHECK)     SYM_CHECK=on  ;;
+      esac
+    done
+
+    write_config "FIND_CHECK="   "  FIND_CHECK=$FIND_CHECK"
+    write_config "MD5SUM_CHECK=" "MD5SUM_CHECK=$MD5SUM_CHECK"
+    write_config "LDD_CHECK="    "   LDD_CHECK=$LDD_CHECK"
+    write_config "SYM_CHECK="    "   SYM_CHECK=$SYM_CHECK"
+
+  fi
+}
+

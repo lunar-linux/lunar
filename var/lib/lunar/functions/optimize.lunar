@@ -1,0 +1,781 @@
+#Copyrighted Jason Johnston  2002 under GPLv2
+
+# All specified optimizations are system wide,
+#  and apply to any module built using lin.
+
+# All settings in this function may be adjusted
+#  in each modules BUILD script.
+
+# $PLATFORM  = This sets the platform (x86, Sparc, PPC, etc..)
+#         specific optimizations for the machine
+# $BOPT = This sets the base optimizations (the -O level)
+#         it is applicable to all platforms and cpu types.
+# $CPU  = This sets the specific cpu and arch type.
+# $SPD  = This sets options that can increase the speed
+#         of compiled binaries.
+# $XTRA = This specifies what type of extra instructions
+#         to use for the specified cpu and platform.
+# $FPM  = This sets the Floating Point Math use
+#         of SSE instructions.
+# $LDF  = This sets the system wide linking optimizations.
+
+# Source in the optimization settings if it exists.
+if [[ -s /etc/lunar/local/optimizations ]]; then
+   . /etc/lunar/local/optimizations
+else
+  echo -e PLATFOM=x86             '\n'    \
+          BUILD=i386-pc-linux-gnu '\n'    \
+	  MAKES=
+          CC=                     '\n'    \
+          CCC=                    '\n'    \
+          BOPT=-O0                '\n'    \
+          CPU=i386                '\n'    \
+          SPD=( )                 '\n'    \
+          XTRA=                   '\n'    \
+          FPM=                    '\n'    \
+          LDF=( )                 '\n'    \
+          ADDON=( ) > /etc/lunar/local/optimizations
+fi
+
+optimize_make() {
+  if [[ $MAKES > 1 ]]; then
+    alias make="make -j$MAKES"
+  fi
+}
+ 
+optimize_base() {
+   if ! [[ $1 ]]; then
+      BOPT="None"
+   fi
+
+   if [[ $CFLAGS ]]; then
+      unset CFLAGS CXXFLAGS 
+   fi
+
+   case $1 in
+      None)    CFLAGS="-O0"
+               CXXFLAGS="-O0"
+               ;;
+      Fast)    CFLAGS="-O1"
+               CXXFLAGS="-O1"
+               ;;
+      Faster)  CFLAGS="-O2"
+               CXXFLAGS="-O2"
+               ;;
+      Fastest) CFLAGS="-O3"
+               CXXFLAGS="-O3"
+               ;;
+      Smaller) CFLAGS="-Os"
+               CXXFLAGS="-Os"
+               ;;
+   esac
+}
+
+optimize_cpu()  {
+   if ! [[ $1 ]]; then
+      if   [[ $PLATFORM == "Alpha" ]];   then
+         CPU="ev4"
+      elif [[ $PLATFORM == "PowerPC" ]]; then
+         CPU="powerpc"
+      elif [[ $PLATFORM == "SPARC" ]];   then
+         CPU="ultrasparc"
+      else
+         CPU="I386"
+      fi
+   fi
+
+# Begin x86 options
+   case $1 in
+      I386)         CFLAGS="$CFLAGS -mcpu=i386 -march=i386"
+                    CXXFLAGS="$CXXFLAGS -mcpu=i386 -march=i386"
+                    BUILD="i386-pc-linux-gnu"
+                    ;;
+      I486)         CFLAGS="$CFLAGS -mcpu=i486 -march=i486"
+                    CXXFLAGS="$CXXFLAGS -mcpu=i486 -march=i486"
+                    BUILD="i486-pc-linux-gnu"
+                    ;;
+      I586)         CFLAGS="$CFLAGS -mcpu=i586 -march=i586"
+                    CXXFLAGS="$CXXFLAGS -mcpu=i586 -march=i586"
+                    BUILD="i586-pc-linux-gnu"
+                    ;;
+      I686)         CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                    CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                    BUILD="i686-pc-linux-gnu"
+                    ;;
+      Pentium)      CFLAGS="$CFLAGS -mcpu=pentium -march=pentium"
+                    CXXFLAGS="$CXXFLAGS -mcpu=pentium -march=pentium"
+                    BUILD="i586-pc-linux-gnu"
+                    ;;
+      PentiumMMX)   CFLAGS="$CFLAGS -mcpu=pentium-mmx -march=pentium-mmx"
+                    CXXFLAGS="$CXXFLAGS -mcpu=pentium-mmx -march=pentium-mmx"
+                    BUILD="i586-pc-linux-gnu"
+                    ;;
+      PentiumPro)   CFLAGS="$CFLAGS -mcpu=pentiumpro -march=pentiumpro"
+                    CXXFLAGS="$CXXFLAGS -mcpu=pentiumpro -march=pentiumpro"
+                    BUILD="i686-pc-linux-gnu"
+                    ;;
+      Pentium2)     if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=pentium2 -march=pentium2"
+                       CXXFLAGS="$CXXFLAGS -mcpu=pentium2 -march=pentium2"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      Pentium3)     if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=pentium3 -march=pentium3"
+                       CXXFLAGS="$CXXFLAGS -mcpu=pentium3 -march=pentium3"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      Pentium4)     if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=pentium4 -march=pentium4"
+                       CXXFLAGS="$CXXFLAGS -mcpu=pentium4 -march=pentium4"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      K6)           if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=k6 -march=k6"
+                       CXXFLAGS="$CXXFLAGS -mcpu=k6 -march=k6"
+                       BUILD="i586-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i586 -march=i586"
+                       CXXFLAGS="$CXXFLAGS -mcpu=k6 -march=k6"
+                       BUILD="i586-pc-linux-gnu"
+                    fi
+                    ;;
+      K62)          if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=k6-2 -march=k6-2"
+                       CXXFLAGS="$CXXFLAGS -mcpu=k6-2 -march=k6-2"
+                       BUILD="i586-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i586"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i586"
+                       BUILD="i586-pc-linux-gnu"
+                    fi
+                    ;;
+      K63)          if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=k6-3 -march=k6-3"
+                       CXXFLAGS="$CXXFLAGS -mcpu=k6-3 -march=k6-3"
+                       BUILD="i586-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i586"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i586"
+                       BUILD="i586-pc-linux-gnu"
+                    fi
+                    ;;
+      Athlon)       if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon -march=athlon"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon -march=athlon"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      AthlonTBird) if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      Athlon4)     if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon-4 -march=athlon-4"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-4 -march=athlon-4"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      AthlonXP)    if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon-xp -march=athlon-xp"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-xp -march=athlon-xp"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+      AthlonMP)    if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon-mp -march=athlon-mp"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-mp -march=athlon-mp"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
+
+# Begin PowerPC options
+      common)  CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      rios)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      rios1)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      rsc)     CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      rios2)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      rs64a)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p403)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p505)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p601)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p602)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p603)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p603e)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p604)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p604e)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p620)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p630)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p740)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p7400)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p7450)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p750)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p801)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p821)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p823)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      p860)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      power)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      power2)  CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      powerpc) CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+
+# Begin Alpha options
+      ev4)     CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      ev45)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      a21064)  CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      ev5)     CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      a21164)  CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      ev56)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      a21164a) CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      pca56)   CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+     a21164pc) CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+     a21164PC) CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      ev6)     CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      a21264)  CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      ev67)    CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+      a21264a) CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               BUILD=""
+               ;;
+
+# Begin SPARC options
+      v7)            CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      cypress)       CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      v8)            CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      super-sparc)   CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      sparclite)     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      hypersparc)    CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      sparclite86x)  CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      f930)          CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      f934)          CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      sparclet)      CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      tsc701)        CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      v9)            CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+      ultrasparc)    CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD=""
+                     ;;
+   esac
+}
+
+optimize_speed() {
+   for A in ${SPD[@]}; do
+      case $A in
+             None) CFLAGS="$CFLAGS"
+                   CXXFLAGS="$CXXFLAGS"
+                 ;;
+           Speedy) CFLAGS="$CFLAGS -funroll-loops"
+                   CXXFLAGS="$CXXFLAGS -funroll-loops"
+                 ;;
+            Risky) CFLAGS="$CFLAGS -ffast-math"
+                   CXXFLAGS="$CXXFLAGS -ffast-math"
+                 ;;
+         Pointers) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fomit-frame-pointer"
+                     CXXFLAGS="$CXXFLAGS -fomit-frame-pointer"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+         Siblings) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -foptimize-sibling-calls"
+                     CXXFLAGS="$CXXFLAGS"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+        Profiling) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fprofile-arcs"
+                     CXXFLAGS="$CXXFLAGS -fprofile-arcs"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+        Branching) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fbranch-probabilities"
+                     CXXFLAGS="$CXXFLAGS -fbranch-probabilities"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;; 
+         Aliasing) if [[ $GCCVER == "3" ]] ; then
+                      CFLAGS="$CFLAGS -fstrict-aliasing"
+                      CXXFLAGS="$CXXFLAGS -fstrict-aliasing"
+                    else
+                      CFLAGS="$CFLAGS"
+                      CXXFLAGS="$CXXFLAGS"
+                    fi
+                 ;;
+            Cprop) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fno-cprop-registers"
+                     CXXFLAGS="$CXXFLAGS -fno-cprop-registers"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+            Float) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -ffloat-store"
+                     CXXFLAGS="$CXXFLAGS -ffloat-store"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+          Address) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fforce-addr"
+                     CXXFLAGS="$CXXFLAGS -fforce-addr"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+            Align) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -falign-functions -falign-loops -falign-jumps"
+                     CXXFLAGS="$CXXFLAGS -falign-functions -falign-loops -falign-jumps"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+      esac
+   done
+}
+
+optimize_extra() {
+ for A in ${XTRA[@]}; do
+   case $A in
+     None)     CFLAGS="$CFLAGS"
+               CXXFLAGS="$CXXFLAGS"
+               ;;
+      MMX)     if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -mmmx"
+                  CXXFLAGS="$CXXFLAGS -mmmx"
+               fi
+	       ;;
+      SSE)     if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -msse"
+                  CXXFLAGS="$CXXFLAGS -msse"
+               fi
+	       ;;
+      SSE2)    if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -msse2"
+                  CXXFLAGS="$CXXFLAGS -msse2"
+               fi
+	       ;;
+      dnow)   if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -m3dnow"
+                  CXXFLAGS="$CXXFLAGS -m3dnow"
+               fi
+	       ;;
+      Altivec) if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -maltivec"
+                  CXXFLAGS="$CXXFLAGS -maltivec"
+               fi
+	       ;;
+   esac
+ done
+}
+
+# Set how floating point math is done
+optimize_fp() {
+   case $1 in
+      x387) if [[ $GCCVER == "3" ]];  then
+              CFLAGS="$CFLAGS -mfpmath=387"
+              CXXFLAGS="$CXXFLAGS -mfpmath=387"
+            fi
+	    ;;
+       SSE) if [[ $GCCVER == "3" ]];  then
+              CFLAGS="$CFLAGS -mfpmath=sse"
+              CXXFLAGS="$CXXFLAGS -mfpmath=sse"
+            fi
+	    ;;
+      Both) if [[ $GCCVER == "3" ]];  then
+              CFLAGS="$CFLAGS -mfpmath=sse,387"
+              CXXFLAGS="$CXXFLAGS -mfpmath=sse,387"
+            fi
+	    ;;
+      None) CFLAGS="$CFLAGS"
+            CXXFLAGS="$CXXFLAGS"
+            ;;
+   esac
+}
+
+# Set up the Linker optimizations
+optimize_ld() {
+   if [[ $LDFLAGS ]]; then
+      unset LDFLAGS
+   fi
+
+   for A in ${LDF[@]}; do
+      case $A in
+         Strip)     LDFLAGS="$LDFLAGS -s"
+                    ;;
+# The Debug option breaks some modules (eg: tar and gzip, just to mention a
+# few), so this option should either be removed, or remain "deactivated"
+# untill this has been resolved but the hatch is that we don't know how many
+# modules is affected by it... See bug No. 75. Or contact me (Niki Guldbran
+# <nikig@vip.cybercity.dk>)
+#
+#         Debug)     LDFLAGS="$LDFLAGS -S"
+#                    ;;
+         Combreloc) LDFLAGS="$LDFLAGS -z combreloc"
+                    ;;
+      esac
+   done
+}
+
+optimize_addon() {
+  if ! [[ `grep ADDON /etc/lunar/local/optimizations` ]]; then
+    echo ADDON=( None ) >> /etc/lunar/local/optimizations
+    ADDON=( None )
+  fi
+
+  for A in ${ADDON[@]}; do
+    case $A in
+      DistCC) if module_installed distcc; then
+                CC="distcc $CC"
+                CCC="distcc $CXX"
+                CXX="distcc $CXX"
+              else
+                CC="$CC"
+                CCC="$CXX"
+                CXX="$CXX"
+              fi
+              ;;
+      CCache) if module_installed ccache; then
+                CC="ccache $CC"
+                CCC="ccache $CXX"
+                CXX="ccache $CXX"
+              else
+                CC="$CC"
+                CCC="$CXX"
+                CXX="ccache $CXX"
+              fi
+              ;;
+    esac
+  done
+}
+
+optimize_platform() {
+   unset CFLAGS CXXFLAGS LDFLAGS
+   GCCVER="$1"
+
+   case $PLATFORM in
+      x86)      optimize_make  $MAKES      &&
+                optimize_base  $BOPT       &&
+                optimize_cpu   $CPU        &&
+                optimize_speed ${SPD[@]}   &&
+                optimize_extra $XTRA       &&
+                optimize_fp    $FPM        &&
+                optimize_ld    ${LDF[@]}   
+                ;;
+      Alpha)    optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
+                optimize_cpu   $CPU       &&
+                optimize_speed ${SPD[@]}  &&
+                optimize_extra $XTRA      &&
+                optimize_fp    $FPM       &&
+                optimize_ld    ${LDF[@]}
+                ;;
+      PowerPC)  optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
+                optimize_cpu   $CPU       &&
+                optimize_speed ${SPD[@]}  &&
+                optimize_extra $XTRA      &&
+                optimize_fp    $FPM       &&
+                optimize_ld    ${LDF[@]}
+                ;;
+      SPARC)    optimize_make  $MAKES      &&
+                optimize_base  $BOPT      &&
+                optimize_cpu   $CPU       &&
+                optimize_speed ${SPD[@]}  &&
+                optimize_extra $XTRA      &&
+                optimize_fp    $FPM       &&
+                optimize_ld    ${LDF[@]}
+                ;;
+   esac
+
+[ -e /usr/bin/lunar-gcc ] && export CC="lunar-gcc"
+[ -e /usr/bin/lunar-g++ ] && export CCC="lunar-g++"
+[ -e /usr/bin/lunar-g++ ] && export CXX="lunar-g++"
+export CFLAGS
+export COPT="$CFLAGS"
+export CCOPT="$CXXFLAGS -Wno-deperecated"
+export CXXFLAGS="$CXXFLAGS -Wno-deprecated"
+export LDFLAGS
+
+}
+
+# This is the flow control and error checking for the menus.
+optimize_architecture()  {
+  # Make sure optimizations file exists, if not create it.
+  if ! [[ -f /etc/lunar/local/optimizations ]]; then
+    touch /etc/lunar/local/optimizations
+  fi
+
+  # Make sure our menu script exists and source it in, or exit.
+  if [[ -f /var/lib/lunar/menu/optimize.menu ]]; then
+    . /var/lib/lunar/menu/optimize.menu
+  else
+    exit 0
+  fi
+
+# Flow control for the menus. This will also check for gcc3,
+# if it exists it will allow more options.
+  TITLE="Lunar Optimizations"
+
+  help compiler_help          &&
+  compiler_options            &&
+  menu                        &&
+  COMPILER=$RESULT
+  
+  help cc_help                &&
+  cc_options                  &&
+  menu checklist              &&
+  CC=$RESULT
+
+  help ccc_help               &&
+  ccc_options                 &&
+  menu checklist              &&
+  CCC=$RESULT
+
+  help platform_help          &&
+  platform_options            &&
+  menu                        &&
+  PLATFORM=$RESULT
+
+  help bopt_help              &&
+  bopt_options                &&
+  menu                        &&
+  BOPT=$RESULT
+
+  help cpu_help $PLATFORM     &&
+  cpu_options $PLATFORM       &&
+  menu                        &&
+  CPU=$RESULT
+  optimize_cpu $CPU           &&
+  BUILD=$BUILD
+
+  help spd_help               &&
+  spd_options                 &&
+  menu checklist              &&
+  SPD=( $RESULT )
+
+  help xtra_help              &&
+  xtra_options                &&
+  menu checklist              &&
+  XTRA=$RESULT
+
+  help fpm_help               &&
+  fpm_options                 &&
+  menu                        &&
+  FPM=$RESULT
+
+  help ldf_help               &&
+  ldf_options                 &&
+  menu checklist              &&
+  LDF=( $RESULT )
+  
+  help addon_help             &&
+  addon_options               &&
+  menu checklist              &&
+  ADDON=( $RESULT )
+
+  optimize
+}

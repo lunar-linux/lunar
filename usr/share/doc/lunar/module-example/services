@@ -1,0 +1,8 @@
+#
+# services example
+#
+
+# lines in this file will be AUTOMATICALLY appended to /etc/services, e.g.:
+#	ftp-data	20/tcp
+#	ftp		21/tcp
+

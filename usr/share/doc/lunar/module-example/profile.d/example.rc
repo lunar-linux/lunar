@@ -1,0 +1,10 @@
+
+# Example.rc
+
+# put any custom bash settings in here you wish to add to shell
+# variables:
+
+# PATH=${PATH}:/opt/lunar/mypackage/bin
+
+# export MYVAR=value
+

@@ -1,0 +1,11 @@
+#
+# CONFLICTS example
+#
+
+# single conflicts:
+#	conflicts moduleA
+
+# multiple:
+#	conflicts moduleA &&
+#	conflicts moduleB
+

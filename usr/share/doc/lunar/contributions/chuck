@@ -1,0 +1,17 @@
+Chuck Busby		scarecrow.143@attbi.com
+
+20011208		spell		xine_d4d_plugin
+20011217				wxGTK
+					audacity
+20020313                                atk
+                                        glib-2
+                                        gtk+-2
+                                        pango
+20020330                                glame
+20020331                                ladspa_sdk
+20020407                                mix
+                                        jack
+20020408                                libsndfile
+                                        ardour
+20020410                                swh-plugins
+

@@ -1,0 +1,61 @@
+.TH "lcrash" "8" "Release $Revision$" "Terry Chan" "Lunar Crash Recovery"
+.SH "NAME"
+.LP 
+\fBlcrash\fR \- Lunar Crash Recovery manual
+.SH "OVERVIEW"
+.LP 
+This manual page was written to give some pointers on how to recover from a "lunar update" crash.
+.SH "DO NOT PANIC"
+.LP 
+These are the suggested steps after your system has been able to successfully boot back into a \fBLunar Linux\fR bash command prompt but you are not able to do a "lunar update" because of a crash/abort/power failure/whatever occuring in the middle of a "lunar update" and it did not finish installing the lunar commands and Moonbase.  All of these instructions should be run as "root".
+
+\fB1. Update Your Moonbase: \fRUsing a web browser or wget, download a copy of http://www.lunar-linux.com/lunar/lunar.tar.bz2.  If you use wget please do these steps: 
+.IP
+cd /var/spool/lunar
+.IP
+wget http://www.lunar-linux.com/lunar/lunar.tar.bz2
+.LP
+If you use a web browser then go to the location mentioned above and download lunar.tar.bz2 and save it to the /var/spool/lunar directory. 
+.LP 
+\fB2. Manually unpack Lunar: \fRNow unpack the tar.bz2 file with these commands:
+.IP
+cd /
+.IP
+bzcat /var/spool/lunar/lunar.tar.bz2 | tar xv
+.IP
+cd lunar ; ./install
+.LP 
+Now your system should be able to run a \fBlunar update\fR.  This process will update the base scripts and the package collection (Moonbase). 
+.LP 
+
+.SH "LIFESAVERS"
+.LP 
+Below are some useful addresses
+.P 
+
+\fBWebsite: \fRhttp://www.lunar\-linux.org/
+.P 
+
+\fBMaillist: \fRhttp://moongroup.com/mailman/listinfo/lunar
+.P 
+
+\fBIRC: \fRirc.openprojects.net #lunar
+
+.SH "NOTES"
+.LP 
+This is a work in progress. Expect frequent updates.
+.SH "SEE ALSO"
+.LP 
+lunar(8) moonbase(1), lin(8), lvu(1), lget(8), lrm(8)
+.SH "DISCLAIMER"
+.LP 
+The information and examples given here are for illustrative purposes. Use at
+your own risk. Every attempt has been made to insure that the content of this
+document was accurate when written. If you find inaccuracies, please send me
+clarifications.
+.SH "COPYRIGHT"
+.LP 
+This document is Copyrighted Terry Chan 2002. It may be reproduced and distributed in whole or in part, in any medium physical or electronic, as long as this copyright notice is retained on all copies.
+.SH "AUTHOR"
+.LP 
+Terry Chan <tpchan@attbi.com>

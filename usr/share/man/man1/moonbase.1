@@ -1,0 +1,129 @@
+.TH MOONBASE "1" "March 2002" "Lunar Linux" LUNAR
+.SH NAME
+moonbase \- the software catalog for lunar
+.SH COPYRIGHT
+.if n moonbase(1) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t moonbase(1) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.SH "DESCRIPTION"
+The software catalog is a list of software modules (simply referred to
+as "modules") divided into sections. Each module contains one
+or more description files. Description files contain such information as
+module name, version, URL, directory information, etc. Other description files provide unpacking, compilation, installation, and tracking instructions. One section in the 
+software catalog of particular interest is PROFILES. Profiles are
+groups of modules. With profiles you can automatically install predefined or
+custom-built module sets using a single command.
+.SH "SUMMARY"
+The moonbase is found under /var/lib/lunar. The top level of directories
+are the section names. The directories under the section names are the
+modules. Each module directory will have a BASH description file called
+DETAILS and optionally contain one or more of the following description files:
+CONFIGURE, DEPENDS, CONFLICTS, PRE_BUILD, BUILD, POST_BUILD, POST_INSTALL, POST_REMOVE.
+If a description file does not exist in the module directory then a set of default
+description instructions are used. The default instructions for each description
+file can be found in /var/lib/lunar/subroutines.
+.SH "DETAILS"
+\fBPROFILES\fR
+.PP
+Each profile contains a simplified DETAILS file: profile name, version, and
+description. Profiles are effectively just a DEPEND file with a list of
+modules to be installed. 
+.PP
+\fBDESCRIPTION FILES\fR
+.PP
+A typical source code installation might look like this (assume the
+application is called foo):
+.IP
+step 1) find the URL and download the tarball
+.IP
+step 2) tar xvfz foo-1.00.tar.gz
+.IP
+step 3) cd foo
+.IP
+step 4) less README (perhaps you skip this step?)
+.IP
+step 5) less INSTALL (... and this one?)
+.IP
+step 6) ./configure
+.IP
+step 7) make
+.IP
+step 8) make install
+.PP
+.PP
+Here is a breakdown of the description files and how they relate to the above
+installation procedure:
+.PP
+\fBDETAILS\fR
+.IP
+This file is required and describes the URL for step 1. It also contains version information,
+module name, source name, source directory, and a description of the module.
+.PP
+\fBCONFIGURE\fR
+.IP
+The configure script.
+.PP
+\fBDEPENDS\fR
+.IP
+This file contains a list of other modules upon which the module depends.
+If dependencies are turned on then the modules listed are installed in order
+prior to installing module.
+.PP
+.PP
+\fBCONFLICTS\fR
+.IP
+Contains a list of modules that conflict with this module. Use sparingly. A good example of a reasonable
+use is when you have two modules in the moonbase that are the same but one is patched. eg apache and apache-mod_ssl
+.PP
+\fBPRE_BUILD\fR
+.IP
+This describes the unpacking process as performed in step 2. The default PRE_BUILD will work for
+tarballs with gzip or bzip2 compression.
+.PP
+\fBBUILD\fR
+.IP
+This describes the compilation and installation processes as performed in steps 6-8. If the
+software module compiles and installs using these 3 steps then the default
+BUILD can be used. 
+.PP
+\fBPOST_BUILD\fR
+.IP
+The default POST_BUILD simply calls the software tracking script. 
+.PP
+\fBPOST_INSTALL\fR
+.IP
+There is no default POST_INSTALL. If no POST_INSTALL is present in the
+module directory then no operations are performed in this step. Normally
+used to start daemons or extra cleanup or install default configuration files,
+after the module is ready to execute.
+.PP
+\fBPOST_REMOVE\fR
+.IP
+This is called, if present, after removing the module. See lrm(8).
+.PP
+.SH "NOTES"
+The best way to learn the software catalog is to examine some of the
+description files yourself. Most software catalog entries are simple. For
+example try looking under /var/lib/lunar/moonbase/editors/emacs.
+If however you want to look at a very unusual, but much more complex example look at
+/var/lib/lunar/moonbase/x11/xfree86. To understand how the software
+catalog works, it is also important to look at /var/lib/lunar/subroutines and
+examine the functions default_pre_build, default_build, and default_post_build.
+.SH "AUTHOR"
+Kyle Sallee
+.PP
+Updated Thomas Stewart 01/15/2002
+.PP
+Converted to Lunar by Terry Chan 03/23/2002
+.PP
+Updated by Terry Chan 5/22/2002
+.PP
+.SH "REPORTING BUGS"
+.PP
+Report bugs to <maintainer@lunar-penguin.org>
+.SH "SEE ALSO"
+lunar(8), lin(8), lrm(8), lvu(1), lget(8)
+.PP
+.SH "WARRANTY"
+.PP
+This is free software with ABSOLUTELY NO WARRANTY
+

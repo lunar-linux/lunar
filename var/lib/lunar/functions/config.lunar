@@ -1,0 +1,67 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/config                                        #
+# includes write_config function                           #
+#                                                          #
+# 20020713                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+# function: write_config
+# usage   : write_config <line to remove> [<line to add>]
+# purpose : removes a line from the $LOCAL_CONFIG and adds another (if given)
+function write_config()
+{
+   [ -z "$1" ] && return 1        
+
+   TMP_LOCAL_CONFIG="/tmp/lunar.localconfig.$$"
+   rm -f $TMP_LOCAL_CONFIG 2>/dev/null
+
+   LOCAL_CONFIG_BACKUP="/tmp/lunar.localconfigbackup.$$"
+   rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
+
+   function handle_trap()
+   {
+      cp $LOCAL_CONFIG_BACKUP $LOCAL_CONFIG 2>/dev/null     
+      unlock_file $LOCAL_CONFIG        
+      rm -f $TMP_LOCAL_CONFIG 2>/dev/null
+      rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
+      exit 1
+   }
+
+
+   [ -f "$LOCAL_CONFIG" ] || {
+           touch $LOCAL_CONFIG     &&
+           chmod 644 $LOCAL_CONFIG &&
+           chown 0:0 $LOCAL_CONFIG
+   }
+
+   cp $LOCAL_CONFIG $LOCAL_CONFIG_BACKUP 2>/dev/null || return 1
+
+   trap "handle_trap" INT QUIT TERM
+
+   lock_file $LOCAL_CONFIG
+
+   grep -v $1 $LOCAL_CONFIG 2>/dev/null > $TMP_LOCAL_CONFIG        
+
+   cat $TMP_LOCAL_CONFIG 2>/dev/null > $LOCAL_CONFIG || return 1
+   
+   [ -n "$2" ] && {
+      echo $2  >> $LOCAL_CONFIG || return 1
+   }
+
+   unlock_file $LOCAL_CONFIG
+
+   rm -f $TMP_LOCAL_CONFIG 2>/dev/null
+   rm -f $LOCAL_CONFIG_BACKUP 2>/dev/null
+   trap INT QUIT TERM
+}

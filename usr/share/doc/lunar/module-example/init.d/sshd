@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# ssh	Secure Shell Daemon
+#
+# chkconfig: 2345 80 30
+# description: SSH daemon
+# processname: master
+# pidfile:     /var/run/sendmail.pid
+# config:      /etc/mail/sendmail.cf
+
+if [ -e "/var/run/sshd.pid" ]; then
+  SPID=`cat /var/run/sshd.pid`
+fi
+
+case $1 in
+          start)  echo "$1ing sshd."
+		  sshd
+		  ;;
+	   stop)  echo "$1ping sshd."
+	          if [ -e "/var/run/sshd.pid" ]; then
+		    kill -n 15 $SPID
+		  fi
+		  ;;
+        restart)  $0 stop && $0 start
+	          ;;
+	      *)  echo "Usage: $0 {start|stop|restart}"
+	          ;;
+esac
+

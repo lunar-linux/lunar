@@ -1,0 +1,14 @@
+service ftp
+{
+   socket_type = stream
+   protocol    = tcp
+   wait        = no
+   user        = root
+   disable     = no
+   server      = /usr/sbin/pure-ftpd
+   server_args = -b 
+   per_source  = 8
+   log_type    = FILE /var/log/xinetd/pure-ftpd
+   log_on_success = PID HOST USERID EXIT DURATION
+   log_on_failure = USERID ATTEMPT
+}

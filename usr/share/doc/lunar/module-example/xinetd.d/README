@@ -1,0 +1,6 @@
+
+xinetd.d has a config file for every service it runs (and port it
+should listen on of course). these config scripts look like the one
+in this directory. They weill automatically be installed into the
+/etc/xinetd.d/ for you if you provide them in here.
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Usage: install [/directory]
+#               
+#The idea is to make this script a bit less absolute
+# This would assist with future ISO generation scripts ;^)
+
+if [ "x$1" = "x" ]
+ then
+   ROOT=/
+ else
+   ROOT=$1
+fi
+
+cp -a bin  $ROOT
+cp -a etc  $ROOT
+cp -a lib  $ROOT
+cp -a sbin $ROOT
+cp -a usr  $ROOT
+cp -a var  $ROOT

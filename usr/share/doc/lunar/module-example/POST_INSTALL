@@ -1,0 +1,10 @@
+
+if  [  -x  /etc/init.d/pure-ftpd.sh  ]; then
+           rm /etc/init.d/pure-ftpd.sh 
+fi
+
+if [ -e "/etc/rc?.d/*pure-ftpd*" ]; then
+   rm -f /etc/rc?.d/*pure-ftpd*
+fi
+
+

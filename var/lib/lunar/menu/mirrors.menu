@@ -1,0 +1,91 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://www.lunar-linux.org                               #
+#                                                          #
+############################################################
+#                                                          #
+# $MENUS/mirror                                            #
+# includes menu for software mirrors selection in lunar    #
+#                                                          #
+# 20020712                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Portions Copyrighted Kyle Sallee under GPL               #
+# Copyrighted Kagan Kongar 2002 under GPLv2                #
+#                                                          #
+############################################################
+
+reverse()  {
+  while  [  -n  "$1"  ];  do
+    LOCATION=$1
+    URL=$2
+    echo  "$URL"
+    echo  "$LOCATION"
+    shift 2
+  done
+}
+
+mirror_list()  {
+  reverse  `sort  $MIRRORS/$1`
+}
+
+select_mirror()  {
+  $DIALOG  --title "Select Mirror Please"  \
+           --ok-label  "Select"            \
+           --menu                          \
+           ""                              \
+           0 70 10                         \
+           `mirror_list  $1`
+}
+
+mirror_menu()  {
+  while
+    G_HELP="Select mirror for downloading GNU sources."
+    K_HELP="Select mirror for downloading KDE sources."
+    N_HELP="Select mirror for downloading GNOME sources."
+    L_HELP="Select mirror for downloading kernel related sources."
+   SF_HELP="Select mirror for downloading SourceForge sources."
+   LR_HELP="Select the mirror for a last resort download place."
+    X_HELP="Select mirror for downloading XFree86 related sources."
+      HELP="Selecting a mirror site can speed your downloads."
+
+    COMMAND=`$DIALOG  --title "Mirror Menu"     \
+                      --ok-label      "Select"  \
+                      --cancel-label  "Exit"    \
+                      --item-help               \
+                      --menu     ""  0 0 0      \
+                      "GNOME"        ""  "$N_HELP"  \
+                      "GNU"          ""  "$G_HELP"  \
+                      "KDE"          ""  "$K_HELP"  \
+                      "KERNEL"       ""  "$L_HELP"  \
+                      "SOURCEFORGE"  ""  "$SF_HELP" \
+                      "LAST_RESORT"  ""  "$LR_HELP" \
+                      "XFREE86"      ""  "$X_HELP"`
+
+  do
+    case  $COMMAND in
+          GNOME)    MIRROR="   GNOME_URL"    ;;
+          GNU)      MIRROR="     GNU_URL"    ;;
+          KDE)      MIRROR="     KDE_URL"    ;;
+          KERNEL)   MIRROR="  KERNEL_URL"    ;;
+          XFREE86)  MIRROR=" XFREE86_URL"    ;;
+      SOURCEFORGE)  MIRROR="  SFORGE_URL"    ;;
+      LAST_RESORT)  MIRROR=" LRESORT_URL"    ;;
+    esac
+
+    if  MIRROR_URL=`select_mirror  $COMMAND`;  then
+      if  [  "$MIRROR_URL" == "Custom"  ];  then
+         MIRROR_URL=`$DIALOG  --inputbox  "Please enter the URL."  0 0`
+      fi
+
+      [ -z "$MIRROR_URL" ] && continue
+
+      write_config "$MIRROR=" "$MIRROR=$MIRROR_URL" &&
+
+      $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+    fi
+  done
+}
+

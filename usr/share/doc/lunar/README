@@ -1,0 +1,58 @@
+How to loop back mount an ISO image:
+
+mount -t iso9660 /path/to/iso/image /path/to/mount/point -o loop
+
+mkisofs -o mylinar.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table /mnt/lunar/
+
+This is the export script that cron runs to export the cvs every hour:
+
+#!/bin/bash
+#
+# This script exports the sorcery out of CVS and 
+# writes it into the /var/www/html/sorcery directory.
+#
+# Chuck Mead  - 19 Feb 2002
+#
+# set up the repository
+export CVSROOT=/redhat/SOURCES/cvsroot
+
+# clean up the directory
+rm -rf /tmp/lunar
+cd /tmp
+
+# do the export
+cvs -Q export -d /tmp/lunar -D tomorrow lunar
+# remove the file first, then export, kongar 20020413-2203CET
+rm -f /var/www/html/docs/Contributor-HOWTO.html
+cvs -Q export -d /var/www/html/docs/ -D tomorrow brutus/docs/Contributor-HOWTO.html
+
+
+# move extra files to docs
+cd /tmp/lunar
+cp ChangeLog /var/www/html/lunar/ChangeLog.lunar
+mv ChangeLog /tmp/lunar/usr/share/doc/lunar/
+cd ..
+rm -f lunar.tar.bz2
+
+# remove the sorcery
+#rm -rf /tmp/lunar/var/lib/sorcery/
+#rm -rf /tmp/lunar/etc/sorcery
+#rm -rf /tmp/lunar/usr/sbin/old
+
+# make everything executeable
+chmod +x /tmp/lunar/usr/sbin/l*
+chmod -R 0755 /tmp/lunar/var/lib/lunar/moonbase/
+chmod 0644 /tmp/lunar/var/lib/lunar/moonbase/COPYING
+
+# tar and bzip lunar
+tar cvf lunar.tar lunar > /dev/null 2>&1
+bzip2 -9 lunar.tar
+
+# back up the old copies
+mv /var/www/html/lunar/lunar.tar.bz2 /var/www/html/lunar/lunar.tar.bz2.1
+
+# move it where it needs to go
+cp /tmp/lunar.tar.bz2 /var/www/html/lunar/
+
+# log the action
+echo lunar exported: `date` >> /var/log/lunar-exports

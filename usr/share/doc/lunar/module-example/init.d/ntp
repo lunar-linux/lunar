@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# ntp.sh
+# chkconfig: 2345 31 88
+# description: NTP is used to synchronize computer clocks
+#  on a connected network or via GPS/phone/etc.
+
+if ! [ -d /etc/config.d ]; then
+     mkdir -p /etc/config.d
+     fi
+
+case "$1" in
+'start')
+	if pgrep ntpd
+	then
+        echo "ntp daemon already running. ntp start aborted"
+        exit 0
+	fi
+	if [ -f /etc/config.d/ntp.conf -a -x /usr/sbin/ntpd ]
+	then
+		/usr/sbin/ntpd -c /etc/config.d/ntp.conf -g
+	fi
+	;;
+'stop')
+	pkill ntpd
+	;;
+*)
+	echo "Usage: $0 { start | stop }"
+	;;
+esac

@@ -1,0 +1,126 @@
+
+	README for the skeleton module
+
+--
+NOTE: all files have been disabled by putting '#' comments in them,
+if you wish to use the examples in this directory, please remove the
+comments and modify it carefully so the module does exactly what you
+think it does.
+
+--
+This skeleton module was compiled from various modules in the moonbase
+and gives a wide range of what is possible when you write modules. I
+tried to include virtually every possible scheme but apart from the
+BUILD files most stuff is pretty straightforward. 
+
+If you have any additions or comments on this file please notice us
+by dropping a mail in the lunar mailinglist. Anything is greatly
+appreciated!
+
+--
+Here's a brief explanation of the files in here:
+
+* DETAILS
+
+Required for any module. This file contains the data needed to obtain,
+describe and update a package. In here vital information like download
+URL's, version numbers and package description is put.
+
+* DEPENDS
+
+This file lists packages that need to be installed before you can install
+this package. It doesn not necessary have to be a library, but can also
+be include files or anything that you would need to compile, install 
+and run the module.
+
+In here you can als list optional depends, being packages that do not
+necessary have to be installed, for instance packages that add extra
+features (e.g. fonts, plugins etc.).
+
+* CONFLICTS
+
+Modules listed in here must not be present when installing this module.
+Use this to separate your module from incompatible other ones. For instance
+the BitchX module is incompatible with the gtk version gtkBitchX, so
+these 2 modules have eachother listed in their CONFLICTS file. Another
+good example is conflicting daemons like sendmail vs. exim, cron vs.
+hc-cron etc.
+
+* BUILD
+
+This script will configure, make and install the package. You can virtually
+control everything in here, like adding patches (kernel), changing build
+options (xfree86) or asking the user for configuration options (sendmail).
+This script does not have to exist for programs that ./configure && make &&
+make install (lin will automatically --prefix=/usr for you), but a lot of
+modules need adjusting.
+
+* CONFIGURE
+
+This file serves as an alternative way to customize the configuring of the
+package.
+
+* PRE_BUILD
+
+This file is used if you need to apply patches or modifications before
+the package is built.
+
+* POST_BUILD
+
+Use this file if you need to tweak the compiles sources before it is
+installed.
+
+* PRE_INSTALL
+
+This file lets you prepare the installation process for the package.
+
+* POST_INSTALL
+
+When you need to additionally tweak things after installation, this is
+the place. Actions in this file are not logged in the install log, so
+you can e.g. create machine dependant configuration options that need
+to be kept in case of module removal.
+
+This is also the place to install and run daemons, reconfigure LILO etc..
+
+* PRE_REMOVE
+
+This script will be called before a module is lrm'ed. You can use it to
+back up configuration, stop daemons or similar stuff.
+
+* POST_REMOVE
+
+Use this file to clean stuff up after removing a module, or place
+configuration files in a backup location, etc..
+
+* other files and directories
+
+Nothing withholds you from putting much more stuff in your module directory,
+think of patches, small scripts, init.d scripts, xinetd or pam.d configuration
+files, or funky ascii art to make your module install look nice.
+
+As a general rule you must try to keep the module as small as possible
+however. For instance, if you were to put a 100K patch in the module
+directory, every lunar update requires that people download those
+100K, whether they use your patch or not. If you must, try to provide
+the patch or extra source code in a way that we can put it on our source
+mirror, or insert it as a secondary source URL in case someone has
+already provided it on the internet. This will save us from a lot of
+frustration.
+
+Some contents of subdirs are automatically handled, here's a list:
+
+   - pam.d         - for pam settings
+   - xinetd.d      - for xinetd service definitions
+   - init.d        - for init.d startup scripts
+   - profile.d     - for bash shell settings
+
+
+The file 'services' can be used to add tcp/ip or udp service port
+definitions automatically in coherence with xinetd.d to the
+/etc/services global file
+
+  
+
+--
+sofar 20020725

@@ -1,0 +1,404 @@
+#Copyrighted Jason Johnston  2002 under GPLv2
+
+optimize() {
+
+  if ! [[ $COMPILER ]]; then
+     COMPILER=2;
+  fi
+  if ! [[ $GCCVER ]]; then
+     GCCVER=$COMPILER
+  fi
+  if [[ `grep GCCVER /etc/lunar/local/config` ]]; then
+     if [[ $GCCVER == "" ]]; then
+        sedit "s/GCCVER=/GCCVER=$COMPILER/" /etc/lunar/local/config
+     fi
+     sedit "s/GCCVER=[2|3]/GCCVER=$COMPILER/" /etc/lunar/local/config
+  else
+     echo -e GCCVER=$COMPILER >> /etc/lunar/local/config
+  fi
+  echo -e PLATFOM=$PLATFORM     '\n'    \
+          BUILD=$BUILD          '\n'    \
+          CC=$CC                '\n'    \
+          CCC=$CCC              '\n'    \
+          BOPT=$BOPT            '\n'    \
+          CPU=$CPU              '\n'    \
+          SPD=( ${SPD[@]} )     '\n'    \
+          XTRA=( ${XTRA[@]} )   '\n'    \
+          FPM=$FPM              '\n'    \
+          LDF=( ${LDF[@]} )     '\n'    \
+          ADDON=( ${ADDON[@]} ) > /etc/lunar/local/optimizations
+}
+
+# Setup the help to be used for descriptions
+help() {
+   case $1 in
+
+   # Help for selecting preferred compiler.
+   compiler_help)
+                MENU="Preferred Compiler"
+           GCC2_HELP="Sets GCC 2x as the preferred compiler."
+           GCC3_HELP="Sets GCC 3x as the preferred compiler."
+                 ;;
+                 
+         cc_help)
+                  MENU="Options for the C compiler"
+             Pipe_HELP="Enable gcc to use named pipes."
+                ;;
+                
+        ccc_help)
+                  MENU="Options for the C++ compiler"
+             Pipe_HELP="Enable gcc to use named pipes."
+                ;;
+                
+   # Help for the platform selections.
+   platform_help)
+                MENU="Platform"
+            x86_HELP="Intel and AMD hardware"
+          Alpha_HELP="Compaq Alpha hardware"
+        PowerPC_HELP="IBM and Apple hardware"
+          SPARC_HELP="SUN Hardware"
+                 ;;
+
+   # Help for the basic optimizations.
+     bopt_help)
+             MENU="Basic Optimization"
+        None_HELP="-O0"
+        Fast_HELP="-O1"
+      Faster_HELP="-02"
+     Fastest_HELP="-O3"
+       Small_HELP="-Os"
+               ;;
+
+   # Help for the cpu selections.
+      cpu_help)
+          MENU="$2 CPUs"
+         case $2 in
+            x86)
+          I386_HELP="I386 processors"
+          I486_HELP="I486 processors"
+          I586_HELP="I586 processors"
+       Pentium_HELP="Pentium processors"
+    PentiumMMX_HELP="Pentium processors with mmx"
+          I686_HELP="I686 processors"
+    PentiumPro_HELP="Pentium Pro processors"
+            P2_HELP="Pentium II processors"
+            P3_HELP="Pentium III processors"
+            P4_HELP="Pentium 4 processors"
+            K6_HELP="AMD K6 processors"
+           K62_HELP="AMD K6-2 processors"
+           K63_HELP="AMD K6-3 processors"
+        Athlon_HELP="AMD Athlon processors"
+   AthlonTBird_HELP="AMD Athlon Thunderbird processors"
+       Athlon4_HELP="AMD Athlon 4 processors"
+      AthlonXP_HELP="AMD Athlon XP processors"
+      AthlonMP_HELP="AMD Athlon MP processors"
+                 ;;
+           Alpha)
+              ev4_HELP="Alpha EV4"
+             ev45_HELP="Alpha EV45"
+           A21064_HELP="Alpha 21064"
+              ev5_HELP="Alpha EV5"
+           A21164_HELP="Alpha 21164"
+             ev56_HELP="Alpha EV56"
+          A21164a_HELP="Alpha 21164a"
+            pca56_HELP="Alpha pca56"
+         A21164pc_HELP="Alpha 21164pc"
+         A21164PC_HELP="Alpha 21164PC"
+              ev6_HELP="Alpha EV6"
+           A21264_HELP="Alpha 21264"
+             ev67_HELP="Alpha EV67"
+          A21264a_HELP="Alpha 21264a"
+                 ;;
+         PowerPC)
+           common_HELP="Common PowerPC"
+             rios_HELP="Rios PowerPC"
+            rios1_HELP="Rios1 PowerPC"
+              rsc_HELP="RSC PowerPC"
+            rios2_HELP="Rios2 PowerPC"
+            rs64a_HELP="RS64a PowerPC"
+              403_HELP="403 PowerPC"
+              505_HELP="505 PowerPC"
+              601_HELP="601 PowerPC"
+              602_HELP="602 PowerPC"
+              603_HELP="603 PowerPC"
+             603a_HELP="603a PowerPC"
+              604_HELP="604 PowerPC"
+             604e_HELP="604e PowerPC"
+              620_HELP="620 PowerPC"
+              630_HELP="630 PowerPC"
+              740_HELP="740 PowerPC"
+             7400_HELP="7400 PowerPC"
+             7450_HELP="7450 PowerPC"
+              750_HELP="750 PowerPC"
+              801_HELP="801 PowerPC"
+              821_HELP="821 PowerPC"
+              823_HELP="823 PowerPC"
+              860_HELP="860 PowerPC"
+            Power_HELP="Power PowerPC"
+           Power2_HELP="Power2 PowerPC"
+          PowerPC_HELP="PowerPC"
+                 ;;
+           SPARC)
+              v7_HELP="V7 SPARC"
+         cypress_HELP="Cypress SPARC"
+              v8_HELP="V8 SPARC"
+      supersparc_HELP="SuperSPARC"
+       sparclite_HELP="SPARCLite"
+      hypersparc_HELP="HyperSPARC"
+            f930_HELP="f930 SPARC"
+            f934_HELP="f934 SPARC"
+        sparclet_HELP="SPARCLet"
+           ts701_HELP="ts701 SPARC"
+              v9_HELP="V9 SPARC"
+      ultrasparc_HELP="ULTRASPARC"
+                 ;;
+           esac
+         ;;
+
+   # Help for speed options.
+      spd_help)
+              MENU="Speed optimizatons"
+       Speedy_HELP="Optimize to increase performance of generated code"
+        Risky_HELP="Optimize to increase performance ... by violating ANSI or IEEE rules"
+     Pointers_HELP="Optimize by omiting frame pointers"
+     Siblings_HELP="Optimize sibling calls"
+    Profiling_HELP="Generate profiles"
+    Branching_HELP="Predict branching"
+     Aliasing_HELP="Enable strict aliasing"
+        Cprop_HELP="Reduce scheduling dependancies and remove copies"
+        Float_HELP="Enable float store"
+      Address_HELP="Force memory address"
+        Align_HELP="Align functions, loops, and jumps"
+               ;;
+
+   # Help for extra options
+     xtra_help)
+             MENU="Extra Features"
+         MMX_HELP="Enable MMX"
+         SSE_HELP="Enable SSE"
+        SSE2_HELP="Enable SSE2"
+        dnow_HELP="3dnow"
+     Altivec_HELP="Enables Altivec"
+               ;;
+
+   # Help for floating point math
+      fpm_help)
+          MENU="Floating Point Math"
+     None_HELP="Do not enable any extra features."
+     x387_HELP="387"
+      SSE_HELP="SSE"
+     Both_HELP="SSE and 387"
+  Altivec_HELP="Altivec"
+               ;;
+   # Warn help
+  cc_warn_help)
+          MENU="Enable/Disable C compiler warnings"
+              ;;
+              
+ ccc_warn_help)
+          MENU="Enable/Disable C++ compiler warnings"
+     None_HELP="Do not change any C++ compiler warnings from default."
+     Deprecated_HELP="Disable warnings of deprecated..."
+              ;;
+          
+   # Help for linker options
+      ldf_help)
+            MENU="Linker options"
+      Strip_HELP="Strip all symbols"
+      Debug_HELP="Strip debug symbols only"
+  Combreloc_HELP="Combreloc"
+               ;;
+
+   # Addon help for extra programs
+    addon_help)
+            MENU="Addon program support"
+       None_HELP="No compiler addons"
+     DistCC_HELP="Distributed compiler support"
+     CCache_HELP="Compiler output caching"
+              ;;
+  esac
+}
+
+compiler_options() {
+   OPTIONS=( "2" "GCC version 2x" "$GCC2_HELP"
+             "3" "GCC version 3x" "$GCC3_HELP" )
+}
+
+cc_options(){
+  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+}
+ccc_options(){
+  OPTIONS=( "Pipe"   "-pipe"  "off"   "$Pipe_HELP" )
+}
+
+platform_options() {
+   OPTIONS=( "x86"     "Intel, AMD, and clones" "$x86_HELP"
+             "Alpha"   "Compaq Alpha"           "$Alpha_HELP"
+             "PowerPC" "PowerPC"                "$PowerPC_HELP"
+             "SPARC"   "Sun SPARC"              "$SPARC_HELP" )
+}
+
+bopt_options() {
+   OPTIONS=( "None"    "-O0" "$None_HELP"
+             "Fast"    "-O1" "$Fast_HELP"
+             "Faster"  "-O2" "$Fasert_HELP"
+             "Fastest" "-O3" "$Fastest_HELP"
+             "Small"   "-Os" "$Small_HELP" )
+
+}
+
+cpu_options() {
+   case $1 in
+      x86) OPTIONS=( "I386"        "I386"        "$I386_HELP"
+                     "I486"        "I486"        "$I486_HELP"
+                     "I586"        "I586"        "$I586_HELP"
+                     "Pentium"     "Pentium"     "$Pentium_HELP"
+                     "PentiumMMX"  "PentiumMMX"  "$PentiumMMX_HELP"
+                     "I686"        "I686"        "$I686_HELP"
+                     "PentiumPro"  "PentiumPro"  "$PentiumPro_HELP"
+                     "Pentium2"    "P2"          "$P2_HELP"
+                     "Pentium3"    "P3"          "$P3_HELP"
+                     "Pentium4"    "P4"          "$P4_HELP"
+                     "K6"          "K6"          "$K6_HELP"
+                     "K62"         "K62"         "$K62_HELP"
+                     "K63"         "K63"         "$K63_HELP"
+                     "Athlon"      "Athlon"      "$Athlon_HELP"
+                     "AthlonTBird" "AthlonTBird" "$AthlonTBird_HELP"
+                     "Athlon4"     "Athlon4"     "$Athlon4_HELP"
+                     "AthlonXP"    "AthlonXP"    "$AthlonXP_HELP"
+                     "AthlonMP"    "AthlonMP"    "$AthlonMP_HELP" )
+                     ;;
+
+    Alpha) OPTIONS=( "ev4"     "ev4"     "$ev4_HELP"
+                     "ev45"    "ev45"    "$ev45_HELP"
+                     "21064"   "21064"   "$A21064_HELP"
+                     "ev5"     "ev5"     "$ev5_HELP"
+                     "21164"   "21164"   "$A21164_HELP"
+                     "ev56"    "ev56"    "$ev56_HELP"
+                     "21164a"  "21164a"  "$A21164a_HELP"
+                     "pca56"   "pca56"   "$pca56_HELP"
+                     "21164pc" "21164pc" "$A21164pc_HELP"
+                     "21164PC" "21164PC" "$A21164PC_HELP"
+                     "ev6"     "ev6"     "$ev6_HELP"
+                     "21264"   "21264"   "$A21264_HELP"
+                     "ev67"    "ev67"    "$ev67_HELP"
+                     "21264a"  "21264a"  "$A21264a_HELP" )
+                     ;;
+
+  PowerPC) OPTIONS=( "common" "common"   "$common_HELP"
+                     "rios"    "rios"    "$rios_HELP"
+                     "rios1"   "rios1"   "$rios1_HELP"
+                     "rsc"     "rsc"     "$rsc_HELP"
+                     "rios2"   "rios2"   "$rios2_HELP"
+                     "rs64a"   "rs64a"   "$rs64a_HELP"
+                     "403"     "403"     "$403_HELP"
+                     "505"     "505"     "$505_HELP"
+                     "601"     "601"     "$601_HELP"
+                     "602"     "602"     "$602_HELP"
+                     "603"     "603"     "$603_HELP"
+                     "603a"    "603a"    "$603a_HELP"
+                     "604"     "604"     "$604_HELP"
+                     "604e"    "604e"    "$604e_HELP"
+                     "620"     "620"     "$620_HELP"
+                     "630"     "630"     "$630_HELP"
+                     "740"     "740"     "$740_HELP"
+                     "7400"    "7400"    "$7400_HELP"
+                     "7450"    "7450"    "$7450_HELP"
+                     "750"     "750"     "$750_HELP"
+                     "801"     "801"     "$801_HELP"
+                     "821"     "821"     "$821_HELP"
+                     "823"     "823"     "$823_HELP"
+                     "Power"   "Power"   "$Power_HELP"
+                     "Power2"  "Power2"  "$Power2_HELP"
+                     "PowerPC" "PowerPC" "$PowerPC_HELP" )
+                     ;;
+    
+    SPARC) OPTIONS=( "v7"         "v7"         "$v7_HELP"
+                     "cypress"    "cypress"    "$cypress_HELP"
+                     "v8"         "v8"         "$v8_HELP"
+                     "supersparc" "supersparc" "$supersparc_HELP"
+                     "sparclite"  "sparclite"  "$sparclite_HELP"
+                     "hypersparc" "hypersparc" "$hypersparc_HELP"
+                     "f930"       "f930"       "$f930_HELP"
+                     "f934"       "f934"       "$f934_HELP"
+                     "sparclet"   "sparclet"   "$sparclet_HELP"
+                     "ts701"      "ts701"      "$ts701_HELP"
+                     "v9"         "v9"         "$v9_HELP"
+                     "ultrasparc" "ultrasparc" "$ultrasparc_HELP" )
+                     ;;
+   esac
+
+}
+
+spd_options() {
+   OPTIONS=( "Speedy"    "-funroll-loops"            "$SPD0"  "$Speedy_HELP"
+             "Risky"     "-ffast-math"               "$SPD1"  "$Risky_HELP" 
+             "Pointers"  "-fomit-frame-pointer"      "$SPD2"  "$Pointer_HELP"
+             "Siblings"  "-foptimize-sibling-calls"  "$SPD3"  "$Siblings_HELP"
+             "Profiling" "-fprofile-arcs"            "$SPD4"  "$Profiling_HELP"
+	     "Branching" "-fbranching-probabilities" "$SPD5"  "$Branching_HELP"
+             "Aliasing"  "-fstrict-aliasing"         "$SPD6"  "$Aliasing_HELP"
+             "Cprop"     "-fno-cprop-registers"      "$SPD7"  "$Cprop_HELP"
+	     "Float"     "-ffloat-store"             "$SPD8"  "$Float_HELP"
+             "Address"   "-fforce-addr"              "$SPD9"  "$Address_HELP"
+             "Align"     "-ffalign-functions"        "$SPD10" "$Align_HELP" )
+}
+
+xtra_options() {
+   OPTIONS=( "MMX"       "MMX"     "$XTRA1" "$MMX_HELP"
+             "SSE"       "SSE"     "$XTRA2" "$SSE_HELP"
+             "SSE2"      "SSE2"    "$XTRA3" "$SSE2_HELP"
+             "dnow"      "3dnow"   "$XTRA4" "$dnow_HELP"
+             "Altivec"   "Altivec" "$XTRA5" "$Altivec_HELP" )
+}
+
+fpm_options() {
+   OPTIONS=( "None"      ""    "$None_HELP"
+             "x387"      ""    "$x387_HELP"
+             "SSE"       ""    "$SSE_HELP"
+             "Both"      ""    "$Both_HELP"
+             "Altivec"   ""    "$Altivec_HELP" )
+}
+
+cc_warn_options() { 
+  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
+            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" ) 
+}
+
+ccc_warn_options() { 
+  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
+            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" )
+}
+
+ldf_options() {
+   OPTIONS=( "Strip"       "-s"            "$LDF1"  "$Strip_HELP"
+             "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
+             "Combreloc"   "-z combreloc"  "$LDF3"  "$Combreloc_HELP" )
+
+}
+
+addon_options() {
+  OPTIONS=( "DistCC" "distcc" "$ADDON2" "$DistCC_HELP"
+            "CCache" "ccache" "$ADDON3" "$CCache_HELP" )
+}
+
+menu() {
+   if [[ $1 == "checklist" ]]; then
+       RESULT=`dialog --title "$TITLE"          \
+                      --stdout                  \
+                      --no-cancel               \
+                      --item-help               \
+                      --separate-output         \
+                      --checklist  "$MENU"      \
+                        0 0 0                   \
+                      "${OPTIONS[@]}"`
+   else
+       RESULT=`dialog --title "$TITLE"          \
+                      --stdout                  \
+                      --no-cancel               \
+                      --item-help               \
+                      --menu  "$MENU"           \
+                        0 0 0                   \
+                      "${OPTIONS[@]}"`
+   fi
+}

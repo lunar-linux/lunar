@@ -1,0 +1,5 @@
+
+This directory contains some init.d scripts that need to be installed
+if you want to run a daemon at startup. Please make your init scripts
+work with chkconfig, so they can be easily installed and removed!
+

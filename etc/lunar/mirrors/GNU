@@ -1,0 +1,107 @@
+"Master Site"	ftp://ftp.gnu.org/pub/gnu
+"Custom Mirror"	Custom
+California	ftp://gatekeeper.dec.com/pub/GNU
+California	ftp://ftp.keystealth.org/pub/gnu
+Illionis	ftp://uiarchive.cso.uiuc.edu/pub/ftp/ftp.gnu.org/gnu
+Indiana		ftp://ftp.in-span.net/pub/mirrors/ftp.gnu.org
+Kentucky	ftp://gnu.ms.uky.edu/pub/mirrors/gnu
+Maryland	ftp://ftp.digex.net/pub/gnu
+Massachusetts	ftp://aeneas.mit.edu/pub/gnu
+Missouri	ftp://wuarchive.wustl.edu/systems/gnu
+New York	ftp://ftp.cs.columbia.edu/archives/gnu/prep
+New York	ftp://ftp.stealth.net/pub/mirrors/ftp.gnu.org
+North Carolina	http://metalab.unc.edu/pub/gnu
+Pennsylvania	ftp://boron.club.cc.cmu.edu/gnu
+Tennessee	ftp://sunsite.utk.edu/pub/gnu/ftp
+Tennessee	ftp://thales.memphis.edu/pub/gnu
+Wisconsin	ftp://ftp.twtelecom.net/pub/GNU
+South Africa	ftp://ftp.sun.ac.za/gnu
+Brazil		ftp://ftp.unicamp.br/pub/gnu
+Brazil		ftp://master.softaplic.com.br/pub/gnu
+Brazil		ftp://ftp.matrix.com.br/pub/gnu
+Canada		ftp://ftp.cs.ubc.ca/mirror2/gnu
+Chile		ftp://ftp.inf.utfsm.cl/pub/gnu
+Costa Rica	ftp://sunsite.ulatina.ac.cr/Mirrors/GNU
+Mexico		ftp://www.gnu.unam.mx/pub/gnu/software
+Mexico		ftp://gnu.cem.itesm.mx/pub/mirrors/gnu.org
+Australia	ftp://ftp.progsoc.uts.edu.au/pub/gnu
+Australia	ftp://mirror.aarnet.edu.au/pub/gnu
+Australia	ftp://gnu.mirror.pacific.net.au/gnu
+China		ftp://ftp.sea9.com/pub/gnu
+China		ftp://ftp.cs.cuhk.edu.hk/pub/gnu
+China		ftp://sunsite.ust.hk/pub/gnu
+China		ftp://ftp.shellhung.org/pub/gnu
+India		ftp://ftp.kernel.org.in/gnu.org/ftp
+Indonesia	ftp://sapi.vlsm.org/gnu
+Indonesia	http://sapi.vlsm.org/gnu
+Japan		ftp://tron.um.u-tokyo.ac.jp/pub/GNU/prep
+Japan		ftp://core.ring.gr.jp/pub/GNU
+Japan		ftp://ftp.ring.gr.jp/pub/GNU
+Japan		ftp://mirrors.hbi.co.jp/gnu
+Japan		ftp://ftp.ayamura.org/pub/gnu
+Korea		ftp://ftpmirror.hanyang.ac.kr/GNU
+Korea		ftp://ftp.linux.sarang.net/mirror/gnu/gnu
+Korea		ftp://ftp.xgate.co.kr/pub/mirror/gnu
+Saudi Arabia	ftp://ftp.isu.net.sa/pub/mirrors/ftp.gnu.org/gnu
+Taiwan		ftp://coda.nctu.edu.tw/UNIX/gnu
+Taiwan		ftp://ftp1.sinica.edu.tw/pub3/GNU/gnu
+Taiwan		ftp://ftp.nctu.edu.tw/UNIX/gnu
+Austria		ftp://ftp.gnu.vbs.at
+Austria		ftp://ftp.univie.ac.at/packages/gnu
+Austria		ftp://gd.tuwien.ac.at/gnu/gnusrc
+Austria		http://gd.tuwien.ac.at/gnu/gnusrc
+Czeck Republic	ftp://ftp.fi.muni.cz/pub/gnu
+Denmark		ftp://ftp.denet.dk/mirrors/ftp.gnu.org/pub/gnu
+Denmark		ftp://ftp.dkuug.dk/pub/gnu
+Denmark		ftp://sunsite.dk/mirrors/gnu
+Denmark		http://mirrors.sunsite.dk/gnu
+Finland		ftp://ftp.funet.fi/pub/gnu/prep
+France		ftp://ftp.irisa.fr/pub/gnu
+France		ftp://ftp.medasys-digital-systems.fr/pub/gnu
+Germany		ftp.cs.tu-berlin.de/pub/gnu
+Germany		ftp://ftp.informatik.rwth-aachen.de/pub/gnu
+Germany		ftp.leo.org/pub/comp/os/unix/gnu
+Germany		ftp.de.uu.net/pub/gnu
+Germany		ftp.freenet.de/pub/ftp.gnu.org/gnu
+Germany		ftp.cs.uni-bonn.de/pub/gnu
+Germany		ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.gnu.org
+Germany		http://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.gnu.org
+Greece		ftp.forthnet.gr/pub/gnu
+Greece		ftp.ntua.gr/pub/gnu
+Greece		ftp.duth.gr/pub/gnu
+Greece		ftp.aua.gr/pub/mirrors/GNU
+Greece		ftp.physics.auth.gr/pub/gnu
+Ireland		ftp://ftp.esat.net/pub/gnu
+Italy		ftp://ftp.oasi.gpa.it/pub/gnu
+Netherlands	ftp://ftp.nluug.nl/pub/gnu
+Netherlands	ftp://ftp.mirror.nl/pub/mirror/gnu
+Netherlands	ftp://ftp.nl.uu.net/pub/gnu
+Norway		ftp://ftp.ntnu.no/pub/gnu
+Norway		ftp://ftp.gnu.no
+Norway		ftp://sunsite.uio.no/pub/gnu
+Poland		ftp://ftp.task.gda.pl/pub/gnu
+Poland		ftp://sunsite.icm.edu.pl/pub/gnu
+Portugal	ftp://ftp.ci.uminho.pt/pub/mirrors/gnu
+Portugal	http://ciumix.ci.uminho.pt/mirrors/gnu
+Portugal	ftp://ftp.ist.ut1.pt/pub/gnu
+Portugal	ftp://mirrors.netvisao.pt/gnu
+Romania		ftp://archive.logicnet.ro/mirrors/ftp.gnu.org/gnu
+Romania		ftp://ftp.timisoara.roedu.net/mirrors/ftp.gnu.org
+Russia		ftp://ftp.chg.ru/pub/gnu
+Slovenia	ftp://ftp.arnes.si/gnu
+Spain		ftp://ftp.etsimo.uniovi.es/pub/gnu
+Spain		ftp://ftp.rediris.es/pub/gnu
+Sweeden		ftp://ftp.isy.liu.se/pub/gnu
+Sweeden		ftp://ftp.staken.kth.se/pub/gnu
+Sweeden		ftp://ftp.luth.se/pub/unix/gnu
+Sweeden		ftp://ftp.sunet.se/pub/gnu
+Sweeden		ftp://ftp.ch1.chalmers.se/pub/gnu
+Switzerland	ftp://ftp.eunet.ch/mirrors4/gnu
+Switzerland	ftp://sunsite.cnlab-switch.ch/mirrors/gnu
+Turkey		ftp://ftp.baskent.edu.tr/gnu/ftp
+Turkey		ftp://ftp.ulak.net.tr/pub/gnu
+United Kingdom	ftp://ftp.mcc.ac.uk/pub/gnu
+United Kingdom	ftp://ftp.mirror.ac.uk/sites/ftp.gnu.org/pub/gnu
+United Kingdom	ftp://ftp.warwick.ac.uk/pub/gnu
+United Kingdom	ftp://sunsite.org.uk/gnu
+United Kingdom	ftp://ftp.hands.com/ftp.gnu.org

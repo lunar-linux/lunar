@@ -1,0 +1,90 @@
+.TH LUNAR 8 March 2002 Lunar Linux LUNAR
+.SH NAME
+lunar - menu-driven software package management utility
+.SH SYNTAX
+.I lunar
+[update|rebuild]
+.SH COPYRIGHT
+.if n lunar(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t lunar(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.SH "DESCRIPTION"
+.I lunar
+is an easy-to-use menu-driven (dialog-based) interface to the
+.I lunar
+source-based package management system.
+.SH "OPTIONS"
+.I lunar
+without options will start the menu-driven package management utility.
+.PP
+.I update
+.IP
+automatically updates all installed software packages. This option is
+non-interactive and does not start up the menu-driven interface. It is
+suitable for use in cron jobs.
+.PP
+\fBrebuild\fR
+.IP
+automatically rebuilds all installed software packages. This option
+is non-interactive and does not start up the menu-driven interface.
+It is suitable for use in cron jobs and is useful for rebuilding
+distributed binaries from source.
+.SH "REQUIREMENTS"
+.I lunar
+requires a connection to the Internet
+.PP
+.I Bash
+version 2 or higher
+.PP
+.I Dialog
+version 0.9a or higher
+.PP
+.I Linux
+kernel version 2.4.x
+.SH "NOTES"
+Options on the
+.I Package Menu
+add or remove software packages to/from installation and removal queues.
+The actual installation and/or removal of the packages will not be
+performed until either
+.I Foreground Execution
+or
+.I Background Execution
+are selected from the main menu.
+.SH "OPERATION"
+.I Navigating the Menus
+.PP
+To return to a previous menu press
+.I <Esc>
+or use the
+.I Cancel
+button
+.PP
+To exit the program from the main menu press
+.I <Esc>
+or use the
+.I Cancel
+button
+.PP
+To toggle between buttons press
+.I <Tab>
+.PP
+To select whichever button is highlighted press
+.I <Enter>
+.PP
+To select/deselect items from a checklist press
+.I <Space>
+.SH "AUTHOR"
+Kyle Sallee
+.PP
+Updated Thomas Stewart 01/15/2002
+.PP
+Converted to Lunar by Terry Chan 03/23/2002
+.PP
+.SH "REPORTING BUGS"
+Report bugs to <maintainer@lunar-penguin.org>
+.SH "SEE ALSO"
+moonbase(1), lin(8), lvu(1), lget(8), lrm(8), lcrash(8)
+.SH "WARRANTY"
+This is free software with ABSOLUTELY NO WARRANTY
+
+
