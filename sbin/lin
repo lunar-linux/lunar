@@ -770,7 +770,7 @@ lin_module()  { (
     run_build                   &&
     run_post_build              &&
     run_post_install            &&
-    if [[ $KEEP_SOURCE != "yes" ]]; then 
+    if [[ $KEEP_SOURCE != "on" ]]; then 
       rm_source_dir               
     fi                          &&
     report_install              &&

@@ -472,6 +472,7 @@ feature_menu()  {
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
   I_HELP="Create archives of installed software?"
+  K_HELP="Keep source code in /usr/src tree? (Defaults to remove)"
   M_HELP="Email reports?"
   P_HELP="Preserve modified files or backup them up and overwrite with defaults?"
   R_HELP="Prompt to view reports?"
@@ -485,6 +486,7 @@ feature_menu()  {
        AUTOPRUNE=${AUTOPRUNE:=off}
            CABAL=${CABAL:=off}
            COLOR=${COLOR:=on}
+     KEEP_SOURCE=${KEEP_SOURCE:=off}      
     MAIL_REPORTS=${MAIL_REPORTS:=off}
     VIEW_REPORTS=${VIEW_REPORTS:=off}
         PRESERVE=${PRESERVE:=on}
@@ -510,6 +512,7 @@ feature_menu()  {
       "AUTOPRUNE"     "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
       "CABAL"         "Toggle"  "$CABAL"         "$B_HELP"   \
       "COLOR"         "Toggle"  "$COLOR"         "$C_HELP"   \
+      "KEEP_SOURCE"   "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
       "GARBAGE"       "Toggle"  "$GARBAGE"       "$G_HELP"   \
       "MAIL_REPORTS"  "Toggle"  "$MAIL_REPORTS"  "$M_HELP"   \
       "PRESERVE"      "Toggle"  "$PRESERVE"      "$P_HELP"   \
@@ -527,6 +530,7 @@ feature_menu()  {
        AUTOPRUNE=off
            CABAL=off
            COLOR=off
+     KEEP_SOURCE=off    
     MAIL_REPORTS=off
         PRESERVE=off
            SOUND=off
@@ -544,6 +548,7 @@ feature_menu()  {
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                CABAL)         CABAL=on  ;;
                COLOR)         COLOR=on  ;;
+         KEEP_SOURCE)   KEEP_SOURCE=on  ;;      
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
             PRESERVE)      PRESERVE=on  ;;
                SOUND)         SOUND=on  ;;
@@ -561,6 +566,7 @@ feature_menu()  {
           grep  -v  "AUTOFIX="       |
           grep  -v  "AUTOPRUNE="     |
           grep  -v  "CABAL="         |
+          grep  -v  "KEEP_SOURCE="   |
           grep  -v  "MAIL_REPORTS="  |
           grep  -v  "VIEW_REPORTS="  |
           grep  -v  "PRESERVE="      |
@@ -577,6 +583,7 @@ feature_menu()  {
     echo  "     AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
     echo  "   AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
     echo  "       CABAL=$CABAL"         >>  $LOCAL_CONFIG
+    echo  " KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
     echo  "MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
     echo  "    PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
     echo  "       SOUND=$SOUND"         >>  $LOCAL_CONFIG
