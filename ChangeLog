@@ -1,3 +1,10 @@
+2003-09-14 23:16  nhudson
+
+	* var/lib/lunar/excluded: 
+	Adding /etc/xml/docbook /etc/xml/catalog and /etc/sgml/catalog to
+	the excluded list because sometimes they get deleted by
+	scrollkeeper or libglade2
+
 2003-09-12 02:11  elaine
 
 	* usr/share/man/man8/lin.8: Added clarification to manual page -V
