@@ -1,3 +1,23 @@
+2004-03-07 23:32  sofar
+
+	* etc/lunar/config, sbin/lin, sbin/lrm,
+	var/lib/lunar/functions/check.lunar,
+	var/lib/lunar/functions/depends.lunar,
+	var/lib/lunar/functions/modules.lunar,
+	var/lib/lunar/functions/moonbase.lunar: Fixes for: - dependency
+	sorting algorithm, completely rewritten from scratch, implemented
+	using a depends.cache file which speeds up all dependency work
+	immensely. The time needed to create the cache might still be a
+	little long tho (2:30 uncached on my box). sorting time for entire
+	moonbase is about 2:30 now, mostly spending in the fgrep. sorting
+	time on 400 modules is < 30 seconds.  - double questions removed -
+	moonbase index creation is now more atomic than it was, it's
+	generated in a tmpfile, then pivoted to the real location, same for
+	depends.cache (crtl-c in the creation will not damage it) - lrm fix
+	that caused files in /boot to be deleted. as far as I can see this
+	was still an TODO left open by kongar&&those-before-him (ouch).
+	tested and works.  - added $DEPENDS_CACHE var in etc/lunar/config
+
 2004-03-05 20:46  tchan
 
 	* var/lib/lunar/functions/depends.lunar: Added the suggested speed
@@ -192,11 +212,4 @@
 	updated modules and rebuild queue's to miss modules ( I hope ;^) ).
 	If needed someone has to tag -F STABLE this to propagate this to
 	lunar.
-
-2004-01-07 05:22  watryac04
-
-	* var/lib/lunar/functions/kernel.lunar: Added stub for
-	update_aboot.  Keeps the POST_INSTALL on alphas from failing.  Will
-	complete the function ASAP.  Added this now after tchan's
-	prompting.
 
