@@ -28,6 +28,12 @@ set_config() {
   else
     NEW="$2=$3"
   fi
+
+  # on-demand creation
+  if [ -f $1 ] ; then
+    touch $1
+  fi
+
   lock_file $1 &&
   if [ -n "$LINE" ] ; then
     sedit "s:$LINE:$NEW:" $1
@@ -39,7 +45,9 @@ set_config() {
 
 
 get_config() {
-  cat $1 | grep -w "$2=.*" | cut -d= -f2-
+  if [ -f $1 ] ; then
+    cat $1 | grep -w "$2=.*" | cut -d= -f2-
+  fi
 }
 
 
