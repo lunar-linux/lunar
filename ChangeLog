@@ -1,3 +1,8 @@
+2003-08-02 22:16  elaine
+
+	* var/lib/lunar/functions/tracking.lunar: Added chmod 644 after
+	temp_create to make install logs readable
+
 2003-07-29 20:49  elaine
 
 	* var/lib/lunar/functions/: build.lunar, check.lunar, config.lunar,
