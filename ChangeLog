@@ -274,15 +274,3 @@
 	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
 	  Merging linker optimizations
 
-2004-10-06 15:27  sofar
-
-	* lib/lsb/init-functions: AAARGH important bugfix that affects
-	  /etc/init.d/network!
-
-2004-10-06 12:43  sofar
-
-	* sbin/lin, var/lib/lunar/functions/modules.lunar,
-	  var/lib/lunar/functions/sources.lunar: Adding -w|--want $VERSION
-	  support (NO WARRANTY) that allows you to override VERSION (don't
-	  try this with more than one module ;^))
-
