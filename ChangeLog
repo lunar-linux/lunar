@@ -1,3 +1,12 @@
+2005-03-09 19:11  moe
+
+	* usr/share/man/man8/lfirsttime.8: Some tweaks. Two new hints.
+
+2005-03-09 15:26  sofar
+
+	* var/lib/lunar/functions/recovery.lunar: Suggested by florin, also
+	  fixed the line above the fix needed.
+
 2005-03-09 13:23  moe
 
 	* var/lib/lunar/functions/prune.lunar: wheeps .. committed a
