@@ -15,6 +15,15 @@
 Contains the the initial defines required for the entirety of the Lunar
 core toolset's operation.<br>
 <br>
+The following tables contain a list of global variables defined for use
+throughout the Lunar tool set. These are used by <a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lget">/sbin/lget</a>,<a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lin">/sbin/lin</a>,<a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lrm">/sbin/lrm</a>,<a
+ href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lunar">/sbin/lunar</a>,
+and <a href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lvu">/bin/lvu</a>
+and many of the <a href="#SUBROUTINES">subroutines</a> and <a
+ href="#FUNCTIONS">functions</a> which make up the toolset.<br>
 <br>
 <h3>Environmental Defines</h3>
 <br>
@@ -38,16 +47,7 @@ dialog binary used by the lunar core tools.<br>
   </tbody>
 </table>
 <br>
-<br>
 <h3>Global Variable Defines</h3>
-<br>
-The following table contains a list of global variables defined for use
-throughout the Lunar tool set. These are used by <a
- href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lget">/sbin/lget</a>,<a
- href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lin">/sbin/lin</a>,<a
- href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lrm">/sbin/lrm</a>,<a
- href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lunar">/sbin/lunar</a>,
-and <a href="http://www.lunar-linux.org/cgi-bin/manServer.pl/?q=lvu">/bin/lvu</a>.<br>
 <br>
 <table cellpadding="2" cellspacing="2" border="1"
  style="text-align: left; width: 100%;">
@@ -139,7 +139,7 @@ compiled while other modules are being installed.<br>
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">SUBROUTINES=/var/lib/lunar/subroutines<br>
+      <td style="vertical-align: top;"><a name="SUBROUTINES"></a>SUBROUTINES=/var/lib/lunar/subroutines<br>
       </td>
       <td style="vertical-align: top;">File containing core subroutines
 which are used by many of the core tools. It sources all of the files in
@@ -147,7 +147,7 @@ $FUNCTIONS.<br>
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">FUNCTIONS=/var/lib/lunar/functions<br>
+      <td style="vertical-align: top;"><a name="FUNCTIONS"></a>FUNCTIONS=/var/lib/lunar/functions<br>
       </td>
       <td style="vertical-align: top;">Directory containing subroutines
 in separate files<br>
