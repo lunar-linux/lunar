@@ -1,3 +1,7 @@
+2004-12-19 12:10  sofar
+
+	* sbin/lrm: Adding quotes fixes #634
+
 2004-12-14 15:38  sofar
 
 	* sbin/lrm: I just forgot to add the option to getopt()... meh
