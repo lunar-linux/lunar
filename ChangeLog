@@ -501,8 +501,3 @@
 	of fur on the highway!		       -- The Squirrels' Motto (The
 	"Hell's Angels of Nature")
 
-2003-06-26 15:25  niki
-
-	* var/lib/lunar/excluded: Now all the SSH host keys are also
-	preserved.
-
