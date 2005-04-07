@@ -1,3 +1,26 @@
+2005-04-07 09:36  sofar
+
+	* var/lib/lunar/functions/download.lunar: I thought I typed that
+
+2005-04-07 09:19  sofar
+
+	* bin/lvu, var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/plugins/download-file.plugin,
+	  var/lib/lunar/plugins/download-generic.plugin: API change:
+	  separately pass the filename argument when downloading and
+	  verifying files (url, filename, target dir)
+
+2005-04-07 08:59  sofar
+
+	* etc/lunar/: config, mirrors/GNOME, mirrors/GNU, mirrors/KDE,
+	  mirrors/KERNEL, mirrors/LRESORT, mirrors/SFORGE, mirrors/XFREE86:
+	  Adjusting all URL's so they end with '/'
+
+2005-04-06 15:18  sofar
+
+	* var/lib/lunar/functions/: build.lunar, plugins.lunar: Fix for
+	  postbuild not installing plugins: force installation
+
 2005-04-06 07:44  sofar
 
 	* var/lib/lunar/functions/download.lunar: Bugfix: second and
