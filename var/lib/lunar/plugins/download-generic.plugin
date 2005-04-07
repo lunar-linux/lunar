@@ -18,7 +18,7 @@ plugin_source_download_generic()  {
   debug_msg "plugin_source_download_generic ($@)"
 
   # this is what the download will be stored as initially:
-  TMP_FILE=$TMPDIR/$(basename $2)
+  TMP_FILE=$TMPDIR/$2
 
   if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
     WGET_FTP_CONNECTION="--passive-ftp"
@@ -46,21 +46,21 @@ plugin_source_download_generic()  {
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1 --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$TMP_FILE" ; then
+  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL \"$1$2\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1$2" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
-      if [ "$TMP_FILE" != "$(dirname $2)/$(basename $TMP_FILE)" ]; then
-        install -m644 $TMP_FILE $(dirname $2)/$(basename $TMP_FILE)
+      if [ "$TMP_FILE" != "$3/$2" ]; then
+        install -m644 $TMP_FILE "$3/$2"
         rm $TMP_FILE
       fi
-      verbose_msg "download of \"$1\" successful"
+      verbose_msg "download of \"$2\" successful"
     else
       rm -f $TMP_FILE
 	  return 1
     fi
   else
-    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
+    activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$1$2\""
     return 1
   fi
 }

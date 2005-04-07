@@ -17,7 +17,7 @@ plugin_source_download_file()  {
   fi
   debug_msg "plugin_source_download_file ($@)"
 
-  cp $(echo $1 | sed 's/file:\/\///') $2
+  cp "${1:7}$2" $3
 }
 
 

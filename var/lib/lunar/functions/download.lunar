@@ -37,7 +37,7 @@ download_url() {
 	debug_msg "download_url($@)"
 	verbose_msg "trying to download \"$URL\""
 	connect &&
-	plugin_call SOURCE_DOWNLOAD $1 $2
+	plugin_call SOURCE_DOWNLOAD $1 $2 $3
 	RETVAL=$?
 	if [ $RETVAL == 2 ]; then
 		message "${PROBLEM_COLOR}Warning:${QUERY_COLOR} I don't know how to download \"$1\"${DEFAULT_COLOR}"
@@ -86,7 +86,7 @@ download_module() {
 			fi
 		}
 
-		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SOURCE_CACHE/$SRC || [ ! -f $SOURCE_CACHE/$SRC ] ; then
+		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE || [ ! -f $SOURCE_CACHE/$SRC ] ; then
 			# check for cache?
 			message "${MESSAGE_COLOR}Downloading source file" \
 				"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
@@ -116,13 +116,13 @@ download_module() {
 			add_url $LRESORT_URL
 		
 			for URL in $ALL_URLS; do
-				# add source part if needed
+				# add trailing '/'
 				if [ "${URL:((${#URL}-1)):1}" == "/" ] ; then
-					URL=${URL}${SRC}
+					URL="${URL}/"
 				fi
 
 				# and download
-				if download_url $URL $SOURCE_CACHE/$SRC ; then
+				if download_url $URL $SRC $SOURCE_CACHE ; then
 					break
 				fi
 			done
