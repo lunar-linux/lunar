@@ -73,13 +73,13 @@ export        DIALOGRC=/etc/lunar/dialogrc
          MD5SUM_CHECK=${MD5SUM_CHECK:=on}
             SYM_CHECK=${SYM_CHECK:=off}
 
-              GNU_URL=ftp://ftp.gnu.org/pub/gnu
-              KDE_URL=ftp://ftp.kde.org/pub/kde
-            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
-           KERNEL_URL=ftp://ftp.kernel.org
-           SFORGE_URL=http://unc.dl.sourceforge.net/sourceforge
-          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
-          LRESORT_URL=http://lunar-linux.org/lunar/cache
+              GNU_URL=ftp://ftp.gnu.org/pub/gnu/
+              KDE_URL=ftp://ftp.kde.org/pub/kde/
+            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME/
+           KERNEL_URL=ftp://ftp.kernel.org/
+           SFORGE_URL=http://unc.dl.sourceforge.net/sourceforge/
+          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86/
+          LRESORT_URL=http://lunar-linux.org/lunar/cache/
 
       MOONBASE_URL[0]=http://lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[1]=http://tx-us.lunar-linux.org/lunar/moonbase.tar.bz2
@@ -87,7 +87,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
       MOONBASE_URL[3]=http://dk.lunar-linux.org/lunar/moonbase.tar.bz2
       MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/moonbase.tar.bz2
 	 
-            PATCH_URL=http://lunar-linux.org/lunar/patches
+            PATCH_URL=http://lunar-linux.org/lunar/patches/
 	    
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
 
