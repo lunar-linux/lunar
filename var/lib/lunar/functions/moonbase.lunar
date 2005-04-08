@@ -43,7 +43,6 @@ get_moonbase () {
   fi
 
   push_uniq_id
-set -x
   if download_module $MODULE ; then
     message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
