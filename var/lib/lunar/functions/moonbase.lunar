@@ -24,14 +24,14 @@ get_moonbase () {
   debug_msg "  run_details ($@)"
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
-        SOURCE=$(basename $MOONBASE_URL)
-    SOURCE_URL=${MOONBASE_URL[@]}
+        SOURCE=$MODULE.tar.bz2
+    SOURCE_URL=$MOONBASE_URL
        PARTIAL=off
    CLEAR_CACHE=on
   }
 
   # make sure we set these values up front to be sure
-  run_details
+  run_details moonbase
   rm -f $TMPDIR/$SOURCE
 
   if [ ! -d "$SYSTEM_MOONBASE" ] ; then
@@ -43,7 +43,7 @@ get_moonbase () {
   fi
 
   push_uniq_id
-
+set -x
   if download_module $MODULE ; then
     message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
