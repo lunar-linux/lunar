@@ -17,6 +17,12 @@ plugin_source_download_generic()  {
   fi
   debug_msg "plugin_source_download_generic ($@)"
 
+  URL=$1
+  # add trailing '/'
+  if [ "${URL:((${#URL}-1)):1}" != "/" ] ; then
+    URL="${URL}/"
+  fi
+
   # this is what the download will be stored as initially:
   TMP_FILE=$TMPDIR/$2
 
@@ -46,8 +52,8 @@ plugin_source_download_generic()  {
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL \"$1$2\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1$2" --output-document "$TMP_FILE" ; then
+  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL \"$URL$2\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$URL$2" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
@@ -60,7 +66,7 @@ plugin_source_download_generic()  {
 	  return 1
     fi
   else
-    activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$1$2\""
+    activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
     return 1
   fi
 }

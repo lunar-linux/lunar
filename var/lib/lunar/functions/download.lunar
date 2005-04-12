@@ -116,11 +116,6 @@ download_module() {
 			add_url $LRESORT_URL
 		
 			for URL in $ALL_URLS; do
-				# add trailing '/'
-				if [ "${URL:((${#URL}-1)):1}" != "/" ] ; then
-					URL="${URL}/"
-				fi
-
 				# and download
 				if download_url $URL $SRC $SOURCE_CACHE ; then
 					break
