@@ -1,3 +1,10 @@
+2005-04-12 07:34  sofar
+
+	* var/lib/lunar/: functions/download.lunar,
+	  plugins/download-generic.plugin: Move the appending of '/' to
+	  URL's to the wget method only, the other methods do not
+	  concatenate the URL with the FILE part.
+
 2005-04-08 10:46  sofar
 
 	* var/lib/lunar/functions/moonbase.lunar: slippy fingers today
