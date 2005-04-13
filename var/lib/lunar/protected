@@ -19,17 +19,11 @@
 ^/etc/bonobo-activation/
 ^/etc/config.d/ospmd.conf
 ^/etc/courier/
-^/etc/cron.daily/
-^/etc/cron.hourly/
-^/etc/cron.monthly/
-^/etc/crontab
-^/etc/cron.weekly/
 ^/etc/cups/
 ^/etc/dhcpd.conf
 ^/etc/exim.conf
 ^/etc/exports
 ^/etc/fstab
-^/etc/ftpusers
 ^/etc/group
 ^/etc/group-
 ^/etc/grsec/
