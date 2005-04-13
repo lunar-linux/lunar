@@ -50,16 +50,14 @@ unalias() {
       done
       # also not so. our last attempt is for a DISABLED dependency, but
       # we can only use this method for OPTIONAL dependencies
-      if [ "${FUNCNAME[1]}" == "optional_depends" ]; then
-        for TARGET in $TARGETS ; do
-          # there's no function for this yet
-          if grep -q ":$TARGET:off:" $DEPENDS_STATUS ; then
-            debug_msg "unaliased \"$1\"->\"$TARGET\""
-            echo $TARGET
-            return
-          fi
-        done
-      fi
+      for TARGET in $TARGETS ; do
+        # there's no function for this yet
+        if grep -q ":$TARGET:off:" $DEPENDS_STATUS ; then
+          debug_msg "unaliased \"$1\"->\"$TARGET\""
+          echo $TARGET
+          return
+        fi
+      done
     fi
 
     # propose one and let the user pick it from a list:
