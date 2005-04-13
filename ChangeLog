@@ -1,3 +1,14 @@
+2005-04-13 09:52  sofar
+
+	* var/lib/lunar/functions/aliases.lunar: This should at least fix
+	  some of the alias problems that ratler had.
+
+2005-04-13 08:02  sofar
+
+	* var/lib/lunar/functions/aliases.lunar: Much more powerfull
+	  aliasing code: really track all possible alias possibilities,
+	  survives 'lunar fixdepends' test.
+
 2005-04-12 07:34  sofar
 
 	* var/lib/lunar/: functions/download.lunar,
