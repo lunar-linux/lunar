@@ -1,7 +1,7 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -20,62 +20,53 @@
 # usage    : rebuild_status_files
 # purpose  : rebuild the accidentally deleted status files
 rebuild_status_files() {
-  message "${PROBLEM_COLOR} Unable to find MODULE_STATUS files\n"          \
-          "${MODULE_COLOR}$MODULE_STATUS and $MODULE_STATUS_BACKUP"        \
-          "${DEFAULT_COLOR}\n"                                             \
-          "${PROBLEM_COLOR}This is a serious error!!\n\nInformation about" \
-          "the modules on hold CAN NOT be recovered.\nHowever, the files"  \
-          "can be re-constructed.\nDo not forget to check your on hold "   \
-          "modules!"                                                       \
-          "${DEFAULT_COLOR}\n"
+  debug_msg "rebuild_status_files ($@)"
 
   if ! query \
      "Do you want to re-construct the status files from install logs?" y; then
-     message  "${PROBLEM_COLOR}Unable to continue without status files :=("\
-              "No more operation!!"                                        \
+     message  "${PROBLEM_COLOR}Unable to continue without status files" \
               "${DEFAULT_COLOR}"
      exit 1
   fi
 
   if ! [ -d "$INSTALL_LOGS" ]; then
-     message  "${PROBLEM_COLOR}Unable to continue without install logs :=("\
-              "No more operation!!"  \
+     message  "${PROBLEM_COLOR}Unable to continue without install logs " \
               "${DEFAULT_COLOR}"
      exit 1
   fi
 
   message  "${MESSAGE_COLOR}Re-creating status files." \
-           "${DEFAULT_COLOR}"                          \
-           "${PROBLEM_COLOR}DO NOT BREAK!!"            \
            "${DEFAULT_COLOR}"
 
-  trap ""  2
-  LOG_FILES=`ls -rt $INSTALL_LOGS`
+  LOG_FILES=$(ls -rt $INSTALL_LOGS)
   for MODULE_NAME in $LOG_FILES; do
-     let "COUNTS=3"
-     REAL_NAME=$MODULE_NAME
-     unset SECTION
-     while [ "$COUNTS" -gt "0" ]; do
-        REAL_NAME=`echo $REAL_NAME | cut -d "-" -f -"$COUNTS"`
-        SECTION=`find_section $REAL_NAME`
-        if [ -n "$SECTION" ]; then
-           let "COUNTS++"
-           VERSION=`echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-`
-           add_module  $REAL_NAME installed $VERSION 
-           OUTTEXT="Processing: $REAL_NAME-$VERSION          "
-           echo -en "$OUTTEXT"
-           for ((II=1; II<=${#OUTTEXT}; II++)); do echo -en "\b"; done
-           break;
-        fi
-        let "COUNTS--"
-     done
-   done
-   echo " "
-   cp $MODULE_STATUS $MODULE_STATUS_BACKUP
-   message  "${MESSAGE_COLOR}Success!!"   \
-            "${DEFAULT_COLOR}\n"
+    COUNTS=3
+    REAL_NAME=$MODULE_NAME
+    unset SECTION
+    while [ "$COUNTS" -gt "0" ]; do
+      REAL_NAME=$(echo $REAL_NAME | cut -d "-" -f -"$COUNTS")
+      SECTION=$(find_section $REAL_NAME)
+      if [ -n "$SECTION" ]; then
+        ((COUNTS++))
+        VERSION=$(echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-)
+        SIZE=$(find_module_size $REAL_NAME $VERSION)
+        DATE=$(ls -l $INSTALL_LOGS/$REAL_NAME-$VERSION --time-style=+%Y%m%d | awk '{print $6}')
+        lock_file $MODULE_STATUS &&
+        lock_file $MODULE_STATUS_BACKUP &&
+        # adjusted add_module code that echos the DATE field ;^)
+        grep -v "^$REAL_NAME:" $MODULE_STATUS_BACKUP >$MODULE_STATUS 2>/dev/null &&
+        echo "$REAL_NAME:$DATE:installed:$VERSION:$SIZE" >>$MODULE_STATUS &&
+        cat $MODULE_STATUS >$MODULE_STATUS_BACKUP &&
+        unlock_file $MODULE_STATUS_BACKUP &&
+        unlock_file $MODULE_STATUS
+        message "Added: $REAL_NAME-$VERSION ($SIZE) ($DATE)"
+        break;
+      fi
+      ((COUNTS--))
+    done
+  done
 
-  trap 2
+  message  "${MESSAGE_COLOR}Success!!${DEFAULT_COLOR}\n"
 }
 
 
@@ -83,6 +74,7 @@ rebuild_status_files() {
 # usage    : replace_status_file
 # purpose  : cp $MODULE_STATUS_BACKUP $MODULE_STATUS via query
 replace_status_file() {
+  debug_msg "replace_status_file ($@)"
 
    if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; return; fi
     message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS file"   \
@@ -95,7 +87,7 @@ replace_status_file() {
          message  "${MESSAGE_COLOR}Success!!"   \
                   "${DEFAULT_COLOR}"
       else
-         message  "${PROBLEM_COLOR}Unsuccessfull :=( No more operation!!"  \
+         message  "${PROBLEM_COLOR}Unsuccessful :=( No more operation!!"  \
                   "${DEFAULT_COLOR}"
          exit 1
       fi
@@ -111,6 +103,7 @@ replace_status_file() {
 # usage    : check_status_files
 # purpose  : checks the avail of MODULE_STATUS and MODULE_STATUS_BACKUP files
 check_status_files() {
+  debug_msg "check_status_files ($@)"
    if ! [ -f "$MODULE_STATUS" ]; then replace_status_file; fi
    if ! [ -f "$MODULE_STATUS" ]; then echo "Unknown error!!!"; exit; fi
    if ! [ -f "$MODULE_STATUS_BACKUP" ]; then
@@ -122,7 +115,7 @@ check_status_files() {
                      "to MODULE_STATUS_BACKUP"   \
                      "${DEFAULT_COLOR}"
          else
-            message  "${PROBLEM_COLOR}Unsuccessfull while copying" \
+            message  "${PROBLEM_COLOR}Unsuccessful while copying" \
                      "MODULE_STATUS to MODULE_STATUS_BACKUP :=(  " \
                      "No more operation!!"                         \
                      "${DEFAULT_COLOR}"

@@ -1,7 +1,7 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -19,16 +19,16 @@
 # function: lock_file
 # usage   : lock_file <absolute file name>
 # purpose : locks a file or wait until. Better use as lock_file <file> && || etc
-function lock_file()
-{
-   function file_lock()
-   {
-#locking is disabled if ln or rm not found!!
+function lock_file() {
+   debug_msg "lock_file ($@)"
+   function file_lock() {
+      #locking is disabled if ln or rm not found!!
       [ -x "/bin/ln" ] || return 0
       [ -x "/bin/rm" ] || return 0
 
       TEMPFILE="$1.$$"
       LOCKFILE="$1.lock"
+
       echo $$ > $TEMPFILE 2>/dev/null ||
       {
          message "${PROBLEM_COLOR}You don't have permission to access" \
@@ -48,7 +48,7 @@ function lock_file()
          rm -f $TEMPFILE
          return 1
       }
-      rm $LOCKFILE 2>/dev/null &&
+      rm -f $LOCKFILE 2>/dev/null &&
       echo "Removed stale lock file of process $STALE_PID"
       ln $TEMPFILE $LOCKFILE 2>/dev/null &&
       {
@@ -71,11 +71,46 @@ function lock_file()
 # function: unlock_file
 # usage   : unlock_file <absolute file name>
 # purpose : unlocks a file
-function unlock_file()
-{
-#unlocking is disabled if rm not found!!
-   [ -x "/bin/rm" ] || return 0
-   rm $1.lock 2>/dev/null && return 0
-   return 1
+function unlock_file() {
+  debug_msg "unlock_file ($@)"
+  #unlocking is disabled if rm not found!!
+  [ -x "/bin/rm" ] || return 0
+  rm -f $1.lock 2>/dev/null && return 0
+  return 1
 }
+
+
+lin_locked()  {
+  debug_msg "lin_locked ($@)"
+  [     -f        /var/lock/installing.$1  ]  &&
+  ps        `cat  /var/lock/installing.$1`    |
+  grep  -q  "lin"
+}
+
+
+solo_locked()  {
+  debug_msg "solo_locked ($@)"
+  for SOLO_MODULE in `cat $SOLO` ; do
+    if lin_locked $SOLO_MODULE ; then
+      message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}${MESSAGE_COLOR} of other modules is disabled during a lin ${MODULE_COLOR}$SOLO_MODULE${DEFAULT_COLOR}"
+      return
+    fi
+  done
+  false
+}
+
+
+current_locked() {
+  debug_msg "current_locked ($@)"
+  if  lin_locked  $MODULE;  then
+    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}$linING${DEFAULT_COLOR_COLOR}"
+    message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR} to finish installing or for the lock to clear.${DEFAULT_COLOR}"
+
+    while  lin_locked  $MODULE;  do  sleep  2;  done
+    false
+  else
+    false
+  fi
+}
+
 

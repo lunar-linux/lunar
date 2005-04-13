@@ -1,0 +1,12 @@
+binutils-sparc64
+bin86
+egcs64
+grub
+lilo
+nasm
+silo
+sparc-utils
+uClibc
+uml
+yaboot
+memtest86+

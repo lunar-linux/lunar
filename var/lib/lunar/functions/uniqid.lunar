@@ -1,0 +1,53 @@
+#!/bin/bash
+#                                                          #
+# uniqid.lunar - Make a uniqe id for tracking clients      #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright Fw systems LLC Under eitherGPL v2 or BSD Lic.  #
+#                                                          #
+############################################################
+
+
+push_uniq_id() {
+  debug_msg "push_uniq_id ($@)"
+  if [ -z "$UNIQID" ]; then
+    create_uniq_id
+  fi
+ 
+  verbose_msg "registering \"$UNIQID\" with server"
+  wget -t 1 -T 5 -q -O - "lunar-linux.org/cgi-bin/houston?loc=$UNIQID" 
+
+}
+
+
+create_uniq_id() {
+  debug_msg "create_uniq_id ($@)"
+  if [ -n "$UNIQID" ]; then 
+    return
+  fi
+
+  OS=$(uname -s)
+
+  if [  "$OS"  == "OpenBSD" ]; then
+    HASH="sha1"
+    IFACE=`netstat -r | grep default | awk '{print $7}'`
+  elif [  "$OS"  == "Linux" ]; then
+    HASH="md5sum"
+    IFACE=`netstat -r | grep default | awk '{print $8}'`
+  else
+    exit 1
+  fi
+
+  UNIQID=`ifconfig $IFACE |\
+      awk '/addr.*[:]* [0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/ {print $NF}' |\
+      tr 'A-Z' 'a-z' | $HASH | awk '{print $1}'`
+  export UNIQID
+
+  verbose_msg "id(\"$IFACE\")=\"$UNIQID\""
+
+  set_local_config "UNIQID" "$UNIQID"
+
+}
+
+

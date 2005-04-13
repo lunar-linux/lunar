@@ -1,0 +1,266 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# lin - install Lunar modules                              #
+#                                                          #
+############################################################
+# cast is part of the sorcery spell management utility     #
+# Copyright 2001 by Kyle Sallee                            #
+############################################################
+#                                                          #
+# this WAS the cast script of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted Jason Johnston  2002 under GPLv2       #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+# This enables alias expansion within lin and its children
+# although this dosen't expand aliases within functions
+# That is a limitation of bash and aliases
+shopt -s expand_aliases
+
+help()	{
+  cat  <<  EOF
+Lin installs single or multiple modules
+
+Example:	lin  nano hdparm sudo
+Usage:		lin  [parameters]  [module]
+
+Optional Parameters:
+
+-c  |  --compile		Ignore $INSTALL_CACHE and compiles
+-d  |  --debug                  Enables debug messages
+       --deps			Configure modules and determine dependencies, 
+-f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
+-h  |  --help                   Displays this help text
+       --opts '--enable-xxx'    Add custom configure options to the module
+-p  |  --probe                  Only lin if not already installed
+-r  |  --reconfigure		Select new dependencies for modules
+-R  |  --resurrect              Force to be unpacked from /var/cache/lunar
+-s  |  --silent			Decreases the level of message output
+-v  |  --verbose                Increases the level of message output
+-V  |  --Version                Select specific Version of module to install
+-w  |  --want version           Try to install a different version that is
+                                not in moonbase
+EOF
+  exit  1
+}
+
+
+main() {
+  debug_msg "main ($@)"
+  MODULES="$@"
+
+  verbose_msg "mod_v=\"$MOD_VERSION\" mod=\"$MODULES\""
+
+  if echo $MODULES | grep -qw moonbase ; then
+    # just update moonbase, no other modules
+    if ! get_moonbase ; then
+      exit 1
+    fi
+    # remove moonbase rofm MODULES and continue
+    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+    if [ -z "$MODULES" ] ; then
+      return
+    fi
+  fi
+
+  if [ -z "$MODULES" ] ; then
+    message "${MESSAGE_COLOR}Nothing to do!${DEFAULT_COLOR}"
+    return
+  fi
+
+  # different approaches for multiple modules (start up downloads first)
+  # and single modules (plain install)
+  if [ -z "$SINGLE_MODULE" ] ; then
+
+    if [ -n "$MOD_VERSION" ] ; then
+      message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
+      exit 1
+    fi
+
+    if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
+      export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
+      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+    fi
+
+    # pass 1 : run full dependency checking
+    # This pass does configuration and dependency identification.
+    if ! DEPS_ONLY=--deps build_depends $MODULES ; then
+      temp_destroy $TEMP_DOWNLOAD_PIDS
+      temp_destroy $TEMP_PREPAREDDEPS
+      verbose_msg "Unexpected errors, bailing out!"
+      exit 1
+    fi
+
+    # pass 2 : hit the download manager button and grab a beer
+    # this runs as a background process, so we are off to step #3 right away
+    if [ -z "$DEPS_ONLY" ] ; then
+      verbose_msg "Spawning download manager"
+      for M in $MODULES ; do
+        LIST="$(for D in `find_depends $M`; do if ! module_installed $D ; then echo $D ; fi ; done | uniq) $LIST"
+      done
+      verbose_msg "download queue: $LIST $MODULES"
+      for M in $LIST $MODULES; do
+          THIS_TEMP=$(temp_create "$M.download.log")
+          rm $THIS_TEMP
+          SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+          eval TEMP_DOWNLOAD_LOG_$SAFE_M=$THIS_TEMP
+      done
+      (
+          for M in $LIST $MODULES; do
+	      SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+              eval THIS_TEMP=\$TEMP_DOWNLOAD_LOG_$SAFE_M
+              lget $M > $THIS_TEMP 2>&1 &
+              echo "$M:`jobs -p`:$THIS_TEMP" >> $TEMP_DOWNLOAD_PIDS
+              wait
+          done
+      ) &    
+
+      # pass 3 : compile/install
+      # no strange stuff should happen here anymore
+      for MODULE in $MODULES ; do
+        if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
+          if ! module_held $MODULE ; then
+            linING="/var/lock/installing.$MODULE"
+            verbose_msg "starting lin \"$MODULE\""
+            if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
+              if [ -e "$TMP_LIN_FAIL" ] ; then
+                echo "$MODULE" >> $TMP_LIN_FAIL
+              fi
+              lin_EXIT_STATUS=1;  
+            else
+              if [ -e "$TMP_LIN_SUCCESS" ] ; then
+                echo "$MODULE" >> $TMP_LIN_SUCCESS
+              fi
+            fi
+          else
+            verbose_msg "Skipping compile and install for held module \"$MODULE\""
+          fi
+        fi
+      done
+    fi
+
+    # cleanups that we need to do
+    temp_destroy $TEMP_DOWNLOAD_PIDS
+    temp_destroy $TEMP_PREPAREDDEPS
+
+  else
+    # we are only doing one module, drop down to:
+    MODULE=$MODULES
+    unset RECONFIGURE
+
+    if [ -n "$MOD_VERSION" ] ; then
+      if echo $MODULE | grep -q '/' ; then
+        if [ -d ${MOONBASE}/*/${MODULE} ] ; then
+	  unset MOD_VERSION
+        else
+          message "${PROBLEM_COLOR}No Moonbase module: ${FILE_COLOR}$MODULE${MESSAGE_COLOR} with \"$MODULE\" form, bailing!${DEFAULT_COLOR}"
+	  return 1
+        fi
+      else
+	if [ -d ${MOONBASE}/*/${MODULE}/${MOD_VERSION} ] ; then
+	  MODULE="${MODULE}/${MOD_VERSION}"
+	else
+          debug_msg "${MESSAGE_COLOR}$MODULES Passing ${FILE_COLOR}$MOD_VERSION${MESSAGE_COLOR} to module for processing${DEFAULT_COLOR}"
+        fi
+	message "Module=\"$MODULE\""
+      fi
+    fi
+
+    run_details $MODULE &&
+    run_depends $MODULE &&
+    satisfy_depends $MODULE
+
+    if [ -z "$DEPS_ONLY" ] ; then
+      if ! module_held $MODULE ; then
+        if [ -n "$PROBE" ] ; then
+	  # --probe install
+          if ! module_installed $MODULE ; then
+            if ! lin_module $MODULE ; then
+              temp_destroy $TEMP_PREPAREDDEPS
+              exit 1
+            fi
+	  elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
+	    # probe install where module is expired
+	    verbose_msg "module \"$MODULE\" needs to be updated"
+	    if ! SINGLE_MODULE= lin_module $MODULE ; then
+	      temp_destroy $TEMP_PREPAREDDEPS
+	      exit 1
+	    fi	    
+          fi
+        else
+	  # normal install - not probed
+          if ! lin_module $MODULE ; then
+            temp_destroy $TEMP_PREPAREDDEPS
+            exit 1
+          fi
+        fi
+      else
+        verbose_msg "Skipping held module \"$MODULE\""
+      fi
+    fi
+  fi
+  
+}
+
+
+. /etc/lunar/config
+
+GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:w:" -l "compile,debug,deps,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
+
+# the following trap makes sure all threads exit in case something weird
+# happens:
+trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOAD_PIDS \$INSTALLWATCHFILE) ; exit 1" CHLD INT TERM KILL
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  export IFS="$STANDARD_IFS"
+  
+  root_check
+  enviro_check
+  set_priority
+  
+  while true ; do
+    case "$1" in
+      -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
+      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+         --deps        ) export DEPS_ONLY="$1" ;                    shift   ;;
+      -f|--from        ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
+      -h|--help        ) help ; exit                                        ;;
+         --opts        ) export PASS_OPTS="$2" ;                    shift 2 ;;
+      -p|--probe       ) export PROBE="$1" ;                        shift   ;;
+      -r|--reconfigure ) export RECONFIGURE="$1" ;                  shift   ;;
+      -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
+      -s|--silent      ) export SILENT="$1" ;                       shift   ;;
+      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      -V|--Version     ) export MOD_VERSION=$2 ;                    shift 2 ;;
+      -w|--want        ) export WANT_VERSION=$2 ;                   shift 2 ;;
+      --) shift ; break ;;
+      *) help ; break ;;
+    esac
+  done
+
+  if [ -n "$RESURRECT" ] ; then
+    resurrect_modules $@
+  else
+    main $@
+  fi
+fi
+
+

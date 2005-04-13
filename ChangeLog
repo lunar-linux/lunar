@@ -1,104 +1,147 @@
-2002-08-20 15:18  xoritor
+2005-03-18 11:01  sofar
 
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	Added Float (-ffloat-store) option to the menu.  Enabled addon use
-	(ccache and distcc) not just selection.  Finished descriptions on
-	XTRA menu.
+	* bin/lvu, var/lib/lunar/unset.sh,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/misc.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/menu/download.menu: W00t, the end of FUZZY!!!
 
-2002-08-20 13:01  dem
+2005-03-18 10:01  sofar
 
-	* var/lib/lunar/functions/optimize.lunar: Fixed a c++ and -pipe
-	typo in the CXX variable
+	* var/lib/lunar/functions/check.lunar: Moo, this should fix that
+	  too
 
-2002-08-20 11:38  sofar
+2005-03-18 09:58  sofar
 
-	* var/lib/lunar/subroutines: Bugfix: allow scripts to switch IW on
-	and off without removing an existing installwatch log file.
+	* var/lib/lunar/functions/main.lunar: Fix for the missing install
+	  log after a resurrect.
 
-2002-08-20 03:07  xoritor
+2005-03-18 00:52  v3rt1g0
 
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
-	Enabled multiple selection of "extra features":   XTRA is now an
-	array holding all of your options.    Multiple options are allowed,
-	but be careful, not all are compatible!      XTRA=( mmx dnow )
+	* var/lib/lunar/functions/main.lunar: Misc typos
 
-2002-08-19 23:43  xoritor
+2005-03-18 00:40  v3rt1g0
 
-	* var/lib/lunar/functions/optimize.lunar: Updates to CXX
-	implementaions.
+	* var/lib/lunar/menu/dmodule.menu: Typo
 
-2002-08-19 22:05  xoritor
+2005-03-18 00:35  v3rt1g0
 
-	* var/lib/lunar/functions/optimize.lunar: True fix for exporting
-	CXX not just a CXX=CCC hackfix.
+	* var/lib/lunar/menu/optimize.menu: Typos
 
-2002-08-19 19:35  xoritor
+2005-03-16 08:02  sofar
 
-	* var/lib/lunar/menu/optimize.menu: Fixed wrong setting of some
-	variables:   FPM and XTRA now set correct values.
+	* var/lib/lunar/functions/messages.lunar: meh, silly
 
-2002-08-19 18:53  sofar
+2005-03-15 16:49  sofar
 
-	* usr/share/man/man1/lvu.1: Added orphans
+	* var/lib/lunar/functions/check.lunar: Fix for AUTOFIX BREAKING
+	  MODULES: you can now use LDD_CHECK=off in DETAILS. please test &&
+	  verify
 
-2002-08-19 18:50  sofar
+2005-03-15 12:36  sofar
 
-	* usr/sbin/lvu: Added lvu orphans: checks installed modules for
-	missing required dependancies.
+	* bin/lvu: Adding 'info' ... slightly modified by chad's patch.
 
-2002-08-19 18:17  sofar
+2005-03-15 11:38  sofar
 
-	* usr/: sbin/lvu, share/man/man1/lvu.1: Renamed orphans to 'leafs'
+	* var/lib/lunar/functions/messages.lunar: New query() routine: bad
+	  input now causes a repeated question, and the double newline is
+	  gone.
 
-2002-08-19 17:28  sofar
+2005-03-15 10:36  sofar
 
-	* usr/sbin/lin: Comment fix
+	* var/lib/lunar/functions/depends.lunar: sanity check: bug #723
 
-2002-08-19 17:26  sofar
+2005-03-15 04:05  v3rt1g0
 
-	* usr/sbin/lunar: New lunar update routine.
+	* etc/lunar/local/README: Fixed a typo and add metion of XOrg for
+	  what its worth
 
-2002-08-19 15:54  tchan
+2005-03-13 21:56  sofar
 
-	* var/lib/lunar/functions/optimize.lunar: Fixed a typo in CXXFLGS,
-	should be CXXFLAGS.
+	* var/lib/lunar/functions/connect.lunar: this is much more
+	  consistent. also adding raX interface type, which is kind of
+	  uncommon.
 
-2002-08-19 14:09  sofar
+2005-03-13 18:19  sofar
 
-	* usr/sbin/lin: Added functionality: lin moonbase. Also callable as
-	"lin <list of modules incliding "moonbase">"
+	* sbin/lin: Proposed consistency fix for lin/download queue
+	  creation: use find_depends()
 
-2002-08-19 13:45  sofar
+2005-03-13 17:08  sofar
 
-	* etc/lunar/config: Added MOONBASE_URL
+	* var/lib/lunar/functions/check.lunar: Removing obsolete call to
+	  show_owner.
 
-2002-08-19 13:43  sofar
+2005-03-09 19:11  moe
 
-	* var/lib/lunar/subroutines: Added get_moonbase()
+	* usr/share/man/man8/lfirsttime.8: Some tweaks. Two new hints.
 
-2002-08-19 13:24  sofar
+2005-03-09 15:26  sofar
 
-	* var/lib/lunar/solo: Synced and added theedge and moonbase
+	* var/lib/lunar/functions/recovery.lunar: Suggested by florin, also
+	  fixed the line above the fix needed.
 
-2002-08-19 12:06  sofar
+2005-03-09 13:23  moe
 
-	* var/lib/lunar/subroutines: Away with clean_moonbase!
+	* var/lib/lunar/functions/prune.lunar: wheeps .. committed a
+	  slightly older version. This is the final solution.
 
-2002-08-19 05:35  xoritor
+2005-03-09 13:17  moe
 
-	* var/lib/lunar/functions/optimize.lunar: Added CXX support to
-	optimizations.
+	* var/lib/lunar/functions/prune.lunar: Fixing lunar prune for good.
+	  God, this has been bothering me. Might break things .. but this
+	  is theedge ;-) However, I've been giving it a good test.
 
-2002-08-19 04:40  xoritor
+2005-03-08 07:48  moe
 
-	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu: Fix
-	for optimizations to allow gcc3 module rename to gcc.
+	* usr/share/man/man8/lfirsttime.8: Typo
 
-2002-08-19 04:30  xoritor
+2005-03-07 23:08  moe
 
-	* usr/sbin/lin: Fix test for gcc3 rename to gcc.
+	* usr/share/man/man8/lfirsttime.8: Tweaks and typo fixes. Also
+	  added a hint to the hint section.
 
-2002-08-19 04:24  csm
+2005-03-07 22:03  moe
 
-	* etc/lunar/local/README: just testing commit
+	* usr/share/man/man8/lfirsttime.8: I finally got to rewriting
+	  lfirsttime. This should be _alot_ better then the manpage we had
+	  until now. Thanks rolling out to Jens, Jasper and Jaime for
+	  typo-hunting. I feel dizzy now.
+
+2005-02-22 12:50  moe
+
+	* etc/lunar/config: Adding the X11 path to the static lunar PATH
+
+2005-02-14 13:01  nestu
+
+	* var/lib/lunar/functions/kernel.lunar: * get rid of the annoying
+	  grub install questions (adding a warning that it should be
+	  installed).  * add a white line between kernel entries.
+
+2005-02-14 11:48  sofar
+
+	* etc/lunar/config: We should use a hardcoded PATH, no user
+	  components allowed by default! This also solves /sbin/ldconfig
+	  not being accessible on some systems etc. Note user can still
+	  override PATH with `lunar set PATH xxxxx`, but it's not exported
+	  to sub-apps.
+
+2005-02-02 12:12  sofar
+
+	* var/lib/lunar/functions/build.lunar: meh... suck
+
+2005-01-19 12:09  moe
+
+	* var/lib/lunar/functions/view.lunar: There's also the type 'data'
+
+2005-01-19 11:37  sofar
+
+	* bin/lvu: indeed I missed it
+
+2005-01-19 11:32  sofar
+
+	* bin/lvu: removed bolding of modules
 

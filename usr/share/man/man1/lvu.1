@@ -1,25 +1,28 @@
-.TH "LVU" "1" "March 2002" "Lunar Linux" "LUNAR"
+.TH "LVU" "1" "August 2003" "Lunar Linux" "LUNAR"
 .SH "NAME"
 lvu \- query/view lunar package management information
 .SH "SYNOPSIS"
 .B lvu
-alien|leafs|orphans|prune|pam
+alien|leafs|orphans|pam
 .PP 
 .B lvu
-what|where|website|sources|maintainer <module>
+cd|what|where|website|sources|urls|maintainer|version <module>
 .PP 
 .B lvu
-compile|install|sum|md5sum <module>
+compile|compiler|links|install|sum|md5sum <module>
 .PP 
 .B lvu
 export|import [snapshot]
 .PP 
 .B lvu
-moonbase|html|updatelog
+moonbase|html|updatelog|activity
 .PP 
 .B lvu
 search "phrase"
 .PP 
+.B lvu
+service port|acronym
+.PP
 .B lvu
 newer|older <yyyymmdd>
 .PP 
@@ -28,7 +31,10 @@ from <path/file>
 .PP 
 .B lvu
 installed [module]
-.PP 
+.PP
+.B lvu
+held|exiled
+.PP
 .B lvu
 section [section]
 .PP 
@@ -37,25 +43,25 @@ voyeur [delay or module]
 .PP 
 .B lvu
 depends <module>
-.PP
+.PP 
 .B lvu
 tree <module>
-.PP
+.PP 
 .B lvu
 eert <module>
-.PP
-.B lvu
-$MODULE_SCRIPT <module>
 .PP 
 .B lvu
 size [module]
+.PP
+.B lvu
+$MODULE_SCRIPT <module>
 .SH "COPYRIGHT"
-.if n lvu(1) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001\-2002
-.if n lvu(1) also contains material which is Copyright (C) Lunar\-Penguin team.
+.if n lvu(1) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if n lvu(1) also contains material which is Copyright (C) Lunar\-Linux team.
 
 .SH "DESCRIPTION"
 .I lvu
-is part of the lunar source\-based package management suite. It is a general purpose command\-line tool for displaying package logs, version information, checking for installed packages, checksums, message digests, maintainer information, package URL information, removing obsolete packages, displaying new packages, untracked files, sections, searching for files that are installed, finding when modules were created and packages in the software catalogue. It can even take and retrieve snapshots of currently installed packages for easy duplication.
+is part of the lunar source\-based package management suite. It is a general purpose command\-line tool for displaying package logs, version information, checking for installed packages, checksums, message digests, maintainer information, package URL information, displaying new packages, untracked files, sections, searching for files that are installed, finding when modules were created and packages in the software catalogue. It can even take and retrieve snapshots of currently installed packages for easy duplication.
 .SH "OPTIONS"
 .B alien
 .IP 
@@ -64,18 +70,19 @@ find and display all files which are not currently tracked by the lunar package 
 .B leafs
 .IP 
 displays installed modules that have no explicit dependencies on them
-.PP
+.PP 
 .B orphans
-.IP
-displays installed modules that are missing required dependancies
-.PP
-.B prune
 .IP 
-removes all old source code and old backups. Otherwise the source code from previous versions is kept so that the packages can be rolled back to older versions. This does not delete sources that are up to date, but not installed.
+displays installed modules that are missing required dependencies
 .PP 
 .B pam
 .IP 
 display modules installed that are pam aware
+.PP 
+.B cd
+module
+.IP 
+changes current directory to the given module and execs a new shell
 .PP 
 .B what
 module
@@ -97,21 +104,49 @@ module
 .IP 
 list all source files contained in a module
 .PP 
+.B urls
+module
+.IP 
+list all URLs for a module
+.PP 
 .B maintainer
 module
 .IP 
 display the email address of the person currently responsible for maintaining a specified module
+.PP 
+.B version
+module
+.IP 
+display version of module in moonbase
 .PP 
 .B compile
 module
 .IP 
 show the compiler output generated when the module was built
 .PP 
+.B compiler
+module
+.IP 
+display the version of compiler used for creating the ELF files in modules
+.PP
+.B links
+module
+.IP
+display the modules that this module's ELF binary files actually links to
+.PP
 .B install
 module
 .IP 
 used to determine what files were installed by a module and where those files are located
-.PP 
+.PP
+.B held
+.IP
+display held modules
+.PP
+.B exiled
+.IP
+display exiled modules
+.PP
 .B sum
 <module>
 .IP 
@@ -142,12 +177,22 @@ prints the entire moonbase in a nice html format
 .B updatelog
 .IP 
 view summary log of previous lunar update
-.PP 
+.PP
+.B activity
+.IP
+view the main lunar activity log
+.PP
 .B search
 "phrase"
 .IP 
 Searches modules long descriptions for
 .I phrase
+.PP 
+.B service
+port|acronym
+.IP 
+displays modules that provide the given service
+.I port|acronym
 .PP 
 .B newer
 date
@@ -178,7 +223,7 @@ view a list of all sections in the software catalogue or display a list of packa
 .PP 
 .B size <module>
 .IP 
-display the size of a given module or your Lunar installation in KB
+display the size of a given module or all your installed modules in KB
 .PP 
 .B voyeur
 <module>
@@ -187,19 +232,19 @@ start looking at what lin is compiling at the moment and outputs it. A module ca
 .PP 
 .B depends
 <module>
-.IP
+.IP 
 displays the modules that explicitly or recursively depend on this module.
-.PP
+.PP 
 .B tree
 <module>
-.IP
+.IP 
 displays a tree of the module's dependencies.
-.PP
+.PP 
 .B eert
 <module>
-.IP
+.IP 
 displays a tree of the module's reverse dependencies.
-.PP
+.PP 
 .B $MODULE_SCRIPT
 module
 .IP 
@@ -215,8 +260,10 @@ Updated Thomas Stewart 01/15/2002
 Converted to Lunar by Terry Chan 03/23/2002
 .PP 
 Edited and new functions added by Chuck Mead 05/21/2002
+.PP
+Updated again by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
-Report bugs to <maintainer@lunar\-penguin.org>
+Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
 lunar(8), lin(8), lrm(8), lget(8), moonbase(1)
 .SH "WARRANTY"

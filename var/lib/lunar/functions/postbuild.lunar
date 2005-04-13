@@ -1,0 +1,271 @@
+#!/bin/bash
+#                                                          #
+# postbuild.lunar - Lunar install extensions               #
+#                                                          #
+############################################################
+#                                                          #
+# parts of these functions come from subroutines and were  #
+# part of sorcerer GNU/Linux. SGL is no longer             #
+# available with GPL license.                              #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted Kyle Sallee 2001                       #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+# Parts Copyrighted Auke Kok 2002 under GPLv2              #
+#                                                          #
+############################################################
+
+
+# function : gather_docs
+# usage 1  : gather_docs
+# usage 2  : gather_docs LIST OF FILES
+# purpose  : Installs extra documentation that came with the
+#            module's source package into the module's
+#            document directory (defined as Lunar's base
+#            document directory plus the module name).  This
+#            function is called from default_post_install as
+#            usage 1, which installs a default (read: common)
+#            set of docs.  If the developer is not happy with
+#            just those doc s/he can call this function from
+#            a module script (like BUILD) with a list of
+#            additional files (usage 2) to install into the
+#            module's document directory.
+# pre-conditions : user must have $GARBAGE="on" to have any
+#                  of this actually happen.
+gather_docs() {
+  debug_msg "gather_docs ($@)"
+
+  # Bail if the user doesn't want to install any extra documentation
+  if [ "$GARBAGE" != "on" ] ; then
+    return
+  fi
+
+  DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
+  mkdir -p $DOC_DIR
+
+  # This is the list of default extra documentation that is to be 
+  # installed automatically if the user has $GARBAGE=on.  Any other
+  # docs are left up to the module writer to get installed.
+  DEFAULT_DOCS="README* INSTALL* FAQ* CHAN* doc* DOC* *doc \
+                *sample* conf SETUP NEWS Change* manual* Manual*"
+
+  if [ -d "$SOURCE_DIRECTORY" ] ; then
+  (
+    cd $SOURCE_DIRECTORY
+
+    # Check if we are being called with parameters or not
+    if [ ${#} -gt 0 ] ; then
+      # For each parameter that is an existing file
+      for FILE in ${@}; do
+        if [ -e ${FILE} -a -f ${FILE} ] ; then
+          # copy it over to the doc directory creating directories as needed
+          verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
+          install -D -m 644 ${FILE} ${DOC_DIR}/${FILE}
+        fi
+      done
+    else
+      # No parameters were passed in, install the default docs
+      for FILE in ${DEFAULT_DOCS}; do
+        # copy all of the default docs (prune Makefiles)
+        if [ -e $FILE -a ! -f ${FILE}/Makefile ] ; then
+          verbose_msg "Installing default documentation to: ${DOC_DIR}/${FILE}"
+          cp -a $FILE $DOC_DIR 2> /dev/null
+	fi
+      done
+    fi
+  )
+  fi
+}
+
+install_pam_confs()  {
+  debug_msg "install_pam_confs ($@)"
+  if [ -d "$SCRIPT_DIRECTORY/pam.d" ] ; then
+    verbose_msg "handling pam config files"
+    cd "$SCRIPT_DIRECTORY/pam.d"
+
+    if [ ! -d /etc/pam.d ] ; then
+		  mkdir -p /etc/pam.d
+		fi
+
+    for FILE in [!CVS]* ; do
+      if [ ! -f /etc/pam.d/$FILE ] ; then
+        /usr/bin/install -g 0 -o 0 -m 0600 $FILE /etc/pam.d
+      fi
+    done
+  fi
+}
+
+
+install_xinetd_confs()  { (
+  unset IFS
+  debug_msg "install_xinetd_confs ($@)"
+  if  [  -d  "$SCRIPT_DIRECTORY/xinetd.d"  ];  then
+    cd       "$SCRIPT_DIRECTORY/xinetd.d"
+    verbose_msg "handling xinetd config files"
+
+    [ -d /etc/xinetd.d ] || mkdir  -p  /etc/xinetd.d
+
+    for  SERVICE  in  $SERVICES;  do
+      for  FILE  in  [!CVS]* ;  do
+        if    grep  -q  "service $SERVICE"   $FILE  ; then
+          if [ ! -f /etc/xinetd.d/$FILE ] ; then
+            /usr/bin/install --backup=numbered -g 0 -o 0 -m 600 $FILE /etc/xinetd.d
+          fi
+        fi
+      done
+    done
+
+    if  [  -n  "$SERVICES"  ];  then
+      devoke_installwatch
+      [ ! -x /etc/init.d/xinetd ] || /etc/init.d/xinetd  restart
+      invoke_installwatch
+    fi
+  fi
+) }
+
+
+use_xinetd()  {
+  debug_msg "use_xinetd ($@)"
+  if  [  -d  $SCRIPT_DIRECTORY/xinetd.d  ]  &&
+      !  grep  -q  "SERVICES="  $MODULE_CONFIG
+  then
+    ALL_SERVICES=`cat  $SCRIPT_DIRECTORY/xinetd.d/[!CVS]*  |
+                  grep  "service"                          |
+                  sed   "s/service //"`
+
+    for SERVICE in $ALL_SERVICES ; do
+      if query  "Invoke $SERVICE via xinetd?"  y ; then
+        SERVICES="$SERVICE $SERVICES"
+      else
+        RETURN=1
+      fi
+    done
+
+    for SERVICE in $SERVICES; do
+      for FILE in $SCRIPT_DIRECTORY/xinetd.d/[!CVS]* ; do
+        if  grep  -q   "service $SERVICE"  $FILE   &&
+            grep  -q   "stunnel"           $FILE;  then
+          add_depends  "$MODULE"  "stunnel"  "on"  "optional"
+        fi
+      done
+    done
+
+    if [ -n "$SERVICES" ] ; then
+      add_depends  "$MODULE"  "xinetd"  "on"   "optional"
+    else  
+      add_depends  "$MODULE"  "xinetd"  "off"  "optional"
+    fi
+
+    set_module_config "SERVICES" "$SERVICES"
+    if [ "$RETURN" == "1" ] ; then
+      return 1
+    else
+      return 0
+    fi
+
+  else
+    return 1
+  fi
+}
+
+
+install_initd()  {
+  debug_msg "install_initd ($@)"
+  [ -d /etc/init.d ] || mkdir -p /etc/init.d
+
+  if  [ -d  $SCRIPT_DIRECTORY/init.d  ] ; then
+    verbose_msg "handling init.d scripts" | tee -a $C_LOG
+    cd $SCRIPT_DIRECTORY/init.d
+    SCRIPTS=[!CVS]*
+    ALL_INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
+
+    for INITDSCRIPT in $ALL_INITDSCRIPTS; do
+      if [ ! -f /etc/init.d/$INITDSCRIPT ] ; then
+        /usr/bin/install -g 0 -o 0 -m 700 $SCRIPT_DIRECTORY/init.d/$INITDSCRIPT /etc/init.d/
+      fi
+    done
+    cd $SCRIPT_DIRECTORY
+  fi
+
+  for INITDSCRIPT in $INITDSCRIPTS; do
+    ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
+        rm -f /etc/rc?.d/???$INITDSCRIPT
+    chkconfig --add $INITDSCRIPT
+
+    CHKCONFIG=`grep '^# chkconfig:' /etc/init.d/$INITDSCRIPT | cut -d : -f 2-2`
+    if `echo $CHKCONFIG | grep -q $(/sbin/runlevel | cut -d ' ' -f 2-2) -`
+    then
+      devoke_installwatch
+      ( cd / && /etc/init.d/$INITDSCRIPT stop )
+      ( cd / && /etc/init.d/$INITDSCRIPT start )
+      invoke_installwatch
+    fi
+
+  done
+}
+
+
+use_initd()  {
+  debug_msg "use_initd ($@)"
+  if  [  -d  $SCRIPT_DIRECTORY/init.d  ] ; then
+    cd $SCRIPT_DIRECTORY/init.d
+
+    SCRIPTS=[!CVS]*
+    INITDSCRIPTS=$(grep -l "# chkconfig: " $SCRIPTS | cut -d/ -f2)
+
+    for  INITDSCRIPT  in  $INITDSCRIPTS;  do
+      if    query  "Invoke $INITDSCRIPT via init.d automatically at boot ?"  y
+      then
+        INSTALLED_INIDSCRIPTS=$(echo $INSTALLED_INIDSCRIPTS $INITDSCRIPT)
+      else
+        if [ -f /etc/init.d/$INITDSCRIPT ] ;
+        then
+          chkconfig --del $INITDSCRIPT
+          ls /etc/rc?.d/???$INITDSCRIPT > /dev/null 2>&1 &&
+                rm -f /etc/rc?.d/???$INITDSCRIPT
+        fi
+      fi
+    done
+    cd $SCRIPT_DIRECTORY
+
+    set_module_config "INITDSCRIPTS" "$INSTALLED_INIDSCRIPTS"
+  fi
+}
+
+
+install_services()  {
+  debug_msg "install_services ($@)"
+  if  [  -f  $SCRIPT_DIRECTORY/services  ];  then
+    export  IFS="$ENTER_IFS"
+    cat  $SCRIPT_DIRECTORY/services  |
+    while  read  LINE;  do
+      grep  -q  "$LINE"      /etc/services  ||
+      echo      "$LINE"  >>  /etc/services
+    done
+  fi
+}
+
+
+install_bashmisc () {
+  debug_msg "install_bashmisc ($@)"
+  if [ -d $SCRIPT_DIRECTORY/profile.d ] ; then
+    [ -d /etc/profile.d ] || mkdir -p /etc/profile.d
+    install -g 0 -o 0 -m 644 $SCRIPT_DIRECTORY/profile.d/*.rc /etc/profile.d
+    message "\n${MESSAGE_COLOR}Please log out and log in again to make changes in your shell\nenvironment take effect.${DEFAULT_COLOR}\n"
+  fi
+  if [ -d $SCRIPT_DIRECTORY/skel ]; then
+    [ -d /etc/skel ] || mkdir -p /etc/skel
+    cp $SCRIPT_DIRECTORY/skel/[!CVS]* /etc/skel &> /dev/null
+    cp $SCRIPT_DIRECTORY/skel/.* /etc/skel &> /dev/null
+  fi
+}
+

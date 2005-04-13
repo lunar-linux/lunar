@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#
+# quick hack to jump in and out of a lunar environment
+#
+
+. /etc/lunar/config
+
+set_priority
+
+if (( $# > 0 )) ; then
+  $@
+else
+  export PS1="\[\033[0;31m\][lunar] \u@\h \w \\$ \[\033[0m\]"
+  message "\n    ${PROBLEM_COLOR}Warning:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
+          "lsh is potential hazardous to your system.${DEFAULT_COLOR}\n"
+  bash --rcfile /etc/lunar/config
+fi
+

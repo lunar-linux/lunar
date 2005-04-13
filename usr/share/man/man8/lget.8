@@ -1,17 +1,19 @@
-.TH LGET 8 "March 2002" "Lunar Linux" LUNAR
+.TH LGET 8 "August 2003" "Lunar Linux" LUNAR
 .SH NAME
 lget \- downloads module source files
 .SH SYNOPSIS
 .B lget
+module_1 module_2 module_3
 .PP
-.B lget
-module_1 module_2 module_2
+.B lget -h|--help
 .PP
-.B lget
-(--from|--url) module_1 module_2 module_2
+.B lget -a|--all
+.PP
+.B lget -d|--debug|-f|--from|-u|--url|-v|--verbose 
+module_1 module_2
 .SH COPYRIGHT
-.if n lget(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
-.if t lget(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if n lget(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
+.if t lget(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .SH "EXAMPLE"
 To download emacs type:
 .IP
@@ -20,36 +22,45 @@ emacs
 .SH "DESCRIPTION" 
 .I lget
 is part of the
-.SM lunar
+.SM Lunar
 source-code package management suite. It is a command-line tool
-for automatically downloading a packages associated source files. 
+for automatically downloading a modules associated source files. 
 .SH "OPTIONS"
-.TP
-.B lget
-.PP
-By itself it trys to download every single package (about 1.2G as of 02/17/2002).
-This is useful if you have a fast link or want to test everything.
 .TP
 .B lget
 module_1 <module_2> <module_3>
 .PP
 This automatically downloads the specified module sources.
 .TP
+.B lget -a|--all
+.PP
+Download the source code for every single module in moonbase (about 2.5G as of 08/08/2003).
+This is useful if you have a fast link or want to start your own Lunar source code mirror.
+.TP
+.B lget -d|--debug
+.PP
+Enables debug messages, very useful when emailing a bug report.
+.TP
 .B lget
---from module
+-f|--from path/dir
 .PP
 This specifies a different
 .I /var/spool/lunar
 directory. This is the default location for downloaded sources.
 .TP
+.B lget -h|--help
+.PP
+Outputs short help.
+.TP
 .B lget
---url
+-u|--url URL module_1
 .PP
 This tries to download the specified module from a different location. This is
 useful if the original link is down.
 .TP
-.B "-h, --help"
-outputs short help
+.B lget -v|--verbose
+.PP
+Increases the level of message output
 .SH "FILES"
 .TP
 .I /etc/lunar/config & /etc/lunar/local/config
@@ -59,7 +70,7 @@ these alone as they are in quite good places by default. See lin(8) for more
 details about these files.
 .IP
 .TP
-.I /var/lib/lunar/subroutines
+.I /var/lib/lunar/functions/*.lunar
 .IP
 Contains functions used by 
 .B lget
@@ -67,7 +78,7 @@ Contains functions used by
 Specifing a different download location for linux
 .IP
 lget
-.B --url http://ftp.mirror.ac.uk/sites/ftp.kernel.org/linux/kernel/2.4/linux-2.4.17.tar.bz2 linux
+.B --url http://ftp.mirror.ac.uk/sites/ftp.kernel.org/linux/kernel/2.4/linux-2.4.20.tar.bz2 linux
 .SH "NOTES"
 Do not include 
 .SM version
@@ -81,8 +92,9 @@ Thomas Stewart
 .PP
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
+Updated by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
-Report bugs to <maintainer@lunar-penguin.org>
+Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
 lunar(8), lin(8), lvu(1), lrm(8)
 .SH "WARRANTY"

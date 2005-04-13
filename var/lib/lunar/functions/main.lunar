@@ -1,0 +1,354 @@
+#!/bin/bash
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://lunar-linux.org                                   #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/main.lunar                                    #
+# contains all main handling code, aka the long complex    #
+# functions like renew, update, fix, etc. One day they all #
+# will be in here.                                         #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Auke Kok 2003 under GPLv2                    #
+#                                                          #
+############################################################
+
+# function : renew
+# usage    : renew
+# purpose  : frontend function that includes all renewing code
+renew() {
+  debug_msg "renew ($@)"
+  message "${MESSAGE_COLOR}Starting update of installed modules${DEFAULT_COLOR}"
+
+  purge_modules
+  
+  export TMP_LIN_SUCCESS=$(temp_create "successful")
+  export TMP_LIN_FAIL=$(temp_create "failed")
+      
+  update_modules
+
+  if [ "$AUTOFIX" == "on" ] ; then
+    message "${MESSAGE_COLOR}Executing AUTOFIX : lunar fix${DEFAULT_COLOR}"
+    run_fix
+  fi
+
+  if [ "$AUTOPRUNE" == "on" ] ; then
+    message "${MESSAGE_COLOR}Executing AUTOPRUNE : lunar prune${DEFAULT_COLOR}"
+    prune
+  fi
+
+  display_update_log
+
+  temp_destroy $TMP_LIN_SUCCESS
+  temp_destroy $TMP_LIN_FAIL
+
+}
+
+
+update() {
+  debug_msg "update ($@)"
+  if ps -C lin > /dev/null ; then
+    error_message "${PROBLEM_COLOR}Unable to update lunar concurrently while installing.${DEFAILT_COLOR}"
+    return 1
+  fi
+
+  # test if $LUNAR_MODULE is installed (for old boxes)
+  if [ -z "$LUNAR_MODULE" ] ; then
+    for ALT in $LUNAR_MODULES ; do
+      if module_installed $ALT ; then
+        lunar set LUNAR_MODULE $ALT
+        export LUNAR_MODULE=$ALT
+	verbose_msg "LUNAR_MODULE set to \"$ALT\""
+      fi
+    done
+    if [ -z "$LUNAR_MODULE" ] ; then
+      error_message "${PROBLEM_COLOR}Error:${DEFAULT_COLOR} ${MESSAGE_COLOR}No core code installed: install one of the following first:${DEFAULT_COLOR}"
+      error_message $LUNAR_MODULES
+      error_message "${MESSAGE_COLOR}then try again (I can't update if I don't know which toolset I use)${DEFAULT_COLOR}"
+      return 1
+    fi
+  fi
+
+  if lin moonbase ; then
+    if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
+    then
+      lin $LUNAR_MODULE && lunar renew
+    else
+      lunar renew
+    fi
+  fi
+}
+
+
+rebuild()  {
+  debug_msg "rebuild ($@)"
+
+  message  "${MESSAGE_COLOR}Starting non-recursive rebuild${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
+  echo run_fix
+
+  LIST=$(grep ":installed:" $MODULE_STATUS | cut -d: -f1 | grep -v moonbase | grep -v $LUNAR_MODULE)
+
+  message "${MESSAGE_COLOR}Sorting modules by dependency${DEFAULT_COLOR}"
+  QUEUE=$(sort_by_dependency $LIST)
+
+  TMP_QUEUE=$(temp_create "rebuild-queue")
+  for MODULE in $QUEUE ; do
+    echo $MODULE >> $TMP_QUEUE
+  done
+
+  unset MODULE
+  if query  "Edit rebuild queue?" n ; then
+    edit_file $TMP_QUEUE
+  fi
+
+  QUEUE=$(cat $TMP_QUEUE)
+  temp_destroy $TMP_QUEUE
+
+  if [ -n "$QUEUE" ] ; then
+    message "${MESSAGE_COLOR}Starting rebuild of modules${DEFAULT_COLOR}"
+    lin -c $QUEUE
+  fi
+}
+
+
+expand_cache_safe() {(
+  debug_msg "expand_cache_safe ($@)"
+
+  export SOURCE_DIRECTORY=$BUILD_DIRECTORY/resurrect-$MODULE-$VERSION
+  mk_source_dir $SOURCE_DIRECTORY
+  # untar the file so we can compare first
+  tar -pkxjf $1 -C $SOURCE_DIRECTORY 1>/dev/null 2>&1
+  # make a md5sum list of files
+  TMP_TARGETS=$(temp_create "resurrect.targets.$MODULE")
+  tar j --list < $1 > $TMP_TARGETS
+  TMP_TARGETS_OK=$(temp_create "resurrect.targets_OK.$MODULE")
+  # do directories: we don't care here
+  # the sed trick is advanced: a non-greedy pattern that returns all
+  # directory names listed in the input
+  for TARGET in $(cat $TMP_TARGETS | sed 's/\/[^\/]*$/\//g' ) ; do
+	if [ ! -d $TARGET ]; then
+      debug_msg "mkdir -p $TARGET"
+      mkdir -p $TARGET
+    fi
+  done
+  # do links
+  for TARGET in $(find $SOURCE_DIRECTORY -type l | sed "s:$SOURCE_DIRECTORY::g" ) ; do
+    # wipe the current link cos it ruins things
+    if [ -h "$TARGET" ] ; then
+      rm -f "$TARGET"
+    fi
+    debug_msg "ln -s $(readlink $SOURCE_DIRECTORY$TARGET) $TARGET"
+    echo "$TARGET" >> $TMP_TARGETS_OK
+  done
+  # do files - bulk process the normal ones
+  cat $TMP_TARGETS | grep -v -f $EXCLUDED >> $TMP_TARGETS_OK
+  # now double check the EXCLUDED ones
+  for TARGET in $(cat $TMP_TARGETS | grep -f $EXCLUDED ) ; do
+    if [ -e "$TARGET" ] ; then
+      debug_msg "Cowardishly not overwriting \"$TARGET\""
+    else
+      echo "$TARGET" >> $TMP_TARGETS_OK
+    fi
+  done
+ 
+  debug_msg "tar xjf $1 -P -k -T $TMP_TARGETS_OK"
+  tar xjf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
+
+  temp_destroy $TMP_TARGETS
+  temp_destroy $TMP_TARGETS_OK
+  rm_source_dir $SOURCE_DIRECTORY
+)}
+
+
+resurrect()  {
+(
+  debug_msg "resurrect ($@)"
+
+  if [ -s /etc/lunar/local/optimizations ] ; then
+    . /etc/lunar/local/optimizations
+  fi
+  if ! run_details $1 ; then
+    return 1
+  fi
+  run_conflicts    &&
+  satisfy_depends  &&
+
+  STATUS=installed &&
+
+  if module_held $MODULE ; then
+    VERSION=$(installed_version $MODULE)
+    STATUS=held
+    lrm --keepconfig $MODULE
+  elif module_installed $MODULE ; then
+    lrm --keepconfig $MODULE
+  fi &&
+
+  CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
+
+  if [ -f "$CACHE_BZ" ] && bzip2 -tf $CACHE_BZ ; then
+    message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
+    expand_cache_safe $CACHE_BZ &&
+    add_module $MODULE $STATUS $VERSION &&
+    verbose_msg "running \"lunar fix $MODULE\"" &&
+    if run_fix $MODULE ; then
+      report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
+      sound SUCCESS
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "success"  "resurrected"
+      message  "${RESURRECT_COLOR}Resurrected ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}successfully${DEFAULT_COLOR}"
+    else
+      sound FAILURE
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
+      false
+    fi
+  else
+    # do not log an error in case we tried autoresurrect:
+    if [ "$AUTORESURRECT" == "off" -o -n "$COMPILE" ] ; then
+      sound FAILURE
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed"  "resurrect failed"
+      false
+    fi
+    false
+  fi
+)
+}
+
+resurrect_modules() {
+  debug_msg "resurrect_modules ($@)"
+  for MODULE in $@ ; do
+    if run_details $MODULE ; then
+      resurrect $MODULE
+    fi
+  done
+}
+
+
+lin_module()  {
+(
+  debug_msg "lin_module ($@)"
+  xterm_msg "compiling $1"
+  # make sure we got all the info
+  if ! run_details $1 ; then
+    return 1
+  fi
+
+  # resurrect if we can, but not is -c was issued
+  if [ "$AUTORESURRECT" == "on" -a -z "$COMPILE" ] ; then
+    # we also do not resurrect if $MODULE is currently installed!
+    if ! module_installed $MODULE ; then
+      if resurrect $MODULE ; then
+        return 0
+      fi
+    fi
+  fi
+
+  # set the installwatchfile
+  export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
+
+  # lock the module for installation, check for moonbase call
+  mod_v_safe_edit $MODULE 
+  linING="/var/lock/installing.$MOD_V_SNAME"
+  if [ "$MODULE" == "moonbase" ] ; then
+    if ! current_locked && ! solo_locked ; then
+      echo $$ > $linING       &&
+      lget moonbase           &&
+      rm -f $linING           &&
+      return
+    else
+      exit 1
+    fi
+  fi
+  check_blacklist             &&
+  
+  # here we run CONFLICTS, DEPENDS and CONFIGURE stuff
+  run_conflicts               &&
+  satisfy_depends             &&
+  show_downloading            &&
+
+  # last minute source code presence check:
+  (
+    for SOURCE in $(sources $MODULE) ; do
+      if [ ! -f $SOURCE_CACHE/$SOURCE ] ; then
+        lget $MODULE
+        break
+     fi
+    done
+  ) &&
+
+  # now entering the physical BUILD stage
+  if ! current_locked && ! solo_locked ; then
+    echo $$ > $linING  &&
+    start_logging  &&
+    if [ -z "$BUILD" ] ; then
+      optimize
+    fi &&
+
+    if ! run_pre_build ; then
+      LIN_ERROR="PRE_BUILD"
+    else
+      if ! run_build ; then
+        LIN_ERROR="BUILD"
+      else
+        if ! run_post_build ; then
+          LIN_ERROR="POST_BUILD"
+	fi
+      fi
+    fi
+
+    stop_logging
+    
+    if [ -n "$LIN_ERROR" ] ; then
+      if [ -f "$INSTALLWATCHFILE" ] ; then
+        temp_destroy $INSTALLWATCHFILE
+      fi
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi  
+
+    if ! finish_install ; then
+      LIN_ERROR="POST_BUILD"
+    else
+      if ! run_post_install ; then
+        LIN_ERROR="POST_INSTALL"
+      fi
+    fi
+    if [ -f "$INSTALLWATCHFILE" ] ; then
+      verbose_msg "removing installwatch file"
+      temp_destroy $INSTALLWATCHFILE
+    fi
+
+    if [ -n "$LIN_ERROR" ] ; then
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
+      return 1
+    fi
+
+    rm_source_dir               &&
+    report $INSTALL_LOGS/$MOD_V_SNAME-$VERSION "install log" $MODULE $VERSION &&
+    rm -f $linING               &&
+    sound SUCCESS               &&
+    activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
+
+    if [ "$?" != 0 ] ; then
+      sound FAILURE
+      message "${PROBLEM_COLOR}! Problem detected${DEFAULT_COLOR}"
+      rm -f $linING
+      report $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2 "compile log" $MODULE $VERSION
+      activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
+      return 1
+    fi
+  fi
+)
+}
+
+

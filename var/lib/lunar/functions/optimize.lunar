@@ -1,4 +1,4 @@
-#Copyrighted Jason Johnston  2002 under GPLv2
+#!/bin/bash
 
 # All specified optimizations are system wide,
 #  and apply to any module built using lin.
@@ -19,56 +19,61 @@
 #         of SSE instructions.
 # $LDF  = This sets the system wide linking optimizations.
 
-# Source in the optimization settings if it exists.
-if [[ -s /etc/lunar/local/optimizations ]]; then
-   . /etc/lunar/local/optimizations
-else
-  echo -e PLATFOM=x86             '\n'    \
-          BUILD=i386-pc-linux-gnu '\n'    \
-          CC=                     '\n'    \
-          CCC=                    '\n'    \
-          BOPT=-O0                '\n'    \
-          CPU=i386                '\n'    \
-          SPD=( )                 '\n'    \
-          XTRA=                   '\n'    \
-          FPM=                    '\n'    \
-          LDF=( )                 '\n'    \
-          ADDON=( ) > /etc/lunar/local/optimizations
-fi
 
-optimize_cc() {
-  if [[ $CC ]]; then
-    unset CC
+
+# Usage   : bad_flags "list of flags to remove"
+# Example : bad_flags -ffast-math -funroll-loops
+bad_flags() {
+  debug_msg "bad_flags ($@)"
+  verbose_msg "bad_flags \"$@\""
+  if [[ "$1" == "ALL" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  elif [[ "$1" == "compiler" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS
+  elif [[ "$1" == "linker" ]]; then
+    unset LDFLAGS
+  else
+    for BAD_FLAG in "$@" ; do
+      CFLAGS=$(echo $CFLAGS | sed s/$BAD_FLAG//)
+      CXXFLAGS=$(echo $CXXFLAGS | sed s/$BAD_FLAG//)
+      CPPFLAGS=$(echo $CPPFLAGS | sed s/$BAD_FLAG//)
+      LDFLAGS=$(echo $LDFLAGS | sed s/$BAD_FLAG//)
+    done
   fi
-  
-  CC="gcc"
-  case $1 in
-    Normal) CC="$CC"
-            ;;
-      Pipe) CC="$CC -pipe"
-            ;;
-  esac
 }
 
-optimize_ccc() {
-  if [[ $CCC ]]; then
-    unset CCC
-  fi
 
-  CCC="g++"
-  CXX="$CCC"
-  case $1 in
-    Normal) CCC="$CCC"
-            CXX="$CXX"
-            ;;
-      Pipe) CCC="$CCC -pipe"
-            CXX="$CXX -pipe"
-            ;;
-  esac
+use_wrappers() {
+  debug_msg "use_wrappers ($@)"
+  if [ "$GCCWRAPPERS" == "on" ] ; then
+    verbose_msg "Enabling gcc wrapper scripts to force optimizations"
+    export PATH=/var/lib/lunar/compilers:${PATH}
+  fi  
 }
-   
+
+
+optimize_make() {
+  debug_msg "optimize_make ($@)"
+  if [ "$PSAFE" == "no" ] ; then
+   unset MAKES
+  elif [ "$MAKES" == "1" ] ; then
+   unset MAKES
+  fi
+  if module_installed linux-openmosix; then
+    alias make="mosrun -h make"
+    if [[ "$MAKES" > 1 ]] ; then
+      alias make="mosrun -h make -j$MAKES"
+    fi
+  elif [[ $MAKES > 1 ]] ; then
+    alias make="make -j$MAKES"
+  fi
+  verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
+}
+ 
+
 optimize_base() {
-   if ! [[ $1 ]]; then
+  debug_msg "optimize_base ($@)"
+   if ! [ "$1" ] ; then
       BOPT="None"
    fi
 
@@ -89,13 +94,15 @@ optimize_base() {
       Fastest) CFLAGS="-O3"
                CXXFLAGS="-O3"
                ;;
-      Smaller) CFLAGS="-Os"
+        Small) CFLAGS="-Os"
                CXXFLAGS="-Os"
                ;;
    esac
 }
 
+
 optimize_cpu()  {
+  debug_msg "optimize_cpu ($@)"
    if ! [[ $1 ]]; then
       if   [[ $PLATFORM == "Alpha" ]];   then
          CPU="ev4"
@@ -248,232 +255,223 @@ optimize_cpu()  {
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
+      Athlon64)    if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon64 -march=athlon64"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon64 -march=athlon64"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
 
 # Begin PowerPC options
-      common)  CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      common)  CFLAGS="$CFLAGS -mcpu=common"
+               CXXFLAGS="$CXXFLAGS -mcpu=common"
+               BUILD="power-linux"
                ;;
-      rios)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      rios)    CFLAGS="$CFLAGS -mcpu=rios"
+               CXXFLAGS="$CXXFLAGS -mcpu=rios"
+               BUILD="power-linux"
                ;;
-      rios1)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      rios1)   CFLAGS="$CFLAGS -mcpu=rios1"
+               CXXFLAGS="$CXXFLAGS -mcpu=rios1"
+               BUILD="power-linux"
                ;;
-      rsc)     CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      rsc)     CFLAGS="$CFLAGS -mcpu=rsc"
+               CXXFLAGS="$CXXFLAGS -mcpu=rsc"
+               BUILD="power-linux"
                ;;
-      rios2)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      rios2)   CFLAGS="$CFLAGS -mcpu=rios2"
+               CXXFLAGS="$CXXFLAGS -mcpu=rios2"
+               BUILD="power-linux"
                ;;
-      rs64a)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      rs64a)   CFLAGS="$CFLAGS -mcpu=rs64a"
+               CXXFLAGS="$CXXFLAGS -mcpu=rs64a"
+               BUILD="powerpc64-linux"
                ;;
-      p403)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      403)    CFLAGS="$CFLAGS -mcpu=403"
+               CXXFLAGS="$CXXFLAGS -mcpu=403"
+               BUILD="powerpc-linux"
                ;;
-      p505)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      505)    CFLAGS="$CFLAGS -mcpu=505"
+               CXXFLAGS="$CXXFLAGS -mcpu=505"
+               BUILD="powerpc-linux"
                ;;
-      p601)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      601)    CFLAGS="$CFLAGS -mcpu=601"
+               CXXFLAGS="$CXXFLAGS -mcpu=601"
+               BUILD="powerpc-linux"
                ;;
-      p602)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      602)    CFLAGS="$CFLAGS -mcpu=602"
+               CXXFLAGS="$CXXFLAGS -mcpu=602"
+               BUILD="powerpc-linux"
                ;;
-      p603)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      603)    CFLAGS="$CFLAGS -mcpu=603"
+               CXXFLAGS="$CXXFLAGS -mcpu=603"
+               BUILD="powerpc-linux"
                ;;
-      p603e)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      603e)   CFLAGS="$CFLAGS -mcpu=603e"
+               CXXFLAGS="$CXXFLAGS -mcpu=603e"
+               BUILD="powerpc-linux"
                ;;
-      p604)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      604)    CFLAGS="$CFLAGS -mcpu=604"
+               CXXFLAGS="$CXXFLAGS -mcpu=604"
+               BUILD="powerpc-linux"
                ;;
-      p604e)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      604e)   CFLAGS="$CFLAGS -mcpu=604e"
+               CXXFLAGS="$CXXFLAGS -mcpu=604e"
+               BUILD="powerpc-linux"
                ;;
-      p620)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      620)    CFLAGS="$CFLAGS -mcpu=620"
+               CXXFLAGS="$CXXFLAGS -mcpu=620"
+               BUILD="powerpc64-linux"
                ;;
-      p630)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      630)    CFLAGS="$CFLAGS -mcpu=630"
+               CXXFLAGS="$CXXFLAGS -mcpu=630"
+               BUILD="powerpc-linux"
                ;;
-      p740)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      740)    CFLAGS="$CFLAGS -mcpu=740"
+               CXXFLAGS="$CXXFLAGS -mcpu=740"
+               BUILD="powerpc-linux"
                ;;
-      p7400)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      7400)   CFLAGS="$CFLAGS -mcpu=7400"
+               CXXFLAGS="$CXXFLAGS -mcpu=7400"
+               BUILD="powerpc-linux"
                ;;
-      p7450)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      7450)   CFLAGS="$CFLAGS -mcpu=7450"
+               CXXFLAGS="$CXXFLAGS -mcpu=7450"
+               BUILD="powerpc-linux"
                ;;
-      p750)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      750)    CFLAGS="$CFLAGS -mcpu=750"
+               CXXFLAGS="$CXXFLAGS -mcpu=750"
+               BUILD="powerpc-linux"
                ;;
-      p801)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      801)    CFLAGS="$CFLAGS -mcpu=801"
+               CXXFLAGS="$CXXFLAGS -mcpu=801"
+               BUILD="powerpc-linux"
                ;;
-      p821)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      821)    CFLAGS="$CFLAGS -mcpu=821"
+               CXXFLAGS="$CXXFLAGS -mcpu=821"
+               BUILD="powerpc-linux"
                ;;
-      p823)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      823)    CFLAGS="$CFLAGS -mcpu=823"
+               CXXFLAGS="$CXXFLAGS -mcpu=823"
+               BUILD="powerpc-linux"
                ;;
-      p860)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      860)    CFLAGS="$CFLAGS -mcpu=860"
+               CXXFLAGS="$CXXFLAGS -mcpu=860"
+               BUILD="powerpc-linux"
                ;;
-      power)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      power)   CFLAGS="$CFLAGS -mcpu=power"
+               CXXFLAGS="$CXXFLAGS -mcpu=power"
+               BUILD="power-linux"
                ;;
-      power2)  CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      power2)  CFLAGS="$CFLAGS -mcpu=power2"
+               CXXFLAGS="$CXXFLAGS -mcpu=power2"
+               BUILD="power-linux"
                ;;
-      powerpc) CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      PowerPC) CFLAGS="$CFLAGS -mcpu=powerpc"
+               CXXFLAGS="$CXXFLAGS -mcpu=powerpc"
+               BUILD="powerpc-linux"
                ;;
+
+
+
+
 
 # Begin Alpha options
-      ev4)     CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev4)     CFLAGS="$CFLAGS -mcpu=ev4"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev4"
+               BUILD="alpha-linux"
                ;;
-      ev45)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev45)    CFLAGS="$CFLAGS -mcpu=ev4"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev4"
+               BUILD="alpha-linux"
                ;;
-      a21064)  CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev5)     CFLAGS="$CFLAGS -mcpu=ev5"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev5"
+               BUILD="alpha-linux"
                ;;
-      ev5)     CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev56)    CFLAGS="$CFLAGS -mcpu=ev56"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev56"
+               BUILD="alpha-linux"
                ;;
-      a21164)  CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      pca56)   CFLAGS="$CFLAGS -mcpu=pca56"
+               CXXFLAGS="$CXXFLAGS -mcpu=pca56"
+               BUILD="alpha-linux"
                ;;
-      ev56)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev6)     CFLAGS="$CFLAGS -mcpu=ev6"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev6"
+               BUILD="alpha-linux"
                ;;
-      a21164a) CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev67)    CFLAGS="$CFLAGS -mcpu=ev67"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev67"
+               BUILD="alpha-linux"
                ;;
-      pca56)   CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
+      ev68)    CFLAGS="$CFLAGS -mcpu=ev67"
+               CXXFLAGS="$CXXFLAGS -mcpu=ev67"
+	       BUILD="alpha-linux"
                ;;
-     a21164pc) CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-     a21164PC) CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-      ev6)     CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-      a21264)  CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-      ev67)    CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-      a21264a) CFLAGS="$CFLAGS"
-               CXXFLAGS="$CXXFLAGS"
-               BUILD=""
-               ;;
-
 # Begin SPARC options
-      v7)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v7)            CFLAGS="$CFLAGS -mcpu=v7"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v7"
+                     BUILD="sparc-linux"
                      ;;
-      cypress)       CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      cypress)       CFLAGS="$CFLAGS -mcpu=cypress"
+                     CXXFLAGS="$CXXFLAGS -mcpu=cypress"
+                     BUILD="sparc-linux"
                      ;;
-      v8)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v8)            CFLAGS="$CFLAGS -mcpu=v8"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v8"
+                     BUILD="sparc-linux"
                      ;;
-      super-sparc)   CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      supersparc)    CFLAGS="$CFLAGS -mcpu=supersparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=supersparc"
+                     BUILD="sparc-linux"
                      ;;
-      sparclite)     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclite)     CFLAGS="$CFLAGS =mcpu=sparclite"
+                     CXXFLAGS="$CXXFLAGS =mcpu=sparclite"
+                     BUILD="sparc-linux"
                      ;;
-      hypersparc)    CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      hypersparc)    CFLAGS="$CFLAGS -mcpu=hypersparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=hypersparc"
+                     BUILD="sparc-linux"
                      ;;
-      sparclite86x)  CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclite86x)  CFLAGS="$CFLAGS -mcpu=sparclite86x"
+                     CXXFLAGS="$CXXFLAGS -mcpu=sparclite86x"
+                     BUILD="sparc-linux"
                      ;;
-      f930)          CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      f930)          CFLAGS="$CFLAGS -mcpu=f930"
+                     CXXFLAGS="$CXXFLAGS -mcpu=f930"
+                     BUILD="sparc-linux"
                      ;;
-      f934)          CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      f934)          CFLAGS="$CFLAGS -mcpu=f934"
+                     CXXFLAGS="$CXXFLAGS -mcpu=f934"
+                     BUILD="sparc-linux"
                      ;;
-      sparclet)      CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclet)      CFLAGS="$CFLAGS -mcpu=sparclet"
+                     CXXFLAGS="$CXXFLAGS -mcpu=sparclet"
+                     BUILD="sparc-linux"
                      ;;
-      tsc701)        CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      tsc701)        CFLAGS="$CFLAGS -mcpu=tsc701"
+                     CXXFLAGS="$CXXFLAGS -mcpu=tsc701"
+                     BUILD="sparc-linux"
                      ;;
-      v9)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v9)            CFLAGS="$CFLAGS -mcpu=v9"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v9"
+                     BUILD="sparc-linux"
                      ;;
-      ultrasparc)    CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      ultrasparc)    CFLAGS="$CFLAGS -mcpu=ultrasparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=ultrasparc"
+                     BUILD="sparc-linux"
                      ;;
    esac
 }
 
+
 optimize_speed() {
+  debug_msg "optimize_speed ($@)"
    for A in ${SPD[@]}; do
       case $A in
              None) CFLAGS="$CFLAGS"
@@ -504,6 +502,7 @@ optimize_speed() {
         Profiling) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
+		     set_local_config "KEEP_SOURCE" "on"
                    else
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
@@ -557,11 +556,51 @@ optimize_speed() {
                      CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
+        Expensive) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -fexpensive-optimizations"
+                     CXXFLAGS="$CXXFLAGS -fexpensive-optimizations"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+                 ;;
+          Doubles) if [[ $GCCVER == "3" ]] ; then
+                     CFLAGS="$CFLAGS -malign-double"
+                     CXXFLAGS="$CXXFLAGS -malign-double"
+                   else
+                     CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                   fi
+		 ;;
+	   Tracer) if [[ $GCCVER == "3" ]] ; then
+	             CFLAGS="$CFLAGS -ftracer"
+		     CXXFLAGS="$CXXFLAGS -ftracer"
+		   else
+		     CFLAGS="$CFLAGS"
+		     CXXFLAGS="$CXXFLAGS"
+		   fi
+                 ;;
+
       esac
    done
 }
 
+
+optimize_stack() {
+  debug_msg "optimize_stack ($@)"
+  if [[ $STACK > 0 ]] ; then
+    if [ $PLATFORM == "x86" ] ; then
+      STACK="-mpreferred-stack-boundary=$STACK" 
+    fi
+      CFLAGS="$CFLAGS $STACK"
+      CXXFLAGS="$CXXFLAGS $STACK"
+      CPPFLAGS="$CPPFLAGS $STACK"
+  fi
+}
+
+
 optimize_extra() {
+  debug_msg "optimize_extra ($@)"
  for A in ${XTRA[@]}; do
    case $A in
      None)     CFLAGS="$CFLAGS"
@@ -596,8 +635,10 @@ optimize_extra() {
  done
 }
 
+
 # Set how floating point math is done
 optimize_fp() {
+  debug_msg "optimize_fp ($@)"
    case $1 in
       x387) if [[ $GCCVER == "3" ]];  then
               CFLAGS="$CFLAGS -mfpmath=387"
@@ -620,8 +661,10 @@ optimize_fp() {
    esac
 }
 
+
 # Set up the Linker optimizations
 optimize_ld() {
+  debug_msg "optimize_ld ($@)"
    if [[ $LDFLAGS ]]; then
       unset LDFLAGS
    fi
@@ -630,15 +673,25 @@ optimize_ld() {
       case $A in
          Strip)     LDFLAGS="$LDFLAGS -s"
                     ;;
-         Debug)     LDFLAGS="$LDFLAGS -S"
+         Optimize)  LDFLAGS="$LDFLAGS -Wl,-O1"
                     ;;
+# The Debug option breaks some modules (eg: tar and gzip, just to mention a
+# few), so this option should either be removed, or remain "deactivated"
+# untill this has been resolved but the hatch is that we don't know how many
+# modules is affected by it... See bug No. 75. Or contact me (Niki Guldbran
+# <nikig@vip.cybercity.dk>)
+#
+#         Debug)     LDFLAGS="$LDFLAGS -S"
+#                    ;;
          Combreloc) LDFLAGS="$LDFLAGS -z combreloc"
                     ;;
       esac
    done
 }
 
+
 optimize_addon() {
+  debug_msg "optimize_addon ($@)"
   if ! [[ `grep ADDON /etc/lunar/local/optimizations` ]]; then
     echo ADDON=( None ) >> /etc/lunar/local/optimizations
     ADDON=( None )
@@ -647,80 +700,143 @@ optimize_addon() {
   for A in ${ADDON[@]}; do
     case $A in
       DistCC) if module_installed distcc; then
-                CC="distcc $CC"
-                CCC="distcc $CXX"
-                CXX="distcc $CXX"
+                CC_EXT="$CC_EXT distcc"
+                CXX_EXT="$CXX_EXT distcc"
               else
-                CC="$CC"
-                CCC="$CXX"
-                CXX="$CXX"
+                CC_EXT="$CC_EXT"
+                CXX_EXT="$CXX_EXT"
               fi
               ;;
       CCache) if module_installed ccache; then
-                CC="ccache $CC"
-                CCC="ccache $CXX"
-                CXX="ccache $CXX"
+                CC_EXT="ccache $CC_EXT"
+                CXX_EXT="ccache $CXX_EXT"
               else
-                CC="$CC"
-                CCC="$CXX"
-                CXX="ccache $CXX"
+                CC_EXT="$CC_EXT"
+                CXX_EXT="$CXX_EXT"
               fi
               ;;
+        GECC) CC_EXT="gecc"
+              CXX_EXT="gecc"
+              ;;
+    esac
+  done
+  verbose_msg "CC_EXT=\"$CC_EXT\", CXX_EXT=\"$CXX_EXT\""
+}
+
+
+optimize_ccc_warn() {
+  debug_msg "optimize_ccc_warn ($@)"
+  for W in ${CCC_WARN[@]}; do
+    case $W in
+    Deprecated)
+      CXXFLAGS="$CXXFLAGS -Wno-deprecated"
+      CPPFLAGS="$CPPFLAGS -Wno-deprecated"
+      ;;
     esac
   done
 }
 
-optimize_platform() {
-   unset CFLAGS CXXFLAGS LDFLAGS
-   GCCVER="$1"
 
-   case $PLATFORM in
-      x86)      optimize_cc    $CC         &&
-                optimize_ccc   $CCC        &&
-                optimize_base  $BOPT       &&
-                optimize_cpu   $CPU        &&
-                optimize_speed ${SPD[@]}   &&
-                optimize_extra $XTRA       &&
-                optimize_fp    $FPM        &&
-                optimize_ld    ${LDF[@]}   &&
-                optimize_addon ${ADDON[@]} 
-                ;;
-      Alpha)    optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
-                optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
-                ;;
-      PowerPC)  optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
-                optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
-                ;;
-      SPARC)    optimize_base  $BOPT      &&
-                optimize_cpu   $CPU       &&
-                optimize_speed ${SPD[@]}  &&
-                optimize_extra $XTRA      &&
-                optimize_fp    $FPM       &&
-                optimize_ld    ${LDF[@]}
-                ;;
-   esac
+optimize() {
+  debug_msg "optimize ($@)"
+  # Source in the optimization settings if it exists.
+  if [ -s /etc/lunar/local/optimizations ] ; then
+    . /etc/lunar/local/optimizations
+  else
+    verbose_msg "initializing optimizations with hard-coded defaults"
+    echo -e PLATFORM=x86            '\n'    \
+BUILD=i386-pc-linux-gnu '\n'    \
+MAKES=                  '\n'    \
+COPT=                   '\n'    \
+CCOPT=                  '\n'    \
+BOPT=-O0                '\n'    \
+CPU=i386                '\n'    \
+SPD=( )                 '\n'    \
+STACK=                  '\n'    \
+XTRA=( )                '\n'    \
+FPM=                    '\n'    \
+CC_WARN=( )             '\n'    \
+CCC_WARN=( )            '\n'    \
+LDF=( )                 '\n'    \
+ADDON=( ) > /etc/lunar/local/optimizations
+  fi
 
-export CC
-export CCC
-export CXX
-export CFLAGS
-export COPT="$CFLAGS"
-export CCOPT="$CXXFLAGS -Wno-deperecated"
-export CXXFLAGS="$CXXFLAGS -Wno-deprecated"
-export LDFLAGS
+  #lets get the BUILD if it is not defined   
+  [ -z "$BUILD" ] && optimize_cpu $CPU
+  [ -n "$BUILD" ] && export BUILD || 
+  echo "Set your optimization preferences via lunar"
 
+  unset CFLAGS CXXFLAGS LDFLAGS
+
+  case $PLATFORM in
+      x86)      optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+		optimize_stack               &&
+                optimize_fp       $FPM       &&
+		optimize_ccc_warn            &&
+                optimize_ld       ${LDF[@]}  &&
+		optimize_addon
+                ;;
+      Alpha)    optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
+		optimize_ccc_warn            &&
+                optimize_ld       ${LDF[@]}  &&
+		optimize_addon
+                ;;
+      PowerPC)  optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
+		optimize_ccc_warn            &&
+                optimize_ld       ${LDF[@]}  &&
+		optimize_addon
+                ;;
+      SPARC)    optimize_make     $MAKES     &&
+                optimize_base     $BOPT      &&
+                optimize_cpu      $CPU       &&
+                optimize_speed    ${SPD[@]}  &&
+                optimize_extra    ${XTRA[@]} &&
+                optimize_fp       $FPM       &&
+		optimize_ccc_warn            &&
+                optimize_ld       ${LDF[@]}  &&
+		optimize_addon
+                ;;
+  esac
+
+  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" ] ; then
+    CFLAGS=$(echo $CFLAGS | sed 's:-mcpu:-mtune:')
+    CXXFLAGS=$(echo $CXXFLAGS | sed 's:-mcpu:-mtune:')
+  fi
+
+  export CC_EXT
+  export CXX_EXT
+  export CFLAGS
+  export COPT
+  export CCOPT
+  export CXXFLAGS
+  export LDFLAGS
+
+  use_wrappers
+  verbose_msg "BUILD=\"$BUILD\""
+  verbose_msg "GCCVER=\"$GCCVER\""
+  verbose_msg "CFLAGS=\"$CFLAGS\""
+  verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
+  verbose_msg "LDFLAGS=\"$LDFLAGS\""
 }
+
 
 # This is the flow control and error checking for the menus.
 optimize_architecture()  {
+  debug_msg "optimize_architecture ($@)"
   # Make sure optimizations file exists, if not create it.
   if ! [[ -f /etc/lunar/local/optimizations ]]; then
     touch /etc/lunar/local/optimizations
@@ -733,72 +849,96 @@ optimize_architecture()  {
     exit 0
   fi
 
-# Flow control for the menus. This will also check for gcc3,
-# if it exists it will allow more options.
+  if [ -f /etc/lunar/local/optimizations ] ; then
+    .  /etc/lunar/local/optimizations
+  fi
+
+  # Flow control for the menus. This will also check for gcc3,
+  # if it exists it will allow more options.
   TITLE="Lunar Optimizations"
 
-  #if module_installed gcc3; then
-    help compiler_help          &&
-    compiler_options            &&
-    menu                        &&
-    COMPILER=$RESULT
-  #fi
+  help compiler_help          &&
+  compiler_options            &&
+  menu radiolist              &&
+  GCCVER=$RESULT
   
-  help cc_help                  &&
-  cc_options                    &&
-  menu                          &&
-  CC=$RESULT
+  help cc_help                &&
+  cc_options                  &&
+  menu checklist              &&
+  COPT=$RESULT
 
-  help ccc_help                 &&
-  ccc_options                   &&
-  menu                          &&
-  CCC=$RESULT
+  help ccc_help               &&
+  ccc_options                 &&
+  menu checklist              &&
+  CCOPT=$RESULT
 
-  help platform_help            &&
-  platform_options              &&
-  menu                          &&
+  help platform_help          &&
+  platform_options            &&
+  menu radiolist              &&
   PLATFORM=$RESULT
 
-  help bopt_help                &&
-  bopt_options                  &&
-  menu                          &&
+  help bopt_help              &&
+  bopt_options                &&
+  menu radiolist              &&
   BOPT=$RESULT
 
-  help cpu_help $PLATFORM       &&
-  cpu_options $PLATFORM         &&
-  menu                          &&
+  help cpu_help $PLATFORM     &&
+  cpu_options $PLATFORM       &&
+  menu radiolist              &&
   CPU=$RESULT
-  optimize_cpu $CPU             &&
+  optimize_cpu $CPU           &&
   BUILD=$BUILD
 
-  help spd_help                 &&
-  spd_options                   &&
-  menu checklist                &&
+  help spd_help               &&
+  spd_options                 &&
+  menu checklist              &&
   SPD=( $RESULT )
 
-  #if module_installed gcc3; then
-    help xtra_help              &&
-    xtra_options                &&
-    menu checklist              &&
-    XTRA=$RESULT
-  #fi
+  help xtra_help              &&
+  xtra_options                &&
+  menu checklist              &&
+  XTRA=( $RESULT )
 
-  #if module_installed gcc3; then
-    help fpm_help               &&
-    fpm_options                 &&
-    menu                        &&
-    FPM=$RESULT
-  #fi
+  help fpm_help               &&
+  fpm_options                 &&
+  menu radiolist              &&
+  FPM=$RESULT
 
-  help ldf_help                 &&
-  ldf_options                   &&
-  menu checklist                &&
+  help ccc_warn_help          &&
+  ccc_warn                    &&
+  menu checklist              &&
+  CCC_WARN=$RESULT  
+
+  help ldf_help               &&
+  ldf_options                 &&
+  menu checklist              &&
   LDF=( $RESULT )
   
-  help addon_help               &&
-  addon_options                 &&
-  menu checklist                &&
+  help addon_help             &&
+  addon_options               &&
+  menu checklist              &&
   ADDON=( $RESULT )
 
-  optimize
+  MAKES=`dialog --title "Make - parallellizing" \
+                --nocancel                       \
+		--stdout                         \
+		--inputbox                       \
+		"Enter the number of concurrent makes ( a value > 1 ) or leave this field empty."  \
+		0 55 $MAKES`
+  # people WILL fill in 1... so, we knock them down and take their money:
+  if [[ $MAKES -lt 2 ]] ; then
+    unset MAKES
+  fi
+
+  STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
+                --nocancel                       \
+		--stdout                         \
+		--inputbox                       \
+		"Enter the number to set the stack to, leave empty for default."  \
+		0 55 $STACK`
+
+  set_optimize
+
 }
+
+

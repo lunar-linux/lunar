@@ -1,31 +1,24 @@
 #Copyrighted Jason Johnston  2002 under GPLv2
 
-optimize() {
+set_optimize() {
 
-  if ! [[ $COMPILER ]]; then
-     COMPILER=2;
-  fi
-  if ! [[ $GCCVER ]]; then
-     GCCVER=$COMPILER
-  fi
-  if [[ `grep GCCVER /etc/lunar/local/config` ]]; then
-     if [[ $GCCVER == "" ]]; then
-        sedit "s/GCCVER=/GCCVER=$COMPILER/" /etc/lunar/local/config
-     fi
-     sedit "s/GCCVER=[2|3]/GCCVER=$COMPILER/" /etc/lunar/local/config
-  else
-     echo -e GCCVER=$COMPILER >> /etc/lunar/local/config
-  fi
-  echo -e PLATFOM=$PLATFORM     '\n'    \
-          BUILD=$BUILD          '\n'    \
-          CC=$CC                '\n'    \
-          CCC=$CCC              '\n'    \
-          BOPT=$BOPT            '\n'    \
-          CPU=$CPU              '\n'    \
-          SPD=( ${SPD[@]} )     '\n'    \
-          XTRA=( ${XTRA[@]} )   '\n'    \
-          FPM=$FPM              '\n'    \
-          LDF=( ${LDF[@]} )     '\n'    \
+  GCCVER=${GCCVER:=3}
+  set_local_config "GCCVER" "$GCCVER"
+
+  echo -e PLATFORM=$PLATFORM            '\n'\
+          BUILD=$BUILD                  '\n'\
+	  MAKES=$MAKES                  '\n'\
+          COPT=$COPT                    '\n'\
+          CCOPT=$CCOPT                  '\n'\
+          BOPT=$BOPT                    '\n'\
+          CPU=$CPU                      '\n'\
+          SPD=( ${SPD[@]} )             '\n'\
+	  STACK=$STACK                  '\n'\
+          XTRA=( ${XTRA[@]} )           '\n'\
+          FPM=$FPM                      '\n'\
+	  CC_WARN=( ${CC_WARN[@]} )     '\n'\
+	  CCC_WARN=( ${CCC_WARN[@]} )   '\n'\
+          LDF=( ${LDF[@]} )             '\n'\
           ADDON=( ${ADDON[@]} ) > /etc/lunar/local/optimizations
 }
 
@@ -42,13 +35,11 @@ help() {
                  
          cc_help)
                   MENU="Options for the C compiler"
-           Normal_HELP="Do not set any options"
              Pipe_HELP="Enable gcc to use named pipes."
                 ;;
                 
         ccc_help)
                   MENU="Options for the C++ compiler"
-           Normal_HELP="Do not set any options"
              Pipe_HELP="Enable gcc to use named pipes."
                 ;;
                 
@@ -57,7 +48,7 @@ help() {
                 MENU="Platform"
             x86_HELP="Intel and AMD hardware"
           Alpha_HELP="Compaq Alpha hardware"
-        PowerPC_HELP="IBM and Apple hardware"
+        PowerPC_HELP="IBM and Apple hardware (Power and PowerPC)"
           SPARC_HELP="SUN Hardware"
                  ;;
 
@@ -66,14 +57,14 @@ help() {
              MENU="Basic Optimization"
         None_HELP="-O0"
         Fast_HELP="-O1"
-      Faster_HELP="-02"
+      Faster_HELP="-O2"
      Fastest_HELP="-O3"
        Small_HELP="-Os"
                ;;
 
    # Help for the cpu selections.
       cpu_help)
-          MENU="$2 CPUs"
+          MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2 | head -n 1)"
          case $2 in
             x86)
           I386_HELP="I386 processors"
@@ -96,20 +87,14 @@ help() {
       AthlonMP_HELP="AMD Athlon MP processors"
                  ;;
            Alpha)
-              ev4_HELP="Alpha EV4"
-             ev45_HELP="Alpha EV45"
-           A21064_HELP="Alpha 21064"
-              ev5_HELP="Alpha EV5"
-           A21164_HELP="Alpha 21164"
-             ev56_HELP="Alpha EV56"
-          A21164a_HELP="Alpha 21164a"
-            pca56_HELP="Alpha pca56"
-         A21164pc_HELP="Alpha 21164pc"
-         A21164PC_HELP="Alpha 21164PC"
-              ev6_HELP="Alpha EV6"
-           A21264_HELP="Alpha 21264"
-             ev67_HELP="Alpha EV67"
-          A21264a_HELP="Alpha 21264a"
+              ev4_HELP="Alpha EV4 (21064)"
+             ev45_HELP="Alpha EV45 (21064a)"
+              ev5_HELP="Alpha EV5 (21164)"
+             ev56_HELP="Alpha EV56 (21164a)"
+            pca56_HELP="Alpha pca56 (21164PC)"
+              ev6_HELP="Alpha EV6 (21264)"
+             ev67_HELP="Alpha EV67 (21264a)"
+	     ev68_HELP="Alpha EV68 (21264b)"
                  ;;
          PowerPC)
            common_HELP="Common PowerPC"
@@ -118,24 +103,24 @@ help() {
               rsc_HELP="RSC PowerPC"
             rios2_HELP="Rios2 PowerPC"
             rs64a_HELP="RS64a PowerPC"
-              403_HELP="403 PowerPC"
-              505_HELP="505 PowerPC"
-              601_HELP="601 PowerPC"
-              602_HELP="602 PowerPC"
-              603_HELP="603 PowerPC"
-             603a_HELP="603a PowerPC"
-              604_HELP="604 PowerPC"
-             604e_HELP="604e PowerPC"
-              620_HELP="620 PowerPC"
-              630_HELP="630 PowerPC"
-              740_HELP="740 PowerPC"
-             7400_HELP="7400 PowerPC"
-             7450_HELP="7450 PowerPC"
-              750_HELP="750 PowerPC"
-              801_HELP="801 PowerPC"
-              821_HELP="821 PowerPC"
-              823_HELP="823 PowerPC"
-              860_HELP="860 PowerPC"
+             p403_HELP="403 PowerPC"
+             p505_HELP="505 PowerPC"
+             p601_HELP="601 PowerPC"
+             p602_HELP="602 PowerPC"
+             p603_HELP="603 PowerPC"
+            p603a_HELP="603a PowerPC"
+             p604_HELP="604 PowerPC"
+            p604e_HELP="604e PowerPC"
+             p620_HELP="620 PowerPC"
+             p630_HELP="630 PowerPC"
+             p740_HELP="740 PowerPC"
+            p7400_HELP="7400 PowerPC"
+            p7450_HELP="7450 PowerPC"
+             p750_HELP="750 PowerPC"
+             p801_HELP="801 PowerPC"
+             p821_HELP="821 PowerPC"
+             p823_HELP="823 PowerPC"
+             p860_HELP="860 PowerPC"
             Power_HELP="Power PowerPC"
            Power2_HELP="Power2 PowerPC"
           PowerPC_HELP="PowerPC"
@@ -147,10 +132,11 @@ help() {
       supersparc_HELP="SuperSPARC"
        sparclite_HELP="SPARCLite"
       hypersparc_HELP="HyperSPARC"
+      sparclite86x_HELP="SPARCLite86x"
             f930_HELP="f930 SPARC"
             f934_HELP="f934 SPARC"
         sparclet_HELP="SPARCLet"
-           ts701_HELP="ts701 SPARC"
+          tsc701_HELP="tsc701 SPARC"
               v9_HELP="V9 SPARC"
       ultrasparc_HELP="ULTRASPARC"
                  ;;
@@ -159,47 +145,64 @@ help() {
 
    # Help for speed options.
       spd_help)
-              MENU="Speed optimizatons"
+              MENU="Speed optimizations"
        Speedy_HELP="Optimize to increase performance of generated code"
-        Risky_HELP="Optimize to increase performance ... by violating ANSI or IEEE rules"
-     Pointers_HELP="Optimize by omiting frame pointers"
+        Risky_HELP="Optimize to increase performance ... by violating ANSI and IEEE FP rules"
+     Pointers_HELP="Optimize by omitting frame pointers"
      Siblings_HELP="Optimize sibling calls"
-    Profiling_HELP="Generate profiles"
-    Branching_HELP="Predict branching"
-     Aliasing_HELP="Enable strict aliasing"
-        Cprop_HELP="Reduce scheduling dependancies and remove copies"
+    Profiling_HELP="Generate profiles (For later use with Branching)"
+    Branching_HELP="Predict branching (For using profiled sources)"
+     Aliasing_HELP="Enable strict aliasing (enabled by default -O1 and above)"
+        Cprop_HELP="Reduce scheduling dependencies and remove copies"
         Float_HELP="Enable float store"
       Address_HELP="Force memory address"
         Align_HELP="Align functions, loops, and jumps"
+    Expensive_HELP="Perform expensive optimizations"
+      Doubles_HELP="Align double, long double, and long long on two word boundaries"
+       Tracer_HELP="Perform tail duplication to enlarge superblock size."
                ;;
 
    # Help for extra options
      xtra_help)
-             MENU="Extra Features"
+                  # do NOT change the next line unless you too smart
+                  CPUINFO=$(echo "`grep flags /proc/cpuinfo` ")
+		  for EXT in mmx sse sse2 3dnow altivec ; do
+		    if echo $CPUINFO | grep -q " $EXT " ; then
+		      FLAGS="$FLAGS $EXT"
+		    fi
+		  done
+
+             MENU="Extra Features, the kernel reports to have:$FLAGS"
          MMX_HELP="Enable MMX"
          SSE_HELP="Enable SSE"
         SSE2_HELP="Enable SSE2"
         dnow_HELP="3dnow"
      Altivec_HELP="Enables Altivec"
+                  unset CPUINFO EXT FLAGS
                ;;
 
    # Help for floating point math
       fpm_help)
-          MENU="Floating Point Math"
+                  # do NOT change the next line unless you too smart
+                  CPUINFO=$(echo "`grep flags /proc/cpuinfo` ")
+		  for EXT in fpu sse altivec ; do
+		    if echo $CPUINFO | grep -q " $EXT " ; then
+		      FLAGS="$FLAGS $EXT"
+		    fi
+		  done
+		  FLAGS=${FLAGS/fpu/387}
+
+          MENU="Floating Point Math, the kernel reports to have: $FLAGS"
      None_HELP="Do not enable any extra features."
      x387_HELP="387"
       SSE_HELP="SSE"
      Both_HELP="SSE and 387"
   Altivec_HELP="Altivec"
+                  unset CPUINFO EXT FLAGS
                ;;
    # Warn help
-  cc_warn_help)
-          MENU="Enable/Disable C compiler warnings"
-              ;;
-              
  ccc_warn_help)
           MENU="Enable/Disable C++ compiler warnings"
-     None_HELP="Do not change any C++ compiler warnings from default."
      Deprecated_HELP="Disable warnings of deprecated..."
               ;;
           
@@ -207,8 +210,9 @@ help() {
       ldf_help)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
-      Debug_HELP="Strip debug symbols only"
+   Optimize_HELP="Optimize hash tables during linking"
   Combreloc_HELP="Combreloc"
+#     Debug_HELP="Strip debug symbols only"
                ;;
 
    # Addon help for extra programs
@@ -222,168 +226,159 @@ help() {
 }
 
 compiler_options() {
-   OPTIONS=( "2" "GCC version 2x" "$GCC2_HELP"
-             "3" "GCC version 3x" "$GCC3_HELP" )
+   OPTIONS=( "2" "GCC version 2x"  $( [ "$GCCVER" == "2" ] && echo "on" || echo "off" )  "$GCC2_HELP"
+             "3" "GCC version 3x"  $( [ "$GCCVER" == "3" ] && echo "on" || echo "off" )  "$GCC3_HELP" )
 }
 
 cc_options(){
-  OPTIONS=( "Normal" "Normal"  "$Normal_HELP"
-            "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  $( [ "$COPT" == "-pipe" ] && echo "on" || echo "off" )   "$Pipe_HELP" )
 }
 ccc_options(){
-  OPTIONS=( "Normal" "Normal"  "$Normal_HELP"
-            "Pipe"   "-pipe"   "$Pipe_HELP" )
+  OPTIONS=( '-pipe'   "-pipe"  $( [ "$CCOPT" == "-pipe" ] && echo "on" || echo "off" )   "$Pipe_HELP" )
 }
 
 platform_options() {
-   OPTIONS=( "x86"     "Intel, AMD, and clones" "$x86_HELP"
-             "Alpha"   "Compaq Alpha"           "$Alpha_HELP"
-             "PowerPC" "PowerPC"                "$PowerPC_HELP"
-             "SPARC"   "Sun SPARC"              "$SPARC_HELP" )
+   OPTIONS=( "x86"     "Intel, AMD, and clones"  $( [ "$PLATFORM" == "x86" ] && echo "on" || echo "off" )      "$x86_HELP"
+             "Alpha"   "Compaq Alpha"            $( [ "$PLATFORM" == "Alpha" ] && echo "on" || echo "off" )    "$Alpha_HELP"
+             "PowerPC" "PowerPC"                 $( [ "$PLATFORM" == "PowerPC" ] && echo "on" || echo "off" )  "$PowerPC_HELP"
+             "SPARC"   "Sun SPARC"               $( [ "$PLATFORM" == "SPARC" ] && echo "on" || echo "off" )    "$SPARC_HELP" )
 }
 
 bopt_options() {
-   OPTIONS=( "None"    "-O0" "$None_HELP"
-             "Fast"    "-O1" "$Fast_HELP"
-             "Faster"  "-O2" "$Fasert_HELP"
-             "Fastest" "-O3" "$Fastest_HELP"
-             "Small"   "-Os" "$Small_HELP" )
+   OPTIONS=( "None"     "-O0"   $( [ "$BOPT" == "None" ] && echo "on" || echo "off" )    "$None_HELP"
+             "Fast"     "-O1"   $( [ "$BOPT" == "Fast" ] && echo "on" || echo "off" )    "$Fast_HELP"
+             "Faster"   "-O2"   $( [ "$BOPT" == "Faster" ] && echo "on" || echo "off" )  "$Fasert_HELP"
+             "Fastest"  "-O3"   $( [ "$BOPT" == "Fastest" ] && echo "on" || echo "off" ) "$Fastest_HELP"
+             "Small"    "-Os"   $( [ "$BOPT" == "Small" ] && echo "on" || echo "off" )   "$Small_HELP" )
 
 }
 
 cpu_options() {
    case $1 in
-      x86) OPTIONS=( "I386"        "I386"        "$I386_HELP"
-                     "I486"        "I486"        "$I486_HELP"
-                     "I586"        "I586"        "$I586_HELP"
-                     "Pentium"     "Pentium"     "$Pentium_HELP"
-                     "PentiumMMX"  "PentiumMMX"  "$PentiumMMX_HELP"
-                     "I686"        "I686"        "$I686_HELP"
-                     "PentiumPro"  "PentiumPro"  "$PentiumPro_HELP"
-                     "Pentium2"    "P2"          "$P2_HELP"
-                     "Pentium3"    "P3"          "$P3_HELP"
-                     "Pentium4"    "P4"          "$P4_HELP"
-                     "K6"          "K6"          "$K6_HELP"
-                     "K62"         "K62"         "$K62_HELP"
-                     "K63"         "K63"         "$K63_HELP"
-                     "Athlon"      "Athlon"      "$Athlon_HELP"
-                     "AthlonTBird" "AthlonTBird" "$AthlonTBird_HELP"
-                     "Athlon4"     "Athlon4"     "$Athlon4_HELP"
-                     "AthlonXP"    "AthlonXP"    "$AthlonXP_HELP"
-                     "AthlonMP"    "AthlonMP"    "$AthlonMP_HELP" )
+      x86) OPTIONS=( "I386"        "I386"         $( [ "$CPU" == "I386" ] && echo "on" || echo "off" )        "$I386_HELP"
+                     "I486"        "I486"         $( [ "$CPU" == "I486" ] && echo "on" || echo "off" )        "$I486_HELP"
+                     "I586"        "I586"         $( [ "$CPU" == "I586" ] && echo "on" || echo "off" )        "$I586_HELP"
+                     "Pentium"     "Pentium"      $( [ "$CPU" == "Pentium" ] && echo "on" || echo "off" )     "$Pentium_HELP"
+                     "PentiumMMX"  "PentiumMMX"   $( [ "$CPU" == "PentiumMMX" ] && echo "on" || echo "off" )  "$PentiumMMX_HELP"
+                     "I686"        "I686"         $( [ "$CPU" == "I686" ] && echo "on" || echo "off" )        "$I686_HELP"
+                     "PentiumPro"  "PentiumPro"   $( [ "$CPU" == "PentiumPro" ] && echo "on" || echo "off" )  "$PentiumPro_HELP"
+                     "Pentium2"    "P2"           $( [ "$CPU" == "Pentium2" ] && echo "on" || echo "off" )    "$P2_HELP"
+                     "Pentium3"    "P3"           $( [ "$CPU" == "Pentium3" ] && echo "on" || echo "off" )    "$P3_HELP"
+                     "Pentium4"    "P4"           $( [ "$CPU" == "Pentium4" ] && echo "on" || echo "off" )    "$P4_HELP"
+                     "K6"          "K6"           $( [ "$CPU" == "K6" ] && echo "on" || echo "off" )          "$K6_HELP"
+                     "K62"         "K62"          $( [ "$CPU" == "K62" ] && echo "on" || echo "off" )         "$K62_HELP"
+                     "K63"         "K63"          $( [ "$CPU" == "K63" ] && echo "on" || echo "off" )         "$K63_HELP"
+                     "Athlon"      "Athlon"       $( [ "$CPU" == "Athlon" ] && echo "on" || echo "off" )      "$Athlon_HELP"
+                     "AthlonTBird" "AthlonTBird"  $( [ "$CPU" == "AthlonTBird" ] && echo "on" || echo "off" ) "$AthlonTBird_HELP"
+                     "Athlon4"     "Athlon4"      $( [ "$CPU" == "Athlon4" ] && echo "on" || echo "off" )     "$Athlon4_HELP"
+                     "AthlonXP"    "AthlonXP"     $( [ "$CPU" == "AthlonXP" ] && echo "on" || echo "off" )    "$AthlonXP_HELP"
+                     "AthlonMP"    "AthlonMP"     $( [ "$CPU" == "AthlonMP" ] && echo "on" || echo "off" )    "$AthlonMP_HELP" )
                      ;;
 
-    Alpha) OPTIONS=( "ev4"     "ev4"     "$ev4_HELP"
-                     "ev45"    "ev45"    "$ev45_HELP"
-                     "21064"   "21064"   "$A21064_HELP"
-                     "ev5"     "ev5"     "$ev5_HELP"
-                     "21164"   "21164"   "$A21164_HELP"
-                     "ev56"    "ev56"    "$ev56_HELP"
-                     "21164a"  "21164a"  "$A21164a_HELP"
-                     "pca56"   "pca56"   "$pca56_HELP"
-                     "21164pc" "21164pc" "$A21164pc_HELP"
-                     "21164PC" "21164PC" "$A21164PC_HELP"
-                     "ev6"     "ev6"     "$ev6_HELP"
-                     "21264"   "21264"   "$A21264_HELP"
-                     "ev67"    "ev67"    "$ev67_HELP"
-                     "21264a"  "21264a"  "$A21264a_HELP" )
+    Alpha) OPTIONS=( "ev4"         "ev4"          $( [ "$CPU" == "ev4" ] && echo "on" || echo "off" )         "$ev4_HELP"
+                     "ev45"        "ev45"         $( [ "$CPU" == "ev45" ] && echo "on" || echo "off" )        "$ev45_HELP"
+                     "ev5"         "ev5"          $( [ "$CPU" == "ev5" ] && echo "on" || echo "off" )         "$ev5_HELP"
+                     "ev56"        "ev56"         $( [ "$CPU" == "ev56" ] && echo "on" || echo "off" )         "$ev56_HELP"
+                     "pca56"       "pca56"        $( [ "$CPU" == "pca56" ] && echo "on" || echo "off" )         "$pca56_HELP"
+                     "ev6"         "ev6"          $( [ "$CPU" == "ev6" ] && echo "on" || echo "off" )         "$ev6_HELP"
+                     "ev67"        "ev67"         $( [ "$CPU" == "ev67" ] && echo "on" || echo "off" )         "$ev67_HELP"
+		     "ev68"        "ev68"         $( [ "$CPU" == "ev68" ] && echo "on" || echo "off" )         "$ev68_HELP" )
                      ;;
 
-  PowerPC) OPTIONS=( "common" "common"   "$common_HELP"
-                     "rios"    "rios"    "$rios_HELP"
-                     "rios1"   "rios1"   "$rios1_HELP"
-                     "rsc"     "rsc"     "$rsc_HELP"
-                     "rios2"   "rios2"   "$rios2_HELP"
-                     "rs64a"   "rs64a"   "$rs64a_HELP"
-                     "403"     "403"     "$403_HELP"
-                     "505"     "505"     "$505_HELP"
-                     "601"     "601"     "$601_HELP"
-                     "602"     "602"     "$602_HELP"
-                     "603"     "603"     "$603_HELP"
-                     "603a"    "603a"    "$603a_HELP"
-                     "604"     "604"     "$604_HELP"
-                     "604e"    "604e"    "$604e_HELP"
-                     "620"     "620"     "$620_HELP"
-                     "630"     "630"     "$630_HELP"
-                     "740"     "740"     "$740_HELP"
-                     "7400"    "7400"    "$7400_HELP"
-                     "7450"    "7450"    "$7450_HELP"
-                     "750"     "750"     "$750_HELP"
-                     "801"     "801"     "$801_HELP"
-                     "821"     "821"     "$821_HELP"
-                     "823"     "823"     "$823_HELP"
-                     "Power"   "Power"   "$Power_HELP"
-                     "Power2"  "Power2"  "$Power2_HELP"
-                     "PowerPC" "PowerPC" "$PowerPC_HELP" )
+  PowerPC) OPTIONS=( "common" "common"	$( [ "$CPU" == "common" ] && echo "on" || echo "off" )   "$common_HELP"
+                     "rios"    "rios" 	$( [ "$CPU" == "rios" ] && echo "on" || echo "off" )   "$rios_HELP"
+                     "rios1"   "rios1" 	$( [ "$CPU" == "rios1" ] && echo "on" || echo "off" )  "$rios1_HELP"
+                     "rsc"     "rsc" 	$( [ "$CPU" == "rsc" ] && echo "on" || echo "off" )    "$rsc_HELP"
+                     "rios2"   "rios2" 	$( [ "$CPU" == "rios2" ] && echo "on" || echo "off" )  "$rios2_HELP"
+                     "rs64a"   "rs64a" 	$( [ "$CPU" == "rs64a" ] && echo "on" || echo "off" )  "$rs64a_HELP"
+                     "403"     "403" 	$( [ "$CPU" == "403" ] && echo "on" || echo "off" )    "$p403_HELP"
+                     "505"     "505" 	$( [ "$CPU" == "505" ] && echo "on" || echo "off" )    "$p505_HELP"
+                     "601"     "601" 	$( [ "$CPU" == "601" ] && echo "on" || echo "off" )    "$p601_HELP"
+                     "602"     "602" 	$( [ "$CPU" == "602" ] && echo "on" || echo "off" )    "$p602_HELP"
+                     "603"     "603" 	$( [ "$CPU" == "603" ] && echo "on" || echo "off" )    "$p603_HELP"
+                     "603a"    "603a" 	$( [ "$CPU" == "603a" ] && echo "on" || echo "off" )   "$p603a_HELP"
+                     "604"     "604" 	$( [ "$CPU" == "604" ] && echo "on" || echo "off" )    "$p604_HELP"
+                     "604e"    "604e" 	$( [ "$CPU" == "604e" ] && echo "on" || echo "off" )   "$p604e_HELP"
+                     "620"     "620" 	$( [ "$CPU" == "620" ] && echo "on" || echo "off" )    "$p620_HELP"
+                     "630"     "630" 	$( [ "$CPU" == "630" ] && echo "on" || echo "off" )    "$p630_HELP"
+                     "740"     "740" 	$( [ "$CPU" == "740" ] && echo "on" || echo "off" )    "$p740_HELP"
+                     "7400"    "7400" 	$( [ "$CPU" == "7400" ] && echo "on" || echo "off" )   "$p7400_HELP"
+                     "7450"    "7450" 	$( [ "$CPU" == "7450" ] && echo "on" || echo "off" )   "$p7450_HELP"
+                     "750"     "750" 	$( [ "$CPU" == "750" ] && echo "on" || echo "off" )    "$p750_HELP"
+                     "801"     "801" 	$( [ "$CPU" == "801" ] && echo "on" || echo "off" )    "$p801_HELP"
+                     "821"     "821" 	$( [ "$CPU" == "821" ] && echo "on" || echo "off" )    "$p821_HELP"
+                     "823"     "823" 	$( [ "$CPU" == "823" ] && echo "on" || echo "off" )    "$p823_HELP"
+                     "Power"   "Power" 	$( [ "$CPU" == "Power" ] && echo "on" || echo "off" )  "$Power_HELP"
+                     "Power2"  "Power2" $( [ "$CPU" == "Power2" ] && echo "on" || echo "off" ) "$Power2_HELP"
+                     "PowerPC" "PowerPC" $( [ "$CPU" == "PowerPC" ] && echo "on" || echo "off" ) "$PowerPC_HELP" )
                      ;;
-    
-    SPARC) OPTIONS=( "v7"         "v7"         "$v7_HELP"
-                     "cypress"    "cypress"    "$cypress_HELP"
-                     "v8"         "v8"         "$v8_HELP"
-                     "supersparc" "supersparc" "$supersparc_HELP"
-                     "sparclite"  "sparclite"  "$sparclite_HELP"
-                     "hypersparc" "hypersparc" "$hypersparc_HELP"
-                     "f930"       "f930"       "$f930_HELP"
-                     "f934"       "f934"       "$f934_HELP"
-                     "sparclet"   "sparclet"   "$sparclet_HELP"
-                     "ts701"      "ts701"      "$ts701_HELP"
-                     "v9"         "v9"         "$v9_HELP"
-                     "ultrasparc" "ultrasparc" "$ultrasparc_HELP" )
+  
+    SPARC) OPTIONS=( "v7"         "v7"         $( [ "$CPU" == "v7" ] && echo "on" || echo "off" ) "$v7_HELP"
+                     "cypress"    "cypress"    $( [ "$CPU" == "cypress" ] && echo "on" || echo "off" ) "$cypress_HELP"
+                     "v8"         "v8"         $( [ "$CPU" == "v8" ] && echo "on" || echo "off" ) "$v8_HELP"
+                     "supersparc" "supersparc" $( [ "$CPU" == "supersparc" ] && echo "on" || echo "off" ) "$supersparc_HELP"
+                     "sparclite"  "sparclite"  $( [ "$CPU" == "sparclite" ] && echo "on" || echo "off" ) "$sparclite_HELP"
+                     "hypersparc" "hypersparc" $( [ "$CPU" == "hypersparc" ] && echo "on" || echo "off" ) "$hypersparc_HELP"
+                     "sparclite86x" "sparclite86x"  $( [ "$CPU" == "sparclite86x" ] && echo "on" || echo "off" ) "$sparclite86x_HELP"
+                     "f930"       "f930"       $( [ "$CPU" == "f930" ] && echo "on" || echo "off" ) "$f930_HELP"
+                     "f934"       "f934"       $( [ "$CPU" == "f934" ] && echo "on" || echo "off" ) "$f934_HELP"
+                     "sparclet"   "sparclet"   $( [ "$CPU" == "sparclet" ] && echo "on" || echo "off" ) "$sparclet_HELP"
+                     "tsc701"     "tsc701"     $( [ "$CPU" == "tsc701" ] && echo "on" || echo "off" ) "$ts701_HELP"
+                     "v9"         "v9"         $( [ "$CPU" == "v9" ] && echo "on" || echo "off" ) "$v9_HELP"
+                     "ultrasparc" "ultrasparc" $( [ "$CPU" == "ultrasparc" ] && echo "on" || echo "off" ) "$ultrasparc_HELP" )
                      ;;
    esac
 
 }
 
 spd_options() {
-   OPTIONS=( "Speedy"    "-funroll-loops"            "$SPD0"  "$Speedy_HELP"
-             "Risky"     "-ffast-math"               "$SPD1"  "$Risky_HELP" 
-             "Pointers"  "-fomit-frame-pointer"      "$SPD2"  "$Pointer_HELP"
-             "Siblings"  "-foptimize-sibling-calls"  "$SPD3"  "$Siblings_HELP"
-             "Profiling" "-fprofile-arcs"            "$SPD4"  "$Profiling_HELP"
-	     "Branching" "-fbranching-probabilities" "$SPD5"  "$Branching_HELP"
-             "Aliasing"  "-fstrict-aliasing"         "$SPD6"  "$Aliasing_HELP"
-             "Cprop"     "-fno-cprop-registers"      "$SPD7"  "$Cprop_HELP"
-	     "Float"     "-ffloat-store"             "$SPD8"  "$Float_HELP"
-             "Address"   "-fforce-addr"              "$SPD9"  "$Address_HELP"
-             "Align"     "-ffalign-functions"        "$SPD10" "$Align_HELP" )
+   OPTIONS=( "Speedy"    "-funroll-loops"            $( echo ${SPD[@]} | grep -q "Speedy" && echo "on" || echo "off" )    "$Speedy_HELP"
+             "Risky"     "-ffast-math"               $( echo ${SPD[@]} | grep -q "Risky" && echo "on" || echo "off" )     "$Risky_HELP" 
+             "Pointers"  "-fomit-frame-pointer"      $( echo ${SPD[@]} | grep -q "Pointers" && echo "on" || echo "off" )  "$Pointer_HELP"
+             "Siblings"  "-foptimize-sibling-calls"  $( echo ${SPD[@]} | grep -q "Siblings" && echo "on" || echo "off" )  "$Siblings_HELP"
+             "Profiling" "-fprofile-arcs"            $( echo ${SPD[@]} | grep -q "Profiling" && echo "on" || echo "off" ) "$Profiling_HELP"
+	     "Branching" "-fbranching-probabilities" $( echo ${SPD[@]} | grep -q "Branching" && echo "on" || echo "off" ) "$Branching_HELP"
+             "Aliasing"  "-fstrict-aliasing"         $( echo ${SPD[@]} | grep -q "Aliasing" && echo "on" || echo "off" )  "$Aliasing_HELP"
+             "Cprop"     "-fno-cprop-registers"      $( echo ${SPD[@]} | grep -q "Cprop" && echo "on" || echo "off" )     "$Cprop_HELP"
+	     "Float"     "-ffloat-store"             $( echo ${SPD[@]} | grep -q "Float" && echo "on" || echo "off" )     "$Float_HELP"
+             "Address"   "-fforce-addr"              $( echo ${SPD[@]} | grep -q "Address" && echo "on" || echo "off" )   "$Address_HELP"
+             "Align"     "-falign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
+             "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
+             "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP"
+             "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP" ) 
 }
 
 xtra_options() {
-   OPTIONS=( "MMX"       "MMX"     "$XTRA1" "$MMX_HELP"
-             "SSE"       "SSE"     "$XTRA2" "$SSE_HELP"
-             "SSE2"      "SSE2"    "$XTRA3" "$SSE2_HELP"
-             "dnow"      "3dnow"   "$XTRA4" "$dnow_HELP"
-             "Altivec"   "Altivec" "$XTRA5" "$Altivec_HELP" )
+   OPTIONS=( "MMX"       "MMX"     $( echo ${XTRA[@]} | grep -q "MMX" && echo "on" || echo "off" )      "$MMX_HELP"
+             "SSE"       "SSE"     $( echo ${XTRA[@]} | grep -q "SSE" && echo "on" || echo "off" )      "$SSE_HELP"
+             "SSE2"      "SSE2"    $( echo ${XTRA[@]} | grep -q "SSE2" && echo "on" || echo "off" )     "$SSE2_HELP"
+             "dnow"      "3dnow"   $( echo ${XTRA[@]} | grep -q "dnow" && echo "on" || echo "off" )     "$dnow_HELP"
+             "Altivec"   "Altivec" $( echo ${XTRA[@]} | grep -q "Altivec" && echo "on" || echo "off" )  "$Altivec_HELP" )
 }
 
 fpm_options() {
-   OPTIONS=( "None"      ""    "$None_HELP"
-             "x387"      ""    "$x387_HELP"
-             "SSE"       ""    "$SSE_HELP"
-             "Both"      ""    "$Both_HELP"
-             "Altivec"   ""    "$Altivec_HELP" )
+   OPTIONS=( "None"      ""   $([ "$FPM" == "None" ] && echo "on" || echo "off" )     "$None_HELP"
+             "x387"      ""   $([ "$FPM" == "x387" ] && echo "on" || echo "off" )     "$x387_HELP"
+             "SSE"       ""   $([ "$FPM" == "SSE" ] && echo "on" || echo "off" )      "$SSE_HELP"
+             "Both"      ""   $([ "$FPM" == "Both" ] && echo "on" || echo "off" )     "$Both_HELP"
+             "Altivec"   ""   $([ "$FPM" == "Altivec" ] && echo "on" || echo "off" )  "$Altivec_HELP" )
 }
 
-cc_warn_options() { 
-  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
-            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" ) 
-}
-
-ccc_warn_options() { 
-  OPTIONS=( "None"       "Normal"            "$Normal_HELP"
-            "Deprecated" "-Wno-deprecated" "$Deprecated_HELP" )
+ccc_warn() { 
+  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CCC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
 }
 
 ldf_options() {
-   OPTIONS=( "Strip"       "-s"            "$LDF1"  "$Strip_HELP"
-             "Debug"       "-S"            "$LDF2"  "$Debug_HELP"
-             "Combreloc"   "-z combreloc"  "$LDF3"  "$Combreloc_HELP" )
+   OPTIONS=( "Strip"      "-s"            $( echo ${LDF[@]} | grep -q "Strip" && echo "on" || echo "off" )     "$Strip_HELP"
+#            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
+            "Optimize"      "-Wl,-O1"     $( echo ${LDF[@]} | grep -q "Optimize" && echo "on" || echo "off" )     "$Optimize_HELP"
+             "Combreloc"  "-z combreloc"  $( echo ${LDF[@]} | grep -q "Combreloc" && echo "on" || echo "off" ) "$Combreloc_HELP" )
 
 }
 
 addon_options() {
-  OPTIONS=( "DistCC" "distcc" "$ADDON2" "$DistCC_HELP"
-            "CCache" "ccache" "$ADDON3" "$CCache_HELP" )
+  OPTIONS=( "CCache" "ccache" $( echo ${ADDON[@]} | grep -q "CCache" && echo "on" || echo "off" ) "$CCache_HELP"
+            "DistCC" "distcc" $( echo ${ADDON[@]} | grep -q "DistCC" && echo "on" || echo "off" ) "$DistCC_HELP" )
 }
 
 menu() {
@@ -396,6 +391,17 @@ menu() {
                       --checklist  "$MENU"      \
                         0 0 0                   \
                       "${OPTIONS[@]}"`
+   elif [[ $1 == "radiolist" ]]; then
+     unset RESULT
+     while [ -z "$RESULT" ]; do
+       RESULT=`dialog --title "$TITLE"          \
+                      --stdout                  \
+		      --no-cancel               \
+		      --item-help               \
+		      --radiolist "$MENU"       \
+		        0 0 0                   \
+		      "${OPTIONS[@]}"`
+     done
    else
        RESULT=`dialog --title "$TITLE"          \
                       --stdout                  \
@@ -405,4 +411,6 @@ menu() {
                         0 0 0                   \
                       "${OPTIONS[@]}"`
    fi
+   RESULT=$(echo $RESULT | sed -e 's:^"::' -e 's:"$::')
+
 }

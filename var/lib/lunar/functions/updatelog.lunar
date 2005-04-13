@@ -1,7 +1,7 @@
-############################################################
+#!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -15,64 +15,47 @@
 #                                                          #
 ############################################################
 
+
 # function : display_update_log 
 # usage    : display_update_log update|rebuild 
 # purpose  : display a log describing update successes, failures, and summaries
-
-display_update_log()  { 
- 
+display_update_log() {
+  debug_msg "display_update_log ($@)"
   rm -f /var/log/lunar/update 
- 
   { 
-
-  display_success_info $1
-
-  if [  $1 = "update" ]; then  
-    display_moonbase_changes
-  fi  
-     
+    if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then 
+      display_success_info
+    fi
   } | tee /var/log/lunar/update 
- 
-  rm -f /tmp/fail_$LOGTMP /tmp/success_$LOGTMP
- 
 }
+
 
 # function : display_success_info 
 # usage    : display_success_info update|rebuild
 # purpose  : display a list of update successes and failures
-display_success_info()  {
+display_success_info() {
+  debug_msg "display_success_info ($@)"
 
-  if  [  -e  /tmp/success_$LOGTMP  ]; then  
-    NUMSUCCESS=`wc -l /tmp/success_$LOGTMP | cut -d \  -f 7 -` 
-  else  
-    NUMSUCCESS=0  
-  fi  
- 
-  if  [  -e  /tmp/fail_$LOGTMP  ]; then  
-    NUMFAILURES=`wc -l /tmp/fail_$LOGTMP | cut -d \  -f 7 -`  
-  else  
-    NUMFAILURES=0  
-  fi  
+  NUMSUCCESS=$(cat $TMP_LIN_SUCCESS | wc -l)
+  NUMFAILURES=$(cat $TMP_LIN_FAIL | wc -l)
 
-  echo  "Lunar $1 completed at `date`"  
-  echo  "Successful ${1}s: $NUMSUCCESS  Failed ${1}s: $NUMFAILURES"  
-  echo  
+  message
+  message  "${MESSAGE_COLOR}Lunar renew completed at `date`${DEFAULT_COLOR}"
+  message  "Successful  : " $NUMSUCCESS
+  message  "Failed      : " $NUMFAILURES  
+  message  
   
-  if  [  $NUMSUCCESS -ne 0  ]; then   
-    echo  "Successful Packages:"  
-    cat  /tmp/success_$LOGTMP  
-    echo  
+  if  [  "$NUMSUCCESS" -gt "0"  ]; then   
+    message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"  
+    cat $TMP_LIN_SUCCESS  
+    message  
   fi  
  
-  if  [  $NUMFAILURES -ne 0  ]; then    
-    echo  "Failed Packages:"   
-    cat  /tmp/fail_$LOGTMP   
-    echo   
+  if  [  "$NUMFAILURES" -gt "0"  ]; then    
+    message  "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
+    cat $TMP_LIN_FAIL
+    message   
   fi   
-
-  if [  $1 = "update" ]; then 
-    display_moonbase_changes 
-  fi 
 
 }
 
@@ -80,30 +63,36 @@ display_success_info()  {
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
 display_moonbase_changes()  {  
+  debug_msg "display_moonbase_changes ($@)"
+  MODULE_CHANGES=$(temp_create "module-changes")
 
-  MODULE_INDEX_BACKUP=/tmp/`basename $MODULE_INDEX`
-  DIFF='diff -I MOONBASE_MD5'
-  
-  if [ -e $MOUDLE_INDEX ] && [ -e $MODULE_INDEX_BACKUP ]; then
+  if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
+    diff -y $MODULE_INDEX $TMP_MODULE_INDEX | sort > $MODULE_CHANGES
 
-    NEW_MODULES=`$DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | wc -l`
-    DEL_MODULES=`$DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | wc -l`
-  
-    if [ $NEW_MODULES -ne 0 ]; then
-      echo "New Modules:"
-      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '<' | cut -d \  -f 2 -
-      echo
+    NEW_MODULES=$(grep '<' $MODULE_CHANGES | wc -l)
+    DEL_MODULES=$(grep '>' $MODULE_CHANGES | wc -l)
+    MOV_MODULES=$(grep '|' $MODULE_CHANGES | wc -l)
+    message
+
+    if [ "$NEW_MODULES" != "0" ]; then
+      message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
+      grep '<' $MODULE_CHANGES | tr -d '<' | sort -t : -k 2
+      message
     fi
 
-    if [ $DEL_MODULES -ne 0 ]; then
-      echo "Removed Modules:"
-      $DIFF $MODULE_INDEX $MODULE_INDEX_BACKUP | grep '>' | cut -d \  -f 2 -
-      echo
+    if [ "$DEL_MODULES" != "0" ]; then
+      message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
+      grep '>' $MODULE_CHANGES | tr -d '>\t ' | sort -t : -k 2
+      message
     fi
 
-    rm -f $MODULE_INDEX_BACKUP
-
+    if [ "$MOV_MODULES" != "0" ]; then
+      message "${MESSAGE_COLOR}Moved modules:${DEFAULT_COLOR}"
+      grep '|' $MODULE_CHANGES | tr -d '>\t ' | sed -e 's#\(.*\):\(.*\)|\(.*\):\(.*\)#\1: \2 -> \4#g' | sort -t - -k 2
+      message
+    fi
   fi
-  
+
+  temp_destroy $MODULE_CHANGES
 }
 

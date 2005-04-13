@@ -1,3 +1,5 @@
+export            PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11/bin
+
 export        DIALOGRC=/etc/lunar/dialogrc
 
           CONFIG_CACHE=/etc/lunar/local
@@ -6,26 +8,21 @@ export        DIALOGRC=/etc/lunar/dialogrc
         LOCAL_EXCLUDED=/etc/lunar/local/excluded
                MIRRORS=/etc/lunar/mirrors
 
-         UPDATE_SCRIPT=/tmp/lunar.update
          LUNAR_MODULES="lunar theedge"
 
        BUILD_DIRECTORY=/usr/src
     DOCUMENT_DIRECTORY=/usr/share/doc
 
-      COLONY_DIRECTORY=/etc/lunar/colony
-          COLONY_NAMES=$COLONY_DIRECTORY/names
-           COLONY_KEYS=$COLONY_DIRECTORY/keys
-         COLONY_OUTPUT=/tmp/colony.output
+        DEFAULT_PREFIX=/usr
 
-         APP_LAUNCHERS=/var/lib/lunar/apprentice
               EXCLUDED=/var/lib/lunar/excluded
               MOONBASE=/var/lib/lunar/moonbase
              PROTECTED=/var/lib/lunar/protected
                   SOLO=/var/lib/lunar/solo
-           SUBROUTINES=/var/lib/lunar/subroutines
              FUNCTIONS=/var/lib/lunar/functions
                  MENUS=/var/lib/lunar/menu
              SUSTAINED=/var/lib/lunar/sustained
+               ALIASES=/var/lib/lunar/aliases
 
        SOUND_DIRECTORY=/var/lib/lunar/sound
            SOUND_THEME=startrek
@@ -41,6 +38,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
         DEPENDS_STATUS=/var/state/lunar/depends
  DEPENDS_STATUS_BACKUP=/var/state/lunar/depends.backup
+         DEPENDS_CACHE=/var/state/lunar/depends.cache
          MODULE_STATUS=/var/state/lunar/packages
   MODULE_STATUS_BACKUP=/var/state/lunar/packages.backup
           MODULE_INDEX=/var/state/lunar/module.index
@@ -51,12 +49,9 @@ export        DIALOGRC=/etc/lunar/dialogrc
 #  Override the following variables in /etc/lunar/local/config
 #  Or by exporting them before installing or removing.
 
-                 LIN=lin
-           APPRENTICE=${APPRENTICE:=off}
               ARCHIVE=${ARCHIVE:=on}
               AUTOFIX=${AUTOFIX:=on}
             AUTOPRUNE=${AUTOPRUNE:=off}
-               COLONY=${COLONY:=off}
          MAIL_REPORTS=${MAIL_REPORTS:=off}
              PRESERVE=${PRESERVE:=on}
                  REAP=${REAP:=on}
@@ -67,7 +62,8 @@ export        DIALOGRC=/etc/lunar/dialogrc
                VOYEUR=${VOYEUR:=on}
               GARBAGE=${GARBAGE:=on}
          PROMPT_DELAY=${PROMPT_DELAY:=150}
-           MAX_COLONYS=16
+ 	  GCCWRAPPERS=${GCCWRAPPERS:=on}
+        PROBE_EXPIRED=${PROBE_EXPIRED:=on}
         LUNAR_PRIORITY="+10"
 
 #total number of sources for a module
@@ -82,13 +78,21 @@ export        DIALOGRC=/etc/lunar/dialogrc
               KDE_URL=ftp://ftp.kde.org/pub/kde
             GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
            KERNEL_URL=ftp://ftp.kernel.org
-           SFORGE_URL=http://telia.dl.sourceforge.net/sourceforge
+           SFORGE_URL=http://unc.dl.sourceforge.net/sourceforge
           XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
-          LRESORT_URL=http://www.lunar-linux.com/lunar/mirrors
+          LRESORT_URL=http://lunar-linux.org/lunar/cache
 
-	 MOONBASE_URL=http://www.lunar-linux.org/lunar/moonbase.tar.bz2
-
+      MOONBASE_URL[0]=http://lunar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[1]=http://tx-us.lunar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[2]=http://de.lunar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[3]=http://dk.lunar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/moonbase.tar.bz2
+	 
+            PATCH_URL=http://lunar-linux.org/lunar/patches
+	    
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
+
+               TMPDIR=${TMPDIR:=/tmp}
 
               DEFAULT="\e[0m"
                  BOLD="\e[1m"
@@ -121,5 +125,14 @@ export        DIALOGRC=/etc/lunar/dialogrc
 	STANDARD_IFS=" 	
 "
 
-. $SUBROUTINES
-[ -s "$LOCAL_CONFIG" ] && . $LOCAL_CONFIG
+
+for FUNCTION in $FUNCTIONS/*.lunar ; do
+  . $FUNCTION
+done
+
+if [ -s "$LOCAL_CONFIG" ] ; then
+  . $LOCAL_CONFIG
+fi
+
+sound $SOUND
+color $COLOR

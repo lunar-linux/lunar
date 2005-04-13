@@ -1,0 +1,129 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# lget - get sources from the net                          #
+#                                                          #
+############################################################
+# leach is part of the sorcery spell management utility    #
+# Copyright 2001 by Kyle Sallee                            #
+############################################################
+#                                                          #
+# this WAS the leach script of a source based Linux distro,#
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Parts Copyrighted Jason Johnston  2002 under GPLv2       #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+
+
+help() {
+
+  cat  <<  EOF
+
+Lget downloads single or multiple module source files.
+
+Example : lget  nano hdparm sudo
+Usage   : lget  [parameters] [modules]
+
+Optional Parameters:
+
+   -a | --all			Download all sources available in moonbase
+   -d | --debug                 Enables debug messages
+   -f | --from  directory       Specify an alternate for $SOURCE_CACHE
+   -h | --help                  Displays this help text
+   -u | --url     URL           Specify an alternate download URL
+   -v | --verbose               Increases the level of message output
+   -V | --Version               Select specific Version of module to install
+EOF
+
+  exit  1
+
+}
+
+
+main() {
+  cd $TMPDIR
+  
+  MODULES="$@"
+
+  if [ -n "$MOD_VERSION" ] ; then
+    if  [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+      message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
+      exit 1
+    else
+      MODULES="$MODULES/$MOD_VERSION"
+      message "module = $MODULES"
+    fi
+  fi
+
+  if [ -z "$MODULES" ] ; then
+    verbose_msg "downloading entire moonbase"
+    MODULES=$(list_moonbase | sort)
+  fi
+
+  if echo $MODULES | grep -qw moonbase ; then
+    # just update moonbase, no other modules
+    get_moonbase
+    # remove moonbase rofm MODULES and continue
+    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+  fi
+
+  for MODULE in $MODULES; do
+    if ! lget_locked $MODULE ; then
+      lget_lock $MODULE
+      verbose_msg "downloading module \"$MODULE\""
+      download_module $MODULE
+      lget_unlock $MODULE
+    else
+      false
+    fi
+  done
+
+}
+
+
+. /etc/lunar/config
+
+GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vV:" -l "all,debug,from:,help,url:,verbose,Version:" -- "$@")
+
+if [ -z "$?" ] ; then
+  help | view_file
+  exit
+else
+  eval set -- $GETOPT_ARGS
+  
+  root_check
+  enviro_check
+  set_priority
+  while true ; do
+    case "$1" in
+      -a|--all     ) export LGET_ALL=yes ;                      shift   ;;
+      -d|--debug   ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
+      -f|--from    ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
+      -h|--help    ) help ;                                     exit  1 ;;
+      -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
+      -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
+      -V|--Version ) export MOD_VERSION=$2 ;                    shift 2 ;;
+      --) shift ; break ;;
+      *) help ; exit ;;
+    esac
+  done
+
+  if [ -n "$LGET_ALL" -o -n "$1" ] ; then
+    main $@
+  else
+    help
+    exit 1
+  fi
+fi

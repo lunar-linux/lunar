@@ -1,7 +1,7 @@
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -49,37 +49,29 @@ Example: .mit.edu,mysite.com"
 
 confirm_proxy_settings() {
 
-confirm()  {
- $DIALOG  $2  --nocancel  --yesno  "$1"  8 50
-}
-    FINISHED=NO
+  confirm()  {
+    $DIALOG  $2  --nocancel  --yesno  "$1"  8 50
+  }
 
-    while [ "$FINISHED" != "YES" ]
-    do
-      PROMPT="Are these settings correct?"
-      PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
-      PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
-      PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
+  FINISHED=NO
 
-   if confirm "$PROMPT" "--cr-wrap"; then
+  while [ "$FINISHED" != "YES" ] ; do
+    PROMPT="Are these settings correct?"
+    PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
+    PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
+    PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
+
+    if confirm "$PROMPT" "--cr-wrap" ; then
        FINISHED=YES
-   else
+    else
        configure_proxy
        FINISHED=NO
-   fi
-    done
+    fi
+  done
 
-    [ "$HPROXY" != "" ] && 
-      write_config "http_proxy=" "  http_proxy=$HPROXY" ||
-      write_config "http_proxy="
-      
-    [ "$FPROXY" != "" ] && 
-      write_config "ftp_proxy="  "   ftp_proxy=$FPROXY" ||
-      write_config "ftp_proxy="
-      
-    [ "$NPROXY" != "" ] && 
-      write_config "no_proxy="   "    no_proxy=$NPROXY" ||
-      write_config "no_proxy=" 
+  set_local_config "http_proxy" "$HPROXY" 
+  set_local_config "ftp_proxy" "$FPROXY"
+  set_local_config "no_proxy" "$NPROXY"
 }
 
 proxy_exit_message() {
@@ -107,9 +99,9 @@ proxy_menu()
 download_options() {
 
 set_download_rate()  {
-  PROMPT="Please enter the maximum KB per second for lgeting. \
-Example: enter 8K for downloading no faster then \
-8 Kbytes per second"
+  PROMPT="Please enter the maximum bytes per second for lgeting. \
+Example: enter 8000 for downloading no faster then \
+8 kBps, 80k for 80 kBps, or 1m for 1mBps"
 
   if  DOWNLOAD_RATE=`$DIALOG  --title "Download Rate" \
                               --ok-label  "Commit"    \
@@ -117,11 +109,25 @@ Example: enter 8K for downloading no faster then \
                               "$PROMPT"               \
                                0 0  "$DOWNLOAD_RATE"`
   then
-    [  -z  "$DOWNLOAD_RATE"          ]  ||
-    [      "$DOWNLOAD_RATE" ==  "0"  ]  ||
-    write_config "DOWNLOAD_RATE=" "DOWNLOAD_RATE=$DOWNLOAD_RATE"
+    set_local_config "DOWNLOAD_RATE" "$DOWNLOAD_RATE"
   fi
 }
+
+set_cvs_threshold()  {
+  PROMPT="Please enter the minimum time between CVS updates in minutes, \
+enter 0 for no threshold. Default threshold is 10 minutes"
+
+  if  CVS_THRESHOLD=`$DIALOG  --title "CVS threshold" \
+                              --ok-label  "Commit"    \
+                              --inputbox              \
+                              "$PROMPT"               \
+                               0 0  "$CVS_THRESHOLD"`
+  then
+    set_local_config "CVS_THRESHOLD" "$CVS_THRESHOLD"
+  fi
+}
+
+
 
 set_ftp_active(){
 
@@ -156,8 +162,8 @@ FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
       Passive)  FTP_ACTIVE=off
                ;;
    esac
-
-   write_config "FTP_ACTIVE" "   FTP_ACTIVE=$FTP_ACTIVE"
+   
+   set_local_config "FTP_ACTIVE" "$FTP_ACTIVE"
 }
 
 set_partial_downloads(){
@@ -182,46 +188,13 @@ CONTINUE=off in DETAILS file :=) or vice-versa."
    #lets get rid of " and spaces in the variable
    PARTIAL=`echo $PARTIAL | sed s/\"//g | tr -d " "`
 
-   if [ "$PARTIAL" == "Enable" ]
-   then
-      write_config "CONTINUE" "     CONTINUE=on"     
+   if [ "$PARTIAL" == "Enable" ] ; then
+     set_local_config "CONTINUE" "on"
    else
-      write_config "CONTINUE" "     CONTINUE=off"
+     set_local_config "CONTINUE" "off"
    fi
 }
 
-set_fuzzy_downloads(){
-
-   PROMPT="Please enable/disable the fuzzy download option.
-
-The default behaviour of lget is to try all possible file
-extensions while downloading the files, regardless of the 
-file extension given in DETAILS file. You may disable this
-behaviour if you want to search and download the exact filename
-and extension.
-
-This option can also be set per module basis. Add
-FUZZY=off in DETAILS file :=) or vice-versa."
-
-   FUZZY=${FUZZY:=on}
-
-   FUZZ=`$DIALOG  --title "Fuzzy Downloads" \
-                            --ok-label  "Commit" \
-                            --checklist          \
-                            "$PROMPT"            \
-                             0 0 0               \
-                  "Enable" "fuzzy downloads" $FUZZY`
-
-   #lets get rid of " and spaces in the variable
-   FUZZ=`echo $FUZZ | sed s/\"//g | tr -d " "`
-
-   if [ "$FUZZ" == "Enable" ]
-   then
-      write_config "FUZZY"  "        FUZZY=on"
-   else
-      write_config "FUZZY"  "        FUZZY=off"        
-   fi
-}
 
 set_cache_usage(){
 
@@ -246,11 +219,10 @@ USE_CACHE=off in DETAILS file :=) or vice-versa."
    #lets get rid of " and spaces in the variable
    CACHE=`echo $CACHE | sed s/\"//g | tr -d " "`
 
-   if [ "$CACHE" == "Enable" ]
-   then
-      write_config "USE_CACHE" "    USE_CACHE=on"
+   if [ "$CACHE" == "Enable" ] ; then
+     set_local_config "USE_CACHE" "on"
    else
-      write_config "USE_CACHE" "    USE_CACHE=off"
+     set_local_config "USE_CACHE" "off"
    fi
 }
 
@@ -272,19 +244,49 @@ NUM_RETRY=<n> in DETAILS file :=)"
                            "$PROMPT"                \
                             0 0  "$NUM_RETRY"`
   then
-    [  -z  "$NUM_RETRY"          ]  ||
-    write_config "NUM_RETRY=" "    NUM_RETRY=$NUM_RETRY"
+    set_local_config "NUM_RETRY" "$NUM_RETRY"
   fi
 }
+
+set_exhaustive() {
+  PROMPT="If you want, lget may try downloading the file from all
+available mirrors, instead of the one you select from the mirror
+menu. All mirrors will be tried until the file is found.
+
+This is not recommended for normal downloads, broken downloads
+should be reported to maintainer@lunar-linux.org.
+"
+
+  EXHAUSTIVE=${EXHAUSTIVE:=off}
+
+  EXHAUSTIVE=`$DIALOG  --title "Exhaustive mirror testing: " \
+             --ok-label  "Commit" \
+             --checklist          \
+             "$PROMPT"            \
+              0 0 0               \
+             "Enable" "exhaustive mirror testing" $EXHAUSTIVE`
+
+  EXHAUSTIVE=`echo $EXHAUSTIVE | sed s/\"//g | tr -d " "`
+
+  if [ "$EXHAUSTIVE" == "Enable" ] ; then
+    set_local_config "EXHAUSTIVE" "on"
+  else
+    set_local_config "EXHAUSTIVE" "off"
+  fi
+
+}
+
+
 
 while
     A_HELP="Active or passive connections while using ftp"
     C_HELP="Continue to get or re-get the partial downloads"
-    F_HELP="Get the exact filename or try to find the other possible extensions"
     N_HELP="How many times will wget try to download the file?"
     H_HELP="Cache usage for http downloads"
     R_HELP="Per process download rate"
     P_HELP="Proxy Settings"
+    E_HELP="Test all mirrors available on download"
+    T_HELP="CVS update threshold time"
 
     COMMAND=`$DIALOG  --title "Download Options"               \
                       --item-help                              \
@@ -292,24 +294,26 @@ while
                       --cancel-label  "Exit"                   \
                       --menu                                   \
                       ""                                       \
-                      0 40 7                                   \
+                      0 40 8                                   \
                       "A"  "Ftp Active/Passive"     "$A_HELP"  \
                       "C"  "Partial Downloads"      "$C_HELP"  \
-                      "F"  "Fuzzy Downloads"        "$F_HELP"  \
                       "H"  "Cache Usage"            "$H_HELP"  \
                       "N"  "Number of Retries"      "$N_HELP"  \
                       "P"  "Proxies"                "$P_HELP"  \
-                      "R"  "Download Rate"          "$R_HELP"`
+                      "R"  "Download Rate"          "$R_HELP"  \
+		      "E"  "Exhaustive mirrors"     "$E_HELP"  \
+		      "T"  "CVS update threshold"   "$T_HELP"`
 
   do
     case  $COMMAND in
       A)  set_ftp_active         ;;
       C)  set_partial_downloads  ;;
-      F)  set_fuzzy_downloads    ;;
       H)  set_cache_usage        ;;
       N)  set_retries            ;;
       P)  proxy_menu             ;;
       R)  set_download_rate      ;;
+      E)  set_exhaustive         ;;
+      T)  set_cvs_threshold      ;;
     esac
   done
 }

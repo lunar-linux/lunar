@@ -1,0 +1,157 @@
+Lunar Credits:
+
+
+ -- Introduction
+
+Hundreds of people have contributed to Lunar-Linux and have made it what it is
+today. It would be impossible to keep a list of every single contribution that
+has been made, but without those small contributions, Lunar-Linux would not be
+what it is now, and we are grateful for them.
+
+Our eternal gratitude goes to Kyle Sallee, the original author of Sorcerer
+GNU Linux, who made it possible for us to work on this great concept and
+especially in the way we want to work on it -- cooperating in a team effort, 
+together as a group. Since that moment Lunar-Linux has grown faster than
+ever.
+
+
+ -- Developers
+
+A few developers have spent enormous time on Lunar-Linux in the past, but
+are unfortunately not able to do so anymore. We miss their coding skills,
+and the pleasure of working together with these enthusiastic people. We
+hope to see them back in the future, there will always be a place in
+#lunar reserved for them:
+
+
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
+Kagan Kongar		kongar@tsrsb.org.tr		kongar
+Rick Altherr		kc8apf@kc8apf.net		kc8apf
+Jason Jackson		jacksonje@health.missouri.edu	houkan
+Timo Kosig		timo.kosig@gmx.de		tiomo
+
+
+Your current Lunar Development team is:
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
+Jan Eidtmann		cmak@lunar-linux.org		cmak
+Chuck Mead		csm@lunar-linux.org             csm
+Drew Swayze             drew@lunar-linux.org            evildrew
+Florin Braescu          florin@lunar-linux.org          florin
+Steven Michalske        hardkrash@lunar-linux.org       hardkrash
+Jasper Huijsmans        jazman@lunar-linux.org          jazman
+Jeff Hodges             jmhodges@lunar-linux.org        jmhodges
+Joel Vennin     	jol@lunar-linux.org     	jol
+Gerrit Germis           lurch@lunar-linux.org           lurch
+Moritz Heiber           moe@lunar-linux.org             Moe
+Jaime Buffery 		nestu@lunar-linux.org 		nestu
+Nick Hudson		nhudson@lunar-linux.org		nhudson
+Niki Guldbrand          niki@lunar-linux.org            niki
+Stefan Wold             ratler@lunar-linux.org          Ratler
+Rodney M. Brown         r0dzilla@lunar-linux.org 	r0dzilla
+Auke Kok		sofar@lunar-linux.org		sofar
+Jon South               striker@lunar-linux.org         Striker
+Terry Chan		tchan@lunar-linux.org           tchan
+Aaron Watry             watryac04@lunar-linux.org       Veerappan
+Jason Johnson		xoritor@lunar-linux.org         xoritor
+
+ -- Others
+
+Of course, there are many module writers, patch submitters, people submitting
+documentation, comments, or otherwise contributing to Lunar-Linux which names
+we have not forgotten (alphabetical by irc nickname):
+
+Name			E-mail				nickname
+----------------	------------------------	-------------------
+Alan Mimms		alanm@unforgettable.com		alan
+Alex Chapman		wrunt@hotmail.com		alex
+Anders Bruun Olsen	anders@bruun-olsen.net		anders
+Andrew Davies           kazami@ntlworld.com		andrew
+artit			artit@acj126.rh.psu.edu		artit
+Arwed von Merkatz	v.merkatz@gmx.net		arwed
+Atani       		atani@atani-software.net	atani
+Barak			barak@wi.rr.com			barak
+Bob Finch		w9ya@amsat.org			bfinch
+Bjorn Nitzler		b.nitzler@umea.bonet.se		bjorn
+Bachman Kharazmi        bkw@lindesign.se                bkw
+Brian Peterson		brian.peterson@tcinternet.net	brian
+Cal Evans		cal@calevans.com		cal
+Chris			cwrobel@dccnet.com		chris
+Christoph Steckelberg	heffer@mailberlin.net		christoph
+Christopher Church	cchurch@cc.gatech.edu		christopher
+Chuck Busby		scarecrow.143@attbi.com		chuck
+Daniel			dcmccal@clemson.edu		daniel
+darookee		darookee@darookee.net		darookee
+David Chan  		davidchan@rcn.com		david
+Milosz Tanski           mtanksi@wideopenwest.com        dem
+Daniel Nielsen		djn@daimi.au.dk			dnielsen
+doubletwist		doubletwist@spack.nu		doubletwist
+Eric Sandall		sandalle@mail.wsu.edu		eric
+Erik Søe Sørensen       eriksoe@daimi.au.dk             
+Vincent Vandeweijer	v_vandeweijer@zonnet.nl		evo_
+fasa           		tremon_r@epita.fr		fasa
+ST LEE			ftbee@hotmail.com		ftbee
+Gareth Clay		g.clay@warwick.ac.uk		gareth
+Gerall Kahla		gerall@chromebob.com		gerall
+Charles Ballowe 	hangman@steelballs.org		hangman
+Harley J Pig		harleypig@harleypig.com		harley
+Hendrik Visage		hvisage@is.co.za		hendrik
+Ladislav Hagara		hgr@vabo.cz			hgr
+Jan Sabbe		jan.sabbe@student.kuleuven.ac.be	jan
+Jason Overholt		j.over@verizon.net		jason
+j cr			jcrowso@hotmail.com		jcr
+Jean-Michel Smith	jean@kcco.com			jean-michel
+Jeff Schmidt		jschmidt@fnal.gov		jeff
+Jim Phillips		jphillips@ergonet-ent.com	jim
+Johan Warlander		johan@warlander.com		johan
+Joel Mayes              joel_mayes@dingoblue.net.au     joel
+Jon Svendsen		jon-sven@frisurf.no		jon
+Jonathan Evraire	evraire@tuwg.com		jonathan
+Joshua Books		jbooks@real.com			joshua
+Jyp                     j.y.p@wanadoo.fr		jyp
+Kyle Risse		krisse@kylerisse.com		krisse
+Ladislav Hagara		hgr@vaboo.cz			ladislav
+Lasar Liepins		lasar@liepins.de		lasar
+Bob Johnson		livewire_@ameritech.net		livewire
+Gáspár Ákos		madar@www.hnp.hu		madar
+Manolis Tzanidakis      mtzanidakis@lycos.co.uk		manolis
+Marc Greene		eru@subdimension.com		marc
+Mark Rushing		mark@orbislumen.net		mark
+Mike Dinitz		mdinitz@Princeton.edu		mike
+Nazadus			nazadus@swbell.net		nazadus
+Chris Newton		baron@shutdown.com		newton
+Nils Hjärpe		nisse@aol.fi			nils
+Paul Laws		paul@moway.co.uk		paul
+Paulo Almeida		pamma@netcabo.pt		paulo
+Philippe Namias		pn@novadeck.net			philippe
+P. Martin		pmartin@pe.net			pmartin
+Richard Snow		richardsnow@mcc4u.com		richard
+Rober Amble		robert_amble@yahoo.com		robert
+Robin Cook		rcook@wyrms.net			robin
+Russel Ingarm		ringram@gargoylecc.com		russel
+Sasha Andric		sasha@goldnet.ca		sasha
+Seppo Tamminen		setammi@uusikaupunki.fi		seppo
+Shawn			shawn@digilliance.net		shawn
+steve			sja8rd@mizzou.edu		sja8rd
+Steve Pinkham		spinkham@bigfoot.com		steve
+Sven Oliver Moll	svolli@svolli.de		svolli
+Target			target@targ.dyndns.org		target
+Thmoas Stewart		thomas@stewarts.org.uk		thomas
+Toby Oxborrow		oxborrow@oxborrow.net		toby
+Tom                     thomas@stewarts.org.uk		tom
+Torgeir Ulvedal Nes	torgeir@nes.ac			torgeir
+trick			gerry@c64.org			trick
+Väinö Järvelä		vaino.jarvela@pp.inet.fi	vaino
+Wes Warner		wes@lppcs.com			wes
+
+ -- Epilogue
+
+Lastly, there are those whose names we have forgotten, and we are ashamed of
+not knowing exactly who has helped us in the past.
+
+If you feel that this list is incomplete or needs adjustment in any way, feel
+free to inform us at <maintainer@lunar-linux.org>.
+

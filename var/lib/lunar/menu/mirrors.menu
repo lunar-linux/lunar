@@ -1,7 +1,7 @@
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -17,18 +17,8 @@
 #                                                          #
 ############################################################
 
-reverse()  {
-  while  [  -n  "$1"  ];  do
-    LOCATION=$1
-    URL=$2
-    echo  "$URL"
-    echo  "$LOCATION"
-    shift 2
-  done
-}
-
 mirror_list()  {
-  reverse  `sort  $MIRRORS/$1`
+  sort -r $MIRRORS/$1 | tr -s "\t" | tr "\t" "\n" | tac
 }
 
 select_mirror()  {
@@ -37,7 +27,7 @@ select_mirror()  {
            --menu                          \
            ""                              \
            0 70 10                         \
-           `mirror_list  $1`
+           $(mirror_list $1)
 }
 
 mirror_menu()  {
@@ -56,13 +46,13 @@ mirror_menu()  {
                       --cancel-label  "Exit"    \
                       --item-help               \
                       --menu     ""  0 0 0      \
-                      "GNOME"        ""  "$N_HELP"  \
-                      "GNU"          ""  "$G_HELP"  \
-                      "KDE"          ""  "$K_HELP"  \
-                      "KERNEL"       ""  "$L_HELP"  \
-                      "SOURCEFORGE"  ""  "$SF_HELP" \
-                      "LAST_RESORT"  ""  "$LR_HELP" \
-                      "XFREE86"      ""  "$X_HELP"`
+                      "GNOME"    ""  "$N_HELP"  \
+                      "GNU"      ""  "$G_HELP"  \
+                      "KDE"      ""  "$K_HELP"  \
+                      "KERNEL"   ""  "$L_HELP"  \
+                      "SFORGE"   ""  "$SF_HELP" \
+                      "LRESORT"  ""  "$LR_HELP" \
+                      "XFREE86"  ""  "$X_HELP"`
 
   do
     case  $COMMAND in
@@ -71,20 +61,19 @@ mirror_menu()  {
           KDE)      MIRROR="     KDE_URL"    ;;
           KERNEL)   MIRROR="  KERNEL_URL"    ;;
           XFREE86)  MIRROR=" XFREE86_URL"    ;;
-      SOURCEFORGE)  MIRROR="  SFORGE_URL"    ;;
-      LAST_RESORT)  MIRROR=" LRESORT_URL"    ;;
+          SFORGE)   MIRROR="  SFORGE_URL"    ;;
+          LRESORT)  MIRROR=" LRESORT_URL"    ;;
     esac
 
-    if  MIRROR_URL=`select_mirror  $COMMAND`;  then
+    if  MIRROR_URL=$(select_mirror $COMMAND);  then
       if  [  "$MIRROR_URL" == "Custom"  ];  then
-         MIRROR_URL=`$DIALOG  --inputbox  "Please enter the URL."  0 0`
+         MIRROR_URL=$($DIALOG  --inputbox  "Please enter the URL."  0 0)
       fi
 
-      [ -z "$MIRROR_URL" ] && continue
-
-      write_config "$MIRROR=" "$MIRROR=$MIRROR_URL" &&
-
-      $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+      if [ -n "$MIRROR_URL" ] ; then
+        set_local_config "$MIRROR" "$MIRROR_URL" &&
+        $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+      fi
     fi
   done
 }

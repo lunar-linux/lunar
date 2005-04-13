@@ -1,119 +1,96 @@
-.TH LIN 8 "March 2002" "Lunar Linux" LUNAR
-.SH NAME
-lin \- lunar install software packages
-.SH SYNOPSIS
+.TH "LIN" "8" "August 2003" "Lunar Linux" "LUNAR"
+.SH "NAME"
+lin \- Lunar install software modules
+.SH "SYNOPSIS"
 .B lin
-[options] [package1] ... [package2] ...
-.SH COPYRIGHT
-.if n lin(8) is Copyright (C) 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
-.if t lin(8) is Copyright \(co 2002 Terry Chan with portions copyrighted by previous authors 2001-2002
+[options] [package1[/version]] ... [package2[/version]] ...
+.SH "COPYRIGHT"
+.if n lin(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
+.if t lin(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .SH "EXAMPLE"
 To install emacs type:
-.IP
-.B lin
-emacs
-.SH "DESCRIPTION" 
+.IP 
+.B lin emacs
+.SH "DESCRIPTION"
 .I lin
 is part of the
-.SM lunar
-source-code package management suite. It is a command-line tool
-for automatically retrieving, unpacking, compiling, installing, and
-tracking software installations. 
+.B Lunar
+source\-code package management suite. It is a command\-line tool for automatically retrieving, unpacking, compiling, installing, and tracking software installations. 
 .SH "OPTIONS"
+.TP 
+.B "\-c, \-\-compile"
+Compiles module even if there is a compile cache in /var/cache/lunar.
+.TP 
+.B "-d, --debug"
+Enables debug messages, very useful when emailing a bug report.
 .TP
-.B "-f, --fix"
-Discover and fix broken modules. Four methods are used to do this.
-The methods can be toggled using lunar->Option->Integrity Checking.
-A fix is automatically issued after a
-.B lunar update.
-.IP
-.I "Find Check"
-.IP
-Discovers missing binary executables, libraries and header files.
-.IP
-.I MD5 Sum
-.IP
-Discovers modified executables and libraries.
-.IP
-.I Ldd Check
-.IP
-Discovers Broken executables and libraries.
-.IP
-.I Sym Check
-.IP
-Discovers miss-owned symbolic links to files.
-.TP
-.B "-n, --nofix"
-Discover broken modules (as --fix) , but does not fix them.
-.TP
-.B "-s"
-Download 1st, lin 2nd. eg
-.B lin
-bash fileutils
-.IP
-Downloads bash and compiles fileutils.
-.TP
-.B "--deps"
+.B "\-\-deps"
 Configures the modules and determines their dependencies, but they are not
 compiled or installed.
+.TP 
+.B "-f, \-\-from" directory
+Specify an alternate directory to search for source code tarballs. An alternative
+to /var/spool/lunar. 
+.TP 
+.B "\-h, \-\-help"
+Outputs short help.
 .TP
-.B "-c, --compile"
-Compiles module even if there is a compile cache in /var/cache/lunar.
-.TP
-.B "-r, --reconfigure"
+.B "\-p, \-\-probe"
+Only lin if the module was not previously installed.
+.TP 
+.B "\-r, \-\-reconfigure"
 Select new configuration and dependencies for modules.
+.TP 
+.B "\-R, \-\-resurrect"
+Reinstalls a module which has been removed but still has the compiled version available.
 .TP
-.B "--from directory"
-Specify an alternate directory to search for cached modules. An alternate
-to /var/cache/lunar. Cached modules are modules that your have already
-compiled. There for installation is quick.
+.B "\-s, \-\-silent"
+Decreases the level of message output.
 .TP
-.B "--url URL"
-Specify an alternative download url.
+.B "\-v, \-\-verbose"
+Increases the level of message output.
 .TP
-.B "--pam"
-reinstalls all installed modules that can use Linux-PAM.
-.TP
-.B "-h, --help"
-Display short help.
+.B "\-V, \-\-Version version
+Specify a (non-standard) module version for installation.
+.B Note:
+versions must begin with a numeral ([0-9]).
 .SH "FILES"
-All files can be edited by hand, but its easier to edit them with lunar.
-.TP
+All files can be edited by hand, but its easier to edit them with
+.B lunar.
+.TP 
 .I /etc/lunar/config
-.IP
+.IP 
 Configuration options.
-.TP
+.TP 
 .I /etc/lunar/mirrors
-.IP
+.IP 
 Mirror information.
-.TP
+.TP 
 .I /etc/lunar/local/*
-.IP
+.IP 
 Local settings.
-.TP
+.TP 
 .I /etc/lunar/local/config
-.IP
-Various local settings and compiler optimisation parameters (select with
-lunar).
-.TP
+.IP 
+Various local settings and compiler optimization parameters (select with lunar).
+.TP 
 .I /etc/lunar/local/depends/*
-.IP
-Dependency and config info for modules.
-.TP
-.I /var/lib/lunar/subroutines
-.IP
-Contains functions used by 
-.I lin.
-.I
+.IP 
+Dependency and configuration information for modules.
+.TP 
+.I /var/lib/lunar/functions/*.lunar
+.IP 
+Contains functions used by
+.B lin.
+.I 
 .SH "ENVIRONMENT"
-.PP
+.PP 
 The following settings can be altered in 
 .I /etc/lunar/local/config 
 It is easier, faster and less error prone to edit them with
 .B lunar.
 .IP AUTODEPENDS
-If set to yes this turns on autodepends, that is lin automatically resolves
-and installs dependencies.
+If set to yes this turns on autodepends, that is lin automatically resolves and installs dependencies.
 .IP GNU_URL
 The GNU Mirror (default: ftp.gnu.org).
 .IP KERNEL_URL
@@ -124,83 +101,91 @@ The xfree86 mirror (default: ftp.xfree86.org).
 The GNOME mirror (default: ftp.gnome.org).
 .IP KDE_URL
 The KDE mirror (default: ftp.kde.org).
+.IP SFORGE_URL
+The Sourceforge mirror. (default: none).
+.IP PATCH_URL
+The default patch mirror. (default: www.lunar\-linux.org/lunar/patches).
+.IP LRESORT_URL
+The default lunar mirror. If all else fails go here! (default: www.lunar\-linux.org/lunar/cache)
+.IP MOONBASE_URL
+The lunar moonbase mirrors. (default: www.lunar\-linux.org/lunar/).
 .IP optimise
-The optimise setting. Used to configure what optimisations are used while
-compiling. These are the available options i586, pentium, i686, pentiumpro,
-k6, athlon, speedy, risky and nostrip.
+The optimise setting. Used to configure what optimisations are used while compiling. These are the available options i586, pentium, i686, pentiumpro, k6, athlon, speedy, risky and nostrip.
 .IP color
-If set to yes lin outputs nice colour. Green for messages, gray for compiling,
-yellow for questions, and red for errors.q
+If set to yes lin outputs nice colour. Green for messages, gray for compiling, yellow for questions, and red for errors.
 .IP PROMPT_DELAY
 The delay in seconds that
 .B lin
-gives you when waiting for responses from you.
-.IP APPRENTICE
-If set to yes, some packages get installed automatically when run.
+pauses when waiting for responses from you.
 .IP MAIL_REPORTS
-If set to yes 
-.I README
-and
-.I INSTALL
-files along with compiler and installation logs will be mailed to the admin
+If set to yes, installation logs will be mailed to the admin upon a successful compile. Compile logs will be mailed instead upon a failed compilation.
 .IP ADMIN'S_EMAIL
 The mailbox where the reports will be mailed. The admin's email address.
 .IP PRESERVE
-When set to yes, files that have been edited will not get deleted when the
-module is re-installed
+When set to yes, configuration files that have been edited will not get deleted when the module is re\-installed
 .IP SOUND
 If set to yes then sounds will be enabled if the
-.I lunar-sound
-is installed
+.I lunar\-sound
+module is installed
 .IP SUSTAIN
-When set to yes this disallows removing of modules that would cause terrible
-malfunctions. eg glibc, gcc, bash, to name some obvious ones. 
+When set to yes this disallows removing of modules that would cause terrible malfunctions. eg glibc, gcc, bash, to name some obvious ones. 
 .IP VIEW_REPORTS
-If set to yes then you will be prompted whether to view reports before
-and after installation.
+If set to yes then you will be prompted whether to view reports before and after installation.
 .IP VOYEUR
 If set to yes then compiler output will be displayed in real time.
 .IP REAP
 Deletes files when removing.
 .IP AUTOFIX
-If set to yes whenever a library is updated all packages that depend on that
-library will be rebuilt. See FIND_CHECK, MD5SUM_CHECK, LDD_CHECK, SYM_CHECK for
-autofix settings.
+If set to yes whenever a library is updated all packages that depend on that library will be rebuilt. See FIND_CHECK, MD5SUM_CHECK, LDD_CHECK, SYM_CHECK for autofix settings.
 .IP FIND_CHECK MD5SUM_CHECK LDD_CHECK SYM_CHECK
-See the -f options above for explanations of these.
-.SH ADVANCED USAGE
-.PP
-Installing from an alternate module cache.
-.IP
+See the \-f options above for explanations of these.
+.SH "ADVANCED USAGE"
+.PP 
+Using source code tarballs from an alternate location.
+.IP 
 lin
-.B --from
-/root/lunar/personal/cache
+.B \-\-from
+/root/spool/lunar
 emacs
 .SH "NOTES"
 Do not include 
-.SM version
-or
 .SM section
-name when specifying a package. To get complete listing of software packages
-type
+name when specifying a package. 
+.B Lin
+normally installs the
+.B default version
+of the package in the 
+.B moonbase.
+Alternate versions of a module may be specified
+either as 
+.B package/version 
+or
+.B --Version version
+(where a /version exists in the moonbase). Package versions are required to begin with
+a numeral ([0-9]). 
+To get complete listing of software packages type
 .I lvu moonbase
-.TP
-If module fails during a lin, try reinstalling it with -r -c to reconfigure and recompile.
+.TP 
+If module fails during a lin, try reinstalling it with \-r \-c to reconfigure and recompile.
 .SH "COMMENTS"
 Unless the
-.B -from
+.B \-from
 option is specified lin will always check the
 .I /var/spool/lunar
 directory first to see if the package exists. If the package does not
 exist it downloads the package via the Internet.
 .SH "AUTHOR"
 Kyle Sallee
-.PP
+.PP 
 Updated Thomas Stewart 01/15/2002
-.PP
+.PP 
 Converted to Lunar by Terry Chan 03/23/2002
+.PP 
+Updated by Chuck Mead 07/17/2003
+.PP
+Updated by Terry Chan 08/08/2003
 .SH "REPORTING BUGS"
-Report bugs to <maintainer@lunar-penguin.org>
+Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
 lunar(8), lrm(8), lvu(1), lget(8), moonbase(1)
 .SH "WARRANTY"

@@ -1,0 +1,89 @@
+#!/bin/bash
+#                                                          #
+# moonbase.lunar - get moonbase from the net               #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted  Auke Kok  2002 under GPLv2                  #
+#                                                          #
+############################################################
+
+
+get_moonbase () {
+(
+  debug_msg "get_moonbase  ($@)"
+  if $(module_held "moonbase") ; then
+    verbose_msg "Skipping compile and install for held module \"moonbase\""
+    return
+  fi
+
+  SYSTEM_MOONBASE=/var/lib/lunar/moonbase
+
+  # the following overrides run_details:
+  run_details() {
+  debug_msg "  run_details ($@)"
+        MODULE=moonbase
+       VERSION=`date -u +%Y%m%d.%H`
+        SOURCE=$(basename $MOONBASE_URL)
+    SOURCE_URL=${MOONBASE_URL[@]}
+       PARTIAL=off
+   CLEAR_CACHE=on
+  }
+
+  # make sure we set these values up front to be sure
+  run_details
+  rm -f $TMPDIR/$SOURCE
+
+  if [ ! -d "$SYSTEM_MOONBASE" ] ; then
+    mkdir -p $SYSTEM_MOONBASE
+  fi
+  
+  if [ ! -d "$SYSTEM_MOONBASE/zlocal" ] ; then
+    mkdir -p $SYSTEM_MOONBASE/zlocal
+  fi
+
+  push_uniq_id
+
+  if download_module $MODULE ; then
+    echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+    mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
+    rm -rf $SYSTEM_MOONBASE                                      &&
+    lrm moonbase                                                 &&
+    mkdir $SYSTEM_MOONBASE                                       &&
+    mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
+    echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
+            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+    bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
+          sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
+    echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
+    OUTCOME=success || OUTCOME=failed
+
+    if [ "$OUTCOME" == "success" ] ; then
+      echo "$MD5SUM_LOGS/$MODULE-$VERSION" >> $INSTALL_LOGS/$MODULE-$VERSION
+      echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+  
+      # create an md5sum log
+      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+      for file in $(cat /var/log/lunar/install/moonbase-$VERSION) ; do
+        test -f "$file" && md5sum "$file"
+      done >> $MD5SUM_LOGS/$MODULE-$VERSION
+    
+      add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+      # get ready to regenerate the module index cache file
+      check_module_index
+      display_moonbase_changes
+    fi
+  else
+    OUTCOME=failed
+    INFO="Could not download a fresh moonbase"
+  fi
+  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+  if [ "$OUTCOME" == "failed" ] ; then
+    return 1
+  fi
+)
+}
+
+

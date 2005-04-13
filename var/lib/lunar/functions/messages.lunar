@@ -1,0 +1,205 @@
+#!/bin/bash
+#                                                          #
+#  messages - lunar message display functions              #
+#                                                          #
+############################################################
+#                                                          #
+# this WAS the subroutines of a source based Linux distro, #
+# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
+# available with GPL license. Since this script was taken  #
+# before licensing scheme change, no legal problems I      #
+# guess.                                                   #
+#                                                          #
+# the code is re-written for Lunar. The previous Copyright #
+# notices are kept; just in case some code is left :=)     #
+# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2001 by Kyle Sallee                            #
+#                                                          #
+# Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
+#                                                          #
+# Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
+#                                                          #
+############################################################
+#                                                          #
+# moved to messages.lunar by sofar 2003                    #
+#                                                          #
+############################################################
+
+
+# error msgs go to stderr !
+error_message() {
+  echo -e "$*" >&2
+}
+
+
+# normal messages go to stdout
+message() {
+  if [ -z "$SILENT" ] ; then
+    echo -e "$*"
+  fi
+}
+
+
+verbose_msg() {
+  if [ "$VERBOSE" == "on" ] ; then
+    message "+ $*"
+  fi
+}
+
+
+debug_msg() {
+  if [ -n "$LUNAR_DEBUG" ] ; then
+    echo "++ $@" > /dev/stderr
+    if [ "$LUNAR_DEBUG" -ge "2" ] ; then
+      echo "++ $@" >> $TMPDIR/lp_debuglog.$$
+      if [ -f $TMPDIR/l_debug_var.$$ ] ; then
+        mv $TMPDIR/l_debug_var.$$ $TMPDIR/l_debug_var.$$.old
+      fi 
+      set | grep '^[A-Z]' | sed 's/^/VAR /' > $TMPDIR/l_debug_var.$$
+      diff -U0 $TMPDIR/l_debug_var.$$.old $TMPDIR/l_debug_var.$$ | \
+          grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ > /dev/stderr
+    fi
+  fi
+}
+
+# function : xterm_msg
+# usage : xterm_msg MESSAGE
+# purpose : To display a short message in the title bar of a X terminal
+xterm_msg() {
+  debug_msg "xterm_bar ($@)"
+  case $TERM in
+    xterm*|gnome*|konsole*|rxvt*)
+      MSG="$(hostname) $(basename $0)[$$]: $@"
+      echo -n "]0; $MSG "
+      ;;
+  esac
+}
+
+# function : report FILE [description] MODULE VERSION
+report() {
+  debug_msg "report ($@)"
+  if [ ! -f "$1" ] ; then
+    return
+  fi
+
+  if [ "$VIEW_REPORTS" == "on" ] ; then
+    sound REPORT
+    if query "View $2 for ${MODULE_COLOR}${3}-${VERSION_COLOR}${4}${DEFAULT_COLOR}${QUERY_COLOR} ?" n ; then
+      view_file $1
+    fi
+  fi
+
+  if [ "$MAIL_REPORTS" == "on" ] ; then
+    TMP_MAIL=$(temp_create "mailreport")
+    date -u > $TMP_MAIL
+    echo >> $TMP_MAIL
+    view_file $1 >> $TMP_MAIL
+    mail -s "Lunar Report from $HOSTNAME : $2 for $3-$4"  \
+              $ADMIN < $TMP_MAIL 2>/dev/null
+    temp_destroy $TMP_MAIL
+  fi
+
+  true
+}
+
+
+query() {
+  debug_msg "query ($@)"
+  # 2 arguments
+  # query "what do you want?  "  DEFAULT
+
+  if [ -z "$SILENT" ]; then
+    unset RESPONSE
+    while [ -z "$RESPONSE" ]; do
+      if [ -n "$MODULE" ]; then
+        echo -e -n "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}: "
+      fi
+      echo -e -n "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
+      read -t $PROMPT_DELAY -n 1 RESPONSE
+      if [ -z "$RESPONSE" ]; then
+        RESPONSE=${RESPONSE:=$2}
+      else
+        echo
+      fi
+      case $RESPONSE in
+        y|Y)  true  ;;
+        n|N)  false ;;
+          *)  unset RESPONSE ;;
+      esac
+    done
+  else
+    case $2 in
+      y|Y)  true    ;;
+      n|N)  false   ;;
+        *)  message "Error: bad input in query()" ; exit 1  ;;
+    esac
+  fi
+}
+
+
+# mquery is a wrapper to autodetect if a certain y/n parameter in a module
+# config is not set yet and handles the case in a single function
+# usage: mqeury USE_LILO "Use lilo instead of grub" ?
+# note : $MODULE must be set properly
+mquery()
+{
+    debug_msg "mquery ($@)"
+    if [ -n "$MODULE" ]; then
+        if [ -z "$(get_module_config $1)" ]; then
+            # it's not set yet... start the asking loop
+            if query "$2" "$3" ; then
+                set_module_config "$1" y
+            else
+                set_module_config "$1" n
+            fi
+        fi
+    fi
+}
+
+
+color()  {
+  debug_msg "color ($@)"
+  case  $1  in
+    off)  unset  MODULE_COLOR
+          unset  VERSION_COLOR
+          unset  QUERY_COLOR
+          unset  LRM_COLOR
+          unset  CHECK_COLOR
+          unset  RESURRECT_COLOR
+          unset  FILE_COLOR
+          unset  SYMLINK_COLOR
+          unset  PROBLEM_COLOR
+          unset  MESSAGE_COLOR
+          unset  DEFAULT_COLOR
+          COLOR=off
+          ;;
+     on)  COLOR=on
+          ;;
+  esac
+}
+
+
+sound()  {
+  debug_msg "sound ($@)"
+  case  $SOUND  in
+    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
+         if  [  -e "$SOUND_FILE" ] ; then
+           (  cd  /  ;  play  $SOUND_FILE  & )
+         fi
+    ;;
+  esac
+}
+
+
+# function : show_fancy_progress
+# usage    : show_fancy_progress <fancy_progress_var_string>
+# purpose  : display progress ex: show_fancy_progress "Processing: $MODULE"
+show_fancy_progress () {
+  debug_msg "show_fancy_progress  ($@)"
+   echo -en "\r                                                                            \r$1\r"
+}
+
+
