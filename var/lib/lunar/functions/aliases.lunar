@@ -30,14 +30,36 @@ unalias() {
     fi
     # shortcut out: in the satisfy_depends stage we should NOT ask this again
     if [ -z "$DEPS_ONLY" ] ; then
+      # first we check if this dependency is already existant in the exact
+      # way: does this MODULE depends on TARGET already ?
       for TARGET in $TARGETS ; do
-        # the target should be present in the dependency database:
         if in_depends $MODULE $TARGET ; then
           debug_msg "unaliased \"$1\"->\"$TARGET\""
           echo $TARGET
           return
-	fi
+        fi
       done
+      # not so... other possibility is that something else already depends
+      # on TARGET?
+      for TARGET in $TARGETS ; do
+        if is_depends $TARGET ; then
+          debug_msg "unaliased \"$1\"->\"$TARGET\""
+          echo $TARGET
+          return
+        fi
+      done
+      # also not so. our last attempt is for a DISABLED dependency, but
+      # we can only use this method for OPTIONAL dependencies
+      if [ "${FUNCNAME[1]}" == "optional_depends" ]; then
+        for TARGET in $TARGETS ; do
+          # there's no function for this yet
+          if grep -q ":$TARGET:off:" $DEPENDS_STATUS ; then
+            debug_msg "unaliased \"$1\"->\"$TARGET\""
+            echo $TARGET
+            return
+          fi
+        done
+      fi
     fi
 
     # propose one and let the user pick it from a list:
