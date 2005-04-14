@@ -1,3 +1,7 @@
+2005-04-13 14:42  sofar
+
+	* var/lib/lunar/protected: removing nonsense $PROTECTED entries.
+
 2005-04-13 09:52  sofar
 
 	* var/lib/lunar/functions/aliases.lunar: This should at least fix
