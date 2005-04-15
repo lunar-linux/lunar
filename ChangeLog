@@ -1,3 +1,8 @@
+2005-04-15 07:27  sofar
+
+	* var/lib/lunar/functions/misc.lunar: prevent expansion of
+	  wildcards. closes #795
+
 2005-04-13 14:42  sofar
 
 	* var/lib/lunar/protected: removing nonsense $PROTECTED entries.
