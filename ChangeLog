@@ -388,17 +388,3 @@
 
 	* etc/lunar/config: Adding the X11 path to the static lunar PATH
 
-2005-02-14 13:01  nestu
-
-	* var/lib/lunar/functions/kernel.lunar: * get rid of the annoying
-	  grub install questions (adding a warning that it should be
-	  installed).  * add a white line between kernel entries.
-
-2005-02-14 11:48  sofar
-
-	* etc/lunar/config: We should use a hardcoded PATH, no user
-	  components allowed by default! This also solves /sbin/ldconfig
-	  not being accessible on some systems etc. Note user can still
-	  override PATH with `lunar set PATH xxxxx`, but it's not exported
-	  to sub-apps.
-
