@@ -54,18 +54,18 @@ debug_msg() {
   if [ -n "$LUNAR_DEBUG" ] ; then
     if [ "$LUNAR_DEBUG" -ge "4" ] ; then
       PLUSSES="+++++++++++++++++++++++++*"
-      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename $0)[$$]: $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" > /dev/stderr
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename $0)[$$]: $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" >&2
       unset PLUSSES
     elif [ "$LUNAR_DEBUG" -ge "3" ] ; then
       PLUSSES="+++++++++++++++++++++++++*"
-      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" > /dev/stderr
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[1]}: ${FUNCNAME[1]} ($@)" >&2
       unset PLUSSES
     elif [ "$LUNAR_DEBUG" -ge "2" ] ; then
       PLUSSES="+++++++++++++++++++++++++*"
-      echo "${PLUSSES:0:${#FUNCNAME[@]}} ${FUNCNAME[1]} ($@)" > /dev/stderr
+      echo "${PLUSSES:0:${#FUNCNAME[@]}} ${FUNCNAME[1]} ($@)" >&2
       unset PLUSSES
     else
-      echo "++ $@" > /dev/stderr
+      echo "++ $@" >&2
     fi
     if [ "$LUNAR_DEBUG" -ge "5" ] ; then
       echo "++ $@" >> $TMPDIR/lp_debuglog.$$
@@ -76,7 +76,7 @@ debug_msg() {
       fi
       set | grep '^[A-Z]' | sed 's/^/VAR /' > $TMPDIR/l_debug_var.$$
       diff -U0 $TMPDIR/l_debug_var.$$.old $TMPDIR/l_debug_var.$$ | \
-          grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ > /dev/stderr
+          grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ >&2
     fi
   fi
 }
