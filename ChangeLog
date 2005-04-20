@@ -1,3 +1,8 @@
+2005-04-20 08:38  sofar
+
+	* bin/lvu: lvu from now displays the results with a space as
+	  delimiter which allows all sorts of re-use stuff.
+
 2005-04-18 11:48  sofar
 
 	* var/lib/lunar/functions/messages.lunar: don't use /dev/stderr,
