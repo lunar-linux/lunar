@@ -760,8 +760,12 @@ main()  {
       ;;
 
     from)
-      cd $INSTALL_LOGS
-      grep $2 *
+      for MODULE in $(list_installed); do
+        VERSION=$(installed_version $MODULE)
+        if grep -q "$2" $INSTALL_LOGS/$MODULE-$VERSION ; then
+          echo "$MODULE $VERSION"
+        fi
+      done
       ;;
       
     newer)
