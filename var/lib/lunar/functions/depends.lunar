@@ -70,7 +70,7 @@ sort_by_dependency() {
   TMP_TSRT=$(temp_create "dependency.sort")
   for LINE in $(cat $DEPENDS_CACHE); do
     A=$(echo $LINE | cut -d: -f1)
-	B=$(echo $LINE | cut -d: -f1)
+	B=$(echo $LINE | cut -d: -f2)
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
