@@ -111,18 +111,8 @@ EOF
 
 
 export_snapshot()  {
-  SOURCE_DIRECTORY=$BUILD_DIRECTORY/snapshot
-  mk_source_dir $SOURCE_DIRECTORY
-  cp -a /etc $SOURCE_DIRECTORY
-  cp -a $CONFIG_CACHE $SOURCE_DIRECTORY
-
-  cat $MODULE_STATUS >> /usr/src/snapshot/packages
-
-  SNAPSHOT="/root/snapshot-$HOSTNAME-$(date -u +%Y%m%d).tar.bz2"
-
-  cd $BUILD_DIRECTORY
-  tar -c snapshot | bzip2  -9 > $SNAPSHOT
-  rm_source_dir $SOURCE_DIRECTORY
+  SNAPSHOT=snapshot-$HOSTNAME-$(date -u +%Y%m%d)
+  tar cjfP "/root/$SNAPSHOT.tar.bz2" $CONFIG_CACHE $MODULE_STATUS
   message "${MESSAGE_COLOR}Snapshot ${DEFAULT_COLOR}${FILE_COLOR}$SNAPSHOT${DEFAULT_COLOR}${MESSAGE_COLOR} created.${DEFAULT_COLOR}"
 }
 
@@ -133,10 +123,13 @@ import_snapshot()  {
 
   if [ -f "$1" ] ; then
     ( mk_source_dir $SOURCE_DIRECTORY )
-    bzcat $SNAPSHOT | tar -x -C $BUILD_DIRECTORY
+    tar xj -C $SOURCE_DIRECTORY -f $SNAPSHOT 2> /dev/null
     cd $SOURCE_DIRECTORY
+    
+	message "${MESSAGE_COLOR}Restoring lunar configuration${DEFAULT_COLOR}"
+    cp -a etc/lunar /etc
 
-    for LINE in $(cat packages) ; do
+    for LINE in $(cat .$MODULE_STATUS) ; do
       LIST="$LIST $(echo $LINE | cut -d: -f1)"
     done
     verbose_msg "Sorting update queue"
@@ -156,12 +149,8 @@ import_snapshot()  {
     QUEUE=$(cat $TMP_QUEUE)
     temp_destroy $TMP_QUEUE
 
-    message "${MESSAGE_COLOR}Restoring system configuration${DEFAULT_COLOR}"
-    cp -ai local /etc/lunar
-    cp -ai etc /
-
     if [ -n "$QUEUE" ] ; then
-      lin -c $QUEUE
+      lin -p $QUEUE
     fi
 
     cd /
