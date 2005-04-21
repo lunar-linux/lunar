@@ -168,7 +168,11 @@ find_section() {
     fi
   fi
 
-  check_module_index
+  if ! check_module_index ; then
+    # shave some time off not trying the rest of the code below since that
+	# is useless
+	return 1
+  fi
 
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
