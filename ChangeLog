@@ -1,3 +1,30 @@
+2005-04-21 11:33  sofar
+
+	* bin/lvu: Rewrote snapshot handling: *ONLY* consider lunar
+	  configs, leave /etc/ out... it just doesn't add anything and
+	  breaks more.
+
+2005-04-21 10:39  sofar
+
+	* var/lib/lunar/functions/depends.lunar: grmbl. look behind you!
+
+2005-04-21 10:32  sofar
+
+	* bin/lvu, var/lib/lunar/functions/aliases.lunar,
+	  var/lib/lunar/functions/depends.lunar,
+	  var/lib/lunar/functions/messages.lunar: Alias fixes: add a
+	  'NEVER_ASK' flag for the two occurences where this is absolutely
+	  required: lvu (s)tree and sort_by_dependency. For safety I
+	  removed the STDIN pipe to unalias in that function as well. Since
+	  sort_by_dependency removes aliases automatically the sort order
+	  isn't disturbed, and lvu will show the aliases if they're not
+	  installed just the way it should.
+
+2005-04-21 09:20  sofar
+
+	* var/lib/lunar/functions/: modules.lunar, moonbase.lunar: Two
+	  speedups: don't linger executing code if not needed.
+
 2005-04-20 08:38  sofar
 
 	* bin/lvu: lvu from now displays the results with a space as
