@@ -473,13 +473,13 @@ function show_tree() {
     # local definitions
     function depends() {
       debug_msg "depends ($@)"
-      DEP=$(unalias $1)
+      DEP=$(NEVER_ASK=1 unalias $1)
       echo "+$DEP"
     }
 
     optional_depends() {
       debug_msg "optional_depends ($@)"
-      DEP=$(unalias $1)
+      DEP=$(NEVER_ASK=1 unalias $1)
       echo "-$DEP"
     }
     
@@ -568,7 +568,7 @@ function show_tree() {
       echo "$DEP" >> $TMP_SEEN
       CUR=${DEP:0:1}
       # note the FLAG= thingy here
-      FLAG= show_tree ${DEP:1}
+      FLAG= show_tree ${DEP:1} 2> /dev/null
     fi
   done
   # don't try this at home:

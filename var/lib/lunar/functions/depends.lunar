@@ -67,7 +67,16 @@ sort_by_dependency() {
   done
 
   # tsort the existing dep relations in all of moonbase
-  cat $DEPENDS_CACHE | awk -F: '{print $1" "$2}' | while read A B ; do echo $A $(unalias $B) ; done | tsort 2> /dev/null | tac > $TMP_ALL
+  TMP_TSRT=$(temp_create "dependency.sort")
+  for LINE in $(cat $DEPENDS_CACHE); do
+    A=$(echo $LINE | cut -d: -f1)
+	B=$(echo $LINE | cut -d: -f1)
+    B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
+    echo "$A $B" >> $TMP_TSRT
+  done
+  tsort $TMP_TSRT 2> /dev/null | tac > $TMP_ALL
+  temp_destroy $TMP_TSRT
+
   # append all modules that do not have a DEPENDS file at all at the end
   # note that this is logically WRONG, but it actually will help with
   # unincluded depends, and therefore is *better* behaviour
