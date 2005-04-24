@@ -421,7 +421,3 @@
 	  until now. Thanks rolling out to Jens, Jasper and Jaime for
 	  typo-hunting. I feel dizzy now.
 
-2005-02-22 12:50  moe
-
-	* etc/lunar/config: Adding the X11 path to the static lunar PATH
-
