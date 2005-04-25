@@ -85,7 +85,7 @@ download_module() {
 				fi
 			fi
 		}
-
+		
 		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE || [ ! -f $SOURCE_CACHE/$SRC ] ; then
 			# check for cache?
 			message "${MESSAGE_COLOR}Downloading source file" \
@@ -115,6 +115,11 @@ download_module() {
 			done
 			add_url $LRESORT_URL
 		
+		    # we did all this hard work and now we toss it out:
+		    if [ -n "$BASE_URL" ] ; then
+		        ALL_URLS=$BASE_URL
+		    fi
+
 			for URL in $ALL_URLS; do
 				# and download
 				if download_url $URL $SRC $SOURCE_CACHE ; then
