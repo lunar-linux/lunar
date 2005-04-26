@@ -93,31 +93,31 @@ download_module() {
 				"${MESSAGE_COLOR}for module" \
 				"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-			# compose a list of URLS
-			ALL_URLS=
-			add_url $FRESORT_URL
-			for URL in $URLS ; do
-				add_url $URL
-				if [ "$EXHAUSTIVE" == "on" ]; then
-					# scan for hits agains known clusters of mirrors
-					for MLIST in $MIRRORS/*; do
-						for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
-							if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
-								# compose the list of valid mirrors
-								REST=${URL:${#ALT}}
-								for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
-									add_url ${HIT}${REST}
-								done
-							fi
-						done
-					done
-				fi
-			done
-			add_url $LRESORT_URL
-		
-		    # we did all this hard work and now we toss it out:
 		    if [ -n "$BASE_URL" ] ; then
+				# in case -u was passed:
 		        ALL_URLS=$BASE_URL
+			else
+				# compose a list of URLS
+				ALL_URLS=
+				add_url $FRESORT_URL
+				for URL in $URLS ; do
+					add_url $URL
+					if [ "$EXHAUSTIVE" == "on" ]; then
+						# scan for hits agains known clusters of mirrors
+						for MLIST in $MIRRORS/*; do
+							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+								if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
+									# compose the list of valid mirrors
+									REST=${URL:${#ALT}}
+									for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+										add_url ${HIT}${REST}
+									done
+								fi
+							done
+						done
+					fi
+				done
+				add_url $LRESORT_URL
 		    fi
 
 			for URL in $ALL_URLS; do
