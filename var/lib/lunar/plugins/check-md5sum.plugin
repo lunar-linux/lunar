@@ -1,0 +1,55 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# check-md5sum.plugin - plugin that performs integrity      #
+#                       checking of installed modules       #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_module_check_md5sum()  {
+  # return CONTINUE if we're disabled
+  if [ "$MD5SUM_CHECK" == "off" ]; then
+    return 2
+  fi
+  debug_msg "plugin_module_check_md5sum ($@)"
+
+  MODULE=$1
+  VERSION=$(installed_version $MODULE)
+  MD5_LOG="$MD5SUM_LOGS/$MODULE-$VERSION"
+  # by default, do not return OK but CONTINUE
+  MD5SUM_STATUS=2
+
+  if [ -e "$MD5_LOG" ]; then
+    IFS_OLD="$IFS"
+    export IFS="	
+"
+
+    cat $MD5_LOG | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
+            grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/" |
+            while read LINE ; do
+      if ! echo $LINE | md5sum --check --status ; then
+        if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" |
+		    egrep -q "executable|shared object|current ar archive" ; then
+          MD5SUM=$(md5sum "$FILE")
+          if ! grep -q "$LINE" $MD5SUM_LOGS/*; then
+            message "${FILE_COLOR}$FILE${DEFAULT_COLOR} of ${MODULE_COLOR}$MODULE${PROBLEM_COLOR} has wrong md5sum.${DEFAULT_COLOR}"
+            MD5SUM_STATUS=1
+          fi
+        fi
+      fi
+    done
+  else
+    message "${MODULE_COLOR}$MODULE${PROBLEM_COLOR}is missing a md5sum log.${DEFAULT_COLOR}"
+  fi
+  return $MD5SUM_STATUS
+}
+
+
+plugin_register MODULE_CHECK plugin_module_check_md5sum
+
+

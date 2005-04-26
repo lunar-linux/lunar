@@ -5,11 +5,16 @@ lrm \- removes Lunar software modules
 .B lrm
 [options] [module1] ... [module2] ...
 .PP
-.B lrm -h|--help
+.B lrm
+-h|--help
 .PP
-.B lrm -d|--debug|-k|--keepconfig|-n|--nosustain|-v|--verbose <module>
+.B lrm
+-d|--debug|-k|--keepconfig|-n|--nosustain|-p|--purge|-u|--upgrade|
+-v|--verbose <module(s)>
 .PP
-.B lrm -D|--downgrade <module> <version>
+.B lrm
+-D|--downgrade <module> <version>
+.PP
 .SH COPYRIGHT
 .if n lrm(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
 .if t lrm(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
@@ -43,8 +48,15 @@ remove module(s) but keep dependencies and config info
 .B "-n, --nosustain"
 emoves module(s) even if they are sustained
 .TP
+.B "-u, --upgrade"
+perform an upgrade-removal. This skips running of pre/post-removal scripts
+and implies -n and -k
+.TP
 .B "-v, --verbose"
 increases the level of message output
+.TP
+.B "-p, --purge"
+remove all modules that require "module" through dependencies
 .SH "FILES"
 .TP
 .I /var/lib/lunar/excluded
@@ -92,7 +104,7 @@ Updated Thomas Stewart 01/15/2002
 .PP
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
-Updated by Terry Chan 08/08/2003
+Updated by Auke Kok 09/21/2004
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"

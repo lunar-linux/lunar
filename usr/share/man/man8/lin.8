@@ -3,7 +3,7 @@
 lin \- Lunar install software modules
 .SH "SYNOPSIS"
 .B lin
-[options] [package1] ... [package2] ...
+[options] [package1[/version]] ... [package2[/version]] ...
 .SH "COPYRIGHT"
 .if n lin(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .if t lin(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
@@ -44,10 +44,10 @@ Select new configuration and dependencies for modules.
 .B "\-R, \-\-resurrect"
 Reinstalls a module which has been removed but still has the compiled version available.
 .TP
-.B "-s, --silent"
+.B "\-s, \-\-silent"
 Decreases the level of message output.
 .TP
-.B "-v, --verbose"
+.B "\-v, \-\-verbose"
 Increases the level of message output.
 .SH "FILES"
 All files can be edited by hand, but its easier to edit them with
@@ -144,11 +144,21 @@ lin
 emacs
 .SH "NOTES"
 Do not include 
-.SM version
-or
 .SM section
-name when specifying a package. To get complete listing of software packages
-type
+name when specifying a package. 
+.B Lin
+normally installs the
+.B default version
+of the package in the 
+.B moonbase.
+Alternate versions of a module may be specified
+either as 
+.B package/version 
+or
+.B --Version version
+(where a /version exists in the moonbase). Package versions are required to begin with
+a numeral ([0-9]). 
+To get complete listing of software packages type
 .I lvu moonbase
 .TP 
 If module fails during a lin, try reinstalling it with \-r \-c to reconfigure and recompile.

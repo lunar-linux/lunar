@@ -4,7 +4,5 @@ configuration files.
 "/etc/lunar/local/config"  contains the variables that 
 you wish to override in /etc/lunar/config.
 
-Addtionally, "/etc/lunar/local"  stores your config for 
-Linus Torvalds' Linux Kernel, net-tools and XFree86.
-
-testing commit perms
+Additionally, "/etc/lunar/local"  stores your config for 
+Linus Torvalds' Linux Kernel, net-tools and XFree86/XOrg.

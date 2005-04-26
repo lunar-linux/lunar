@@ -1,4 +1,423 @@
-2005-03-08 10:58  moe
+2005-04-21 11:33  sofar
 
-	* usr/share/man/man8/lfirsttime.8: Updating lfirsttime with lunar
+	* bin/lvu: Rewrote snapshot handling: *ONLY* consider lunar
+	  configs, leave /etc/ out... it just doesn't add anything and
+	  breaks more.
+
+2005-04-21 10:39  sofar
+
+	* var/lib/lunar/functions/depends.lunar: grmbl. look behind you!
+
+2005-04-21 10:32  sofar
+
+	* bin/lvu, var/lib/lunar/functions/aliases.lunar,
+	  var/lib/lunar/functions/depends.lunar,
+	  var/lib/lunar/functions/messages.lunar: Alias fixes: add a
+	  'NEVER_ASK' flag for the two occurences where this is absolutely
+	  required: lvu (s)tree and sort_by_dependency. For safety I
+	  removed the STDIN pipe to unalias in that function as well. Since
+	  sort_by_dependency removes aliases automatically the sort order
+	  isn't disturbed, and lvu will show the aliases if they're not
+	  installed just the way it should.
+
+2005-04-21 09:20  sofar
+
+	* var/lib/lunar/functions/: modules.lunar, moonbase.lunar: Two
+	  speedups: don't linger executing code if not needed.
+
+2005-04-20 08:38  sofar
+
+	* bin/lvu: lvu from now displays the results with a space as
+	  delimiter which allows all sorts of re-use stuff.
+
+2005-04-18 11:48  sofar
+
+	* var/lib/lunar/functions/messages.lunar: don't use /dev/stderr,
+	  but rather /proc/self/fd/2
+
+2005-04-15 07:27  sofar
+
+	* var/lib/lunar/functions/misc.lunar: prevent expansion of
+	  wildcards. closes #795
+
+2005-04-13 14:42  sofar
+
+	* var/lib/lunar/protected: removing nonsense $PROTECTED entries.
+
+2005-04-13 09:52  sofar
+
+	* var/lib/lunar/functions/aliases.lunar: This should at least fix
+	  some of the alias problems that ratler had.
+
+2005-04-13 08:02  sofar
+
+	* var/lib/lunar/functions/aliases.lunar: Much more powerfull
+	  aliasing code: really track all possible alias possibilities,
+	  survives 'lunar fixdepends' test.
+
+2005-04-12 07:34  sofar
+
+	* var/lib/lunar/: functions/download.lunar,
+	  plugins/download-generic.plugin: Move the appending of '/' to
+	  URL's to the wget method only, the other methods do not
+	  concatenate the URL with the FILE part.
+
+2005-04-08 10:46  sofar
+
+	* var/lib/lunar/functions/moonbase.lunar: slippy fingers today
+
+2005-04-08 10:45  sofar
+
+	* var/lib/lunar/functions/moonbase.lunar: Now I get it ;^)
+
+2005-04-08 10:33  sofar
+
+	* etc/lunar/config: Damn, I forgot these all along!
+
+2005-04-07 09:36  sofar
+
+	* var/lib/lunar/functions/download.lunar: I thought I typed that
+
+2005-04-07 09:19  sofar
+
+	* bin/lvu, var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/plugins/download-file.plugin,
+	  var/lib/lunar/plugins/download-generic.plugin: API change:
+	  separately pass the filename argument when downloading and
+	  verifying files (url, filename, target dir)
+
+2005-04-07 08:59  sofar
+
+	* etc/lunar/: config, mirrors/GNOME, mirrors/GNU, mirrors/KDE,
+	  mirrors/KERNEL, mirrors/LRESORT, mirrors/SFORGE, mirrors/XFREE86:
+	  Adjusting all URL's so they end with '/'
+
+2005-04-06 15:18  sofar
+
+	* var/lib/lunar/functions/: build.lunar, plugins.lunar: Fix for
+	  postbuild not installing plugins: force installation
+
+2005-04-06 07:44  sofar
+
+	* var/lib/lunar/functions/download.lunar: Bugfix: second and
+	  further sources were not downloaded.
+
+2005-04-05 08:47  sofar
+
+	* sbin/lin: Adding brackets solves this too =^)
+
+2005-04-05 05:26  tchan
+
+	* sbin/lin: Reverting sofar's change to lin because he just broke
+	  the ability to do, for example:  "lin automake autoconf".  2nd
+	  module always fails because BUILD_DIRECTORY is set to 1st modules
+	  source_dir <---- bzzzzt!!!! Not good! sofar will have to fix this
+	  correctly when he has some time.  At least now I can do "lin
+	  module1 module2 module3" again.
+
+2005-04-04 22:33  moe
+
+	* var/lib/lunar/functions/download.lunar: well, you forgot about
+	  it, right sofar? (I won't mind since you created a 5GB svn tree
+	  today ;)
+
+2005-04-04 13:36  sofar
+
+	* var/lib/lunar/plugins/download-generic.plugin: Add generic
+	  https:// to the plugins (needed for cvs module)
+
+2005-04-04 11:22  sofar
+
+	* var/lib/lunar/functions/modules.lunar: Replacing an expensive
+	  call with efficient code
+
+2005-04-04 11:11  sofar
+
+	* sbin/lin, var/lib/lunar/functions/modules.lunar,
+	  var/lib/lunar/functions/moonbase.lunar: Two changes: reinstate
+	  moonbase changelog (was somehow broken) Make lin a single thread
+	  and not call itself but rather call the main() function again
+	  (which retains cmdline settings like debug, verbose, etc)
+
+2005-04-02 15:43  sofar
+
+	* var/lib/lunar/functions/download.lunar: Rather elegant and simple
+	  fix for CVS/SVN/etc NEED_REFRESH checks: only check ${URLS[0]}
+	  for this, the rest would be nonsense anyway.
+
+2005-04-02 10:27  sofar
+
+	* bin/lvu, var/lib/lunar/functions/download.lunar: Much better
+	  implementation of the URL alternatives: this creates a decent
+	  picklist and insterts alternatives for known MIRROR clusters
+	  automatically in the list. Lvu urls needs some more work but is
+	  acceptable.
+
+2005-04-01 10:17  sofar
+
+	* var/lib/lunar/functions/messages.lunar: Extended debugging
+	  support: use -dd -ddd -dddd or even -ddddd to increase debug
+	  level
+
+2005-04-01 07:21  sofar
+
+	* var/lib/lunar/plugins/unpack-generic.plugin: Fix by....
+	  KONGAR!!!! =^D
+
+2005-03-31 13:09  sofar
+
+	* var/lib/lunar/: functions/optimize.lunar, menu/optimize.menu:
+	  Adding a switch for -Wl,as-needed to reduce the amount of linked
+	  in libraries. Faster startups? possibly. Could prove useful.
+
+2005-03-31 08:09  sofar
+
+	* sbin/lrm: cosmetic warning fix
+
+2005-03-30 13:10  sofar
+
+	* var/lib/lunar/sustained: These are no longer needed in here (the
+	  less the better)
+
+2005-03-30 11:25  sofar
+
+	* etc/lunar/config, sbin/lrm, var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/plugins/bootloader-grub.plugin,
+	  var/lib/lunar/plugins/bootloader-lilo.plugin,
+	  var/lib/lunar/plugins/download-cvs.plugin,
+	  var/lib/lunar/plugins/download-svn.plugin,
+	  var/lib/lunar/plugins/unpack-rpm.plugin,
+	  var/lib/lunar/plugins/unpack-zip.plugin,
+	  var/lib/lunar/plugins/verify-gpg.plugin: Merging in moonbase
+	  plugins: some plugins are moved to moonbase, a few base plugins
+	  are left behind.
+
+2005-03-28 23:53  v3rt1g0
+
+	* sbin/lsh: Just a little typo that has been bugging me.
+
+2005-03-28 13:26  sofar
+
+	* var/lib/lunar/plugins/check-md5sum.plugin: locale-fix: do not
+	  rely on 'FAILED' in the output, since in spanish it is "TU MADRE"
+
+2005-03-27 22:02  sofar
+
+	* var/lib/lunar/: functions/kernel.lunar, functions/plugins.lunar,
+	  plugins/bootloader-grub.plugin, plugins/bootloader-lilo.plugin:
+	  Moving bootloader code to plugins: we need to move the plugins
+	  out to the moonbase-modules later on.
+
+2005-03-25 17:56  sofar
+
+	* var/lib/lunar/: functions/check.lunar, functions/plugins.lunar,
+	  plugins/check-find.plugin, plugins/check-ldd.plugin,
+	  plugins/check-md5sum.plugin, plugins/check-symlinks.plugin:
+	  Rewriting fix code: - now plugins instead of one large file -
+	  lunar fix/nofix now runs better per-module - global lunar
+	  fix/nofix doesn't perform expensive ld_export overhead
+
+2005-03-25 15:54  sofar
+
+	* var/lib/lunar/functions/depends.lunar: Optimize performance of
+	  depends code a bit more
+
+2005-03-25 15:53  sofar
+
+	* bin/lvu: Remove remainder of versioned modules
+
+2005-03-25 11:11  sofar
+
+	* var/lib/lunar/plugins/unpack-generic.plugin: Adding plain tar
+	  files too =^)
+
+2005-03-25 10:47  sofar
+
+	* bin/lvu, var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/plugins/unpack-generic.plugin,
+	  var/lib/lunar/plugins/unpack-rpm.plugin,
+	  var/lib/lunar/plugins/unpack-zip.plugin: Fix lvu urls: now lists
+	  ALL urls!!! Migrate unpack() to use plugins for all types (allows
+	  zip and rpm code to be migrated out of core later)
+
+2005-03-24 16:38  sofar
+
+	* bin/lvu, sbin/lget, sbin/lin, usr/share/man/man8/lin.8,
+	  usr/share/man/man8/lrm.8, var/lib/lunar/functions/build.lunar,
+	  var/lib/lunar/functions/check.lunar,
+	  var/lib/lunar/functions/depends.lunar,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/edit.lunar,
+	  var/lib/lunar/functions/logging.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/modules.lunar,
+	  var/lib/lunar/functions/plugins.lunar,
+	  var/lib/lunar/functions/sizes.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/functions/temp.lunar,
+	  var/lib/lunar/functions/tracking.lunar,
+	  var/lib/lunar/plugins/download-generic.plugin,
+	  var/lib/lunar/plugins/verify-gpg.plugin,
+	  var/lib/lunar/plugins/verify-md5.plugin,
+	  var/lib/lunar/plugins/verify-sha1.plugin: Mega merge:
+
+	  * source verification is now a plugin too * rewrote gpg
+	  verification a bit * removed versioned modules (only one remains:
+	  gcc/3.4.3) * Implemented nested sections: moonbase/gnome/apps is
+	  now possible
+
+2005-03-23 16:18  sofar
+
+	* var/lib/lunar/: functions/download.lunar,
+	  functions/plugins.lunar, plugins/download-cvs.plugin,
+	  plugins/download-file.plugin, plugins/download-generic.plugin,
+	  plugins/download-svn.plugin: Adding a plugin system for
+	  downloading source code(tested). This codeset allows people to
+	  write plugins for other things later on.
+
+2005-03-23 08:42  sofar
+
+	* bin/lvu: Wanna get nitpicking? eat this!
+
+2005-03-23 00:23  hardkrash
+
+	* bin/lvu: Cleaning up the activity log so that it only finds the
+	  actual module Not other modules with the string of module name in
+	  it
+
+2005-03-20 16:53  sofar
+
+	* var/lib/lunar/functions/: check.lunar, modules.lunar,
+	  recovery.lunar: Reworking some checks and code to be more
+	  consistent in using base functions, rewrite md5sum_check slightly
+
+2005-03-20 14:57  sofar
+
+	* var/lib/lunar/functions/: check.lunar, locking.lunar: This allows
+	  'lunar fixdepends' to rebuild the depends/depends.backup files if
+	  they are nonexistant, and thus empty too!
+
+2005-03-18 22:50  sofar
+
+	* sbin/lrm: oops!
+
+2005-03-18 14:48  sofar
+
+	* var/lib/lunar/functions/download.lunar: Yikes!!!
+
+2005-03-18 11:01  sofar
+
+	* bin/lvu, var/lib/lunar/unset.sh,
+	  var/lib/lunar/functions/download.lunar,
+	  var/lib/lunar/functions/main.lunar,
+	  var/lib/lunar/functions/misc.lunar,
+	  var/lib/lunar/functions/moonbase.lunar,
+	  var/lib/lunar/functions/sources.lunar,
+	  var/lib/lunar/menu/download.menu: W00t, the end of FUZZY!!!
+
+2005-03-18 10:01  sofar
+
+	* var/lib/lunar/functions/check.lunar: Moo, this should fix that
+	  too
+
+2005-03-18 09:58  sofar
+
+	* var/lib/lunar/functions/main.lunar: Fix for the missing install
+	  log after a resurrect.
+
+2005-03-18 00:52  v3rt1g0
+
+	* var/lib/lunar/functions/main.lunar: Misc typos
+
+2005-03-18 00:40  v3rt1g0
+
+	* var/lib/lunar/menu/dmodule.menu: Typo
+
+2005-03-18 00:35  v3rt1g0
+
+	* var/lib/lunar/menu/optimize.menu: Typos
+
+2005-03-16 08:02  sofar
+
+	* var/lib/lunar/functions/messages.lunar: meh, silly
+
+2005-03-15 16:49  sofar
+
+	* var/lib/lunar/functions/check.lunar: Fix for AUTOFIX BREAKING
+	  MODULES: you can now use LDD_CHECK=off in DETAILS. please test &&
+	  verify
+
+2005-03-15 12:36  sofar
+
+	* bin/lvu: Adding 'info' ... slightly modified by chad's patch.
+
+2005-03-15 11:38  sofar
+
+	* var/lib/lunar/functions/messages.lunar: New query() routine: bad
+	  input now causes a repeated question, and the double newline is
+	  gone.
+
+2005-03-15 10:36  sofar
+
+	* var/lib/lunar/functions/depends.lunar: sanity check: bug #723
+
+2005-03-15 04:05  v3rt1g0
+
+	* etc/lunar/local/README: Fixed a typo and add metion of XOrg for
+	  what its worth
+
+2005-03-13 21:56  sofar
+
+	* var/lib/lunar/functions/connect.lunar: this is much more
+	  consistent. also adding raX interface type, which is kind of
+	  uncommon.
+
+2005-03-13 18:19  sofar
+
+	* sbin/lin: Proposed consistency fix for lin/download queue
+	  creation: use find_depends()
+
+2005-03-13 17:08  sofar
+
+	* var/lib/lunar/functions/check.lunar: Removing obsolete call to
+	  show_owner.
+
+2005-03-09 19:11  moe
+
+	* usr/share/man/man8/lfirsttime.8: Some tweaks. Two new hints.
+
+2005-03-09 15:26  sofar
+
+	* var/lib/lunar/functions/recovery.lunar: Suggested by florin, also
+	  fixed the line above the fix needed.
+
+2005-03-09 13:23  moe
+
+	* var/lib/lunar/functions/prune.lunar: wheeps .. committed a
+	  slightly older version. This is the final solution.
+
+2005-03-09 13:17  moe
+
+	* var/lib/lunar/functions/prune.lunar: Fixing lunar prune for good.
+	  God, this has been bothering me. Might break things .. but this
+	  is theedge ;-) However, I've been giving it a good test.
+
+2005-03-08 07:48  moe
+
+	* usr/share/man/man8/lfirsttime.8: Typo
+
+2005-03-07 23:08  moe
+
+	* usr/share/man/man8/lfirsttime.8: Tweaks and typo fixes. Also
+	  added a hint to the hint section.
+
+2005-03-07 22:03  moe
+
+	* usr/share/man/man8/lfirsttime.8: I finally got to rewriting
+	  lfirsttime. This should be _alot_ better then the manpage we had
+	  until now. Thanks rolling out to Jens, Jasper and Jaime for
+	  typo-hunting. I feel dizzy now.
 

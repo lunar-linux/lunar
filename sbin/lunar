@@ -44,21 +44,23 @@ General options:
 
 Commands:
 
-prune                   Removes old sources and install/compile logs
-renew                   Checks ver. against moonbase & recompiles if necessary
-update                  Fetches latest moonbase and then does a "renew"
-rebuild                 Recompiles all installed modules
-optimize                Shortcut to the optimization menu
-fix                     Check and fix all modules and internal state of lunar
-nofix                   Check but do not fix modules and internal state
-fixdepends              Check and fix the dependency database of lunar
-resurrect  modulename(s)  Force modulename(s) to be unpacked from /var/cache
-install    modulename(s)  Install a checklist of modules
-remove     modulename(s)  Remove a checklist of modules
-hold       modulename(s)  Place a hold on a checklist of modules
-unhold     modulename(s)  Remove a hold on a checklist of modules
-exile      modulename(s)  Remove a module a/o prevent it from being resurrected
-unexile    modulename(s)  Allows a module to be compiled|resurrected again
+prune                  Removes old sources and install/compile logs
+renew                  Checks ver. against moonbase & recompiles if necessary
+update                 Fetches latest moonbase and then does a "renew"
+rebuild                Recompiles all installed modules
+optimize               Shortcut to the optimization menu
+fix                    Check and fix all modules and internal state of lunar
+nofix                  Check but do not fix modules and internal state
+fixdepends             Check and fix the dependency database of lunar
+set  [var [value]]     Check internal variable(s) and assign their values
+unset var              Unsets an internal variable
+resurrect  module(s)   Force modulename(s) to be unpacked from /var/cache
+install    module(s)   Install a checklist of modules
+remove     module(s)   Remove a checklist of modules
+hold       module(s)   Place a hold on a checklist of modules
+unhold     module(s)   Remove a hold on a checklist of modules
+exile      module(s)   Remove a module a/o prevent it from being resurrected
+unexile    module(s)   Allows a module to be compiled|resurrected again
 EOF
   exit  1
 }
@@ -147,11 +149,10 @@ show_file()	{
 
 
 file_list() {
-  LIST=`ls  $1`
-  for  LINE  in  $LIST;  do
-    echo  $LINE 
-    echo  `file  -b  $1/$LINE  |  cut  -d ' ' -f1`
-  done
+  pushd $1 > /dev/null
+  file -N -F ' ' * | cut -d ' ' -f1,3 --output-delimiter='
+	'
+  popd > /dev/null
 }
 
 
@@ -191,15 +192,16 @@ remove_pkgs()	{
       INSTALLED_MODULES=$(show_installed_modules)
     fi
 
-    MODULE=`$DIALOG --title "Select module to remove please." \
+    unset MODULE
+    MODULE=`$DIALOG --title "Select module to remove:" \
                     --item-help                               \
                     --ok-label      "Select"                  \
                     --cancel-label  "Exit"                    \
                     --menu  "" 0 60 10                        \
                     $INSTALLED_MODULES`
   do
-    DESCRIPTION="Description unavailable"
-    run_module_file $MODULE DETAILS
+   (
+    DESCRIPTION=$(run_module_file $MODULE DETAILS)
 
     if  $DIALOG  --title      "Removal $MODULE"  \
                  --yesno      "$DESCRIPTION"    \
@@ -209,6 +211,7 @@ remove_pkgs()	{
       $DIALOG  --msgbox  "$MODULE added to the remove queue."  0 0  ||
       $DIALOG  --msgbox  "$MODULE is not really installed?"    0 0
     fi
+   )
   done
 }
 
@@ -384,7 +387,7 @@ set_email()  {
                 "Please enter the email address of the person or role account that should receive reports from this box."  \
                 0 0  "$ADMIN"`
   then
-    write_config "ADMIN=" "    ADMIN=$ADMIN"
+    set_local_config "ADMIN" "$ADMIN"
   fi
 }
 
@@ -395,7 +398,7 @@ set_delay()  {
                              "Please enter the time in seconds to wait for a response when prompted with a question."  \
                               0 0  "$PROMPT_DELAY"`
   then
-    write_config "PROMPT_DELAY=" "PROMPT_DELAY=$PROMPT_DELAY"
+    set_local_config "PROMPT_DELAY" "$PROMPT_DELAY"
   fi
 }
 
@@ -505,7 +508,6 @@ log_menu()  {
 
 feature_menu()  {
   A_HELP="Create convenient auto-install scripts for common executables?"
-  B_HELP="Administrate groups of Unix/Linux boxes?"
   C_HELP="Colorized messages on lin and lrm?"
   D_HELP="Use tmpfs for module installs?"
   E_HELP="Remove files when lrm?"
@@ -522,13 +524,13 @@ feature_menu()  {
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
   V_HELP="View compilation as it happens?"
   W_HELP="Verbose display of compilation process?"
+  X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
 
          ARCHIVE=${ARCHIVE:=on}
    AUTORESURRECT=${AUTORESURRECT:=on}
          AUTOFIX=${AUTOFIX:=on}
        AUTOPRUNE=${AUTOPRUNE:=off}
-           CABAL=${CABAL:=off}
            COLOR=${COLOR:=on}
      KEEP_SOURCE=${KEEP_SOURCE:=off}      
     MAIL_REPORTS=${MAIL_REPORTS:=off}
@@ -556,7 +558,6 @@ feature_menu()  {
       "AUTORESURRECT"    "Toggle"  "$AUTORESURRECT" "$H_HELP"   \
       "AUTOFIX"          "Toggle"  "$AUTOFIX"       "$F_HELP"   \
       "AUTOPRUNE"        "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
-      "CABAL"            "Toggle"  "$CABAL"         "$B_HELP"   \
       "COLOR"            "Toggle"  "$COLOR"         "$C_HELP"   \
       "KEEP_SOURCE"      "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
       "GARBAGE"          "Toggle"  "$GARBAGE"       "$G_HELP"   \
@@ -569,7 +570,8 @@ feature_menu()  {
       "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
       "TMPFS"            "Toggle"  "$TMPFS"         "$D_HELP"   \
       "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
-      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP"`
+      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
+      "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"`
 
   then
   
@@ -577,7 +579,6 @@ feature_menu()  {
    AUTORESURRECT=off
          AUTOFIX=off
        AUTOPRUNE=off
-           CABAL=off
            COLOR=off
      KEEP_SOURCE=off    
     MAIL_REPORTS=off
@@ -591,6 +592,7 @@ feature_menu()  {
            TMPFS=off
 	 VERBOSE=off
 ZLOCAL_OVERRIDES=off
+   PROBE_EXPIRED=off
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -598,7 +600,6 @@ ZLOCAL_OVERRIDES=off
        AUTORESURRECT) AUTORESURRECT=on  ;;
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
-               CABAL)         CABAL=on  ;;
                COLOR)         COLOR=on  ;;
          KEEP_SOURCE)   KEEP_SOURCE=on  ;;      
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
@@ -612,48 +613,29 @@ ZLOCAL_OVERRIDES=off
                TMPFS)         TMPFS=on  ;;
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
+       PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
       esac
     done
 
-    TEMP=`cat       $LOCAL_CONFIG    |
-          grep  -v  "ARCHIVE="       |
-	  grep  -v  "AUTORESURRECT=" |
-          grep  -v  "AUTOFIX="       |
-          grep  -v  "AUTOPRUNE="     |
-          grep  -v  "CABAL="         |
-          grep  -v  "KEEP_SOURCE="   |
-          grep  -v  "MAIL_REPORTS="  |
-          grep  -v  "VIEW_REPORTS="  |
-          grep  -v  "PRESERVE="      |
-          grep  -v  "SOUND="         |
-          grep  -v  "SUSTAIN="       |
-          grep  -v  "VOYEUR="        |
-          grep  -v  "REAP="          |
-          grep  -v  "GARBAGE="       |
-          grep  -v  "color"          |
-          grep  -v  "TMPFS="         |
-	  grep  -v  "VERBOSE="       |
-	  grep  -v  "ZLOCAL_OVERRIDES="`
+    set_local_config "ARCHIVE" "$ARCHIVE"
+    set_local_config "AUTORESURRECT" "$AUTORESURRECT"
+    set_local_config "AUTOFIX" "$AUTOFIX"
+    set_local_config "AUTOPRUNE" "$AUTOPRUNE"
+    set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
+    set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"
+    set_local_config "PRESERVE" "$PRESERVE"
+    set_local_config "SOUND" "$SOUND"
+    set_local_config "SUSTAIN" "$SUSTAIN"
+    set_local_config "VIEW_REPORTS" "$VIEW_REPORTS"
+    set_local_config "VOYEUR" "$VOYEUR"
+    set_local_config "REAP" "$REAP"
+    set_local_config "GARBAGE" "$GARBAGE"
+    set_local_config "TMPFS" "$TMPFS"
+    set_local_config "VERBOSE" "$VERBOSE"
+    set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
+    set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
+    set_local_config "COLOR" "$COLOR"
 
-    echo  "$TEMP"                        >   $LOCAL_CONFIG
-    echo  "      ARCHIVE=$ARCHIVE"       >>  $LOCAL_CONFIG
-    echo  "AUTORESURRECT=$AUTORESURRECT" >>  $LOCAL_CONFIG
-    echo  "      AUTOFIX=$AUTOFIX"       >>  $LOCAL_CONFIG
-    echo  "    AUTOPRUNE=$AUTOPRUNE"     >>  $LOCAL_CONFIG
-    echo  "        CABAL=$CABAL"         >>  $LOCAL_CONFIG
-    echo  "  KEEP_SOURCE=$KEEP_SOURCE"   >>  $LOCAL_CONFIG
-    echo  " MAIL_REPORTS=$MAIL_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "     PRESERVE=$PRESERVE"      >>  $LOCAL_CONFIG
-    echo  "        SOUND=$SOUND"         >>  $LOCAL_CONFIG
-    echo  "      SUSTAIN=$SUSTAIN"       >>  $LOCAL_CONFIG
-    echo  " VIEW_REPORTS=$VIEW_REPORTS"  >>  $LOCAL_CONFIG
-    echo  "       VOYEUR=$VOYEUR"        >>  $LOCAL_CONFIG
-    echo  "         REAP=$REAP"          >>  $LOCAL_CONFIG
-    echo  "      GARBAGE=$GARBAGE"       >>  $LOCAL_CONFIG
-    echo  "        color $COLOR"         >>  $LOCAL_CONFIG
-    echo  "        TMPFS=$TMPFS"         >>  $LOCAL_CONFIG
-    echo  "      VERBOSE=$VERBOSE"       >>  $LOCAL_CONFIG
-    echo  "ZLOCAL_OVERRIDES=$ZLOCAL_OVERRIDES" >> $LOCAL_CONFIG
   fi
 }
 
@@ -737,6 +719,31 @@ foreground_execute() {
 }
 
 
+setvar() {
+  if [ -z "$*" ] ; then
+    sort -n $LOCAL_CONFIG | grep -v -e UNIQID -e color | while read LINE ; do
+      printf "%32s %s\n" "$(echo $LINE|cut -d= -f1)" "$(echo $LINE|cut -d= -f2-)"
+    done
+  else
+    VAR=$1
+    shift
+    if [ -z "$*" ] ; then
+      VAL=$(get_local_config "$VAR")
+      printf "%s=%s\n" "$VAR" "$VAL"
+    else
+      set_local_config "$VAR" "$@"
+    fi
+  fi
+}
+
+
+unsetvar() {
+  if [ ! -z "$*" ] ; then
+    unset_local_config "$1"
+  fi   
+}
+
+
 main_menu()  {
   while
     M_HELP="Easy module management"
@@ -750,37 +757,20 @@ main_menu()  {
         OK="Select"
     CANCEL="Exit"
 
-    if  [  "$CABAL"  ==  "on"  ];  then
-      COMMAND=`$DIALOG --title "Main Menu"                   \
-                       --item-help                           \
-                       --ok-label      "$OK"                 \
-                       --cancel-label  "$CANCEL"             \
-                       --menu                                \
-                       "$LUNAR_MODULE version: $LUNAR_VERSION"       \
-                       0 0 0                                 \
-                       "M"  "Module      Menu"     "$M_HELP"  \
-                       "O"  "Option      Menu"     "$O_HELP"  \
-                       "L"  "Log         Menu"     "$L_HELP"  \
-                       "Q"  "Queue       Menu"     "$Q_HELP"  \
-		       "N"  "Maintenance Menu"     "$N_HELP"  \
-                       "F"  "Foreground  Execute"  "$F_HELP"  \
-                       "B"  "Background  Execute"  "$B_HELP"`  
-    else
-      COMMAND=`$DIALOG --title "Main Menu"                   \
-                       --item-help                           \
-                       --ok-label      "$OK"                 \
-                       --cancel-label  "$CANCEL"             \
-                       --menu                                \
-                       "$LUNAR_MODULE version: $LUNAR_VERSION"       \
-                       0 0 0                                 \
-                       "M"  "Module      Menu"     "$M_HELP"  \
-                       "O"  "Option      Menu"     "$O_HELP"  \
-                       "L"  "Log         Menu"     "$L_HELP"  \
-                       "Q"  "Queue       Menu"     "$Q_HELP"  \
-		       "N"  "Maintenance Menu"     "$N_HELP"  \
-                       "F"  "Foreground  Execute"  "$F_HELP"  \
-                       "B"  "Background  Execute"  "$B_HELP"`
-    fi
+    COMMAND=`$DIALOG --title "Main Menu"                   \
+                     --item-help                           \
+                     --ok-label      "$OK"                 \
+                     --cancel-label  "$CANCEL"             \
+                     --menu                                \
+                     "$LUNAR_MODULE version: $LUNAR_VERSION"       \
+                     0 0 0                                 \
+                     "M"  "Module      Menu"     "$M_HELP"  \
+                     "O"  "Option      Menu"     "$O_HELP"  \
+                     "L"  "Log         Menu"     "$L_HELP"  \
+                     "Q"  "Queue       Menu"     "$Q_HELP"  \
+		     "N"  "Maintenance Menu"     "$N_HELP"  \
+                     "F"  "Foreground  Execute"  "$F_HELP"  \
+                     "B"  "Background  Execute"  "$B_HELP"`
   do
     case  $COMMAND in
       M)  module_menu         ;;
@@ -846,6 +836,8 @@ else
     update     ) update                                 ;;
     rebuild    ) rebuild                                ;;
     optimize   ) optimize_architecture                  ;;
+    set        ) shift && setvar $@                     ;;
+    unset      ) shift && unsetvar $@                   ;;
     fix        ) shift && run_fix $@                    ;;
     nofix      ) shift && export NOFIX=on && run_fix $@ ;;
     fixdepends ) shift && fix_depends $@                ;;

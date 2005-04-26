@@ -1,7 +1,7 @@
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -51,10 +51,10 @@ integrity_menu()  {
       esac
     done
 
-    write_config "FIND_CHECK="   "  FIND_CHECK=$FIND_CHECK"
-    write_config "MD5SUM_CHECK=" "MD5SUM_CHECK=$MD5SUM_CHECK"
-    write_config "LDD_CHECK="    "   LDD_CHECK=$LDD_CHECK"
-    write_config "SYM_CHECK="    "   SYM_CHECK=$SYM_CHECK"
+    set_local_config "FIND_CHECK" "$FIND_CHECK"
+    set_local_config "LDD_CHECK" "$LDD_CHECK"
+    set_local_config "MD5SUM_CHECK" "$MD5SUM_CHECK"
+    set_local_config "SYM_CHECK" "$SYM_CHECK"
 
   fi
 }

@@ -36,22 +36,14 @@
 connect()  {
   debug_msg "connect ($@)"
 
-  if  !  ifconfig  |  grep  -q  "^eth"   &&
-      !  ifconfig  |  grep  -q  "^wlan"  &&
-      !  ifconfig  |  grep  -q  "^ppp"   &&
-      !  ifconfig  |  grep  -q  "^ath"   &&
-      !  ifconfig  |  grep  -q  "^tun";  then
+  if ! ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|ra[0-9]"
+  then
     pon
 
     # Timeout in deciseconds to wait for Interface to come up.
     TIMEOUT=30
 
-    until  ifconfig  |  grep  -q  eth   ||
-           ifconfig  |  grep  -q  wlan  ||
-           ifconfig  |  grep  -q  ath   ||
-           ifconfig  |  grep  -q  tun   ||
-           ifconfig  |  grep  -q  ppp   ||
-           [  $TIMEOUT == 0  ]
+    until ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|ra[0-9]" || [ $TIMEOUT == 0  ]
     do
       sleep  10
       (( TIMEOUT-- ))
@@ -69,17 +61,17 @@ disconnect()  {
   then  return
   fi
 
-  rm  -f           /tmp/disconnect
-  cat  <<  EOF  >  /tmp/disconnect
+  rm  -f           $TMPDIR/disconnect
+  cat  <<  EOF  >  $TMPDIR/disconnect
 #!/bin/sh
 
 while  ps  -A  |  grep  -q  "lget";  do  sleep  120;  done
 poff
-rm  -f  /tmp/disconnect
+rm  -f  $TMPDIR/disconnect
 EOF
 
-chmod  a+x  /tmp/disconnect
-            /tmp/disconnect  &
+chmod  a+x  $TMPDIR/disconnect
+            $TMPDIR/disconnect  &
 
 }
 

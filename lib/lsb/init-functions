@@ -435,7 +435,7 @@ default_usage () {
 # and run the code
 if  set | grep -q "^$ACTION ()" ; then 
   # do the custom function
-  $ACTION
+  $ACTION $@
 else
   get_data
   # these are always available:

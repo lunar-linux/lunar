@@ -1,5 +1,12 @@
+binutils-sparc64
+bin86
+egcs64
 grub
 lilo
-e3
+nasm
+silo
+sparc-utils
+uClibc
+uml
 yaboot
 memtest86+

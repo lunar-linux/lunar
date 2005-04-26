@@ -17,16 +17,23 @@
 #            of formats
 patch_it () { 
   verbose_msg "patch_it \"$1\" \"$2\"";
-  
-  if [[ -n `echo $1 | grep .tar` ]] ; then
+
+  # get patch from $SOURCE_CACHE automatically
+  if [ ! -f "$1" -a -f "$SOURCE_CACHE/$1" ] ; then
+    PATCH="$SOURCE_CACHE/$1"
+  else
+    PATCH="$1"
+  fi
+
+  if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
     TARCMD="tar x -O"
   else
     TARCMD="cat"
   fi
 
-  if [[ -n `echo $1 | grep .bz2` ]] ; then
+  if [[ -n `echo $PATCH | grep '\.bz2$'` ]] ; then
     GZCMD="bzcat"
-  elif [[ -n `echo $1 | grep .gz` ]] ; then
+  elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
     GZCMD="zcat"
   else
     GZCMD="cat"
@@ -35,7 +42,7 @@ patch_it () {
   TMPFILE1=$(temp_create "patch_1")
   TMPFILE2=$(temp_create "patch_2")
 
-  if $GZCMD $1 > $TMPFILE1 ; then
+  if $GZCMD $PATCH > $TMPFILE1 ; then
     # uncompress OK
     if cat $TMPFILE1 | $TARCMD > $TMPFILE2 ; then
       # untar OK
@@ -48,7 +55,7 @@ patch_it () {
     fi
   fi
 
-  message "${PROBLEM_COLOR}! Broken patch file ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
+  message "${PROBLEM_COLOR}! Broken patch file ${DEFAULT_COLOR}${FILE_COLOR}$PATCH${DEFAULT_COLOR}"
 
   temp_destroy $TMPFILE1
   temp_destroy $TMPFILE2
@@ -60,13 +67,13 @@ patch_it () {
 # usage    : sedit sed-statement file [file [file] ...]
 # purpose  : edit [files] with a sed function
 sedit () { 
-    SEDIT=$1;
-    shift;
-    for FILE in $@;
-    do
-        verbose_msg "Editing \"${FILE}\"";
-        sed -i "$SEDIT" "$FILE";
-    done
+  debug_msg "sedit ($@)"
+  SEDIT=$1
+  shift
+  for FILE in $@ ; do
+    verbose_msg "Editing \"$FILE\""
+    sed -i "$SEDIT" "$FILE"
+  done
 }
 
 

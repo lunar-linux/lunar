@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "lfirsttime 8"
-.TH lfirsttime 8 "2005-03-08" "Moritz Heiber" "Lunar Linux for the first time"
+.TH lfirsttime 8 "2005-03-09" "Moritz Heiber" "Lunar Linux for the first time"
 .SH "NAME"
 lfirsttime \- or 'What to do after a successful installation?'
 .SH "SYNOPSIS"
@@ -266,6 +266,16 @@ Once the update has been completed successfully you may go ahead and customize y
 .IP "\fBTAB-completion\fR" 4
 .IX Item "TAB-completion"
 All of the coretools are able to do tab\-completion. Say, you want to install the module 'xfce4\-panel' just go ahead and type 'lin xfce4\-p<\s-1TAB\s0>' and lin is going to append the rest of the module's name to the command. Once there are too few characters to resolve the name into one single module you just need to hit \s-1TAB\s0 twice to get a list of all the modules starting with the characters you just typed i.e. 'lin xfce<\s-1TAB\s0><\s-1TAB\s0>' is going to give you a list of all modules starting with 'xfce'.
+.IP "\fBLeftovers\fR" 4
+.IX Item "Leftovers"
+Incase of a compilation failure the sources of the failed module are left in \f(CW$BUILD_DIRECTORY\fR (usually /usr/src/). Moreover, I few tracking files lunar creates to monitor the running installation process might be left in /tmp. Make sure you tidy up these two locations from time to time.
+.Sp
+\&\fB\s-1CAUTION:\s0\fR Directories like 'linux\-2.x' are kernel source directories and _must_ be left intact. Otherwise your system is going to break! Only delete them if you're absolutely sure that they don't belong to your currently running kernel.
+.IP "\fBRunning coretools processes\fR" 4
+.IX Item "Running coretools processes"
+If you're interrupting a module installation process (f.e. by pressing '\s-1CTRL\-C\s0) you should check if there are any running coretools processes running in the background as another try to install the module might fail because of them. Have a closer look at \fBps aux\fR and \fBkill/killall\fR all the remaining coretools instances of a failed installation attempt.
+.Sp
+\&\fB\s-1CAUTION:\s0\fR Lunar allows you to run multiple installations independently. Be sure about the processes' purpose you're terminating!
 .IP "\fB\s-1IRC\s0 channel\fR" 4
 .IX Item "IRC channel"
 The fastest help you get is by chatting with the developers directly. Join the \fBLunar Linux \s-1IRC\s0 channel\fR at freenode

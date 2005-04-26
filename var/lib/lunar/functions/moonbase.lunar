@@ -12,6 +12,10 @@
 get_moonbase () {
 (
   debug_msg "get_moonbase  ($@)"
+  if $(module_held "moonbase") ; then
+    verbose_msg "Skipping compile and install for held module \"moonbase\""
+    return
+  fi
 
   SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
@@ -20,16 +24,15 @@ get_moonbase () {
   debug_msg "  run_details ($@)"
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
-        SOURCE=$(basename $MOONBASE_URL)
-    SOURCE_URL=${MOONBASE_URL[@]}
-         FUZZY=off
+        SOURCE=$MODULE.tar.bz2
+    SOURCE_URL=$MOONBASE_URL
        PARTIAL=off
    CLEAR_CACHE=on
   }
 
   # make sure we set these values up front to be sure
-  run_details
-  rm -f /tmp/$SOURCE
+  run_details moonbase
+  rm -f $TMPDIR/$SOURCE
 
   if [ ! -d "$SYSTEM_MOONBASE" ] ; then
     mkdir -p $SYSTEM_MOONBASE
@@ -40,35 +43,42 @@ get_moonbase () {
   fi
 
   push_uniq_id
-
   if download_module $MODULE ; then
-    echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
+    message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
     rm -rf $SYSTEM_MOONBASE                                      &&
+	TMP_MODULE_INDEX=$(temp_create "temp.module.index")          &&
+	cp $MODULE_INDEX $TMP_MODULE_INDEX                           &&
+    lrm moonbase                                                 &&
     mkdir $SYSTEM_MOONBASE                                       &&
     mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
-    echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
+    message "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
           sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
     echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
     OUTCOME=success || OUTCOME=failed
 
-    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
-    add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+    if [ "$OUTCOME" == "success" ] ; then
+      echo "$MD5SUM_LOGS/$MODULE-$VERSION" >> $INSTALL_LOGS/$MODULE-$VERSION
+      message "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
+  
+      # create an md5sum log
+      message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+      for file in $(cat /var/log/lunar/install/moonbase-$VERSION) ; do
+        test -f "$file" && md5sum "$file"
+      done >> $MD5SUM_LOGS/$MODULE-$VERSION
     
-    # get ready to regenerate the module index cache file
-    TMP_MODULE_INDEX=$(temp_create "module-index")
-    cp $MODULE_INDEX $TMP_MODULE_INDEX
-    if [ -f "$MODULE_INDEX" ]; then
-      rm -f $MODULE_INDEX
+      add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
+      # get ready to regenerate the module index cache file
+      create_module_index
+      create_depends_cache
+      update_plugins
+      display_moonbase_changes
+	  temp_destroy $TMP_MODULE_INDEX
     fi
-    create_module_index
-    echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}${MODULE_INDEX}" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
-    display_moonbase_changes
   else
     OUTCOME=failed
     INFO="Could not download a fresh moonbase"
@@ -79,30 +89,5 @@ get_moonbase () {
   fi
 )
 }
-
-
-# function : set_moonbase_md5
-# usage    : set_moonbase_md5
-# purpose  : creates the md5 value of overall moonbase
-set_moonbase_md5() {
-  debug_msg "set_moonbase_md5 ($@)"
-  MOONBASE_MD5=$(echo $MOONBASE/*/* | md5sum | cut -d "-" -f 1-1)
-  echo $MOONBASE_MD5
-}
-
-
-# function : get_moonbase_md5
-# usage    : get_moonbase_md5
-# purpose  : graps the MOONBASE_MD5 line from the $MODULE_INDEX
-get_moonbase_md5() {
-  debug_msg "get_moonbase_md5 ($@)"
-  MOONBASE_MD5=$(grep ^MOONBASE_MD5: $MODULE_INDEX | tail -1 2>/dev/null | \
-                cut -d : -f 2-2)
-  if [ -z "$MOONBASE_MD5" ] ; then
-    MOONBASE_MD5="0"
-  fi
-  echo "$MOONBASE_MD5"
-}
-
 
 

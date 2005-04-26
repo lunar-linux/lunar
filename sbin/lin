@@ -31,7 +31,6 @@
 # That is a limitation of bash and aliases
 shopt -s expand_aliases
 
-
 help()	{
   cat  <<  EOF
 Lin installs single or multiple modules
@@ -46,11 +45,14 @@ Optional Parameters:
        --deps			Configure modules and determine dependencies, 
 -f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
 -h  |  --help                   Displays this help text
+       --opts '--enable-xxx'    Add custom configure options to the module
 -p  |  --probe                  Only lin if not already installed
 -r  |  --reconfigure		Select new dependencies for modules
--R  |  --resurrect              Force module to be unpacked from /var/cache/lunar
+-R  |  --resurrect              Force to be unpacked from /var/cache/lunar
 -s  |  --silent			Decreases the level of message output
 -v  |  --verbose                Increases the level of message output
+-w  |  --want version           Try to install a different version that is
+                                not in moonbase
 EOF
   exit  1
 }
@@ -62,7 +64,7 @@ main() {
 
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
-    if ! get_moonbase ; then
+    if ! lget moonbase ; then
       exit 1
     fi
     # remove moonbase rofm MODULES and continue
@@ -79,46 +81,54 @@ main() {
 
   # different approaches for multiple modules (start up downloads first)
   # and single modules (plain install)
-  if [ $(echo $MODULES | wc -w) -gt 1 ] ; then
+  if [ -z "$SINGLE_MODULE" ] ; then
 
-    if [ ! -n "$TEMP_DOWNLOADLOG" ] ; then
-      export TEMP_DOWNLOADLOG=$(temp_create "download-log")
-    fi
-
-    if [ ! -n "$TEMP_PREPAREDDEPS" ] ; then
+    if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
+      export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
     fi
 
     # pass 1 : run full dependency checking
     # This pass does configuration and dependency identification.
-    if ! build_depends $MODULES ; then
-      temp_destroy $TEMP_DOWNLOADLOG
+    if ! DEPS_ONLY=--deps build_depends $MODULES ; then
+      temp_destroy $TEMP_DOWNLOAD_PIDS
       temp_destroy $TEMP_PREPAREDDEPS
       verbose_msg "Unexpected errors, bailing out!"
       exit 1
-    elif [ -n "$DEPS_ONLY" ] ; then
-      temp_destroy $TEMP_DOWNLOADLOG
-      temp_destroy $TEMP_PREPAREDDEPS
-      exit 0
     fi
 
     # pass 2 : hit the download manager button and grab a beer
     # this runs as a background process, so we are off to step #3 right away
-    verbose_msg "Spawning download manager"
-    lget $MODULES >> $TEMP_DOWNLOADLOG 2>&1 &
+    if [ -z "$DEPS_ONLY" ] ; then
+      verbose_msg "Spawning download manager"
+      for M in $MODULES ; do
+        LIST="$(for D in `find_depends $M`; do if ! module_installed $D ; then echo $D ; fi ; done | uniq) $LIST"
+      done
+      verbose_msg "download queue: $LIST $MODULES"
+      for M in $LIST $MODULES; do
+          THIS_TEMP=$(temp_create "$M.download.log")
+          rm $THIS_TEMP
+          SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+          eval TEMP_DOWNLOAD_LOG_$SAFE_M=$THIS_TEMP
+      done
+      (
+          for M in $LIST $MODULES; do
+	      SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+              eval THIS_TEMP=\$TEMP_DOWNLOAD_LOG_$SAFE_M
+              lget $M > $THIS_TEMP 2>&1 &
+              echo "$M:`jobs -p`:$THIS_TEMP" >> $TEMP_DOWNLOAD_PIDS
+              wait
+          done
+      ) &    
 
-    # pass 3 : compile/install
-    # no strange stuff should happen here anymore
-    for MODULE in $MODULES ; do
-      verbose_msg "starting installation of \"$MODULE\""
-      if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
-        if ! module_held $MODULE ; then
-          linING="/var/lock/installing.$MODULE"
-          if  [  -n  "$COMPILE"      ]  ||
-              [  -n  "$RECONFIGURE"  ]  ||
-              module_installed  $MODULE   ||
-              !  resurrect     $MODULE;  then
-            if ! lin $DEPS_ONLY $RECONFIGURE $COMPILE $PROBE $SILENT $MODULE ; then
+      # pass 3 : compile/install
+      # no strange stuff should happen here anymore
+      for MODULE in $MODULES ; do
+        if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
+          if ! module_held $MODULE ; then
+            linING="/var/lock/installing.$MODULE"
+            verbose_msg "starting lin \"$MODULE\""
+            if ! ( SINGLE_MODULE=1 main $MODULE ) ; then
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
@@ -128,50 +138,53 @@ main() {
                 echo "$MODULE" >> $TMP_LIN_SUCCESS
               fi
             fi
+          else
+            verbose_msg "Skipping compile and install for held module \"$MODULE\""
           fi
-        else
-          verbose_msg "Skipping compile and install for held module \"$MODULE\""
         fi
-      fi
-    done
+      done
+    fi
 
     # cleanups that we need to do
-    temp_destroy $TEMP_DOWNLOADLOG
+    temp_destroy $TEMP_DOWNLOAD_PIDS
     temp_destroy $TEMP_PREPAREDDEPS
 
   else
-    if [ -z "$TEMP_PREPAREDDEPS" ] ; then
-      FLAG_PREPAREDDEPS_SET=on
-      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
-    fi
     # we are only doing one module, drop down to:
     MODULE=$MODULES
-    if ! module_held $MODULE ; then
-      if [ -n "$PROBE" ] ; then
-        if ! module_installed $MODULE ; then
-          build_depends $MODULE &&
-          if [ ! -n "$DEPS_ONLY" ] ; then
+    unset RECONFIGURE
+
+    run_details $MODULE &&
+    run_depends $MODULE &&
+    satisfy_depends $MODULE
+
+    if [ -z "$DEPS_ONLY" ] ; then
+      if ! module_held $MODULE ; then
+        if [ -n "$PROBE" ] ; then
+	  # --probe install
+          if ! module_installed $MODULE ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
               exit 1
             fi
+	  elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
+	    # probe install where module is expired
+	    verbose_msg "module \"$MODULE\" needs to be updated"
+	    if ! SINGLE_MODULE= lin_module $MODULE ; then
+	      temp_destroy $TEMP_PREPAREDDEPS
+	      exit 1
+	    fi	    
           fi
-        fi
-      else
-        build_depends $MODULE &&
-        if [ ! -n "$DEPS_ONLY" ] ; then
+        else
+	  # normal install - not probed
           if ! lin_module $MODULE ; then
             temp_destroy $TEMP_PREPAREDDEPS
             exit 1
           fi
         fi
+      else
+        verbose_msg "Skipping held module \"$MODULE\""
       fi
-    else
-      verbose_msg "Skipping held module \"$MODULE\""
-    fi
-    if [ -n "$FLAG_PREPAREDDEPS_SET" ] ; then
-      temp_destroy $TEMP_PREPAREDDEPS
-      unset FLAG_PREPAREDDEPS_SET
     fi
   fi
   
@@ -180,7 +193,11 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsv" -l "compile,debug,deps,from:,help,probe,reconfigure,resurrect,silent,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:w:" -l "compile,debug,deps,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
+
+# the following trap makes sure all threads exit in case something weird
+# happens:
+trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOAD_PIDS \$INSTALLWATCHFILE) ; exit 1" CHLD INT TERM KILL
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -200,11 +217,13 @@ else
          --deps        ) export DEPS_ONLY="$1" ;                    shift   ;;
       -f|--from        ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
       -h|--help        ) help ; exit                                        ;;
+         --opts        ) export PASS_OPTS="$2" ;                    shift 2 ;;
       -p|--probe       ) export PROBE="$1" ;                        shift   ;;
       -r|--reconfigure ) export RECONFIGURE="$1" ;                  shift   ;;
       -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
       -s|--silent      ) export SILENT="$1" ;                       shift   ;;
       -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
+      -w|--want        ) export WANT_VERSION=$2 ;                   shift 2 ;;
       --) shift ; break ;;
       *) help ; break ;;
     esac

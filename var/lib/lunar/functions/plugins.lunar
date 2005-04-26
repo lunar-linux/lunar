@@ -1,0 +1,103 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# plugins.lunar - Lunar plugin code                        #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2005 by Auke Kok under GPLv2                   #
+#                                                          #
+############################################################
+
+#
+# plugin handler return status convention:
+#
+# when a handler is called, it should use the following return codes
+#
+# 0 - OK AND HALT, do not process other plugins
+# 1 - FAIL, stop executing plugins and report an error
+# 2 - OK AND CONTINUE or CONTINUE, run other plugins
+#
+
+plugin_register() {
+	# first arg: plugin type
+	# second arg: function hook name
+	# Defined plugin types:
+	# 1 - SOURCE_DOWNLOAD - download some source code
+	# 2 - SOURCE_NEEDREFRESH - source exists but needs refresh
+    # 3 - SOURCE_VERIFY - perform intergity verification on a file
+	# 4 - SOURCE_UNPACK - unpack a certain file to $(PWD)
+	# 5 - MODULE_CHECK - perform integrity checking on installed modules
+	# 6 - KERNEL_UPDATEBOOTLOADER - automate bootloader maintenance
+	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
+	((LUNAR_PLUGIN_COUNT++))
+	debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
+}
+
+
+plugin_call() {
+	debug_msg "plugin_call($@)"
+	# scan available plugins for plugin_type $1 and pass args to it
+	REQUESTED_TYPE=$1
+	shift
+	for ((COUNT=0; COUNT < $LUNAR_PLUGIN_COUNT; COUNT++)); do
+		THIS_TYPE=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f1)
+		THIS_HANDLER=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f2-)
+		if [ "$REQUESTED_TYPE" == "$THIS_TYPE" ]; then
+			# we have identified a valid plugin for this type
+			$THIS_HANDLER $@
+			RETVAL=$?
+			if [ $RETVAL -eq 2 ]; then
+				continue
+			else
+				return $RETVAL
+			fi
+		fi
+	done
+	debug_msg "Finished running all plugins for type \"$1\""
+	return 2
+}
+
+
+update_plugin() {
+	debug_msg "update_plugin($@)"
+	# update plugins of all modules or a specific one
+	#
+	# $1 - module name
+	# $2 - forced removal of plugin
+	#
+	# scan module for plugins, and add/delete them as needed
+	if SECTION=$(find_section $1); then
+		if [ -d $MOONBASE/$SECTION/$1/plugin.d ]; then
+			if [ "$2" == "install" ] ; then
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Installed \"$(basename $PLUGIN)\""
+					install -m644 $PLUGIN $PLUGIN_DIR/
+				done
+			elif [ "$2" == "remove" ] || ! module_installed $1 ; then
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Removed \"$(basename $PLUGIN)\""
+					rm -f $PLUGIN_DIR/$(basename $PLUGIN)
+				done
+			else
+				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+					debug_msg "Installed \"$(basename $PLUGIN)\""
+					install -m644 $PLUGIN $PLUGIN_DIR/
+				done
+			fi
+		fi
+	fi
+}
+
+
+update_plugins() {
+	debug_msg "update_plugins($@)"
+	# rework all plugins	
+	verbose_msg "Updating plugins"
+	for MODULE in $(list_moonbase); do
+		update_plugin $MODULE
+	done
+}
+
+
+

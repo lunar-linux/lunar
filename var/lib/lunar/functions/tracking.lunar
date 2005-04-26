@@ -25,12 +25,6 @@
 ############################################################
 
 
-boost_locked() {
-  debug_msg "boost_locked ($@)"
-  [ -f $BOOST_LOCK ] && ps `cat $BOOST_LOCK` | grep -q lin
-}
-
-
 # function : invoke_installwatch
 # usage    : invoke_installwatch
 # purpose  : start logging all disk accesses with installwatch
@@ -56,11 +50,10 @@ devoke_installwatch() {
 # purpose  : remove unwanted accesses from the installwatch file
 parse_iw() {
   debug_msg "parse_iw ($@)"
-  OMIT="^/dev\|^/tmp\|^/usr/src"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
-  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v "$OMIT"
-  cat                $INSTALLWATCHFILE | cut -f4 | grep -v "$OMIT" | grep "^/"
+  grep -v "$OMIT_IN" $INSTALLWATCHFILE | cut -f3 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f $EXCLUDED
+  cat                $INSTALLWATCHFILE | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f $EXCLUDED | grep "^/"
 }
 
 
@@ -68,6 +61,7 @@ parse_iw() {
 # usage    : create_install_log
 # purpose  : create an install log
 create_install_log() {
+
   debug_msg "create_install_log ($@)"
 
   TMP_INST_LOG=$(temp_create "install-log")
@@ -78,13 +72,7 @@ create_install_log() {
 
   export IFS="$TAB_ENTER_IFS"
 
-  parse_iw                   |
-  sort                       |
-  uniq                       |
-  filter  "$EXCLUDED"        |
-  filter  "$LOCAL_EXCLUDED"  |
-  exists                     >  $TMP_INST_LOG
-
+  parse_iw | sort | uniq | filter  "$LOCAL_EXCLUDED" | exists > $TMP_INST_LOG
   echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
   echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
@@ -128,8 +116,8 @@ create_install_cache() {
 }
 
 
-boost()	{
-  debug_msg "boost ($@)"
+finish_install() {
+  debug_msg "finish_install ($@)"
 
   create_install_log    &&
   create_md5sum_log     &&
@@ -137,9 +125,6 @@ boost()	{
   
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
-
-  rm  -f  $BOOST_LOCK
-
 }
 
 

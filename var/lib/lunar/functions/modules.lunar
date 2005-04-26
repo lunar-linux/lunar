@@ -1,7 +1,7 @@
 #!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -30,21 +30,8 @@
 list_sections() {
   debug_msg "list_sections ($@)"
   check_module_index
-  SECTIONS=$(grep -v ^MOONBASE_MD5 $MODULE_INDEX  2>/dev/null | \
-             cut -d : -f 2-2 | sort | uniq)
-  if [ -n "$SECTIONS" ] ; then
-    echo "$SECTIONS"
-    return 0
-  fi
-
-  SECTIONS=$(ls $MOONBASE | grep -v -e "ChangeLog" -e "CVS" -e "COPYING" \
-            -e "LICENSE" -e "README")
-  if [ -n "$SECTIONS" ] ; then
-    echo "$SECTIONS"
-    return 0
-  fi
-
-  return 1
+  cut -d: -f2 < $MODULE_INDEX | sort | uniq
+  return 0
 }
 
 
@@ -54,15 +41,16 @@ list_sections() {
 list_modules() {
   debug_msg "list_modules ($@)"
   if [ -z "$1" ] ; then
-    message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}" 
+    error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}"
     exit 1
   fi
 
-  for MODULE in $(ls $MOONBASE/$1 2>/dev/null | \
-      grep -v -e "ChangeLog" -e "CVS" -e "COPYING" -e "LICENSE" -e "README")
-  do
-    echo "$MODULE" 
-  done
+  if ! grep -q ":$1$" $MODULE_INDEX ; then
+    error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  grep ":$1$" $MODULE_INDEX | cut -d: -f1
   return 0
 }
 
@@ -93,7 +81,10 @@ list_installed() {
 create_module_index() {
   debug_msg "create_module_index ($@)"
   # make sure it exists before trying to see it's writeable
-  touch $MODULE_INDEX &> /dev/null
+  # this also assures that depends.cache gets remade
+  if [ ! -f $MODULE_INDEX ] ; then
+    touch $MODULE_INDEX &> /dev/null
+  fi
   
   # silently fail if we cannot write to $MODULE_INDEX, it is okay
   # for this to fail in case we are a mere user using lvu's search
@@ -101,17 +92,39 @@ create_module_index() {
   if [ ! -w "$MODULE_INDEX" ] ; then
     return 0
   fi
+ 
+  verbose_msg "Updating module index file..."
+  # doing this allows us to ctrl-C the process without breaking the
+  # index file
+  TMP_INDEX=$(temp_create "module.index")
 
-  lock_file $MODULE_INDEX || return 1
+  # here we have two options: system moonbase or custom:
+  if [ "$MOONBASE" == "/var/lib/lunar/moonbase" -a -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ] ; then
+    # short way out:
+    debug_msg "Quick generating \$MODULE_INDEX..."
+    grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
+        sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
+    # we search zlocal locally to make sure they get found:
+    find $MOONBASE/zlocal -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' >> $TMP_INDEX
+  else
+    # this *really* is the fastest way to do it, no guarantees, we
+    # do have to make sure MOONBASE is coherent and tidy though
+    debug_msg "Regenerating \$MODULE_INDEX manually..."
+    find $MOONBASE -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
+  fi
+  
+  # this should be safe enough:
+  lock_file $MODULE_INDEX &&
+  install -m644 $TMP_INDEX $MODULE_INDEX
 
-  rm -f $MODULE_INDEX 2>/dev/null
-
-  echo MOONBASE_MD5:`set_moonbase_md5` > $MODULE_INDEX
-  for SECTION in $(list_sections) ; do
-    list_modules $SECTION | sed "s/$/:$SECTION/" >> $MODULE_INDEX
-  done
-
+  # do not forget to do these at any time:
   unlock_file $MODULE_INDEX
+  temp_destroy $TMP_INDEX
 }  
 
 
@@ -119,13 +132,16 @@ create_module_index() {
 # usage   : check_module_index
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
-  debug_msg "function check_module_index ($@)"
-  if [ $(get_moonbase_md5) != $(set_moonbase_md5) ] ; then
+(
+  debug_msg "check_module_index ($@)"
+  if [ ! -e $MODULE_INDEX -o ! -e $DEPENDS_CACHE -o -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
     create_module_index
+    create_depends_cache
     return 0
   else
     return 1
   fi
+)
 }
 
 
@@ -152,7 +168,11 @@ find_section() {
     fi
   fi
 
-  check_module_index
+  if ! check_module_index ; then
+    # shave some time off not trying the rest of the code below since that
+	# is useless
+	return 1
+  fi
 
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
@@ -161,8 +181,12 @@ find_section() {
       return 0
     fi
   fi
+
+  if ! SECTIONS=$(list_sections) ; then
+    return 0
+  fi
            
-  for SECTION in $(list_sections) ; do
+  for SECTION in $SECTIONS ; do
     if [ -n "$(list_modules $SECTION | grep ^$MODULE$ )" ] ; then
       echo "$SECTION"
       return 0
@@ -183,22 +207,32 @@ run_details() {
   # (return 1), which means that the calling code needs to decide 
   # if this is a problem or not... -sofar
 
-  if ! SECTION=$(find_section $1) ; then
-    message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
+  SECTION=$(find_section $1)
+  if [ -z "$SECTION" ] ; then
+    error_message  "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${DEFAULT_COLOR}"  \
              "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
     return 1
   else
     if [ ! -f "$MOONBASE/$SECTION/$1/DETAILS" ] ; then
-      message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
+      error_message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
       return 1
     fi
    
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
-    run_module_file $1 DETAILS &> /dev/null &&
+    if [ -z "$WANT_VERSION" ] ; then
+      run_module_file $1 DETAILS &> /dev/null || return -1
+    else
+      TMP_DETAILS=$(temp_create "details.version")
+      cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^[ ]*VERSION=/d' > $TMP_DETAILS
+      VERSION="$WANT_VERSION"
+      . $TMP_DETAILS &> /dev/null || return -1
+      temp_destroy $TMP_DETAILS
+    fi
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
-    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$1}
+    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MODULE}
+    MODULE_PREFIX=${MODULE_PREFIX:-$DEFAULT_PREFIX}
 
     return 0
   fi
@@ -210,12 +244,18 @@ run_details() {
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
   debug_msg "run_module_file ($@)"
+  if [ "$1" == "moonbase" ] ; then
+    return 0
+  fi
   if [ -z "$SCRIPT_DIRECTORY" ] ; then
-    if ! run_details $1 &> /dev/null ; then
+    if ! run_details $1 > /dev/null ; then
       return 1
     fi
   fi
-  if [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
+  CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
+  if [ -e "$SCRIPT_DIRECTORY/$2.$CPU_ARCH" ]; then
+    . $SCRIPT_DIRECTORY/$2.$CPU_ARCH
+  elif [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
     . $SCRIPT_DIRECTORY/$2
   fi    
 }
@@ -256,20 +296,33 @@ installed_version() {
 }
 
 
+# display current moonbase version of $MODULE
+module_version() {
+  debug_msg "module_version($@)"
+  (
+    if run_details $1 ; then
+      echo $VERSION
+    else
+      exit 1
+    fi
+  )
+}
+
+
 # function : hold_modules
 # usage    : hold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold
 hold_modules() {
   debug_msg "hold_modules ($@)"
   if [ -n "$1" ] ; then
-    lock_file $MODULE_STATUS_BACKUP
-    lock_file $MODULE_STATUS
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:held:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done
-    unlock_file $MODULE_STATUS
+    done &&
+    unlock_file $MODULE_STATUS &&
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -281,14 +334,14 @@ hold_modules() {
 unhold_modules () {
   debug_msg "unhold_modules  ($@)"
   if [ -n "$1" ] ; then
-    lock_file $MODULE_STATUS_BACKUP
-    lock_file $MODULE_STATUS
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:held:installed:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done
-    unlock_file $MODULE_STATUS
+    done &&
+    unlock_file $MODULE_STATUS &&
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -300,8 +353,8 @@ unhold_modules () {
 exile_modules() {
   debug_msg "exile_modules ($@)"
   if [ -n "$1" ] ; then
-    lock_file $MODULE_STATUS_BACKUP
-    lock_file $MODULE_STATUS
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
       if $(module_installed $MODULE) ; then
         grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
@@ -310,8 +363,8 @@ exile_modules() {
         echo "$MODULE::exiled:0.0" >> $MODULE_STATUS_BACKUP
       fi
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done
-    unlock_file $MODULE_STATUS
+    done &&
+    unlock_file $MODULE_STATUS &&
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -323,24 +376,225 @@ exile_modules() {
 unexile_modules () {
   debug_msg "unexile_modules  ($@)"
   if [ -n "$1" ] ; then
-    lock_file $MODULE_STATUS_BACKUP
-    lock_file $MODULE_STATUS
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:exiled:installed:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done
-    unlock_file $MODULE_STATUS
+    done &&
+    unlock_file $MODULE_STATUS &&
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
 
 
-module_needs_update () {
-  debug_msg "module_needs_update  ($@)"
-  if [ -n "$1" ] ; then
-    :
-  else
-    return 1
+# function : remove_module
+# usage    : remove_module; but $MODULE must be defined earlier
+# purpose  : removed a module from the MODULE_STATUS files, no source removal
+remove_module() {
+  debug_msg "remove_module ($@)"
+
+  # catch this on new boxes:
+  if [ ! -f $MODULE_STATUS ] ; then
+    touch $MODULE_STATUS $MODULE_STATUS_BACKUP $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  fi
+
+  verbose_msg "updating lunar state files after module removal"
+  lock_file $MODULE_STATUS_BACKUP                              &&
+  lock_file $MODULE_STATUS                                     && 
+  grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
+  cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
+  unlock_file $MODULE_STATUS                                   &&
+  unlock_file $MODULE_STATUS_BACKUP                            &&
+
+  if [ -n "$EXILE" ] ; then
+     exile_modules "$1"                                  &&
+     lock_file $DEPENDS_STATUS_BACKUP                    &&
+     lock_file $DEPENDS_STATUS                           &&
+     grep  -v  ":$1:" $DEPENDS_STATUS_BACKUP  >   $DEPENDS_STATUS  &&
+     cat $DEPENDS_STATUS >  $DEPENDS_STATUS_BACKUP       &&
+     unlock_file $DEPENDS_STATUS                         &&
+     unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
+
+
+# function: add_module
+# usage   : add_module <module_name>
+# purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
+add_module()  {
+  debug_msg "add_module ($@)"
+
+  # catch this on new boxes:
+  if [ ! -f $MODULE_STATUS ] ; then
+    touch $MODULE_STATUS $MODULE_STATUS_BACKUP $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  fi
+
+  verbose_msg "updating lunar state files after module installation"
+  lock_file $MODULE_STATUS_BACKUP                             &&
+  lock_file $MODULE_STATUS                                    &&
+  grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null &&
+  echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
+  cp $MODULE_STATUS $MODULE_STATUS_BACKUP                     &&
+  unlock_file $MODULE_STATUS                                  &&
+  unlock_file $MODULE_STATUS_BACKUP
+}
+
+
+# function : purge_modules
+# usage    : purge_modules
+# purpose  : purge modules that were removed from moonbase
+purge_modules() {
+  debug_msg "purge_modules ($@)"
+  verbose_msg "Discovering modules that were removed from moonbase"
+  for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+  (
+    if ! run_details $MODULE &> /dev/null ; then
+      message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
+      if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
+        lrm $MODULE
+        continue
+      else
+        message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
+      fi
+    fi
+  )
+  done 
+}
+
+
+module_is_expired() {
+  debug_msg "module_is_expired ($@)"
+  (
+    if [ -z "$MODULE" ] ; then
+      MODULE=$1
+    fi
+    LINE=$(grep "^$MODULE:" $MODULE_STATUS | grep -v "^moonbase" | awk -F: '{print "IDATE="$2" STATUS="$3" IVERSION="$4}')
+    eval $LINE
+    if run_details $MODULE &> /dev/null ; then
+      if [ "$STATUS" == "installed" ] ; then
+        if [ "$VERSION" != "$IVERSION" ] || [ -z "$IDATE" ] ||
+	  (( "$UPDATED" > "$IDATE" )) ; then
+	  if [ "$MODULE" != "lunar" ] && [ "$MODULE" != "theedge" ] ; then
+	    return 0
+	  fi
+	fi
+      fi
+    fi
+    # nope... it's not expired
+    return -1
+  )
+}
+
+
+# function : list_expired_modules
+# usage    : list_expired_modules
+# purpose  : return a list of modules that need to be updated
+list_expired_modules() {
+  debug_msg "list_expired_modules ($@)"
+  for MODULE in $(list_installed) ; do
+    if $(module_is_expired $MODULE) ; then
+      echo "$MODULE"
+    fi
+  done
+}
+
+
+# function : update_modules
+# usage    : update_modules
+# purpose  : update all installed modules that need to be updated
+update_modules() {
+  debug_msg "update_modules ($@)"
+
+  export IFS="$STANDARD_IFS"
+
+  verbose_msg "Searching for modules to update"
+  LIST=$(list_expired_modules)
+  
+  if [ -z "$LIST" ] ; then
+    verbose_msg "Nothing to update!"
+    return
+  fi
+  
+  verbose_msg "Sorting update queue"
+  QUEUE=$(sort_by_dependency $LIST)
+
+  message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
+  TMP_QUEUE=$(temp_create "update-queue")
+  for MODULE in $QUEUE ; do
+    echo $MODULE >> $TMP_QUEUE
+    echo $MODULE
+  done
+
+  unset MODULE
+  if query "Do you wish to edit the update queue ? " n ; then
+    edit_file $TMP_QUEUE
+  fi
+  QUEUE=$(cat $TMP_QUEUE)
+  temp_destroy $TMP_QUEUE
+
+  if [ -n "$QUEUE" ] ; then
+    lin -c $QUEUE
+  fi
+}
+
+
+find_pam_aware()  {
+  debug_msg "find_pam_aware ($@)"
+
+  cat  $MODULE_STATUS_BACKUP  |
+  while  read  LINE;  do
+                        
+    MODULE="`echo  $LINE  |  cut  -d  :  -f1`"
+    STATUS="`echo  $LINE  |  cut  -d  :  -f3`"
+                                              
+    if  [  "$STATUS"  ==  "installed"  ]   ||
+        [  "$STATUS"  ==  "held"       ];  then
+
+      SECTION=`find_section  $MODULE`
+                                    
+      if    [  -d  "$MOONBASE/$SECTION/$MODULE/pam.d"  ]  &&
+            [  "$MODULE"  !=  "Linux-PAM"              ]
+      then  echo  $MODULE
+      fi
+
+    fi
+  done
+
+}
+
+
+check_blacklist() {
+  debug_msg "check_blacklist ($@)"
+  # Copyrighted Jason Johnston  2002 under GPLv2
+
+  # This checks the /var/state/lunar/gcc.<platform>
+  # file to see if it exists.  If it does exist then
+  # we grep it to see the names of the modules that
+  # DO NOT compile with gcc 3x.  If the module is
+  # on the list, we set the path so that gcc 3x is
+  # NOT used.
+
+  # If you find a module that does not compile with
+  # gcc 3x please email your findings to
+  # maintainer@lunar-linux.org.
+
+  if [ -z "$PLATFORM" ] ; then
+    eval $(grep PLATFORM= /etc/lunar/local/optimizations)
+  fi
+
+  # Usage check_checklist $MODULES
+  PLATFORM=${PLATFORM:-x86}
+  if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
+    BLKLST=$(grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM)
+    if [ "$BLKLST" == "$MODULE" ] ; then
+      message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
+      exit 0
+    fi
+  else
+    touch /var/state/lunar/blacklist.$PLATFORM
+  fi
+}
+
+

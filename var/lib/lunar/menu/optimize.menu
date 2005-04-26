@@ -1,21 +1,10 @@
 #Copyrighted Jason Johnston  2002 under GPLv2
 
-optimize() {
+set_optimize() {
 
-  if ! [[ $COMPILER ]]; then
-     COMPILER=2;
-  fi
-  if ! [[ $GCCVER ]]; then
-     GCCVER=$COMPILER
-  fi
-  if [[ `grep GCCVER /etc/lunar/local/config` ]]; then
-     if [[ $GCCVER == "" ]]; then
-        sedit "s/GCCVER=/GCCVER=$COMPILER/" /etc/lunar/local/config
-     fi
-     sedit "s/GCCVER=[2|3]/GCCVER=$COMPILER/" /etc/lunar/local/config
-  else
-     echo -e GCCVER=$COMPILER >> /etc/lunar/local/config
-  fi
+  GCCVER=${GCCVER:=3}
+  set_local_config "GCCVER" "$GCCVER"
+
   echo -e PLATFORM=$PLATFORM            '\n'\
           BUILD=$BUILD                  '\n'\
 	  MAKES=$MAKES                  '\n'\
@@ -68,14 +57,14 @@ help() {
              MENU="Basic Optimization"
         None_HELP="-O0"
         Fast_HELP="-O1"
-      Faster_HELP="-02"
+      Faster_HELP="-O2"
      Fastest_HELP="-O3"
        Small_HELP="-Os"
                ;;
 
    # Help for the cpu selections.
       cpu_help)
-          MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2)"
+          MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2 | head -n 1)"
          case $2 in
             x86)
           I386_HELP="I386 processors"
@@ -143,10 +132,11 @@ help() {
       supersparc_HELP="SuperSPARC"
        sparclite_HELP="SPARCLite"
       hypersparc_HELP="HyperSPARC"
+      sparclite86x_HELP="SPARCLite86x"
             f930_HELP="f930 SPARC"
             f934_HELP="f934 SPARC"
         sparclet_HELP="SPARCLet"
-           ts701_HELP="ts701 SPARC"
+          tsc701_HELP="tsc701 SPARC"
               v9_HELP="V9 SPARC"
       ultrasparc_HELP="ULTRASPARC"
                  ;;
@@ -155,20 +145,20 @@ help() {
 
    # Help for speed options.
       spd_help)
-              MENU="Speed optimizatons"
+              MENU="Speed optimizations"
        Speedy_HELP="Optimize to increase performance of generated code"
         Risky_HELP="Optimize to increase performance ... by violating ANSI and IEEE FP rules"
-     Pointers_HELP="Optimize by omiting frame pointers"
+     Pointers_HELP="Optimize by omitting frame pointers"
      Siblings_HELP="Optimize sibling calls"
     Profiling_HELP="Generate profiles (For later use with Branching)"
     Branching_HELP="Predict branching (For using profiled sources)"
      Aliasing_HELP="Enable strict aliasing (enabled by default -O1 and above)"
-        Cprop_HELP="Reduce scheduling dependancies and remove copies"
+        Cprop_HELP="Reduce scheduling dependencies and remove copies"
         Float_HELP="Enable float store"
       Address_HELP="Force memory address"
         Align_HELP="Align functions, loops, and jumps"
     Expensive_HELP="Perform expensive optimizations"
-      Doubles_HELP="Align double, long double, and long long on two word boundries"
+      Doubles_HELP="Align double, long double, and long long on two word boundaries"
        Tracer_HELP="Perform tail duplication to enlarge superblock size."
                ;;
 
@@ -220,8 +210,10 @@ help() {
       ldf_help)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
-#     Debug_HELP="Strip debug symbols only"
+   Optimize_HELP="Optimize hash tables during linking"
+     Reduce_HELP="Reduce the amount of linked libraries if possible"
   Combreloc_HELP="Combreloc"
+#     Debug_HELP="Strip debug symbols only"
                ;;
 
    # Addon help for extra programs
@@ -322,18 +314,19 @@ cpu_options() {
                      "PowerPC" "PowerPC" $( [ "$CPU" == "PowerPC" ] && echo "on" || echo "off" ) "$PowerPC_HELP" )
                      ;;
   
-    SPARC) OPTIONS=( "v7"         "v7"         "$v7_HELP"
-                     "cypress"    "cypress"    "$cypress_HELP"
-                     "v8"         "v8"         "$v8_HELP"
-                     "supersparc" "supersparc" "$supersparc_HELP"
-                     "sparclite"  "sparclite"  "$sparclite_HELP"
-                     "hypersparc" "hypersparc" "$hypersparc_HELP"
-                     "f930"       "f930"       "$f930_HELP"
-                     "f934"       "f934"       "$f934_HELP"
-                     "sparclet"   "sparclet"   "$sparclet_HELP"
-                     "ts701"      "ts701"      "$ts701_HELP"
-                     "v9"         "v9"         "$v9_HELP"
-                     "ultrasparc" "ultrasparc" "$ultrasparc_HELP" )
+    SPARC) OPTIONS=( "v7"         "v7"         $( [ "$CPU" == "v7" ] && echo "on" || echo "off" ) "$v7_HELP"
+                     "cypress"    "cypress"    $( [ "$CPU" == "cypress" ] && echo "on" || echo "off" ) "$cypress_HELP"
+                     "v8"         "v8"         $( [ "$CPU" == "v8" ] && echo "on" || echo "off" ) "$v8_HELP"
+                     "supersparc" "supersparc" $( [ "$CPU" == "supersparc" ] && echo "on" || echo "off" ) "$supersparc_HELP"
+                     "sparclite"  "sparclite"  $( [ "$CPU" == "sparclite" ] && echo "on" || echo "off" ) "$sparclite_HELP"
+                     "hypersparc" "hypersparc" $( [ "$CPU" == "hypersparc" ] && echo "on" || echo "off" ) "$hypersparc_HELP"
+                     "sparclite86x" "sparclite86x"  $( [ "$CPU" == "sparclite86x" ] && echo "on" || echo "off" ) "$sparclite86x_HELP"
+                     "f930"       "f930"       $( [ "$CPU" == "f930" ] && echo "on" || echo "off" ) "$f930_HELP"
+                     "f934"       "f934"       $( [ "$CPU" == "f934" ] && echo "on" || echo "off" ) "$f934_HELP"
+                     "sparclet"   "sparclet"   $( [ "$CPU" == "sparclet" ] && echo "on" || echo "off" ) "$sparclet_HELP"
+                     "tsc701"     "tsc701"     $( [ "$CPU" == "tsc701" ] && echo "on" || echo "off" ) "$ts701_HELP"
+                     "v9"         "v9"         $( [ "$CPU" == "v9" ] && echo "on" || echo "off" ) "$v9_HELP"
+                     "ultrasparc" "ultrasparc" $( [ "$CPU" == "ultrasparc" ] && echo "on" || echo "off" ) "$ultrasparc_HELP" )
                      ;;
    esac
 
@@ -350,7 +343,7 @@ spd_options() {
              "Cprop"     "-fno-cprop-registers"      $( echo ${SPD[@]} | grep -q "Cprop" && echo "on" || echo "off" )     "$Cprop_HELP"
 	     "Float"     "-ffloat-store"             $( echo ${SPD[@]} | grep -q "Float" && echo "on" || echo "off" )     "$Float_HELP"
              "Address"   "-fforce-addr"              $( echo ${SPD[@]} | grep -q "Address" && echo "on" || echo "off" )   "$Address_HELP"
-             "Align"     "-ffalign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
+             "Align"     "-falign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
              "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
              "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP"
              "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP" ) 
@@ -378,6 +371,8 @@ ccc_warn() {
 
 ldf_options() {
    OPTIONS=( "Strip"      "-s"            $( echo ${LDF[@]} | grep -q "Strip" && echo "on" || echo "off" )     "$Strip_HELP"
+            "Optimize"      "-Wl,-O1"     $( echo ${LDF[@]} | grep -q "Optimize" && echo "on" || echo "off" )     "$Optimize_HELP"
+            "Reduce"      "-Wl,--as-needed"     $( echo ${LDF[@]} | grep -q "Reduce" && echo "on" || echo "off" )     "$Reduce_HELP"
 #            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
              "Combreloc"  "-z combreloc"  $( echo ${LDF[@]} | grep -q "Combreloc" && echo "on" || echo "off" ) "$Combreloc_HELP" )
 
@@ -418,4 +413,6 @@ menu() {
                         0 0 0                   \
                       "${OPTIONS[@]}"`
    fi
+   RESULT=$(echo $RESULT | sed -e 's:^"::' -e 's:"$::')
+
 }

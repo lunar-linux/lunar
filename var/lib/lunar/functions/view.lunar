@@ -16,6 +16,7 @@ view_file()  {
       ASCII) cat $1         | ${PAGER:-less} ;;
       bzip2) cat $1 | bzcat | ${PAGER:-less} ;;
        gzip) cat $1 | zcat  | ${PAGER:-less} ;;
+       data) cat $1         | ${PAGER:-less} ;;
     esac
   else
     cat | ${PAGER:-less}

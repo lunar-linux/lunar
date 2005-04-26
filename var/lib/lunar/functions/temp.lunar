@@ -19,9 +19,8 @@
 
 temp_create() {
   debug_msg "temp_create ($@)"
-  TMPDIR=${TMPDIR:-/var/tmp}
- 
-  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$1.XXXXXXXXXX ) ; then
+  TMPFILE=$MODULE
+  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$TMPFILE.XXXXXXXXXX ) ; then
     echo $TMPFILE
   else
     message "${PROBLEM_COLOR}ERROR:${NORMAL_COLOR}${DEFAULT_COLOR}" \

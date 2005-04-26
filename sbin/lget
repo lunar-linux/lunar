@@ -44,6 +44,7 @@ Optional Parameters:
    -h | --help                  Displays this help text
    -u | --url     URL           Specify an alternate download URL
    -v | --verbose               Increases the level of message output
+   -V | --Version               Select specific Version of module to install
 EOF
 
   exit  1
@@ -52,10 +53,9 @@ EOF
 
 
 main() {
-  cd /tmp
+  cd $TMPDIR
   
   MODULES="$@"
-
   if [ -z "$MODULES" ] ; then
     verbose_msg "downloading entire moonbase"
     MODULES=$(list_moonbase | sort)
@@ -84,7 +84,7 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:v" -l "all,debug,from:,help,url:,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vV:" -l "all,debug,from:,help,url:,verbose,Version:" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -104,6 +104,7 @@ else
       -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
       -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
       --) shift ; break ;;
+      *) help ; exit ;;
     esac
   done
 

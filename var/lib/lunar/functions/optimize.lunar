@@ -255,6 +255,16 @@ optimize_cpu()  {
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
+      Athlon64)    if [[ $GCCVER == "3" ]];  then
+                       CFLAGS="$CFLAGS -mcpu=athlon64 -march=athlon64"
+                       CXXFLAGS="$CXXFLAGS -mcpu=athlon64 -march=athlon64"
+                       BUILD="i686-pc-linux-gnu"
+                    else
+                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
+                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       BUILD="i686-pc-linux-gnu"
+                    fi
+                    ;;
 
 # Begin PowerPC options
       common)  CFLAGS="$CFLAGS -mcpu=common"
@@ -404,57 +414,57 @@ optimize_cpu()  {
 	       BUILD="alpha-linux"
                ;;
 # Begin SPARC options
-      v7)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v7)            CFLAGS="$CFLAGS -mcpu=v7"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v7"
+                     BUILD="sparc-linux"
                      ;;
-      cypress)       CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      cypress)       CFLAGS="$CFLAGS -mcpu=cypress"
+                     CXXFLAGS="$CXXFLAGS -mcpu=cypress"
+                     BUILD="sparc-linux"
                      ;;
-      v8)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v8)            CFLAGS="$CFLAGS -mcpu=v8"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v8"
+                     BUILD="sparc-linux"
                      ;;
-      super-sparc)   CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      supersparc)    CFLAGS="$CFLAGS -mcpu=supersparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=supersparc"
+                     BUILD="sparc-linux"
                      ;;
-      sparclite)     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclite)     CFLAGS="$CFLAGS =mcpu=sparclite"
+                     CXXFLAGS="$CXXFLAGS =mcpu=sparclite"
+                     BUILD="sparc-linux"
                      ;;
-      hypersparc)    CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      hypersparc)    CFLAGS="$CFLAGS -mcpu=hypersparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=hypersparc"
+                     BUILD="sparc-linux"
                      ;;
-      sparclite86x)  CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclite86x)  CFLAGS="$CFLAGS -mcpu=sparclite86x"
+                     CXXFLAGS="$CXXFLAGS -mcpu=sparclite86x"
+                     BUILD="sparc-linux"
                      ;;
-      f930)          CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      f930)          CFLAGS="$CFLAGS -mcpu=f930"
+                     CXXFLAGS="$CXXFLAGS -mcpu=f930"
+                     BUILD="sparc-linux"
                      ;;
-      f934)          CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      f934)          CFLAGS="$CFLAGS -mcpu=f934"
+                     CXXFLAGS="$CXXFLAGS -mcpu=f934"
+                     BUILD="sparc-linux"
                      ;;
-      sparclet)      CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      sparclet)      CFLAGS="$CFLAGS -mcpu=sparclet"
+                     CXXFLAGS="$CXXFLAGS -mcpu=sparclet"
+                     BUILD="sparc-linux"
                      ;;
-      tsc701)        CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      tsc701)        CFLAGS="$CFLAGS -mcpu=tsc701"
+                     CXXFLAGS="$CXXFLAGS -mcpu=tsc701"
+                     BUILD="sparc-linux"
                      ;;
-      v9)            CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      v9)            CFLAGS="$CFLAGS -mcpu=v9"
+                     CXXFLAGS="$CXXFLAGS -mcpu=v9"
+                     BUILD="sparc-linux"
                      ;;
-      ultrasparc)    CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
-                     BUILD=""
+      ultrasparc)    CFLAGS="$CFLAGS -mcpu=ultrasparc"
+                     CXXFLAGS="$CXXFLAGS -mcpu=ultrasparc"
+                     BUILD="sparc-linux"
                      ;;
    esac
 }
@@ -492,11 +502,7 @@ optimize_speed() {
         Profiling) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
-		     if ! [[ `grep KEEP_SOURCE=on /etc/lunar/local/config` ]]; then
-		       echo "KEEP_SOURCE=yes" >> /etc/lunar/local/config
-		     elif [[ `grep KEEP_SOURCE=off /etc/lunar/local/config` ]]; then
-		       sedit "s/KEEP_SOURCE=off/KEEP_SOURCE=on/" /etc/lunar/local/config
-		     fi
+		     set_local_config "KEEP_SOURCE" "on"
                    else
                      CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
@@ -667,6 +673,10 @@ optimize_ld() {
       case $A in
          Strip)     LDFLAGS="$LDFLAGS -s"
                     ;;
+         Optimize)  LDFLAGS="$LDFLAGS -Wl,-O1"
+                    ;;
+         Reduce)    LDFLAGS="$LDFLAGS -Wl,--as-needed"
+                    ;;
 # The Debug option breaks some modules (eg: tar and gzip, just to mention a
 # few), so this option should either be removed, or remain "deactivated"
 # untill this has been resolved but the hatch is that we don't know how many
@@ -804,6 +814,11 @@ ADDON=( ) > /etc/lunar/local/optimizations
                 ;;
   esac
 
+  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" ] ; then
+    CFLAGS=$(echo $CFLAGS | sed 's:-mcpu:-mtune:')
+    CXXFLAGS=$(echo $CXXFLAGS | sed 's:-mcpu:-mtune:')
+  fi
+
   export CC_EXT
   export CXX_EXT
   export CFLAGS
@@ -847,7 +862,7 @@ optimize_architecture()  {
   help compiler_help          &&
   compiler_options            &&
   menu radiolist              &&
-  COMPILER=$RESULT
+  GCCVER=$RESULT
   
   help cc_help                &&
   cc_options                  &&
@@ -892,7 +907,7 @@ optimize_architecture()  {
   FPM=$RESULT
 
   help ccc_warn_help          &&
-  ccc_warn            &&
+  ccc_warn                    &&
   menu checklist              &&
   CCC_WARN=$RESULT  
 
@@ -910,8 +925,12 @@ optimize_architecture()  {
                 --nocancel                       \
 		--stdout                         \
 		--inputbox                       \
-		"Enter the number of concurrent makes ( >= 1 ). Hint: how many CPU's do you have?"  \
+		"Enter the number of concurrent makes ( a value > 1 ) or leave this field empty."  \
 		0 55 $MAKES`
+  # people WILL fill in 1... so, we knock them down and take their money:
+  if [[ $MAKES -lt 2 ]] ; then
+    unset MAKES
+  fi
 
   STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
                 --nocancel                       \
@@ -920,7 +939,8 @@ optimize_architecture()  {
 		"Enter the number to set the stack to, leave empty for default."  \
 		0 55 $STACK`
 
-  optimize
+  set_optimize
+
 }
 
 

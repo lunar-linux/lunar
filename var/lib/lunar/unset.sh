@@ -10,12 +10,7 @@ unset BOLD
 unset BOOST_LOCK
 unset BOPT
 unset BUILD
-unset CABAL
 unset CHECK_COLOR
-unset COLONY
-unset COLONY_KEYS
-unset COLONY_NAMES
-unset COLONY_OUTPUT
 unset COLOR
 unset COMPILE_LOGS
 unset CONFIG_CACHE
@@ -36,7 +31,6 @@ unset FIND_CHECK
 unset FPM
 unset FTP_ACTIVE
 unset FUNCTIONS
-unset FUZZY
 unset GARBAGE
 unset GCCVER
 unset GCCWRAPPERS
@@ -60,7 +54,6 @@ unset LUNAR_MODULE
 unset LUNAR_MODULES
 unset LUNAR_PRIORITY
 unset MAKES
-unset MAX_COLONYS
 unset MAX_SOURCES
 unset MD5SUM_CHECK
 unset MD5SUM_LOGS
@@ -95,8 +88,8 @@ unset SPD
 unset SUBROUTINES
 unset SUSTAIN
 unset SUSTAINED
-unset SYMLINK_COLOR
 unset SYM_CHECK
+unset SYMLINK_COLOR
 unset TMPFS
 unset TRACKED
 unset UNIQID

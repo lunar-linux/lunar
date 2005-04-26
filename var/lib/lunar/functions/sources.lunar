@@ -2,7 +2,7 @@
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -23,7 +23,7 @@ verify_source() {
   debug_msg "verify_source ($@)"
   VERIFIED="true"
   for SOURCE_FILE in $@ ; do
-    if ! guess_filename $SOURCE_CACHE/$1 >/dev/null ; then
+    if [ ! -f $SOURCE_CACHE/$1 ] ; then
       message "${PROBLEM_COLOR}Missing ${FILE_COLOR}${1}${DEFAULT_COLOR}"
       message "${PROBLEM_COLOR}Lunar Install aborting.${DEFAULT_COLOR}"
       activity_log "lin" "$MODULE" "$VERSION" "failed" "because it was missing source:  $1"
@@ -34,9 +34,8 @@ verify_source() {
 
 
 # function : sources
-# usage    : sources <module_name> {MD5|VFY|
-# purpose  : displays the filenames and md5sums or VFY part of sources
-#            for a given module
+# usage    : sources <module_name>
+# purpose  : displays the sources needed for a given module
 sources() {
 (
   debug_msg "sources ($@)"
@@ -51,21 +50,11 @@ sources() {
     TEMP=${TEMP/SOURCE0/SOURCE}
 
     eval SRC1=\$${TEMP}
-    if [ "$2" == "MD5" ] ; then
-      eval SRC_MD5=\$${TEMP}_MD5
-      if [ -z "$SRC_MD5" ] ; then
-        SRC_MD5=0
-      fi
-    fi
-
     eval SRC2=\$SOURCE$((CNT+1))
     eval SRC3=\$SOURCE$((CNT+2))
 
     if [ -n "$SRC1" ] ; then
       echo $SRC1
-      if [ "$2" == "MD5" ] ; then
-        echo $SRC_MD5
-      fi
     fi
 
     #if two consequtive empty sources, then break
@@ -77,93 +66,26 @@ sources() {
 }
 
 
-# function : md5_verify_source
-# usage    : md5_verify_source filename md5
-# purpose  : md5 verifies a filename
-md5_verify_source() {
-  debug_msg "md5_verify_source ($@)"
-  if [ "$2" != "$(md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)" ] ; then
-     return 1
+erase()  {
+  debug_msg "erase ($@)"
+  if [ "$PARTIAL" == "off" ]; then
+    debug_msg "erase: deleting \"$1\""
+    rm -f $1
   fi
-
 }
 
 
 unpack() {
   debug_msg "unpack ($@)"
 
-    FILENAME=$(guess_filename $SOURCE_CACHE/$1)
-
+  FILENAME=$SOURCE_CACHE/$1
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
-
-  case $(file -b $FILENAME | cut -d' ' -f1) in
-        bzip2)  tar jxf $FILENAME ;;
-         gzip)  tar zxf $FILENAME ;;
-	  tar)  tar xf $FILENAME ;;
-    compress*)  tar zxf $FILENAME ;;
-          Zip)  unzip -q $FILENAME ;;
-          RPM)  rpmunpack  < $FILENAME  |  gzip  -d     \
-                                        |  cpio  -idm   ;;
-            *)  false                                   ;;
-  esac
+  plugin_call SOURCE_UNPACK $SOURCE_CACHE/$1
 
   if [ "$?" != 0 ] ; then
     message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
     return 1
   fi
-  
-  [ -n "$SOURCE_DIRECTORY" ] &&
-  [ -d "$SOURCE_DIRECTORY" ]
-  
-  if [[ $(echo $CFLAGS | grep fbranch-probabilities) ]]; then
-    chown -R 777 $SOURCE_DIRECTORY 2>&1 >/dev/null
-  else
-    chown -R root:root $SOURCE_DIRECTORY 2>&1 >/dev/null 
-  fi
-}
-
-
-
-# usage : gpg_verify_src $SRC $GPG-SIG-URL $GPG-PUBLIC-KEYS-URL
-gpg_verify_source() {
-  debug_msg "gpg_verify_source($@)"
-  if [ ! -x /usr/bin/gpg ] ; then
-    message "${PROBLEM_COLOR}! Cannot verify sources without ${MODULE_COLOR}gpg${DEFAULT_COLOR}${PROBLEM_COLOR} installed${DEFAULT_COLOR}"
-    return 1
-  fi
-
-  # do we need to download a keyset?
-  if [ -n "$3" ] ; then
-    TMP_GPG_KEYS=$(temp_create "gpg-pubkeys")
-    verbose_msg "Downloading pub keys from \"$3\""
-    # TODO calling wget is a hack... we should accept file: urls too
-    if wget $3 -O $TMP_GPG_KEYS -q ; then
-      GNUPGHOME=/var/state/lunar/ gpg --import $TMP_GPG_KEYS
-    fi
-  fi
-  
-  # try to get the required key
-  TMP_GPG_SIG=$(temp_create "gpg-signature")
-  verbose_msg "Downloading signature \"$2\""
-  # TODO calling wget is a hack... we should accept file: urls too
-  if wget $2 -O $TMP_GPG_SIG -q ; then
-    verbose_msg "Verifying signature of \"$SOURCE_CACHE/$1\""
-    verbose_msg "GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1"
-    if ! GNUPGHOME=/var/state/lunar/ gpg --verify $TMP_GPG_SIG $SOURCE_CACHE/$1 ; then
-      verbose_msg "gpg exited with \"$?\""
-      temp_destroy $TMP_GPG_SIG
-      temp_destroy $TMP_GPG_KEYS
-      return 1
-    fi
-    temp_destroy $TMP_GPG_SIG
-    temp_destroy $TMP_GPG_KEYS
-  else
-    message "cannot download key!"
-    temp_destroy $TMP_GPG_SIG
-    temp_destroy $TMP_GPG_KEYS
-    return 1
-  fi
-
 }
 
 
@@ -178,6 +100,11 @@ verify_all_sources() {
     return 1
   fi
 
+  if [ -n "$WANT_VERSION" ] ; then
+    message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Integrity checking is disabled when using \"--want\"!${DEFAULT_COLOR}"
+    return 0
+  fi
+
   for (( C=0 ; C<=$MAX_SOURCES ; C++ )) ; do
     TEMP=SOURCE$((C))
     TEMP=${TEMP/SOURCE0/SOURCE}
@@ -187,7 +114,6 @@ verify_all_sources() {
     if ! verify_source $SRC1 ; then
       return 1
     fi
-
     eval VFYS=\${${TEMP}_VFY[@]}
 
     # cumulate result:
@@ -196,35 +122,28 @@ verify_all_sources() {
       # we need to check ALL args for validity... if one fails we should not
       # trust the source
       for VFY in $VFYS ; do
-        if [ "${VFY:0:4}" == "md5:" ] ; then
-	  if ! md5_verify_source $SRC1 $(echo $VFY | cut -d: -f2) ; then
-	    message "${PROBLEM_COLOR}!md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
-	    RESULT=1
-	  fi
-	elif [ "${VFY:0:4}" == "gpg:" ] ; then
-	  if ! gpg_verify_source $SRC1 $(echo $VFY | cut -d: -f2- | cut -f1) $(echo $VFY | cut d: -f2- | cut -f2) $(echo $VFY | cut -d: -f2- | cut -f3) ; then
-	    message "${PROBLEM_COLOR}!gpg signature check failed for ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}"
-	    RESULT=1
-	  fi
-        fi
+        plugin_call SOURCE_VERIFY $SRC1 $VFY
+		if [ $? == 1 ]; then
+		  RESULT=1
+		fi
+      done
       # so what if?
       if [ "$RESULT" == "1" ] ; then
         # remove?
-	MODULE=$1
-	message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
+        MODULE=$1
+        message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
 	
-	if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
+        if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
           rm -f $SOURCE_CACHE/$SRC1
-	fi
+        fi
       fi
-      done
     fi
 
     # our fallthrough as usual:
     eval SRC2=\$SOURCE$((C+1));
     eval SRC3=\$SOURCE$((C+2));
     [ -z "$SRC2" ] && [ -z "$SRC3" ] && break
-  done    
+  done
  
   # result?
   if [ -n "$RESULT" ] ; then
@@ -237,4 +156,75 @@ verify_all_sources() {
   fi
 )
 }
+
+
+rm_source_dir() {
+  debug_msg "rm_source_dir ($@)"
+
+  if [ "$KEEP_SOURCE" == "on" ] ; then
+    return 0
+  fi
+
+  cd $BUILD_DIRECTORY
+  DEAD_DIR=$1
+  DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "destroying building dir \"$DEAD_DIR\""
+  if [ "$TMPFS" != "off" ] ; then
+    umount $DEAD_DIR 2> /dev/null
+    rmdir $DEAD_DIR 2> /dev/null
+  else
+    rm -rf $DEAD_DIR 2> /dev/null
+  fi
+}
+
+
+mk_source_dir() {
+  debug_msg "mk_source_dir ($@)"
+
+  # yes this sounds weird but it might happen: no dir $BUILD_DIRECTORY on
+  # clean boxes!
+  if [ ! -e "$BUILD_DIRECTORY" ] ; then
+    mkdir -p "$BUILD_DIRECTORY"
+  fi
+  cd "$BUILD_DIRECTORY"
+  NEW_DIR=$1
+  NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
+
+  verbose_msg "creating building dir \"$NEW_DIR\""
+  if [ "$TMPFS" != "off" ] ; then 
+    if [ -d "$NEW_DIR" ] ; then
+      verbose_msg "Removing old source directory first!"
+      umount $NEW_DIR 2>/dev/null
+      rmdir $NEW_DIR 2>/dev/null
+    fi
+    mkdir -p $NEW_DIR &&
+    mount -o size=1g,nr_inodes=1m -t tmpfs tmpfs $NEW_DIR
+  else
+    if [ -d $NEW_DIR ] ; then
+      verbose_msg "Removing old source directory first!"
+      rm -rf $NEW_DIR 2>/dev/null
+    fi
+    mkdir -p $NEW_DIR
+  fi
+}
+
+
+validate_source_dir()  {
+  debug_msg "validate_source_dir ($@)"
+
+  verbose_msg "validating \"$SOURCE_DIRECTORY\""
+  if  [  -n    "$SOURCE_DIRECTORY"                                   ]  &&
+      [        "$SOURCE_DIRECTORY"  !=           "$BUILD_DIRECTORY"  ]  &&
+      echo     "$SOURCE_DIRECTORY"  |  grep  -q  "$BUILD_DIRECTORY"
+  then
+    true
+  else
+    message  "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."
+    message  "\$SOURCE_DIRECTORY must not be empty."
+    message  "\$SOURCE_DIRECTORY must be a subdirectory of \$BUILD_DIRECTORY"
+    false
+  fi
+}
+
 

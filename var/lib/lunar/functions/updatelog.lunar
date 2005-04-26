@@ -1,7 +1,7 @@
 #!/bin/bash
 #                                                          #
 # This code is written for Lunar Linux, see                #
-# http://www.lunar-linux.org                               #
+# http://lunar-linux.org                                   #
 #                                                          #
 ############################################################
 #                                                          #
@@ -64,21 +64,35 @@ display_success_info() {
 # purpose  : display a list of modules added or removed during this update
 display_moonbase_changes()  {  
   debug_msg "display_moonbase_changes ($@)"
+  MODULE_CHANGES=$(temp_create "module-changes")
+
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
-    NEW_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '<' | wc -l)
-    DEL_MODULES=$(diff -I MOONBASE_MD5 $MODULE_INDEX $TMP_MODULE_INDEX | grep '>' | wc -l)
-  
+    diff -y $MODULE_INDEX $TMP_MODULE_INDEX | sort > $MODULE_CHANGES
+
+    NEW_MODULES=$(grep '<' $MODULE_CHANGES | wc -l)
+    DEL_MODULES=$(grep '>' $MODULE_CHANGES | wc -l)
+    MOV_MODULES=$(grep '|' $MODULE_CHANGES | wc -l)
+    message
+
     if [ "$NEW_MODULES" != "0" ]; then
       message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
-      diff -I "MOONBASE_MD5:" $MODULE_INDEX $TMP_MODULE_INDEX | grep '<' | cut -d \  -f 2 -
+      grep '<' $MODULE_CHANGES | tr -d '<' | sort -t : -k 2
       message
     fi
 
     if [ "$DEL_MODULES" != "0" ]; then
       message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
-      diff -I "MOONBASE_MD5:" $MODULE_INDEX $TMP_MODULE_INDEX | grep '>' | cut -d \  -f 2 -
+      grep '>' $MODULE_CHANGES | tr -d '>\t ' | sort -t : -k 2
+      message
+    fi
+
+    if [ "$MOV_MODULES" != "0" ]; then
+      message "${MESSAGE_COLOR}Moved modules:${DEFAULT_COLOR}"
+      grep '|' $MODULE_CHANGES | tr -d '>\t ' | sed -e 's#\(.*\):\(.*\)|\(.*\):\(.*\)#\1: \2 -> \4#g' | sort -t - -k 2
       message
     fi
   fi
+
+  temp_destroy $MODULE_CHANGES
 }
 
