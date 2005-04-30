@@ -1,0 +1,54 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# check-find.plugin - plugin that performs file presence    #
+#                       checking of installed modules       #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_module_check_find() {
+  if [ "$FIND_CHECK" == "off" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_module_check_find ($@)"
+  
+  MODULE=$1
+  VERSION=$(installed_version $MODULE)
+  I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
+  FIND_STATUS=2
+
+  if [ -e "$I_LOG" ]; then
+    IFS_OLD="$IFS"
+    export IFS="
+"
+
+    LOG=$(cat $I_LOG | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | grep -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/")
+
+    for ITEM in $LOG ; do
+      if [ ! -e "$ITEM" ]; then
+        (
+          export IFS="$IFS_OLD"
+          message "${FILE_COLOR}${ITEM}${DEFAULT_COLOR} of ${MODULE_COLOR}${MODULE}${PROBLEM_COLOR} is missing.${DEFAULT_COLOR}"
+        )
+        FIND_STATUS=1
+      fi
+    done
+  else
+    (
+      export IFS="$IFS_OLD"
+      message "${MODULE_COLOR}${MODULE}${PROBLEM_COLOR} is missing an install log.${DEFAULT_COLOR}"
+    )
+    FIND_STATUS=1
+  fi
+  return $FIND_STATUS
+}
+
+
+plugin_register MODULE_CHECK plugin_module_check_find
+
+

@@ -211,6 +211,7 @@ help() {
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
    Optimize_HELP="Optimize hash tables during linking"
+     Reduce_HELP="Reduce the amount of linked libraries if possible"
   Combreloc_HELP="Combreloc"
 #     Debug_HELP="Strip debug symbols only"
                ;;
@@ -370,8 +371,9 @@ ccc_warn() {
 
 ldf_options() {
    OPTIONS=( "Strip"      "-s"            $( echo ${LDF[@]} | grep -q "Strip" && echo "on" || echo "off" )     "$Strip_HELP"
-#            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
             "Optimize"      "-Wl,-O1"     $( echo ${LDF[@]} | grep -q "Optimize" && echo "on" || echo "off" )     "$Optimize_HELP"
+            "Reduce"      "-Wl,--as-needed"     $( echo ${LDF[@]} | grep -q "Reduce" && echo "on" || echo "off" )     "$Reduce_HELP"
+#            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
              "Combreloc"  "-z combreloc"  $( echo ${LDF[@]} | grep -q "Combreloc" && echo "on" || echo "off" ) "$Combreloc_HELP" )
 
 }

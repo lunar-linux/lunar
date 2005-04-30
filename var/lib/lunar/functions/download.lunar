@@ -4,460 +4,192 @@
 # download.lunar - get sources from the net                #
 #                                                          #
 ############################################################
-# leach is part of the sorcery spell management utility    #
-# Copyright 2001 by Kyle Sallee                            #
-############################################################
 #                                                          #
-# this WAS the leach script of a source based Linux distro,#
-# calls Sorcerer GNU/Linux, or SGL. SGL is no longer       #
-# available with GPL license. Since this script was taken  #
-# before licensing scheme change, no legal problems I      #
-# guess.                                                   #
-#                                                          #
-# the code is re-written for Lunar. The previous Copyright #
-# notices are kept; just in case some code is left :=)     #
-# Kagan Kongar <kongar@tsrsb.org.tr>, 20020519             #
-#                                                          #
-# This secondly was lget mostly, and has been moved into   #
-# a separate lunar functions file handling all the generic #
-# downloading functionality for lunar                      #
-#                                                          #
-############################################################
-#                                                          #
-# Parts Copyrighted  Jason Johnston  2002 under GPLv2      #
-#                                                          #
-# Parts Copyrighted  Kagan Kongar  2002 under GPLv2        #
-#                                                          #
-# Parts Copyrighted  Auke Kok  2002 under GPLv2            #
+# Copyrigh Auke Kok / Lunar-Linux 2005 under GPLv2         #
 #                                                          #
 ############################################################
 
 
-get_cpan() {
-  debug_msg "skipping cpan downloads for $@"
+lget_lock() {
+	debug_msg "lget_lock ($@)"
+	echo $$ > /var/lock/lgetting.$MODULE
 }
 
 
-get_svn() {
-  debug_msg "get_svn ($@)"
-  if ! module_installed subversion ; then
-    message "${PROBLEM_COLOR}! Cannot fetch SVN sources without \"subversion\" installed${DEFAULT_COLOR}"
-    exit 1
-  fi
-
-  SVN_URL=$(echo $1 | cut -d: -f1-2)
-  SVN_DIR=$(echo $1 | cut -d: -f3)
-
-  message  "${MESSAGE_COLOR}Downloading SVN module for" \
- 	   "module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-  mk_source_dir $TMPDIR/$MODULE-$VERSION
-  cd $TMPDIR/$MODULE-$VERSION
-
-  if [ -f "$2" ] ; then
-    verbose_msg "Extracting local SVN copy"
-    # unpacking in last component dir of $SVN_DIR
-    CD=$(pwd -P)
-    if ! tar xjf $2 ; then
-      message "${PROBLEM_COLOR}Warning: bad local SVN copy, checking out fresh SVN copy${DEFAULT_COLOR}"
-      
-      rm_source_dir $TMPDIR/$MODULE-$VERSION
-      mk_source_dir $TMPDIR/$MODULE-$VERSION
-    fi
-    cd $CD
-  fi
-
-  NUM_RETRY=${NUM_RETRY:-5}
-  if [ "$NUM_RETRY" -eq 0 ]; then
-      NUM_RETRY=1000
-  fi
-
-  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [ -d "${SVN_DIR}/.svn" ] ; then
-      cd ${SVN_DIR}
-      verbose_msg "[${TRY}] svn up"
-      svn up && GOT_SVN="yes" 
-      cd ${CD}
-    else
-      verbose_msg "[${TRY}] svn co $SVN_URL $SVN_DIR"
-      svn co $SVN_URL $SVN_DIR && GOT_SVN="yes"
-    fi
-
-    if [ "$?" == "0" ] ; then
-      break
-    fi
-
-    sleep 2
-  done
-  
-  if [ "$GOT_SVN" == "yes" ] ; then
-    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$2${DEFAULT_COLOR}"
-    # pack in last component dir of $SVN_DIR
-    tar cjf $2 $SVN_DIR
-  else
-    activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $1"
-  fi
-
-  cd $TMPDIR
-  rm_source_dir $TMPDIR/$MODULE-$VERSION
-
-}
-
-
-get_cvs() {
-  debug_msg "get_cvs ($@)"
-  if ! module_installed cvs ; then
-    message "${PROBLEM_COLOR}! Cannot fetch CVS sources without \"cvs\" installed!${DEFAULT_COLOR}"
-    exit 1
-  fi
-
-  [ -f ~/.cvspass ] || touch ~/.cvspass
-  CVSURL=$(echo $1 | sed "s:^cvs\://::")
-  CVSARGS=$(echo $CVSURL | cut -d@ -f1)
-  CVSSERVER=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f1)
-  CVSSPATH=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f2)
-  CVSMODULE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f3)
-  CVSRELEASE=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f4)
-  CVSOPTIONS=$(echo $CVSURL | cut -d@ -f2 | cut -d: -f5)
-
-  if [ ! -z "$CVSRELEASE" ]; then
-    CVSRELEASE="-r $CVSRELEASE"
-  fi
-
-  CVSROOT="$CVSARGS@$CVSSERVER:$CVSSPATH"
-
-  message  "${MESSAGE_COLOR}Downloading CVS module"                      \
-           "${FILE_COLOR}${CVSMODULE}${DEFAULT_COLOR}${MESSAGE_COLOR}"   \
- 	   "for module ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-
-  mk_source_dir $TMPDIR/$MODULE-$VERSION
-  cd $TMPDIR/$MODULE-$VERSION
-  
-  if [ -f "$2" ] ; then
-    verbose_msg "Extracting local CVS copy"
-    # unpacking in last component dir of $CVSMODULE
-    CD=$(pwd -P)
-    debug_msg "get_cvs: PWD=$PWD mkdir -p $(dirname $CVSMODULE)"
-    mkdir -p $(dirname $CVSMODULE)
-    cd $(dirname $CVSMODULE)
-    debug_msg "get_cvs: PWD=$PWD tar xjf $2"
-    if ! tar xjf $2 ; then
-      message "${PROBLEM_COLOR}Warning: bad local CVS copy, checking out fresh CVS copy${DEFAULT_COLOR}"
-      
-      rm_source_dir $TMPDIR/$MODULE-$VERSION
-      mk_source_dir $TMPDIR/$MODULE-$VERSION
-      cd $TMPDIR/$MODULE-$VERSION
-    else
-      cd $TMPDIR/$MODULE-$VERSION/$CVSMODULE
-    fi
-  fi
-
-  verbose_msg "CVSROOT=\"$CVSROOT\""
-
-  NUM_RETRY=${NUM_RETRY:-5}
-  if [ "$NUM_RETRY" -eq 0 ]; then
-    NUM_RETRY=1000
-  fi
-
-  for (( TRY=1 ; $TRY<$NUM_RETRY+1 ; TRY++ )) ; do
-    if [ -d CVS ] ; then
-      verbose_msg "[${TRY}] cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE"
-      cvs -qz3 up -PAd $CVSOPTIONS $CVSRELEASE && GOT_CVS="yes" 
-    else 
-      verbose_msg "[${TRY}] cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE"
-      CVSROOT=$CVSROOT cvs -qz3 co $CVSOPTIONS $CVSRELEASE $CVSMODULE && GOT_CVS="yes"
-    fi
-
-    if [ "$?" == "0" ] ; then
-      break
-    fi
-
-    sleep 2
-  done
-  
-  if [ "$GOT_CVS" == "yes" ] ; then
-    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${2}${DEFAULT_COLOR}"
-    # pack in last component dir of $CVSMODULE
-    cd $TMPDIR/$MODULE-$VERSION/$(dirname $CVSMODULE)
-    tar cjf $2 $(basename $CVSMODULE)
-    cd $CD
-  else
-    activity_log "lget"  "$MODULE"  "$VERSION"  "failed" "Could not get $CVSMODULE"
-  fi
-
-  cd $TMPDIR
-  rm_source_dir $TMPDIR/$MODULE-$VERSION
-
-}
-
-
-call_wget()  {
-  debug_msg "call_wget ($@)"
-
-  # this is what the download will be stored as initially:
-  TMP_FILE=$TMPDIR/$(basename $2)
-
-  if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
-    WGET_FTP_CONNECTION="--passive-ftp"
-  fi
-
-  if [ "$CONTINUE" == "off" ] ; then
-    erase $TMP_FILE
-  else
-    WGET_PARTIAL="--continue"
-  fi
-
-  if [ "$USE_CACHE" == "off" ] ; then
-    WGET_CACHE="--cache=off"
-  else
-    WGET_CACHE="--cache=on"
-  fi
-
-  if [ -n "$DOWNLOAD_RATE" ] ; then
-    WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
-  fi
-
-  WGET_RETRIES="--tries=${WGET_NUM_RETRY:=5}"
-
-  [ -n "$http_proxy" ] && export http_proxy=$http_proxy
-  [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
-  [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
-
-  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL $1 --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$1" --output-document "$TMP_FILE" ; then
-    # looks like it worked
-    if testpack $TMP_FILE ; then
-      install -m644 $TMP_FILE $(dirname $2)/$(basename $TMP_FILE)
-      rm $TMP_FILE
-      verbose_msg "download of \"$1\" successful"
-    else
-      rm -f $TMP_FILE
-    fi
-  else
-    activity_log  "lget"  "$MODULE"  "$VERSION"  "failed" "broken URL: $1"
-    return 1
-  fi
-}
-
-
-# function: get_url
-# usage   : get_url URL DESTINATION
-#
-#   if left blank, destination defaults to $SOURCE_CACHE/$(filename URL)
-#   if specified, the remainder will be copied to $DESTINATION
-#
-get_url() {
-(
-  cd $TMPDIR
-  debug_msg "get_url ($@)"
-  if [ -n "$1" ] ; then
-    if [ "${1:0:6}" == "cvs://" ] ; then
-      # cvs urls
-      CVS_THRESHOLD=${CVS_THRESHOLD:-10}
-      if (( "$CVS_THRESHOLD" > 0 )) ; then
-        if [ ! -f "$2" ] ; then
-	  get_cvs $1 $2
-        elif [ "$(find $2 -amin +$CVS_THRESHOLD)" == "$2" ] ; then
-	  get_cvs $1 $2
+lget_locked() {
+	debug_msg "lget_locked ($@)"
+	if [ -f "/var/lock/lgetting.$MODULE" ] &&
+			ps `cat /var/lock/lgetting.$MODULE` | grep	-q	"lget" ; then
+		true
 	else
-	  verbose_msg "Skipping cvs update (less than $CVS_THRESHOLD mins old)"
+		false
 	fi
-      else
-        get_cvs $1 $2
-      fi
-    elif [ "${1:0:6}" == "svn://" ] ; then
-      # svn urls
-      SVN_THRESHOLD=${SVN_THRESHOLD:-10}
-      if (( "SVN_THRESHOLD" > 0 )) ; then
-        if [ ! -f "$2" ] ; then
-	  get_svn $1 $2
-	elif [ "$(find $2 -amin +$SVN_THRESHOLD)" == "$2" ] ; then
-	  get_svn $1 $2
-	else
-	  verbose_msg "Skipping svn update (less than $SVN_THRESHOLD mins old)"
+}
+
+
+lget_unlock() {
+	debug_msg "lget_unlock ($@)"
+	rm -f /var/lock/lgetting.$MODULE &> /dev/null
+}
+
+
+download_url() {
+	debug_msg "download_url($@)"
+	verbose_msg "trying to download \"$URL\""
+	connect &&
+	plugin_call SOURCE_DOWNLOAD $1 $2 $3
+	RETVAL=$?
+	if [ $RETVAL == 2 ]; then
+		message "${PROBLEM_COLOR}Warning:${QUERY_COLOR} I don't know how to download \"$1\"${DEFAULT_COLOR}"
 	fi
-      else
-        get_svn $1 $2
-      fi
-    elif [ "${1:0:7}" == "cpan://" ] ; then
-      # skip CPAN modules here...
-      URL="$CPAN_URL/${1:7}"
-      FILE=$(basename $URL)
-      get_url $URL $2
-
-    # adding this since wget is a bitch and will not fetch this... sigh
-    # this will copy file to $2... so you may use it as you like
-    elif [ -n "$BASE_URL" -a "${BASE_URL:0:7}" == "file://" ] ; then
-      cp $(echo $BASE_URL | sed 's/file:\/\///') $2
-    elif [ "${1:0:7}" == "file://" ] ; then
-      cp $(echo $1 | sed 's/file:\/\///') $2
-
-    else
-      # ordinary URL's handled by call_wget
-      connect &&
-      if [ -n "$BASE_URL" ] ; then
-        # base url set means we don't touch the other possibilities:
-        call_wget $BASE_URL/$(basename $2) $2
-      else
-        if [ -n "$FRESORT_URL" ] ; then
-          # try fresort first
-          if ! call_wget $FRESORT_URL/$(basename $2) $2 ; then
-            # normal url second
-            if ! call_wget $1 $2 ; then
-              # and failover
-              call_wget $LRESORT_URL/$(basename $2) $2
-            fi
-          fi
-        elif ! call_wget $1 $2 ; then
-          # just try the normal url
-          if [ -n "$LRESORT_URL" ] ; then
-            # and the failover url
-            call_wget $LRESORT_URL/$(basename $2) $2
-          fi
-        fi
-      fi
-    fi
-  fi
-)
+	return $RETVAL
 }
 
-
-lget_lock()  {
-  debug_msg "lget_lock ($@)"
-  mod_v_safe_edit $1
-  echo $$ > /var/lock/lgetting.$MOD_V_SNAME
-}
-
-
-lget_locked()  {
-  debug_msg "lget_locked ($@)"
-  mod_v_safe_edit $1
-  if [ -f "/var/lock/lgetting.$MOD_V_SNAME" ] &&
-        ps `cat /var/lock/lgetting.$MOD_V_SNAME` | grep  -q  "lget" ; then
-    true
-  else
-    false
-  fi
-}
-
-
-lget_unlock()  {
-  debug_msg "lget_unlock ($@)"
-  mod_v_safe_edit $1
-  rm -f /var/lock/lgetting.$MOD_V_SNAME &> /dev/null
-}
 
 
 download_module() {
 (
-  debug_msg "download_module ($@)"
-  if ! run_details $1 ; then
-    exit 1
-  fi
-
-  MAX_SOURCES=${MAX_SOURCES:=100}
-
-  # loop over all sources
-  for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
-    # get the URL part
-    eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
-    eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
-
-    # continue (to next) if empty once, break if empty tiwce
-    if [ -z "$SRC" ] ; then
-      if [ -z "$SECOND" ] ; then
-        SECOND="yes"
-        continue
-      else
-        break
-      fi
-    fi
-    
-    # silly that this exists:
-    if [ "$CLEAR_CACHE" == "on" ] ; then
-      verbose_msg "clearing source cache copy of \"$SRC\""
-      rm -f $SOURCE_CACHE/$SRC 2>/dev/null
-    fi
-
-    # add source part if needed
-    for URL in $URLS ; do
-      if [ "${URL:((${#URL}-1)):1}" == "/" ] ; then
-        URL=${URL}${SRC}
-      fi
-
-      # quit if we did get it
-      if [ -f "$SOURCE_CACHE/$SRC" ] ; then
-        if [ "${URL:0:6}" == "cvs://" ] ; then
-	  verbose_msg "trying to download \"$URL\""
-	  get_url $URL $SOURCE_CACHE/$SRC && break
-	elif [ "${URL:0:6}" == "svn://" ] ; then
-	  verbose_msg "trying to download \"$URL\""
-	  get_url $URL $SOURCE_CACHE/$SRC && break
-	elif [ "${URL:0:6}" == "cpan://" ] ; then
-	  verbose_msg "trying to download \"$URL\""
-	  get_url $URL $SOURCE_CACHE/$SRC && break
-	else
-	  verbose_msg "Skipping download of \"$SRC\" for module \"$MODULE\" (in cache)"
-	  continue 2
+	debug_msg "download_module ($@)"
+	if ! run_details $1 ; then
+		exit 1
 	fi
-      else
-        message  "${MESSAGE_COLOR}Downloading source file"  \
-                 "${FILE_COLOR}${SRC}${DEFAULT_COLOR}"      \
-                 "${MESSAGE_COLOR}for module"               \
-                 "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-        verbose_msg "trying to download \"$URL\""
-	get_url $URL $SOURCE_CACHE/$SRC && break
-      fi
-      
-    done
-  done
 
-  return 0
+	MAX_SOURCES=${MAX_SOURCES:=100}
+
+	# loop over all sources
+	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
+		# get the URL part
+		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
+		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
+
+		# continue (to next) if empty once, break if empty tiwce
+		if [ -z "$SRC" ] ; then
+			if [ -z "$SECOND" ] ; then
+				SECOND="yes"
+				continue
+			else
+				break
+			fi
+		fi
+		
+		# silly that this exists:
+		if [ "$CLEAR_CACHE" == "on" ] ; then
+			verbose_msg "clearing source cache copy of \"$SRC\""
+			rm -f $SOURCE_CACHE/$SRC 2>/dev/null
+		fi
+		
+		add_url() {
+			if [ -n "$1" ]; then
+				if ! echo " $ALL_URLS " | grep -q " $1 "; then
+					ALL_URLS="$ALL_URLS $1"
+				fi
+			fi
+		}
+		
+		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE || [ ! -f $SOURCE_CACHE/$SRC ] ; then
+			# check for cache?
+			message "${MESSAGE_COLOR}Downloading source file" \
+				"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
+				"${MESSAGE_COLOR}for module" \
+				"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+		    if [ -n "$BASE_URL" ] ; then
+				# in case -u was passed:
+		        ALL_URLS=$BASE_URL
+			else
+				# compose a list of URLS
+				ALL_URLS=
+				add_url $FRESORT_URL
+				for URL in $URLS ; do
+					add_url $URL
+					if [ "$EXHAUSTIVE" == "on" ]; then
+						# scan for hits agains known clusters of mirrors
+						for MLIST in $MIRRORS/*; do
+							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+								if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
+									# compose the list of valid mirrors
+									REST=${URL:${#ALT}}
+									for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+										add_url ${HIT}${REST}
+									done
+								fi
+							done
+						done
+					fi
+				done
+				add_url $LRESORT_URL
+		    fi
+
+			for URL in $ALL_URLS; do
+				# and download
+				if download_url $URL $SRC $SOURCE_CACHE ; then
+					break
+				fi
+			done
+		else
+			# break out of the loop if the cache has it:
+			verbose_msg "Skipping download of \"$SRC\" (in cache)"
+			continue
+		fi
+	done
 ) 
 }
 
 
 testpack () {
-  debug_msg "testpack ($@)"
-  if [ -f "$1" ]; then
-    FILENAME=$1
-  else
-    FILENAME=$SOURCE_CACHE/$1
-  fi
-  if [ -f "$FILENAME" ] ; then
-    COMPRESSOR=$(file -b $FILENAME | cut -d ' ' -f1)
-    case $COMPRESSOR in
-      bzip2)     bzip2 -tf  $FILENAME           >/dev/null 2>&1   ;;
-      gzip)      gzip  -tf  $FILENAME           >/dev/null 2>&1   ;;
-      compress*) gzip  -tf  $FILENAME           >/dev/null 2>&1   ;;
-      Zip)       unzip -tq  $FILENAME           >/dev/null 2>&1   ;;
-      RPM)       rpmunpack <$FILENAME | gzip -t >/dev/null 2>&1   ;;
-      *)         true                                             ;;
-    esac
-  fi
+	debug_msg "testpack ($@)"
+	if [ -f "$1" ]; then
+		FILENAME=$1
+	else
+		FILENAME=$SOURCE_CACHE/$1
+	fi
+	if [ -f "$FILENAME" ] ; then
+		COMPRESSOR=$(file -b $FILENAME | cut -d ' ' -f1)
+		case $COMPRESSOR in
+			bzip2)
+				bzip2 -tf $FILENAME > /dev/null 2>&1
+				;;
+			gzip)
+				gzip -tf $FILENAME > /dev/null 2>&1
+				;;
+			compress*)
+				gzip -tf $FILENAME > /dev/null 2>&1
+				;;
+			Zip)
+				unzip -tq $FILENAME > /dev/null 2>&1
+				;;
+			RPM)
+				rpmunpack < $FILENAME | gzip -t > /dev/null 2>&1
+				;;
+			*)
+				true
+				;;
+	  	esac
+	fi
 }
 
 
 show_downloading()
 {
-    debug_msg "show_downloading ($@)"
-    DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
-    if [ -n "$DOWNLOAD_PID" ]; then
-        DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
-        if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
-            cat $DOWNLOAD_LOG
-        else
-            tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
-            sleep 1
-        fi
-        rm $DOWNLOAD_LOG
-    elif lget_locked $MODULE; then
-        message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
-        while lget_locked $MODULE; do
-	    echo -n "."
-	    sleep 5
-	done
-    fi
+	debug_msg "show_downloading ($@)"
+	DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
+	if [ -n "$DOWNLOAD_PID" ]; then
+		DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
+		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
+			cat $DOWNLOAD_LOG
+			rm -f $DOWNLOAD_LOG
+		elif [ -f "$DOWNLOAD_LOG" ]; then
+			tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+			sleep 1
+			rm -f $DOWNLOAD_LOG
+		fi
+	elif lget_locked $MODULE; then
+		message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
+		while lget_locked $MODULE; do
+			echo -n "."
+			sleep 5
+		done
+	fi
 }
 
 

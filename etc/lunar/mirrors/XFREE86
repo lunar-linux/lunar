@@ -1,43 +1,43 @@
-"Master Site"			ftp://ftp.xfree86.org/pub/XFree86
+"Master Site"			ftp://ftp.xfree86.org/pub/XFree86/
 "Custom Mirror"			Custom
-Korea				ftp://ftp.kreonet.re.kr/pub/Linux/xfree86
-Japan				ftp://ftp.netlab.is.tsukuba.ac.jp/pub/XFree86
-Japan				ftp://ftp.iij.ad.jp/pub/X/XFree86
-Japan				ftp://kddlabs.co.jp/X/XFree86
-Australia and New Zeland	http://www.planetmirror.com/pub/XFree86
-Australia and New Zeland	ftp://ftp.planetmirror.com/pub/XFree86
-Australia and New Zeland	ftp://mirror.aarnet.edu.au/pub/XFree86
-Australia and New Zeland	ftp://x.physics.usyd.edu.au/pub/XFree86
-Costa Rica			ftp://xfree.ulatina.ac.cr
-Austria				ftp://gd.tuwien.Ac.at/hci/X11/XFree86
-Czech Republic			ftp://ftp.fee.vutbr.cz/pub/XFree86
-Denmark				ftp://mirror.inet.tele.dk/mirrors/ftp.xfree86.org/pub/XFree86
-Finland				ftp://ftp.funet.fi/pub/X11/XFree86
-France				ftp://ftp.free.fr/pub/XFree86
-France				ftp://ftp.lip6.fr/pub/X11/XFree86
-France				ftp://ftp.ovh.net/mirrors
-Germany				ftp://ftp.cs.tu-berlin.de/pub/X/XFree86
-Germany				ftp://ftp.gwdg.de/pub/xfree86/XFree86
-Germany				ftp://ftp.mpi-sb.mpg.de/pub/X/mirror/ftp.xfree86.org/XFree86
-Germany				ftp://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.xfree86.org
-Germany				ftp://ftp.uni-erlangen.de/pub/Linux/MIRROR.xfree86
-Germany				ftp://ftp.uni-stuttgart.de/pub/X11/Xfree86
-Germany				http://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.xfree86.org/XFree86
-Italy				ftp://ftp.unina.it/pub/XFree86
-Ireland				ftp://ftp.esat.net/pub/X11/XFree86
-Netherlands			ftp://ftp.nl.uu.net/pub/XFree86
-Netherlands			ftp://dl.xs4all.nl/pub2/mirror/XFree
-Norway				ftp://sunsite.uio.no/pub/XFree86
-Poland				ftp://ftp.task.gda.pl/pub/XFree86
-Spain				ftp://ftp.cica.es/pub/XFree86
-Spain				ftp://ftp.cica.es/mirrors/XFree86
-United Kingdom			ftp://sunsite.doc.ic.ac.uk/packages/XFree86
-United States			ftp://ftp.calderasystems.com/pub/mirrors/xfree86
-United States			ftp://carroll.cac.psu.edu/pub/XFree86
-United States			ftp://ftp.cs.umn.edu/pub/XFree86
-United States			ftp://download.sourceforge.net/pub/mirrors/XFree86
-United States			ftp://ftp.freesoftware.com/pub/XFree86
-United States			ftp://ftp.infomagic.com/pub/mirrors/XFree86
-United States			ftp://mirror.sftw.com/pub/XFree86
-United States			ftp://phyppro1.phy.bnl.gov/pub/XFree86
-United States			ftp://ftp.rge.com/pub/X/XFree86
+Korea				ftp://ftp.kreonet.re.kr/pub/Linux/xfree86/
+Japan				ftp://ftp.netlab.is.tsukuba.ac.jp/pub/XFree86/
+Japan				ftp://ftp.iij.ad.jp/pub/X/XFree86/
+Japan				ftp://kddlabs.co.jp/X/XFree86/
+Australia and New Zeland	http://www.planetmirror.com/pub/XFree86/
+Australia and New Zeland	ftp://ftp.planetmirror.com/pub/XFree86/
+Australia and New Zeland	ftp://mirror.aarnet.edu.au/pub/XFree86/
+Australia and New Zeland	ftp://x.physics.usyd.edu.au/pub/XFree86/
+Costa Rica			ftp://xfree.ulatina.ac.cr/
+Austria				ftp://gd.tuwien.Ac.at/hci/X11/XFree86/
+Czech Republic			ftp://ftp.fee.vutbr.cz/pub/XFree86/
+Denmark				ftp://mirror.inet.tele.dk/mirrors/ftp.xfree86.org/pub/XFree86/
+Finland				ftp://ftp.funet.fi/pub/X11/XFree86/
+France				ftp://ftp.free.fr/pub/XFree86/
+France				ftp://ftp.lip6.fr/pub/X11/XFree86/
+France				ftp://ftp.ovh.net/mirrors/
+Germany				ftp://ftp.cs.tu-berlin.de/pub/X/XFree86/
+Germany				ftp://ftp.gwdg.de/pub/xfree86/XFree86/
+Germany				ftp://ftp.mpi-sb.mpg.de/pub/X/mirror/ftp.xfree86.org/XFree86/
+Germany				ftp://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.xfree86.org/
+Germany				ftp://ftp.uni-erlangen.de/pub/Linux/MIRROR.xfree86/
+Germany				ftp://ftp.uni-stuttgart.de/pub/X11/Xfree86/
+Germany				http://ftp-stud.fht-esslingen.de/pub/Mirrors/ftp.xfree86.org/XFree86/
+Italy				ftp://ftp.unina.it/pub/XFree86/
+Ireland				ftp://ftp.esat.net/pub/X11/XFree86/
+Netherlands			ftp://ftp.nl.uu.net/pub/XFree86/
+Netherlands			ftp://dl.xs4all.nl/pub2/mirror/XFree/
+Norway				ftp://sunsite.uio.no/pub/XFree86/
+Poland				ftp://ftp.task.gda.pl/pub/XFree86/
+Spain				ftp://ftp.cica.es/pub/XFree86/
+Spain				ftp://ftp.cica.es/mirrors/XFree86/
+United Kingdom			ftp://sunsite.doc.ic.ac.uk/packages/XFree86/
+United States			ftp://ftp.calderasystems.com/pub/mirrors/xfree86/
+United States			ftp://carroll.cac.psu.edu/pub/XFree86/
+United States			ftp://ftp.cs.umn.edu/pub/XFree86/
+United States			ftp://download.sourceforge.net/pub/mirrors/XFree86/
+United States			ftp://ftp.freesoftware.com/pub/XFree86/
+United States			ftp://ftp.infomagic.com/pub/mirrors/XFree86/
+United States			ftp://mirror.sftw.com/pub/XFree86/
+United States			ftp://phyppro1.phy.bnl.gov/pub/XFree86/
+United States			ftp://ftp.rge.com/pub/X/XFree86/

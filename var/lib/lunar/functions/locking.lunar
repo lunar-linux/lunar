@@ -29,38 +29,47 @@ function lock_file() {
       TEMPFILE="$1.$$"
       LOCKFILE="$1.lock"
 
-      echo $$ > $TEMPFILE 2>/dev/null ||
-      {
-         message "${PROBLEM_COLOR}You don't have permission to access" \
-                 "$TEMPFILE ${DEFAULT_COLOR}"
-         exit 1
-      }
-      ln $TEMPFILE $LOCKFILE 2>/dev/null &&
-      {
-         rm -f $TEMPFILE
-         return 0
-      } 
-      [ -f "$LOCKFILE" ]         || return 1
+      # test permission
+      if ! echo $$ > $TEMPFILE 2>/dev/null; then
+        message "${PROBLEM_COLOR}You don't have permission to access" \
+                "$TEMPFILE ${DEFAULT_COLOR}"
+        exit 1
+      fi
+
+      # file exists?
+      if [ ! -f "$1" ]; then
+        touch "$1"
+      fi
+	  
+      # set lockfile
+      if ln $TEMPFILE $LOCKFILE 2>/dev/null ; then
+        rm -f $TEMPFILE
+        return 0
+      # failed due to other lock?
+      elif [ ! -f "$LOCKFILE" ]; then
+        return 1
+      fi
+      # stale lock?
       STALE_PID=`< $LOCKFILE`
-      [ "$STALE_PID" -gt "0" ]   || return 1
-      kill -0 $STALE_PID 2>/dev/null &&
-      {
-         rm -f $TEMPFILE
-         return 1
-      }
+      if [ "$STALE_PID" -le "0" ]; then
+        return 1
+      fi
+      if kill -0 $STALE_PID 2>/dev/null; then
+        rm -f $TEMPFILE
+        return 1
+      fi
+      # yes, stale
       rm -f $LOCKFILE 2>/dev/null &&
-      echo "Removed stale lock file of process $STALE_PID"
-      ln $TEMPFILE $LOCKFILE 2>/dev/null &&
-      {
-         rm -f $TEMPFILE
-         return 0
-      }
+          echo "Removed stale lock file of process $STALE_PID"
+      if ln $TEMPFILE $LOCKFILE 2>/dev/null; then
+        rm -f $TEMPFILE
+        return 0
+      fi
       rm -f $TEMPFILE
       return 1
    }
 
-   while ! file_lock $1
-   do
+   while ! file_lock $1; do
       message "${MESSAGE_COLOR}Waiting to lock the file $1${DEFAULT_COLOR}"
       sleep 1
    done

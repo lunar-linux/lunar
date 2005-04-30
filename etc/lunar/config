@@ -23,11 +23,10 @@ export        DIALOGRC=/etc/lunar/dialogrc
                  MENUS=/var/lib/lunar/menu
              SUSTAINED=/var/lib/lunar/sustained
                ALIASES=/var/lib/lunar/aliases
+            PLUGIN_DIR=/var/lib/lunar/plugins
 
        SOUND_DIRECTORY=/var/lib/lunar/sound
            SOUND_THEME=startrek
-
-            BOOST_LOCK=/var/lock/boost
 
           ACTIVITY_LOG=/var/log/lunar/activity
           INSTALL_LOGS=/var/log/lunar/install
@@ -74,21 +73,21 @@ export        DIALOGRC=/etc/lunar/dialogrc
          MD5SUM_CHECK=${MD5SUM_CHECK:=on}
             SYM_CHECK=${SYM_CHECK:=off}
 
-              GNU_URL=ftp://ftp.gnu.org/pub/gnu
-              KDE_URL=ftp://ftp.kde.org/pub/kde
-            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
-           KERNEL_URL=ftp://ftp.kernel.org
-           SFORGE_URL=http://unc.dl.sourceforge.net/sourceforge
-          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
-          LRESORT_URL=http://lunar-linux.org/lunar/cache
+              GNU_URL=ftp://ftp.gnu.org/pub/gnu/
+              KDE_URL=ftp://ftp.kde.org/pub/kde/
+            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME/
+           KERNEL_URL=ftp://ftp.kernel.org/
+           SFORGE_URL=http://unc.dl.sourceforge.net/sourceforge/
+          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86/
+          LRESORT_URL=http://lunar-linux.org/lunar/cache/
 
-      MOONBASE_URL[0]=http://lunar-linux.org/lunar/moonbase.tar.bz2
-      MOONBASE_URL[1]=http://tx-us.lunar-linux.org/lunar/moonbase.tar.bz2
-      MOONBASE_URL[2]=http://de.lunar-linux.org/lunar/moonbase.tar.bz2
-      MOONBASE_URL[3]=http://dk.lunar-linux.org/lunar/moonbase.tar.bz2
-      MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/moonbase.tar.bz2
+      MOONBASE_URL[0]=http://lunar-linux.org/lunar/
+      MOONBASE_URL[1]=http://tx-us.lunar-linux.org/lunar/
+      MOONBASE_URL[2]=http://gbg-se.lunar-linux.org/lunar/
+      MOONBASE_URL[3]=http://de.lunar-linux.org/lunar/
+      MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/
 	 
-            PATCH_URL=http://lunar-linux.org/lunar/patches
+            PATCH_URL=http://lunar-linux.org/lunar/patches/
 	    
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
 
@@ -136,3 +135,8 @@ fi
 
 sound $SOUND
 color $COLOR
+
+for LUNAR_PLUGIN in $PLUGIN_DIR/*.plugin; do
+  . $LUNAR_PLUGIN
+done
+

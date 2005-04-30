@@ -261,6 +261,7 @@ default_post_build() {
   } | tee -a $C_LOG
   
   install_initd
+  update_plugin $MODULE install
 
   devoke_installwatch
   ldconfig
@@ -307,11 +308,10 @@ prepare_module_config()  {
 
 # run the CONFIGURE script
 run_configure() {
-  mod_v_safe_edit $MODULE
   debug_msg "run_configure ($@)"
   if [ -n "$RECONFIGURE" ];  then
-    verbose_msg "Reconfiguring \"$MOD_V_SNAME\""
-    rm -f $DEPENDS_CONFIG/$MOD_V_SNAME
+    verbose_msg "Reconfiguring \"$MODULE\""
+    rm -f $DEPENDS_CONFIG/$MODULE
     remove_depends $MODULE
   fi
 
@@ -386,9 +386,8 @@ run_post_install() {
     if [ ! -e /var/state/lunar/module_history ]; then
       mkdir /var/state/lunar/module_history
     fi
-    mod_v_safe_edit $MODULE                             &&
     SCRIPT_DATE=$(date -u +%Y%m%d)                      &&
-    MH_NAME=$MOD_V_SNAME-$VERSION-$SCRIPT_DATE.tar.bz2  &&
+    MH_NAME=$MODULE-$VERSION-$SCRIPT_DATE.tar.bz2  &&
     cd $MOONBASE/$SECTION                               &&
     tar -cjf /var/state/lunar/module_history/$MH_NAME $MODULE
   )

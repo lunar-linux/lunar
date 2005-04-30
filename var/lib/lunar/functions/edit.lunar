@@ -86,10 +86,3 @@ edit_file() {
 }
 
 
-# function : mod_v_safe_edit
-# usage    : mod_v_safe_edit $VARIABLE
-# purpose  : creates a 'safe' value in variable "$MOD_V_SNAME"
-mod_v_safe_edit() {
-  MOD_V_SNAME=$(echo $1 | sed 's:/:.:g') 
-  return 0
-}

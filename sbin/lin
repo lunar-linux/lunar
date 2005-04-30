@@ -51,7 +51,6 @@ Optional Parameters:
 -R  |  --resurrect              Force to be unpacked from /var/cache/lunar
 -s  |  --silent			Decreases the level of message output
 -v  |  --verbose                Increases the level of message output
--V  |  --Version                Select specific Version of module to install
 -w  |  --want version           Try to install a different version that is
                                 not in moonbase
 EOF
@@ -63,11 +62,9 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
-  verbose_msg "mod_v=\"$MOD_VERSION\" mod=\"$MODULES\""
-
   if echo $MODULES | grep -qw moonbase ; then
     # just update moonbase, no other modules
-    if ! get_moonbase ; then
+    if ! lget moonbase ; then
       exit 1
     fi
     # remove moonbase rofm MODULES and continue
@@ -85,11 +82,6 @@ main() {
   # different approaches for multiple modules (start up downloads first)
   # and single modules (plain install)
   if [ -z "$SINGLE_MODULE" ] ; then
-
-    if [ -n "$MOD_VERSION" ] ; then
-      message "${MESSAGE_COLOR} -V|--Version only allowed for single-module install!${DEFAULT_COLOR}"
-      exit 1
-    fi
 
     if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
       export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
@@ -136,7 +128,7 @@ main() {
           if ! module_held $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
-            if ! SINGLE_MODULE=1 lin $COMPILE $PROBE $SILENT $MODULE ; then
+            if ! ( SINGLE_MODULE=1 main $MODULE ) ; then
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
@@ -161,24 +153,6 @@ main() {
     # we are only doing one module, drop down to:
     MODULE=$MODULES
     unset RECONFIGURE
-
-    if [ -n "$MOD_VERSION" ] ; then
-      if echo $MODULE | grep -q '/' ; then
-        if [ -d ${MOONBASE}/*/${MODULE} ] ; then
-	  unset MOD_VERSION
-        else
-          message "${PROBLEM_COLOR}No Moonbase module: ${FILE_COLOR}$MODULE${MESSAGE_COLOR} with \"$MODULE\" form, bailing!${DEFAULT_COLOR}"
-	  return 1
-        fi
-      else
-	if [ -d ${MOONBASE}/*/${MODULE}/${MOD_VERSION} ] ; then
-	  MODULE="${MODULE}/${MOD_VERSION}"
-	else
-          debug_msg "${MESSAGE_COLOR}$MODULES Passing ${FILE_COLOR}$MOD_VERSION${MESSAGE_COLOR} to module for processing${DEFAULT_COLOR}"
-        fi
-	message "Module=\"$MODULE\""
-      fi
-    fi
 
     run_details $MODULE &&
     run_depends $MODULE &&
@@ -249,7 +223,6 @@ else
       -R|--resurrect   ) export RESURRECT="$1" ;                    shift   ;;
       -s|--silent      ) export SILENT="$1" ;                       shift   ;;
       -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
-      -V|--Version     ) export MOD_VERSION=$2 ;                    shift 2 ;;
       -w|--want        ) export WANT_VERSION=$2 ;                   shift 2 ;;
       --) shift ; break ;;
       *) help ; break ;;

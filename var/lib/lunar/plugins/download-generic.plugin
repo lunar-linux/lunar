@@ -1,0 +1,75 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# download-generic.plugin - download http/ftp urls         #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2005 by Auke Kok under GPLv2                   #
+#                                                          #
+############################################################
+
+
+plugin_source_download_generic()  {
+  # check if we can handle this type of URL:
+  if [ ${1:0:7} != "http://" -a ${1:0:8} != "https://" -a ${1:0:6} != "ftp://" ]; then
+    return 2
+  fi
+  debug_msg "plugin_source_download_generic ($@)"
+
+  URL=$1
+  # add trailing '/'
+  if [ "${URL:((${#URL}-1)):1}" != "/" ] ; then
+    URL="${URL}/"
+  fi
+
+  # this is what the download will be stored as initially:
+  TMP_FILE=$TMPDIR/$2
+
+  if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
+    WGET_FTP_CONNECTION="--passive-ftp"
+  fi
+
+  if [ "$CONTINUE" == "off" ] ; then
+    erase $TMP_FILE
+  else
+    WGET_PARTIAL="--continue"
+  fi
+
+  if [ "$USE_CACHE" == "off" ] ; then
+    WGET_CACHE="--cache=off"
+  else
+    WGET_CACHE="--cache=on"
+  fi
+
+  if [ -n "$DOWNLOAD_RATE" ] ; then
+    WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
+  fi
+
+  WGET_RETRIES="--tries=${WGET_NUM_RETRY:=5}"
+
+  [ -n "$http_proxy" ] && export http_proxy=$http_proxy
+  [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
+  [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
+
+  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL \"$URL$2\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$URL$2" --output-document "$TMP_FILE" ; then
+    # looks like it worked
+    if testpack $TMP_FILE ; then
+      if [ "$TMP_FILE" != "$3/$2" ]; then
+        install -m644 $TMP_FILE "$3/$2"
+        rm $TMP_FILE
+      fi
+      verbose_msg "download of \"$2\" successful"
+    else
+      rm -f $TMP_FILE
+	  return 1
+    fi
+  else
+    activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
+    return 1
+  fi
+}
+
+
+plugin_register SOURCE_DOWNLOAD plugin_source_download_generic

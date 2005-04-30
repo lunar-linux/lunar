@@ -24,14 +24,14 @@ get_moonbase () {
   debug_msg "  run_details ($@)"
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
-        SOURCE=$(basename $MOONBASE_URL)
-    SOURCE_URL=${MOONBASE_URL[@]}
+        SOURCE=$MODULE.tar.bz2
+    SOURCE_URL=$MOONBASE_URL
        PARTIAL=off
    CLEAR_CACHE=on
   }
 
   # make sure we set these values up front to be sure
-  run_details
+  run_details moonbase
   rm -f $TMPDIR/$SOURCE
 
   if [ ! -d "$SYSTEM_MOONBASE" ] ; then
@@ -43,16 +43,17 @@ get_moonbase () {
   fi
 
   push_uniq_id
-
   if download_module $MODULE ; then
-    echo -e "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
+    message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
     rm -rf $SYSTEM_MOONBASE                                      &&
+	TMP_MODULE_INDEX=$(temp_create "temp.module.index")          &&
+	cp $MODULE_INDEX $TMP_MODULE_INDEX                           &&
     lrm moonbase                                                 &&
     mkdir $SYSTEM_MOONBASE                                       &&
     mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
-    echo -e "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
+    message "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
             "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
     bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
           sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
@@ -61,7 +62,7 @@ get_moonbase () {
 
     if [ "$OUTCOME" == "success" ] ; then
       echo "$MD5SUM_LOGS/$MODULE-$VERSION" >> $INSTALL_LOGS/$MODULE-$VERSION
-      echo -e "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+      message "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
               "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}"
   
       # create an md5sum log
@@ -72,8 +73,11 @@ get_moonbase () {
     
       add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1)
       # get ready to regenerate the module index cache file
-      check_module_index
+      create_module_index
+      create_depends_cache
+      update_plugins
       display_moonbase_changes
+	  temp_destroy $TMP_MODULE_INDEX
     fi
   else
     OUTCOME=failed

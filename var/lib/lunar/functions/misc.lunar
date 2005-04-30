@@ -83,7 +83,7 @@ exists() {
   debug_msg "exists ($@)"
   while read ITEM ; do
     if [ -e "$ITEM" ] ; then
-      echo $ITEM
+      echo "$ITEM"
     fi
   done
 }

@@ -67,7 +67,16 @@ sort_by_dependency() {
   done
 
   # tsort the existing dep relations in all of moonbase
-  cat $DEPENDS_CACHE | awk -F: '{print $1" "$2}' | while read A B ; do echo $A $(unalias $B) ; done | tsort 2> /dev/null | tac > $TMP_ALL
+  TMP_TSRT=$(temp_create "dependency.sort")
+  for LINE in $(cat $DEPENDS_CACHE); do
+    A=$(echo $LINE | cut -d: -f1)
+	B=$(echo $LINE | cut -d: -f2)
+    B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
+    echo "$A $B" >> $TMP_TSRT
+  done
+  tsort $TMP_TSRT 2> /dev/null | tac > $TMP_ALL
+  temp_destroy $TMP_TSRT
+
   # append all modules that do not have a DEPENDS file at all at the end
   # note that this is logically WRONG, but it actually will help with
   # unincluded depends, and therefore is *better* behaviour
@@ -92,14 +101,6 @@ is_depends()  {
 }
 
 
-# dont use until agreed on dev mailinglist
-#is_depended()  {
-#  debug_msg "is_depended ($@)"
-#  # Is $1 a previously selected dependency of any module.
-#  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
-#}
-                                                                                
-                                                                                
 in_depends()  {
   debug_msg "in_depends ($@)"
   # Was $2 presented as a depenency for module $1
@@ -126,26 +127,26 @@ remove_depends() {
 
   cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
                                                                                 
-  unlock_file $DEPENDS_STATUS_BACKUP &&
-  unlock_file $DEPENDS_STATUS
+  unlock_file $DEPENDS_STATUS &&
+  unlock_file $DEPENDS_STATUS_BACKUP
 }
                                                                                 
 
 add_depends() {
   debug_msg "add_depends ($@)"
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
-    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
-      remove_depends "$1" "$2"
-    fi
-                                                                                
-    verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
-                                                                                
     lock_file $DEPENDS_STATUS_BACKUP                       &&
     lock_file $DEPENDS_STATUS                              &&
-    echo  "$1:$2:$3:$4:$5:$6"  >>  $DEPENDS_STATUS         &&
-    cat  $DEPENDS_STATUS        >  $DEPENDS_STATUS_BACKUP  &&
-    unlock_file $DEPENDS_STATUS_BACKUP                     &&
-    unlock_file $DEPENDS_STATUS
+    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
+      grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
+	else
+      verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
+	fi
+                                                                                
+    echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
+    cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP           &&
+    unlock_file $DEPENDS_STATUS                            &&
+    unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
                                                                                 
@@ -220,7 +221,6 @@ run_depends() {
     fi
   }
                                                                                 
-  prepare_depends_status
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
     if [ -n "$SINGLE_MODULE" ] ; then
@@ -304,7 +304,7 @@ conflicts() {
       lrm $DEP
     else
       message "${PROBLEM_COLOR}ERROR: Cannot continue installing conflicting modules, exiting!${DEFAULT_COLOR}"
-      return 1
+      exit 1
     fi
   fi
 
@@ -315,14 +315,6 @@ conflicts() {
 run_conflicts() {
   debug_msg "run_conflicts ($@)"
   run_module_file $MODULE CONFLICTS
-}
-
-
-# create the dependency files if they do not exist
-prepare_depends_status()  {
-  debug_msg "prepare_depends_status ($@)"
-  [ -f $DEPENDS_STATUS ]        || touch  $DEPENDS_STATUS
-  [ -f $DEPENDS_STATUS_BACKUP ] || touch  $DEPENDS_STATUS_BACKUP
 }
 
 
@@ -398,7 +390,7 @@ create_depends_cache() {
 
     # fast method for re-creating the depends.cache, might take long though
     for DEPFILE in $DEPFILES ; do
-      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" | cut -d/ -f2-) . $DEPFILE
+      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" -e 's/.*\/\([^\/]*\)$/\1/') . $DEPFILE
     done > $TMP_DEP_CACHE &&
     install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
   

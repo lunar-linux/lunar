@@ -103,15 +103,19 @@ create_module_index() {
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
-        sed -e 's:/DETAILS$::' -e 's:/var/lib/lunar/moonbase/::' -e 's|/|:|' | \
-	awk -F: '{print $2":"$1}' > $TMP_INDEX
+        sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
     # we search zlocal locally to make sure they get found:
-    find $MOONBASE/zlocal -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' >> $TMP_INDEX
+    find $MOONBASE/zlocal -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' >> $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    find $MOONBASE -type f -name DETAILS | sed "s:$MOONBASE/::g" | sed 's|/|:|' | sed 's:/DETAILS::g' | awk -F: '{print $2":"$1}' > $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS | \
+        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
   fi
   
   # this should be safe enough:
@@ -128,6 +132,7 @@ create_module_index() {
 # usage   : check_module_index
 # purpose : checks if the index is up-to-date regarding to moonbase
 function check_module_index() {
+(
   debug_msg "check_module_index ($@)"
   if [ ! -e $MODULE_INDEX -o ! -e $DEPENDS_CACHE -o -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ] ; then
     create_module_index
@@ -136,6 +141,7 @@ function check_module_index() {
   else
     return 1
   fi
+)
 }
 
 
@@ -162,7 +168,11 @@ find_section() {
     fi
   fi
 
-  check_module_index
+  if ! check_module_index ; then
+    # shave some time off not trying the rest of the code below since that
+	# is useless
+	return 1
+  fi
 
   SECTION=$(grep ^$1: $MODULE_INDEX 2>/dev/null | head -n 1 | cut -d: -f2)
   if [ -n "$SECTION" ] ; then
@@ -221,8 +231,7 @@ run_details() {
       temp_destroy $TMP_DETAILS
     fi
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
-    mod_v_safe_edit $1 
-    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MOD_V_SNAME}
+    MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MODULE}
     MODULE_PREFIX=${MODULE_PREFIX:-$DEFAULT_PREFIX}
 
     return 0
@@ -400,13 +409,7 @@ remove_module() {
   unlock_file $MODULE_STATUS_BACKUP                            &&
 
   if [ -n "$EXILE" ] ; then
-     lock_file $MODULE_STATUS_BACKUP                     &&
-     lock_file $MODULE_STATUS                            && 
-     echo  "$1::exiled:0.0"  >>  $MODULE_STATUS          &&
-     cat  $MODULE_STATUS      >  $MODULE_STATUS_BACKUP   &&
-     unlock_file $MODULE_STATUS                          &&
-     unlock_file $MODULE_STATUS_BACKUP                   &&
-
+     exile_modules "$1"                                  &&
      lock_file $DEPENDS_STATUS_BACKUP                    &&
      lock_file $DEPENDS_STATUS                           &&
      grep  -v  ":$1:" $DEPENDS_STATUS_BACKUP  >   $DEPENDS_STATUS  &&
@@ -431,8 +434,7 @@ add_module()  {
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS_BACKUP                             &&
   lock_file $MODULE_STATUS                                    &&
-  # the next statement MUST be allowed to fail if statfiles are empty:
-  grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null
+  grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null &&
   echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
   cp $MODULE_STATUS $MODULE_STATUS_BACKUP                     &&
   unlock_file $MODULE_STATUS                                  &&

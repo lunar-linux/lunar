@@ -12,9 +12,8 @@
 
 start_logging () {
   debug_msg "start_logging  ($@)"
-  mod_v_safe_edit $MODULE 
-  export C_LOG=$(temp_create "${MOD_V_SNAME}.compile-log")
-  export C_FIFO=$(temp_create "${MOD_V_SNAME}.compile-fifo")
+  export C_LOG=$(temp_create "${MODULE}.compile-log")
+  export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
 
   # just remaking this as FIFO
   rm -f $C_FIFO
@@ -26,13 +25,12 @@ start_logging () {
 
 stop_logging() {
   debug_msg "stop_logging ($@)"
-  mod_v_safe_edit $MODULE 
   echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -u)\"" >> $C_LOG
   message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2"  \
+           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
            "${DEFAULT_COLOR}"
 
-  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MOD_V_SNAME-$VERSION.bz2
+  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.bz2
   temp_destroy $C_LOG
   temp_destroy $C_FIFO
 }

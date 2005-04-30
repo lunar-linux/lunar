@@ -23,11 +23,6 @@ unalias() {
 	return
       fi
     done
-    # shortcut out when not installed and running lvu
-    if [ "$(basename $0)" == "lvu" ] ; then
-      echo $1
-      return
-    fi
     # shortcut out: in the satisfy_depends stage we should NOT ask this again
     if [ -z "$DEPS_ONLY" ] ; then
       # first we check if this dependency is already existant in the exact
@@ -58,6 +53,12 @@ unalias() {
           return
         fi
       done
+    fi
+
+    # shortcut out when explicitly instructed so
+    if [ -n "$NEVER_ASK" ] ; then
+      echo $1
+      return
     fi
 
     # propose one and let the user pick it from a list:

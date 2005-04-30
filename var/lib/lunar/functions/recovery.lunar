@@ -51,16 +51,17 @@ rebuild_status_files() {
         VERSION=$(echo $MODULE_NAME | cut -d "-" -f "$COUNTS"-)
         SIZE=$(find_module_size $REAL_NAME $VERSION)
         DATE=$(ls -l $INSTALL_LOGS/$REAL_NAME-$VERSION --time-style=+%Y%m%d | awk '{print $6}')
+        remove_module "$REAL_NAME" &&
+        # adjusted add_module code that echos the DATE field ;^)
         lock_file $MODULE_STATUS &&
         lock_file $MODULE_STATUS_BACKUP &&
-        # adjusted add_module code that echos the DATE field ;^)
-        grep -v "^$REAL_NAME:" $MODULE_STATUS_BACKUP >$MODULE_STATUS 2>/dev/null &&
         echo "$REAL_NAME:$DATE:installed:$VERSION:$SIZE" >>$MODULE_STATUS &&
         cat $MODULE_STATUS >$MODULE_STATUS_BACKUP &&
         unlock_file $MODULE_STATUS_BACKUP &&
-        unlock_file $MODULE_STATUS
+        unlock_file $MODULE_STATUS &&
+
         message "Added: $REAL_NAME-$VERSION ($SIZE) ($DATE)"
-        break;
+        break
       fi
       ((COUNTS--))
     done
