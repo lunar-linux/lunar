@@ -675,7 +675,7 @@ option_menu()  {
       F)  feature_menu           ;;
       I)  integrity_menu         ;;
       M)  mirror_menu            ;;
-      O)  optimize_architecture  ;;
+      O)  . /var/lib/lunar/menu/optimize.menu && optimize_menu          ;;
       L)  set_default_module     ;;
     esac
   done
@@ -835,7 +835,7 @@ else
     renew      ) renew                                  ;;
     update     ) update                                 ;;
     rebuild    ) rebuild                                ;;
-    optimize   ) optimize_architecture                  ;;
+    optimize   ) . /var/lib/lunar/menu/optimize.menu && optimize_menu  ;;
     set        ) shift && setvar $@                     ;;
     unset      ) shift && unsetvar $@                   ;;
     fix        ) shift && run_fix $@                    ;;

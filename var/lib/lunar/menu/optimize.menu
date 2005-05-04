@@ -8,43 +8,30 @@ set_optimize() {
   echo -e PLATFORM=$PLATFORM            '\n'\
           BUILD=$BUILD                  '\n'\
 	  MAKES=$MAKES                  '\n'\
-          COPT=$COPT                    '\n'\
-          CCOPT=$CCOPT                  '\n'\
           BOPT=$BOPT                    '\n'\
           CPU=$CPU                      '\n'\
           SPD=( ${SPD[@]} )             '\n'\
 	  STACK=$STACK                  '\n'\
           XTRA=( ${XTRA[@]} )           '\n'\
           FPM=$FPM                      '\n'\
-	  CC_WARN=( ${CC_WARN[@]} )     '\n'\
-	  CCC_WARN=( ${CCC_WARN[@]} )   '\n'\
+	  CC_OPTS=( ${CC_OPTS[@]} )     '\n'\
           LDF=( ${LDF[@]} )             '\n'\
           ADDON=( ${ADDON[@]} ) > /etc/lunar/local/optimizations
 }
 
 # Setup the help to be used for descriptions
-help() {
+optimizations_help() {
    case $1 in
 
    # Help for selecting preferred compiler.
-   compiler_help)
+   compiler)
                 MENU="Preferred Compiler"
            GCC2_HELP="Sets GCC 2x as the preferred compiler."
            GCC3_HELP="Sets GCC 3x as the preferred compiler."
                  ;;
                  
-         cc_help)
-                  MENU="Options for the C compiler"
-             Pipe_HELP="Enable gcc to use named pipes."
-                ;;
-                
-        ccc_help)
-                  MENU="Options for the C++ compiler"
-             Pipe_HELP="Enable gcc to use named pipes."
-                ;;
-                
    # Help for the platform selections.
-   platform_help)
+   platform)
                 MENU="Platform"
             x86_HELP="Intel and AMD hardware"
           Alpha_HELP="Compaq Alpha hardware"
@@ -53,7 +40,7 @@ help() {
                  ;;
 
    # Help for the basic optimizations.
-     bopt_help)
+     bopt)
              MENU="Basic Optimization"
         None_HELP="-O0"
         Fast_HELP="-O1"
@@ -63,17 +50,15 @@ help() {
                ;;
 
    # Help for the cpu selections.
-      cpu_help)
+      cpu)
           MENU="$2 CPUs, according to the kernel you have a$(cat /proc/cpuinfo | grep 'model name' | cut -d: -f2 | head -n 1)"
          case $2 in
             x86)
           I386_HELP="I386 processors"
           I486_HELP="I486 processors"
-          I586_HELP="I586 processors"
-       Pentium_HELP="Pentium processors"
+          I586_HELP="I586 processors, identical to 'pentium'"
     PentiumMMX_HELP="Pentium processors with mmx"
-          I686_HELP="I686 processors"
-    PentiumPro_HELP="Pentium Pro processors"
+          I686_HELP="I686 processors, identical to 'pentiumpro'"
             P2_HELP="Pentium II processors"
             P3_HELP="Pentium III processors"
             P4_HELP="Pentium 4 processors"
@@ -144,7 +129,7 @@ help() {
          ;;
 
    # Help for speed options.
-      spd_help)
+      spd)
               MENU="Speed optimizations"
        Speedy_HELP="Optimize to increase performance of generated code"
         Risky_HELP="Optimize to increase performance ... by violating ANSI and IEEE FP rules"
@@ -160,10 +145,11 @@ help() {
     Expensive_HELP="Perform expensive optimizations"
       Doubles_HELP="Align double, long double, and long long on two word boundaries"
        Tracer_HELP="Perform tail duplication to enlarge superblock size."
+       Blocks_HELP="Reorder basic blocks in order to reduce number of taken branches."
                ;;
 
    # Help for extra options
-     xtra_help)
+     xtra)
                   # do NOT change the next line unless you too smart
                   CPUINFO=$(echo "`grep flags /proc/cpuinfo` ")
 		  for EXT in mmx sse sse2 3dnow altivec ; do
@@ -182,7 +168,7 @@ help() {
                ;;
 
    # Help for floating point math
-      fpm_help)
+      fpm)
                   # do NOT change the next line unless you too smart
                   CPUINFO=$(echo "`grep flags /proc/cpuinfo` ")
 		  for EXT in fpu sse altivec ; do
@@ -201,13 +187,15 @@ help() {
                   unset CPUINFO EXT FLAGS
                ;;
    # Warn help
- ccc_warn_help)
-          MENU="Enable/Disable C++ compiler warnings"
-     Deprecated_HELP="Disable warnings of deprecated..."
+ cc_opt)
+          MENU="General C/C++ compiler settings"
+Deprecated_HELP="Disable warnings of deprecated symbols in C++"
+     CPipe_HELP="Enable cc to use named pipes."
+    CCPipe_HELP="Enable c++ to use named pipes."
               ;;
           
    # Help for linker options
-      ldf_help)
+      ldf)
             MENU="Linker options"
       Strip_HELP="Strip all symbols"
    Optimize_HELP="Optimize hash tables during linking"
@@ -217,7 +205,7 @@ help() {
                ;;
 
    # Addon help for extra programs
-    addon_help)
+    addon)
             MENU="Addon program support"
        None_HELP="No compiler addons"
      DistCC_HELP="Distributed compiler support"
@@ -226,46 +214,36 @@ help() {
   esac
 }
 
-compiler_options() {
+
+optimizations_options() {
+  case $1 in
+   compiler)
    OPTIONS=( "2" "GCC version 2x"  $( [ "$GCCVER" == "2" ] && echo "on" || echo "off" )  "$GCC2_HELP"
              "3" "GCC version 3x"  $( [ "$GCCVER" == "3" ] && echo "on" || echo "off" )  "$GCC3_HELP" )
-}
-
-cc_options(){
-  OPTIONS=( '-pipe'   "-pipe"  $( [ "$COPT" == "-pipe" ] && echo "on" || echo "off" )   "$Pipe_HELP" )
-}
-ccc_options(){
-  OPTIONS=( '-pipe'   "-pipe"  $( [ "$CCOPT" == "-pipe" ] && echo "on" || echo "off" )   "$Pipe_HELP" )
-}
-
-platform_options() {
+   ;;
+   platform)
    OPTIONS=( "x86"     "Intel, AMD, and clones"  $( [ "$PLATFORM" == "x86" ] && echo "on" || echo "off" )      "$x86_HELP"
              "Alpha"   "Compaq Alpha"            $( [ "$PLATFORM" == "Alpha" ] && echo "on" || echo "off" )    "$Alpha_HELP"
              "PowerPC" "PowerPC"                 $( [ "$PLATFORM" == "PowerPC" ] && echo "on" || echo "off" )  "$PowerPC_HELP"
              "SPARC"   "Sun SPARC"               $( [ "$PLATFORM" == "SPARC" ] && echo "on" || echo "off" )    "$SPARC_HELP" )
-}
-
-bopt_options() {
+   ;;
+   bopt)
    OPTIONS=( "None"     "-O0"   $( [ "$BOPT" == "None" ] && echo "on" || echo "off" )    "$None_HELP"
              "Fast"     "-O1"   $( [ "$BOPT" == "Fast" ] && echo "on" || echo "off" )    "$Fast_HELP"
              "Faster"   "-O2"   $( [ "$BOPT" == "Faster" ] && echo "on" || echo "off" )  "$Fasert_HELP"
              "Fastest"  "-O3"   $( [ "$BOPT" == "Fastest" ] && echo "on" || echo "off" ) "$Fastest_HELP"
              "Small"    "-Os"   $( [ "$BOPT" == "Small" ] && echo "on" || echo "off" )   "$Small_HELP" )
-
-}
-
-cpu_options() {
-   case $1 in
+  ;;
+  cpu)
+   case $2 in
       x86) OPTIONS=( "I386"        "I386"         $( [ "$CPU" == "I386" ] && echo "on" || echo "off" )        "$I386_HELP"
                      "I486"        "I486"         $( [ "$CPU" == "I486" ] && echo "on" || echo "off" )        "$I486_HELP"
-                     "I586"        "I586"         $( [ "$CPU" == "I586" ] && echo "on" || echo "off" )        "$I586_HELP"
-                     "Pentium"     "Pentium"      $( [ "$CPU" == "Pentium" ] && echo "on" || echo "off" )     "$Pentium_HELP"
+                     "I586"        "I586 (Pentium)"         $( [ "$CPU" == "I586" ] && echo "on" || echo "off" )        "$I586_HELP"
                      "PentiumMMX"  "PentiumMMX"   $( [ "$CPU" == "PentiumMMX" ] && echo "on" || echo "off" )  "$PentiumMMX_HELP"
-                     "I686"        "I686"         $( [ "$CPU" == "I686" ] && echo "on" || echo "off" )        "$I686_HELP"
-                     "PentiumPro"  "PentiumPro"   $( [ "$CPU" == "PentiumPro" ] && echo "on" || echo "off" )  "$PentiumPro_HELP"
+                     "I686"        "I686 (PentiumPro)"         $( [ "$CPU" == "I686" ] && echo "on" || echo "off" )        "$I686_HELP"
                      "Pentium2"    "P2"           $( [ "$CPU" == "Pentium2" ] && echo "on" || echo "off" )    "$P2_HELP"
-                     "Pentium3"    "P3"           $( [ "$CPU" == "Pentium3" ] && echo "on" || echo "off" )    "$P3_HELP"
-                     "Pentium4"    "P4"           $( [ "$CPU" == "Pentium4" ] && echo "on" || echo "off" )    "$P4_HELP"
+                     "Pentium3"    "P3 (Celeron)"           $( [ "$CPU" == "Pentium3" ] && echo "on" || echo "off" )    "$P3_HELP"
+                     "Pentium4"    "P4 (Xeon)"           $( [ "$CPU" == "Pentium4" ] && echo "on" || echo "off" )    "$P4_HELP"
                      "K6"          "K6"           $( [ "$CPU" == "K6" ] && echo "on" || echo "off" )          "$K6_HELP"
                      "K62"         "K62"          $( [ "$CPU" == "K62" ] && echo "on" || echo "off" )         "$K62_HELP"
                      "K63"         "K63"          $( [ "$CPU" == "K63" ] && echo "on" || echo "off" )         "$K63_HELP"
@@ -329,10 +307,8 @@ cpu_options() {
                      "ultrasparc" "ultrasparc" $( [ "$CPU" == "ultrasparc" ] && echo "on" || echo "off" ) "$ultrasparc_HELP" )
                      ;;
    esac
-
-}
-
-spd_options() {
+  ;;
+  spd)
    OPTIONS=( "Speedy"    "-funroll-loops"            $( echo ${SPD[@]} | grep -q "Speedy" && echo "on" || echo "off" )    "$Speedy_HELP"
              "Risky"     "-ffast-math"               $( echo ${SPD[@]} | grep -q "Risky" && echo "on" || echo "off" )     "$Risky_HELP" 
              "Pointers"  "-fomit-frame-pointer"      $( echo ${SPD[@]} | grep -q "Pointers" && echo "on" || echo "off" )  "$Pointer_HELP"
@@ -346,41 +322,40 @@ spd_options() {
              "Align"     "-falign-functions"        $( echo ${SPD[@]} | grep -q "Align" && echo "on" || echo "off" )     "$Align_HELP" 
              "Expensive" "-fexpensive-optimizations" $( echo ${SPD[@]} | grep -q "Expensive" && echo "on" || echo "off" ) "$Expensive_HELP" 
              "Doubles"   "-malign-double"            $( echo ${SPD[@]} | grep -q "Doubles" && echo "on" || echo "off" )   "$Doubles_HELP"
-             "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP" ) 
-}
-
-xtra_options() {
+             "Tracer"   "-ftracer"                   $( echo ${SPD[@]} | grep -q "Tracer" && echo "on" || echo "off" )   "$Tracer_HELP"
+	     "Blocks"   "-freorder-blocks"           $( echo ${SPD[@]} | grep -q "Blocks" && echo "on" || echo "off" )   "$Blocks_HELP" )
+   ;;
+  xtra)
    OPTIONS=( "MMX"       "MMX"     $( echo ${XTRA[@]} | grep -q "MMX" && echo "on" || echo "off" )      "$MMX_HELP"
              "SSE"       "SSE"     $( echo ${XTRA[@]} | grep -q "SSE" && echo "on" || echo "off" )      "$SSE_HELP"
              "SSE2"      "SSE2"    $( echo ${XTRA[@]} | grep -q "SSE2" && echo "on" || echo "off" )     "$SSE2_HELP"
              "dnow"      "3dnow"   $( echo ${XTRA[@]} | grep -q "dnow" && echo "on" || echo "off" )     "$dnow_HELP"
              "Altivec"   "Altivec" $( echo ${XTRA[@]} | grep -q "Altivec" && echo "on" || echo "off" )  "$Altivec_HELP" )
-}
-
-fpm_options() {
+   ;;
+  fpm)
    OPTIONS=( "None"      ""   $([ "$FPM" == "None" ] && echo "on" || echo "off" )     "$None_HELP"
              "x387"      ""   $([ "$FPM" == "x387" ] && echo "on" || echo "off" )     "$x387_HELP"
              "SSE"       ""   $([ "$FPM" == "SSE" ] && echo "on" || echo "off" )      "$SSE_HELP"
              "Both"      ""   $([ "$FPM" == "Both" ] && echo "on" || echo "off" )     "$Both_HELP"
              "Altivec"   ""   $([ "$FPM" == "Altivec" ] && echo "on" || echo "off" )  "$Altivec_HELP" )
-}
-
-ccc_warn() { 
-  OPTIONS=( "Deprecated" "-Wno-deprecated" $( echo ${CCC_WARN[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" )
-}
-
-ldf_options() {
+   ;;
+  cc_opt)
+  OPTIONS=( "Deprecated" "-Wno-deprecated for C++" $( echo ${CC_OPTS[@]} | grep -q "Deprecated" && echo "on" || echo "off" )  "$Deprecated_HELP" 
+            'ccpipe'   "-pipe for C"  $( echo ${CC_OPTS[@]} | grep -q "ccpipe" && echo "on" || echo "off" )   "$CPipe_HELP"
+            'cxxpipe'   "-pipe for C++"  $( echo ${CC_OPTS[@]} | grep -q "cxxpipe" && echo "on" || echo "off" )   "$CCPipe_HELP" )
+   ;;
+  ldf)
    OPTIONS=( "Strip"      "-s"            $( echo ${LDF[@]} | grep -q "Strip" && echo "on" || echo "off" )     "$Strip_HELP"
             "Optimize"      "-Wl,-O1"     $( echo ${LDF[@]} | grep -q "Optimize" && echo "on" || echo "off" )     "$Optimize_HELP"
             "Reduce"      "-Wl,--as-needed"     $( echo ${LDF[@]} | grep -q "Reduce" && echo "on" || echo "off" )     "$Reduce_HELP"
 #            "Debug"      "-S"            $( echo ${LDF[@]} | grep -q "Debug" && echo "on" || echo "off" )     "$Debug_HELP"
              "Combreloc"  "-z combreloc"  $( echo ${LDF[@]} | grep -q "Combreloc" && echo "on" || echo "off" ) "$Combreloc_HELP" )
-
-}
-
-addon_options() {
+   ;;
+  addon)
   OPTIONS=( "CCache" "ccache" $( echo ${ADDON[@]} | grep -q "CCache" && echo "on" || echo "off" ) "$CCache_HELP"
             "DistCC" "distcc" $( echo ${ADDON[@]} | grep -q "DistCC" && echo "on" || echo "off" ) "$DistCC_HELP" )
+   ;;
+  esac
 }
 
 menu() {
@@ -416,3 +391,117 @@ menu() {
    RESULT=$(echo $RESULT | sed -e 's:^"::' -e 's:"$::')
 
 }
+
+
+optimize_menu()  {
+  debug_msg "optimize_architecture ($@)"
+  # Make sure optimizations file exists, if not create it.
+  if [ ! -f /etc/lunar/local/optimizations ] ; then
+    touch /etc/lunar/local/optimizations
+  else
+    . /etc/lunar/local/optimizations
+  fi
+
+  # Flow control for the menus. This will also check for gcc3,
+  # if it exists it will allow more options.
+  TITLE="Lunar Optimizations"
+
+  # loop until escape or exited
+  while true; do
+  DEFAULT=${CHOICE:-V}
+ 
+  export IFS="$TAB_ENTER_IFS"
+
+  CHOICE=`$DIALOG --title "$TITLE" \
+                  --ok-label "Select" \
+                  --cancel-label "Close" \
+		  --default-item "$DEFAULT" \
+		  --item-help \
+		  --menu \
+		  "" \
+		  0 0 0 \
+		  "compiler" "Compiler version               [$GCCVER]" "Select the default gcc version to be used" \
+		  "platform" "Platform choice                [$PLATFORM]" "Select the specific architecture like x86, ppc" \
+		  "bopt"     "Base speed optimization        [$BOPT]" "Select the base optimization from -Os, -O0, -O1 etc" \
+		  "cpu"      "CPU selection                  [$CPU]" "Select the target CPU type" \
+		  "xtra"     "CPU extensions                 [$XTRA]" "Select CPU extensions" \
+		  "spd"      "Specialized optimizations" "Select specific compiler flags for expensive and risky optimizations" \
+		  "cc_opt"   "General C/C++ options" "Select named pipes, warnings on deprecated symbols" \
+		  "fpm"      "Floating point optimizations   [$FPM]" "enable specific floating point optimizations" \
+		  "ldf"      "Linker optimizations           [$LDF]" "Enable linker specific optimizations" \
+		  "addon"    "Compiler addons                [$ADDON]" "Enable compiler addons like ccache, distcc" \
+		  "parallel" "Parallization" "Enable mutliple parallel compiles" \
+		  "stack"    "Stack" "Set the stack size"`
+  if [ $? != 0 ] ; then
+    verbose_msg "Saving optimizations"
+    set_optimize
+    return
+  fi
+
+  optimizations_help $CHOICE $PLATFORM
+  optimizations_options $CHOICE $PLATFORM
+
+  case $CHOICE in
+    compiler)
+      menu radiolist
+      GCCVER=$RESULT
+      ;;
+    platform)
+      menu radiolist
+      PLATFORM=$RESULT
+      ;;
+    bopt)
+      menu radiolist
+      BOPT=$RESULT
+      ;;
+    cpu)
+      menu radiolist
+      CPU=$RESULT
+      optimize_cpu $CPU
+      BUILD=$BUILD
+      ;;
+    spd)
+      menu checklist
+      SPD=( $RESULT )
+      ;;
+    xtra)
+      menu checklist
+      XTRA=( $RESULT )
+      ;;
+    fpm)
+      menu radiolist
+      FPM=$RESULT
+      ;;
+    cc_opt)
+      menu checklist
+      CC_OPTS=( $RESULT )
+      ;;
+    ldf)
+      menu checklist
+      LDF=( $RESULT )
+      ;;
+    addon)
+      menu checklist
+      ADDON=( $RESULT )
+      ;;
+    parallel)
+      MAKES=`dialog --title "Make - parallellizing" \
+             --nocancel --stdout --inputbox         \
+		"Enter the number of concurrent makes ( a value > 1 ) or leave this field empty."  \
+		0 55 $MAKES`
+      # people WILL fill in 1... so, we knock them down and take their money:
+      if [[ $MAKES -lt 2 ]] ; then
+        unset MAKES
+      fi
+      ;;
+    stack)
+      STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
+             --nocancel --stdout --inputbox \
+		"Enter the number to set the stack to, leave empty for default."  \
+		0 55 $STACK`
+      ;;
+  esac
+  done
+}
+
+

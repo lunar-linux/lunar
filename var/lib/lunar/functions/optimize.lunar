@@ -726,14 +726,20 @@ optimize_addon() {
 }
 
 
-optimize_ccc_warn() {
-  debug_msg "optimize_ccc_warn ($@)"
-  for W in ${CCC_WARN[@]}; do
+optimize_cc_opt() {
+  debug_msg "optimize_cc_opt ($@)"
+  for W in ${CC_OPTS[@]}; do
     case $W in
-    Deprecated)
-      CXXFLAGS="$CXXFLAGS -Wno-deprecated"
-      CPPFLAGS="$CPPFLAGS -Wno-deprecated"
-      ;;
+      Deprecated)
+        CXXFLAGS="$CXXFLAGS -Wno-deprecated"
+        CPPFLAGS="$CPPFLAGS -Wno-deprecated"
+        ;;
+	  ccpipe)
+	    COPT="$COPT -pipe"
+	    ;;
+	  cxxpipe)
+	    CCOPT="$CCOPT -pipe"
+	    ;;
     esac
   done
 }
@@ -749,16 +755,13 @@ optimize() {
     echo -e PLATFORM=x86            '\n'    \
 BUILD=i386-pc-linux-gnu '\n'    \
 MAKES=                  '\n'    \
-COPT=                   '\n'    \
-CCOPT=                  '\n'    \
 BOPT=-O0                '\n'    \
 CPU=i386                '\n'    \
 SPD=( )                 '\n'    \
 STACK=                  '\n'    \
 XTRA=( )                '\n'    \
 FPM=                    '\n'    \
-CC_WARN=( )             '\n'    \
-CCC_WARN=( )            '\n'    \
+CC_OPTS=( )             '\n'    \
 LDF=( )                 '\n'    \
 ADDON=( ) > /etc/lunar/local/optimizations
   fi
@@ -770,51 +773,24 @@ ADDON=( ) > /etc/lunar/local/optimizations
 
   unset CFLAGS CXXFLAGS LDFLAGS
 
+  optimize_make     $MAKES     &&
+  optimize_base     $BOPT      &&
+  optimize_cpu      $CPU       &&
+  optimize_speed    ${SPD[@]}  &&
+  optimize_extra    ${XTRA[@]} &&
+  optimize_fp       $FPM       &&
+  optimize_cc_opt              &&
+  optimize_ld       ${LDF[@]}  &&
+  optimize_addon               &&
+
   case $PLATFORM in
-      x86)      optimize_make     $MAKES     &&
-                optimize_base     $BOPT      &&
-                optimize_cpu      $CPU       &&
-                optimize_speed    ${SPD[@]}  &&
-                optimize_extra    ${XTRA[@]} &&
-		optimize_stack               &&
-                optimize_fp       $FPM       &&
-		optimize_ccc_warn            &&
-                optimize_ld       ${LDF[@]}  &&
-		optimize_addon
-                ;;
-      Alpha)    optimize_make     $MAKES     &&
-                optimize_base     $BOPT      &&
-                optimize_cpu      $CPU       &&
-                optimize_speed    ${SPD[@]}  &&
-                optimize_extra    ${XTRA[@]} &&
-                optimize_fp       $FPM       &&
-		optimize_ccc_warn            &&
-                optimize_ld       ${LDF[@]}  &&
-		optimize_addon
-                ;;
-      PowerPC)  optimize_make     $MAKES     &&
-                optimize_base     $BOPT      &&
-                optimize_cpu      $CPU       &&
-                optimize_speed    ${SPD[@]}  &&
-                optimize_extra    ${XTRA[@]} &&
-                optimize_fp       $FPM       &&
-		optimize_ccc_warn            &&
-                optimize_ld       ${LDF[@]}  &&
-		optimize_addon
-                ;;
-      SPARC)    optimize_make     $MAKES     &&
-                optimize_base     $BOPT      &&
-                optimize_cpu      $CPU       &&
-                optimize_speed    ${SPD[@]}  &&
-                optimize_extra    ${XTRA[@]} &&
-                optimize_fp       $FPM       &&
-		optimize_ccc_warn            &&
-                optimize_ld       ${LDF[@]}  &&
-		optimize_addon
-                ;;
+    x86)
+      optimize_stack
+      ;;
   esac
 
-  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" ] ; then
+  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" \
+       -o "$(installed_version gcc | cut -d. -f1)" == "4" ] ; then
     CFLAGS=$(echo $CFLAGS | sed 's:-mcpu:-mtune:')
     CXXFLAGS=$(echo $CXXFLAGS | sed 's:-mcpu:-mtune:')
   fi
@@ -833,114 +809,6 @@ ADDON=( ) > /etc/lunar/local/optimizations
   verbose_msg "CFLAGS=\"$CFLAGS\""
   verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
   verbose_msg "LDFLAGS=\"$LDFLAGS\""
-}
-
-
-# This is the flow control and error checking for the menus.
-optimize_architecture()  {
-  debug_msg "optimize_architecture ($@)"
-  # Make sure optimizations file exists, if not create it.
-  if ! [[ -f /etc/lunar/local/optimizations ]]; then
-    touch /etc/lunar/local/optimizations
-  fi
-
-  # Make sure our menu script exists and source it in, or exit.
-  if [[ -f /var/lib/lunar/menu/optimize.menu ]]; then
-    . /var/lib/lunar/menu/optimize.menu
-  else
-    exit 0
-  fi
-
-  if [ -f /etc/lunar/local/optimizations ] ; then
-    .  /etc/lunar/local/optimizations
-  fi
-
-  # Flow control for the menus. This will also check for gcc3,
-  # if it exists it will allow more options.
-  TITLE="Lunar Optimizations"
-
-  help compiler_help          &&
-  compiler_options            &&
-  menu radiolist              &&
-  GCCVER=$RESULT
-  
-  help cc_help                &&
-  cc_options                  &&
-  menu checklist              &&
-  COPT=$RESULT
-
-  help ccc_help               &&
-  ccc_options                 &&
-  menu checklist              &&
-  CCOPT=$RESULT
-
-  help platform_help          &&
-  platform_options            &&
-  menu radiolist              &&
-  PLATFORM=$RESULT
-
-  help bopt_help              &&
-  bopt_options                &&
-  menu radiolist              &&
-  BOPT=$RESULT
-
-  help cpu_help $PLATFORM     &&
-  cpu_options $PLATFORM       &&
-  menu radiolist              &&
-  CPU=$RESULT
-  optimize_cpu $CPU           &&
-  BUILD=$BUILD
-
-  help spd_help               &&
-  spd_options                 &&
-  menu checklist              &&
-  SPD=( $RESULT )
-
-  help xtra_help              &&
-  xtra_options                &&
-  menu checklist              &&
-  XTRA=( $RESULT )
-
-  help fpm_help               &&
-  fpm_options                 &&
-  menu radiolist              &&
-  FPM=$RESULT
-
-  help ccc_warn_help          &&
-  ccc_warn                    &&
-  menu checklist              &&
-  CCC_WARN=$RESULT  
-
-  help ldf_help               &&
-  ldf_options                 &&
-  menu checklist              &&
-  LDF=( $RESULT )
-  
-  help addon_help             &&
-  addon_options               &&
-  menu checklist              &&
-  ADDON=( $RESULT )
-
-  MAKES=`dialog --title "Make - parallellizing" \
-                --nocancel                       \
-		--stdout                         \
-		--inputbox                       \
-		"Enter the number of concurrent makes ( a value > 1 ) or leave this field empty."  \
-		0 55 $MAKES`
-  # people WILL fill in 1... so, we knock them down and take their money:
-  if [[ $MAKES -lt 2 ]] ; then
-    unset MAKES
-  fi
-
-  STACK=`dialog --title "Set stack parameters. (WARNING! Best left empty!)" \
-                --nocancel                       \
-		--stdout                         \
-		--inputbox                       \
-		"Enter the number to set the stack to, leave empty for default."  \
-		0 55 $STACK`
-
-  set_optimize
-
 }
 
 
