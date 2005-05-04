@@ -430,7 +430,7 @@ optimize_menu()  {
 		  "fpm"      "Floating point optimizations   [$FPM]" "enable specific floating point optimizations" \
 		  "ldf"      "Linker optimizations           [$LDF]" "Enable linker specific optimizations" \
 		  "addon"    "Compiler addons                [$ADDON]" "Enable compiler addons like ccache, distcc" \
-		  "parallel" "Parallization" "Enable mutliple parallel compiles" \
+		  "parallel" "Parallization" "Enable multiple parallel compiles" \
 		  "stack"    "Stack" "Set the stack size"`
   if [ $? != 0 ] ; then
     verbose_msg "Saving optimizations"
