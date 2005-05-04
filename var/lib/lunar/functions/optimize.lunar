@@ -486,16 +486,10 @@ optimize_speed() {
          Pointers) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fomit-frame-pointer"
                      CXXFLAGS="$CXXFLAGS -fomit-frame-pointer"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
          Siblings) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -foptimize-sibling-calls"
-                     CXXFLAGS="$CXXFLAGS"
-                   else
-                     CFLAGS="$CFLAGS"
                      CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
@@ -503,84 +497,58 @@ optimize_speed() {
                      CFLAGS="$CFLAGS -fprofile-arcs"
                      CXXFLAGS="$CXXFLAGS -fprofile-arcs"
 		     set_local_config "KEEP_SOURCE" "on"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
         Branching) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fbranch-probabilities"
                      CXXFLAGS="$CXXFLAGS -fbranch-probabilities"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;; 
          Aliasing) if [[ $GCCVER == "3" ]] ; then
                       CFLAGS="$CFLAGS -fstrict-aliasing"
                       CXXFLAGS="$CXXFLAGS -fstrict-aliasing"
-                    else
-                      CFLAGS="$CFLAGS"
-                      CXXFLAGS="$CXXFLAGS"
                     fi
                  ;;
             Cprop) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fno-cprop-registers"
                      CXXFLAGS="$CXXFLAGS -fno-cprop-registers"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
             Float) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -ffloat-store"
                      CXXFLAGS="$CXXFLAGS -ffloat-store"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
           Address) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fforce-addr"
                      CXXFLAGS="$CXXFLAGS -fforce-addr"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
             Align) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -falign-functions -falign-loops -falign-jumps"
                      CXXFLAGS="$CXXFLAGS -falign-functions -falign-loops -falign-jumps"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
         Expensive) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -fexpensive-optimizations"
                      CXXFLAGS="$CXXFLAGS -fexpensive-optimizations"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
                  ;;
           Doubles) if [[ $GCCVER == "3" ]] ; then
                      CFLAGS="$CFLAGS -malign-double"
                      CXXFLAGS="$CXXFLAGS -malign-double"
-                   else
-                     CFLAGS="$CFLAGS"
-                     CXXFLAGS="$CXXFLAGS"
                    fi
 		 ;;
 	   Tracer) if [[ $GCCVER == "3" ]] ; then
 	             CFLAGS="$CFLAGS -ftracer"
 		     CXXFLAGS="$CXXFLAGS -ftracer"
-		   else
-		     CFLAGS="$CFLAGS"
-		     CXXFLAGS="$CXXFLAGS"
 		   fi
                  ;;
-
+	   Blocks) if [[ $GCCVER == "3" ]] ; then
+	             CFLAGS="$CFLAGS -freorder-blocks"
+		     CXXFLAGS="$CXXFLAGS -freorder-blocks"
+		   fi
+                 ;;
       esac
    done
 }
