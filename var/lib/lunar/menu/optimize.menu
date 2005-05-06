@@ -541,7 +541,7 @@ optimize_menu()  {
 	  fi
 	else
 	  # annoy the user and make sure he reads this warning message
-	  $DIALOG --defaultno --colors --yesno "                    \Z1*** WARNING ***\n\n\ZnPlease read this carefully. You are about to turn off the optimization safety. This means that you can possibly turn on compiler or linker optimizations that can and will break your box. Not only will the problem most likely occur only days, weeks or months after you turn this switch, but also it can corrupt all your personal data, make your machine unbootable, and cause serious personal distress, headache, loss of vision, heart failure, loss of income, or otherwise very bad things. Before you turn off this option, please think for yourself for a minute and ask yourself:\n\n                    Is it worth it?" 20 70
+	  $DIALOG --defaultno --yes-label "No" --no-label "Yes" --colors --yesno "                    \Z1*** WARNING ***\n\n\ZnPlease read this carefully. You are about to turn off the optimization safety. This means that you can possibly turn on compiler or linker optimizations that can and will break your box. Not only will the problem most likely occur only days, weeks or months after you turn this switch, but also it can corrupt all your personal data, make your machine unbootable, and cause serious personal distress, headache, loss of vision, heart failure, loss of income, or otherwise very bad things. Before you turn off this option, please think for yourself for a minute and ask yourself: Is it worth it?\n\nOnly use safe optimizations?" 20 70
 	  if [ $? == 0 ]; then
 	    # oookay, he must be knowing what he's doing!
             SAFE_OPTIMIZATIONS=off
