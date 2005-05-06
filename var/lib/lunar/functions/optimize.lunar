@@ -558,11 +558,10 @@ optimize_stack() {
   debug_msg "optimize_stack ($@)"
   if [[ $STACK > 0 ]] ; then
     if [ $PLATFORM == "x86" ] ; then
-      STACK="-mpreferred-stack-boundary=$STACK" 
+      CFLAGS="$CFLAGS -mpreferred-stack-boundary=$STACK"
+      CXXFLAGS="$CXXFLAGS -mpreferred-stack-boundary=$STACK"
+      CPPFLAGS="$CPPFLAGS -mpreferred-stack-boundary=$STACK"
     fi
-      CFLAGS="$CFLAGS $STACK"
-      CXXFLAGS="$CXXFLAGS $STACK"
-      CPPFLAGS="$CPPFLAGS $STACK"
   fi
 }
 
