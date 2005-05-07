@@ -187,7 +187,7 @@ run_depends() {
     #              $4 = description of why to use this module
 
     DEP=$(unalias $1)
-    if ! in_depends "$MODULE" "$DEP" ; then
+    if ! grep -q "^$MODULE:$DEP:" $DEPENDS_STATUS ; then
                                                                                
       if module_exiled $DEP ; then
         verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
