@@ -632,27 +632,22 @@ optimize_fp() {
 # Set up the Linker optimizations
 optimize_ld() {
   debug_msg "optimize_ld ($@)"
-   if [[ $LDFLAGS ]]; then
-      unset LDFLAGS
-   fi
+  if [[ $LDFLAGS ]]; then
+    unset LDFLAGS
+  fi
 
-   for A in ${LDF[@]}; do
-      case $A in
-         Strip)     LDFLAGS="$LDFLAGS -s"
-                    ;;
-         Optimize)  WL="$WL,-O1"
-                    ;;
-         Reduce)    WL="$WL,--as-needed"
-                    ;;
-         Debug)     LDFLAGS="$LDFLAGS -S"
-                    ;;
-         Combreloc) LDFLAGS="$LDFLAGS -z combreloc"
-                    ;;
-      esac
-	  if [ -n "$WL" ]; then
-	    LDFLAGS="$LDFLAGS -Wl$WL"
-	  fi
-   done
+  for A in ${LDF[@]}; do
+    case $A in
+      Strip)     LDFLAGS="$LDFLAGS -s"           ;;
+      Optimize)  WL="$WL,-O1"                    ;;
+      Reduce)    WL="$WL,--as-needed"            ;;
+      Debug)     LDFLAGS="$LDFLAGS -S"           ;;
+      Combreloc) LDFLAGS="$LDFLAGS -z combreloc" ;;
+    esac
+  done
+  if [ -n "$WL" ]; then
+    LDFLAGS="$LDFLAGS -Wl$WL"
+  fi
 }
 
 

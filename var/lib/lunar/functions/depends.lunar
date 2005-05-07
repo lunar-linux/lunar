@@ -104,7 +104,7 @@ is_depends()  {
 in_depends()  {
   debug_msg "in_depends ($@)"
   # Was $2 presented as a depenency for module $1
-  return $(grep -q "^$1:$2:" $DEPENDS_STATUS)
+  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
 }
                                                                                 
                                                                                 
