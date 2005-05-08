@@ -831,7 +831,9 @@ main()  {
       for MODULE in $(list_installed); do
         VERSION=$(installed_version $MODULE)
         if grep -q "$2" $INSTALL_LOGS/$MODULE-$VERSION ; then
-          echo "$MODULE $VERSION"
+		  for FILE in $(grep "$2" $INSTALL_LOGS/$MODULE-$VERSION | cut -d: -f2) ; do
+            echo "$MODULE:$FILE"
+          done
         fi
       done
       ;;

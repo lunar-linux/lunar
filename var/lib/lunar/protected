@@ -112,6 +112,10 @@
 ^/var/lib/lunar/protected
 ^/var/lib/mysql/
 ^/var/mailman/Mailman/mm_cfg.py
+^/var/mailman/archives
+^/var/mailman/data
+^/var/mailman/lists
+^/var/mailman/qfiles
 ^/var/named/
 ^/var/nis/
 ^/var/spool/
