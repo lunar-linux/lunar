@@ -501,7 +501,7 @@ optimize_menu()  {
 		      echo "enable specific floating point optimizations"
 		    fi
                     echo "cc_opt"
-		    echo "General C/C++ options         [${CC_OPT[@]}]"
+		    echo "General C/C++ options         [${CC_OPTS[@]}]"
 		    echo "Select named pipes, warnings on deprecated symbols"
                     echo "ldf"
 		    echo "Linker optimizations          [${LDF[@]}]"
