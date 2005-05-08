@@ -78,6 +78,7 @@ sources     [module]       display source files for a module
 urls        [module]       display all URLs for a module
 maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
+submit      module         try to submit a module to the lunar ML
 
 sum         [module]       display checksums
 md5sum      [module]       display md5sums
@@ -722,6 +723,84 @@ show_info() {
   fi
 }
 
+
+submit_module() {
+  # this code tries to send the module back to the mailinglist
+  # as good as it gets
+  if [ -z "$1" ]; then
+    message "submit requires a single module name."
+    exit 1
+  fi
+  if [ ! -x /usr/sbin/sendmail ]; then
+    message "submit requires /usr/sbin/sendmail from (postfix, exim, sendmail)"
+    exit 1
+  fi
+  if ! run_details "$1" ; then
+      message "submit requires an existing module"
+      exit 1
+  else
+    if echo $SECTION | grep -q '^zlocal' ; then
+      SECTION=" "
+    fi
+    TMP_MSG=$(temp_create "submission")
+    (
+      echo '# MODULE SUBMISSION TEMPLATE'
+      echo '# --------------------------'
+      echo '# '
+      echo '# (all lines starting with # will be deleted before sending)'
+      echo '# Please fill in the fields as complete as possible to help'
+      echo '# developers track the status of your module'
+      echo '# '
+      echo '# PLEASE DO NOT CHANGE THE FOLLOWING FIELDS:'
+      echo 'To: lunar@lunar-linux.org'
+      echo 'Date:' $(date)
+      echo 'Subject: Module submission -' $MODULE
+      echo '# '
+      echo '# YOUR E_MAIL ADDRESS MUST BE VALID:'
+      echo 'From: '
+      echo '#Reply-To:'
+      echo '#Cc: '
+      echo '# PLEASE DO NOT ADD WHITESPACE ABOVE THIS LINE'
+      echo ''
+      echo '# '
+      echo '# Please fill in some of the following information if applicable:'
+      echo '# '
+      echo 'module name       :' $MODULE
+      echo 'suggested section :' $SECTION
+      echo 'update (y/n)      : n'
+      echo 'bugfix (y/n)      : n'
+      echo 'security (y/n)    : n'
+      echo ''
+      echo '# '
+      echo '# Add additional information, hints, comments below here,'
+      echo '# if you entered "y" in one of the fields above, please explain!'
+      echo '# '
+      echo ''
+      echo '# YOUR NAME HERE'
+      echo ''
+      echo '# '
+      echo '# Below is your module. Please do not change the format'
+      echo '# '
+      cd $SCRIPT_DIRECTORY
+      for FILE in $(find . -type f | grep -v 'CVS/' | sed 's/\.\///g'); do
+        echo "==================== BEGIN $FILE ===================="
+        cat $FILE
+        echo "===================== END $FILE ====================="
+        echo ""
+      done
+    ) > $TMP_MSG
+    edit_file $TMP_MSG
+    cat $TMP_MSG | grep -v '^#'
+    if query "Submit this module now?" y; then
+      RECIPIENT=$(grep -m 1 '^To: ' $TMP_MSG | sed 's/^To: //')
+      cat $TMP_MSG | grep -v '^#' | sendmail $RECIPIENT
+      temp_destroy $TMP_MSG
+    else
+      message "Submission aborted. your submission was saved as $TMP_MSG"
+    fi
+  fi
+}
+
 main()  {
   case $1 in
     html)
@@ -1087,6 +1166,10 @@ main()  {
          show_info $2
        fi
      fi
+     ;;
+
+   submit)
+     submit_module $2
      ;;
 
    *)
