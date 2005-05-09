@@ -28,7 +28,7 @@ rework_module() {
   # we declare these local to override the systems default ones:
   optional_depends()  {
     debug_msg "  optional_depends ($@)"
-    DEP=$(unalias $1)
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
     if module_exiled $DEP ; then
       echo "$MODULE:$DEP:off:optional:$2:$3"
     else
@@ -42,7 +42,7 @@ rework_module() {
                                                                                 
   depends()  {
     debug_msg "  depends ($@)"
-    DEP=$(unalias $1)
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
     if ! module_installed $DEP && ! module_held $DEP ; then
       if ! is_depends $DEP && module_exiled $DEP ; then
         return  1
@@ -59,7 +59,7 @@ rework_module() {
    (
     if run_details $1 &> /dev/null ; then
       if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
-      run_module_file $MODULE DEPENDS
+      run_module_file $MODULE DEPENDS | grep -v '%'
       fi
     fi
    ) 
@@ -73,9 +73,9 @@ rework_module() {
   lock_file $DEPENDS_STATUS_BACKUP                              &&
   lock_file $DEPENDS_STATUS                                     &&
   grep -v "^$MODULE:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS  &&
-  run_depends $MODULE >> $DEPENDS_STATUS                        &&
-  cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP                  &&
-  unlock_file $DEPENDS_STATUS                                   &&
+  run_depends $MODULE >> $DEPENDS_STATUS
+  cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
+  unlock_file $DEPENDS_STATUS
   unlock_file $DEPENDS_STATUS_BACKUP
 }
 
@@ -121,13 +121,16 @@ run_fix()  {
           if [ -n "$NOFIX" ] ; then
             continue
           fi
-          satisfy_depends      &&
-          FIX= satisfy_depends &&
+          NEVER_ASK=1 DEPS_ONLY= satisfy_depends      &&
+          NEVER_ASK=1 DEPS_ONLY= FIX= satisfy_depends &&
 
           if ! run_checks $MODULE ; then
+		    verbose_msg "Attempting to recompile \"$MODULE\""
             if ! FIX= lin --compile $MODULE ; then
+		      verbose_msg "Attempt to recompile \"$MODULE\" FAILED"
               continue
             elif ! run_checks $MODULE ; then
+		      verbose_msg "Attempt to recompile \"$MODULE\" succeeded but \"$MODULE\" still is broken!"
 			  continue
             fi
           fi

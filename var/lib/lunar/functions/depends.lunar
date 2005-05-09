@@ -255,7 +255,7 @@ satisfy_depends()  {
   grep "^$MODULE:" $DEPENDS_STATUS > $TMP_FILE
 
   # first recursively check if all required dependencies are installed
-  for DEP_MODULE in $(find_depends $MODULE) ; do
+  for DEP_MODULE in $(find_depends $MODULE | grep -v '%') ; do
     if [ $DEP_MODULE != $MODULE ]; then
       if ! module_installed $DEP_MODULE ; then
         if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
