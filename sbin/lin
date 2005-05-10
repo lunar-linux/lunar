@@ -156,7 +156,7 @@ main() {
 
     run_details $MODULE &&
     run_depends $MODULE &&
-    satisfy_depends $MODULE
+    WANT_VERSION= satisfy_depends $MODULE
 
     if [ -z "$DEPS_ONLY" ] ; then
       if ! module_held $MODULE ; then
