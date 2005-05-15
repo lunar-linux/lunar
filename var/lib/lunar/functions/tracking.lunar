@@ -49,6 +49,7 @@ devoke_installwatch() {
 # usage    : parse_iw
 # purpose  : remove unwanted accesses from the installwatch file
 parse_iw() {
+  local OMIT_IN
   debug_msg "parse_iw ($@)"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
@@ -61,7 +62,7 @@ parse_iw() {
 # usage    : create_install_log
 # purpose  : create an install log
 create_install_log() {
-
+  local TMP_INST_LOG INST_LOG IFS MISOWNED_SYMLINKS
   debug_msg "create_install_log ($@)"
 
   TMP_INST_LOG=$(temp_create "install-log")
@@ -91,6 +92,7 @@ create_install_log() {
 
 
 create_md5sum_log()  {
+  local FILE
   debug_msg "create_md5sum_log ($@)"
 
   rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null

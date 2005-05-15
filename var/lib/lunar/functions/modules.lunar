@@ -59,6 +59,7 @@ list_modules() {
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
 list_moonbase() {
+  local SECTION
   debug_msg "list_moonbase ($@)"
   for SECTION in $(list_sections) ; do
     list_modules $SECTION
@@ -79,6 +80,7 @@ list_installed() {
 # usage   : create_module_index
 # purpose : created an index file of module:section pair list
 create_module_index() {
+  local TMP_INDEX
   debug_msg "create_module_index ($@)"
   # make sure it exists before trying to see it's writeable
   # this also assures that depends.cache gets remade
@@ -150,6 +152,7 @@ function check_module_index() {
 # purpose  : finds the section of a given module as parameter
 # returns  : (0) on success, (1) on failure, errors on stdout
 find_section() {
+  local SECTION SECTIONS
   debug_msg "find_section ($@)"
 
   ZLOCAL_OVERRIDES=${ZLOCAL_OVERRIDES:=off}
@@ -202,6 +205,7 @@ find_section() {
 # purpose  : runs the DETAILS file of a module
 # returns  : (0) on success, (1) on failure, error messages on stdout
 run_details() {
+  local TMP_DETAILS
   debug_msg "run_details ($@)"
   # Note: run_details doesn't EXIT the code, but merely drops a warning
   # (return 1), which means that the calling code needs to decide 
@@ -313,6 +317,7 @@ module_version() {
 # usage    : hold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold
 hold_modules() {
+  local MODULE
   debug_msg "hold_modules ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP &&
@@ -321,8 +326,8 @@ hold_modules() {
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:installed:held:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done &&
-    unlock_file $MODULE_STATUS &&
+    done
+    unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -332,6 +337,7 @@ hold_modules() {
 # usage    : unhold_modules $MODULE [$MODULE....]
 # purpose  : put modules on hold back to normal
 unhold_modules () {
+  local MODULE
   debug_msg "unhold_modules  ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP &&
@@ -340,8 +346,8 @@ unhold_modules () {
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:held:installed:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done &&
-    unlock_file $MODULE_STATUS &&
+    done
+    unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -351,6 +357,7 @@ unhold_modules () {
 # usage    : exile_modules $MODULE [$MODULE....]
 # purpose  : put modules on exile
 exile_modules() {
+  local MODULE
   debug_msg "exile_modules ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP &&
@@ -363,8 +370,8 @@ exile_modules() {
         echo "$MODULE::exiled:0.0" >> $MODULE_STATUS_BACKUP
       fi
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done &&
-    unlock_file $MODULE_STATUS &&
+    done
+    unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -374,6 +381,7 @@ exile_modules() {
 # usage    : unexile_modules $MODULE [$MODULE....]
 # purpose  : put modules on exile back to normal
 unexile_modules () {
+  local MODULE
   debug_msg "unexile_modules  ($@)"
   if [ -n "$1" ] ; then
     lock_file $MODULE_STATUS_BACKUP &&
@@ -382,8 +390,8 @@ unexile_modules () {
       grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
       grep "^$MODULE:" $MODULE_STATUS | sed "s:exiled:installed:" >> $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-    done &&
-    unlock_file $MODULE_STATUS &&
+    done
+    unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
   fi
 }
@@ -405,16 +413,16 @@ remove_module() {
   lock_file $MODULE_STATUS                                     && 
   grep  -v  "^$1:" $MODULE_STATUS_BACKUP  >  $MODULE_STATUS 2>/dev/null
   cat $MODULE_STATUS >  $MODULE_STATUS_BACKUP               2>/dev/null
-  unlock_file $MODULE_STATUS                                   &&
-  unlock_file $MODULE_STATUS_BACKUP                            &&
+  unlock_file $MODULE_STATUS
+  unlock_file $MODULE_STATUS_BACKUP
 
   if [ -n "$EXILE" ] ; then
      exile_modules "$1"                                  &&
      lock_file $DEPENDS_STATUS_BACKUP                    &&
      lock_file $DEPENDS_STATUS                           &&
      grep  -v  ":$1:" $DEPENDS_STATUS_BACKUP  >   $DEPENDS_STATUS  &&
-     cat $DEPENDS_STATUS >  $DEPENDS_STATUS_BACKUP       &&
-     unlock_file $DEPENDS_STATUS                         &&
+     cat $DEPENDS_STATUS >  $DEPENDS_STATUS_BACKUP
+     unlock_file $DEPENDS_STATUS
      unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
@@ -436,8 +444,8 @@ add_module()  {
   lock_file $MODULE_STATUS                                    &&
   grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null &&
   echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
-  cp $MODULE_STATUS $MODULE_STATUS_BACKUP                     &&
-  unlock_file $MODULE_STATUS                                  &&
+  cp $MODULE_STATUS $MODULE_STATUS_BACKUP
+  unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
 }
 
@@ -446,6 +454,7 @@ add_module()  {
 # usage    : purge_modules
 # purpose  : purge modules that were removed from moonbase
 purge_modules() {
+  local MODULE
   debug_msg "purge_modules ($@)"
   verbose_msg "Discovering modules that were removed from moonbase"
   for MODULE in $(list_installed | grep -v "^moonbase$") ; do
@@ -492,6 +501,7 @@ module_is_expired() {
 # usage    : list_expired_modules
 # purpose  : return a list of modules that need to be updated
 list_expired_modules() {
+  local MODULE
   debug_msg "list_expired_modules ($@)"
   for MODULE in $(list_installed) ; do
     if $(module_is_expired $MODULE) ; then
@@ -505,6 +515,7 @@ list_expired_modules() {
 # usage    : update_modules
 # purpose  : update all installed modules that need to be updated
 update_modules() {
+  local IFS LIST QUEUE MODULE
   debug_msg "update_modules ($@)"
 
   export IFS="$STANDARD_IFS"
@@ -540,30 +551,6 @@ update_modules() {
 }
 
 
-find_pam_aware()  {
-  debug_msg "find_pam_aware ($@)"
-
-  cat  $MODULE_STATUS_BACKUP  |
-  while  read  LINE;  do
-                        
-    MODULE="`echo  $LINE  |  cut  -d  :  -f1`"
-    STATUS="`echo  $LINE  |  cut  -d  :  -f3`"
-                                              
-    if  [  "$STATUS"  ==  "installed"  ]   ||
-        [  "$STATUS"  ==  "held"       ];  then
-
-      SECTION=`find_section  $MODULE`
-                                    
-      if    [  -d  "$MOONBASE/$SECTION/$MODULE/pam.d"  ]  &&
-            [  "$MODULE"  !=  "Linux-PAM"              ]
-      then  echo  $MODULE
-      fi
-
-    fi
-  done
-
-}
-
 
 check_blacklist() {
   debug_msg "check_blacklist ($@)"
@@ -587,8 +574,7 @@ check_blacklist() {
   # Usage check_checklist $MODULES
   PLATFORM=${PLATFORM:-x86}
   if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
-    BLKLST=$(grep ^$MODULE$ /var/state/lunar/blacklist.$PLATFORM)
-    if [ "$BLKLST" == "$MODULE" ] ; then
+    if grep "^$MODULE$" /var/state/lunar/blacklist.$PLATFORM ; then
       message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
       exit 0
     fi

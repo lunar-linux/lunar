@@ -51,16 +51,8 @@ activate_voyeur()  {
 
 activity_log()  {
   debug_msg "activity_log ($@)"
-
-    DATE=`date  -u  +%Y%m%d-%T`
-  COMMAND=$1
-   MODULE=$2
-  VERSION=$3
-  OUTCOME=$4
-     INFO=$5
-
   lock_file $ACTIVITY_LOG &&
-  echo "$DATE	$COMMAND	$MODULE	$VERSION	$OUTCOME	$INFO"  >> $ACTIVITY_LOG &&
+  echo -e "$(date -u +%Y%m%d-%T)\t$1\t$2\t$3\t$4\t$5" >> $ACTIVITY_LOG
   unlock_file $ACTIVITY_LOG
 }
 

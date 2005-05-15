@@ -20,6 +20,7 @@
 # usage   : lock_file <absolute file name>
 # purpose : locks a file or wait until. Better use as lock_file <file> && || etc
 function lock_file() {
+   local TEMPFILE LOCKFILE STALE_PID
    debug_msg "lock_file ($@)"
    function file_lock() {
       #locking is disabled if ln or rm not found!!

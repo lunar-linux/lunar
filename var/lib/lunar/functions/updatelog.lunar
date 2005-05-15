@@ -34,6 +34,7 @@ display_update_log() {
 # usage    : display_success_info update|rebuild
 # purpose  : display a list of update successes and failures
 display_success_info() {
+  local NUMSUCCESS NUMFAILURES
   debug_msg "display_success_info ($@)"
 
   NUMSUCCESS=$(cat $TMP_LIN_SUCCESS | wc -l)
@@ -63,6 +64,7 @@ display_success_info() {
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
 display_moonbase_changes()  {
+  local MODULE_CHANGES NEW_MODULES DEL_MODULES MOV_MODULES M
   debug_msg "display_moonbase_changes ($@)"
 
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then

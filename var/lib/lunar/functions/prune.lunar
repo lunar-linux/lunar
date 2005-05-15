@@ -13,6 +13,7 @@
 # usage    : prune
 # purpose  : prune all old logs, source copy's, install caches
 prune() {
+  local TMP_SPOOL_KEEP TMP_CACHE_KEEP MODULE SOURCE VERSION FILE LOGS
   debug_msg "prune ($@)"
 
   if [ -z "$BUILD" ] ; then

@@ -23,10 +23,12 @@ run_checks() {
 
 # rework_module : check depends database for a module
 rework_module() {
+  local MODULE
   debug_msg "rework_module ($@)"
                                                                                 
   # we declare these local to override the systems default ones:
   optional_depends()  {
+    local DEP
     debug_msg "  optional_depends ($@)"
     DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
     if module_exiled $DEP ; then
@@ -41,6 +43,7 @@ rework_module() {
   }
                                                                                 
   depends()  {
+    local DEP
     debug_msg "  depends ($@)"
     DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
     if ! module_installed $DEP && ! module_held $DEP ; then
@@ -82,6 +85,7 @@ rework_module() {
 
 # fix_depends : single pass to fix depends database
 fix_depends () {
+  local LIST
   debug_msg "fix_depends  ($@)"
   
   if [ -n "$1" ] ; then
@@ -97,6 +101,7 @@ fix_depends () {
                                                                                 
 
 run_fix()  {
+  local MODULES MODULE
   debug_msg "run_fix ($@)"
   MODULES=$*
 
@@ -139,4 +144,5 @@ run_fix()  {
     )
   done
 }
+
 

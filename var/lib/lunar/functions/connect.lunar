@@ -34,6 +34,7 @@
 
 
 connect()  {
+  local TIMEOUT
   debug_msg "connect ($@)"
 
   if ! ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|ra[0-9]"

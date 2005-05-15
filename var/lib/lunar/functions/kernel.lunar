@@ -44,15 +44,3 @@ update_bootloader() {
 }
 
 
-# dummy caller:
-update_lilo() {
-	update_bootloader $1 $2
-}
-
-# dummy stub:
-update_grub() {
-	:
-}
-
-
-

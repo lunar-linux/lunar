@@ -28,6 +28,7 @@
 
 
 save_libraries()  {
+  local OLD_VERSION OLD_LOG OLD_LIBS SAVED LINE
   debug_msg "save_libraries ($@)"
 
   [ "$MODULE" == "glibc" ] && return 0
@@ -75,6 +76,7 @@ save_libraries()  {
 
 
 release_saved_libraries()  {
+  local OLD_LIBS SAVED FILE
   debug_msg "release_saved_libraries ($@)"
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
   SAVED=$OLD_LIBS/$MODULE.saved.libraries
@@ -91,6 +93,7 @@ release_saved_libraries()  {
 
 
 export_ld()  {
+  local DIRECTORY
   debug_msg "export_ld ($@)"
   for DIRECTORY in $* ; do
     if file -b $DIRECTORY/*.so* | grep  -q  "shared object" ; then
@@ -106,7 +109,7 @@ export_ld()  {
 
 prepare_install() {
   debug_msg "prepare_install ($@)"
-  if  module_installed $MODULE  || module_held $MODULE ; then
+  if module_installed $MODULE || module_held $MODULE ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
     save_libraries
@@ -114,8 +117,12 @@ prepare_install() {
     lrm --upgrade $MODULE
     true
   fi
-  # turn on tracking now
+  # turn on tracking now 
   invoke_installwatch
+  plugin_call BUILD_INSTALL $MODULE
+  if [ $? == 2 ]; then
+    return 0
+  fi
 }
 
 
@@ -212,6 +219,7 @@ default_cvs_build() {
 
 
 default_cpan_pre_build() {
+  local CPAN_MODULE CPAN_SOURCE_BRANCH
   debug_msg "default_cpan_pre_build ($@)"
   mk_source_dir $SOURCE_DIRECTORY
   cd $SOURCE_DIRECTORY
@@ -223,6 +231,7 @@ default_cpan_pre_build() {
 
 
 default_cpan_build() {
+  local CPAN_MODULE
   debug_msg "default_cpan_build ($@)"
   prepare_install
   verbose_msg "running \"default_cpan_build\""
@@ -236,9 +245,7 @@ default_cpan_build() {
         o conf keep_source_where $SOURCE_DIRECTORY
 	install $CPAN_MODULE
 	quit" | /usr/bin/cpan || exit 1
-  RESULT=$?
   rm_source_dir $SOURCE_DIRECTORY
-
 } > $C_FIFO 2>&1
 
 
@@ -249,59 +256,39 @@ default_post_build() {
     message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
   fi
 
-  invoke_installwatch
-
-  {
-    gather_docs
-
-    install_pam_confs
-    install_services
-    install_xinetd_confs
-    install_bashmisc
-  } | tee -a $C_LOG
-  
-  install_initd
   update_plugin $MODULE install
 
-  devoke_installwatch
+  plugin_call BUILD_POST_BUILD $MODULE
+  if [ $? != 2 ]; then
+    message "${PROBLEM_COLOR}ERROR: problems running POST_BUILD plugins!${PROBLEM_COLOR}"
+    return 1
+  fi
+
   ldconfig
   release_saved_libraries
-  cd  /
+  cd /
 }
 
 
 syms_not_owned()  {
+  local DEST
   debug_msg "syms_not_owned ($@)"
-
-  cat  $1  |
   while read ITEM ; do
-
-    if  [  -h  "$ITEM"  ]   &&
-        [  -f  "$ITEM"  ];  then
-
-      DEST=$(  basename  $(  ls   -la  "$ITEM"  |
-                             cut  -d  '>'  -f2  |
-                             cut  -c  2-
-                          )
-            )
-
-      if  !  grep  -q  "$DEST"  "$1"
-      then   echo  -n  "$ITEM\|"
-             echo      "$ITEM"  >>  $TMPDIR/$MODULE.rejected.symlinks
+    if [ -h "$ITEM" ] && [ -f "$ITEM" ]; then
+      DEST=$(basename $(ls -la "$ITEM" | cut -d '>' -f2 | cut -c 2- ) )
+      if ! grep -q "$DEST" "$1" ; then
+	    echo -n "$ITEM\|"
+        echo "$ITEM" >> $TMPDIR/$MODULE.rejected.symlinks
       fi
-
     fi
-
-  done
-
+  done < $1
 }
 
 
 prepare_module_config()  {
   debug_msg "prepare_module_config ($@)"
-  if [ ! -x "$MODULE_CONFIG" ] ; then
-    touch $MODULE_CONFIG
-    chmod a+x $MODULE_CONFIG
+  if [ ! -e "$MODULE_CONFIG" ] ; then
+    > $MODULE_CONFIG
   fi
 }
 
@@ -316,12 +303,6 @@ run_configure() {
   fi
 
   prepare_module_config
-
-  if ! use_xinetd ; then
-    if [ -n "$RECONFIGURE" ] || ! grep -q INITDSCRIPTS $MODULE_CONFIG ; then
-      use_initd
-    fi
-  fi
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
 
   # add custom passed OPTS before retreiving them
@@ -329,6 +310,7 @@ run_configure() {
     OPTS="$(get_module_config OPTS) $PASS_OPTS"
     set_module_config OPTS "$OPTS"
   fi
+  plugin_call BUILD_CONFIGURE $MODULE
   run_module_file $MODULE CONFIGURE
 }
 
@@ -340,6 +322,7 @@ run_pre_build() {
   cd $BUILD_DIRECTORY
 
   if verify_all_sources $MODULE ; then
+    plugin_call BUILD_PRE_BUILD $MODULE
     if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
       run_module_file $MODULE PRE_BUILD
     else
@@ -361,6 +344,7 @@ run_build()  {
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
+  plugin_call BUILD_BUILD $MODULE
   if [ -s $SCRIPT_DIRECTORY/BUILD ] ; then
     run_module_file $MODULE BUILD
   else
@@ -381,16 +365,7 @@ run_post_build() {
 
 run_post_install() {
   debug_msg "run_post_install ($@)"
-  # keep a record of the module scripts used for every install
-  (
-    if [ ! -e /var/state/lunar/module_history ]; then
-      mkdir /var/state/lunar/module_history
-    fi
-    SCRIPT_DATE=$(date -u +%Y%m%d)                      &&
-    MH_NAME=$MODULE-$VERSION-$SCRIPT_DATE.tar.bz2  &&
-    cd $MOONBASE/$SECTION                               &&
-    tar -cjf /var/state/lunar/module_history/$MH_NAME $MODULE
-  )
+  plugin_call BUILD_POST_INSTALL $MODULE
   if [ -s $SCRIPT_DIRECTORY/POST_INSTALL ] ; then
     run_module_file $MODULE POST_INSTALL
   fi

@@ -23,12 +23,18 @@ plugin_register() {
 	# first arg: plugin type
 	# second arg: function hook name
 	# Defined plugin types:
-	# 1 - SOURCE_DOWNLOAD - download some source code
-	# 2 - SOURCE_NEEDREFRESH - source exists but needs refresh
-    # 3 - SOURCE_VERIFY - perform intergity verification on a file
-	# 4 - SOURCE_UNPACK - unpack a certain file to $(PWD)
-	# 5 - MODULE_CHECK - perform integrity checking on installed modules
-	# 6 - KERNEL_UPDATEBOOTLOADER - automate bootloader maintenance
+	#  1 - SOURCE_DOWNLOAD         download some source code
+	#  2 - SOURCE_NEEDREFRESH      source exists but needs refresh
+    #  3 - SOURCE_VERIFY           perform intergity verification on a file
+	#  4 - SOURCE_UNPACK           unpack a certain file to $(PWD)
+	#  5 - MODULE_CHECK            integrity checking on installed modules
+	#  6 - KERNEL_UPDATEBOOTLOADER automate bootloader maintenance
+	#  7 - BUILD_CONFIGURE         called before running CONFIGURE
+	#  8 - BUILD_PRE_BUILD           ,,     ,,     ,,    PRE_BUILD 
+	#  9 - BUILD_BUILD               ,,     ,,     ,,    BUILD
+	# 10 - BUILD_INSTALL             ,,     ,,     ,,    INSTALL
+	# 11 - BUILD_POST_BUILD          ,,     ,,     ,,    POST_BUILD
+	# 12 - BUILD_POST_INSTALL        ,,     ,,     ,,    POST_INSTALL
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
 	debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
@@ -36,6 +42,7 @@ plugin_register() {
 
 
 plugin_call() {
+    local REQUESTED_TYPE COUNT THIS_TYPE THIS_HANDLER RETVAL
 	debug_msg "plugin_call($@)"
 	# scan available plugins for plugin_type $1 and pass args to it
 	REQUESTED_TYPE=$1
@@ -50,16 +57,18 @@ plugin_call() {
 			if [ $RETVAL -eq 2 ]; then
 				continue
 			else
+				debug_msg "plugin $THIS_HANDLER returned \"$RETVAL\""
 				return $RETVAL
 			fi
 		fi
 	done
-	debug_msg "Finished running all plugins for type \"$1\""
+	debug_msg "Finished running all plugins for type \"$REQUESTED_TYPE\""
 	return 2
 }
 
 
 update_plugin() {
+	local SECTION PLUGIN
 	debug_msg "update_plugin($@)"
 	# update plugins of all modules or a specific one
 	#
@@ -91,6 +100,7 @@ update_plugin() {
 
 
 update_plugins() {
+	local MODULE
 	debug_msg "update_plugins($@)"
 	# rework all plugins	
 	verbose_msg "Updating plugins"

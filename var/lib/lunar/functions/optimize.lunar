@@ -631,6 +631,7 @@ optimize_fp() {
 
 # Set up the Linker optimizations
 optimize_ld() {
+  local WL
   debug_msg "optimize_ld ($@)"
   if [[ $LDFLAGS ]]; then
     unset LDFLAGS

@@ -20,9 +20,11 @@
 # usage   : find_module_size <module> |version|
 # purpose : finds the installed size of module in KB
 find_module_size() {
+   local VERSION LINE SIZE0 SIZE
    #this functions checks the modules file if there is already size entry
    module_size()
    {
+      local SIZE
       unset SIZE
       [ -e "$MODULE_STATUS" ] &&
       SIZE=`grep  "^$1\:" $MODULE_STATUS | cut -d ":" -f 5-5`
