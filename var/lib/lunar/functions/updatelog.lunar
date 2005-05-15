@@ -62,37 +62,55 @@ display_success_info() {
 # function : display_moonbase_changes
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
-display_moonbase_changes()  {  
+display_moonbase_changes()  {
   debug_msg "display_moonbase_changes ($@)"
-  MODULE_CHANGES=$(temp_create "module-changes")
 
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
-    diff -y $MODULE_INDEX $TMP_MODULE_INDEX | sort > $MODULE_CHANGES
+    MODULE_CHANGES=$(temp_create "module-changes")
+    diff -U0 $TMP_MODULE_INDEX $MODULE_INDEX | grep -v -e '^@@' -e '^---' -e '^+++' > $MODULE_CHANGES
 
-    NEW_MODULES=$(grep '<' $MODULE_CHANGES | wc -l)
-    DEL_MODULES=$(grep '>' $MODULE_CHANGES | wc -l)
-    MOV_MODULES=$(grep '|' $MODULE_CHANGES | wc -l)
-    message
+    MODULES=$(cat $MODULE_CHANGES | cut -d: -f1 | sed 's:^[+-]::' | sort -t : | uniq)
+	for M in $MODULES; do
+	  IN=$(grep "^-$M:" $MODULE_CHANGES)
+	  OUT=$(grep "^+$M:" $MODULE_CHANGES)
+	  if [ -z "$IN" -a -n "$OUT" ] ; then
+	    # new module:
+		NEW_MODULES="$NEW_MODULES $M"
+	  elif [ -n "$IN" -a -z "$OUT" ] ; then
+	    # removed module:
+		DEL_MODULES="$DEL_MODULES $M"
+	  else
+	    # moved module
+		MOV_MODULES="$MOV_MODULES $M"
+	  fi
+	done
 
-    if [ "$NEW_MODULES" != "0" ]; then
+    if [ -n "$NEW_MODULES" ]; then
       message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
-      grep '<' $MODULE_CHANGES | tr -d '<' | sort -t : -k 2
+	  for M in $NEW_MODULES; do
+	   message "  $M"
+	  done
       message
     fi
 
-    if [ "$DEL_MODULES" != "0" ]; then
+    if [ -n "$DEL_MODULES" ]; then
       message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
-      grep '>' $MODULE_CHANGES | tr -d '>\t ' | sort -t : -k 2
+	  for M in $DEL_MODULES; do
+	    message "  $M"
+	  done
       message
     fi
 
-    if [ "$MOV_MODULES" != "0" ]; then
+    if [ -n "$MOV_MODULES" ]; then
       message "${MESSAGE_COLOR}Moved modules:${DEFAULT_COLOR}"
-      grep '|' $MODULE_CHANGES | tr -d '>\t ' | sed -e 's#\(.*\):\(.*\)|\(.*\):\(.*\)#\1: \2 -> \4#g' | sort -t - -k 2
+	  for M in $MOV_MODULES; do
+	    INS=$(grep "^[-]$M:" $MODULE_CHANGES | cut -d: -f2)
+		OUTS=$(grep "^[+]$M:" $MODULE_CHANGES | cut -d: -f2)
+		message "  $M: $INS -> $OUTS"
+	  done
       message
     fi
-  fi
-
   temp_destroy $MODULE_CHANGES
+  fi
 }
 

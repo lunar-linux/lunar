@@ -354,7 +354,8 @@ build_depends()  {
 }
 
 
-create_depends_cache() {
+create_depends_cache()
+{(
   debug_msg "create_depends_cache($@)"
 
   if [ ! -w $DEPENDS_CACHE -a -e $DEPENDS_CACHE ] ; then
@@ -398,7 +399,7 @@ create_depends_cache() {
   else
     verbose_msg "Skipping depends cache regeneration"
   fi
-}
+)}
 
 
 # list all installed modules depending on $1
@@ -411,3 +412,5 @@ list_installed_depending() {
     fi
   done
 }
+
+
