@@ -139,7 +139,7 @@ main() {
               fi
             fi
           else
-            verbose_msg "Skipping compile and install for held module \"$MODULE\""
+            verbose_msg "Skipping compile and install for held/exiled module \"$MODULE\""
           fi
         fi
       done
