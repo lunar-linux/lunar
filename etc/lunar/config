@@ -50,20 +50,20 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
               ARCHIVE=${ARCHIVE:=on}
               AUTOFIX=${AUTOFIX:=on}
-            AUTOPRUNE=${AUTOPRUNE:=off}
+            AUTOPRUNE=${AUTOPRUNE:=on}
          MAIL_REPORTS=${MAIL_REPORTS:=off}
              PRESERVE=${PRESERVE:=on}
                  REAP=${REAP:=on}
                 ADMIN=${ADMIN:=root}
                 SOUND=${SOUND:=off}
               SUSTAIN=${SUSTAIN:=on}
-         VIEW_REPORTS=${VIEW_REPORTS:=on}
+         VIEW_REPORTS=${VIEW_REPORTS:=off}
                VOYEUR=${VOYEUR:=on}
               GARBAGE=${GARBAGE:=on}
          PROMPT_DELAY=${PROMPT_DELAY:=150}
- 	  GCCWRAPPERS=${GCCWRAPPERS:=on}
+          GCCWRAPPERS=${GCCWRAPPERS:=on}
         PROBE_EXPIRED=${PROBE_EXPIRED:=on}
-        LUNAR_PRIORITY="+10"
+       LUNAR_PRIORITY="+10"
 
 #total number of sources for a module
            MAX_SOURCES=100
