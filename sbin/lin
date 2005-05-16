@@ -125,7 +125,7 @@ main() {
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
-          if ! module_held $MODULE ; then
+          if ! module_held $MODULE && ! module_exiled $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
             if ! ( SINGLE_MODULE=1 main $MODULE ) ; then
