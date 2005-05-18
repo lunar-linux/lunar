@@ -245,12 +245,13 @@ run_depends() {
 # NOTE: this is where a missing dependency gets installed! IOW we really do
 # "satisfy" any dependencies here!
 satisfy_depends()  {
-  local TMP_FILE DEP_MODULE DEP_STATUS DEP_ON DEP_OFF OPTS LINE
+  local TMP_FILE DEP_MODULE DEP_STATUS DEP_ON DEP_OFF LINE
   debug_msg "satisfy_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then 
     return 0
   fi
   
+  # make sure we start with clean OPTS here:
   unset OPTS
 
   if [ -s "$MODULE_CONFIG" ] ; then
