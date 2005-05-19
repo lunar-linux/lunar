@@ -63,6 +63,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
          PROMPT_DELAY=${PROMPT_DELAY:=150}
           GCCWRAPPERS=${GCCWRAPPERS:=on}
         PROBE_EXPIRED=${PROBE_EXPIRED:=on}
+                TMPFS=${TMPFS:=off}
        LUNAR_PRIORITY="+10"
 
 #total number of sources for a module
