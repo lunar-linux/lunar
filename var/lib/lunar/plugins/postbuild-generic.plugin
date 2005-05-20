@@ -46,6 +46,10 @@ gather_docs()
         # copy it over to the doc directory creating directories as needed
         verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
         install -D -m 644 ${FILE} ${DOC_DIR}/${FILE}
+      elif [ -d ${FILE} ] ; then
+        # copy the directory to the docdir
+	verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
+	cp -a ${FILE} ${DOC_DIR}/
       fi
     done
     devoke_installwatch
