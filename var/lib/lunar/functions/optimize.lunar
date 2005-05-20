@@ -757,6 +757,7 @@ ADDON=( ) > /etc/lunar/local/optimizations
   export CFLAGS
   export CXXFLAGS
   export LDFLAGS
+  export MAKES
 
   use_wrappers
   verbose_msg "BUILD=\"$BUILD\""
