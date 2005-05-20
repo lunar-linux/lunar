@@ -125,7 +125,7 @@ main() {
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
-          if ! module_held $MODULE ; then
+          if ! module_held $MODULE && ! module_exiled $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
             if ! ( SINGLE_MODULE=1 main $MODULE ) ; then
@@ -139,7 +139,7 @@ main() {
               fi
             fi
           else
-            verbose_msg "Skipping compile and install for held module \"$MODULE\""
+            verbose_msg "Skipping compile and install for held/exiled module \"$MODULE\""
           fi
         fi
       done
@@ -156,7 +156,7 @@ main() {
 
     run_details $MODULE &&
     run_depends $MODULE &&
-    satisfy_depends $MODULE
+    WANT_VERSION= satisfy_depends $MODULE
 
     if [ -z "$DEPS_ONLY" ] ; then
       if ! module_held $MODULE ; then
