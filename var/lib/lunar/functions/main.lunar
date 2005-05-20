@@ -84,6 +84,7 @@ update() {
 
 
 rebuild()  {
+  local LIST QUEUE TMP_QUEUE
   debug_msg "rebuild ($@)"
 
   message  "${MESSAGE_COLOR}Starting non-recursive rebuild${DEFAULT_COLOR}"

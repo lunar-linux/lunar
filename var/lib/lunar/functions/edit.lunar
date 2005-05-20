@@ -16,6 +16,7 @@
 # purpose  : calls "patch -px < $filename", where filename may be a variety
 #            of formats
 patch_it () { 
+  local PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
   verbose_msg "patch_it \"$1\" \"$2\"";
 
   # get patch from $SOURCE_CACHE automatically
@@ -66,7 +67,8 @@ patch_it () {
 # function : sedit
 # usage    : sedit sed-statement file [file [file] ...]
 # purpose  : edit [files] with a sed function
-sedit () { 
+sedit () {
+  local SEDIT
   debug_msg "sedit ($@)"
   SEDIT=$1
   shift
@@ -82,7 +84,7 @@ sedit () {
 # purpose  : to edit a file
 edit_file() {
   debug_msg "edit_file ($@)"
-  ${EDITOR:-nano}  $1
+  ${EDITOR:-nano} $1
 }
 
 

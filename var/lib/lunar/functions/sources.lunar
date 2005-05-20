@@ -20,6 +20,7 @@
 
 
 verify_source() {
+  local VERIFIED SOURCE_FILE
   debug_msg "verify_source ($@)"
   VERIFIED="true"
   for SOURCE_FILE in $@ ; do
@@ -76,6 +77,7 @@ erase()  {
 
 
 unpack() {
+  local FILENAME
   debug_msg "unpack ($@)"
 
   FILENAME=$SOURCE_CACHE/$1
@@ -159,6 +161,7 @@ verify_all_sources() {
 
 
 rm_source_dir() {
+  local DEAD_DIR
   debug_msg "rm_source_dir ($@)"
 
   if [ "$KEEP_SOURCE" == "on" ] ; then
@@ -180,6 +183,7 @@ rm_source_dir() {
 
 
 mk_source_dir() {
+  local NEW_DIR
   debug_msg "mk_source_dir ($@)"
 
   # yes this sounds weird but it might happen: no dir $BUILD_DIRECTORY on

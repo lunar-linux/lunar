@@ -34,6 +34,7 @@ lget_unlock() {
 
 
 download_url() {
+    local RETVAL
 	debug_msg "download_url($@)"
 	verbose_msg "trying to download \"$URL\""
 	connect &&
@@ -49,6 +50,7 @@ download_url() {
 
 download_module() {
 (
+	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT
 	debug_msg "download_module ($@)"
 	if ! run_details $1 ; then
 		exit 1
@@ -137,6 +139,7 @@ download_module() {
 
 
 testpack () {
+	local FILENAME
 	debug_msg "testpack ($@)"
 	if [ -f "$1" ]; then
 		FILENAME=$1
@@ -144,8 +147,7 @@ testpack () {
 		FILENAME=$SOURCE_CACHE/$1
 	fi
 	if [ -f "$FILENAME" ] ; then
-		COMPRESSOR=$(file -b $FILENAME | cut -d ' ' -f1)
-		case $COMPRESSOR in
+		case $(file -b $FILENAME | cut -d ' ' -f1) in
 			bzip2)
 				bzip2 -tf $FILENAME > /dev/null 2>&1
 				;;
@@ -171,6 +173,7 @@ testpack () {
 
 show_downloading()
 {
+	local DOWNLOAD_PID DOWNLOAD_LOG
 	debug_msg "show_downloading ($@)"
 	DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
 	if [ -n "$DOWNLOAD_PID" ]; then

@@ -12,6 +12,7 @@
 # translate %ALIAS if needed to a module name that is installed
 # and add it to the dependency chain if needed
 unalias() {
+  local TARGET TARGETS TARGETBYNUM N CHOICE
   if [ "${1:0:1}" == "%" ] ; then
     debug_msg "unalias($@)"
     TARGETS=$(grep "^$1:" $ALIASES | cut -d: -f2-)

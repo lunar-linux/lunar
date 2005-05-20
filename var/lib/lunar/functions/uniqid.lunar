@@ -22,6 +22,7 @@ push_uniq_id() {
 
 
 create_uniq_id() {
+  local OS HASH IFACE
   debug_msg "create_uniq_id ($@)"
   if [ -n "$UNIQID" ]; then 
     return

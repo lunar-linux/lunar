@@ -51,11 +51,11 @@ verbose_msg() {
 
 
 debug_msg() {
+  local PLUSSES
   if [ -n "$LUNAR_DEBUG" ] ; then
     if [ "$LUNAR_DEBUG" -ge "2" ] ; then
 	  PLUSSES="+++++++++++++++++++++++++*"
 	  echo -n "${PLUSSES:0:${#FUNCNAME[@]}} " >&2
-	  unset PLUSSES
 	fi
     if [ "$LUNAR_DEBUG" -ge "4" ] ; then
       echo -n "$(basename $0)[$$]: " >&2
@@ -91,6 +91,7 @@ debug_msg() {
 # usage : xterm_msg MESSAGE
 # purpose : To display a short message in the title bar of a X terminal
 xterm_msg() {
+  local MSG
   debug_msg "xterm_bar ($@)"
   case $TERM in
     xterm*|gnome*|konsole*|rxvt*)
@@ -102,6 +103,7 @@ xterm_msg() {
 
 # function : report FILE [description] MODULE VERSION
 report() {
+  local TMP_MAIL
   debug_msg "report ($@)"
   if [ ! -f "$1" ] ; then
     return
@@ -129,6 +131,7 @@ report() {
 
 
 query() {
+  local RESPONSE
   debug_msg "query ($@)"
   # 2 arguments
   # query "what do you want?  "  DEFAULT
@@ -204,15 +207,14 @@ color()  {
 }
 
 
-sound()  {
+sound()
+{
   debug_msg "sound ($@)"
-  case  $SOUND  in
-    on)  SOUND_FILE=$SOUND_DIRECTORY/$SOUND_THEME/$1
-         if  [  -e "$SOUND_FILE" ] ; then
-           (  cd  /  ;  play  $SOUND_FILE  & )
-         fi
-    ;;
-  esac
+  if [ "$SOUND" == "on" ]; then
+    if [ -f "$SOUND_DIRECTORY/$SOUND_THEME/$1" ]; then
+	  ( cd / ; play "$SOUND_DIRECTORY/$SOUND_THEME/$1" & )
+	fi
+  fi
 }
 
 

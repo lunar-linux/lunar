@@ -20,6 +20,7 @@
 # usage   : add_priv_user username:groupname [adduseropts [adduseropts]...]
 # info    : adds username:groupname and passes adduseropts to 'adduser'
 function add_priv_user() {
+  local USERNAME GROUPNAME
   debug_msg "function add_priv_user ($@)"
 
   if [ -n "$INSTALLWATCHFILE" ] ; then

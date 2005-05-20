@@ -20,6 +20,7 @@
 
 
 set_config() {
+  local LINE NEW
   debug_msg "set_config ($@)"
 
   LINE=$(cat $1 | grep -w "$2=.*")

@@ -25,9 +25,11 @@
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {
+  local TMP_FDEPS
   debug_msg "find_depends ($@)"
 
   find_depends_intern() {
+    local DEP STATE LINE
     grep "^$1:" $DEPENDS_CACHE | while read LINE ; do
       DEP=$(echo $LINE | cut -d: -f2)
       DEP=$(unalias $DEP)
@@ -57,6 +59,7 @@ function find_depends() {
 # usage    : LIST=$(sort_by_dependency $LIST)
 # purpose  : return a LIST sorted by dependency
 sort_by_dependency() {
+  local TMP_LIST TMP_ALL TMP_TSRT A B
   debug_msg "sort_by_dependency ($@)"
 
   TMP_LIST=$(temp_create "deptree.in")
@@ -155,6 +158,7 @@ run_depends() {
   debug_msg "run_depends ($@)"
   # local definitions of depends and optional_depends!
   depends() {
+    local DEP
     debug_msg "  depends ($@)"
     DEP=$(unalias $1)
     if grep -q "^$DEP\$" $TEMP_PREPAREDDEPS 2>/dev/null ; then
@@ -181,6 +185,7 @@ run_depends() {
                                                                                 
   optional_depends()  {
   debug_msg "  optional_depends ($@)"
+    local DEP DEFAULT DEPMOD_AVAIL
     # parameters:  $1 = module name
     #              $2 = configure parameter if module wanted
     #              $3 = configure parameter if module declined
@@ -240,11 +245,13 @@ run_depends() {
 # NOTE: this is where a missing dependency gets installed! IOW we really do
 # "satisfy" any dependencies here!
 satisfy_depends()  {
+  local TMP_FILE DEP_MODULE DEP_STATUS DEP_ON DEP_OFF LINE
   debug_msg "satisfy_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then 
     return 0
   fi
   
+  # make sure we start with clean OPTS here:
   unset OPTS
 
   if [ -s "$MODULE_CONFIG" ] ; then
@@ -255,7 +262,7 @@ satisfy_depends()  {
   grep "^$MODULE:" $DEPENDS_STATUS > $TMP_FILE
 
   # first recursively check if all required dependencies are installed
-  for DEP_MODULE in $(find_depends $MODULE) ; do
+  for DEP_MODULE in $(find_depends $MODULE | grep -v '%') ; do
     if [ $DEP_MODULE != $MODULE ]; then
       if ! module_installed $DEP_MODULE ; then
         if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
@@ -296,6 +303,7 @@ satisfy_depends()  {
 
 # conflicts... remove conflicting modules
 conflicts() {
+  local DEP
   debug_msg "conflicts ($@)"
   DEP=$1
   if module_installed $DEP ; then
@@ -354,7 +362,9 @@ build_depends()  {
 }
 
 
-create_depends_cache() {
+create_depends_cache()
+{(
+  local TMP_DEP_CACHE DEPFILES DEPFILE MODULE
   debug_msg "create_depends_cache($@)"
 
   if [ ! -w $DEPENDS_CACHE -a -e $DEPENDS_CACHE ] ; then
@@ -398,11 +408,12 @@ create_depends_cache() {
   else
     verbose_msg "Skipping depends cache regeneration"
   fi
-}
+)}
 
 
 # list all installed modules depending on $1
 list_installed_depending() {
+  local SUBDEP
   debug_msg "list_installed_depending($2)"
   for SUBDEP in $(grep ":$1:" $DEPENDS_CACHE | cut -d: -f1) ; do
     if $(module_installed $SUBDEP ) ; then
@@ -411,3 +422,5 @@ list_installed_depending() {
     fi
   done
 }
+
+
