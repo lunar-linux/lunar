@@ -86,7 +86,8 @@ export        DIALOGRC=/etc/lunar/dialogrc
       MOONBASE_URL[1]=http://tx-us.lunar-linux.org/lunar/
       MOONBASE_URL[2]=http://gbg-se.lunar-linux.org/lunar/
       MOONBASE_URL[3]=http://de.lunar-linux.org/lunar/
-      MOONBASE_URL[4]=http://nl.lunar-linux.org/lunar/
+      MOONBASE_URL[4]=http://k-de.lunar-linux.org/lunar/
+      MOONBASE_URL[5]=http://nl.lunar-linux.org/lunar/
 	 
             PATCH_URL=http://lunar-linux.org/lunar/patches/
 	    
