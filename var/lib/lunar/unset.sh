@@ -44,7 +44,6 @@ unset KDE_URL
 unset KERNEL_URL
 unset LDD_CHECK
 unset LDF
-unset LIN
 unset LINES
 unset LOCAL_CONFIG
 unset LOCAL_EXCLUDED

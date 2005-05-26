@@ -3,8 +3,8 @@
 export PATH=${PATH/\/var\/lib\/lunar\/compilers:/}
 
 if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ $CXX_EXT g++ $CCOPT \"$@\"" >&2
+  echo "++ $MAKE_EXT make ${MAKES:+-j$MAKES} \"$@\"" >&2
 fi
-  
-$CXX_EXT g++ $CCOPT "$@"
+
+$MAKE_EXT make ${MAKES:+-j$MAKES} "$@"
 

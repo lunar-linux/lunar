@@ -60,14 +60,8 @@ optimize_make() {
    unset MAKES
   fi
   if module_installed linux-openmosix; then
-    alias make="mosrun -h make"
-    if [[ "$MAKES" > 1 ]] ; then
-      alias make="mosrun -h make -j$MAKES"
-    fi
-  elif [[ $MAKES > 1 ]] ; then
-    alias make="make -j$MAKES"
+    $MAKE_EXT="$MAKE_EXT mosrun -h"
   fi
-  verbose_msg "make=\"$(which make)\", MAKES=\"$MAKES\""
 }
  
 
@@ -757,11 +751,13 @@ ADDON=( ) > /etc/lunar/local/optimizations
 
   export CC_EXT
   export CXX_EXT
-  export CFLAGS
+  export MAKE_EXT
   export COPT
   export CCOPT
+  export CFLAGS
   export CXXFLAGS
   export LDFLAGS
+  export MAKES
 
   use_wrappers
   verbose_msg "BUILD=\"$BUILD\""

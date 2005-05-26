@@ -178,7 +178,7 @@ prload () {
 mkpid () {
   if [ ! -e $PIDFILE ] ; then
     echo -n "[PID] "
-    /bin/pgrep -P 1 "^$PROCESS_BASE$" > $PIDFILE && return 0 || return -1
+    /bin/pgrep -o -P 1 "^$PROCESS_BASE$" > $PIDFILE && return 0 || return -1
   else 
     return 
   fi
