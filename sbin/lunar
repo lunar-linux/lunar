@@ -404,6 +404,7 @@ set_delay()  {
 
 
 queue_menu()  {
+  [ ! -d /var/log/lunar/queue ] || mkdir -p /var/log/lunar/queue
   while
     I_HELP="View the list of modules selected for installation"
     i_HELP="Edit the list of modules selected for installation"
