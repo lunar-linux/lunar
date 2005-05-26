@@ -707,13 +707,11 @@ background_execute() {
 
 
 foreground_execute() {
-  [  -f         $REMOVE_QUEUE  ]  &&
-  lrm  `cat  $REMOVE_QUEUE`
-  rm  -f        $REMOVE_QUEUE
+  [ -f $REMOVE_QUEUE ] && lrm `cat $REMOVE_QUEUE`
+  rm -f $REMOVE_QUEUE
 
-  [  -f         $INSTALL_QUEUE  ]  &&
-  $LIN   `cat  $INSTALL_QUEUE`
-  rm  -f        $INSTALL_QUEUE
+  [ -f $INSTALL_QUEUE ] && lin `cat $INSTALL_QUEUE`
+  rm  -f $INSTALL_QUEUE
 
   goodbye
 }
