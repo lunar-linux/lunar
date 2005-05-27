@@ -78,7 +78,10 @@ sources     [module]       display source files for a module
 urls        [module]       display all URLs for a module
 maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
+
+edit        module         copy a module to zlocal for editing
 submit      module         try to submit a module to the lunar ML
+unedit      module         delete your zlocal copy of a module
 
 sum         [module]       display checksums
 md5sum      [module]       display md5sums
@@ -727,6 +730,12 @@ show_info() {
 submit_module() {
   # this code tries to send the module back to the mailinglist
   # as good as it gets
+  if [ "$ZLOCAL_OVERRIDES" == "off" ]; then
+    message "You can't submit non-zlocal modules. Turn on ZLOCAL_OVERRIDES"
+	message "and do \`lvu edit \$MODULE; lin moonbase\`"
+	message "so that module changes can be tracked properly!"
+	exit 1
+  fi
   if [ -z "$1" ]; then
     message "submit requires a single module name."
     exit 1
@@ -740,9 +749,18 @@ submit_module() {
       exit 1
   else
     if echo $SECTION | grep -q '^zlocal' ; then
-      SECTION=" "
+	  ZLOCAL_OVERRIDES=off SECTION=$(find_section $1)
+	  if echo $SECTION | grep -q '^zlocal' ; then
+	    unset SECTION
+	  fi
+	else
+	  message "Please don't edit modules outside of the 'zlocal' secion!"
+	  message "do this first: \`lvu edit \$MODULE ; lin moonbase\`"
+	  message "so that module changes can be tracked properly!"
+	  exit 1
     fi
     TMP_MSG=$(temp_create "submission")
+	BOUNDARY="===============$(date -u +%s)=="
     (
       echo '# MODULE SUBMISSION TEMPLATE'
       echo '# --------------------------'
@@ -755,12 +773,20 @@ submit_module() {
       echo 'To: lunar@lunar-linux.org'
       echo 'Date:' $(date)
       echo 'Subject: Module submission -' $MODULE
+	  echo 'MIME-Version: 1.0'
+	  echo "Content-Type: multipart/mixed; boundary=\"$BOUNDARY\""
       echo '# '
       echo '# YOUR E_MAIL ADDRESS MUST BE VALID:'
       echo 'From: '
       echo '#Reply-To:'
       echo '#Cc: '
-      echo '# PLEASE DO NOT ADD WHITESPACE ABOVE THIS LINE'
+	  echo ''
+	  echo "--$BOUNDARY"
+	  echo 'Content-Type: text/plain; charset="us-ascii"'
+	  echo 'MIME-Version: 1.0'
+	  echo 'Content-Transfer-Encoding: 7bit'
+	  echo ''
+      echo '# PLEASE DO NOT CHANGE WHITESPACE ABOVE THIS LINE'
       echo ''
       echo '# '
       echo '# Please fill in some of the following information if applicable:'
@@ -777,17 +803,27 @@ submit_module() {
       echo '# '
       echo ''
       echo '# YOUR NAME HERE'
-      echo ''
+	  echo "$USER"
+	  echo ''
       echo '# '
       echo '# Below is your module. Please do not change the format'
       echo '# '
-      cd $SCRIPT_DIRECTORY
-      for FILE in $(find . -type f | grep -v 'CVS/' | sed 's/\.\///g'); do
-        echo "==================== BEGIN $FILE ===================="
-        cat $FILE
-        echo "===================== END $FILE ====================="
-        echo ""
-      done
+	  echo ''
+	  echo "--$BOUNDARY"
+	  echo "Content-Type: text/plain; name=\"$1.patch\""
+	  echo 'MIME-Version: 1.0'
+	  echo ''
+	  if [ -n "$SECTION" ]; then
+	    diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
+	  else
+        cd $SCRIPT_DIRECTORY
+        for FILE in $(find . -type f | grep -v -e 'CVS/' -e '\.svn/' | sed 's/\.\///g'); do
+		  echo "--- $MODULE/$FILE"
+		  echo "+++ $MODULE/$FILE"
+		  echo "@@ -0,0 +1,$(wc -l $MODULE/$FILE| echo) @@"
+          cat $FILE | sed 's|^|+|g'
+        done
+	  fi
     ) > $TMP_MSG
     edit_file $TMP_MSG
     cat $TMP_MSG | grep -v '^#'
@@ -800,6 +836,46 @@ submit_module() {
     fi
   fi
 }
+
+
+edit_module()
+{
+	if [ "ZLOCAL_OVERRIDES" == "off" ]; then
+		message "Cannot edit modules when ZLOCAL_OVERRIDES == off"
+		message "Do this: \`lunar set ZLOCAL_OVERRIDES on\`"
+	else
+		if SECTION=$(find_section $1) ; then
+			if echo $SECTION | grep -q ^zlocal; then
+				message "Module \"$1\" is already in section \"zlocal\""
+				message "unedit it first or edit the working copy"
+			else
+				cp -a $MOONBASE/$SECTION/$1 $MOONBASE/zlocal/
+				# clean out SCM directories
+				find $MOONBASE/zlocal/$1 -type d -name CVS -o -name .svn | xargs rm -rf
+				message "Copied \"$1\" from \"$SECTION\""
+				message "Edit your module in \"$MOONBASE/zlocal/$1\""
+			fi
+		else
+			message "Can't find module \"$1\""
+		fi
+	fi
+}
+
+
+unedit_module()
+{
+	if SECTION=$(find_section $1) ; then
+		if echo $SECTION | grep -q ^zlocal; then
+			rm -f $MOONBASE/$SECTION/$1
+			message "Removed \"$1\" from \"$SECTION\""
+		else
+			message "Module \"$1\" is not in section \"zlocal\""
+		fi
+	else
+		message "Can't find module \"$1\""
+	fi
+}
+
 
 main()  {
   case $1 in
@@ -1171,6 +1247,14 @@ main()  {
    submit)
      submit_module $2
      ;;
+
+   edit)
+     edit_module $2
+	 ;;
+
+   unedit)
+     unedit_module $2
+	 ;;
 
    *)
      help
