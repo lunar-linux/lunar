@@ -866,7 +866,7 @@ unedit_module()
 {
 	if SECTION=$(find_section $1) ; then
 		if echo $SECTION | grep -q ^zlocal; then
-			rm -f $MOONBASE/$SECTION/$1
+			rm -rf $MOONBASE/$SECTION/$1
 			message "Removed \"$1\" from \"$SECTION\""
 		else
 			message "Module \"$1\" is not in section \"zlocal\""
