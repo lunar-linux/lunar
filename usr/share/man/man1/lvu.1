@@ -54,6 +54,8 @@ eert <module>
 size [module]
 .PP
 .B lvu
+submit|edit|unedit [module]
+.B lvu
 $MODULE_SCRIPT <module>
 .SH "COPYRIGHT"
 .if n lvu(1) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
@@ -245,6 +247,21 @@ displays a tree of the module's dependencies.
 .IP 
 displays a tree of the module's reverse dependencies.
 .PP 
+.B edit
+<module>
+.IP
+Copy an existing module to zlocal so it can be edited. Turn on ZLOCAL_OVERRIDES to make sure your edited module gets used instead of the default module.
+.PP
+.B unedit
+<module>
+.IP
+Discards your 'edit'ed zlocal module. Works the same as removing it.
+.PP
+.B submit
+<module>
+.IP
+Submit a module to the lunar module submission list/mail alias. Please only submit tested changes.
+.PP
 .B $MODULE_SCRIPT
 module
 .IP 
