@@ -107,7 +107,7 @@ download_module() {
 					if [ "$EXHAUSTIVE" == "on" ]; then
 						# scan for hits agains known clusters of mirrors
 						for MLIST in $MIRRORS/*; do
-							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST | grp -v "^Custom$"); do
 								if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
 									# compose the list of valid mirrors
 									REST=${URL:${#ALT}}
