@@ -114,3 +114,31 @@ filter() {
 }
 
 
+unmap_device()
+{
+    local DEVICE
+    for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
+        if [ "$(readlink -f $DEVICE)" == "$(readlink -f $1)" ]; then
+            echo $DEVICE
+            return 0
+        fi
+    done
+    echo $1
+    return 0
+}
+
+
+find_pam_aware()  {
+  local MODULE SECTION
+  debug_msg "find_pam_aware ($@)"
+
+  for MODULE in $(list_installed); do 
+    SECTION=$(find_section $MODULE)
+    if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] && 
+           [ "$MODULE" != "Linux-PAM" ]; then
+      echo $MODULE
+    fi
+  done < $MODULE_STATUS
+}
+
+
