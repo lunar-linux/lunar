@@ -817,10 +817,10 @@ submit_module() {
 	    diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
 	  else
         cd $SCRIPT_DIRECTORY
-        for FILE in $(find . -type f | grep -v -e 'CVS/' -e '\.svn/' | sed 's/\.\///g'); do
+        for FILE in $(find * -type f | grep -v -e 'CVS/' -e '\.svn/'); do
 		  echo "--- $MODULE/$FILE"
 		  echo "+++ $MODULE/$FILE"
-		  echo "@@ -0,0 +1,$(wc -l $MODULE/$FILE| echo) @@"
+		  echo "@@ -0,0 +1,$(wc -l $FILE| echo) @@"
           cat $FILE | sed 's|^|+|g'
         done
 	  fi
