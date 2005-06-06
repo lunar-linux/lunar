@@ -816,14 +816,15 @@ submit_module() {
 	  if [ -n "$SECTION" ]; then
 	    diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
 	  else
-        cd $SCRIPT_DIRECTORY
-        for FILE in $(find * -type f | grep -v -e 'CVS/' -e '\.svn/'); do
-		  echo "--- $MODULE/$FILE"
-		  echo "+++ $MODULE/$FILE"
-		  echo "@@ -0,0 +1,$(wc -l $FILE| echo) @@"
-          cat $FILE | sed 's|^|+|g'
-        done
+	    diff -Nurb $MOONBASE/zlocal/.nonexistant $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | sed "s|\.nonexistant|$MODULE|g" | grep -v "^diff "
 	  fi
+	  echo -e "\n--$BOUNDARY"
+	  echo 'Content-Type: text/plain; charset="us-ascii"'
+	  echo 'MIME-Version: 1.0'
+	  echo 'Content-Transfer-Encoding: 7bit'
+	  echo ''
+	  echo "lvu submit $1 $(cat /bin/lvu | md5sum)"
+	  echo ''
     ) > $TMP_MSG
     edit_file $TMP_MSG
     cat $TMP_MSG | grep -v '^#'
