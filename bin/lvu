@@ -841,7 +841,7 @@ submit_module() {
 
 edit_module()
 {
-	if [ "ZLOCAL_OVERRIDES" != "on" ]; then
+	if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
 		message "Cannot edit modules when ZLOCAL_OVERRIDES == off"
 		message "Do this: \`lunar set ZLOCAL_OVERRIDES on\`"
 	else
