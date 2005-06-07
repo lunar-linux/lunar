@@ -147,26 +147,34 @@ testpack () {
 		FILENAME=$SOURCE_CACHE/$1
 	fi
 	if [ -f "$FILENAME" ] ; then
-		case $(file -b $FILENAME | cut -d ' ' -f1) in
-			bzip2)
-				bzip2 -tf $FILENAME > /dev/null 2>&1
+		FILEMAGIC=$(file -b $FILENAME)
+		case $FILENAME in
+			*.bz2|*.BZ2)
+				echo $FILEMAGIC | grep -qw "bzip2"
 				;;
-			gzip)
-				gzip -tf $FILENAME > /dev/null 2>&1
+			*.gz|*.GZ|*.tgz|*.TGZ)
+				echo $FILEMAGIC | grep -qw "gzip"
 				;;
-			compress*)
-				gzip -tf $FILENAME > /dev/null 2>&1
+			*.z|*.Z)
+				echo $FILEMAGIC | grep -qw "compress"
 				;;
-			Zip)
-				unzip -tq $FILENAME > /dev/null 2>&1
+			*.zip|*.ZIP)
+				echo $FILEMAGIC | grep -qw "Zip"
 				;;
-			RPM)
-				rpmunpack < $FILENAME | gzip -t > /dev/null 2>&1
+			*.rpm|*.RPM)
+				echo $FILEMAGIC | grep -qw "RPM"
+				;;
+			*.CAB|*.cab)
+				echo $FILEMAGIC | grep -qw "Cabinet"
 				;;
 			*)
+				# we don't know how to handle this type of file
 				true
 				;;
 	  	esac
+	else
+		# filename does not exist!
+		false
 	fi
 }
 
