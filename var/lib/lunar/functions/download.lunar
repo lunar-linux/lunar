@@ -147,26 +147,33 @@ testpack () {
 		FILENAME=$SOURCE_CACHE/$1
 	fi
 	if [ -f "$FILENAME" ] ; then
-		case $(file -b $FILENAME | cut -d ' ' -f1) in
-			bzip2)
+		case $FILENAME in
+			*.tar.bz2|*.tbz2|*.tbz|*.tgz|*.tar.gz)
+				tar tf $FILENAME > /dev/null 2>&1
+				;;
+			*.bz2)
 				bzip2 -tf $FILENAME > /dev/null 2>&1
 				;;
-			gzip)
+			*.gz)
 				gzip -tf $FILENAME > /dev/null 2>&1
 				;;
-			compress*)
+			*.Z|*.z)
 				gzip -tf $FILENAME > /dev/null 2>&1
 				;;
-			Zip)
+			*.zip)
 				unzip -tq $FILENAME > /dev/null 2>&1
 				;;
-			RPM)
+			*.rpm)
 				rpmunpack < $FILENAME | gzip -t > /dev/null 2>&1
 				;;
 			*)
+				# we don't know how to handle this type of file
 				true
 				;;
 	  	esac
+	else
+		# filename does not exist!
+		false
 	fi
 }
 
