@@ -771,7 +771,7 @@ submit_module() {
       echo '# '
       echo '# PLEASE DO NOT CHANGE THE FOLLOWING FIELDS:'
       echo 'To: lunar@lunar-linux.org'
-      echo 'Date:' $(date)
+      echo 'Date:' $(date -u -R)
       echo 'Subject: Module submission -' $MODULE
 	  echo 'MIME-Version: 1.0'
 	  echo "Content-Type: multipart/mixed; boundary=\"$BOUNDARY\""
@@ -824,6 +824,7 @@ submit_module() {
 	  echo 'Content-Transfer-Encoding: 7bit'
 	  echo ''
 	  echo "lvu submit $1 $(cat /bin/lvu | md5sum)"
+	  echo "$(uname -r) $(if [ -f /usr/include/linux/version.h ]; then grep UTS_RELEASE /usr/include/linux/version.h | cut -d '"' -f2 ; else echo "unknown" ; fi) gcc-$(installed_version gcc) glibc-$(installed_version glibc)"
 	  echo ''
     ) > $TMP_MSG
     edit_file $TMP_MSG
