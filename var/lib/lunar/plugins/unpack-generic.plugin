@@ -13,11 +13,11 @@
 
 plugin_unpack_generic() {
 	case $1 in
-		*.tar.bz2|*.tbz2)
+		*tar.bz2|*tbz2)
 			debug_msg "Unpacking tar.bz2 file \"$1\""
 			tar jxf $1 --no-same-owner --no-same-permissions || return 1
 			;;
-		*.tar.gz|*.tgz|*.tar.Z)
+		*tar.gz|*tgz|*tar.Z)
 			debug_msg "Unpacking tar.gz file \"$1\""
 			tar zxf $1 --no-same-owner --no-same-permissions || return 1
 			;;
