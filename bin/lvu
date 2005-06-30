@@ -742,15 +742,16 @@ diff_module() {
       exit 1
   else
     if echo $SECTION | grep -q '^zlocal' ; then
-	  ZLOCAL_OVERRIDES=off SECTION=$(find_section $1)
-	  if echo $SECTION | grep -q '^zlocal' ; then
+	  ZLOCAL_OVERRIDES=off NZSECTION=$(find_section $1)
+	  if echo $NZSECTION | grep -q '^zlocal' ; then
 	    unset SECTION
 	  fi
 	else
 	  message "no local copy of \"$MODULE\" exists"
 	  exit 1
     fi
-  diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
+	ZSECTION=$(echo $SECTION | sed 's/zlocal\///g')
+    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff " | sed "s|$ZSECTION\/||g"
   fi
 }
 
