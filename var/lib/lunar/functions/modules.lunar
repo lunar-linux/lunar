@@ -158,8 +158,10 @@ find_section() {
   ZLOCAL_OVERRIDES=${ZLOCAL_OVERRIDES:=off}
   if [ "$ZLOCAL_OVERRIDES" == "on" ] ; then
     if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||" -e "s|/$1$||" ) ; then
-	  echo $SECTION
-      return 0
+	  if [ -n "$SECTION" ]; then
+	    echo $SECTION
+        return 0
+	  fi
     fi
   fi
 
