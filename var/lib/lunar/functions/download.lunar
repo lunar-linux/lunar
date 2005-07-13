@@ -35,10 +35,12 @@ lget_unlock() {
 
 download_url() {
     local RETVAL
+    local CLEAN_URL
 	debug_msg "download_url($@)"
-	verbose_msg "trying to download \"$URL\""
+	CLEAN_URL=`echo $1 | sed "s:\([^:]/\)/*:\1:g"`
+	verbose_msg "trying to download \"$CLEAN_URL\""
 	connect &&
-	plugin_call SOURCE_DOWNLOAD $1 $2 $3
+	plugin_call SOURCE_DOWNLOAD $CLEAN_URL $2 $3
 	RETVAL=$?
 	if [ $RETVAL == 2 ]; then
 		message "${PROBLEM_COLOR}Warning:${QUERY_COLOR} I don't know how to download \"$1\"${DEFAULT_COLOR}"
@@ -61,8 +63,8 @@ download_module() {
 	# loop over all sources
 	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
 		# get the URL part
-		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ | sed s:\([^:]/\)/*:\1:g )
-		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ | sed s:\([^:]/\)/*:\1:g )[@]}
+		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
+		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
 
 		# continue (to next) if empty once, break if empty tiwce
 		if [ -z "$SRC" ] ; then
