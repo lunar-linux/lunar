@@ -181,7 +181,7 @@ optimizations_help() {
      FLAGS=${FLAGS/fpu/387}
      FLAGS=${FLAGS/387 sse/387 and sse (both)}
 
-     MENU="Select available Floating Point Math compile extenstions. The kernel reports that this sytem has: $FLAGS"
+     MENU="Select available Floating Point Math compile extensions. The kernel reports that this system has: $FLAGS"
      None_HELP="Do not enable any extra features."
      x387_HELP="Classic 387 or higher Floating Point Co-Processor"
      SSE_HELP="Streaming SIMD (Single Instruction, Multiple Data) Extensions"
