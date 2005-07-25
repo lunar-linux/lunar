@@ -35,7 +35,7 @@ Example: http://192.168.1.1:8080/"
 Example: http://192.168.1.1:8080/"
 
      NO_PROMPT="Please enter all domains/ip addresses \
-(comma-seperated) proxy should NOT be used for: \
+(comma-separated) proxy should NOT be used for: \
 Example: .mit.edu,mysite.com"
 
     HPROXY=`inputbox "$HTTP_PROMPT" "$http_proxy"` &&

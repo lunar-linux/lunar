@@ -80,8 +80,9 @@ maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
 
 edit        module         copy a module to zlocal for editing
-submit      module         try to submit a module to the lunar ML
-unedit      module         delete your zlocal copy of a module
+diff        module         view changes on edited module
+submit      module         attempt to submit a module to the lunar ML
+unedit      module         delete zlocal copy of a module
 
 sum         [module]       display checksums
 md5sum      [module]       display md5sums
@@ -727,6 +728,33 @@ show_info() {
 }
 
 
+diff_module() {
+  if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
+    message "can't diff modules without ZLOCAL_OVERRIDES=on"
+	exit 1
+  fi
+  if [ -z "$1" ]; then
+    message "diff requires a single module name"
+	exit 1
+  fi
+  if ! run_details "$1" ; then
+      message "diff requires an existing module"
+      exit 1
+  else
+    if echo $SECTION | grep -q '^zlocal' ; then
+	  ZLOCAL_OVERRIDES=off NZSECTION=$(find_section $1)
+	  if echo $NZSECTION | grep -q '^zlocal' ; then
+	    unset SECTION
+	  fi
+	else
+	  message "no local copy of \"$MODULE\" exists"
+	  exit 1
+    fi
+	ZSECTION=$(echo $SECTION | sed 's/zlocal\///g')
+    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff " | sed "s|$ZSECTION\/||g"
+  fi
+}
+
 submit_module() {
   # this code tries to send the module back to the mailinglist
   # as good as it gets
@@ -1245,6 +1273,10 @@ main()  {
        fi
      fi
      ;;
+
+   diff)
+     diff_module $2
+	 ;;
 
    submit)
      submit_module $2
