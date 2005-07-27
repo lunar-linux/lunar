@@ -145,6 +145,7 @@ lrm_module() {
 
   # time-out 1: PRE_REMOVE
   if [ "$UPGRADE" != "on" ]; then
+    plugin_call BUILD_PRE_REMOVE $MODULE
     run_module_file $MODULE PRE_REMOVE
   fi
 
@@ -183,6 +184,7 @@ lrm_module() {
 
   # time-out 2: POST_REMOVE
   if [ "$UPGRADE" != "on" ] ; then
+    plugin_call BUILD_POST_REMOVE $MODULE
     run_module_file $MODULE POST_REMOVE
   fi
   if [ "$KEEPCONFIG" == "on" -o "$UPGRADE" == "on" ] ; then
