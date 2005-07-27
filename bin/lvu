@@ -642,9 +642,11 @@ show_urls() { (
   download_url() { echo $1$2 ; return 1 ; }
   connect() { return 0 ; }
  
+  LRESORT_URL=
+  FRESORT_URL=
+  EXHAUSTIVE=on
   SILENT=on
   VERBOSE=off
-  EXHAUSTIVE=off
   CLEAR_CACHE=off
 
   if [ -z "$1" ] ; then
