@@ -100,7 +100,7 @@ create_md5sum_log()  {
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
   files < $INSTALL_LOGS/$MODULE-$VERSION | while read FILE ; do
-    md5sum $FILE >> $MD5SUM_LOGS/$MODULE-$VERSION
+    md5sum "$FILE" >> $MD5SUM_LOGS/$MODULE-$VERSION
   done
 
 }
