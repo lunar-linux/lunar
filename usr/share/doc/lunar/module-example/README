@@ -70,10 +70,6 @@ the package is built.
 Use this file if you need to tweak the compiles sources before it is
 installed.
 
-* PRE_INSTALL
-
-This file lets you prepare the installation process for the package.
-
 * POST_INSTALL
 
 When you need to additionally tweak things after installation, this is
@@ -114,6 +110,8 @@ Some contents of subdirs are automatically handled, here's a list:
    - xinetd.d      - for xinetd service definitions
    - init.d        - for init.d startup scripts
    - profile.d     - for bash shell settings
+   - plugin.d      - for lunar code plugins
+   - skel          - for /etc/skel/ files
 
 
 The file 'services' can be used to add tcp/ip or udp service port
