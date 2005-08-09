@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ $CXX_EXT g++ $CCOPT \"$@\"" >&2
+  echo "++ $CXX_EXT ${COMPILER_PATH:-/usr/bin}/g++ $CCOPT \"$@\"" >&2
 fi
  
 $CXX_EXT ${COMPILER_PATH:-/usr/bin}/g++ $CCOPT "$@"

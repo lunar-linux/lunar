@@ -743,8 +743,9 @@ ADDON=( ) > /etc/lunar/local/optimizations
       ;;
   esac
 
-  if [ "$(installed_version gcc | cut -d. -f1,2)" == "3.4" \
-       -o "$(installed_version gcc | cut -d. -f1)" == "4" ] ; then
+  local GCC_REALVERSION=$(${COMPILER_PATH:-/usr/bin}/gcc --version | head -n 1 | awk '{print $3}')
+  if [ "$(echo $GCC_REALVERSION | cut -d. -f1,2)" == "3.4" \
+       -o "$(echo $GCC_REALVERSION | cut -d. -f1)" == "4" ] ; then
     CFLAGS=$(echo $CFLAGS | sed 's:-mcpu:-mtune:')
     CXXFLAGS=$(echo $CXXFLAGS | sed 's:-mcpu:-mtune:')
   fi

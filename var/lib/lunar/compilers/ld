@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ ld \"$@\"" >&2
+  echo "++ ${LD_PATH:-/usr/bin}/ld \"$@\"" >&2
 fi
 
 ${LD_PATH:-/usr/bin}/ld "$@"
