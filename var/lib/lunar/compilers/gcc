@@ -3,6 +3,6 @@
 if [ -n "$LUNAR_DEBUG" ] ; then
   echo "++ $CC_EXT gcc $COPT \"$@\"" >&2
 fi
-  
-$CC_EXT /usr/bin/gcc $COPT "$@"
+ 
+$CC_EXT ${COMPILER_PATH:-/usr/bin}/gcc $COPT "$@"
 

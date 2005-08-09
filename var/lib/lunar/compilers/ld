@@ -4,5 +4,5 @@ if [ -n "$LUNAR_DEBUG" ] ; then
   echo "++ ld \"$@\"" >&2
 fi
 
-/usr/bin/ld "$@"
+${LD_PATH:-/usr/bin}/ld "$@"
 
