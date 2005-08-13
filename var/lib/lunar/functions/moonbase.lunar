@@ -19,6 +19,10 @@ get_moonbase () {
 
   SYSTEM_MOONBASE=/var/lib/lunar/moonbase
 
+  # prevent using stale copies of moonbase. You can still override moonbase's
+  # URL with `lunar set MOONBASE_URL[0] http://.....
+  unset LRESORT_URL FRESORT_URL
+
   # the following overrides run_details:
   run_details() {
   debug_msg "  run_details ($@)"
