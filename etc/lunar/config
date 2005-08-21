@@ -22,7 +22,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
              FUNCTIONS=/var/lib/lunar/functions
                  MENUS=/var/lib/lunar/menu
              SUSTAINED=/var/lib/lunar/sustained
-               ALIASES=/var/lib/lunar/aliases
             PLUGIN_DIR=/var/lib/lunar/plugins
 
        SOUND_DIRECTORY=/var/lib/lunar/sound

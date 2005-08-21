@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ $MAKE_EXT make ${MAKES:+-j$MAKES} \"$@\"" >&2
+  echo "++ $MAKE_EXT ${MAKE_PATH:-/usr/bin}/make ${MAKES:+-j$MAKES} \"$@\"" >&2
 fi
 
-$MAKE_EXT /usr/bin/make ${MAKES:+-j$MAKES} "$@"
+$MAKE_EXT ${MAKE_PATH:-/usr/bin}/make ${MAKES:+-j$MAKES} "$@"
 
