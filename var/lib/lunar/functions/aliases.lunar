@@ -13,6 +13,14 @@
 # and add it to the dependency chain if needed
 unalias() {
   local TARGET TARGETS TARGETBYNUM N CHOICE
+  # try to figure out where the aliases file is:
+  if [ -z "$ALIASES" -o ! -f "$ALIASES" ]; then
+    if [ -f "$MOONBASE/aliases" ] ; then
+	  ALIASES="$MOONBASE/aliases"
+	else
+	  ALIASES="/var/lib/lunar/aliases"
+	fi
+  fi
   if [ "${1:0:1}" == "%" ] ; then
     debug_msg "unalias($@)"
     TARGETS=$(grep "^$1:" $ALIASES | cut -d: -f2-)
