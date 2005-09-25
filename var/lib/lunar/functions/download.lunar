@@ -5,7 +5,7 @@
 #                                                          #
 ############################################################
 #                                                          #
-# Copyrigh Auke Kok / Lunar-Linux 2005 under GPLv2         #
+# Copyright Auke Kok / Lunar-Linux 2005 under GPLv2        #
 #                                                          #
 ############################################################
 
@@ -64,7 +64,7 @@ download_module() {
 		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
 		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
 
-		# continue (to next) if empty once, break if empty tiwce
+		# continue (to next) if empty once, break if empty twice
 		if [ -z "$SRC" ] ; then
 			if [ -z "$SECOND" ] ; then
 				SECOND="yes"
@@ -106,7 +106,7 @@ download_module() {
 				for URL in $URLS ; do
 					add_url $URL
 					if [ "$EXHAUSTIVE" == "on" ]; then
-						# scan for hits agains known clusters of mirrors
+						# scan for hits against known clusters of mirrors
 						for MLIST in $MIRRORS/*; do
 							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST | grep -v "^Custom$"); do
 								if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then

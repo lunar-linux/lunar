@@ -51,7 +51,7 @@ renew() {
 update() {
   debug_msg "update ($@)"
   if ps -C lin > /dev/null ; then
-    error_message "${PROBLEM_COLOR}Unable to update lunar concurrently while installing.${DEFAILT_COLOR}"
+    error_message "${PROBLEM_COLOR}Unable to update lunar concurrently while installing.${DEFAULT_COLOR}"
     return 1
   fi
 
