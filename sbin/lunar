@@ -747,7 +747,7 @@ main_menu()  {
   while
     M_HELP="Easy module management"
     O_HELP="Change lunar options and features"
-    L_HELP="View and edit lunar genreated log files."
+    L_HELP="View and edit lunar generated log files."
     Q_HELP="View and edit lunar queues."
     F_HELP="Process queues while you watch and wait"
     N_HELP="Discover and fix internal problems"

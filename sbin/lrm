@@ -333,7 +333,7 @@ else
 
   for MODULE in "${@#-}" ; do
     if check_status "$MODULE" ; then
-      # assemble pureg list if requested
+      # assemble purge list if requested
       if [ "$PURGE" == "on" ] ; then
         DEPS=$(list_installed_depending "$MODULE" | sort | uniq)
         for DEP in $DEPS ; do
