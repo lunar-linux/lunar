@@ -71,9 +71,7 @@ sort_by_dependency() {
 
   # tsort the existing dep relations in all of moonbase
   TMP_TSRT=$(temp_create "dependency.sort")
-  for LINE in $(cat $DEPENDS_CACHE); do
-    A=$(echo $LINE | cut -d: -f1)
-	B=$(echo $LINE | cut -d: -f2)
+  cat $DEPENDS_CACHE | cut -d: -f1,2 --output-delimiter=" " | while read A B ; do
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
@@ -106,7 +104,7 @@ is_depends()  {
 
 in_depends()  {
   debug_msg "in_depends ($@)"
-  # Was $2 presented as a depenency for module $1
+  # Was $2 presented as a dependency for module $1
   return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
 }
                                                                                 

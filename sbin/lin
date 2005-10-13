@@ -27,7 +27,7 @@
 ############################################################
 
 # This enables alias expansion within lin and its children
-# although this dosen't expand aliases within functions
+# although this doesn't expand aliases within functions
 # That is a limitation of bash and aliases
 shopt -s expand_aliases
 
@@ -67,7 +67,7 @@ main() {
     if ! lget moonbase ; then
       exit 1
     fi
-    # remove moonbase rofm MODULES and continue
+    # remove moonbase from MODULES and continue
     MODULES=$(echo $MODULES | sed 's/moonbase//g')
     if [ -z "$MODULES" ] ; then
       return

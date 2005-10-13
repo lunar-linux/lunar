@@ -112,7 +112,7 @@ check_status_files() {
                   "${MODULE_COLOR}$MODULE_STATUS_BACKUP"                     \
                   "${DEFAULT_COLOR}"
          if `cp $MODULE_STATUS $MODULE_STATUS_BACKUP`; then
-            message  "${MESSAGE_COLOR}MODULE_STATUS is succesfully copied" \
+            message  "${MESSAGE_COLOR}MODULE_STATUS is successfully copied" \
                      "to MODULE_STATUS_BACKUP"   \
                      "${DEFAULT_COLOR}"
          else

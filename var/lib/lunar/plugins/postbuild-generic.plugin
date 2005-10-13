@@ -105,7 +105,7 @@ plugin_archive_module()
   if [ ! -e /var/state/lunar/module_history ]; then
     mkdir -p /var/state/lunar/module_history
   fi
-  tar -cj -C $MOONBASE/$SECTION -f /var/state/lunar/module_history/$MODULE-$VERSION-$(date -u +%Y%m%d).tar.bz2 $MODULE
+  tar -cj --exclude=.svn -C $MOONBASE/$SECTION -f /var/state/lunar/module_history/$MODULE-$VERSION-$(date -u +%Y%m%d).tar.bz2 $MODULE
   return 2
 }
 

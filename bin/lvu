@@ -784,7 +784,7 @@ submit_module() {
 	    unset SECTION
 	  fi
 	else
-	  message "Please don't edit modules outside of the 'zlocal' secion!"
+	  message "Please don't edit modules outside of the 'zlocal' section!"
 	  message "do this first: \`lvu edit \$MODULE ; lin moonbase\`"
 	  message "so that module changes can be tracked properly!"
 	  exit 1

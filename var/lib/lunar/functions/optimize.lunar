@@ -111,151 +111,151 @@ optimize_cpu()  {
 
 # Begin x86 options
    case $1 in
-      I386)         CFLAGS="$CFLAGS -mcpu=i386 -march=i386"
-                    CXXFLAGS="$CXXFLAGS -mcpu=i386 -march=i386"
+      I386)         CFLAGS="$CFLAGS -march=i386"
+                    CXXFLAGS="$CXXFLAGS -march=i386"
                     BUILD="i386-pc-linux-gnu"
                     ;;
-      I486)         CFLAGS="$CFLAGS -mcpu=i486 -march=i486"
-                    CXXFLAGS="$CXXFLAGS -mcpu=i486 -march=i486"
+      I486)         CFLAGS="$CFLAGS -march=i486"
+                    CXXFLAGS="$CXXFLAGS -march=i486"
                     BUILD="i486-pc-linux-gnu"
                     ;;
-      I586)         CFLAGS="$CFLAGS -mcpu=i586 -march=i586"
-                    CXXFLAGS="$CXXFLAGS -mcpu=i586 -march=i586"
+      I586)         CFLAGS="$CFLAGS -march=i586"
+                    CXXFLAGS="$CXXFLAGS -march=i586"
                     BUILD="i586-pc-linux-gnu"
                     ;;
-      I686)         CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                    CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+      I686)         CFLAGS="$CFLAGS -march=i686"
+                    CXXFLAGS="$CXXFLAGS -march=i686"
                     BUILD="i686-pc-linux-gnu"
                     ;;
-      Pentium)      CFLAGS="$CFLAGS -mcpu=pentium -march=pentium"
-                    CXXFLAGS="$CXXFLAGS -mcpu=pentium -march=pentium"
+      Pentium)      CFLAGS="$CFLAGS -march=pentium"
+                    CXXFLAGS="$CXXFLAGS -march=pentium"
                     BUILD="i586-pc-linux-gnu"
                     ;;
-      PentiumMMX)   CFLAGS="$CFLAGS -mcpu=pentium-mmx -march=pentium-mmx"
-                    CXXFLAGS="$CXXFLAGS -mcpu=pentium-mmx -march=pentium-mmx"
+      PentiumMMX)   CFLAGS="$CFLAGS -march=pentium-mmx"
+                    CXXFLAGS="$CXXFLAGS -march=pentium-mmx"
                     BUILD="i586-pc-linux-gnu"
                     ;;
-      PentiumPro)   CFLAGS="$CFLAGS -mcpu=pentiumpro -march=pentiumpro"
-                    CXXFLAGS="$CXXFLAGS -mcpu=pentiumpro -march=pentiumpro"
+      PentiumPro)   CFLAGS="$CFLAGS -march=pentiumpro"
+                    CXXFLAGS="$CXXFLAGS -march=pentiumpro"
                     BUILD="i686-pc-linux-gnu"
                     ;;
       Pentium2)     if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=pentium2 -march=pentium2"
-                       CXXFLAGS="$CXXFLAGS -mcpu=pentium2 -march=pentium2"
+                       CFLAGS="$CFLAGS -march=pentium2"
+                       CXXFLAGS="$CXXFLAGS -march=pentium2"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       Pentium3)     if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=pentium3 -march=pentium3"
-                       CXXFLAGS="$CXXFLAGS -mcpu=pentium3 -march=pentium3"
+                       CFLAGS="$CFLAGS -march=pentium3"
+                       CXXFLAGS="$CXXFLAGS -march=pentium3"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       Pentium4)     if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=pentium4 -march=pentium4"
-                       CXXFLAGS="$CXXFLAGS -mcpu=pentium4 -march=pentium4"
+                       CFLAGS="$CFLAGS -march=pentium4"
+                       CXXFLAGS="$CXXFLAGS -march=pentium4"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       K6)           if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=k6 -march=k6"
-                       CXXFLAGS="$CXXFLAGS -mcpu=k6 -march=k6"
+                       CFLAGS="$CFLAGS -march=k6"
+                       CXXFLAGS="$CXXFLAGS -march=k6"
                        BUILD="i586-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i586 -march=i586"
-                       CXXFLAGS="$CXXFLAGS -mcpu=k6 -march=k6"
+                       CFLAGS="$CFLAGS -march=i586"
+                       CXXFLAGS="$CXXFLAGS -march=k6"
                        BUILD="i586-pc-linux-gnu"
                     fi
                     ;;
       K62)          if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=k6-2 -march=k6-2"
-                       CXXFLAGS="$CXXFLAGS -mcpu=k6-2 -march=k6-2"
+                       CFLAGS="$CFLAGS -march=k6-2"
+                       CXXFLAGS="$CXXFLAGS -march=k6-2"
                        BUILD="i586-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i586"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i586"
+                       CFLAGS="$CFLAGS -march=i586"
+                       CXXFLAGS="$CXXFLAGS -march=i586"
                        BUILD="i586-pc-linux-gnu"
                     fi
                     ;;
       K63)          if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=k6-3 -march=k6-3"
-                       CXXFLAGS="$CXXFLAGS -mcpu=k6-3 -march=k6-3"
+                       CFLAGS="$CFLAGS -march=k6-3"
+                       CXXFLAGS="$CXXFLAGS -march=k6-3"
                        BUILD="i586-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i586"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i586"
+                       CFLAGS="$CFLAGS -march=i586"
+                       CXXFLAGS="$CXXFLAGS -march=i586"
                        BUILD="i586-pc-linux-gnu"
                     fi
                     ;;
       Athlon)       if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon -march=athlon"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon -march=athlon"
+                       CFLAGS="$CFLAGS -march=athlon"
+                       CXXFLAGS="$CXXFLAGS -march=athlon"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       AthlonTBird) if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-tbird -march=athlon-tbird"
+                       CFLAGS="$CFLAGS -march=athlon-tbird"
+                       CXXFLAGS="$CXXFLAGS -march=athlon-tbird"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       Athlon4)     if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon-4 -march=athlon-4"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-4 -march=athlon-4"
+                       CFLAGS="$CFLAGS -march=athlon-4"
+                       CXXFLAGS="$CXXFLAGS -march=athlon-4"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       AthlonXP)    if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon-xp -march=athlon-xp"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-xp -march=athlon-xp"
+                       CFLAGS="$CFLAGS -march=athlon-xp"
+                       CXXFLAGS="$CXXFLAGS -march=athlon-xp"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       AthlonMP)    if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon-mp -march=athlon-mp"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon-mp -march=athlon-mp"
+                       CFLAGS="$CFLAGS -march=athlon-mp"
+                       CXXFLAGS="$CXXFLAGS -march=athlon-mp"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;
       Athlon64)    if [[ $GCCVER == "3" ]];  then
-                       CFLAGS="$CFLAGS -mcpu=athlon64 -march=athlon64"
-                       CXXFLAGS="$CXXFLAGS -mcpu=athlon64 -march=athlon64"
+                       CFLAGS="$CFLAGS -march=athlon64"
+                       CXXFLAGS="$CXXFLAGS -march=athlon64"
                        BUILD="i686-pc-linux-gnu"
                     else
-                       CFLAGS="$CFLAGS -mcpu=i686 -march=i686"
-                       CXXFLAGS="$CXXFLAGS -mcpu=i686 -march=i686"
+                       CFLAGS="$CFLAGS -march=i686"
+                       CXXFLAGS="$CXXFLAGS -march=i686"
                        BUILD="i686-pc-linux-gnu"
                     fi
                     ;;

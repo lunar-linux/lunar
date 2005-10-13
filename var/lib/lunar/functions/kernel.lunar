@@ -15,7 +15,7 @@
 
 
 # Description : This function makes backups of the kernels and modules
-# Arg 1       : Filename of the kernel to backup (With or witout full path)
+# Arg 1       : Filename of the kernel to backup (With or without full path)
 #               With the format $VERSION_$EXTRAVERSION
 backup_mods_krnl() {
 	debug_msg "backup_mods_krnl ($@)"

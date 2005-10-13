@@ -16,7 +16,7 @@
 #                                                          #
 ############################################################
 
-# Definiton:
+# Definition:
 # a queue is a multielement data structure from which elements
 # can be removed only in the same order in which they are inserted;
 # that is, it follows a FIFO constraint.
