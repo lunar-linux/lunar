@@ -296,7 +296,6 @@ make_hold_checklist()  {
 
 
 hold_pkgs()  {
-   CHECKLIST=`make_hold_checklist`
   HOLD_TITLE="Select modules to hold or unhold"
    HOLD_HELP="[X]=held  [ ]=installed"
 
@@ -307,26 +306,10 @@ hold_pkgs()  {
                         --checklist            \
                         "$HOLD_HELP"           \
                         0 0 10                 \
-                        $CHECKLIST`
+                        $(make_hold_checklist)`
   then
-    rm  -f  $MODULE_STATUS
-
-    for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
-        MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-         DATE=`echo  "$LINE"  |  cut  -d : -f2`
-       STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-      VERSION=`echo  "$LINE"  |  cut  -d : -f4`
-
-      if    echo  -e  "$OUTLIST"  |  grep  -q  "^$MODULE\$";  then
-        STATUS="held";
-      else
-        STATUS=${STATUS/held/installed}
-      fi
-
-      echo  "$MODULE:$DATE:$STATUS:$VERSION"  >>  $MODULE_STATUS
-    done
-
-    cp  $MODULE_STATUS  $MODULE_STATUS_BACKUP
+    unhold_modules $(cut -d: -f1 < $MODULE_STATUS)
+    hold_modules $OUTLIST
   fi
 
 }
