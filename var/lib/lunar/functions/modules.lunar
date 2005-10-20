@@ -284,6 +284,39 @@ module_held() {
 }
 
 
+module_license_accepted() {
+  debug_msg "module_license_accepted ($@)"
+  local L LICENSE
+  LICENSE=$(run_details $1 > /dev/null ; echo $LICENSE)
+  # check if $MODULE's $LICENSE is accepted or not, works as follows:
+  # if ACCEPTED_LICENSES is set, LICENSE *must* be listed, else if
+  # REJECTED_LICESES is set, must _NOT_ be listed
+  if [ -n "$(echo $ACCEPTED_LICENSES)" ]; then
+    for L in $ACCEPTED_LICENSES; do
+      if [ "$LICENSE" == "$L" ]; then
+        # explicitly accepted license!
+	debug_msg "module_license_accepted: \"$LICENSE\" is explicitly accepted"
+        return 0
+      fi
+    done
+    # it was not explicitly accepted
+    error_message "${MODULE_COLOR}$1${DEFAULT_COLOR}: ${PROBLEM_COLOR}License \"$LICENSE\" is not explicitly accepted${DEFAULT_COLOR}"
+    return 1
+  elif [ -n $REJECTED_LICENSES ]; then
+    for L in $REJECTED_LICENSES; do
+      if [ "$LICENSE" == "$L" ]; then
+        # explicitly rejected license!
+	error_message "${MODULE_COLOR}$1${DEFAULT_COLOR}: ${PROBLEM_COLOR}License \"$LICENSE\" is explicitly rejected${DEFAULT_COLOR}"
+	return 1
+      fi
+    done
+    # implicitly not rejected
+    debug_msg "module_license_accepted: \"$LICENSE\" is not rejected"
+    return 0
+  fi
+}
+
+
 # function : module_exiled
 # usage    : module_exiled $MODULE
 # purpose  : check if $MODULE is exiled

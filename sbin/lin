@@ -125,7 +125,7 @@ main() {
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
-          if ! module_held $MODULE && ! module_exiled $MODULE ; then
+          if ! module_held $MODULE && ! module_exiled $MODULE && module_license_accepted $MODULE ; then
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
             if ! ( SINGLE_MODULE=1 main $MODULE ) ; then
@@ -139,7 +139,17 @@ main() {
               fi
             fi
           else
-            verbose_msg "Skipping compile and install for held/exiled module \"$MODULE\""
+            # split up error messages
+            if module_held $MODULE; then
+              verbose_msg "Skipping compile and install for held module \"$MODULE\""
+            elif module_exiled $MODULE; then
+              verbose_msg "Skipping compile and install for exiled module \"$MODULE\""
+            else
+              message "${MESSAGE_COLOR}The license of this module is incompatible with the list of"
+              message "allowed and/or rejected licenses. Please adjust the ACCEPTED_LICENSES or"
+              message "REJECTED_LICENSES variables to include or not include the specific"
+              message "license of this module.${DEFAULT_COLOR}"
+            fi
           fi
         fi
       done
