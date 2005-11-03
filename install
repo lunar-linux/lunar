@@ -12,6 +12,9 @@ if [ "x$1" = "x" ]
    ROOT=$1
 fi
 
+mkdir -p $ROOT/var/log/lunar/{install,compile,md5sum,queue}
+mkdir -p $ROOT/var/{cache,lib,spool,state}/lunar
+
 cp -a bin  $ROOT
 cp -a etc  $ROOT
 cp -a lib  $ROOT
