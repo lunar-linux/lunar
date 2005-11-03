@@ -104,6 +104,8 @@ optimize_cpu()  {
          CPU="powerpc"
       elif [[ $PLATFORM == "SPARC" ]];   then
          CPU="ultrasparc"
+      elif [[ $PLATFORM == "x86_64" ]];  then
+         CPU="x86_64"
       else
          CPU="I386"
       fi
@@ -459,6 +461,10 @@ optimize_cpu()  {
       ultrasparc)    CFLAGS="$CFLAGS -mcpu=ultrasparc"
                      CXXFLAGS="$CXXFLAGS -mcpu=ultrasparc"
                      BUILD="sparc-linux"
+                     ;;
+      x86_64)        CFLAGS="$CFLAGS"
+                     CXXFLAGS="$CXXFLAGS"
+                     BUILD="x86_64-pc-linux-gnu"
                      ;;
    esac
 }

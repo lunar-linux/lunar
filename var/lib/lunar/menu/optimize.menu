@@ -39,6 +39,7 @@ optimizations_help() {
      Alpha_HELP="Compaq Alpha hardware"
      PowerPC_HELP="IBM and Apple hardware (Power and PowerPC)"
      SPARC_HELP="SUN Hardware"
+     x86_64_HELP="Both AMD64 and Intel EM64T machines"
      ;;
 
    # Help for the basic optimizations.
@@ -126,6 +127,9 @@ optimizations_help() {
          tsc701_HELP="tsc701 SPARC"
          v9_HELP="V9 SPARC"
          ultrasparc_HELP="ULTRASPARC"
+         ;;
+       x86_64)
+         x86_64_HELP="x86_64"
          ;;
      esac
      ;;
@@ -230,7 +234,8 @@ optimizations_options() {
       OPTIONS=( "x86"     "Intel, AMD, and clones"  $( [ "$PLATFORM" == "x86" ] && echo "on" || echo "off" )      "$x86_HELP"
                 "Alpha"   "Compaq Alpha"            $( [ "$PLATFORM" == "Alpha" ] && echo "on" || echo "off" )    "$Alpha_HELP"
                 "PowerPC" "PowerPC"                 $( [ "$PLATFORM" == "PowerPC" ] && echo "on" || echo "off" )  "$PowerPC_HELP"
-                "SPARC"   "Sun SPARC"               $( [ "$PLATFORM" == "SPARC" ] && echo "on" || echo "off" )    "$SPARC_HELP" )
+                "SPARC"   "Sun SPARC"               $( [ "$PLATFORM" == "SPARC" ] && echo "on" || echo "off" )    "$SPARC_HELP"
+                "x86_64"   "AMD64/EM64T"            $( [ "$PLATFORM" == "x86_64" ] && echo "on" || echo "off" )    "$x86_64_HELP" )
       ;;
     bopt)
       OPTIONS=( "None"     "-O0"   $( [ "$BOPT" == "None" ] && echo "on" || echo "off" )    "$None_HELP"
@@ -315,6 +320,9 @@ optimizations_options() {
                    "v9"           "v9"           $( [ "$CPU" == "v9" ] && echo "on" || echo "off" )           "$v9_HELP"
                    "ultrasparc"   "ultrasparc"   $( [ "$CPU" == "ultrasparc" ] && echo "on" || echo "off" )   "$ultrasparc_HELP" )
          ;;
+       x86_64)
+         OPTIONS=( "x86_64"       "x86_64"        $( [ "$CPU" == "x86_64" ] && echo "on" || echo "off" ) "$x86_64_HELP" )
+         ;; 
      esac
      ;;
    spd)
