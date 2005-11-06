@@ -285,15 +285,43 @@ module_held() {
 
 
 module_license_accepted() {
+  #
+  # This code handles acceptance or rejection of certain licenses.
+  #
+  # valid licenses currently are:
+  # osi == gpl gpl2 lgpl gfdl bsd mpl cc apache artistic qpl
+  
   debug_msg "module_license_accepted ($@)"
-  local L LICENSE
+
+  local L LICENSE IS_OSI
   LICENSE=$(run_details $1 > /dev/null ; echo $LICENSE)
+  # assume it's osi if it's empty
+  if [ -z "$LICENSE" ]; then
+    debug_msg "assuming LICENSE=\"osi\""
+    LICENSE="osi"
+  fi
+  
+  # check for osi license
+  case LICENSE in
+    gpl|gpl2|lgpl|gfdl|bsd|mpl|cc|apache|artistic|qpl)
+      IS_OSI=yes
+    ;;
+  esac
+
+  # default case: only accept osi licenses:
+  if [ -z "${ACCEPTED_LICENSES}${REJECTED_LICESES}" ]; then
+    verbose_msg "Assuming we only accept osi licenses, please adjust your license acceptance settings in the lunar menus".
+    ACCEPTED_LICENSES=osi
+  fi
+  
   # check if $MODULE's $LICENSE is accepted or not, works as follows:
   # if ACCEPTED_LICENSES is set, LICENSE *must* be listed, else if
   # REJECTED_LICESES is set, must _NOT_ be listed
+  # * accept "osi" will accept all osi licenses
+  # * accept "all" will accept anything
   if [ -n "$(echo $ACCEPTED_LICENSES)" ]; then
     for L in $ACCEPTED_LICENSES; do
-      if [ "$LICENSE" == "$L" ]; then
+      if [ "$L" == "osi" -a "$IS_OSI" == "yes" ] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
         # explicitly accepted license!
 	debug_msg "module_license_accepted: \"$LICENSE\" is explicitly accepted"
         return 0

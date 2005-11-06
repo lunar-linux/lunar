@@ -1,0 +1,71 @@
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://lunar-linux.org                                   #
+#                                                          #
+############################################################
+#                                                          #
+# $MENUS/license                                           #
+# includes menu for setting the accepted/rejected licenses #
+#                                                          #
+# 20051105                                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyrighted Auke Kok 2005 under GPLv2                    #
+#                                                          #
+############################################################
+
+set_accepted_licenses()
+{
+
+    PROMPT="Please select acceptable licenses
+
+Lunar by default only accepts osi-approved licenses. You will
+need to tell lunar to explicitly accept or reject licenses if
+you wish to change this behaviour.
+
+You have several ways of doing so:
+ o Enter \"all\" in this field to except every license.
+ o Enter \"osi\" to accept any known osi approved license.
+ o Or enter any specific license name in here to accept it.
+ o Enter licenses in the REJECTED_LICENSES and leave this
+   field empty to reject only those licenses.
+  
+Currently known osi licenses: gpl gpl2 lgpl gfdl bsd mpl cc apache
+artistic qpl."
+
+    ACCEPTED_LICENSES=`$DIALOG --title "Select accepted licenses" \
+        --ok-label "Commit" --inputbox                            \
+	"$PROMPT" 0 0 "$ACCEPTED_LICENSES"`
+
+    set_local_config ACCEPTED_LICENSES "$ACCEPTED_LICENSES"
+
+}
+
+set_rejected_licenses()
+{
+
+    PROMPT="Please select rejected licenses
+
+Lunar by default only accepts osi-approved licenses. You will
+need to tell lunar to explicitly accept or reject licenses if
+you wish to change this behaviour.
+
+You have several ways of doing so:
+ o use the ACCEPTED_LICENSES field to accept only specific licenses
+ o enter any license name in here to reject it - however \"osi\"
+   or \"all\" does not work in this field - you must use the exact
+   name.
+
+Remember that if you leave ACCEPTED_LICENSES empty, all licenses will
+be accepted that do not match the REJECTED_LICENSES list."
+
+    REJECTED_LICENSES=`$DIALOG --title "Select rejected licenses" \
+        --ok-label "Commit" --inputbox                            \
+	"$PROMPT" 0 0 "$REJECTED_LICENSES"`
+
+    set_local_config REJECTED_LICENSES "$REJECTED_LICENSES"
+
+}
+
