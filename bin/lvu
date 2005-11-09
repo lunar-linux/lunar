@@ -34,7 +34,7 @@ help() {
 cat << EOF
 LVU -- Lunar View utility (for viewing just about everything in Lunar-Linux)
 
-Usage:		lvu [general options] [command [command parameters]]
+Usage:      lvu [general options] [command [command parameters]]
 
 GENERAL OPTIONS:
 
@@ -61,6 +61,7 @@ orphans                    display installed modules that are missing
                                dependencies
 held                       display held modules
 exiled                     display exiled modules
+expired                    display a list of modules which need an update
 info        module         display terse summary information about module
 
 search      "phrase"       searches all modules long descriptions for phrase.
@@ -1003,6 +1004,12 @@ main()  {
 
     exiled)
       grep ":exiled:" $MODULE_STATUS | cut -d: -f1
+      ;;
+
+    expired)
+      for MODULE in $(list_expired_modules); do
+        echo "$MODULE ($(installed_version $MODULE) -> $(run_details $MODULE > /dev/null ; echo $VERSION))"
+      done
       ;;
 		
     sum)
