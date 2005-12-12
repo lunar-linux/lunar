@@ -588,6 +588,11 @@ optimize_extra() {
                   CXXFLAGS="$CXXFLAGS -msse2"
                fi
 	       ;;
+      SSE3)    if [[ $GCCVER == "3" ]];  then
+                  CFLAGS="$CFLAGS -msse3"
+                  CXXFLAGS="$CXXFLAGS -msse3"
+               fi
+	       ;;	       	       
       dnow)   if [[ $GCCVER == "3" ]];  then
                   CFLAGS="$CFLAGS -m3dnow"
                   CXXFLAGS="$CXXFLAGS -m3dnow"

@@ -73,6 +73,7 @@ optimizations_help() {
          Athlon4_HELP="AMD Athlon 4 processors"
          AthlonXP_HELP="AMD Athlon XP processors"
          AthlonMP_HELP="AMD Athlon MP processors"
+	  Athlon64_HELP="AMD Athlon 64 processors"
          ;;
        Alpha)
          ev4_HELP="Alpha EV4 (21064)"
@@ -158,7 +159,7 @@ optimizations_help() {
    xtra)
      # do NOT change the next line unless you too smart
      CPUINFO=$(echo "`grep flags /proc/cpuinfo` ")
-     for EXT in mmx sse sse2 3dnow altivec ; do
+     for EXT in mmx sse sse2 pni 3dnow altivec ; do
        if echo $CPUINFO | grep -q " $EXT " ; then
          FLAGS="$FLAGS $EXT"
        fi
@@ -168,6 +169,7 @@ optimizations_help() {
      MMX_HELP="Multi-Media instruction code eXtensions"
      SSE_HELP="Streaming SIMD (Single Instruction, Multiple Data) Extensions"
      SSE2_HELP="Streaming SIMD (Single Instruction, Multiple Data) Extensions v2"
+     SSE3_HELP="Streaming SIMD (Single Instruction, Multiple Data) Extensions v3"
      dnow_HELP="3dnow"
      Altivec_HELP="Enables Altivec"
      unset CPUINFO EXT FLAGS
@@ -262,7 +264,8 @@ optimizations_options() {
                    "AthlonTBird" "AthlonTBird"  $( [ "$CPU" == "AthlonTBird" ] && echo "on" || echo "off" ) "$AthlonTBird_HELP"
                    "Athlon4"     "Athlon4"      $( [ "$CPU" == "Athlon4" ] && echo "on" || echo "off" )     "$Athlon4_HELP"
                    "AthlonXP"    "AthlonXP"     $( [ "$CPU" == "AthlonXP" ] && echo "on" || echo "off" )    "$AthlonXP_HELP"
-                   "AthlonMP"    "AthlonMP"     $( [ "$CPU" == "AthlonMP" ] && echo "on" || echo "off" )    "$AthlonMP_HELP" )
+                   "AthlonMP"    "AthlonMP"     $( [ "$CPU" == "AthlonMP" ] && echo "on" || echo "off" )    "$AthlonMP_HELP"
+		    "Athlon64"    "Athlon64"     $( [ "$CPU" == "Athlon64" ] && echo "on" || echo "off" )    "$Athlon64_HELP" )
          ;;
 
        Alpha)
@@ -354,6 +357,9 @@ optimizations_options() {
 	 if grep -qw sse2 /proc/cpuinfo ; then
            OPTIONS=( ${OPTIONS[@]} "SSE2"    "SSE2"    $( echo ${XTRA[@]} | grep -q "SSE2" && echo "on" || echo "off" )     "$SSE2_HELP" )
 	 fi
+	 if grep -qw pni /proc/cpuinfo ; then
+           OPTIONS=( ${OPTIONS[@]} "SSE3"    "SSE3"    $( echo ${XTRA[@]} | grep -q "SSE3" && echo "on" || echo "off" )     "$SSE3_HELP" )
+	 fi	 
 	 if grep -qw 3dnow /proc/cpuinfo ; then
            OPTIONS=( ${OPTIONS[@]} "dnow"    "3dnow"   $( echo ${XTRA[@]} | grep -q "dnow" && echo "on" || echo "off" )     "$dnow_HELP" )
 	 fi
