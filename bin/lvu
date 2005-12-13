@@ -753,7 +753,7 @@ diff_module() {
 	  message "no local copy of \"$MODULE\" exists"
 	  exit 1
     fi
-	ZSECTION=$(echo $SECTION | sed 's/zlocal//g')
+	ZSECTION=$(echo $SECTION | sed 's/zlocal/\//g')
     diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff " | sed "s|$ZSECTION\/||g"
   fi
 }
