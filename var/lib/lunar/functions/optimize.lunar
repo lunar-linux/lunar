@@ -649,7 +649,7 @@ optimize_ld() {
 optimize_addon() {
   debug_msg "optimize_addon ($@)"
   if ! [[ `grep ADDON /etc/lunar/local/optimizations` ]]; then
-    echo ADDON=( None ) >> /etc/lunar/local/optimizations
+    echo ADDON=\( None \) >> /etc/lunar/local/optimizations
     ADDON=( None )
   fi
 
@@ -711,13 +711,13 @@ BUILD=i386-pc-linux-gnu '\n'    \
 MAKES=                  '\n'    \
 BOPT=-O0                '\n'    \
 CPU=i386                '\n'    \
-SPD=( )                 '\n'    \
+SPD=\( \)                 '\n'    \
 STACK=                  '\n'    \
-XTRA=( )                '\n'    \
+XTRA=\( \)                '\n'    \
 FPM=                    '\n'    \
-CC_OPTS=( )             '\n'    \
-LDF=( )                 '\n'    \
-ADDON=( ) > /etc/lunar/local/optimizations
+CC_OPTS=\( \)             '\n'    \
+LDF=\( \)                 '\n'    \
+ADDON=\( \) > /etc/lunar/local/optimizations
   fi
 
   #lets get the BUILD if it is not defined   
