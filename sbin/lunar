@@ -296,7 +296,6 @@ make_hold_checklist()  {
 
 
 hold_pkgs()  {
-   CHECKLIST=`make_hold_checklist`
   HOLD_TITLE="Select modules to hold or unhold"
    HOLD_HELP="[X]=held  [ ]=installed"
 
@@ -307,26 +306,10 @@ hold_pkgs()  {
                         --checklist            \
                         "$HOLD_HELP"           \
                         0 0 10                 \
-                        $CHECKLIST`
+                        $(make_hold_checklist)`
   then
-    rm  -f  $MODULE_STATUS
-
-    for  LINE  in  `cat  $MODULE_STATUS_BACKUP`;  do
-        MODULE=`echo  "$LINE"  |  cut  -d : -f1`
-         DATE=`echo  "$LINE"  |  cut  -d : -f2`
-       STATUS=`echo  "$LINE"  |  cut  -d : -f3`
-      VERSION=`echo  "$LINE"  |  cut  -d : -f4`
-
-      if    echo  -e  "$OUTLIST"  |  grep  -q  "^$MODULE\$";  then
-        STATUS="held";
-      else
-        STATUS=${STATUS/held/installed}
-      fi
-
-      echo  "$MODULE:$DATE:$STATUS:$VERSION"  >>  $MODULE_STATUS
-    done
-
-    cp  $MODULE_STATUS  $MODULE_STATUS_BACKUP
+    unhold_modules $(cut -d: -f1 < $MODULE_STATUS)
+    hold_modules $OUTLIST
   fi
 
 }
@@ -651,6 +634,8 @@ option_menu()  {
     I_HELP="Select the test that lunar fix, and AUTOFIX execute"
     D_HELP="Options for downloads"
     L_HELP="Select default lunar module"
+    A_HELP="Select accepted licenses"
+    R_HELP="Select rejected licenses"
 
     COMMAND=`$DIALOG  --title "Option Menu"                    \
                       --item-help                              \
@@ -666,7 +651,9 @@ option_menu()  {
                       "F"  "Feature Menu"           "$F_HELP"  \
                       "I"  "Integrity Checking"     "$I_HELP"  \
                       "M"  "Software Mirrors"       "$M_HELP"  \
-                      "O"  "Optimize Architecture"  "$O_HELP"`
+                      "O"  "Optimize Architecture"  "$O_HELP"  \
+		      "A"  "Accepted licenses"      "$A_HELP"  \
+		      "R"  "Rejected licenses"      "$R_HELP"`
 
   do
     case  $COMMAND in
@@ -678,6 +665,8 @@ option_menu()  {
       M)  mirror_menu            ;;
       O)  . /var/lib/lunar/menu/optimize.menu && optimize_menu          ;;
       L)  set_default_module     ;;
+      A)  set_accepted_licenses  ;;
+      R)  set_rejected_licenses  ;;
     esac
   done
 }

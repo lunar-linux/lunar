@@ -284,6 +284,67 @@ module_held() {
 }
 
 
+module_license_accepted() {
+  #
+  # This code handles acceptance or rejection of certain licenses.
+  #
+  # valid licenses currently are:
+  # osi == gpl gpl2 lgpl gfdl bsd mpl cc apache artistic qpl
+  
+  debug_msg "module_license_accepted ($@)"
+
+  local L LICENSE IS_OSI
+  LICENSE=$(run_details $1 > /dev/null ; echo $LICENSE)
+  # assume it's osi if it's empty
+  if [ -z "$LICENSE" ]; then
+    debug_msg "assuming LICENSE=\"osi\""
+    LICENSE="osi"
+  fi
+  
+  # check for osi license
+  case $LICENSE in
+    gpl|gpl2|lgpl|gfdl|bsd|mpl|cc|apache|artistic|qpl|osi)
+      IS_OSI=yes
+    ;;
+  esac
+
+  # check if $MODULE's $LICENSE is accepted or not, works as follows:
+  # if ACCEPTED_LICENSES is set, LICENSE *must* be listed, else if
+  # REJECTED_LICESES is set, must _NOT_ be listed
+  # * accept "osi" will accept all osi licenses
+  # * accept "all" will accept anything
+  if [ -n "$ACCEPTED_LICENSES" ]; then
+    for L in $ACCEPTED_LICENSES; do
+      if [ "$L" == "osi" -a "$IS_OSI" == "yes" ] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
+        # explicitly accepted license!
+	debug_msg "module_license_accepted: \"$LICENSE\" is explicitly accepted"
+        return 0
+      fi
+    done
+    # it was not explicitly accepted
+    error_message "${MODULE_COLOR}$1${DEFAULT_COLOR}: ${PROBLEM_COLOR}License \"$LICENSE\" is not explicitly accepted${DEFAULT_COLOR}"
+    return 1
+  elif [ -n "$REJECTED_LICENSES" ]; then
+    for L in $REJECTED_LICENSES; do
+      if [ "$LICENSE" == "$L" ]; then
+        # explicitly rejected license!
+	error_message "${MODULE_COLOR}$1${DEFAULT_COLOR}: ${PROBLEM_COLOR}License \"$LICENSE\" is explicitly rejected${DEFAULT_COLOR}"
+	return 1
+      fi
+    done
+    # implicitly not rejected
+    debug_msg "module_license_accepted: \"$LICENSE\" is not rejected"
+    return 0
+  else ## if [ -z "${ACCEPTED_LICENSES}${REJECTED_LICESES}" ]; then
+    # so now we have a problem - the user didn't set their prefs
+    if [ "$IS_OSI" != "yes" ] ; then
+      error_message "${MODULE_COLOR}$1${DEFAULT_COLOR}: ${PROBLEM_COLOR}License \"$LICENSE\" cannot be accepted by default${DEFAULT_COLOR}"
+      return 1
+    fi
+  fi
+}
+
+
 # function : module_exiled
 # usage    : module_exiled $MODULE
 # purpose  : check if $MODULE is exiled

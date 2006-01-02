@@ -46,7 +46,7 @@ plugin_source_download_generic()  {
     WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
   fi
 
-  WGET_RETRIES="--tries=${WGET_NUM_RETRY:=5}"
+  WGET_RETRIES="--tries=${NUM_RETRY:=5}"
 
   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy

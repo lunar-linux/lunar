@@ -53,7 +53,15 @@ download_module() {
 	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT
 	debug_msg "download_module ($@)"
 	if ! run_details $1 ; then
-		exit 1
+		return 1
+	fi
+
+	if ! module_license_accepted $1 ; then
+		message "${MESSAGE_COLOR}The license of this module is incompatible with the list of"
+		message "allowed and/or rejected licenses. Please adjust the ACCEPTED_LICENSES or"
+		message "REJECTED_LICENSES variables to include or not include the specific"
+		message "license of this module.${DEFAULT_COLOR}"
+		return 1
 	fi
 
 	MAX_SOURCES=${MAX_SOURCES:=100}
@@ -84,7 +92,7 @@ download_module() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
 					# make sure the URL has ONE "/" at the end
-					ALL_URLS="$ALL_URLS $(echo "$1/" | sed "s:\([^:]/\)/*:\1:g")"
+					ALL_URLS="$ALL_URLS $(echo "$1/" | sed "s:[/][/]$:/:g")"
 				fi
 			fi
 		}

@@ -139,7 +139,7 @@ This manual page has been written in order to ease the life of the system admini
 .IX Header "DO NOT PANIC!"
 These are the suggested tasks you should accomplish immediately after the first boot of a newly installed Lunar box.
 .PP
-All of the lunar related commands mentioned below either feature a whole manpage or at least a very useful helpscreen. If you need immediant assistance regarding any of those commands, issue:
+All of the lunar related commands mentioned below either feature a whole manpage or at least a very useful helpscreen. If you need immediate assistance regarding any of those commands, issue:
 .PP
 \&\fBman 'command'\fR or \fB'command' \-\-help\fR
 .PP
@@ -150,7 +150,7 @@ The operations described below follow a strict logic and they should be executed
 \&\fBPlease remember that the Lunar Install/Rescue \s-1ISO\s0 is not a full featured system.\fR
 .SH "NETWORK SETTINGS"
 .IX Header "NETWORK SETTINGS"
-This step is crucial to your future success with \fBLunar Linux\fR. If you haven't set up your network card yet try it with \fBlnet\fR. Remember, you need to know about your current network card's driver and have the kernel built the appropriate modules for it.
+This step is crucial to your future success with \fBLunar Linux\fR. If you haven't set up your network card yet try it with \fBlnet\fR. Remember, you need to know about your current network card's driver and have the kernel build the appropriate modules for it.
 .Sh "Check your network settings"
 .IX Subsection "Check your network settings"
 Once you've set up your network card correctly, try to ping out.
@@ -173,7 +173,7 @@ If you do not know for sure what type of network card you have try executing the
 If your \s-1NIC\s0 module is there but your interface is not up, reconfigure the interface with \fBlnet\fR and test again.  If your \s-1NIC\s0 module is still not listed in the output of \fBlsmod\fR, the chances are you have misconfigured the kernel or misconfigured your network.  To check the kernel modules, try \fBls \-l /lib/modules/`uname \-r`/kernel/drivers/net\fR to see the network modules available with the current kernel. If the your \s-1NIC\s0's kernel module doesn't show up you probably have to reconfigure and recompile your current kernel to include the appropriate module(s).
 .Sh "lnet or manual configuration"
 .IX Subsection "lnet or manual configuration"
-Your network setting can be configured completely using \fBlnet\fR; just make sure you set up your interface correctly as needed. If you encouter problems after having configured your network with \fBlnet\fR you probably want to adjust the configuration manually.
+Your network setting can be configured completely using \fBlnet\fR; just make sure you set up your interface correctly as needed. If you encounter problems after having configured your network with \fBlnet\fR you probably want to adjust the configuration manually.
 .PP
 The network configuration file for your Lunar installation may be found in \fB/etc/config.d/network/'interface'\fR (f.e. 'eth0' \-> /etc/config.d/network/eth0). Any time you adjust your interface's configuration manually or through \fBlnet\fR you will have to restart the network to make use of any changes that have been done in the meantime. The init script used to start/stop/restart network is \fB/etc/init.d/network\fR.
 .PP
@@ -189,9 +189,9 @@ You need to get the most recent version of the available \fBcoretools\fR. The \f
 .PP
 \&\fBlunar\fR or \fBtheedge\fR
 .PP
-\&\fBlunar\fR is the stable branch of the lunar \fBcoretools\fR. It's ment to run with  stable production environments. \fBtheedge\fR is the unstable branch. It might occasionally contain bugs, however it's generally used to test out new features and bugfixes before they're migrated to the stable branch. If you'd like to help out with the lunar development or you discovered a bug in \fBlunar\fR you might want to give \fBtheedge\fR a try.
+\&\fBlunar\fR is the stable branch of the lunar \fBcoretools\fR. It's meant to run with stable production environments. \fBtheedge\fR is the unstable branch. It might occasionally contain bugs, however it's generally used to test out new features and bugfixes before they're migrated to the stable branch. If you'd like to help out with the lunar development or you discovered a bug in \fBlunar\fR you might want to give \fBtheedge\fR a try.
 .PP
-Since the \s-1ISO\s0 ships with \fBtheedge\fR preinstalled you \fBhave to\fR update \fBtheedge\fR before you do anything else .. even if you're planning to use \fBlunar\fR lateron!
+Since the \s-1ISO\s0 ships with \fBtheedge\fR preinstalled you \fBhave to\fR update \fBtheedge\fR before you do anything else -- even if you're planning to use \fBlunar\fR later on!
 .PP
 Execute: \fBlin theedge\fR
 .PP
@@ -200,7 +200,7 @@ If you want to keep \fBLunar Linux\fR as stable as possible you need to install 
 Execute: \fBlin lunar\fR
 .Sh "Core Components"
 .IX Subsection "Core Components"
-A very brief explaination of the most important coretool components. For further information regarding the referenced parts please refer to their manpages (i.e. man <part>):
+A very brief explanation of the most important coretool components. For further information regarding the referenced parts please refer to their manpages (i.e. man <part>):
 .IP "\fBlin\fR; usage: lin <module>" 4
 .IX Item "lin; usage: lin <module>"
 Install a package/module.
@@ -223,12 +223,12 @@ Execute: \fBlin moonbase\fR
 \&\fBLunar Linux\fR can easily be customized and is highly configurable. For changing the options that affect your system you may use the menu driven \fBlunar\fR configuration utility. It's based upon ncurses which means you can even run it in the console of your choice. You need to become root to use it.
 .IP "\fBOptimizations\fR" 4
 .IX Item "Optimizations"
-Set the right optimizations for your computer. Beware that changing your optimizations to the wrongly values might actually break your whole installations so be really carefull about what you're chosing. The \s-1ISO\s0 has been built with a minimum of available optimizations to ensure the highest amount of flexibility. To see wether or not your processor supports a certain feature try a \fBcat /proc/cpu\fR. It usually shows the available settings that suit your machine.
+Set the right optimizations for your computer. Be aware that changing your optimizations to the wrong values might actually break your whole installation so be really careful about what you're choosing. The \s-1ISO\s0 has been built with a minimum of available optimizations to ensure the highest amount of flexibility. To see whether or not your processor supports a certain feature try a \fBcat /proc/cpu\fR. It usually shows the available settings that suit your machine.
 .IP "\fBIntegrity checking\fR" 4
 .IX Item "Integrity checking"
 Lunar is performing a range of security checks on tarballs and installed packages to prevent faulty tarballs and possible intruders from taking over your system. It also ensures that none of your currently installed packages is broken.
 .Sp
-You may select the amount of checks from the \fBIntegrity checking\fR submenu at the \fBOptions\fR menu. It's generally recommeneded to at least chose \fB\s-1FIND_CHECK\s0\fR and \fB\s-1LDD_CHECK\s0\fR.
+You may select the amount of checks from the \fBIntegrity checking\fR submenu at the \fBOptions\fR menu. It's generally recommended to at least chose \fB\s-1FIND_CHECK\s0\fR and \fB\s-1LDD_CHECK\s0\fR.
 .IP "\fBFeature menu\fR" 4
 .IX Item "Feature menu"
 As mentioned before, Lunar is highly configurable. Thus you have a whole menu to select its features from. It's strongly advised to at least take a look at it and get used to them. Explanations are usually displayed as soon as you select an item.
@@ -239,7 +239,7 @@ Take a look at the \fBlunar\fR configuration tool. It can be a \fBpowerful compa
 .IX Header "GENERAL UPDATES"
 Right now you're set to update your whole system. Before you do that make sure you have the most recent \fBcoretools\fR and \fBmoonbase\fR installed.
 .PP
-The next step can be omitted .. however, it is highly recommened that you rebuild the following modules in the right order to ensure that your system is working right.
+The next step can be omitted -- however, it is highly recommended that you rebuild the following modules in the right order to ensure that your system is working right.
 .PP
 Here we go:
 .PP
@@ -258,7 +258,7 @@ It's going to compare your system's installed modules against the moonbases' def
 .PP
 Once it is done it is going to present you with a summary about how many module where successfully updated and which of them failed. \fBlvu\fR ('lvu activity') is going to show you which of them failed and usually why. \fBlvu\fR ('lvu compile <module>') is also going to show you the compilation's logfile which should clearly point you to the error that led to the failure of the module's compilation.
 .PP
-The first thing to do would be to 're'lin' (i.e. execute \fBlin \-c\fR once more. It is always advised to use the \-c and the \-r switch incase a module fails to compile) all the failed modules by hand. If you think you will not be able to resolve the matter on your own you can still file a bugreport at the \fBLunar Linux bugtracker\fR http://bugs.lunar\-linux.org or report the error to the \fBLunar Linux mailinglist\fR. However, you will have to subscribe to the list at http://foo\-projects.org/mailman/listinfo/lunar before being able to post any mail to it.
+The first thing to do would be to 're'lin' (i.e. execute \fBlin \-c\fR once more. It is always advised to use the \-c and the \-r switch in case a module fails to compile) all the failed modules by hand. If you think you will not be able to resolve the matter on your own you can still file a bugreport at the \fBLunar Linux bugtracker\fR http://bugs.lunar\-linux.org or report the error to the \fBLunar Linux mailinglist\fR. However, you will have to subscribe to the list at http://foo\-projects.org/mailman/listinfo/lunar before being able to post any mail to it.
 .PP
 Once the update has been completed successfully you may go ahead and customize your installation to suit your own needs. Well done!
 .SH "HINTS"
@@ -268,7 +268,7 @@ Once the update has been completed successfully you may go ahead and customize y
 All of the coretools are able to do tab\-completion. Say, you want to install the module 'xfce4\-panel' just go ahead and type 'lin xfce4\-p<\s-1TAB\s0>' and lin is going to append the rest of the module's name to the command. Once there are too few characters to resolve the name into one single module you just need to hit \s-1TAB\s0 twice to get a list of all the modules starting with the characters you just typed i.e. 'lin xfce<\s-1TAB\s0><\s-1TAB\s0>' is going to give you a list of all modules starting with 'xfce'.
 .IP "\fBLeftovers\fR" 4
 .IX Item "Leftovers"
-Incase of a compilation failure the sources of the failed module are left in \f(CW$BUILD_DIRECTORY\fR (usually /usr/src/). Moreover, I few tracking files lunar creates to monitor the running installation process might be left in /tmp. Make sure you tidy up these two locations from time to time.
+In case of a compilation failure the sources of the failed module are left in \f(CW$BUILD_DIRECTORY\fR (usually /usr/src/). Moreover, a few tracking files lunar creates to monitor the running installation process might be left in /tmp. Make sure you tidy up these two locations from time to time.
 .Sp
 \&\fB\s-1CAUTION:\s0\fR Directories like 'linux\-2.x' are kernel source directories and _must_ be left intact. Otherwise your system is going to break! Only delete them if you're absolutely sure that they don't belong to your currently running kernel.
 .IP "\fBRunning coretools processes\fR" 4
@@ -283,10 +283,10 @@ The fastest help you get is by chatting with the developers directly. Join the \
 irc://irc.freenode.net/#lunar
 .SH "NOTES"
 .IX Header "NOTES"
-This is by far not a complete coverage of what should be done with a ready-to-go Lunar system. Please consult the documentations at the Lunar website for more information.
+This is merely an introduction to what should be done to get a ready-to-go Lunar system. Please consult the documentation at the Lunar website for more information.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-Documenations at the Lunar Linux website at http://lunar\-linux.org
+Documentation at the Lunar Linux website at http://lunar\-linux.org
 .PP
 \&\fIlunar\fR\|(8), \fImoonbase\fR\|(1), \fIlin\fR\|(8), \fIlvu\fR\|(1), \fIlget\fR\|(8), \fIlrm\fR\|(8), \fIlnet\fR\|(8)
 .SH "DISCLAIMER"
