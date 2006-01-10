@@ -196,15 +196,17 @@ default_game_config() {
 default_cvs_config() {
   debug_msg "default_cvs_config ($@)"
   verbose_msg "running \"default_cvs_config\""
+  verbose_msg "CFLAGS=\"$CFLAGS\""
+  verbose_msg "LDFLAGS=\"$LDFLAGS\""
+  verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
-  ./autogen.sh                                    &&
-  _configure  --build=$BUILD                      \
-              --prefix=$MODULE_PREFIX             \
-              --sysconfdir=/etc                   \
-              --localstatedir=/var                \
-              --infodir=$MODULE_PREFIX/share/info \
-              --mandir=$MODULE_PREFIX/share/man   \
-              $OPTS
+  ./autogen.sh  --build=$BUILD                      \
+                --prefix=$MODULE_PREFIX             \
+                --sysconfdir=/etc                   \
+                --localstatedir=/var                \
+                --infodir=$MODULE_PREFIX/share/info \
+                --mandir=$MODULE_PREFIX/share/man   \
+                $OPTS
 } > $C_FIFO 2>&1
 
 
