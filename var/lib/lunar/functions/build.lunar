@@ -159,7 +159,7 @@ _configure()
   elif [ -e Makefile -o -e makefile ]; then
     verbose_msg "Missing \"configure\": skipping configure stage."
   else
-    error_msg "${PROBLEM_COLOR}Missing ${FILE_COLOR}configure${PROBLEM_COLOR} and/or ${FILE_COLOR}Makefile${PROBLEM_COLOR}!${DEFAULT_COLOR}"
+    error_message "${PROBLEM_COLOR}Missing ${FILE_COLOR}configure${PROBLEM_COLOR} and/or ${FILE_COLOR}Makefile${PROBLEM_COLOR}!${DEFAULT_COLOR}"
     return 1
   fi
 }
