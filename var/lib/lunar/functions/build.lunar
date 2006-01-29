@@ -147,57 +147,66 @@ default_pre_build() {
 }
 
 
+# wrapper function to call ./configure
+_configure()
+{
+  debug_msg "_configure($@)"
+  if [ -e ./configure ]; then
+    verbose_msg "CFLAGS=\"$CFLAGS\""
+	verbose_msg "LDFLAGS=\"$LDFLAGS\""
+    verbose_msg "./configure $@"
+    ./configure $@
+  elif [ -e Makefile -o -e makefile ]; then
+    verbose_msg "Missing \"configure\": skipping configure stage."
+  else
+    error_message "${PROBLEM_COLOR}Missing ${FILE_COLOR}configure${PROBLEM_COLOR} and/or ${FILE_COLOR}Makefile${PROBLEM_COLOR}!${DEFAULT_COLOR}"
+    return 1
+  fi
+}
+
+
 default_config() {
   debug_msg "default_config ($@)"
   verbose_msg "running \"default_config\""
-
-  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
-  verbose_msg "OPTS=\"$OPTS\""                &&
-  verbose_msg "./configure --build=$BUILD --prefix=$MODULE_PREFIX --sysconfdir=/etc --localstatedir=/var --infodir=$MODULE_PREFIX/share/info --mandir=$MODULE_PREFIX/share/man $OPTS"
-
-  ./configure  --build=$BUILD                      \
-               --prefix=$MODULE_PREFIX             \
-               --sysconfdir=/etc                   \
-               --localstatedir=/var                \
-               --infodir=$MODULE_PREFIX/share/info \
-               --mandir=$MODULE_PREFIX/share/man   \
-               $OPTS
+  _configure  --build=$BUILD                      \
+              --prefix=$MODULE_PREFIX             \
+              --sysconfdir=/etc                   \
+              --localstatedir=/var                \
+              --infodir=$MODULE_PREFIX/share/info \
+              --mandir=$MODULE_PREFIX/share/man   \
+              $OPTS
 } > $C_FIFO 2>&1
 
 
 default_game_config() {
   debug_msg "default_game_config ($@)"
   verbose_msg "running \"default_game_config\""
-  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
-  verbose_msg "OPTS=\"$OPTS\""                &&
-  verbose_msg "./configure --build=$BUILD --prefix=$MODULE_PREFIX --bindir=$MODULE_PREFIX/games --datadir=$MODULE_PREFIX/share/games --sysconfdir=/etc --localstatedir=/var --infodir=$MODULE_PREFIX/share/info --mandir=$MODULE_PREFIX/share/man $OPTS"
-
-  ./configure  --build=$BUILD                       \
-               --prefix=$MODULE_PREFIX              \
-               --bindir=$MODULE_PREFIX/games        \
-               --datadir=$MODULE_PREFIX/share/games \
-               --sysconfdir=/etc                    \
-               --localstatedir=/var                 \
-               --infodir=$MODULE_PREFIX/share/info  \
-               --mandir=$MODULE_PREFIX/share/man    \
-               $OPTS
+  _configure  --build=$BUILD                       \
+              --prefix=$MODULE_PREFIX              \
+              --bindir=$MODULE_PREFIX/games        \
+              --datadir=$MODULE_PREFIX/share/games \
+              --sysconfdir=/etc                    \
+              --localstatedir=/var/games           \
+              --infodir=$MODULE_PREFIX/share/info  \
+              --mandir=$MODULE_PREFIX/share/man    \
+              $OPTS
 } > $C_FIFO 2>&1
 
 
 default_cvs_config() {
   debug_msg "default_cvs_config ($@)"
   verbose_msg "running \"default_cvs_config\""
-  verbose_msg "CFLAGS=\"$CFLAGS\""            &&
-  verbose_msg "OPTS=\"$OPTS\""                &&
-  verbose_msg "./autogen.sh --build=$BUILD --prefix=$MODULE_PREFIX --sysconfdir=/etc --localstatedir=/var --infodir=$MODULE_PREFIX/share/info --mandir=$MODULE_PREFIX/share/man $OPTS"
+  verbose_msg "CFLAGS=\"$CFLAGS\""
+  verbose_msg "LDFLAGS=\"$LDFLAGS\""
+  verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
-  ./autogen.sh --build=$BUILD                      \
-               --prefix=$MODULE_PREFIX             \
-               --sysconfdir=/etc                   \
-               --localstatedir=/var                \
-               --infodir=$MODULE_PREFIX/share/info \
-               --mandir=$MODULE_PREFIX/share/man   \
-               $OPTS
+  ./autogen.sh  --build=$BUILD                      \
+                --prefix=$MODULE_PREFIX             \
+                --sysconfdir=/etc                   \
+                --localstatedir=/var                \
+                --infodir=$MODULE_PREFIX/share/info \
+                --mandir=$MODULE_PREFIX/share/man   \
+                $OPTS
 } > $C_FIFO 2>&1
 
 
@@ -209,12 +218,14 @@ default_make() {
   make install
 } > $C_FIFO 2>&1
 
+
 default_game_build() {
   debug_msg "default_game_build ($@)"
   verbose_msg "running \"default_game_build\""
   default_game_config  &&
   default_make
 } > $C_FIFO 2>&1
+
 
 default_build() {
   debug_msg "default_build ($@)"

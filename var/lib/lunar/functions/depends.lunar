@@ -203,9 +203,9 @@ run_depends() {
         fi
 
 	if module_installed $DEP ; then
-	  DEPMOD_AVAIL="Use optional ${MESSAGE_COLOR}(presently installed) module${QUERY_COLOR} $DEP"
+	  DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
 	else
-	  DEPMOD_AVAIL="Install & use optional ${PROBLEM_COLOR}(not yet installed) ${MESSAGE_COLOR}module${QUERY_COLOR} $DEP"
+	  DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
 	fi
 
         # this is shortcut case s1) as discussed in lunar-dev ML
@@ -214,7 +214,7 @@ run_depends() {
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
 	  lin --deps $DEP
 	elif query  "$DEPMOD_AVAIL 
-          dependency - purpose: $4? " $DEFAULT ; then
+          ${QUERY_COLOR}Purpose: ${DEFAULT_COLOR}${MESSAGE_COLOR}$4 ${QUERY_COLOR}?" $DEFAULT ; then
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           lin --deps $DEP
         else
