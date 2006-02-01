@@ -341,7 +341,7 @@ run_configure() {
 
 run_pre_build() {
   debug_msg "run_pre_build ($@)"
-  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${MODULE_COLOR}$VERSION${DEFAULT_COLOR}"
 
   cd $BUILD_DIRECTORY
 
