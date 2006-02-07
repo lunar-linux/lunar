@@ -16,10 +16,10 @@ unalias() {
   # try to figure out where the aliases file is:
   if [ -z "$ALIASES" -o ! -f "$ALIASES" ]; then
     if [ -f "$MOONBASE/aliases" ] ; then
-	  ALIASES="$MOONBASE/aliases"
-	else
-	  ALIASES="/var/lib/lunar/aliases"
-	fi
+      ALIASES="$MOONBASE/aliases"
+    else
+      ALIASES="/var/lib/lunar/aliases"
+    fi
   fi
   if [ "${1:0:1}" == "%" ] ; then
     debug_msg "unalias($@)"
@@ -29,7 +29,7 @@ unalias() {
       if $(module_installed $TARGET) ; then
         debug_msg "unaliased \"$1\"->\"$TARGET\""
         echo $TARGET
-	return
+        return
       fi
     done
     # shortcut out: in the satisfy_depends stage we should NOT ask this again
@@ -78,14 +78,14 @@ unalias() {
       ((N=0))
       for TARGET in $TARGETS ; do
         ((N++))
-	TARGETBYNUM[$N]=$TARGET
+        TARGETBYNUM[$N]=$TARGET
         error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR}"
       done
       read CHOICE
       # test directly first
-      if $(echo $TARGETS | grep -qw "$CHOICE") ; then
+      if echo $TARGETS | grep -qw "$CHOICE" ; then
         echo $TARGET
-	return
+        return
       # then the number
       elif [ -n "$CHOICE" -a -n "${TARGETBYNUM[$CHOICE]}" ] ; then
         echo ${TARGETBYNUM[$CHOICE]}
