@@ -116,9 +116,10 @@ filter() {
 
 unmap_device()
 {
-    local DEVICE
+    local DEVICE REAL
+    REAL=$(readlink -f $1)
     for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
-        if [ "$(readlink -f $DEVICE)" == "$(readlink -f $1)" ]; then
+        if [[ "$(readlink -f $DEVICE)" == "$REAL" ]]; then
             echo $DEVICE
             return 0
         fi
