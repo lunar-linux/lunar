@@ -30,15 +30,13 @@ function find_depends() {
 
   find_depends_intern() {
     local DEP STATE LINE
-    grep "^$1:" $DEPENDS_CACHE | while read LINE ; do
-      DEP=$(echo $LINE | cut -d: -f2)
+    awk -F: -v mod=$1 '{if ($1==mod){print $2,$3}}' $DEPENDS_CACHE | while read DEP STATE ; do
       DEP=$(unalias $DEP)
       # this is our shortcut out:
       if ! grep -qx "$DEP" $TMP_FDEPS ; then
-      debug_msg "$DEP"
+        debug_msg "$DEP"
         echo "$DEP" >> $TMP_FDEPS
-        STATE=$(echo $LINE | cut -d: -f3)
-        if [ "$STATE" == "required" ] ; then
+        if [[ "$STATE" == "required" ]] ; then
           echo $DEP
           find_depends_intern $DEP
         elif module_installed $DEP ; then
@@ -71,7 +69,7 @@ sort_by_dependency() {
 
   # tsort the existing dep relations in all of moonbase
   TMP_TSRT=$(temp_create "dependency.sort")
-  cat $DEPENDS_CACHE | cut -d: -f1,2 --output-delimiter=" " | while read A B ; do
+  awk -F: '{print $1,$2}' $DEPENDS_CACHE | while read A B ; do
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
@@ -145,7 +143,7 @@ add_depends() {
 	fi
                                                                                 
     echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
-    cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP           &&
+    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP              &&
     unlock_file $DEPENDS_STATUS                            &&
     unlock_file $DEPENDS_STATUS_BACKUP
   fi
