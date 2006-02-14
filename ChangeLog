@@ -1,147 +1,387 @@
-2005-03-18 11:01  sofar
+2006-01-29 19:28  sofar
 
-	* bin/lvu, var/lib/lunar/unset.sh,
-	  var/lib/lunar/functions/download.lunar,
-	  var/lib/lunar/functions/main.lunar,
-	  var/lib/lunar/functions/misc.lunar,
-	  var/lib/lunar/functions/moonbase.lunar,
-	  var/lib/lunar/functions/sources.lunar,
-	  var/lib/lunar/menu/download.menu: W00t, the end of FUZZY!!!
+	* lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/init.lunar: Backport
+	  - mostly cosmetics and internals.
 
-2005-03-18 10:01  sofar
+2006-01-02 05:45  sofar
 
-	* var/lib/lunar/functions/check.lunar: Moo, this should fix that
-	  too
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/mirrors/GNU,
+	  lunar/branches/stable/install, lunar/branches/stable/sbin/lin,
+	  lunar/branches/stable/sbin/lunar,
+	  lunar/branches/stable/usr/share/man/man1/lvu.1,
+	  lunar/branches/stable/usr/share/man/man8/lfirsttime.8,
+	  lunar/branches/stable/var/lib/lunar/compilers/ld,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/menu/license.menu,
+	  lunar/branches/stable/var/lib/lunar/menu/optimize.menu,
+	  lunar/branches/stable/var/lib/lunar/plugins/download-generic.plugin:
+	  Full sync with theedge!
 
-2005-03-18 09:58  sofar
+2005-12-31 04:17  tchan
 
-	* var/lib/lunar/functions/main.lunar: Fix for the missing install
-	  log after a resurrect.
+	* lunar/branches/stable/var/lib/lunar/functions/optimize.lunar:
+	  Fixed the same parentheses bug that was in theedge. echo commands
+	  and parens really should be backslashed escaped.
 
-2005-03-18 00:52  v3rt1g0
+2005-12-26 02:21  sofar
 
-	* var/lib/lunar/functions/main.lunar: Misc typos
+	* lunar/branches/stable/var/lib/lunar/aliases,
+	  lunar/trunk/var/lib/lunar/aliases: Deleted into oblivion (see
+	  moonbase/aliases).
 
-2005-03-18 00:40  v3rt1g0
+2005-11-11 20:00  sofar
 
-	* var/lib/lunar/menu/dmodule.menu: Typo
+	* lunar/branches/stable/etc/lunar/mirrors/LRESORT,
+	  lunar/trunk/etc/lunar/mirrors/LRESORT: Merged Moe's changes and
+	  removed my puny nl.lunar-linux.org mirror from the list as it is
+	  no longer serving download content (it's just acting as a backup
+	  server now mirroring our svn repos and torrents).
 
-2005-03-18 00:35  v3rt1g0
+2005-10-20 18:48  sofar
 
-	* var/lib/lunar/menu/optimize.menu: Typos
+	* lunar/branches/stable/etc/lunar/config: Backport config change:
+	  urls genericized to download.lunar-linux.org
 
-2005-03-16 08:02  sofar
+2005-10-16 16:46  tchan
 
-	* var/lib/lunar/functions/messages.lunar: meh, silly
+	* lunar/branches/stable/var/lib/lunar/compilers/ld: Found the right
+	  command to make it executable now. "svn ps svn:executable on ld"
 
-2005-03-15 16:49  sofar
+2005-10-16 16:40  tchan
 
-	* var/lib/lunar/functions/check.lunar: Fix for AUTOFIX BREAKING
-	  MODULES: you can now use LDD_CHECK=off in DETAILS. please test &&
-	  verify
+	* lunar/branches/stable/var/lib/lunar/compilers/ld: My attempt to
+	  get svn to recoginize the correct permissions on ld. Which should
+	  be 755, not 644.
 
-2005-03-15 12:36  sofar
+2005-10-13 20:23  sofar
 
-	* bin/lvu: Adding 'info' ... slightly modified by chad's patch.
+	* lunar/branches/stable/bin/lvu, lunar/branches/stable/sbin/lget,
+	  lunar/branches/stable/sbin/lin, lunar/branches/stable/sbin/lrm,
+	  lunar/branches/stable/sbin/lunar,
+	  lunar/branches/stable/var/lib/lunar/compilers/ld,
+	  lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/check.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/kernel.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/main.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/queue.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/recovery.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/uniqid.lunar,
+	  lunar/branches/stable/var/lib/lunar/plugins/postbuild-generic.plugin,
+	  lunar/trunk/usr/share/doc/lunar/README: Backport fix and cosmetic
+	  backports (spelling, gcc arch x86 optimizations). Full sync to
+	  theedge.
 
-2005-03-15 11:38  sofar
+2005-10-10 20:52  tchan
 
-	* var/lib/lunar/functions/messages.lunar: New query() routine: bad
-	  input now causes a repeated question, and the double newline is
-	  gone.
+	* lunar/branches/stable/etc/lunar/mirrors/GNOME: Fixed the
+	  planetmirror GNOME mirror URL.
 
-2005-03-15 10:36  sofar
+2005-08-21 20:47  sofar
 
-	* var/lib/lunar/functions/depends.lunar: sanity check: bug #723
+	* lunar/branches/stable/etc/lunar/config,
+	  lunar/branches/stable/usr/share/doc/lunar/module-example/README,
+	  lunar/branches/stable/var/lib/lunar/compilers/c++,
+	  lunar/branches/stable/var/lib/lunar/compilers/cc,
+	  lunar/branches/stable/var/lib/lunar/compilers/g++,
+	  lunar/branches/stable/var/lib/lunar/compilers/gcc,
+	  lunar/branches/stable/var/lib/lunar/compilers/make,
+	  lunar/branches/stable/var/lib/lunar/functions/aliases.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar:
+	  backport fix: new wrappers, adding gcc compiler path detection,
+	  remove reference to non-used core file, and 'aliases' now lives in
+	  $MOONBASE.
 
-2005-03-15 04:05  v3rt1g0
+2005-08-13 19:36  sofar
 
-	* etc/lunar/local/README: Fixed a typo and add metion of XOrg for
-	  what its worth
+	* lunar/branches/stable/var/lib/lunar/functions/moonbase.lunar:
+	  Backpatch from theedge.
 
-2005-03-13 21:56  sofar
+2005-08-02 19:24  sofar
 
-	* var/lib/lunar/functions/connect.lunar: this is much more
-	  consistent. also adding raX interface type, which is kind of
-	  uncommon.
+	* lunar/branches/stable/usr/share/doc/lunar/README: This is useless
+	  information here. Time to cleanup.
 
-2005-03-13 18:19  sofar
+2005-08-02 19:23  sofar
 
-	* sbin/lin: Proposed consistency fix for lin/download queue
-	  creation: use find_depends()
+	* lunar/branches/stable/usr/share/doc/lunar/contributions:
+	  Seriously, I already merged all the names in the CREDITS file. ***
+	  TODO *** someone needs to maintain the CREDITS file. Please
+	  volunteer!!!
 
-2005-03-13 17:08  sofar
+2005-07-31 16:00  sofar
 
-	* var/lib/lunar/functions/check.lunar: Removing obsolete call to
-	  show_owner.
+	* lunar/branches/stable/var/lib/lunar/functions/tracking.lunar:
+	  Backport fix: md5sum of filenames with spaces
 
-2005-03-09 19:11  moe
+2005-07-27 11:17  sofar
 
-	* usr/share/man/man8/lfirsttime.8: Some tweaks. Two new hints.
+	* lunar/branches/stable/sbin/lrm,
+	  lunar/branches/stable/var/lib/lunar/compilers/c++,
+	  lunar/branches/stable/var/lib/lunar/compilers/cc,
+	  lunar/branches/stable/var/lib/lunar/compilers/g++,
+	  lunar/branches/stable/var/lib/lunar/compilers/gcc,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar:
+	  Backmerge: fix wrappers and add the last 2 new plugin hooks.
 
-2005-03-09 15:26  sofar
+2005-07-27 09:53  sofar
 
-	* var/lib/lunar/functions/recovery.lunar: Suggested by florin, also
-	  fixed the line above the fix needed.
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar: Damn
+	  you too!!!
 
-2005-03-09 13:23  moe
+2005-07-27 07:36  sofar
 
-	* var/lib/lunar/functions/prune.lunar: wheeps .. committed a
-	  slightly older version. This is the final solution.
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/mirrors/SFORGE,
+	  lunar/trunk/bin/lvu, lunar/trunk/etc/lunar/mirrors/SFORGE:
+	  Modified 'lvu urls' so that it lists ALL mirror sites but never
+	  last resort/first resort urls. this makes it produce the same list
+	  everywhere. Also adding the crappy osdn.sf.net mirror.
 
-2005-03-09 13:17  moe
+2005-07-27 07:24  sofar
 
-	* var/lib/lunar/functions/prune.lunar: Fixing lunar prune for good.
-	  God, this has been bothering me. Might break things .. but this
-	  is theedge ;-) However, I've been giving it a good test.
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/trunk/var/lib/lunar/functions/download.lunar: Bugfix: the
+	  '/' at the end of a URL may be missing like in the case of
+	  mirrors. You should account for BOTH situations. This forces
+	  proper termination of any URL.
 
-2005-03-08 07:48  moe
+2005-07-25 09:53  sofar
 
-	* usr/share/man/man8/lfirsttime.8: Typo
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/mirrors/LRESORT,
+	  lunar/branches/stable/var/lib/lunar/compilers/make,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar,
+	  lunar/branches/stable/var/lib/lunar/menu/download.menu,
+	  lunar/branches/stable/var/lib/lunar/menu/optimize.menu,
+	  lunar/branches/stable/var/lib/lunar/plugins/unpack-generic.plugin:
+	  Backmerge from theedge: - lvu sync - add k-de mirror - fix for
+	  make wrapper breaking other wrappers - fix download urls with // -
+	  small spelling fixes - fix unpacking of -tar.bz2's (no dot before
+	  extension)
 
-2005-03-07 23:08  moe
+2005-06-24 13:24  tchan
 
-	* usr/share/man/man8/lfirsttime.8: Tweaks and typo fixes. Also
-	  added a hint to the hint section.
+	* lunar/branches/stable/etc/lunar/config: Yet another hack to fix
+	  the double "/" problem in MIRRORS, especially SFORGE.
 
-2005-03-07 22:03  moe
+2005-06-21 16:34  tchan
 
-	* usr/share/man/man8/lfirsttime.8: I finally got to rewriting
-	  lfirsttime. This should be _alot_ better then the manpage we had
-	  until now. Thanks rolling out to Jens, Jasper and Jaime for
-	  typo-hunting. I feel dizzy now.
+	* lunar/branches/stable/etc/lunar/mirrors/SFORGE: Commited Moe's
+	  changes from theedge to lunar, -r 14524:15363
 
-2005-02-22 12:50  moe
+2005-06-08 11:33  sofar
 
-	* etc/lunar/config: Adding the X11 path to the static lunar PATH
+	* lunar/branches/stable/bin/lvu, lunar/trunk/bin/lvu: Adding a
+	  little bit of system info so we can spot non-2.4 users etc. Also
+	  specify date using -R format. Hopefully it'll make Moe happier.
 
-2005-02-14 13:01  nestu
+2005-06-07 15:25  sofar
 
-	* var/lib/lunar/functions/kernel.lunar: * get rid of the annoying
-	  grub install questions (adding a warning that it should be
-	  installed).  * add a white line between kernel entries.
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/trunk/var/lib/lunar/functions/download.lunar: Even better:
+	  we DO use name-based content checking but we don't do full tar
+	  checkouts or uncompresses, and let magic do the work instead.
 
-2005-02-14 11:48  sofar
+2005-06-07 14:26  sofar
 
-	* etc/lunar/config: We should use a hardcoded PATH, no user
-	  components allowed by default! This also solves /sbin/ldconfig
-	  not being accessible on some systems etc. Note user can still
-	  override PATH with `lunar set PATH xxxxx`, but it's not exported
-	  to sub-apps.
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar:
+	  bugfix hack: testpack is *THE* ideal location to use name-based
+	  checking of tarballs etc. This will catch virtually all 404 error
+	  pages and continue downloading from other URLs. afterwards
+	  sha1sum's are still checked but only prior to installation.
 
-2005-02-02 12:12  sofar
+2005-06-06 14:03  sofar
 
-	* var/lib/lunar/functions/build.lunar: meh... suck
+	* lunar/branches/stable/bin/lvu, lunar/trunk/bin/lvu: Bad typo fix.
 
-2005-01-19 12:09  moe
+2005-06-06 13:21  sofar
 
-	* var/lib/lunar/functions/view.lunar: There's also the type 'data'
+	* lunar/branches/stable/bin/lvu, lunar/trunk/bin/lvu: Merging yet
+	  another lvu submit fix. this one seems to produce proper patch
+	  formatted diffs.
 
-2005-01-19 11:37  sofar
+2005-06-03 09:44  sofar
 
-	* bin/lvu: indeed I missed it
+	* lunar/branches/stable/bin/lvu: Backmerged fix for submit patch
+	  bug.
 
-2005-01-19 11:32  sofar
+2005-06-02 07:50  sofar
 
-	* bin/lvu: removed bolding of modules
+	* lunar/branches/stable/var/lib/lunar/functions/misc.lunar: Keeping
+	  lunar in sync these days on a daily base.
+
+2005-05-31 20:16  sofar
+
+	* lunar/branches/stable/bin/lvu: Bugfix merge: ZLOCAL_OVERRIDES
+	  defaults to "".
+
+2005-05-28 12:33  sofar
+
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar: e
+
+2005-05-28 12:31  sofar
+
+	* lunar/branches/stable/var/lib/lunar/functions/download.lunar: Fix
+	  download bug on 'Custom' keyword.
+
+2005-05-27 14:00  sofar
+
+	* lunar/branches/stable/bin/lvu: Needs a -r.
+
+2005-05-27 13:51  sofar
+
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/usr/share/man/man1/lvu.1: Merginng new 'lvu
+	  submit|edit|unedit' code into the core.
+
+2005-05-26 13:49  sofar
+
+	* lunar/branches/stable/sbin/lunar: Force creation of queue
+	  directory.
+
+2005-05-26 11:42  sofar
+
+	* lunar/branches/stable/etc/lunar/config: adding wdps mirror in
+	  germany
+
+2005-05-26 11:35  sofar
+
+	* lunar/branches/stable/lib/lsb/init-functions,
+	  lunar/branches/stable/var/lib/lunar/compilers/c++,
+	  lunar/branches/stable/var/lib/lunar/compilers/cc,
+	  lunar/branches/stable/var/lib/lunar/compilers/g++,
+	  lunar/branches/stable/var/lib/lunar/compilers/gcc,
+	  lunar/branches/stable/var/lib/lunar/compilers/make,
+	  lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/plugins/postbuild-generic.plugin,
+	  lunar/branches/stable/var/lib/lunar/unset.sh: backmerge theedge
+	  ->lunar including: -o fix by moe in lsb/init-functions adding make
+	  wrapper queue run fix (LIN) wrapper fixes
+
+2005-05-20 08:42  sofar
+
+	* lunar/branches/stable/var/lib/lunar/functions/aliases.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/check.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/config.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/connect.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/edit.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/kernel.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/locking.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/logging.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/main.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/messages.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/misc.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/postbuild.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/prune.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/sizes.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/sources.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/temp.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/tracking.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/uniqid.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/updatelog.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/useradd.lunar,
+	  lunar/branches/stable/var/lib/lunar/plugins/initd.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/postbuild-generic.plugin:
+	  Merge with theedge: - alias fixes - update plugin framework to
+	  include new plugin types - ENV var protection enabled using
+	  'local' - moonbase update changes display fixes
+
+2005-05-20 08:36  sofar
+
+	* lunar/branches/stable/etc/lunar/config,
+	  lunar/branches/stable/sbin/lin: bugfix merge: unc->osdn. Also
+	  --want version no longer acts for dependencies, and "exiled"
+	  modules are not installed when linned.
+
+2005-05-08 20:44  sofar
+
+	* lunar/branches/stable/bin/lvu, lunar/branches/stable/sbin/lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/menu/optimize.menu,
+	  lunar/branches/stable/var/lib/lunar/protected: tree sync with
+	  theedge: optimization rewrite, in_depends() fix, lvu submit
+	  merged. Mailman protected additions.
+
+2005-04-30 22:00  sofar
+
+	* lunar/branches/stable/bin/lvu: Merging lvu submit code back as
+	  well.
+
+2005-04-30 14:49  sofar
+
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/config,
+	  lunar/branches/stable/etc/lunar/mirrors/GNOME,
+	  lunar/branches/stable/etc/lunar/mirrors/GNU,
+	  lunar/branches/stable/etc/lunar/mirrors/KDE,
+	  lunar/branches/stable/etc/lunar/mirrors/KERNEL,
+	  lunar/branches/stable/etc/lunar/mirrors/LRESORT,
+	  lunar/branches/stable/etc/lunar/mirrors/SFORGE,
+	  lunar/branches/stable/etc/lunar/mirrors/XFREE86,
+	  lunar/branches/stable/sbin/lget, lunar/branches/stable/sbin/lin,
+	  lunar/branches/stable/sbin/lrm, lunar/branches/stable/sbin/lsh,
+	  lunar/branches/stable/usr/share/man/man8/lin.8,
+	  lunar/branches/stable/usr/share/man/man8/lrm.8,
+	  lunar/branches/stable/var/lib/lunar/functions/aliases.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/check.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/edit.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/kernel.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/locking.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/logging.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/main.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/messages.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/misc.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/moonbase.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/recovery.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/sizes.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/sources.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/temp.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/tracking.lunar,
+	  lunar/branches/stable/var/lib/lunar/menu/optimize.menu,
+	  lunar/branches/stable/var/lib/lunar/plugins,
+	  lunar/branches/stable/var/lib/lunar/plugins/check-find.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/check-ldd.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/check-md5sum.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/check-symlinks.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/download-file.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/download-generic.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/unpack-generic.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/verify-md5.plugin,
+	  lunar/branches/stable/var/lib/lunar/plugins/verify-sha1.plugin,
+	  lunar/branches/stable/var/lib/lunar/protected,
+	  lunar/branches/stable/var/lib/lunar/sustained: Full state merge
+	  theedge -> lunar (20040430). Includes: - aliases fixes - plugin
+	  system - lvu fixes - removal of versioned modules - adjustment of
+	  protected files for crontab - optimization additions - mirror
+	  system updates, download code changes
+
+2005-04-26 15:50  sofar
+
+	* lunar/branches/stable, theedge/tags/STABLE: Making the theedge
+	  STABLE TAG a lunar 'stable' 'branch'
 
