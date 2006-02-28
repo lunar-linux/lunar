@@ -152,8 +152,6 @@ _configure()
 {
   debug_msg "_configure($@)"
   if [ -e ./configure ]; then
-    verbose_msg "CFLAGS=\"$CFLAGS\""
-	verbose_msg "LDFLAGS=\"$LDFLAGS\""
     verbose_msg "./configure $@"
     ./configure $@
   elif [ -e Makefile -o -e makefile ]; then
@@ -196,8 +194,6 @@ default_game_config() {
 default_cvs_config() {
   debug_msg "default_cvs_config ($@)"
   verbose_msg "running \"default_cvs_config\""
-  verbose_msg "CFLAGS=\"$CFLAGS\""
-  verbose_msg "LDFLAGS=\"$LDFLAGS\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
   ./autogen.sh  --build=$BUILD                      \
@@ -341,7 +337,7 @@ run_configure() {
 
 run_pre_build() {
   debug_msg "run_pre_build ($@)"
-  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${MODULE_COLOR}$VERSION${DEFAULT_COLOR}"
+  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
 
   cd $BUILD_DIRECTORY
 

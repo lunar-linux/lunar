@@ -40,7 +40,7 @@ renew() {
     prune
   fi
 
-  display_update_log
+  display_update_log renew
 
   temp_destroy $TMP_LIN_SUCCESS
   temp_destroy $TMP_LIN_FAIL
@@ -110,8 +110,15 @@ rebuild()  {
   temp_destroy $TMP_QUEUE
 
   if [ -n "$QUEUE" ] ; then
+    export TMP_LIN_SUCCESS=$(temp_create "successful")
+    export TMP_LIN_FAIL=$(temp_create "failed")
+  
     message "${MESSAGE_COLOR}Starting rebuild of modules${DEFAULT_COLOR}"
     lin -c $QUEUE
+
+    display_update_log rebuild
+    temp_destroy $TMP_LIN_SUCCESS
+    temp_destroy $TMP_LIN_FAIL
   fi
 }
 
@@ -281,10 +288,7 @@ lin_module()  {
   # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
     echo $$ > $linING  &&
-    start_logging  &&
-    if [ -z "$BUILD" ] ; then
-      optimize
-    fi &&
+    start_logging
 
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"

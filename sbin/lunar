@@ -663,7 +663,7 @@ option_menu()  {
       F)  feature_menu           ;;
       I)  integrity_menu         ;;
       M)  mirror_menu            ;;
-      O)  . /var/lib/lunar/menu/optimize.menu && optimize_menu          ;;
+      O)  optimize_menu          ;;
       L)  set_default_module     ;;
       A)  set_accepted_licenses  ;;
       R)  set_rejected_licenses  ;;
@@ -823,7 +823,7 @@ else
     renew      ) renew                                  ;;
     update     ) update                                 ;;
     rebuild    ) rebuild                                ;;
-    optimize   ) . /var/lib/lunar/menu/optimize.menu && optimize_menu  ;;
+    optimize   ) optimize_menu				;;
     set        ) shift && setvar $@                     ;;
     unset      ) shift && unsetvar $@                   ;;
     fix        ) shift && run_fix $@                    ;;

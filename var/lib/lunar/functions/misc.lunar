@@ -117,7 +117,7 @@ filter() {
 unmap_device()
 {
     local DEVICE REAL
-    REAL=$(readlink -f $1)
+	REAL=$(readlink -f $1)
     for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
         if [[ "$(readlink -f $DEVICE)" == "$REAL" ]]; then
             echo $DEVICE
@@ -143,3 +143,25 @@ find_pam_aware()  {
 }
 
 
+custom_filters()
+{
+	local FILE
+	if [[ "${COMPRESS_MANPAGES:=on}" == "on" ]]; then
+		while read FILE; do
+			if [[ -f "$FILE" ]] ; then
+				if echo "$FILE" | grep '^/usr/share/man/man' | grep -q -v '\.gz$'; then
+					gzip -9 < "$FILE" > "$FILE.gz"
+					debug_msg "Compressing man page \"$FILE\""
+					rm -f "$FILE"
+					echo "$FILE.gz"
+				else
+					echo "$FILE"
+				fi
+			else
+				echo "$FILE"
+			fi
+		done
+	else
+		cat -
+	fi
+}

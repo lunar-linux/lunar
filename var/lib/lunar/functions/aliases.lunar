@@ -89,7 +89,7 @@ unalias() {
     done
     read CHOICE
     # test directly first
-    if $(echo $TARGETS | grep -qw "$CHOICE") ; then
+    if echo $TARGETS | grep -qw "$CHOICE" ; then
       echo $TARGET
       return
     # then the number

@@ -73,7 +73,7 @@ create_install_log() {
 
   export IFS="$TAB_ENTER_IFS"
 
-  parse_iw | sort | uniq | filter  "$LOCAL_EXCLUDED" | exists > $TMP_INST_LOG
+  parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
   echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
   echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG

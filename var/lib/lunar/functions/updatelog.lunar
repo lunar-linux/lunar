@@ -24,7 +24,7 @@ display_update_log() {
   rm -f /var/log/lunar/update 
   { 
     if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then 
-      display_success_info
+      display_success_info $1
     fi
   } | tee /var/log/lunar/update 
 }
@@ -41,7 +41,7 @@ display_success_info() {
   NUMFAILURES=$(cat $TMP_LIN_FAIL | wc -l)
 
   message
-  message  "${MESSAGE_COLOR}Lunar renew completed at `date`${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Lunar $1 completed at `date`${DEFAULT_COLOR}"
   message  "Successful  : " $NUMSUCCESS
   message  "Failed      : " $NUMFAILURES  
   message  

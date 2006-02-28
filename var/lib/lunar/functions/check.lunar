@@ -109,6 +109,9 @@ run_fix()  {
     MODULES=$(list_installed | grep -v moonbase)
   fi
 
+  export TMP_LIN_SUCCESS=$(temp_create "successful")
+  export TMP_LIN_FAIL=$(temp_create "failed")
+
   for MODULE in $MODULES ; do
     # ENV separation required here!
     (
@@ -143,6 +146,11 @@ run_fix()  {
       fi
     )
   done
+
+  display_update_log fix
+  temp_destroy $TMP_LIN_SUCCESS
+  temp_destroy $TMP_LIN_FAIL
+
 }
 
 

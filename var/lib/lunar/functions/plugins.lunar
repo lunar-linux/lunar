@@ -37,6 +37,7 @@ plugin_register() {
 	# 12 - BUILD_POST_INSTALL        ,,     ,,     ,,    POST_INSTALL
 	# 13 - BUILD_PRE_REMOVE          ,,     ,,     ,,    PRE_REMOVE
 	# 14 - BUILD_POST_REMOVE         ,,     ,,     ,,    POST_REMOVE
+	# 15 - OPTIMIZE_MENU           Display optimization menu's
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
 	((LUNAR_PLUGIN_COUNT++))
 	debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
