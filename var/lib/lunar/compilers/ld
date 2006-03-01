@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -n "$LUNAR_DEBUG" ] ; then
-  echo "++ ${LD_PATH:-/usr/bin}/ld \"$@\"" >&2
+if [[ -n "$LUNAR_DEBUG" ]] ; then
+  echo "++ ${LD_PATH:-/usr/bin}/${LD:-ld} \"$@\"" >&2
 fi
 
-${LD_PATH:-/usr/bin}/ld "$@"
+${LD_PATH:-/usr/bin}/${LD:-ld} "$@"
 
