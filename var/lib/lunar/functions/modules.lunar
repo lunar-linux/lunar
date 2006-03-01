@@ -347,7 +347,7 @@ module_license_accepted() {
 # purpose  : check if $MODULE is exiled
 module_exiled() {
   debug_msg "module_exiled ($@)"
-  $(cut -d: -f1,3 $MODULE_INDEX | grep -q "^$1:exiled")
+  $(cut -d: -f1,3 $MODULE_STATUS | grep -q "^$1:exiled")
 }
 
 
@@ -600,32 +600,11 @@ update_modules() {
 
 check_blacklist() {
   debug_msg "check_blacklist ($@)"
-  # Copyrighted Jason Johnston  2002 under GPLv2
-
-  # This checks the /var/state/lunar/gcc.<platform>
-  # file to see if it exists.  If it does exist then
-  # we grep it to see the names of the modules that
-  # DO NOT compile with gcc 3x.  If the module is
-  # on the list, we set the path so that gcc 3x is
-  # NOT used.
-
-  # If you find a module that does not compile with
-  # gcc 3x please email your findings to
-  # maintainer@lunar-linux.org.
-
-  if [ -z "$PLATFORM" ] ; then
-    eval $(grep PLATFORM= /etc/lunar/local/optimizations)
-  fi
-
-  # Usage check_checklist $MODULES
-  PLATFORM=${PLATFORM:-x86}
   if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
     if grep "^$MODULE$" /var/state/lunar/blacklist.$PLATFORM ; then
-      message "${PROBLEM_COLOR}! Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is blacklisted and will not be installed${DEFAULT_COLOR}"
+      error_message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is blacklisted and will not be installed!${DEFAULT_COLOR}"
       exit 0
     fi
-  else
-    touch /var/state/lunar/blacklist.$PLATFORM
   fi
 }
 
