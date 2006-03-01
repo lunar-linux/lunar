@@ -166,10 +166,10 @@ find_section() {
 
   if [[ "${ZLOCAL_OVERRIDES:=off}" == "on" ]] ; then
     if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
-	  if [[ -n "$SECTION" ]]; then
-	    echo $SECTION
+      if [[ -n "$SECTION" ]]; then
+        echo $SECTION
         return 0
-	  fi
+      fi
     fi
   fi
 
@@ -212,16 +212,16 @@ run_details() {
              "${PROBLEM_COLOR}in ${FILE_COLOR}$MOONBASE${DEFAULT_COLOR}"
     return 1
   else
-    if [[ ! -f "$MOONBASE/$SECTION/$1/DETAILS" ]] ; then
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
+    if [[ ! -f $SCRIPT_DIRECTORY/DETAILS ]] ; then
       error_message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
       return 1
     fi
    
-    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
     if [[ -z "$WANT_VERSION" ]] ; then
-      run_module_file $1 DETAILS &> /dev/null || return -1
+      . $SCRIPT_DIRECTORY/DETAILS &> /dev/null || return -1
     else
       TMP_DETAILS=$(temp_create "details.version")
       cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^\s*VERSION=/d' > $TMP_DETAILS
@@ -238,25 +238,29 @@ run_details() {
 }
 
 
+has_module_file()
+{
+	if [[ -e "$SCRIPT_DIRECTORY/$2" ]] || [[ -e "$SCRIPT_DIRECTORY/$2.$PLATFORM" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+
 # function : run_module_file
 # usage    : run_module_file $MODULE $SCRIPTNAME 
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
-  debug_msg "run_module_file ($@)"
-  if [[ "$1" == "moonbase" ]] ; then
-    return 0
-  fi
-  if [[ -z "$SCRIPT_DIRECTORY" ]] ; then
-    if ! run_details $1 > /dev/null ; then
-      return 1
-    fi
-  fi
-  CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-  if [[ -e "$SCRIPT_DIRECTORY/$2.$CPU_ARCH" ]]; then
-    . $SCRIPT_DIRECTORY/$2.$CPU_ARCH
-  elif [[ -e "$SCRIPT_DIRECTORY/$2" ]]; then
-    . $SCRIPT_DIRECTORY/$2
-  fi    
+	debug_msg "run_module_file ($@)"
+	if [[ "$1" == "moonbase" ]] ; then
+		return 0
+	fi
+	if [[ -e "$SCRIPT_DIRECTORY/$2.$PLATFORM" ]]; then
+		. $SCRIPT_DIRECTORY/$2.$PLATFORM
+	elif [[ -e "$SCRIPT_DIRECTORY/$2" ]]; then
+		. $SCRIPT_DIRECTORY/$2
+	fi    
 }
 
 

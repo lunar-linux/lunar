@@ -223,7 +223,7 @@ run_depends() {
   }
                                                                                 
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
-  if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
+  if has_module_file $MODULE DEPENDS ; then
     if [ -n "$SINGLE_MODULE" ] ; then
       # we only need to show this once, but we get here twice per module
       message  "${CHECK_COLOR}Checking dependencies for"  \
@@ -318,7 +318,9 @@ conflicts() {
 
 run_conflicts() {
   debug_msg "run_conflicts ($@)"
-  run_module_file $MODULE CONFLICTS
+  if has_module_file $MODULE CONFLICTS ; then
+    run_module_file $MODULE CONFLICTS
+  fi
 }
 
 

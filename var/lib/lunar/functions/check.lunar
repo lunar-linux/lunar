@@ -61,8 +61,8 @@ rework_module() {
   debug_msg "  run_depends ($@)"
    (
     if run_details $1 &> /dev/null ; then
-      if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
-      run_module_file $MODULE DEPENDS | grep -v '%'
+      if has_module_file $MODULE DEPENDS ; then
+        run_module_file $MODULE DEPENDS | grep -v '%'
       fi
     fi
    ) 

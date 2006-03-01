@@ -331,7 +331,9 @@ run_configure() {
     set_module_config OPTS "$OPTS"
   fi
   plugin_call BUILD_CONFIGURE $MODULE
-  run_module_file $MODULE CONFIGURE
+  if has_module_file $MODULE CONFIGURE ; then
+    run_module_file $MODULE CONFIGURE
+  fi
 }
 
 
@@ -343,7 +345,7 @@ run_pre_build() {
 
   if verify_all_sources $MODULE ; then
     plugin_call BUILD_PRE_BUILD $MODULE
-    if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
+    if has_module_file $MODULE PRE_BUILD ; then
       run_module_file $MODULE PRE_BUILD
     else
       if ! default_pre_build ; then
@@ -370,7 +372,7 @@ run_build()  {
   if [[ "${USE_WRAPPERS:-yes}" == "yes" ]]; then
     export PATH=/var/lib/lunar/compilers:$PATH
   fi
-  if [[ -s $SCRIPT_DIRECTORY/BUILD ]] ; then
+  if has_module_file $MODULE BUILD ; then
     run_module_file $MODULE BUILD
   else
     default_build
@@ -381,7 +383,7 @@ run_build()  {
 
 run_post_build() {
   debug_msg "run_post_build ($@)"
-  if [ -s $SCRIPT_DIRECTORY/POST_BUILD ] ; then
+  if has_module_file $MODULE POST_BUILD ; then
     run_module_file $MODULE POST_BUILD
   fi
   default_post_build
@@ -391,7 +393,7 @@ run_post_build() {
 run_post_install() {
   debug_msg "run_post_install ($@)"
   plugin_call BUILD_POST_INSTALL $MODULE
-  if [ -s $SCRIPT_DIRECTORY/POST_INSTALL ] ; then
+  if has_module_file $MODULE POST_INSTALL ; then
     run_module_file $MODULE POST_INSTALL
   fi
 }
