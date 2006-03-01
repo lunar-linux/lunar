@@ -12,7 +12,7 @@ plugin_wrappers_optimize()
 	
 	if [ "${USE_WRAPPERS:-yes}" == "yes" ]; then
 		verbose_msg "Enabled wrapper script usage"
-		export PATH=/var/lib/lunar/compilers/:${COMPILER_PATH}:${PATH}
+		export PATH=/var/lib/lunar/compilers/:${PATH}
 	fi
 	return 2
 }
