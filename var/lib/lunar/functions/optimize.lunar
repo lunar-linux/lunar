@@ -10,6 +10,29 @@
 ############################################################
 
 
+bad_flags()
+{
+	debug_msg "bad_flags ($@)"
+	verbose_msg "bad_flags \"$@\""
+
+	# maintain some degree of backward compatibility here
+	if [[ "$1" == "ALL" ]]; then
+		unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+	elif [[ "$1" == "compiler" ]]; then
+		unset CFLAGS CXXFLAGS CPPFLAGS
+	elif [[ "$1" == "linker" ]]; then
+		unset LDFLAGS
+	else
+		for BAD_FLAG in "$@" ; do
+			CFLAGS=$(echo $CFLAGS | sed s/$BAD_FLAG//)
+			CXXFLAGS=$(echo $CXXFLAGS | sed s/$BAD_FLAG//)
+			CPPFLAGS=$(echo $CPPFLAGS | sed s/$BAD_FLAG//)
+			LDFLAGS=$(echo $LDFLAGS | sed s/$BAD_FLAG//)
+		done
+	fi
+}
+
+
 optimize_menu()
 {(
 	export IFS=$'\t\n'
