@@ -358,14 +358,19 @@ run_pre_build() {
 
 run_build()  {
   debug_msg "run_build ($@)"
-  if [ -d "$SOURCE_DIRECTORY" ] ; then
+  if [[ -d "$SOURCE_DIRECTORY" ]] ; then
     cd $SOURCE_DIRECTORY
   fi
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
+  # this calls optimizations and others:
   plugin_call BUILD_BUILD $MODULE
-  if [ -s $SCRIPT_DIRECTORY/BUILD ] ; then
+  # now override compile wrappers if needed:
+  if [[ "${USE_WRAPPERS:-yes}" == "yes" ]]; then
+    export PATH=/var/lib/lunar/compilers:$PATH
+  fi
+  if [[ -s $SCRIPT_DIRECTORY/BUILD ]] ; then
     run_module_file $MODULE BUILD
   else
     default_build
