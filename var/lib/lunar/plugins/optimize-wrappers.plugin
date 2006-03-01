@@ -4,14 +4,15 @@
 
 plugin_wrappers_optimize()
 {
-
-	if [ -f /etc/lunar/local/optimizations.WRAPPERS ]; then
-		. /etc/lunar/local/optimizations.WRAPPERS
+	if [[ -n "$USE_WRAPPERS" ]] ; then
+		if [ -f /etc/lunar/local/optimizations.WRAPPERS ]; then
+			. /etc/lunar/local/optimizations.WRAPPERS
+		fi
 	fi
 	
 	if [ "${USE_WRAPPERS:-yes}" == "yes" ]; then
 		verbose_msg "Enabled wrapper script usage"
-		export PATH=/var/lib/lunar/compilers/:${PATH}
+		export PATH=/var/lib/lunar/compilers/:${COMPILER_PATH}:${PATH}
 	fi
 	return 2
 }
