@@ -1,8 +1,10 @@
 #!/bin/bash
 
+PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p $(basename $0))
+
 if [[ -n "$LUNAR_DEBUG" ]] ; then
-  echo "++ $CC_EXT ${COMPILER_PATH:-/usr/bin}/${CC:-cc} $COPT \"$@\"" >&2
+  echo "++ $CC_EXT $PROG $COPT \"$@\"" >&2
 fi
- 
-$CC_EXT ${COMPILER_PATH:-/usr/bin}/${CC:-cc} $COPT "$@"
+
+exec $CC_EXT $PROG $COPT "$@"
 

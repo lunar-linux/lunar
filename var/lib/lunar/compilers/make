@@ -1,8 +1,10 @@
 #!/bin/bash
 
+PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p $(basename $0))
+
 if [[ -n "$LUNAR_DEBUG" ]] ; then
-  echo "++ $MAKE_EXT ${MAKE_PATH:-/usr/bin}/${MAKE:-make} ${MAKES:+-j$MAKES} \"$@\"" >&2
+	echo "++ $MAKE_EXT $PROG ${MAKES:+-j$MAKES} \"$@\"" >&2
 fi
 
-$MAKE_EXT ${MAKE_PATH:-/usr/bin}/${MAKE:-make} ${MAKES:+-j$MAKES} "$@"
+exec $MAKE_EXT $PROG ${MAKES:+-j$MAKES} "$@"
 

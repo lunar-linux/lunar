@@ -1,8 +1,9 @@
 #!/bin/bash
 
+PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p $(basename $0))
+
 if [[ -n "$LUNAR_DEBUG" ]] ; then
-  echo "++ ${LD_PATH:-/usr/bin}/${LD:-ld} \"$@\"" >&2
+	echo "++ $PROG \"$@\"" >&2
 fi
 
-${LD_PATH:-/usr/bin}/${LD:-ld} "$@"
-
+exec $PROG "$@"
