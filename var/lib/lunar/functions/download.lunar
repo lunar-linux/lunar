@@ -36,7 +36,7 @@ lget_unlock() {
 download_url() {
     local RETVAL
 	debug_msg "download_url($@)"
-	verbose_msg "trying to download \"$1\""
+	verbose_msg "trying to download \"$1/$2\""
 	connect &&
 	plugin_call SOURCE_DOWNLOAD $1 $2 $3
 	RETVAL=$?
