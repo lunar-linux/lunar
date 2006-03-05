@@ -13,88 +13,92 @@
 # and add it to the dependency chain if needed
 unalias() {
   local TARGET TARGETS TARGETBYNUM N CHOICE
-  # try to figure out where the aliases file is:
-  if [ -z "$ALIASES" -o ! -f "$ALIASES" ]; then
-    if [ -f "$MOONBASE/aliases" ] ; then
-	  ALIASES="$MOONBASE/aliases"
-	else
-	  ALIASES="/var/lib/lunar/aliases"
-	fi
-  fi
-  if [ "${1:0:1}" == "%" ] ; then
-    debug_msg "unalias($@)"
-    TARGETS=$(grep "^$1:" $ALIASES | cut -d: -f2-)
-    # dumb algorithm: pick the first installed one
-    for TARGET in $TARGETS ; do
-      if $(module_installed $TARGET) ; then
-        debug_msg "unaliased \"$1\"->\"$TARGET\""
-        echo $TARGET
-	return
-      fi
-    done
-    # shortcut out: in the satisfy_depends stage we should NOT ask this again
-    if [ -z "$DEPS_ONLY" ] ; then
-      # first we check if this dependency is already existant in the exact
-      # way: does this MODULE depends on TARGET already ?
-      for TARGET in $TARGETS ; do
-        if in_depends $MODULE $TARGET ; then
-          debug_msg "unaliased \"$1\"->\"$TARGET\""
-          echo $TARGET
-          return
-        fi
-      done
-      # not so... other possibility is that something else already depends
-      # on TARGET?
-      for TARGET in $TARGETS ; do
-        if is_depends $TARGET ; then
-          debug_msg "unaliased \"$1\"->\"$TARGET\""
-          echo $TARGET
-          return
-        fi
-      done
-      # also not so. our last attempt is for a DISABLED dependency, but
-      # we can only use this method for OPTIONAL dependencies
-      for TARGET in $TARGETS ; do
-        # there's no function for this yet
-        if grep -q ":$TARGET:off:" $DEPENDS_STATUS ; then
-          debug_msg "unaliased \"$1\"->\"$TARGET\""
-          echo $TARGET
-          return
-        fi
-      done
-    fi
-
-    # shortcut out when explicitly instructed so
-    if [ -n "$NEVER_ASK" ] ; then
-      echo $1
-      return
-    fi
-
-    # propose one and let the user pick it from a list:
-    debug_msg "unalias: starting selection loop"
-    error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
-    while true ; do
-      error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module${DEFAULT_COLOR}"
-      ((N=0))
-      for TARGET in $TARGETS ; do
-        ((N++))
-	TARGETBYNUM[$N]=$TARGET
-        error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR}"
-      done
-      read CHOICE
-      # test directly first
-      if $(echo $TARGETS | grep -qw "$CHOICE") ; then
-        echo $TARGET
-	return
-      # then the number
-      elif [ -n "$CHOICE" -a -n "${TARGETBYNUM[$CHOICE]}" ] ; then
-        echo ${TARGETBYNUM[$CHOICE]}
-        return
-      fi
-      error_message "${MESSAGE_COLOR}Sorry, I can't do anything with \"${DEFAULT_COLOR}${QUERY_COLOR}$CHOICE${DEFAULT_COLOR}${MESSAGE_COLOR}\", please try again${DEFAULT_COLOR}"
-    done
-  else
+  # quick exit code
+  if [ "${1:0:1}" != "%" ] ; then
     echo $1
     return
   fi
+
+  debug_msg "unalias($@)"
+  # try to figure out where the aliases file is:
+  if [[ -z "$ALIASES" ]] || [[ ! -f "$ALIASES" ]]; then
+    if [ -f "$MOONBASE/aliases" ] ; then
+      ALIASES="$MOONBASE/aliases"
+    else
+      ALIASES="/var/lib/lunar/aliases"
+    fi
+  fi
+  
+  TARGETS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' $ALIASES)
+  # dumb algorithm: pick the first installed one
+  for TARGET in $TARGETS ; do
+    if module_installed $TARGET ; then
+      debug_msg "unaliased \"$1\"->\"$TARGET\""
+      echo $TARGET
+      return
+    fi
+  done
+  # shortcut out: in the satisfy_depends stage we should NOT ask this again
+  if [[ -z "$DEPS_ONLY" ]] ; then
+    # first we check if this dependency is already existant in the exact
+    # way: does this MODULE depends on TARGET already ?
+    for TARGET in $TARGETS ; do
+      if in_depends $MODULE $TARGET ; then
+        debug_msg "unaliased \"$1\"->\"$TARGET\""
+        echo $TARGET
+        return
+      fi
+    done
+    # not so... other possibility is that something else already depends
+    # on TARGET?
+    for TARGET in $TARGETS ; do
+      if is_depends $TARGET ; then
+        debug_msg "unaliased \"$1\"->\"$TARGET\""
+        echo $TARGET
+        return
+      fi
+    done
+    # also not so. our last attempt is for a DISABLED dependency, but
+    # we can only use this method for OPTIONAL dependencies
+    for TARGET in $TARGETS ; do
+      # there's no function for this yet
+      if grep -q ":$TARGET:off:" $DEPENDS_STATUS ; then
+        debug_msg "unaliased \"$1\"->\"$TARGET\""
+        echo $TARGET
+        return
+      fi
+    done
+  fi
+
+  # shortcut out when explicitly instructed so
+  if [[ -n "$NEVER_ASK" ]] ; then
+    echo $1
+    return
+  fi
+
+  # propose one and let the user pick it from a list:
+  debug_msg "unalias: starting selection loop"
+  error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
+  while true ; do
+    error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module${DEFAULT_COLOR}"
+    ((N=0))
+    for TARGET in $TARGETS ; do
+      ((N++))
+      TARGETBYNUM[$N]=$TARGET
+      error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR}"
+    done
+    read CHOICE
+    # test directly first
+    if echo $TARGETS | grep -qw "$CHOICE" ; then
+      echo $TARGET
+      return
+    # then the number
+    elif [[ -n "$CHOICE" ]] && [[ -n "${TARGETBYNUM[$CHOICE]}" ]] ; then
+      echo ${TARGETBYNUM[$CHOICE]}
+      return
+    fi
+    error_message "${MESSAGE_COLOR}Sorry, I can't do anything with \"${DEFAULT_COLOR}${QUERY_COLOR}$CHOICE${DEFAULT_COLOR}${MESSAGE_COLOR}\", please try again${DEFAULT_COLOR}"
+  done
 }
+
+

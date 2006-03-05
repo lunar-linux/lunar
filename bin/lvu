@@ -700,15 +700,24 @@ show_info() {
     echo ""
     echo "Installation Info"
     if module_installed $1 ; then
-      echo -n "  Installed Version: $(installed_version $1)"
+      IVERSION=$(installed_version $1)
+      echo -n "  Installed Version: $IVERSION"
       if module_is_expired $1 ; then
-        echo "  (updated module available!)"
+        echo "  (updated module available: $VERSION!)"
       else
         echo ""
       fi
-      echo "  Approx. Size:      $(main size $1)"
+      echo -n "  Last compile time: "
+      if module_installed "TimeDate" ; then
+        CTIME=$(main compile $1 | grep 'Mark Compile ' | cut -d \" -f6 | perl -e 'use Date::Parse; my $start = <> ; my $stop = <> ; print str2time($stop) - str2time($start) . "\n";')
+        echo "$((CTIME / 60))m$((CTIME % 60))s"
+      else
+        echo "(unable to calculate without \"TimeDate\" installed)"
+      fi
+      echo -n "  Approx. Size:      "
+      main size $1
       echo -n "  Files Installed:   "
-      echo "`echo "$(main install $1)" | wc -l`"
+      main install $1 | wc -l
     else
       echo "  Module not installed."
     fi
