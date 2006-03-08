@@ -1,6 +1,8 @@
+^/bin/basename
 ^/bin/bash
 ^/bin/cat
 ^/bin/cp
+^/bin/cuT
 ^/bin/date
 ^/bin/grep
 ^/bin/mkdir
@@ -90,7 +92,6 @@
 ^/lib/ld-linux.so.2
 ^/lib/modules/
 /perllocal.pod$
-^/usr/bin/basename
 ^/usr/bin/dirname
 ^/usr/bin/file
 ^/usr/bin/install
