@@ -2,7 +2,7 @@
 ^/bin/bash
 ^/bin/cat
 ^/bin/cp
-^/bin/cuT
+^/bin/cut
 ^/bin/date
 ^/bin/grep
 ^/bin/mkdir
