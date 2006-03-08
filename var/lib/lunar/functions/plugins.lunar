@@ -51,8 +51,8 @@ plugin_call() {
 	REQUESTED_TYPE=$1
 	shift
 	for ((COUNT=0; COUNT < $LUNAR_PLUGIN_COUNT; COUNT++)); do
-		THIS_TYPE=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f1)
-		THIS_HANDLER=$(echo ${LUNAR_PLUGINS[$COUNT]} | cut -d: -f2-)
+		THIS_TYPE=${LUNAR_PLUGINS[$COUNT]%%:*}
+		THIS_HANDLER=${LUNAR_PLUGINS[$COUNT]#*:}
 		if [ "$REQUESTED_TYPE" == "$THIS_TYPE" ]; then
 			# we have identified a valid plugin for this type
 			$THIS_HANDLER $@
