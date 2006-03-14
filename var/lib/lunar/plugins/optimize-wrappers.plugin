@@ -51,7 +51,7 @@ EOF
 	TITLE="Lunar CCache Optimizations"
 	
 	while true; do
-		RESULT=`$DIALOG --cancel-label "Close" --menu "Use the Compiler wrapper scripts? This will enable all optimizations for most programs even if the Makefile doesn't support them, and allows for more debugging output." 0 0 0 "USE_WRAPPERS" "Use the compile wrappers         [$USE_WRAPPERS]"`
+		RESULT=`$DIALOG --ok-label "Select" --cancel-label "Close" --menu "Use the Compiler wrapper scripts? This will enable all optimizations for most programs even if the Makefile doesn't support them, and allows for more debugging output." 0 0 0 "USE_WRAPPERS" "Use the compile wrappers         [$USE_WRAPPERS]"`
 		if [ $? != 0 ]; then
 			break
 		else
