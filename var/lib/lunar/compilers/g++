@@ -6,5 +6,5 @@ if [[ -n "$LUNAR_DEBUG" ]] ; then
 	echo "++ $CXX_EXT $PROG $CCOPT $CXXFLAGS $@" >&2
 fi
  
-exec $CXX_EXT $PROG $CCOPT $CXXFLAGS $@
+exec $CXX_EXT $PROG $CCOPT $CXXFLAGS "$@"
 

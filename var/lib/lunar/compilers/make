@@ -6,5 +6,5 @@ if [[ -n "$LUNAR_DEBUG" ]] ; then
 	echo "++ $MAKE_EXT $PROG ${MAKES:+-j$MAKES} $@" >&2
 fi
 
-exec $MAKE_EXT $PROG ${MAKES:+-j$MAKES} $@
+exec $MAKE_EXT $PROG ${MAKES:+-j$MAKES} "$@"
 
