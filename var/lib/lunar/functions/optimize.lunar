@@ -45,7 +45,7 @@ bad_flags() {
 
 use_wrappers() {
   debug_msg "use_wrappers ($@)"
-  if [ "$GCCWRAPPERS" == "on" ] ; then
+  if [ "${USE_WRAPPERS:-${GCCWRAPPERS:-on}}" == "on" ] ; then
     verbose_msg "Enabling gcc wrapper scripts to force optimizations"
     export PATH=/var/lib/lunar/compilers:${PATH}
   fi  
