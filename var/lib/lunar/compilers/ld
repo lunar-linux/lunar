@@ -3,8 +3,8 @@
 PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p ${0##*/})
 
 if [[ -n "$LUNAR_DEBUG" ]] ; then
-	echo "++ $PROG ${LDFLAGS//-Wl,/} $@" >&2
+        echo "++ $PROG $@" >&2
 fi
 
-exec $PROG ${LDFLAGS//-Wl,/} "$@"
+exec $PROG "$@"
 
