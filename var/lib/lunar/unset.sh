@@ -32,8 +32,6 @@ unset FPM
 unset FTP_ACTIVE
 unset FUNCTIONS
 unset GARBAGE
-unset GCCVER
-unset GCCWRAPPERS
 unset GNOME_URL
 unset GNU_URL
 unset GREEN

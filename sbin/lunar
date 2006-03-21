@@ -511,20 +511,20 @@ feature_menu()  {
   X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
 
-         ARCHIVE=${ARCHIVE:=on}
-   AUTORESURRECT=${AUTORESURRECT:=on}
-         AUTOFIX=${AUTOFIX:=on}
-       AUTOPRUNE=${AUTOPRUNE:=off}
-           COLOR=${COLOR:=on}
-     KEEP_SOURCE=${KEEP_SOURCE:=off}      
-    MAIL_REPORTS=${MAIL_REPORTS:=off}
-    VIEW_REPORTS=${VIEW_REPORTS:=off}
-        PRESERVE=${PRESERVE:=on}
-           SOUND=${SOUND:=off}
+         ARCHIVE=${ARCHIVE:-on}
+   AUTORESURRECT=${AUTORESURRECT:-on}
+         AUTOFIX=${AUTOFIX:-on}
+       AUTOPRUNE=${AUTOPRUNE:-off}
+           COLOR=${COLOR:-on}
+     KEEP_SOURCE=${KEEP_SOURCE:-off}      
+    MAIL_REPORTS=${MAIL_REPORTS:-off}
+    VIEW_REPORTS=${VIEW_REPORTS:-off}
+        PRESERVE=${PRESERVE:-on}
+           SOUND=${SOUND:-off}
          SUSTAIN=${SUSTAIN:on}
-          VOYEUR=${VOYEUR:=on}
-            REAP=${REAP:=on}
-         GARBAGE=${GARBAGE:=on}
+          VOYEUR=${VOYEUR:-on}
+            REAP=${REAP:-on}
+         GARBAGE=${GARBAGE:-on}
 	 VERBOSE=${VERBOSE:off}
 
         if [ -z $TMPFS ]; then
@@ -789,7 +789,7 @@ main() {
 
   export IFS="$TAB_ENTER_IFS"
 
-  LUNAR_MODULE=${LUNAR_MODULE:=lunar}
+  LUNAR_MODULE=${LUNAR_MODULE:-lunar}
   LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
 
   main_menu

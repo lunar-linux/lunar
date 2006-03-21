@@ -164,7 +164,7 @@ find_section() {
   local SECTION SECTIONS
   debug_msg "find_section ($@)"
 
-  if [[ "${ZLOCAL_OVERRIDES:=off}" == "on" ]] ; then
+  if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
     if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
       if [[ -n "$SECTION" ]]; then
         echo $SECTION

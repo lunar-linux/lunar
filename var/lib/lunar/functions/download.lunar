@@ -64,7 +64,7 @@ download_module() {
 		return 1
 	fi
 
-	MAX_SOURCES=${MAX_SOURCES:=100}
+	MAX_SOURCES=${MAX_SOURCES:-100}
 
 	# loop over all sources
 	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do

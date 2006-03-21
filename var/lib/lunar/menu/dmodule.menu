@@ -32,8 +32,8 @@ The modules MUST exist in the moonbase and MUST meet
 some common criteria. Better do not hack by yourself."
 
  LUNAR_MODULES=$(echo "$LUNAR_MODULES" | tr " " "\t")
- LUNAR_MODULES=${LUNAR_MODULES:=lunar}
- LUNAR_MODULE=${LUNAR_MODULE:=lunar}
+ LUNAR_MODULES=${LUNAR_MODULES:-lunar}
+ LUNAR_MODULE=${LUNAR_MODULE:-lunar}
 
  unset SDM
  for LUNAR in $LUNAR_MODULES ; do
