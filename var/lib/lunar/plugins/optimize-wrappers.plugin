@@ -4,7 +4,7 @@
 
 plugin_wrappers_optimize()
 {
-	if [[ -n "$USE_WRAPPERS" ]] ; then
+	if [[ -z "$USE_WRAPPERS" ]] ; then
 		if [ -f /etc/lunar/local/optimizations.WRAPPERS ]; then
 			. /etc/lunar/local/optimizations.WRAPPERS
 		fi
