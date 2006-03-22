@@ -1,3 +1,90 @@
+2006-03-22 18:28  sofar
+
+	* lunar/branches/stable/var/lib/lunar/compilers/c++,
+	  lunar/branches/stable/var/lib/lunar/compilers/cc,
+	  lunar/branches/stable/var/lib/lunar/compilers/g++,
+	  lunar/branches/stable/var/lib/lunar/compilers/gcc,
+	  lunar/branches/stable/var/lib/lunar/compilers/ld,
+	  lunar/branches/stable/var/lib/lunar/menu/optimize.menu,
+	  lunar/branches/stable/var/lib/lunar/plugins/optimize-wrappers.plugin:
+	  fully backmerge all changes: - delete optimize.menu - add
+	  optimize-wrappers plugin - remove COPT CCOPT CFLAGS and CXX flags
+	  from wrappers
+
+2006-03-22 01:54  sofar
+
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/config,
+	  lunar/branches/stable/sbin/lunar,
+	  lunar/branches/stable/usr/share/doc/lunar/core-documentation/etc_lunar_config.html,
+	  lunar/branches/stable/var/lib/lunar/compilers/c++,
+	  lunar/branches/stable/var/lib/lunar/compilers/cc,
+	  lunar/branches/stable/var/lib/lunar/compilers/g++,
+	  lunar/branches/stable/var/lib/lunar/compilers/gcc,
+	  lunar/branches/stable/var/lib/lunar/compilers/ld,
+	  lunar/branches/stable/var/lib/lunar/compilers/make,
+	  lunar/branches/stable/var/lib/lunar/functions/build.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/check.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/init.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/main.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/messages.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/misc.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/optimize.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/plugins.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/sources.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/updatelog.lunar,
+	  lunar/branches/stable/var/lib/lunar/menu/dmodule.menu,
+	  lunar/branches/stable/var/lib/lunar/menu/download.menu,
+	  lunar/branches/stable/var/lib/lunar/plugins/download-generic.plugin,
+	  lunar/branches/stable/var/lib/lunar/unset.sh: Backport of all
+	  outstanding changes in theedge: - new wrappers - new optimization
+	  plugins (you need to run lunar optimize!) - has_module_file
+	  generic code - GCCWRAPPERS obsoleted - remove := in favour of :-
+	  bash default assignment
+
+2006-03-19 23:07  sofar
+
+	* lunar/branches/stable/var/lib/lunar/functions/optimize.lunar:
+	  Making 'lunar' ready for USE_WRAPPERS flag handling.
+
+2006-03-08 16:30  sofar
+
+	* lunar/branches/stable/var/lib/lunar/protected: basename was moved.
+	  cut was missing.
+
+2006-03-06 06:03  sofar
+
+	* lunar/branches/stable/var/lib/lunar/functions/misc.lunar: add this
+	  to lunar too
+
+2006-03-05 21:05  sofar
+
+	* lunar/branches/stable/bin/lvu,
+	  lunar/branches/stable/etc/lunar/mirrors/LRESORT,
+	  lunar/branches/stable/sbin/lin,
+	  lunar/branches/stable/usr/share/man/man8/lin.8,
+	  lunar/branches/stable/var/lib/lunar/functions/aliases.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/depends.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/download.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/main.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/misc.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/modules.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/tracking.lunar,
+	  lunar/branches/stable/var/lib/lunar/functions/updatelog.lunar:
+	  Backmerge from theedge: bugfixes and older additions only - lvu
+	  info shows compile time if possible - structure update in lin
+	  (cosmetic/internal) - add auto-manpage compression for
+	  /usr/share/man - speedups for dependency and core module functions
+	  - minor bugfix in alias code - update to man lin(8) - bugfix to
+	  LRESORT mirror file - some prelim updates to updatelog display
+
+2006-02-14 20:17  sofar
+
+	* lunar/branches/stable/ChangeLog: updated
+
 2006-01-29 19:28  sofar
 
 	* lunar/branches/stable/var/lib/lunar/functions/build.lunar,
