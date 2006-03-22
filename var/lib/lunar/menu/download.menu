@@ -140,8 +140,8 @@ download problems, select active ftp option.
 This option can also be set per module basis. Add
 FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
 
-   FTP_ACTIVE=${FTP_ACTIVE:=off}
-   FTP_PASSIVE=${FTP_PASSIVE:=on}
+   FTP_ACTIVE=${FTP_ACTIVE:-off}
+   FTP_PASSIVE=${FTP_PASSIVE:-on}
 
    [ "$FTP_ACTIVE" == "on" ] && 
    FTP_PASSIVE=off || 
@@ -176,7 +176,7 @@ and works fine on almost all cases.
 This option can also be set per module basis. Add
 CONTINUE=off in DETAILS file :=) or vice-versa."
 
-   CONTINUE=${CONTINUE:=on}
+   CONTINUE=${CONTINUE:-on}
 
    PARTIAL=`$DIALOG  --title "Partial Downloads" \
                             --ok-label  "Commit" \
@@ -207,7 +207,7 @@ a Pragma: no-cache directive to http server.
 This option can also be set per module basis. Add
 USE_CACHE=off in DETAILS file :=) or vice-versa."
 
-   USE_CACHE=${USE_CACHE:=on}
+   USE_CACHE=${USE_CACHE:-on}
 
    CACHE=`$DIALOG  --title "Cache Usage" \
                             --ok-label  "Commit" \
@@ -236,7 +236,7 @@ number of retries.
 This option can also be set per module basis. Add
 NUM_RETRY=<n> in DETAILS file :=)"
 
-  NUM_RETRY=${NUM_RETRY:=5}
+  NUM_RETRY=${NUM_RETRY:-5}
 
   if  NUM_RETRY=`$DIALOG  --title "Number of Retries" \
                           --ok-label  "Commit"        \
@@ -257,7 +257,7 @@ This is not recommended for normal downloads, broken downloads
 should be reported to maintainer@lunar-linux.org.
 "
 
-  EXHAUSTIVE=${EXHAUSTIVE:=off}
+  EXHAUSTIVE=${EXHAUSTIVE:-off}
 
   EXHAUSTIVE=`$DIALOG  --title "Exhaustive mirror testing: " \
              --ok-label  "Commit" \

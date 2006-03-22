@@ -42,33 +42,32 @@ export        DIALOGRC=/etc/lunar/dialogrc
           MODULE_INDEX=/var/state/lunar/module.index
 
          INSTALL_CACHE=/var/cache/lunar
-          SOURCE_CACHE=${SOURCE_CACHE:=/var/spool/lunar}
+          SOURCE_CACHE=${SOURCE_CACHE:-/var/spool/lunar}
 
 #  Override the following variables in /etc/lunar/local/config
 #  Or by exporting them before installing or removing.
 
-              ARCHIVE=${ARCHIVE:=on}
-              AUTOFIX=${AUTOFIX:=on}
-            AUTOPRUNE=${AUTOPRUNE:=on}
-         MAIL_REPORTS=${MAIL_REPORTS:=off}
-             PRESERVE=${PRESERVE:=on}
-                 REAP=${REAP:=on}
-                ADMIN=${ADMIN:=root}
-                SOUND=${SOUND:=off}
-              SUSTAIN=${SUSTAIN:=on}
-         VIEW_REPORTS=${VIEW_REPORTS:=off}
-               VOYEUR=${VOYEUR:=on}
-              GARBAGE=${GARBAGE:=on}
-         PROMPT_DELAY=${PROMPT_DELAY:=150}
-          GCCWRAPPERS=${GCCWRAPPERS:=on}
-        PROBE_EXPIRED=${PROBE_EXPIRED:=on}
-                TMPFS=${TMPFS:=off}
+              ARCHIVE=${ARCHIVE:-on}
+              AUTOFIX=${AUTOFIX:-on}
+            AUTOPRUNE=${AUTOPRUNE:-on}
+         MAIL_REPORTS=${MAIL_REPORTS:-off}
+             PRESERVE=${PRESERVE:-on}
+                 REAP=${REAP:-on}
+                ADMIN=${ADMIN:-root}
+                SOUND=${SOUND:-off}
+              SUSTAIN=${SUSTAIN:-on}
+         VIEW_REPORTS=${VIEW_REPORTS:-off}
+               VOYEUR=${VOYEUR:-on}
+              GARBAGE=${GARBAGE:-on}
+         PROMPT_DELAY=${PROMPT_DELAY:-150}
+        PROBE_EXPIRED=${PROBE_EXPIRED:-on}
+                TMPFS=${TMPFS:-off}
        LUNAR_PRIORITY="+10"
 
-            LDD_CHECK=${LDD_CHECK:=on}
-           FIND_CHECK=${FIND_CHECK:=on}
-         MD5SUM_CHECK=${MD5SUM_CHECK:=on}
-            SYM_CHECK=${SYM_CHECK:=off}
+            LDD_CHECK=${LDD_CHECK:-on}
+           FIND_CHECK=${FIND_CHECK:-on}
+         MD5SUM_CHECK=${MD5SUM_CHECK:-on}
+            SYM_CHECK=${SYM_CHECK:-off}
 
               GNU_URL=ftp://ftp.gnu.org/pub/gnu
               KDE_URL=ftp://ftp.kde.org/pub/kde
@@ -85,7 +84,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
 	    
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
 
-               TMPDIR=${TMPDIR:=/tmp}
+               TMPDIR=${TMPDIR:-/tmp}
 
               DEFAULT="\e[0m"
                  BOLD="\e[1m"

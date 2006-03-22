@@ -146,7 +146,7 @@ find_pam_aware()  {
 custom_filters()
 {
 	local FILE
-	if [[ "${COMPRESS_MANPAGES:=on}" == "on" ]]; then
+	if [[ "${COMPRESS_MANPAGES:-on}" == "on" ]]; then
 		while read FILE; do
 			if [[ -f "$FILE" ]] ; then
 				if echo "$FILE" | grep '^/usr/share/man/.*\..$' | grep -q -v '\.gz$'; then

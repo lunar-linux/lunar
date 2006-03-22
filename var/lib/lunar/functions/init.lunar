@@ -59,7 +59,7 @@ root_check() {
 # purpose  : force niceness on lunar's processes
 set_priority() {
   debug_msg "set_priority ($@)"
-  LUNAR_PRIORITY=${LUNAR_PRIORITY:="+10"}
+  LUNAR_PRIORITY=${LUNAR_PRIORITY:-"+10"}
   renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
 }
 

@@ -152,8 +152,6 @@ _configure()
 {
   debug_msg "_configure($@)"
   if [ -e ./configure ]; then
-    verbose_msg "CFLAGS=\"$CFLAGS\""
-	verbose_msg "LDFLAGS=\"$LDFLAGS\""
     verbose_msg "./configure $@"
     ./configure $@
   elif [ -e Makefile -o -e makefile ]; then
@@ -196,8 +194,6 @@ default_game_config() {
 default_cvs_config() {
   debug_msg "default_cvs_config ($@)"
   verbose_msg "running \"default_cvs_config\""
-  verbose_msg "CFLAGS=\"$CFLAGS\""
-  verbose_msg "LDFLAGS=\"$LDFLAGS\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
   ./autogen.sh  --build=$BUILD                      \
@@ -335,19 +331,21 @@ run_configure() {
     set_module_config OPTS "$OPTS"
   fi
   plugin_call BUILD_CONFIGURE $MODULE
-  run_module_file $MODULE CONFIGURE
+  if has_module_file $MODULE CONFIGURE ; then
+    run_module_file $MODULE CONFIGURE
+  fi
 }
 
 
 run_pre_build() {
   debug_msg "run_pre_build ($@)"
-  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+  message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${MODULE_COLOR}$VERSION${DEFAULT_COLOR}"
 
   cd $BUILD_DIRECTORY
 
   if verify_all_sources $MODULE ; then
     plugin_call BUILD_PRE_BUILD $MODULE
-    if [ -s $SCRIPT_DIRECTORY/PRE_BUILD ] ; then
+    if has_module_file $MODULE PRE_BUILD ; then
       run_module_file $MODULE PRE_BUILD
     else
       if ! default_pre_build ; then
@@ -362,14 +360,19 @@ run_pre_build() {
 
 run_build()  {
   debug_msg "run_build ($@)"
-  if [ -d "$SOURCE_DIRECTORY" ] ; then
+  if [[ -d "$SOURCE_DIRECTORY" ]] ; then
     cd $SOURCE_DIRECTORY
   fi
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
   
+  # this calls optimizations and others:
   plugin_call BUILD_BUILD $MODULE
-  if [ -s $SCRIPT_DIRECTORY/BUILD ] ; then
+  # now override compile wrappers if needed:
+  if [[ "${USE_WRAPPERS:-yes}" == "yes" ]]; then
+    export PATH=/var/lib/lunar/compilers:$PATH
+  fi
+  if has_module_file $MODULE BUILD ; then
     run_module_file $MODULE BUILD
   else
     default_build
@@ -380,7 +383,7 @@ run_build()  {
 
 run_post_build() {
   debug_msg "run_post_build ($@)"
-  if [ -s $SCRIPT_DIRECTORY/POST_BUILD ] ; then
+  if has_module_file $MODULE POST_BUILD ; then
     run_module_file $MODULE POST_BUILD
   fi
   default_post_build
@@ -390,7 +393,7 @@ run_post_build() {
 run_post_install() {
   debug_msg "run_post_install ($@)"
   plugin_call BUILD_POST_INSTALL $MODULE
-  if [ -s $SCRIPT_DIRECTORY/POST_INSTALL ] ; then
+  if has_module_file $MODULE POST_INSTALL ; then
     run_module_file $MODULE POST_INSTALL
   fi
 }

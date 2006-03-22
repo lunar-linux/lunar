@@ -61,8 +61,8 @@ rework_module() {
   debug_msg "  run_depends ($@)"
    (
     if run_details $1 &> /dev/null ; then
-      if [ -s "$SCRIPT_DIRECTORY/DEPENDS" ] ; then
-      run_module_file $MODULE DEPENDS | grep -v '%'
+      if has_module_file $MODULE DEPENDS ; then
+        run_module_file $MODULE DEPENDS | grep -v '%'
       fi
     fi
    ) 
@@ -109,21 +109,34 @@ run_fix()  {
     MODULES=$(list_installed | grep -v moonbase)
   fi
 
+  if [[ -n "$FIXDEPENDS" ]] ; then
+    for MODULE in $MODULES ; do
+      fix_depends $MODULE
+    done
+    return
+  fi
+
+  # discover BROKEN modules
   for MODULE in $MODULES ; do
-    # ENV separation required here!
+    if ! run_checks $MODULE ; then
+       BROKEN_MODULES=( ${BROKEN_MODULES[@]} $MODULE )
+    fi
+  done
+
+  # if we were called with --fixdepends then we may skip the rest
+  if [ -n "$FIXDEPENDS" ] ; then
+    return
+  fi
+  
+  export TMP_LIN_SUCCESS=$(temp_create "successful")
+  export TMP_LIN_FAIL=$(temp_create "failed")
+
+  for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do
     (
       run_details $MODULE &&
-      fix_depends $MODULE &&
-
-      # if we were called with --fixdepends then we may skip the rest
-      if [ -n "$FIXDEPENDS" ] ; then
-        continue
-      fi        
-
       if module_installed $MODULE && ! module_held $MODULE ; then
-
         if ! run_checks $MODULE ; then
-          if [ -n "$NOFIX" ] ; then
+          if [[ -n "$NOFIX" ]] ; then
             continue
           fi
           NEVER_ASK=1 DEPS_ONLY= satisfy_depends      &&
@@ -143,6 +156,11 @@ run_fix()  {
       fi
     )
   done
+
+  display_update_log fix
+  temp_destroy $TMP_LIN_SUCCESS
+  temp_destroy $TMP_LIN_FAIL
+
 }
 
 

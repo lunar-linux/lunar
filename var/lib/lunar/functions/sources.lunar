@@ -40,7 +40,7 @@ verify_source() {
 sources() {
 (
   debug_msg "sources ($@)"
-  MAX_SOURCES=${MAX_SOURCES:=100}
+  MAX_SOURCES=${MAX_SOURCES:-100}
 
   if ! run_details $1 ; then
     return 1
@@ -96,7 +96,7 @@ unpack() {
 verify_all_sources() {
 (
   debug_msg "verify_all_sources ($@)"
-  MAX_SOURCES=${MAX_SOURCES:=100}
+  MAX_SOURCES=${MAX_SOURCES:-100}
 
   if ! run_details $1 ; then
     return 1
@@ -170,7 +170,7 @@ rm_source_dir() {
 
   cd $BUILD_DIRECTORY
   DEAD_DIR=$1
-  DEAD_DIR=${DEAD_DIR:=$SOURCE_DIRECTORY}
+  DEAD_DIR=${DEAD_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
   if [ "$TMPFS" != "off" ] ; then
@@ -193,7 +193,7 @@ mk_source_dir() {
   fi
   cd "$BUILD_DIRECTORY"
   NEW_DIR=$1
-  NEW_DIR=${NEW_DIR:=$SOURCE_DIRECTORY}
+  NEW_DIR=${NEW_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "creating building dir \"$NEW_DIR\""
   if [ "$TMPFS" != "off" ] ; then 

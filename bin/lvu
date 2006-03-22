@@ -376,7 +376,7 @@ voyeur()  {
     follow_active_lin $MODULE
   done
 
-  DEFAULT_DELAY=${DEFAULT_DELAY:=60}
+  DEFAULT_DELAY=${DEFAULT_DELAY:-60}
 
   while true ; do
     if ! ACTIVE_MODULE=$(find_active_lin) ; then

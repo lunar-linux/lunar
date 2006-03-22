@@ -145,7 +145,7 @@ query() {
       echo -e -n "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
       read -t $PROMPT_DELAY -n 1 RESPONSE
       if [ -z "$RESPONSE" ]; then
-        RESPONSE=${RESPONSE:=$2}
+        RESPONSE=${RESPONSE:-$2}
       else
         echo
       fi

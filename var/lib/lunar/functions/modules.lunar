@@ -164,7 +164,7 @@ find_section() {
   local SECTION SECTIONS
   debug_msg "find_section ($@)"
 
-  if [[ "${ZLOCAL_OVERRIDES:=off}" == "on" ]] ; then
+  if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
     if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
       if [[ -n "$SECTION" ]]; then
         echo $SECTION
@@ -238,25 +238,29 @@ run_details() {
 }
 
 
+has_module_file()
+{
+	if [[ -e "$SCRIPT_DIRECTORY/$2" ]] || [[ -e "$SCRIPT_DIRECTORY/$2.$PLATFORM" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+
 # function : run_module_file
 # usage    : run_module_file $MODULE $SCRIPTNAME 
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
-  debug_msg "run_module_file ($@)"
-  if [ "$1" == "moonbase" ] ; then
-    return 0
-  fi
-  if [ -z "$SCRIPT_DIRECTORY" ] ; then
-    if ! run_details $1 > /dev/null ; then
-      return 1
-    fi
-  fi
-  CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-  if [ -e "$SCRIPT_DIRECTORY/$2.$CPU_ARCH" ]; then
-    . $SCRIPT_DIRECTORY/$2.$CPU_ARCH
-  elif [ -e "$SCRIPT_DIRECTORY/$2" ] ; then
-    . $SCRIPT_DIRECTORY/$2
-  fi    
+	debug_msg "run_module_file ($@)"
+	if [[ "$1" == "moonbase" ]] ; then
+		return 0
+	fi
+	if [[ -e "$SCRIPT_DIRECTORY/$2.$PLATFORM" ]]; then
+		. $SCRIPT_DIRECTORY/$2.$PLATFORM
+	elif [[ -e "$SCRIPT_DIRECTORY/$2" ]]; then
+		. $SCRIPT_DIRECTORY/$2
+	fi    
 }
 
 

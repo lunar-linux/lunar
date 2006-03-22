@@ -288,10 +288,7 @@ lin_module()  {
   # now entering the physical BUILD stage
   if ! current_locked && ! solo_locked ; then
     echo $$ > $linING  &&
-    start_logging  &&
-    if [ -z "$BUILD" ] ; then
-      optimize
-    fi &&
+    start_logging
 
     if ! run_pre_build ; then
       LIN_ERROR="PRE_BUILD"
