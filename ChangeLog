@@ -1,3 +1,251 @@
+2006-03-22 17:44  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/c++,
+	  lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld: New wrappers. Neutered
+	  from COPTS CCOPTS CFLAGS and CXXFLAGS.
+
+2006-03-22 17:27  sofar
+
+	* lunar/trunk/var/lib/lunar/plugins/optimize-wrappers.plugin:
+	  BUGFIX: wrappers were always enabled basically - ovverriding it
+	  globally or from DETAILS never worked.
+
+2006-03-21 19:10  sofar
+
+	* lunar/trunk/bin/lvu, lunar/trunk/etc/lunar/config,
+	  lunar/trunk/sbin/lunar,
+	  lunar/trunk/usr/share/doc/lunar/core-documentation/etc_lunar_config.html,
+	  lunar/trunk/var/lib/lunar/functions/download.lunar,
+	  lunar/trunk/var/lib/lunar/functions/init.lunar,
+	  lunar/trunk/var/lib/lunar/functions/messages.lunar,
+	  lunar/trunk/var/lib/lunar/functions/misc.lunar,
+	  lunar/trunk/var/lib/lunar/functions/modules.lunar,
+	  lunar/trunk/var/lib/lunar/functions/sources.lunar,
+	  lunar/trunk/var/lib/lunar/menu/dmodule.menu,
+	  lunar/trunk/var/lib/lunar/menu/download.menu,
+	  lunar/trunk/var/lib/lunar/plugins/download-generic.plugin,
+	  lunar/trunk/var/lib/lunar/unset.sh: Do not use := but preferably
+	  :- since it is safer (doesn't modify the defaulted var). Also wipe
+	  GCCWRAPPERS from all references.
+
+2006-03-21 16:06  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/ld: Reverting this since it
+	  breaks a tonload of compiles (and generally makes people unhappy).
+
+2006-03-17 04:30  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld,
+	  lunar/trunk/var/lib/lunar/compilers/make: Most needed fix - add ""
+	  around $@ in the wrappers.
+
+2006-03-14 05:20  sofar
+
+	* lunar/trunk/var/lib/lunar/plugins/optimize-wrappers.plugin: label
+	  change to make this intuitive.
+
+2006-03-14 05:15  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/c++,
+	  lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld,
+	  lunar/trunk/var/lib/lunar/compilers/make: Force CFLAGS, CXXFLAGS
+	  when calling cc/c++. Force LDFLAGS (with -Wl, part stripped) when
+	  calling ld. This works and should strip more programs, compile
+	  more with chosen optimizations. You may notice some flags passed
+	  twice to programs, but I consider this cosmetic and not harmful.
+
+2006-03-08 06:23  sofar
+
+	* lunar/trunk/var/lib/lunar/protected: indeed, typo
+
+2006-03-08 06:11  sofar
+
+	* lunar/trunk/var/lib/lunar/protected: Just making really sure that
+	  'basename' and 'cut' don't get deleted.
+
+2006-03-08 05:44  ratler
+
+	* lunar/trunk/var/lib/lunar/compilers/c++,
+	  lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld,
+	  lunar/trunk/var/lib/lunar/compilers/make,
+	  lunar/trunk/var/lib/lunar/functions/plugins.lunar: This fixes bug
+	  http://bugs.lunar-linux.org/view.php?id=71 In short during prepare
+	  install stage of coreutils, plugin and wrappers expected to find
+	  cut and basename which are part of coreutils. Those tools have
+	  been replaced with bash equivalent code.
+
+2006-03-06 05:38  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/misc.lunar: Making this
+	  algorithm a bit more agressive - compress all xxx.n files with
+	  gzip.
+
+2006-03-05 21:42  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/check.lunar,
+	  lunar/trunk/var/lib/lunar/functions/updatelog.lunar: Allow 'lunar
+	  fix' to display a report whether fixes were succesfull or not.
+
+2006-03-05 20:05  sofar
+
+	* lunar/trunk/etc/lunar/mirrors/LRESORT: bugfix: someone nuked
+	  spaces/tabs - also added be and fr-de.
+
+2006-03-05 06:58  sofar
+
+	* lunar/trunk/bin/lvu: Add a compile time calculator to 'lvu info' -
+	  it will use TimeDate - and display that this perl module is
+	  missing.
+
+2006-03-03 18:00  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/download.lunar: cosmetic - add
+	  source file to verbose_msg
+
+2006-03-02 22:12  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/c++,
+	  lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld,
+	  lunar/trunk/var/lib/lunar/compilers/make: New wrappers: these
+	  actually do some smart tinkering and call the non-wrapped version
+	  of $0 properly, preventing loops. Tested with e2fsprogs which
+	  showed the problem in the first place.
+
+2006-03-01 21:13  sofar
+
+	* lunar/trunk/sbin/lin: Reworked this a bit: give it some color,
+	  stderr loggin too, and readable now as well.
+
+2006-03-01 21:12  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/modules.lunar: Bugfix: exiled
+	  modules were able to be installed.
+
+2006-03-01 17:12  sofar
+
+	* lunar/trunk/var/lib/lunar/compilers/c++,
+	  lunar/trunk/var/lib/lunar/compilers/cc,
+	  lunar/trunk/var/lib/lunar/compilers/g++,
+	  lunar/trunk/var/lib/lunar/compilers/gcc,
+	  lunar/trunk/var/lib/lunar/compilers/ld,
+	  lunar/trunk/var/lib/lunar/compilers/make: Updated compiler
+	  wrappers: * always use COMPILER_PATH if possible, then use
+	  /usr/bin * use $CC $CXX $LD $MAKE is available, otherwise 'cc' and
+	  'c++' * optimize for speed a bit by using [[ ]]
+
+2006-03-01 16:03  sofar
+
+	* lunar/trunk/var/lib/lunar/plugins/optimize-wrappers.plugin: No, we
+	  cannot set COMPILER_PATH here because the compiler plugin might
+	  finish after this plugin, thus it won't work.
+
+2006-03-01 16:00  sofar
+
+	* lunar/trunk/var/lib/lunar/plugins/optimize-wrappers.plugin: *
+	  enable USE_WRAPPERS to be overridden by the user (`lunar set
+	  USE_WRAPPERS no`) * insert COMPILER_PATH env into PATH
+
+2006-03-01 08:23  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/optimize.lunar: Properly set
+	  BUILD - x86/x86_64 are easy. We also cast the $(uname -m) to
+	  lowercase as it should be, and append -gnu as well (making
+	  "sparc64-linux-gnu"). I'm contemplating making the BUILD variable
+	  read-only as you cannot really change it, just like you cannot
+	  change the PLATFORM. `arch` will always say i686 too even if you
+	  are `i386` optimized completely. Keeping this scheme will simplify
+	  things for the plugins.
+
+2006-03-01 07:13  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/build.lunar,
+	  lunar/trunk/var/lib/lunar/functions/check.lunar,
+	  lunar/trunk/var/lib/lunar/functions/depends.lunar,
+	  lunar/trunk/var/lib/lunar/functions/modules.lunar: Adding a
+	  'has_module_file' wrapper before 'run_module_file' - rewriting
+	  run_module_file - this way a module can have a BUILD.x86_64
+	  WITHOUT a BUILD. Only thing that is still required is a "DETAILS"
+	  file.
+
+2006-03-01 06:44  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/build.lunar: Add wrapper
+	  support back, some minor important optimizations.
+
+2006-03-01 06:28  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/optimize.lunar: Add
+	  'bad_flags' back for backward compatibility - this really should
+	  be retired in favour for a complete disabling call of all
+	  optimizations.
+
+2006-03-01 01:16  sofar
+
+	* lunar/trunk/var/lib/lunar/plugins/optimize-wrappers.plugin: Adding
+	  the optimization wrappers in here as a default-present system
+	  wrapper. This is needed to make wrappers work again with the
+	  latest changes.
+
+2006-03-01 00:18  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/optimize.lunar: Always set
+	  $PLATFORM and $BUILD according to the system (this is done BEFORE
+	  local config - so you can override them with `lunar set BUILD`
+	  etc.). Also allow the menu to be empty (i.e. no plugins
+	  installed).
+
+2006-02-28 06:08  sofar
+
+	* lunar/trunk/var/lib/lunar/functions/build.lunar: <v3rt1g0> sofar,
+	  any reason why you got rid of the version info text on install?
+
+2006-02-28 05:58  sofar
+
+	* lunar/trunk/sbin/lunar,
+	  lunar/trunk/var/lib/lunar/functions/aliases.lunar,
+	  lunar/trunk/var/lib/lunar/functions/build.lunar,
+	  lunar/trunk/var/lib/lunar/functions/check.lunar,
+	  lunar/trunk/var/lib/lunar/functions/main.lunar,
+	  lunar/trunk/var/lib/lunar/functions/misc.lunar,
+	  lunar/trunk/var/lib/lunar/functions/optimize.lunar,
+	  lunar/trunk/var/lib/lunar/functions/plugins.lunar,
+	  lunar/trunk/var/lib/lunar/functions/tracking.lunar,
+	  lunar/trunk/var/lib/lunar/functions/updatelog.lunar,
+	  lunar/trunk/var/lib/lunar/menu/optimize.menu: * New optimization
+	  architecture - based on plugins * All optimization menu's and code
+	  will move to moonbase plugins * removed optimize.menu *
+	  optimize.lunar is now only a plugin stub * pre-compile
+	  optimizations are set using the BUILD_BUILD plugin type * remove
+	  'optimize' main call to optimizations * Added "custom_filters" to
+	  allow on-the-fly compression of man-pages * Attempt to display
+	  success/fail log when checking modules * small performance tweak
+	  to unmap_device * bugfix for aliases code (bug was not be
+	  noticeable to people)
+
+2006-02-25 00:07  moe
+
+	* lunar/trunk/var/lib/lunar/functions/modules.lunar: Well well well
+	  .. you didn't think of tabs, bro .. But SURPRISE!!!!!11 WE DID!
+
+2006-02-14 20:16  sofar
+
+	* lunar/trunk/ChangeLog: updated
+
 2006-02-12 06:33  sofar
 
 	* lunar/trunk/var/lib/lunar/functions/aliases.lunar,
