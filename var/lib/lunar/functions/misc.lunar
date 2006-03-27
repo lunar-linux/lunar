@@ -30,13 +30,13 @@
 # usage    : VARIABLE=`directories < dirlistfile`
 # purpose  : to determine the directories from a given list
 directories() {
-  local ITEM
-  debug_msg "directories ($@)"
-  while read ITEM ; do
-    if [ -d "$ITEM" ] && [ ! -h "$ITEM" ] ; then
-      echo "$ITEM"
-    fi
-  done
+	debug_msg "directories ($@)"
+	local ITEM
+	while read ITEM ; do
+		if [ -d "$ITEM" ] && [ ! -h "$ITEM" ] ; then
+			echo "$ITEM"
+		fi
+	done
 }
 
 
@@ -44,13 +44,13 @@ directories() {
 # usage    : VARIABLE=`files < dirlistfile`
 # purpose  : to determine the ordinary files from a given list
 files() {
-  local ITEM
-  debug_msg "files ($@)"
-  while read ITEM ; do
-    if [ -f "$ITEM" ] && [ ! -h "$ITEM" ] ; then
-      echo "$ITEM"
-    fi
-  done
+	debug_msg "files ($@)"
+	local ITEM
+	while read ITEM ; do
+		if [ -f "$ITEM" ] && [ ! -h "$ITEM" ] ; then
+			echo "$ITEM"
+		fi
+	done
 }
 
 
@@ -58,13 +58,13 @@ files() {
 # usage    : VARIABLE=`symlinks < dirlistfile`
 # purpose  : to determine the symbolic links from a given list
 symlinks() {
-  local ITEM
-  debug_msg "symlinks ($@)"
-  while read ITEM ; do
-    if [ -h "$ITEM" ] ; then
-      echo "$ITEM"
-    fi
-  done
+	debug_msg "symlinks ($@)"
+	local ITEM
+	while read ITEM ; do
+		if [ -h "$ITEM" ] ; then
+			echo "$ITEM"
+		fi
+	done
 }
 
 
@@ -72,11 +72,11 @@ symlinks() {
 # usage    : VARIABLE=`dirnames < dirlistfile`
 # purpose  : info about the real locations of symlinks
 dirnames() {
-  local FILE
-  debug_msg "dirnames ($@)"
-  while read FILE ; do
-    dirname "$FILE"
-  done
+	debug_msg "dirnames ($@)"
+	local FILE
+	while read FILE ; do
+		dirname "$FILE"
+	done
 }
 
 
@@ -84,13 +84,13 @@ dirnames() {
 # usage    : VARIABLE=`exists < dirlistfile`
 # purpose  : filter out the non-existent files in a list
 exists() {
-  local ITEM
-  debug_msg "exists ($@)"
-  while read ITEM ; do
-    if [ -e "$ITEM" ] ; then
-      echo "$ITEM"
-    fi
-  done
+	debug_msg "exists ($@)"
+	local ITEM
+	while read ITEM ; do
+		if [ -e "$ITEM" ] ; then
+			echo "$ITEM"
+		fi
+	done
 }
 
 
@@ -98,48 +98,49 @@ exists() {
 # usage    : filter $FILE
 # purpose  : filter stdin with files/dirs/symlinks provided in file $1.
 filter() {
-  local TMP_GREPRE
-  debug_msg "filter ($@)"
-  if [ -f "$1" ] ; then
-    TMP_GREPRE=$(temp_create "fgrep")
-    directories < $1 | sed -e 's:^:^:g' -e 's:$:/:g'   > $TMP_GREPRE
-    files       < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
-    symlinks    < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
-    read
-    grep -v -f $TMP_GREPRE
-    temp_destroy $TMP_GREPRE
-  else
-    cat
-  fi
+	debug_msg "filter ($@)"
+	local TMP_GREPRE
+	if [ -f "$1" ] ; then
+		TMP_GREPRE=$(temp_create "fgrep")
+		directories < $1 | sed -e 's:^:^:g' -e 's:$:/:g'   > $TMP_GREPRE
+		files       < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
+		symlinks    < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
+		read
+		grep -v -f $TMP_GREPRE
+		temp_destroy $TMP_GREPRE
+	else
+		cat
+	fi
 }
 
 
 unmap_device()
 {
-    local DEVICE REAL
+	debug_msg "unmap_device($@)"
+	local DEVICE REAL
 	REAL=$(readlink -f $1)
-    for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
-        if [[ "$(readlink -f $DEVICE)" == "$REAL" ]]; then
-            echo $DEVICE
-            return 0
-        fi
-    done
-    echo $1
-    return 0
+	for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
+		if [[ "$(readlink -f $DEVICE)" == "$REAL" ]]; then
+			echo $DEVICE
+			return 0
+		fi
+	done
+	echo $1
+	return 0
 }
 
 
 find_pam_aware()  {
-  local MODULE SECTION
-  debug_msg "find_pam_aware ($@)"
+	debug_msg "find_pam_aware ($@)"
+	local MODULE SECTION
 
-  for MODULE in $(list_installed); do 
-    SECTION=$(find_section $MODULE)
-    if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] && 
-           [ "$MODULE" != "Linux-PAM" ]; then
-      echo $MODULE
-    fi
-  done < $MODULE_STATUS
+	for MODULE in $(list_installed); do 
+		SECTION=$(find_section $MODULE)
+		if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] && 
+			     [ "$MODULE" != "Linux-PAM" ]; then
+			echo $MODULE
+		fi
+	done < $MODULE_STATUS
 }
 
 
