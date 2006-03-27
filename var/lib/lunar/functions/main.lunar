@@ -24,10 +24,10 @@ renew() {
   message "${MESSAGE_COLOR}Starting update of installed modules${DEFAULT_COLOR}"
 
   purge_modules
-  
+
   export TMP_LIN_SUCCESS=$(temp_create "successful")
   export TMP_LIN_FAIL=$(temp_create "failed")
-      
+
   update_modules
 
   if [ "$AUTOFIX" == "on" ] ; then
@@ -89,7 +89,7 @@ rebuild()  {
 
   message  "${MESSAGE_COLOR}Starting non-recursive rebuild${DEFAULT_COLOR}"
   message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
-  echo run_fix
+  run_fix
 
   LIST=$(grep ":installed:" $MODULE_STATUS | cut -d: -f1 | grep -v moonbase | grep -v $LUNAR_MODULE)
 
@@ -112,7 +112,7 @@ rebuild()  {
   if [ -n "$QUEUE" ] ; then
     export TMP_LIN_SUCCESS=$(temp_create "successful")
     export TMP_LIN_FAIL=$(temp_create "failed")
-  
+
     message "${MESSAGE_COLOR}Starting rebuild of modules${DEFAULT_COLOR}"
     lin -c $QUEUE
 
@@ -162,7 +162,7 @@ expand_cache_safe() {(
       echo "$TARGET" >> $TMP_TARGETS_OK
     fi
   done
- 
+
   debug_msg "tar xjf $1 -P -k -T $TMP_TARGETS_OK"
   tar xjf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
 
@@ -303,7 +303,7 @@ lin_module()  {
     fi
 
     stop_logging
-    
+
     if [ -n "$LIN_ERROR" ] ; then
       if [ -f "$INSTALLWATCHFILE" ] ; then
         temp_destroy $INSTALLWATCHFILE
