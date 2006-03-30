@@ -41,7 +41,7 @@ optimize_menu()
 			$DIALOG --msgbox "There are no configurable compontents. Please update your moonbase!" 6 60
 			return
 		fi
-		PLUGIN=`$DIALOG --cancel-label "Close" --menu "Select a component for which to configure optimizations" 0 0 0 $(plugin_call OPTIMIZE_MENU)`
+		PLUGIN=`$DIALOG --cancel-label "Close" --default-item "$PLUGIN" --menu "Select a component for which to configure optimizations" 0 0 0 $(plugin_call OPTIMIZE_MENU)`
 		if [ $? != 0 ]; then
 			return
 		fi
