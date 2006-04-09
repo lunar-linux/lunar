@@ -46,5 +46,3 @@ plugin_module_check_ldd() {
 
 
 plugin_register MODULE_CHECK plugin_module_check_ldd
-
-
