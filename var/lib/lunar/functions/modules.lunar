@@ -107,19 +107,14 @@ create_module_index() {
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
         sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
         -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
-    # we search zlocal locally to make sure they get found:
-    find $MOONBASE/zlocal -type f -name DETAILS | \
-        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
-        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' >> $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    find $MOONBASE -type f -name DETAILS | \
-        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
-        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS ! -regex "$MOONBASE/zlocal/.*" \
+        -printf "%h\n" | sed "s:$MOONBASE/::g;s:^\(.*\)/\(.*\)$:\2\:\1:g" > $TMP_INDEX
   fi
-  
+
   # this should be safe enough:
   lock_file $MODULE_INDEX &&
   install -m644 $TMP_INDEX $MODULE_INDEX
