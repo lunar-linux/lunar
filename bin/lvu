@@ -456,7 +456,7 @@ function show_tree() {
       error_message "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${PROBLEM_COLOR} in ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
     return 1
   fi
-  
+
   # create dependency tracking file if needed
   if [ -z "$TMP_SEEN" ] ; then
     export TMP_SEEN=$(temp_create "seen")
@@ -477,17 +477,16 @@ function show_tree() {
       DEP=$(NEVER_ASK=1 unalias $1)
       echo "-$DEP"
     }
-    
+
     debug_msg "run_depends ($@)"
-    SECTION=$(grep "^$1:" $MODULE_INDEX | cut -d: -f2)
+    SECTION=$(find_section $1)
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
     CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-    if [ -f $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH
-    elif [ -f $MOONBASE/$SECTION/$1/DEPENDS ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS
+    if has_module_file $1 DEPENDS ; then
+      run_module_file $1 DEPENDS
     fi
   }
- 
+
   if [ -z "$1" ] ; then
     help
     exit 1
