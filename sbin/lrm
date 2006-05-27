@@ -182,6 +182,9 @@ lrm_module() {
     verbose_msg "Skipping removal of files completely (REAP=$REAP)"
   fi
 
+  # administration duty time:
+  remove_module $MODULE
+
   # time-out 2: POST_REMOVE
   if [ "$UPGRADE" != "on" ] ; then
     plugin_call BUILD_POST_REMOVE $MODULE
@@ -198,9 +201,6 @@ lrm_module() {
       /etc/init.d/xinetd restart
     fi
   fi
-
-  # administration duty time:
-  remove_module $MODULE
 
   message  "${LRM_COLOR}Removed${EXTEMP} module:"  \
            "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"

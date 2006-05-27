@@ -107,19 +107,14 @@ create_module_index() {
     grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
         sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
         -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
-    # we search zlocal locally to make sure they get found:
-    find $MOONBASE/zlocal -type f -name DETAILS | \
-        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
-        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' >> $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    find $MOONBASE -type f -name DETAILS | \
-        sed -e "s:$MOONBASE/::g" -e 's:/DETAILS::g' \
-        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
+    find $MOONBASE -type f -name DETAILS ! -regex "$MOONBASE/zlocal/.*" \
+        -printf "%h\n" | sed "s:$MOONBASE/::g;s:^\(.*\)/\(.*\)$:\2\:\1:g" > $TMP_INDEX
   fi
-  
+
   # this should be safe enough:
   lock_file $MODULE_INDEX &&
   install -m644 $TMP_INDEX $MODULE_INDEX
@@ -232,7 +227,10 @@ run_details() {
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
     MODULE_CONFIG=${MODULE_CONFIG:-$DEPENDS_CONFIG/$MODULE}
     MODULE_PREFIX=${MODULE_PREFIX:-$DEFAULT_PREFIX}
-
+    if [ "$MODULE_PREFIX" != "$DEFAULT_PREFIX" ]; then
+      export PKG_CONFIG_PATH=$MODULE_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+      export PATH=$PATH:$MODULE_PREFIX/bin
+    fi
     return 0
   fi
 }
@@ -287,7 +285,7 @@ module_license_accepted() {
   #
   # valid licenses currently are:
   # osi == gpl gpl2 lgpl gfdl bsd mpl cc apache artistic qpl
-  
+
   debug_msg "module_license_accepted ($@)"
 
   local L LICENSE IS_OSI
@@ -297,7 +295,7 @@ module_license_accepted() {
     debug_msg "assuming LICENSE=\"osi\""
     LICENSE="osi"
   fi
-  
+
   # check for osi license
   case $LICENSE in
     gpl|gpl2|lgpl|gfdl|bsd|mpl|cc|apache|artistic|qpl|osi)
@@ -312,7 +310,7 @@ module_license_accepted() {
   # * accept "all" will accept anything
   if [[ -n "$ACCEPTED_LICENSES" ]]; then
     for L in $ACCEPTED_LICENSES; do
-      if [[ "$L" == "osi" ]] && "$IS_OSI" == "yes" ]] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
+      if [[ "$L" == "osi" ]] && [[ "$IS_OSI" == "yes" ]] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
         # explicitly accepted license!
 	debug_msg "module_license_accepted: \"$LICENSE\" is explicitly accepted"
         return 0

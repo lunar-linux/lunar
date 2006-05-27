@@ -34,7 +34,7 @@ lget_unlock() {
 
 
 download_url() {
-    local RETVAL
+	local RETVAL
 	debug_msg "download_url($@)"
 	verbose_msg "trying to download \"$1/$2\""
 	connect &&
@@ -92,7 +92,7 @@ download_module() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
 					# make sure the URL has ONE "/" at the end
-					ALL_URLS="$ALL_URLS $(echo "$1/" | sed "s:[/][/]$:/:g")"
+					ALL_URLS="$ALL_URLS $(echo "$1/" | sed "s:[/]*$:/:g")"
 				fi
 			fi
 		}
@@ -129,7 +129,7 @@ download_module() {
 					fi
 				done
 				add_url $LRESORT_URL
-		    fi
+			fi
 
 			for URL in $ALL_URLS; do
 				# and download

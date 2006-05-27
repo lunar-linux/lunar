@@ -479,12 +479,11 @@ function show_tree() {
     }
     
     debug_msg "run_depends ($@)"
-    SECTION=$(grep "^$1:" $MODULE_INDEX | cut -d: -f2)
+    SECTION=$(find_section $1)
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
     CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-    if [ -f $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS.$CPU_ARCH
-    elif [ -f $MOONBASE/$SECTION/$1/DEPENDS ] ; then
-      . $MOONBASE/$SECTION/$1/DEPENDS
+    if has_module_file $1 DEPENDS ; then
+      run_module_file $1 DEPENDS
     fi
   }
  
@@ -762,8 +761,8 @@ diff_module() {
 	  message "no local copy of \"$MODULE\" exists"
 	  exit 1
     fi
-	ZSECTION=$(echo $SECTION | sed 's/zlocal/\//g')
-    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff " | sed "s|$ZSECTION\/||g"
+	ZSECTION=$(echo "$SECTION/" | sed 's/^zlocal\///g;s/\/$//')
+    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | grep -v "^diff " | sed "s:$MOONBASE/$NZSECTION/::g;s:$MOONBASE/zlocal/$ZSECTION/::g"
   fi
 }
 
