@@ -285,7 +285,7 @@ module_license_accepted() {
   #
   # valid licenses currently are:
   # osi == gpl gpl2 lgpl gfdl bsd mpl cc apache artistic qpl
-  
+
   debug_msg "module_license_accepted ($@)"
 
   local L LICENSE IS_OSI
@@ -295,7 +295,7 @@ module_license_accepted() {
     debug_msg "assuming LICENSE=\"osi\""
     LICENSE="osi"
   fi
-  
+
   # check for osi license
   case $LICENSE in
     gpl|gpl2|lgpl|gfdl|bsd|mpl|cc|apache|artistic|qpl|osi)
@@ -310,7 +310,7 @@ module_license_accepted() {
   # * accept "all" will accept anything
   if [[ -n "$ACCEPTED_LICENSES" ]]; then
     for L in $ACCEPTED_LICENSES; do
-      if [[ "$L" == "osi" ]] && "$IS_OSI" == "yes" ]] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
+      if [[ "$L" == "osi" ]] && [[ "$IS_OSI" == "yes" ]] || [ "$L" == "all" ] || [ "$LICENSE" == "$L" ] ; then
         # explicitly accepted license!
 	debug_msg "module_license_accepted: \"$LICENSE\" is explicitly accepted"
         return 0
