@@ -28,10 +28,11 @@
 # usage    : list_sections
 # purpose  : list the moonbase sections, filter out the specific files
 list_sections() {
-  debug_msg "list_sections ($@)"
-  check_module_index
-  cut -d: -f2 < $MODULE_INDEX | sort | uniq
-  return 0
+	debug_msg "list_sections ($@)"
+	check_module_index
+	cut -d: -f2 < $MODULE_INDEX | sort | uniq
+	find $MOONBASE/zlocal -name DETAILS | sed "s:^$MOONBASE\/::g;s:\/[^\/]*\/DETAILS$::g" | sort | uniq
+	return 0
 }
 
 
@@ -39,19 +40,26 @@ list_sections() {
 # usage    : list_modules $SECTION
 # purpose  : list the modules in a section, filter out the specific files
 list_modules() {
-  debug_msg "list_modules ($@)"
-  if [[ -z "$1" ]] ; then
-    error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}"
-    exit 1
-  fi
+	debug_msg "list_modules ($@)"
+	if [[ -z "$1" ]] ; then
+		error_message "${PROBLEM_COLOR}list_modules(): no SECTION defined!${DEFAULT_COLOR}"
+		exit 1
+	fi
 
-  if ! grep -q ":$1$" $MODULE_INDEX ; then
-    error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
-    exit 1
-  fi
+	if [[ ! -d $MOONBASE/$1 ]] ; then
+		error_message "${PROBLEM_COLOR}list_modules(): no such section \"$1\"!${DEFAULT_COLOR}"
+		exit 1
+	fi
 
-  grep ":$1$" $MODULE_INDEX | cut -d: -f1
-  return 0
+	if grep -q ":$1$" $MODULE_INDEX; then
+		grep ":$1$" $MODULE_INDEX | cut -d: -f1
+		return 0
+	else
+	 (
+		 cd $MOONBASE/$1
+		 find . -maxdepth 2 -name DETAILS -type f | sed 's/\.\///g;s/\/DETAILS$//g'
+	 )
+	fi
 }
 
 
@@ -59,11 +67,11 @@ list_modules() {
 # usage    : list_moonbase
 # purpose  : returns the names of all modules in moonbase
 list_moonbase() {
-  local SECTION
-  debug_msg "list_moonbase ($@)"
-  for SECTION in $(list_sections) ; do
-    list_modules $SECTION
-  done				
+	local SECTION
+	debug_msg "list_moonbase ($@)"
+	for SECTION in $(list_sections) ; do
+		list_modules $SECTION
+	done
 }
 
 
@@ -71,8 +79,8 @@ list_moonbase() {
 # usage    : list_installed
 # purpose  : return a list of installed (or held) modules
 list_installed() {
-  debug_msg "list_installed ($@)"
-  grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
+	debug_msg "list_installed ($@)"
+	grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
 }
 
 
