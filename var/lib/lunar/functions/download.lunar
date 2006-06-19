@@ -36,7 +36,7 @@ lget_unlock() {
 download_url() {
 	local RETVAL
 	debug_msg "download_url($@)"
-	verbose_msg "trying to download \"${1%%/}/${2}\""
+	verbose_msg "trying to download \"${2}\" from \"${1}\""
 	connect &&
 	plugin_call SOURCE_DOWNLOAD $1 $2 $3
 	RETVAL=$?
@@ -45,7 +45,6 @@ download_url() {
 	fi
 	return $RETVAL
 }
-
 
 
 download_module() {
@@ -91,8 +90,7 @@ download_module() {
 		add_url() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
-					# make sure the URL has ONE "/" at the end
-					ALL_URLS="$ALL_URLS $(echo "$1/" | sed "s:[/]*$:/:g")"
+					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
 		}
