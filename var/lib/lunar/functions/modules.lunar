@@ -164,37 +164,51 @@ function check_module_index() {
 # purpose  : finds the section of a given module as parameter
 # returns  : (0) on success, (1) on failure, errors on stdout
 find_section() {
-  local SECTION SECTIONS
-  debug_msg "find_section ($@)"
+	local SECTION SECTIONS
+	debug_msg "find_section ($@)"
 
-  if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
-    if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
-      if [[ -n "$SECTION" ]]; then
-        echo $SECTION
-        return 0
-      fi
-    fi
-  fi
+	# if using ZLOCAL, we must search there first
+	if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
+		if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
+			if [[ -n "$SECTION" ]]; then
+				echo $SECTION
+				return 0
+			fi
+		fi
+	fi
 
-  SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
-  if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
-    echo "$SECTION"
-    return 0
-  fi
+	# otherwise check for ordinary modules named that way
+	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
+	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
+		echo "$SECTION"
+		return 0
+	fi
 
-  if ! check_module_index ; then
-    # shave some time off not trying the rest of the code below since that
-    # is useless
-    return 1
-  fi
+	# assuming we're not using ZLOCAL, we haven't looked there yet!
+	# perhaps it's a zlocal module ? search zlocal for it now
+	if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
+		if [[ -n "$SECTION" ]]; then
+			echo $SECTION
+			return 0
+		fi
+	fi
 
-  SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
-  if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
-    echo "$SECTION"
-    return 0
-  fi
+	# still not found? refresh module index... this may take a while
+	if ! check_module_index ; then
+		# shave some time off not trying the rest of the code below since that
+		# is useless
+		return 1
+	fi
 
-  return 1
+	# and search again, this should be quick now
+	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
+	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
+		echo "$SECTION"
+		return 0
+	fi
+
+	# bummer, not found
+	return 1
 }
 
 
