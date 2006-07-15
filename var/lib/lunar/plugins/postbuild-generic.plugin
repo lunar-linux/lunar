@@ -38,7 +38,6 @@ gather_docs()
   DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
   if [ -d "$SOURCE_DIRECTORY" ] ; then
     cd $SOURCE_DIRECTORY
-    invoke_installwatch
     mkdir -p $DOC_DIR
     # For each parameter that is an existing file
     for FILE in ${@}; do
@@ -48,14 +47,13 @@ gather_docs()
         install -D -m 644 ${FILE} ${DOC_DIR}/${FILE}
       elif [ -d ${FILE} ] ; then
         # copy the directory to the docdir
-	verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
-	cp -a ${FILE} ${DOC_DIR}/
+        verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
+        cp -a ${FILE} ${DOC_DIR}/
       fi
     done
-    devoke_installwatch
-	# do not return 2 here: this function is called directly and
-	# must return true (0) here
-	return 0
+        # do not return 2 here: this function is called directly and
+        # must return true (0) here
+        return 0
   fi
   return 2
 }
