@@ -73,8 +73,10 @@ plugin_initd_post_build()
     CHKCONFIG=`grep '^# chkconfig:' /etc/init.d/$INITDSCRIPT | cut -d : -f 2-2`
     if `echo $CHKCONFIG | grep -q $(/sbin/runlevel | cut -d ' ' -f 2-2) -`
     then
-      ( cd / && /etc/init.d/$INITDSCRIPT stop )
-      ( cd / && /etc/init.d/$INITDSCRIPT start )
+      if [ "${LUNAR_RESTART_SERVICES:=on}" == "on" ]; then
+        ( cd / && /etc/init.d/$INITDSCRIPT stop )
+        ( cd / && /etc/init.d/$INITDSCRIPT start )
+      fi
     fi
 
   done
