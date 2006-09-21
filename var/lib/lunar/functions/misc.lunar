@@ -166,3 +166,9 @@ custom_filters()
 		cat -
 	fi
 }
+
+
+source_basename()
+{
+	echo $1 | sed 's/.tar.\(bz2\|gz\)$//g'
+}
