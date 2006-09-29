@@ -172,3 +172,13 @@ source_basename()
 {
 	echo $1 | sed 's/.tar.\(bz2\|gz\)$//g'
 }
+
+
+last_kernel()
+{
+	if [ -f /usr/src/linux/include/linux/utsrelease.h ]; then
+		grep UTS_RELEASE /usr/src/linux/include/linux/utsrelease.h | cut -d'"' -f2
+	else
+		grep UTS_RELEASE /usr/src/linux/include/linux/version.h | cut -d'"' -f2
+	fi
+}
