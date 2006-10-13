@@ -26,7 +26,7 @@ select_mirror()  {
            --ok-label  "Select"            \
            --menu                          \
            ""                              \
-           0 70 10                         \
+           0 80 10                         \
            $(mirror_list $1)
 }
 
@@ -39,20 +39,22 @@ mirror_menu()  {
    SF_HELP="Select mirror for downloading SourceForge sources."
    LR_HELP="Select the mirror for a last resort download place."
     X_HELP="Select mirror for downloading XFree86 related sources."
+ XORG_HELP="Select mirror for downloading XOrg related sources."
       HELP="Selecting a mirror site can speed your downloads."
 
-    COMMAND=`$DIALOG  --title "Mirror Menu"     \
-                      --ok-label      "Select"  \
-                      --cancel-label  "Exit"    \
-                      --item-help               \
-                      --menu     ""  0 0 0      \
-                      "GNOME"    ""  "$N_HELP"  \
-                      "GNU"      ""  "$G_HELP"  \
-                      "KDE"      ""  "$K_HELP"  \
-                      "KERNEL"   ""  "$L_HELP"  \
-                      "SFORGE"   ""  "$SF_HELP" \
-                      "LRESORT"  ""  "$LR_HELP" \
-                      "XFREE86"  ""  "$X_HELP"`
+    COMMAND=`$DIALOG  --title "Mirror Menu"        \
+                      --ok-label      "Select"     \
+                      --cancel-label  "Exit"       \
+                      --item-help                  \
+                      --menu     ""  0 0 0         \
+                      "GNOME"    ""  "$N_HELP"     \
+                      "GNU"      ""  "$G_HELP"     \
+                      "KDE"      ""  "$K_HELP"     \
+                      "KERNEL"   ""  "$L_HELP"     \
+                      "SFORGE"   ""  "$SF_HELP"    \
+                      "LRESORT"  ""  "$LR_HELP"    \
+                      "XFREE86"  ""  "$X_HELP"     \
+                      "XORG"     ""  "$XORG_HELP"`											
 
   do
     case  $COMMAND in
@@ -61,6 +63,7 @@ mirror_menu()  {
           KDE)      MIRROR="     KDE_URL"    ;;
           KERNEL)   MIRROR="  KERNEL_URL"    ;;
           XFREE86)  MIRROR=" XFREE86_URL"    ;;
+          XORG)     MIRROR="    XORG_URL"    ;;
           SFORGE)   MIRROR="  SFORGE_URL"    ;;
           LRESORT)  MIRROR=" LRESORT_URL"    ;;
     esac

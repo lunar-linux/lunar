@@ -97,5 +97,6 @@ unset VIOLET
 unset VOYEUR
 unset WHITE
 unset XFREE86_URL
+unset XORG_URL
 unset XTRA
 unset YELLOW
