@@ -27,33 +27,37 @@ plugin_source_download_generic()  {
   TMP_FILE=$TMPDIR/$2
 
   if [ "$FTP_ACTIVE" == "off" -o "$FTP_PASSIVE" == "on" ] ; then
-    WGET_FTP_CONNECTION="--passive-ftp"
+    WGET_OPTS+=" --passive-ftp"
   fi
 
   if [ "$CONTINUE" == "off" ] ; then
     erase $TMP_FILE
   else
-    WGET_PARTIAL="--continue"
+    WGET_OPTS+=" --continue"
   fi
 
   if [ "$USE_CACHE" == "off" ] ; then
-    WGET_CACHE="--cache=off"
+    WGET_OPTS+=" --cache=off"
   else
-    WGET_CACHE="--cache=on"
+    WGET_OPTS+=" --cache=on"
   fi
 
   if [ -n "$DOWNLOAD_RATE" ] ; then
-    WGET_RATE="--limit-rate=${DOWNLOAD_RATE}"
+    WGET_OPTS+=" --limit-rate=${DOWNLOAD_RATE}"
   fi
 
-  WGET_RETRIES="--tries=${NUM_RETRY:-5}"
+  if [ ${1:0:8} == "https://" ]; then
+    WGET_OPTS+=" --no-check-certificate"
+  fi
+
+  WGET_OPTS+=" --tries=${NUM_RETRY:-5}"
 
   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  verbose_msg "calling \"wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL \"$URL$2\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget $WGET_CACHE $WGET_RATE $WGET_FTP_CONNECTION $WGET_RETRIES $WGET_PARTIAL "$URL$2" --output-document "$TMP_FILE" ; then
+  verbose_msg "calling \"wget $WGET_OPTS \"$URL$2\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget $WGET_OPTS "$URL$2" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
