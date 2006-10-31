@@ -36,7 +36,7 @@ function find_depends() {
       if ! grep -qx "$DEP" $TMP_FDEPS ; then
         debug_msg "$DEP"
         echo "$DEP" >> $TMP_FDEPS
-        if [[ "$(grep "^$:1$DEP:" $DEPENDS_CACHE | cut -d: -f3)" == "required" ]] ; then
+        if [[ "$(grep "^$1:$DEP:" $DEPENDS_CACHE | cut -d: -f3)" == "required" ]] ; then
           echo "$DEP"
           find_depends_intern "$DEP"
         elif module_installed "$DEP" ; then
