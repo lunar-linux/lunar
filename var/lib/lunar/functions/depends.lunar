@@ -398,10 +398,10 @@ create_depends_cache()
 
     # fast method for re-creating the depends.cache, might take long though
     for DEPFILE in $DEPFILES ; do
-      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" -e 's/.*\/\([^\/]*\)$/\1/') . $DEPFILE
+      TMP=${DEPFILE%/*} MODULE=${TMP##*/} . $DEPFILE
     done > $TMP_DEP_CACHE &&
     install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
-  
+
     temp_destroy $TMP_DEP_CACHE
   else
     verbose_msg "Skipping depends cache regeneration"
