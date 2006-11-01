@@ -105,10 +105,10 @@ update_plugin() {
 update_plugins() {
 	local MODULE
 	debug_msg "update_plugins($@)"
-	# rework all plugins	
+	# find all plugins in moonbase and run update_plugin() on them
 	verbose_msg "Updating plugins"
-	for MODULE in $(list_moonbase); do
-		update_plugin $MODULE
+	find $MOONBASE -wholename "*/plugin.d/*.plugin" | while read PLUGIN ; do
+		update_plugin `basename $(echo $PLUGIN | sed 's/\/plugin.d\/.*//g')`
 	done
 }
 

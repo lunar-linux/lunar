@@ -96,13 +96,9 @@ create_md5sum_log()  {
   debug_msg "create_md5sum_log ($@)"
 
   rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
-  
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-  files < $INSTALL_LOGS/$MODULE-$VERSION | while read FILE ; do
-    md5sum "$FILE" >> $MD5SUM_LOGS/$MODULE-$VERSION
-  done
-
+  files < $INSTALL_LOGS/$MODULE-$VERSION | xargs md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
 }
 
 create_install_cache() {
@@ -124,7 +120,7 @@ finish_install() {
   create_install_log    &&
   create_md5sum_log     &&
   create_install_cache  &&
-  
+
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
 }
