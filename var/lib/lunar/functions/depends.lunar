@@ -29,19 +29,19 @@ function find_depends() {
   debug_msg "find_depends ($@)"
 
   find_depends_intern() {
-    local DEP STATE LINE
-    awk -F: -v mod=$1 '{if ($1==mod){print $2,$3}}' $DEPENDS_CACHE | while read DEP STATE ; do
-      DEP=$(unalias $DEP)
+    local DEP LINE
+    for DEP in $(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' $DEPENDS_CACHE) ; do
+      DEP=$(unalias "$DEP")
       # this is our shortcut out:
       if ! grep -qx "$DEP" $TMP_FDEPS ; then
         debug_msg "$DEP"
         echo "$DEP" >> $TMP_FDEPS
-        if [[ "$STATE" == "required" ]] ; then
-          echo $DEP
-          find_depends_intern $DEP
-        elif module_installed $DEP ; then
-          echo $DEP
-          find_depends_intern $DEP
+        if [[ "$(grep "^$1:$DEP:" $DEPENDS_CACHE | cut -d: -f3)" == "required" ]] ; then
+          echo "$DEP"
+          find_depends_intern "$DEP"
+        elif module_installed "$DEP" ; then
+          echo "$DEP"
+          find_depends_intern "$DEP"
         fi
       fi
     done
@@ -105,14 +105,14 @@ in_depends()  {
   # Was $2 presented as a dependency for module $1
   return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
 }
-                                                                                
-                                                                                
+
+
 remove_depends() {
   debug_msg "remove_depends ($@)"
   lock_file $DEPENDS_STATUS_BACKUP &&
   lock_file $DEPENDS_STATUS        ||
   return 1
-                                                                                
+
   if [ -n "$2" ] ; then
     if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
       grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
@@ -125,11 +125,11 @@ remove_depends() {
   fi
 
   cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
-                                                                                
+
   unlock_file $DEPENDS_STATUS &&
   unlock_file $DEPENDS_STATUS_BACKUP
 }
-                                                                                
+
 
 add_depends() {
   debug_msg "add_depends ($@)"
@@ -141,15 +141,15 @@ add_depends() {
 	else
       verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
 	fi
-                                                                                
+
     echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
     cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP              &&
     unlock_file $DEPENDS_STATUS                            &&
     unlock_file $DEPENDS_STATUS_BACKUP
   fi
 }
-                                                                                
-     
+
+
 run_depends() {
   debug_msg "run_depends ($@)"
   # local definitions of depends and optional_depends!
@@ -178,7 +178,7 @@ run_depends() {
       fi
     fi
   }
-                                                                                
+
   optional_depends()  {
   debug_msg "  optional_depends ($@)"
     local DEP DEFAULT DEPMOD_AVAIL
@@ -189,7 +189,7 @@ run_depends() {
 
     DEP=$(unalias $1)
     if ! grep -q "^$MODULE:$DEP:" $DEPENDS_STATUS ; then
-                                                                               
+
       if module_exiled $DEP ; then
         verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
         add_depends "$MODULE" "$DEP" "off" "optional" "$2" "$3"
@@ -221,7 +221,7 @@ run_depends() {
       fi
     fi
   }
-                                                                                
+
   grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
   if has_module_file $MODULE DEPENDS ; then
     if [ -n "$SINGLE_MODULE" ] ; then
@@ -267,14 +267,14 @@ satisfy_depends()  {
       fi
     fi
   done
-  
+
   # then parse $OPTS
   while read LINE; do
     DEP_MODULE=$(echo $LINE | cut -d: -f2)
     DEP_STATUS=$(echo $LINE | cut -d: -f3)
         DEP_ON=$(echo $LINE | cut -d: -f5)
        DEP_OFF=$(echo $LINE | cut -d: -f6)
-                                                                                
+
     if [ -n "$FIX" ] ; then
       if DEP_STATUS="on" ; then
         lin $FIX $DEP_MODULE
@@ -292,7 +292,7 @@ satisfy_depends()  {
       OPTS="$OPTS $DEP_ON"
     fi
   done < $TMP_FILE
-                                            
+
   temp_destroy $TMP_FILE
 }
 
@@ -398,10 +398,10 @@ create_depends_cache()
 
     # fast method for re-creating the depends.cache, might take long though
     for DEPFILE in $DEPFILES ; do
-      MODULE=$(echo $DEPFILE | sed -e "s:$MOONBASE/::g" -e "s:/DEPENDS::g" -e 's/.*\/\([^\/]*\)$/\1/') . $DEPFILE
+      TMP=${DEPFILE%/*} MODULE=${TMP##*/} . $DEPFILE
     done > $TMP_DEP_CACHE &&
     install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
-  
+
     temp_destroy $TMP_DEP_CACHE
   else
     verbose_msg "Skipping depends cache regeneration"

@@ -11,9 +11,49 @@
 #                                                          #
 ############################################################
 #                                                          #
-# Copyrighted Auke Kok 2003 under GPLv2                    #
+# Copyrighted Auke Kok 2006 under GPLv2                    #
 #                                                          #
 ############################################################
+
+
+# function: add_priv_group
+# usage   : add_priv_group groupname [addgroupopts [addgroupopts]...]
+# info    : adds groupname and passes addgroupopts to 'addgroup'
+function add_priv_group() {
+  local GROUPNAME
+  debug_msg "function add_priv_group ($@)"
+
+  if [ -n "$INSTALLWATCHFILE" ] ; then
+    devoke_installwatch
+  fi
+  GROUPNAME=$1
+
+  if [ -z "$GROUPNAME" ] ; then
+    message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  if grep -q "^$GROUPNAME:" /etc/group ; then
+    verbose_msg "group \"$GROUPNAME\" already exists, not creating"
+  else
+    # add the group:
+    for (( N=0 ; N<100 ; N++)) ; do
+      if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
+        break
+      fi
+    done
+    if [ "$N" == "100" ] ; then
+      message "${PROBLEM_COLOR}!add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
+      exit 1
+    fi
+    verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
+    groupadd -g $N $GROUPNAME
+  fi
+
+  if [ -n "$INSTALLWATCHFILE" ] ; then
+    invoke_installwatch
+  fi
+}
 
 
 # function: add_priv_user
@@ -45,22 +85,11 @@ function add_priv_user() {
     if grep -q "^$GROUPNAME:" /etc/group ; then
       verbose_msg "group \"$GROUPNAME\" already exists, not creating"
     else
-    
-      # add the group:
-      for (( N=0 ; N<100 ; N++)) ; do
-        if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
-	  break
-	fi
-      done
-      if [ "$N" == "100" ] ; then
-        message "${PROBLEM_COLOR}!add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
-	exit 1
+      if ! add_priv_group $GROUPNAME ; then
+        exit 1
       fi
-      verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
-      groupadd -g $N $GROUPNAME
-      
     fi
-    
+
     # add the user:
     for (( N=0 ; N<100 ; N++)) ; do
       if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$" )" ] ; then
@@ -71,12 +100,12 @@ function add_priv_user() {
       message "${PROBLEM_COLOR}!add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
       exit 1
     fi
-    
+
     shift
-    
+
     verbose_msg "creating user \"$USERNAME\" (opts=\"-u $N -g $GROUPNAME $@\")"
     useradd -u $N -g $GROUPNAME $USERNAME $@
-    
+
   fi
 
   if [ -n "$INSTALLWATCHFILE" ] ; then
