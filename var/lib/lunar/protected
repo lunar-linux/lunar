@@ -103,6 +103,7 @@
 ^/usr/bin/md5sum
 ^/usr/bin/ranlib
 ^/usr/bin/sha1sum
+^/usr/bin/tee
 ^/usr/include/bits/syscall.h
 ^/usr/include/gnu/stubs.h
 ^/usr/lib/installwatch.so
