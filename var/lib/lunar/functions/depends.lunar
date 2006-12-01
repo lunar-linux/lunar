@@ -138,9 +138,9 @@ add_depends() {
     lock_file $DEPENDS_STATUS                              &&
     if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
       grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
-	else
+    else
       verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
-	fi
+    fi
 
     echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
     cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP              &&
@@ -169,9 +169,9 @@ run_depends() {
         message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
         return 1
       else
-        message "${MODULE_COLOR}${MODULE}: ${DEFAULT_COLOR}" \
-                "Adding required dependency${FILE_COLOR}"   \
-                "$DEP ${DEFAULT_COLOR}"
+        message "${MODULE_COLOR}${MODULE}:${DEFAULT_COLOR}" \
+                "${MESSAGE_COLOR}Adding required dependency${DEFAULT_COLOR}" \
+                "${MODULE_COLOR}$DEP${DEFAULT_COLOR}"
         add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
         lin --deps $DEP
         echo "$DEP" >> $TEMP_PREPAREDDEPS
