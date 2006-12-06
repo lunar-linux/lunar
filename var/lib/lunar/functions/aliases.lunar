@@ -48,7 +48,8 @@ unalias() {
   debug_msg "unalias: starting selection loop"
   error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
   while true ; do
-    error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module${DEFAULT_COLOR}"
+    error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module"
+    error_message "Press [ENTER] to select choice #1 (the recommended choice).${DEFAULT_COLOR}"
     ((N=0))
     for TARGET in $TARGETS ; do
       ((N++))
@@ -62,8 +63,8 @@ unalias() {
       set_local_config `echo LUNAR_ALIAS_${1:1}` $TARGET
       echo $TARGET
       return
-    # then the number
-    elif [[ -n "$CHOICE" ]] && [[ -n "${TARGETBYNUM[$CHOICE]}" ]] ; then
+    # then the number, resolving the default
+    elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]] ; then
       verbose_msg "Stored alias mapping $1 -> ${TARGETBYNUM[$CHOICE]}"
       set_local_config `echo LUNAR_ALIAS_${1:1}` ${TARGETBYNUM[$CHOICE]}
       echo ${TARGETBYNUM[$CHOICE]}
