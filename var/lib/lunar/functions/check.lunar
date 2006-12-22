@@ -119,12 +119,18 @@ run_fix()  {
 		return
 	fi
 
-	# discover BROKEN modules
-	for MODULE in $MODULES ; do
-		if ! run_checks $MODULE ; then
-			 BROKEN_MODULES=( ${BROKEN_MODULES[@]} $MODULE )
-		fi
-	done
+	# discover BROKEN modules and note them if we plan on fixing them
+	if [[ ! -n "$NOFIX" ]] ; then
+		for MODULE in $MODULES ; do
+			if ! run_checks $MODULE ; then
+				 BROKEN_MODULES=( ${BROKEN_MODULES[@]} $MODULE )
+			fi
+		done
+	else
+		for MODULE in $MODULES ; do
+			run_checks $MODULE
+		done
+	fi
 
 	# if we were called with --fixdepends then we may skip the rest
 	if [ -n "$FIXDEPENDS" ] ; then
@@ -134,30 +140,32 @@ run_fix()  {
 	export TMP_LIN_SUCCESS=$(temp_create "successful")
 	export TMP_LIN_FAIL=$(temp_create "failed")
 
-	for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do
-		if module_installed $MODULE && ! module_held $MODULE ; then
-			if ! run_checks $MODULE ; then
-				if [[ -n "$NOFIX" ]] ; then
-					continue
-				fi
-				NEVER_ASK=1 DEPS_ONLY= satisfy_depends      &&
-				NEVER_ASK=1 DEPS_ONLY= FIX= satisfy_depends &&
-
+        if [[ ! -n "$NOFIX" ]] ; then
+		for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do
+			if module_installed $MODULE && ! module_held $MODULE ; then
 				if ! run_checks $MODULE ; then
-					verbose_msg "Attempting to recompile \"$MODULE\""
-					if ! FIX= lin --compile $MODULE ; then
-						verbose_msg "Attempt to recompile \"$MODULE\" FAILED"
-						continue
-					elif ! run_checks $MODULE ; then
-						verbose_msg "Attempt to recompile \"$MODULE\" succeeded but \"$MODULE\" still is broken!"
-						continue
+					NEVER_ASK=1 DEPS_ONLY= satisfy_depends      &&
+					NEVER_ASK=1 DEPS_ONLY= FIX= satisfy_depends &&
+
+					if ! run_checks $MODULE ; then
+						verbose_msg "Attempting to recompile \"$MODULE\""
+						if ! FIX= lin --compile $MODULE ; then
+							verbose_msg "Attempt to recompile \"$MODULE\" FAILED"
+							continue
+						elif ! run_checks $MODULE ; then
+							verbose_msg "Attempt to recompile \"$MODULE\" succeeded but \"$MODULE\" still is broken!"
+							continue
+						fi
 					fi
 				fi
 			fi
-		fi
-	done
+		done
+		
+		display_update_log fix
+	else
+		display_update_log nofix
+	fi
 
-	display_update_log fix
 	temp_destroy $TMP_LIN_SUCCESS
 	temp_destroy $TMP_LIN_FAIL
 }
