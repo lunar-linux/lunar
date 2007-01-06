@@ -230,15 +230,15 @@ run_details() {
     return 1
   else
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
-    if [[ ! -f $SCRIPT_DIRECTORY/DETAILS ]] ; then
+    if ! has_module_file $1 DETAILS ; then
       error_message  "${PROBLEM_COLOR}Module ${MODULE_COLOR}${1}" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}has no ${FILE_COLOR}DETAILS" \
                "${DEFAULT_COLOR}${PROBLEM_COLOR}file!${DEFAULT_COLOR}"
       return 1
     fi
-   
+
     if [[ -z "$WANT_VERSION" ]] ; then
-      . $SCRIPT_DIRECTORY/DETAILS &> /dev/null || return -1
+      run_module_file $1 DETAILS &> /dev/null || return -1
     else
       TMP_DETAILS=$(temp_create "details.version")
       cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^\s*VERSION=/d' > $TMP_DETAILS

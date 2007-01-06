@@ -131,7 +131,7 @@ import_snapshot()  {
     ( mk_source_dir $SOURCE_DIRECTORY )
     tar xj -C $SOURCE_DIRECTORY -f $SNAPSHOT 2> /dev/null
     cd $SOURCE_DIRECTORY
-    
+
 	message "${MESSAGE_COLOR}Restoring lunar configuration${DEFAULT_COLOR}"
     cp -a etc/lunar /etc
 
@@ -147,7 +147,7 @@ import_snapshot()  {
       echo $MOD >>$TMP_QUEUE
       echo $MOD
     done
-    
+
     if query "Do you wish to edit the install queue ? " n ; then
       edit_file $TMP_QUEUE
     fi
@@ -184,17 +184,18 @@ md5sum_files() {
 
 
 alien() {
-  message "In a few minutes I will print files found on this disk that were not"
-  message "installed by lunar. This is not a security feature! Files could still"
-  message "be lurking undetected on this box."
+  message "In a few minutes I will print files found on this disk that were not" 1>&2
+  message "installed by lunar. This is not a security feature! Files could still" 1>&2
+  message "be lurking undetected on this box." 1>&2
 
   TMP_FOUND=$(temp_create "lvu.found")
   TMP_KNOWN=$(temp_create "lvu.known")
 
-  message  "Discovering ambient files..."
+  message  "Discovering ambient files..." 1>&2
   find $TRACKED | files | grep -v -f "$EXCLUDED" | grep -v -f "$PROTECTED" | sort | uniq > $TMP_FOUND
-  message  "Discovering installed files..."
-  cat $INSTALL_LOGS/* | files | sort | uniq > $TMP_KNOWN
+  message  "Discovering installed files..." 1>&2
+  ( cat $INSTALL_LOGS/* ; ls $INSTALL_CACHE/* ; ls $SOURCE_CACHE/*
+  )| files | sort | uniq > $TMP_KNOWN
 
   diff -B -a -d $TMP_FOUND $TMP_KNOWN | grep -e "^< " | cut -c 3-
 
@@ -210,9 +211,9 @@ lvu_catalog()  {
   ((  COUNT=0  ))
 
   for  SECTION  in  $(list_sections);  do
-    echo 
+    echo
     echo  "-------------------------------------------------"
-    echo  "SECTION:  $SECTION"  
+    echo  "SECTION:  $SECTION"
     echo  "-------------------------------------------------"
     for  MODULE  in  $(list_modules $SECTION);  do
       echo  $MODULE
@@ -584,7 +585,7 @@ show_eert() {
     error_message "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${PROBLEM_COLOR} in ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
     return 1
   fi
-		        
+
   if [ -n "$SHORTTREE" ] ; then
     DEPENDS=$DEPENDS_STATUS
   else
@@ -600,7 +601,7 @@ show_eert() {
     else
       STR="${INDENT}^----${PROBLEM_COLOR}$1${DEFAULT_COLOR}: "
     fi
-    
+
     for DEP in $RDEPS ; do
       REL=$(grep "^$DEP:$1:" $DEPENDS)
       CUR=$(echo $REL | cut -d: -f1)
@@ -641,7 +642,7 @@ show_urls() { (
   plugin_call() { return 0 ; }
   download_url() { echo $1$2 ; return 1 ; }
   connect() { return 0 ; }
- 
+
   LRESORT_URL=
   FRESORT_URL=
   EXHAUSTIVE=on
@@ -654,7 +655,7 @@ show_urls() { (
   else
     MODULES=$1
   fi
-  
+
   for MODULE in $MODULES ; do
     download_module $MODULE | uniq
   done
@@ -683,7 +684,7 @@ show_info() {
     if grep -qw $1 $SOLO ; then
       echo -n "solo "
     fi
-    echo 
+    echo
     if [ -e $MOONBASE/$SECTION/$MODULE/services ] ; then
       LINES="`wc -l $MOONBASE/$SECTION/$MODULE/services | cut -d' ' -f1`"
       echo -n "  Provides Service"
@@ -720,10 +721,10 @@ show_info() {
     else
       echo "  Module not installed."
     fi
- 
+
     echo ""
 	ACTIVITY=$(view_file $ACTIVITY_LOG | awk "(\$3 == \"$1\")")
-   
+
     if [ `echo "$ACTIVITY" | wc -l` -gt 10 ]; then
       ACTIVITY="`echo "$ACTIVITY" | tail -n10`"
       echo "Module Activity History (last 10)"
@@ -923,15 +924,15 @@ main()  {
     html)
       lvu_catalog_html
       ;;
-      
+
     export)
       export_snapshot
       ;;
-      
+
     import)
       import_snapshot $2
       ;;
-      
+
     section)
       if [ -n "$2" ] ; then
         list_modules $2
@@ -939,7 +940,7 @@ main()  {
 	list_sections
       fi
       ;;
-      
+
     alien)
       alien
       ;;
@@ -954,15 +955,15 @@ main()  {
         fi
       done
       ;;
-      
+
     newer)
       newer $2
       ;;
-      
+
     older)
       older $2
       ;;
-      
+
     moonbase)
       lvu_catalog | view_file
       ;;
@@ -970,11 +971,11 @@ main()  {
     leafs)
       show_leafs | sort | uniq
       ;;
-      
+
     orphans)
       show_orphans
       ;;
-      
+
     updatelog)
       if [ -e /var/log/lunar/update ]; then
         view_file /var/log/lunar/update
@@ -1027,7 +1028,7 @@ main()  {
 	fi
       fi
       ;;
-	  
+
     md5sum)
       if [ -n "$2" ] ; then
         if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
@@ -1044,7 +1045,7 @@ main()  {
     pam)
       find_pam_aware
       ;;
-     
+
     sources)
       sources $2
       ;;
@@ -1055,58 +1056,58 @@ main()  {
 
     maintainer)
       if run_details $2 ; then
-        if [ -n "$MAINTAINER" ] ; then  
+        if [ -n "$MAINTAINER" ] ; then
           echo $MAINTAINER
         else
           echo maintainer@lunar-linux.org
         fi
       fi
       ;;
-      
+
     DETAILS)
       show_module_component $1 $2
       ;;
-      
+
     DEPENDS)
       show_module_component $1 $2
       ;;
-      
+
     CONFIGURE)
       show_module_component $1 $2
       ;;
-      
+
     CONFLICTS)
       show_module_component $1 $2
       ;;
-      
+
     PRE_BUILD)
       show_module_component $1 $2
       ;;
-      
+
     BUILD)
       show_module_component $1 $2
       ;;
-      
+
     POST_BUILD)
       show_module_component $1 $2
       ;;
-      
+
     POST_INSTALL)
       show_module_component $1 $2
       ;;
-      
+
     PRE_REMOVE)
       show_module_component $1 $2
       ;;
-      
+
     POST_REMOVE)
       show_module_component $1 $2
       ;;
-      
+
     search)
       grep -irle $2 "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
-      
+
     service)
       cat $MODULE_INDEX | while read ENTRY ; do
         MOD=$(echo $ENTRY | cut -d: -f1)
@@ -1116,11 +1117,11 @@ main()  {
 	fi
       done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
-      
+
     depends)
       show_depends "$2" | sort | uniq
       ;;
-      
+
     website)
       if [ -z "$2" ] ; then
         return 1
@@ -1134,7 +1135,7 @@ main()  {
         fi
       fi
       ;;
-      
+
     version)
       if [ -n "$2" ] ; then
         if run_details $2 ; then
@@ -1175,7 +1176,7 @@ main()  {
         fi
       fi
       ;;
-      
+
     tree)
       show_tree "$2"
       ;;
@@ -1184,7 +1185,7 @@ main()  {
       SHORTTREE=1
       show_tree "$2"
       ;;
-      
+
     eert)
       SHORTTREE=1
       show_eert "$2"
@@ -1195,7 +1196,7 @@ main()  {
       ;;
 
     compile)
-      run_details $2 ; 
+      run_details $2 ;
         if [ -f $COMPILE_LOGS/$2-$(lvu version $2).bz2 ] ; then
           view_file $COMPILE_LOGS/$2-$(lvu version $2).bz2
         else
@@ -1205,7 +1206,7 @@ main()  {
         fi
       #fi
       ;;
-	      
+
    install)
      if run_details $2 ; then
        view_file $INSTALL_LOGS/$2-$(installed_version $2) \
@@ -1216,15 +1217,15 @@ main()  {
    compiler)
      if [ ! -z "$2" ] ; then
        if run_details $2 ; then
-         if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then 
-           echo "Install log for $2 does not exist" 
+         if [ ! -e $INSTALL_LOGS/$2-$(installed_version $2) ] ; then
+           echo "Install log for $2 does not exist"
            return 1
          else
            cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
              if file $LINE | grep -q "ELF " ; then
                echo -n "$LINE "
                strings -a $LINE | grep GCC: | sort -r | head -n 1
-             fi  
+             fi
            done
          fi
        fi
@@ -1249,7 +1250,7 @@ main()  {
      egrep -l "$REGEX" *
      popd >/dev/null
      ;;
-     
+
    what)
      if [ ! -z "$2" ] ; then
        if run_details $2 ; then
@@ -1265,7 +1266,7 @@ main()  {
        fi
      fi
      ;;
-	   
+
    where)
      if [ ! -z "$2" ] ; then
        if run_details $2 ; then
@@ -1312,7 +1313,7 @@ main()  {
      ;;
 
    esac
- 
+
 }
 
 
@@ -1327,9 +1328,9 @@ if [ -z "$?" ] ; then
 else
   eval set -- $GETOPT_ARGS
   export IFS="$STANDARD_IFS"
-  
+
   set_priority
-  
+
   while true ; do
     case "$1" in
       -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
