@@ -585,7 +585,7 @@ show_eert() {
     error_message "${PROBLEM_COLOR}Unable to find module ${MODULE_COLOR}${1}${PROBLEM_COLOR} in ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
     return 1
   fi
-		
+
   if [ -n "$SHORTTREE" ] ; then
     DEPENDS=$DEPENDS_STATUS
   else
@@ -1028,7 +1028,7 @@ main()  {
 	fi
       fi
       ;;
-	
+
     md5sum)
       if [ -n "$2" ] ; then
         if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
@@ -1206,7 +1206,7 @@ main()  {
         fi
       #fi
       ;;
-	
+
    install)
      if run_details $2 ; then
        view_file $INSTALL_LOGS/$2-$(installed_version $2) \
@@ -1266,7 +1266,7 @@ main()  {
        fi
      fi
      ;;
-	
+
    where)
      if [ ! -z "$2" ] ; then
        if run_details $2 ; then
