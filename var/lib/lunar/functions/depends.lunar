@@ -21,7 +21,7 @@
 ############################################################
 
 
-# function : find_depends 
+# function : find_depends
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {
@@ -29,14 +29,13 @@ function find_depends() {
   debug_msg "find_depends ($@)"
 
   find_depends_intern() {
-    local DEP LINE
+    local DEP
     for DEP in $(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' $DEPENDS_CACHE) ; do
       DEP=$(unalias "$DEP")
       # this is our shortcut out:
       if ! grep -qx "$DEP" $TMP_FDEPS ; then
-        debug_msg "$DEP"
         echo "$DEP" >> $TMP_FDEPS
-        if [[ "$(grep "^$1:$DEP:" $DEPENDS_CACHE | cut -d: -f3)" == "required" ]] ; then
+        if grep -q "^$1:$DEP:required:" $DEPENDS_CACHE ; then
           echo "$DEP"
           find_depends_intern "$DEP"
         elif module_installed "$DEP" ; then
