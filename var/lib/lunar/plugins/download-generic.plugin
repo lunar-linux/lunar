@@ -67,10 +67,13 @@ plugin_source_download_generic()  {
       verbose_msg "download of \"$2\" successful"
     else
       rm -f $TMP_FILE
-	  return 1
+      return 1
     fi
   else
-    activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
+    # don't report errors against cache misses
+    if [ "$URL" != "$LRESORT_URL/" ]; then
+      activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
+    fi
     return 1
   fi
 }
