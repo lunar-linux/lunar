@@ -338,11 +338,11 @@ older()  {
 
 
 show_module_component()  {
-  COMPONENT=$1
-     MODULE=$2
-    SECTION=$(find_section $MODULE)
-  if [ -e $MOONBASE/$SECTION/$MODULE/$COMPONENT ] ; then
-    cat $MOONBASE/$SECTION/$MODULE/$COMPONENT
+  SCRIPT_DIRECTORY=$MOONBASE/$(find_section $2)/$2
+  if [[ -e "$SCRIPT_DIRECTORY/$1.$PLATFORM" ]]; then
+    cat "$SCRIPT_DIRECTORY/$1.$PLATFORM"
+  elif [[ -e "$SCRIPT_DIRECTORY/$1" ]] ; then
+    cat "$SCRIPT_DIRECTORY/$1"
   fi
 }
 
