@@ -18,12 +18,12 @@
 ############################################################
 
 
-
-set_config() {
+set_config()
+{
   local LINE NEW
   debug_msg "set_config ($@)"
 
-  LINE=$(cat $1 | grep -w "$2=.*")
+	LINE=$(grep -w "$2=.*" $1)
   if [ "$1" == "$LOCAL_CONFIG" ] ; then
     NEW=$(printf "%16s=%s" "$2" "$3")
   else
@@ -48,7 +48,8 @@ set_config() {
 }
 
 
-unset_config() {
+unset_config()
+{
   debug_msg "unset_config ($@)"
   
   # on-demand creation
@@ -65,32 +66,35 @@ unset_config() {
 }
 
 
-get_config() {
-  if [ -f $1 ] ; then
-    cat $1 | grep -w "$2=.*" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
+get_config()
+{
+	if [[ -f $1 ]] ; then
+		grep -w "$2=.*" $1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
   fi
 }
 
 
-set_local_config() {
+set_local_config()
+{
   debug_msg "set_local_config ($@)"
   set_config "$LOCAL_CONFIG" "$1" "$2"
 }
 
 
-unset_local_config() {
+unset_local_config()
+{
   debug_msg "unset_local_config ($@)"
   unset_config "$LOCAL_CONFIG" "$1"
 }
 
 
 get_local_config() {
-  debug_msg "get_local_config ($@)"
   get_config "$LOCAL_CONFIG" "$1"
 }
 
 
-set_module_config() {
+set_module_config()
+{
   debug_msg "set_module_config ($@)"
   if [ -n "$MODULE" ] ; then
     set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
@@ -98,7 +102,8 @@ set_module_config() {
 }
 
 
-unset_module_config() {
+unset_module_config()
+{
   debug_msg "unset_module_config ($@)"
   if [ -n "$MODULE" ] ; then
     unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
@@ -106,7 +111,8 @@ unset_module_config() {
 }
 
 
-get_module_config() {
+get_module_config()
+{
   debug_msg "get_module_config ($@)"
   if [ -n "$MODULE" ] ; then
     get_config "$DEPENDS_CONFIG/$MODULE" "$1"
@@ -114,7 +120,8 @@ get_module_config() {
 }
 
 
-get_other_module_config() {
+get_other_module_config()
+{
   debug_msg "get_other_module_config ($@)"
   if [ -n "$1" ] ; then
     get_config "$DEPENDS_CONFIG/$1" "$2"

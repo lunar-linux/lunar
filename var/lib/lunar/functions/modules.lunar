@@ -287,8 +287,9 @@ run_module_file() {
 # function : module_installed
 # usage    : module_installed $MODULE
 # purpose  : check if $MODULE is installed (or held)
-module_installed() {
-  $(cut -d: -f1,3 $MODULE_STATUS | grep -q -e "^$1:installed" -e "^$1:held")
+module_installed()
+{
+	grep -q "^$1:[[:digit:]]*:installed:\|^$1:[[:digit:]]*:held:" $MODULE_STATUS
 }
 
 
@@ -297,7 +298,7 @@ module_installed() {
 # purpose  : check if $MODULE is held
 module_held() {
   debug_msg "module_held ($@)"
-  $(cut -d: -f1,3 $MODULE_STATUS | grep -q "^$1:held")
+	grep -q "^$1:[[:digit:]]*:held:" $MODULE_STATUS
 }
 
 
