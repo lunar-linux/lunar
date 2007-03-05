@@ -185,7 +185,7 @@ mquery()
 }
 
 # oquery adds to OPTS instead of storing a variable
-# usage: oqeury "Enable SSL support" y "--enable-ssl" "--disable-ssl"
+# usage: oqeury USE_SSL "Enable SSL support" y "--enable-ssl" "--disable-ssl"
 # note : $MODULE must be set properly
 oquery()
 {
