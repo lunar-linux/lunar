@@ -743,27 +743,29 @@ show_info() {
 diff_module() {
   if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
     message "can't diff modules without ZLOCAL_OVERRIDES=on"
-	exit 1
+    exit 1
   fi
   if [ -z "$1" ]; then
     message "diff requires a single module name"
-	exit 1
+    exit 1
   fi
   if ! run_details "$1" ; then
       message "diff requires an existing module"
       exit 1
   else
     if echo $SECTION | grep -q '^zlocal' ; then
-	  ZLOCAL_OVERRIDES=off NZSECTION=$(find_section $1)
-	  if echo $NZSECTION | grep -q '^zlocal' ; then
-	    unset SECTION
-	  fi
-	else
-	  message "no local copy of \"$MODULE\" exists"
-	  exit 1
+      ZLOCAL_OVERRIDES=off NZSECTION=$(find_section $1)
+      if echo $NZSECTION | grep -q '^zlocal' ; then
+        unset SECTION
+      fi
+    else
+      message "no local copy of \"$MODULE\" exists"
+      exit 1
     fi
-	ZSECTION=$(echo "$SECTION/" | sed 's/^zlocal\///g;s/\/$//')
-    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | grep -v "^diff " | sed "s:$MOONBASE/$NZSECTION/::g;s:$MOONBASE/zlocal/$ZSECTION/::g"
+    ZSECTION=$(echo "$SECTION/" | sed 's/^zlocal\///g;s/\/$//')
+    echo diff a/$NZSECTION/$MODULE b/$NZSECTION/$MODULE
+    diff -Nur $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | \
+    grep -v ^diff | sed "s:$MOONBASE/$NZSECTION/:a/$NZSECTION/:g;s:$MOONBASE/zlocal/$ZSECTION/:b/$NZSECTION/:g"
   fi
 }
 
