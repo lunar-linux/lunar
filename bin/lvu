@@ -763,7 +763,9 @@ diff_module() {
 	  exit 1
     fi
 	ZSECTION=$(echo "$SECTION/" | sed 's/^zlocal\///g;s/\/$//')
-    diff -Nurb $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | grep -v "^diff " | sed "s:$MOONBASE/$NZSECTION/::g;s:$MOONBASE/zlocal/$ZSECTION/::g"
+    echo diff a/$NZSECTION/$MODULE b/$NZSECTION/$MODULE
+    diff -Nur $MOONBASE/$NZSECTION/$MODULE $MOONBASE/zlocal/$ZSECTION/$MODULE --exclude ".svn" --exclude "CVS" | \
+    grep -v ^diff | sed "s:$MOONBASE/$NZSECTION/:a/$NZSECTION/:g;s:$MOONBASE/zlocal/$ZSECTION/:b/$NZSECTION/:g"
   fi
 }
 

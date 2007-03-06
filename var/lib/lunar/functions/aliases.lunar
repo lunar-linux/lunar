@@ -54,7 +54,11 @@ unalias() {
     for TARGET in $TARGETS ; do
       ((N++))
       TARGETBYNUM[$N]=$TARGET
-      error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR}"
+      if module_installed $TARGET ; then
+        error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR} ${LRM_COLOR}(Installed)${DEFAULT_COLOR}"
+      else
+        error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR} ${MESSAGE_COLOR}(Not installed)${DEFAULT_COLOR}"
+      fi
     done
     read CHOICE
     # test directly first

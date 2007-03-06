@@ -167,8 +167,9 @@ query() {
 
 # mquery is a wrapper to autodetect if a certain y/n parameter in a module
 # config is not set yet and handles the case in a single function
-# usage: mqeury USE_LILO "Use lilo instead of grub" ?
+# usage: mquery USE_LILO "Use lilo instead of grub ?" y [yesopts] [noopts]
 # note : $MODULE must be set properly
+# note : both [yesopts] and [noopts] may be empty or ""
 mquery()
 {
     debug_msg "mquery ($@)"
@@ -180,6 +181,12 @@ mquery()
             else
                 set_module_config "$1" n
             fi
+        fi
+        # and lookup the result in case of yes/no opts
+        if [ $(get_module_config $1) == "y" ] ; then
+            OPTS="$OPTS $4"
+        else
+            OPTS="$OPTS $5"
         fi
     fi
 }

@@ -9,7 +9,7 @@ module_1 module_2 module_3
 .PP
 .B lget -a|--all
 .PP
-.B lget -d|--debug|-f|--from|-u|--url|-v|--verbose 
+.B lget -d|--debug|-f|--from|-u|--url|-v|--verbose|-w|--want
 module_1 module_2
 .SH COPYRIGHT
 .if n lget(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001-2002
@@ -41,8 +41,7 @@ This is useful if you have a fast link or want to start your own Lunar source co
 .PP
 Enables debug messages, very useful when emailing a bug report.
 .TP
-.B lget
--f|--from path/dir
+.B lget -f|--from path/dir
 .PP
 This specifies a different
 .I /var/spool/lunar
@@ -52,11 +51,16 @@ directory. This is the default location for downloaded sources.
 .PP
 Outputs short help.
 .TP
-.B lget
--u|--url URL module_1
+.B lget -u|--url URL module_1
 .PP
 This tries to download the specified module from a different location. This is
 useful if the original link is down.
+.TP
+.B lget -w|--want version
+.PP
+Attempt to download version version of the module by substituting the current
+version of the module with the wanted version. May fail if the package requires
+more than one file download, or other reasons.
 .TP
 .B lget -v|--verbose
 .PP
