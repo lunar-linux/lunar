@@ -38,13 +38,12 @@ Usage   : lget  [parameters] [modules]
 
 Optional Parameters:
 
-   -a | --all			Download all sources available in moonbase
+   -a | --all                   Download all sources available in moonbase
    -d | --debug                 Enables debug messages
    -f | --from  directory       Specify an alternate for $SOURCE_CACHE
    -h | --help                  Displays this help text
    -u | --url     URL           Specify an alternate download URL
    -v | --verbose               Increases the level of message output
-   -V | --Version               Select specific Version of module to install
    -w | --want version          Try to download a different version that is
                                 not in moonbase
 EOF
@@ -86,14 +85,14 @@ main() {
 
 . /etc/lunar/config
 
-GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vV:w:" -l "all,debug,from:,help,url:,verbose,Version:want:" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vw:" -l "all,debug,from:,help,url:,verbose,want:" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
   exit
 else
   eval set -- $GETOPT_ARGS
-  
+
   root_check
   enviro_check
   set_priority
