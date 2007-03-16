@@ -431,7 +431,8 @@ maintenance_menu() {
     N_HELP="Check all modules but do not fix the internal state"
     D_HELP="Check and fix the dependency database of lunar"
     P_HELP="Prune old sources and install/compile logs"
-    
+    A_HELP="Change selected or select new alias mappings"
+
     COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
                       --ok-label      "Select"                           \
                       --cancel-label  "Exit"                             \
@@ -443,16 +444,20 @@ maintenance_menu() {
                       "F"     "Fix everything"                 "$F_HELP" \
                       "N"     "Check everything but don't fix" "$N_HELP" \
                       "D"     "Fix dependencies"               "$D_HELP" \
-		      "P"     "Prune old sources and logs"     "$P_HELP"`
+                      "P"     "Prune old sources and logs"     "$P_HELP" \
+                      "A"     "Select or Change Aliases"       "$A_HELP"`
   do
     case $COMMAND in
      F)  lunar fix          ;;
      N)  lunar nofix        ;;
      D)  lunar fixdepends   ;;
      P)  lunar prune        ;;
+     A)  select_aliases     ;;
     esac
-    message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
-    read
+    if [ $COMMAND != "A" ] ; then
+      message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
+      read
+    fi
   done
 }
 
