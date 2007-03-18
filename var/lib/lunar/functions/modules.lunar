@@ -280,7 +280,7 @@ run_module_file() {
 		. $SCRIPT_DIRECTORY/$2.$PLATFORM
 	elif [[ -e "$SCRIPT_DIRECTORY/$2" ]]; then
 		. $SCRIPT_DIRECTORY/$2
-	fi    
+	fi
 }
 
 
@@ -297,7 +297,7 @@ module_installed()
 # usage    : module_held $MODULE
 # purpose  : check if $MODULE is held
 module_held() {
-  debug_msg "module_held ($@)"
+	debug_msg "module_held ($@)"
 	grep -q "^$1:[[:digit:]]*:held:" $MODULE_STATUS
 }
 

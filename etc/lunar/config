@@ -80,9 +80,10 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
       MOONBASE_URL[0]=http://lunar-linux.org/lunar/
       MOONBASE_URL[1]=http://download.lunar-linux.org/lunar/
-	 
+
             PATCH_URL=http://download.lunar-linux.org/lunar/patches/
-	    
+           MIRROR_URL=http://download.lunar-linux.org/lunar/mirrors/
+
               TRACKED="/bin /boot /etc /lib /sbin /usr /var /opt/lunar"
 
                TMPDIR=${TMPDIR:-/tmp}
@@ -111,13 +112,9 @@ export        DIALOGRC=/etc/lunar/dialogrc
         MESSAGE_COLOR="${CYAN}"
         DEFAULT_COLOR="${DEFAULT}"
 
-        TAB_ENTER_IFS="	
-"
-        ENTER_IFS="
-"
-	STANDARD_IFS=" 	
-"
-
+        TAB_ENTER_IFS=$'\t\n'
+        ENTER_IFS=$'\n'
+        STANDARD_IFS=$' \t\n'
 
 for FUNCTION in $FUNCTIONS/*.lunar ; do
   . $FUNCTION

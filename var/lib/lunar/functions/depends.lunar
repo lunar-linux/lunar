@@ -21,7 +21,7 @@
 ############################################################
 
 
-# function : find_depends 
+# function : find_depends
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
 function find_depends() {

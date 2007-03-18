@@ -84,13 +84,13 @@ download_module() {
 				break
 			fi
 		fi
-		
+
 		# silly that this exists:
 		if [ "$CLEAR_CACHE" == "on" ] ; then
 			verbose_msg "clearing source cache copy of \"$SRC\""
 			rm -f $SOURCE_CACHE/$SRC 2>/dev/null
 		fi
-		
+
 		add_url() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
@@ -98,54 +98,63 @@ download_module() {
 				fi
 			fi
 		}
-		
-		if plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE || [ ! -f $SOURCE_CACHE/$SRC ] ; then
-			# check for cache?
-			message "${MESSAGE_COLOR}Downloading source file" \
-				"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
-				"${MESSAGE_COLOR}for module" \
-				"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-		    if [ -n "$BASE_URL" ] ; then
-				# in case -u was passed:
-		        ALL_URLS=$BASE_URL
-			else
-				# compose a list of URLS
-				ALL_URLS=
-				add_url $FRESORT_URL
-				for URL in $URLS ; do
-					add_url $URL
-					if [ "$EXHAUSTIVE" == "on" ]; then
-						# scan for hits against known clusters of mirrors
-						for MLIST in $MIRRORS/*; do
-							for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST | grep -v "^Custom$"); do
-								if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
-									# compose the list of valid mirrors
-									REST=${URL:${#ALT}}
-									for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
-										add_url ${HIT}${REST}
-									done
-								fi
-							done
-						done
-					fi
-				done
-				add_url $LRESORT_URL
-			fi
-
-			for URL in $ALL_URLS; do
-				# and download
-				if download_url $URL $SRC $SOURCE_CACHE ; then
-					break
-				fi
-			done
-		else
+		if ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE && [ -f $SOURCE_CACHE/$SRC ] ; then
 			# break out of the loop if the cache has it:
 			verbose_msg "Skipping download of \"$SRC\" (in cache)"
 			continue
 		fi
+
+		# check for cache?
+		message "${MESSAGE_COLOR}Downloading source file" \
+			"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
+			"${MESSAGE_COLOR}for module" \
+			"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+
+		if [ -n "$BASE_URL" ] ; then
+			# in case -u was passed:
+			ALL_URLS=$BASE_URL
+		else
+			# compose a list of URLS
+			ALL_URLS=
+			add_url $FRESORT_URL
+			for URL in $URLS ; do
+				add_url $URL
+				if [ "$EXHAUSTIVE" != "on" ]; then
+					continue
+				fi
+
+				# scan for hits against known clusters of mirrors
+				for MLIST in $MIRRORS/*; do
+					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST | grep -v "^Custom$"); do
+						if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
+							# compose the list of valid mirrors
+							REST=${URL:${#ALT}}
+							for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+								add_url ${HIT}${REST}
+							done
+						fi
+					done
+				done
+			done
+			add_url $LRESORT_URL
+		fi
+
+		for URL in $ALL_URLS; do
+			# and download
+			if download_url $URL $SRC $SOURCE_CACHE ; then
+				# done for this file!
+				FAILED=1
+				break
+			fi
+		done
+		if [ ${FAILED:-0} == 0 ] ; then
+			FAILALL=1
+		fi
+
 	done
-) 
+	return ${FAILALL:-0}
+)
 }
 
 

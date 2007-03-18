@@ -20,49 +20,49 @@
 
 set_config()
 {
-  local LINE NEW
-  debug_msg "set_config ($@)"
+	local LINE NEW
+	debug_msg "set_config ($@)"
 
 	LINE=$(grep -w "$2=.*" $1)
-  if [ "$1" == "$LOCAL_CONFIG" ] ; then
-    NEW=$(printf "%16s=%s" "$2" "$3")
-  else
-    NEW="$2=\"$3\""
-  fi
+	if [ "$1" == "$LOCAL_CONFIG" ] ; then
+		NEW=$(printf "%16s=%s" "$2" "$3")
+	else
+		NEW="$2=\"$3\""
+	fi
 
-  # on-demand creation
-  if [ ! -f $1 ] ; then
-    touch $1
-  fi
+	# on-demand creation
+	if [ ! -f $1 ] ; then
+		touch $1
+	fi
 
-  lock_file $1 &&
-  if [ -n "$LINE" ] ; then
-    # make sure we escape those ':' characters:
-    LINE=$(echo $LINE | sed 's/:/\\:/g')
-    NEW=$(echo $NEW | sed 's/:/\\:/g')
-    sedit "s:$LINE:$NEW:" $1
-  else
-    echo "$NEW" >> $1
-  fi
-  unlock_file $1
+	lock_file $1 &&
+	if [ -n "$LINE" ] ; then
+		# make sure we escape those ':' characters:
+		LINE=$(echo $LINE | sed 's/:/\\:/g')
+		NEW=$(echo $NEW | sed 's/:/\\:/g')
+		sedit "s:$LINE:$NEW:" $1
+	else
+		echo "$NEW" >> $1
+	fi
+	unlock_file $1
 }
 
 
 unset_config()
 {
-  debug_msg "unset_config ($@)"
-  
-  # on-demand creation
-  if [ ! -f $1 ] ; then
-    touch $1
-  fi
+	debug_msg "unset_config ($@)"
 
-  lock_file $1 &&
-  if [ -n "$2" ] ; then
-    # make sure we escape those ':' characters:
-    sedit "/^[ ]*$2=/d" $1
-  fi
-  unlock_file $1
+	# on-demand creation
+	if [ ! -f $1 ] ; then
+		touch $1
+	fi
+
+	lock_file $1 &&
+	if [ -n "$2" ] ; then
+		# make sure we escape those ':' characters:
+		sedit "/^[ ]*$2=/d" $1
+	fi
+	unlock_file $1
 }
 
 
@@ -70,62 +70,62 @@ get_config()
 {
 	if [[ -f $1 ]] ; then
 		grep -w "$2=.*" $1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
-  fi
+	fi
 }
 
 
 set_local_config()
 {
-  debug_msg "set_local_config ($@)"
-  set_config "$LOCAL_CONFIG" "$1" "$2"
+	debug_msg "set_local_config ($@)"
+	set_config "$LOCAL_CONFIG" "$1" "$2"
 }
 
 
 unset_local_config()
 {
-  debug_msg "unset_local_config ($@)"
-  unset_config "$LOCAL_CONFIG" "$1"
+	debug_msg "unset_local_config ($@)"
+	unset_config "$LOCAL_CONFIG" "$1"
 }
 
 
 get_local_config() {
-  get_config "$LOCAL_CONFIG" "$1"
+	get_config "$LOCAL_CONFIG" "$1"
 }
 
 
 set_module_config()
 {
-  debug_msg "set_module_config ($@)"
-  if [ -n "$MODULE" ] ; then
-    set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
-  fi
+	debug_msg "set_module_config ($@)"
+	if [ -n "$MODULE" ] ; then
+		set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
+	fi
 }
 
 
 unset_module_config()
 {
-  debug_msg "unset_module_config ($@)"
-  if [ -n "$MODULE" ] ; then
-    unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
-  fi
+	debug_msg "unset_module_config ($@)"
+	if [ -n "$MODULE" ] ; then
+		unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
+	fi
 }
 
 
 get_module_config()
 {
-  debug_msg "get_module_config ($@)"
-  if [ -n "$MODULE" ] ; then
-    get_config "$DEPENDS_CONFIG/$MODULE" "$1"
-  fi
+	debug_msg "get_module_config ($@)"
+	if [ -n "$MODULE" ] ; then
+		get_config "$DEPENDS_CONFIG/$MODULE" "$1"
+	fi
 }
 
 
 get_other_module_config()
 {
-  debug_msg "get_other_module_config ($@)"
-  if [ -n "$1" ] ; then
-    get_config "$DEPENDS_CONFIG/$1" "$2"
-  fi
+	debug_msg "get_other_module_config ($@)"
+	if [ -n "$1" ] ; then
+		get_config "$DEPENDS_CONFIG/$1" "$2"
+	fi
 }
 
 
