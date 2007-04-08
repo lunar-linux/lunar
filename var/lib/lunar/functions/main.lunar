@@ -274,6 +274,7 @@ lin_module()  {
   run_conflicts               &&
   satisfy_depends             &&
   show_downloading            &&
+  RECONFIGURE= run_configure  &&
 
   # last minute source code presence check:
   (

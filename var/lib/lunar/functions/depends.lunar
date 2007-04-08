@@ -338,6 +338,7 @@ build_module_depends() {
       exit 1
     fi &&
     run_details $1 &&
+    RECONFIGURE= run_configure &&
     RECONFIGURE= run_depends &&
     RECONFIGURE= satisfy_depends
   fi

@@ -35,11 +35,11 @@ but not installed.
 .PP
 .I renew
 .IP 
-check installed versions of sources against the moonbase, and recompile where necessary. This is the same as the final stage of a lunar update.
+Update all packages without fetching a fresh moonbase first. Does not run prune or autofix.
 .PP 
 .I update
 .IP 
-automatically updates all installed software packages. This option is non\-interactive and does not start up the menu\-driven interface. It is suitable for use in cron jobs.
+Fetches a new moonbase, updates all packages and runs (optionally) a prune and autofix.
 .PP 
 .I rebuild
 .IP 
