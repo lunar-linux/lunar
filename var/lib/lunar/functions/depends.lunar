@@ -324,7 +324,6 @@ run_conflicts() {
 
 
 build_module_depends() {
-(
   debug_msg "build_module_depends ($@)"
   if [ -n "$DEPS_ONLY" ] ; then
     if ! run_conflicts $1 ; then
@@ -338,11 +337,9 @@ build_module_depends() {
       exit 1
     fi &&
     run_details $1 &&
-    RECONFIGURE= run_configure &&
     RECONFIGURE= run_depends &&
     RECONFIGURE= satisfy_depends
   fi
-)
 }
 
 

@@ -86,6 +86,7 @@ main() {
     if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
       export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+      export TEMP_CONFIGOPTS=$(temp_create "configopts")
     fi
 
     # pass 1 : run full dependency checking
@@ -113,32 +114,32 @@ main() {
       done
       (
           for M in $LIST $MODULES; do
-	      SAFE_M=$(echo $M | md5sum | awk '{print $1}')
+              SAFE_M=$(echo $M | md5sum | awk '{print $1}')
               eval THIS_TEMP=\$TEMP_DOWNLOAD_LOG_$SAFE_M
               lget $M > $THIS_TEMP 2>&1 &
               echo "$M:`jobs -p`:$THIS_TEMP" >> $TEMP_DOWNLOAD_PIDS
               wait
           done
-      ) &    
+      ) &
 
       # pass 3 : compile/install
       # no strange stuff should happen here anymore
       for MODULE in $MODULES ; do
         if ! module_installed $MODULE || [ ! -n "$PROBE" ] || ( [ -n "$PROBE" ] && [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ) ; then
-	  # 3 more conditions to stop processing this module:
+          # 3 more conditions to stop processing this module:
           if module_held $MODULE ; then
-	    error_message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} Skipping compile and install for held module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+            error_message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} Skipping compile and install for held module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
             continue
-	  elif module_exiled $MODULE ; then
+          elif module_exiled $MODULE ; then
             error_message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} Skipping compile and install for exiled module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
             continue
-	  elif ! module_license_accepted $MODULE ; then
-	    error_message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} The license of module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is incompatible with the list of"
+          elif ! module_license_accepted $MODULE ; then
+            error_message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} The license of module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is incompatible with the list of"
             error_message "allowed and/or rejected licenses. Please adjust the ACCEPTED_LICENSES or"
             error_message "REJECTED_LICENSES variables to include or not include the specific"
             error_message "license of this module.${DEFAULT_COLOR}"
             continue
-	  else
+          else
             # we're good now, start installing
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
@@ -146,7 +147,7 @@ main() {
               if [ -e "$TMP_LIN_FAIL" ] ; then
                 echo "$MODULE" >> $TMP_LIN_FAIL
               fi
-              lin_EXIT_STATUS=1;  
+              lin_EXIT_STATUS=1;
             else
               if [ -e "$TMP_LIN_SUCCESS" ] ; then
                 echo "$MODULE" >> $TMP_LIN_SUCCESS
@@ -160,6 +161,7 @@ main() {
     # cleanups that we need to do
     temp_destroy $TEMP_DOWNLOAD_PIDS
     temp_destroy $TEMP_PREPAREDDEPS
+    temp_destroy $TEMP_CONFIGOPTS
 
   else
     # we are only doing one module, drop down to:
@@ -173,22 +175,22 @@ main() {
     if [ -z "$DEPS_ONLY" ] ; then
       if ! module_held $MODULE ; then
         if [ -n "$PROBE" ] ; then
-	  # --probe install
+          # --probe install
           if ! module_installed $MODULE ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
               exit 1
             fi
-	  elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
-	    # probe install where module is expired
-	    verbose_msg "module \"$MODULE\" needs to be updated"
-	    if ! SINGLE_MODULE= lin_module $MODULE ; then
-	      temp_destroy $TEMP_PREPAREDDEPS
-	      exit 1
-	    fi	    
+          elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
+            # probe install where module is expired
+            verbose_msg "module \"$MODULE\" needs to be updated"
+            if ! SINGLE_MODULE= lin_module $MODULE ; then
+              temp_destroy $TEMP_PREPAREDDEPS
+              exit 1
+            fi
           fi
         else
-	  # normal install - not probed
+          # normal install - not probed
           if ! lin_module $MODULE ; then
             temp_destroy $TEMP_PREPAREDDEPS
             exit 1
@@ -199,7 +201,6 @@ main() {
       fi
     fi
   fi
-  
 }
 
 

@@ -138,7 +138,7 @@ expand_cache_safe() {(
   # the sed trick is advanced: a non-greedy pattern that returns all
   # directory names listed in the input
   for TARGET in $(cat $TMP_TARGETS | sed 's/\/[^\/]*$/\//g' ) ; do
-	if [ ! -d $TARGET ]; then
+    if [ ! -d $TARGET ]; then
       debug_msg "mkdir -p $TARGET"
       mkdir -p $TARGET
     fi
@@ -274,7 +274,8 @@ lin_module()  {
   run_conflicts               &&
   satisfy_depends             &&
   show_downloading            &&
-  RECONFIGURE= run_configure  &&
+
+  OPTS="`grep ^$MODULE: $TEMP_CONFIGOPTS | cut -d: -f2`"
 
   # last minute source code presence check:
   (
