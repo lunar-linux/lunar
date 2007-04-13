@@ -275,7 +275,7 @@ lin_module()  {
   satisfy_depends             &&
   show_downloading            &&
 
-  OPTS="`grep ^$MODULE: $TEMP_CONFIGOPTS | cut -d: -f2`"
+  OPTS="$OPTS `grep ^$MODULE: $TEMP_CONFIGOPTS | cut -d: -f2`"
 
   # last minute source code presence check:
   (
