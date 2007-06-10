@@ -782,8 +782,12 @@ submit_module() {
     message "submit requires a single module name."
     exit 1
   fi
-  if [ ! -x /usr/sbin/sendmail ]; then
-    message "submit requires /usr/sbin/sendmail from (postfix, exim, sendmail)"
+  if [ ! -x /usr/bin/curl ]; then
+    message "submit requires curl, please \`lin curl\`"
+    exit 1
+  fi
+  if [ -z "$ADMIN" -o "$ADMIN" == "$USER" ]; then
+    message "Please set ADMIN to your e-mail address: lunar set ADMIN \"me@my.mail.domain\""
     exit 1
   fi
   if ! run_details "$1" ; then
@@ -791,89 +795,48 @@ submit_module() {
       exit 1
   else
     if echo $SECTION | grep -q '^zlocal' ; then
-	  ZLOCAL_OVERRIDES=off SECTION=$(find_section $1)
-	  if echo $SECTION | grep -q '^zlocal' ; then
-	    unset SECTION
-	  fi
-	else
-	  message "Please don't edit modules outside of the 'zlocal' section!"
-	  message "do this first: \`lvu edit \$MODULE ; lin moonbase\`"
-	  message "so that module changes can be tracked properly!"
-	  exit 1
+      ZLOCAL_OVERRIDES=off SECTION=$(find_section $1)
+      if echo $SECTION | grep -q '^zlocal' ; then
+        unset SECTION
+      fi
+    else
+      message "Please don't edit modules outside of the 'zlocal' section!"
+      message "do this first: \`lvu edit \$MODULE ; lin moonbase\`"
+      message "so that module changes can be tracked properly!"
+      exit 1
     fi
     TMP_MSG=$(temp_create "submission")
-	BOUNDARY="===============$(date -u +%s)=="
     (
-      echo '# MODULE SUBMISSION TEMPLATE'
-      echo '# --------------------------'
-      echo '# '
-      echo '# (all lines starting with # will be deleted before sending)'
-      echo '# Please fill in the fields as complete as possible to help'
-      echo '# developers track the status of your module'
-      echo '# '
-      echo '# PLEASE DO NOT CHANGE THE FOLLOWING FIELDS:'
-      echo 'To: lunar@lunar-linux.org'
-      echo 'Date:' $(date -u -R)
-      echo 'Subject: Module submission -' $MODULE
-	  echo 'MIME-Version: 1.0'
-	  echo "Content-Type: multipart/mixed; boundary=\"$BOUNDARY\""
-      echo '# '
-      echo '# YOUR E_MAIL ADDRESS MUST BE VALID:'
-      echo 'From: '
-      echo '#Reply-To:'
-      echo '#Cc: '
-	  echo ''
-	  echo "--$BOUNDARY"
-	  echo 'Content-Type: text/plain; charset="us-ascii"'
-	  echo 'MIME-Version: 1.0'
-	  echo 'Content-Transfer-Encoding: 7bit'
-	  echo ''
-      echo '# PLEASE DO NOT CHANGE WHITESPACE ABOVE THIS LINE'
-      echo ''
-      echo '# '
-      echo '# Please fill in some of the following information if applicable:'
-      echo '# '
-      echo 'module name       :' $MODULE
-      echo 'suggested section :' $SECTION
-      echo 'update (y/n)      : n'
-      echo 'bugfix (y/n)      : n'
-      echo 'security (y/n)    : n'
-      echo ''
-      echo '# '
-      echo '# Add additional information, hints, comments below here,'
-      echo '# if you entered "y" in one of the fields above, please explain!'
-      echo '# '
-      echo ''
-      echo '# YOUR NAME HERE'
-	  echo "$USER"
-	  echo ''
-      echo '# '
-      echo '# Below is your module. Please do not change the format'
-      echo '# '
-	  echo ''
-	  echo "--$BOUNDARY"
-	  echo "Content-Type: text/plain; name=\"$1.patch\""
-	  echo 'MIME-Version: 1.0'
-	  echo ''
-	  if [ -n "$SECTION" ]; then
-	    diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
-	  else
-	    diff -Nurb $MOONBASE/zlocal/.nonexistant $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | sed "s|\.nonexistant|$MODULE|g" | grep -v "^diff "
-	  fi
-	  echo -e "\n--$BOUNDARY"
-	  echo 'Content-Type: text/plain; charset="us-ascii"'
-	  echo 'MIME-Version: 1.0'
-	  echo 'Content-Transfer-Encoding: 7bit'
-	  echo ''
-	  echo "lvu submit $1 $(cat /bin/lvu | md5sum)"
-	  echo "$(uname -r) $(if [ -f /usr/include/linux/version.h ]; then grep UTS_RELEASE /usr/include/linux/version.h | cut -d '"' -f2 ; else echo "unknown" ; fi) gcc-$(installed_version gcc) glibc-$(installed_version glibc)"
-	  echo ''
+      echo ""
+      echo "# type a changelog message here"
+      echo "# all lines starting with '#' will be removed"
     ) > $TMP_MSG
     edit_file $TMP_MSG
-    cat $TMP_MSG | grep -v '^#'
+    sed -i '/^#/d' $TMP_MSG
+    (
+      echo ''
+      echo '---'
+      echo 'from:' $ADMIN
+      echo 'module:' $MODULE
+      echo "id: $UNIQID"
+      echo "lvu submit: $1"
+      echo "lvu: $(cat /bin/lvu | md5sum)"
+      echo "uname -r: $(uname -r)"
+      echo "kernel headers: $(if [ -f /usr/include/linux/version.h ]; then grep UTS_RELEASE /usr/include/linux/version.h | cut -d '"' -f2 ; else echo "unknown" ; fi)"
+      echo "gcc: $(installed_version gcc)"
+      echo "glibc: $(installed_version glibc)"
+      echo ''
+      echo '---'
+      echo "diff $SECTION/$MODULE $SECTION/$MODULE"
+      if [ -n "$SECTION" ]; then
+        diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
+      else
+        diff -Nurb $MOONBASE/zlocal/.nonexistant $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | sed "s|\.nonexistant|$MODULE|g" | grep -v "^diff "
+      fi
+    ) >> $TMP_MSG
+    cat $TMP_MSG
     if query "Submit this module now?" y; then
-      RECIPIENT=$(grep -m 1 '^To: ' $TMP_MSG | sed 's/^To: //')
-      cat $TMP_MSG | grep -v '^#' | sendmail $RECIPIENT
+      curl -F file=@$TMP_MSG -F module=$MODULE -F id=$UNIQID "http://lunar-linux.org/submit.php"
       temp_destroy $TMP_MSG
     else
       message "Submission aborted. your submission was saved as $TMP_MSG"
