@@ -817,7 +817,7 @@ submit_module() {
       echo ''
       echo '---'
       echo 'from:' $ADMIN
-      echo 'module:' $MODULE
+      echo 'module:' $1
       echo "id: $UNIQID"
       echo "lvu submit: $1"
       echo "lvu: $(cat /bin/lvu | md5sum)"
@@ -827,16 +827,11 @@ submit_module() {
       echo "glibc: $(installed_version glibc)"
       echo ''
       echo '---'
-      echo "diff $SECTION/$MODULE $SECTION/$MODULE"
-      if [ -n "$SECTION" ]; then
-        diff -Nurb $MOONBASE/$SECTION/$MODULE $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | grep -v "^diff "
-      else
-        diff -Nurb $MOONBASE/zlocal/.nonexistant $MOONBASE/zlocal/$MODULE --exclude ".svn" --exclude "CVS" | sed "s|^\([+-][+-][+-] \)$MOONBASE/[^/]*/|\1|g" | sed "s|\.nonexistant|$MODULE|g" | grep -v "^diff "
-      fi
+      lvu diff $1
     ) >> $TMP_MSG
     cat $TMP_MSG
     if query "Submit this module now?" y; then
-      curl -F file=@$TMP_MSG -F module=$MODULE -F id=$UNIQID "http://lunar-linux.org/submit.php"
+      curl -F file=@$TMP_MSG -F module=$1 -F id=$UNIQID "http://lunar-linux.org/submit.php"
       temp_destroy $TMP_MSG
     else
       message "Submission aborted. your submission was saved as $TMP_MSG"
