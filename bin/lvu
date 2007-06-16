@@ -895,7 +895,7 @@ new_module()
 
 	MODULE=$1
 
-	message "Paste the principle download URL for your apllication:"
+	message "Paste the principal download URL for your application:"
 	read URL
 	echo
 
