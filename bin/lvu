@@ -950,7 +950,7 @@ new_module()
           SOURCE=$SOURCE
       SOURCE_URL=$SOURCE_URL
 EOFDETA
-		if [ $(tar tf $SOURCE_CACHE/$(basename $URL) | head -n 1) != "$MODULE-$VERSION/" ]; then
+		if [ "$(tar tf $SOURCE_CACHE/$(basename $URL) | head -n 1)" != "$MODULE-$VERSION/" ]; then
 			echo "SOURCE_DIRECTORY=\$BUILD_DIRECTORY/\$MODULE-\$VERSION"
 		fi
 		cat <<EOFDETB
