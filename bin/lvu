@@ -80,6 +80,7 @@ urls        [module]       display all URLs for a module
 maintainer  module         display maintainer for a module
 version     module         display version of module in moonbase
 
+new         module         attempt to create a new module from scratch
 edit        module         copy a module to zlocal for editing
 diff        module         view changes on edited module
 submit      module         attempt to submit a module to the lunar ML
@@ -882,6 +883,93 @@ unedit_module()
 }
 
 
+new_module()
+{
+	if [ -z "$1" ]; then
+		echo "You have to give it a name - use \`lvu new $name\`"
+		exit 1
+	elif run_details $1 > /dev/null 2>&1 ; then
+		echo "Module \"$1\" already exists, use \`lvu edit $1\` instead"
+		exit 1
+	fi
+
+	MODULE=$1
+
+	message "Paste the principle download URL for your apllication:"
+	read URL
+	echo
+
+	message "Write a 1-line summary of the module. do NOT write something"
+	message "like \"foo is a...\". Write something that describes it best:"
+	read SHORT
+	echo
+
+	message "Paste the main website URL:"
+	read WEB_SITE
+	echo
+
+	LONG=$(temp_create "lvu.new.$1")
+	message "Paste 1 or 2 paragraphs of text that give a good description for $1:"
+	message "Press CONTROL-D on an empty line when finished"
+	cat - > $LONG
+
+	ENTERED=$(date +%Y%m%d)
+	UPDATED=$(date +%Y%m%d)
+
+	SOURCE_URL="$(dirname $URL)/"		# get url
+	SOURCE=$(basename $URL)			# get base
+
+	if [ ! -f $SOURCE_CACHE/$SOURCE ] ; then
+		if ! download_url $SOURCE_URL $SOURCE $SOURCE_CACHE ; then
+			echo "Unable to download $URL"
+			exit 1
+		fi
+	fi
+
+	SHA1=$(sha1sum $SOURCE_CACHE/$SOURCE | cut -c1-40)
+
+	VERSION=$(echo $SOURCE | sed "s/$MODULE//")
+	VERSION=$(echo $VERSION | sed 's/^[-]//;s/^_//')
+	VERSION=${VERSION/^_}
+	VERSION=${VERSION/.tar}
+	VERSION=${VERSION/.tgz}
+	VERSION=${VERSION/.bz2}
+	VERSION=${VERSION/.gz}
+
+	SOURCE=$(echo $SOURCE | sed "s/$MODULE/\${MODULE}/")
+	SOURCE=$(echo $SOURCE | sed "s/$VERSION/\${VERSION}/")
+
+	if ! mkdir $MOONBASE/zlocal/$1 ; then
+		message "Unable to create module folder in zlocal section"
+		exit 1
+	fi
+	(
+		cat <<EOFDETA
+          MODULE=$MODULE
+         VERSION=$VERSION
+          SOURCE=$SOURCE
+      SOURCE_URL=$SOURCE_URL
+EOFDETA
+		if [ $(tar tf $SOURCE_CACHE/$(basename $URL) | head -n 1) != "$MODULE-$VERSION/" ]; then
+			echo "SOURCE_DIRECTORY=\$BUILD_DIRECTORY/\$MODULE-\$VERSION"
+		fi
+		cat <<EOFDETB
+      SOURCE_VFY=sha1:$SHA1
+        WEB_SITE="$WEB_SITE"
+         ENTERED=$ENTERED
+         UPDATED=$UPDATED
+           SHORT="$SHORT"
+cat <<EOF
+EOFDETB
+		cat $LONG | fmt -72
+		echo "EOF"
+	) > $MOONBASE/zlocal/$1/DETAILS
+
+	message "Module \"$1\" created best-effort. You might have to \`lvu edit $1\" to make it work"
+	message "Don't forget to create a DEPENDS file! (hint: use \`lvu links $1\`)"
+	message "Don't forget to \`lvu submit $1\` if you think this module is useful to others!"
+}
+
 main()  {
   case $1 in
     html)
@@ -1270,6 +1358,9 @@ main()  {
    unedit)
      unedit_module $2
 	 ;;
+   new)
+     new_module $2
+     ;;
 
    *)
      help
@@ -1306,6 +1397,4 @@ else
 
   main $@
 fi
-
-
 
