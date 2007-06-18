@@ -524,6 +524,11 @@ purge_modules() {
   local MODULE
   debug_msg "purge_modules ($@)"
   verbose_msg "Discovering modules that were removed from moonbase"
+  # safetynet: don't wipe everything
+  if [ $(list_moonbase | wc -l) -lt 100 ]; then
+    error_message "${PROBLEM_COLOR}Error: ${DEFAULT_COLOR}${MESSAGE_COLOR} your moonbase seems damaged. Re-lin moonbase to fix.${DEFAULT_COLOR}"
+    exit 1
+  fi
   for MODULE in $(list_installed | grep -v "^moonbase$") ; do
   (
     if ! run_details $MODULE &> /dev/null ; then
