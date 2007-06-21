@@ -169,12 +169,12 @@ find_section() {
 
 	# if using ZLOCAL, we must search there first
 	if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
-		if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
-			if [[ -n "$SECTION" ]]; then
+		for SECTION in $(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; do
+			if [[ -f "$MOONBASE/$SECTION/$1/DETAILS" ]]; then
 				echo $SECTION
 				return 0
 			fi
-		fi
+		done
 	fi
 
 	# otherwise check for ordinary modules named that way
