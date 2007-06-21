@@ -1,0 +1,80 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# build-zpatches.plugin -  build handling of custom         #
+#                          patches that need to be applied  #
+#                          to a module without editing      #
+#                          DETAILS/BUILD files              #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2007 by Stefan Wold under GPLv2                 #
+#                                                           #
+#############################################################
+
+
+plugin_zpatches_apply()
+{
+    local PATCHDIRS FPATCH PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
+    if [ -d $MOONBASE/zlocal/_patches/$MODULE ]; then
+	cd $SOURCE_DIRECTORY
+	PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE"
+	# Check for version based patch dir
+	if [ -d $MOONBASE/zlocal/_patches/$MODULE/$VERSION ]; then
+	    PATCHDIRS+=" $MOONBASE/zpatches/$MODULE/$VERSION"
+	fi
+	# Now find all patches and apply them
+	# We also sort them so it possible to apply patch order
+        # by prefixing a patch with 01, 02, 03 etc
+	find $PATCHDIRS -maxdepth 1 -type f | sed 's;[^/]*$;& &;' | sort -t ' ' -k 2 | while read FPATCH PATCH; do
+	    verbose_msg "Applying custom patch for $MODULE ($PATCH)"
+
+	    if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
+		TARCMD="tar x -O"
+	    else
+		TARCMD="cat"
+	    fi
+	    
+	    if [[ -n `echo $PATCH | grep '\.bz2$'` ]] ; then
+		GZCMD="bzcat"
+	    elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
+		GZCMD="zcat"
+	    else
+		GZCMD="cat"
+	    fi
+	    
+	    TMPFILE1=$(temp_create "zpatch_1")
+	    TMPFILE2=$(temp_create "zpatch_2")
+	    
+	    if $GZCMD $FPATCH > $TMPFILE1 ; then
+            # uncompress OK
+		if cat $TMPFILE1 | $TARCMD > $TMPFILE2 ; then
+                # untar OK
+	            # Trying -p1 first or else we try -p0
+	            # An error will be visible if -p1 fail which is normal
+	            # Only return error if both -p1 and -p0 fail
+		    patch -p1 -t < $TMPFILE2 || patch -p0 -t < $TMPFILE2
+		    if [ $? -ne 0 ]; then
+			message "${PROBLEM_COLOR}ERROR: Failed to apply ${PATCH} for ${MODULE}${DEFAULT_COLOR}"
+			temp_destroy $TMPFILE1
+			temp_destroy $TMPFILE2
+			return 1
+		    else
+			temp_destroy $TMPFILE1
+			temp_destroy $TMPFILE2
+		    fi
+		fi
+	    fi
+	done
+	if [ $? != 0 ]; then
+	    exit 1
+	else
+	    return 2
+	fi
+    else
+	# No patchdir for that module found just continue
+	return 2
+    fi
+}
+
+plugin_register BUILD_BUILD plugin_zpatches_apply
