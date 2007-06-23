@@ -274,7 +274,8 @@ lin_module()  {
   run_conflicts               &&
   satisfy_depends             &&
   show_downloading            &&
-  RECONFIGURE= run_configure  &&
+
+  OPTS="$OPTS `grep ^$MODULE: $TEMP_CONFIGOPTS | cut -d: -f2`"
 
   # last minute source code presence check:
   (

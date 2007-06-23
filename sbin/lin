@@ -86,6 +86,7 @@ main() {
     if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
       export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
       export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+      export TEMP_CONFIGOPTS=$(temp_create "configopts")
     fi
 
     # pass 1 : run full dependency checking
@@ -160,6 +161,7 @@ main() {
     # cleanups that we need to do
     temp_destroy $TEMP_DOWNLOAD_PIDS
     temp_destroy $TEMP_PREPAREDDEPS
+    temp_destroy $TEMP_CONFIGOPTS
 
   else
     # we are only doing one module, drop down to:
@@ -199,7 +201,6 @@ main() {
       fi
     fi
   fi
-  
 }
 
 

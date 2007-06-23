@@ -328,13 +328,15 @@ run_configure() {
 
   # add custom passed OPTS before retrieving them
   if [ -n "$PASS_OPTS" ] ; then
-    OPTS="$(get_module_config OPTS) $PASS_OPTS"
-    set_module_config OPTS "$OPTS"
+    SAVE_OPTS="$(get_module_config OPTS) $PASS_OPTS"
+    set_module_config OPTS "$SAVE_OPTS"
   fi
   plugin_call BUILD_CONFIGURE $MODULE
   if has_module_file $MODULE CONFIGURE ; then
     run_module_file $MODULE CONFIGURE
   fi
+  # store $OPTS for later use
+  echo "$MODULE:$OPTS" >> $TEMP_CONFIGOPTS
 }
 
 
