@@ -21,7 +21,7 @@ plugin_zpatches_apply()
 	PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE"
 	# Check for version based patch dir
 	if [ -d $MOONBASE/zlocal/_patches/$MODULE/$VERSION ]; then
-	    PATCHDIRS+=" $MOONBASE/zpatches/$MODULE/$VERSION"
+	    PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE/$VERSION"
 	fi
 	# Now find all patches and apply them
 	# We also sort them so it possible to apply patch order
