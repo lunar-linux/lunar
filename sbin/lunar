@@ -71,12 +71,11 @@ show_modules()	{
         !  module_held       $MODULE  &&
         !  module_exiled     $MODULE
     then
-      SHORT="Short Description Unavailable"
       (
         run_details $MODULE
-        echo  $MODULE
-        echo  $VERSION
-        echo  $SHORT
+        echo  "$MODULE"
+        echo  "$VERSION"
+        echo  "${SHORT:-Short Description Unavailable}"
       )
     fi
   done
@@ -86,7 +85,7 @@ show_modules()	{
 show_sections()  {
   for SECTION in $(list_sections);  do
     [ -z "$(list_modules $SECTION)" ] || {
-      echo  $SECTION
+      echo  "$SECTION"
       echo  "section"
     }
   done
@@ -108,15 +107,15 @@ select_section() {
 add_pkgs()  { (
   while
     SECTION=`select_section`
-  do            
+  do
     while
-      MODULES=`show_modules $SECTION`  &&
-       MODULE=`$DIALOG  --title "Select module to install please"  \
+    show_modules $SECTION ; read
+      MODULE=`$DIALOG  --title "Select module to install please"  \
                        --item-help                               \
                        --menu                                    \
                        "$SECTION"                                \
                        0 60 10                                   \
-                       $MODULES`
+                       $(show_modules $SECTION)`
     do
       DESCRIPTION=`$MOONBASE/$SECTION/$MODULE/DETAILS`
 
@@ -219,21 +218,19 @@ remove_pkgs()	{
 
 make_checklist()  {
   for  MODULE in `list_modules "$1"`;  do
-    SHORT="Short Description Unavailable"
     (
     run_details $MODULE
-    STATUS="OFF"
 
-    if    module_installed  $MODULE  ||
-          module_held       $MODULE
-    then  STATUS="on"
-    else  STATUS="off"
+    if module_installed $MODULE || module_held $MODULE; then
+      STATUS="on"
+    else
+      STATUS="off"
     fi
 
-    echo  $MODULE
-    echo  $VERSION
-    echo  $STATUS
-    echo  $SHORT
+    echo $MODULE
+    echo $VERSION
+    echo $STATUS
+    echo ${SHORT:-Short Description Unavailable}
     )
   done
 }
