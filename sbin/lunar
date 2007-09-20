@@ -495,7 +495,6 @@ log_menu()  {
 feature_menu()  {
   A_HELP="Create convenient auto-install scripts for common executables?"
   C_HELP="Colorized messages on lin and lrm?"
-  D_HELP="Use tmpfs for module installs?"
   E_HELP="Remove files when lrm?"
   F_HELP="Check for and repair broken programs after updating lunar?"
   G_HELP="Install the garbage documentation? (extras like README, LICENSE etc)"
@@ -529,10 +528,6 @@ feature_menu()  {
          GARBAGE=${GARBAGE:-on}
 	 VERBOSE=${VERBOSE:off}
 
-        if [ -z $TMPFS ]; then
-          TMPFS=on;
-        fi
-
   if  TOGGLES=`$DIALOG  --title "Feature Menu"  \
                         --no-cancel             \
                         --item-help             \
@@ -554,7 +549,6 @@ feature_menu()  {
       "VIEW_REPORTS"     "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
       "VOYEUR"           "Toggle"  "$VOYEUR"        "$V_HELP"   \
       "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
-      "TMPFS"            "Toggle"  "$TMPFS"         "$D_HELP"   \
       "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
       "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
       "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"`
@@ -575,7 +569,6 @@ feature_menu()  {
           VOYEUR=off
             REAP=off
          GARBAGE=off
-           TMPFS=off
 	 VERBOSE=off
 ZLOCAL_OVERRIDES=off
    PROBE_EXPIRED=off
@@ -596,7 +589,6 @@ ZLOCAL_OVERRIDES=off
               VOYEUR)        VOYEUR=on  ;;
                 REAP)          REAP=on  ;;
              GARBAGE)       GARBAGE=on  ;;
-               TMPFS)         TMPFS=on  ;;
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
        PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
@@ -616,7 +608,6 @@ ZLOCAL_OVERRIDES=off
     set_local_config "VOYEUR" "$VOYEUR"
     set_local_config "REAP" "$REAP"
     set_local_config "GARBAGE" "$GARBAGE"
-    set_local_config "TMPFS" "$TMPFS"
     set_local_config "VERBOSE" "$VERBOSE"
     set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
     set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
