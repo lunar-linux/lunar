@@ -33,7 +33,8 @@ plugin_module_check_md5sum()  {
             while read LINE ; do
       if ! echo $LINE | md5sum --check --status ; then
         FILE=$(echo $LINE | awk '{ print $2 }')
-        if [ -f "$FILE" ] && [ ! -h "$FILE" ]; then
+        if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" |
+              egrep -q "executable|shared object|current ar archive|ASCII C?? program" ; then
           message "${FILE_COLOR}$FILE${DEFAULT_COLOR} of ${MODULE_COLOR}$MODULE${PROBLEM_COLOR} has wrong md5sum.${DEFAULT_COLOR}"
           MD5SUM_STATUS=1
         fi
