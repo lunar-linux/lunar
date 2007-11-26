@@ -439,7 +439,7 @@ show_conflicts()  {
     done
   done
   sort -k 2,2 < $TMP_CONFLICTS | uniq -D -f 1
-  trap "rm -f $TMP_CONFLICTS ; exit" INT TERM KILL
+  trap "rm -f $TMP_CONFLICTS ; exit" INT TERM KILL EXIT
 }
 
 show_depends()  {
