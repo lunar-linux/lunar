@@ -59,6 +59,7 @@ leafs                      display installed modules that have no explicit
                                dependencies on them
 orphans                    display installed modules that are missing
                                dependencies
+conflicts                  display conflicting files
 held                       display held modules
 exiled                     display exiled modules
 expired                    display a list of modules which need an update
@@ -427,13 +428,26 @@ show_orphans()  {
   done
 }
 
+show_conflicts()  {
+  TMP_CONFLICTS=$(temp_create "conflicts")
+  for MODULE in $(list_installed); do
+    VERSION=$(installed_version $MODULE)
+    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | 
+    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" | 
+    while read LINE; do 
+        [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
+    done
+  done
+  sort -k 2,2 < $TMP_CONFLICTS | uniq -D -f 1
+  trap "rm -f $TMP_CONFLICTS ; exit" INT TERM KILL
+}
 
 show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
 
-    for  LINE  in  $(grep  ":$1:"  $DEPENDS_STATUS) ; do
-       MODULE=$(echo  $LINE  |  cut  -d :  -f1)
+    grep ":$1:" $DEPENDS_STATUS | while read LINE ; do
+      MODULE=${LINE%%:*}
       STATUS=$(echo  $LINE  |  cut  -d :  -f3)
 
       if    [  "$STATUS"  ==  "on"  ]
@@ -1025,6 +1039,10 @@ main()  {
 
     orphans)
       show_orphans
+      ;;
+
+    conflicts)
+      show_conflicts
       ;;
 
     updatelog)

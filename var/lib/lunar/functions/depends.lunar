@@ -378,7 +378,9 @@ create_depends_cache()
     }
 
     optional_depends() {
-      echo "$MODULE:$1:optional:$2:$3:$4"
+      # No quotes, this prevent us from parsing newlines
+      # if someone by accident add a newline in optional_depends
+      echo $MODULE:$1:optional:$2:$3:$4
     }
 
     # yeah, this sucks:
