@@ -792,9 +792,9 @@ submit_module() {
   # as good as it gets
   if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
     message "You can't submit non-zlocal modules. Turn on ZLOCAL_OVERRIDES"
-	message "and do \`lvu edit \$MODULE; lin moonbase\`"
-	message "so that module changes can be tracked properly!"
-	exit 1
+    message "and do \`lvu edit \$MODULE; lin moonbase\`"
+    message "so that module changes can be tracked properly!"
+    exit 1
   fi
   if [ -z "$1" ]; then
     message "submit requires a single module name."
@@ -804,13 +804,20 @@ submit_module() {
     message "submit requires curl, please \`lin curl\`"
     exit 1
   fi
-  if [ -z "$ADMIN" -o "$ADMIN" == "$USER" ]; then
+  if [ -z "$ADMIN" -o "$ADMIN" == "$USER" -o "$ADMIN" == "root" ]; then
     message "Please set ADMIN to your e-mail address: lunar set ADMIN \"me@my.mail.domain\""
     exit 1
   fi
-  if ! run_details "$1" ; then
-      message "submit requires an existing module"
+  if [ -z "$REALNAME" ]; then
+    REALNAME="getent passwd $USER | cut -d: -f5 | cut -d, -f1"
+    if [ -z "$G_REALNAME" ]; then
+      message "Please set REALNAME to your real name: lunar set REALNAME \"John Notdoe\""
       exit 1
+    fi
+  fi
+  if ! run_details "$1" ; then
+    message "submit requires an existing module"
+    exit 1
   else
     if echo $SECTION | grep -q '^zlocal' ; then
       ZLOCAL_OVERRIDES=off SECTION=$(find_section $1)
@@ -824,17 +831,23 @@ submit_module() {
       exit 1
     fi
     TMP_MSG=$(temp_create "submission")
+    TMP_MSG2=$(temp_create "submission")
     (
+      echo "$1: "
       echo ""
-      echo "# type a changelog message here"
-      echo "# all lines starting with '#' will be removed"
+      echo ""
+      echo "# type a changelog message here. The first line should start with"
+      echo "# the module name and summarize your change. All lines starting with '#'"
+      echo "# will be removed automatically"
     ) > $TMP_MSG
     edit_file $TMP_MSG
     sed -i '/^#/d' $TMP_MSG
     (
+      head -n 1 $TMP_MSG
       echo ''
+      echo "From: $REALNAME <$ADMIN>"
+      tail +2 $TMP_MSG
       echo '---'
-      echo 'from:' $ADMIN
       echo 'module:' $1
       echo "id: $UNIQID"
       echo "lvu submit: $1"
@@ -845,14 +858,18 @@ submit_module() {
       echo "glibc: $(installed_version glibc)"
       echo ''
       echo '---'
+      lvu diff $1 | diffstat -p1
+      echo ''
+      echo '---'
       lvu diff $1
-    ) >> $TMP_MSG
-    cat $TMP_MSG
+    ) >> $TMP_MSG2
+    cat $TMP_MSG2
     if query "Submit this module now?" y; then
-      curl -F file=@$TMP_MSG -F module=$1 -F id=$UNIQID "http://lunar-linux.org/submit.php"
+      curl -F file=@$TMP_MSG2 -F module=$1 -F id=$UNIQID "http://lunar-linux.org/submit.php"
+      temp_destroy $TMP_MSG2
       temp_destroy $TMP_MSG
     else
-      message "Submission aborted. your submission was saved as $TMP_MSG"
+      message "Submission aborted. your submission was saved as $TMP_MSG2"
     fi
   fi
 }

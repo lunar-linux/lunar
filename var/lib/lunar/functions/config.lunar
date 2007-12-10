@@ -20,31 +20,32 @@
 
 set_config()
 {
-	local LINE NEW
+	local LINE NEW FILE VAR
 	debug_msg "set_config ($@)"
 
 	LINE=$(grep -w "$2=.*" $1)
-	if [ "$1" == "$LOCAL_CONFIG" ] ; then
-		NEW=$(printf "%16s=%s" "$2" "$3")
+	FILE=$1
+	VAR=$2
+	shift 2
+	if [ "$FILE" == "$LOCAL_CONFIG" ] ; then
+		NEW="$(printf "%16s" "$VAR")=\"$@\""
 	else
-		NEW="$2=\"$3\""
+		NEW="$VAR=\"$@\""
 	fi
 
 	# on-demand creation
-	if [ ! -f $1 ] ; then
-		touch $1
+	if [ ! -f $FILE ] ; then
+		touch $FILE
 	fi
 
-	lock_file $1 &&
+	lock_file $FILE &&
 	if [ -n "$LINE" ] ; then
 		# make sure we escape those ':' characters:
 		LINE=$(echo $LINE | sed 's/:/\\:/g')
-		NEW=$(echo $NEW | sed 's/:/\\:/g')
-		sedit "s:$LINE:$NEW:" $1
-	else
-		echo "$NEW" >> $1
+		sedit "/[^ ]$VAR=/d" $FILE
 	fi
-	unlock_file $1
+	echo "$NEW" >> $FILE
+	unlock_file $FILE
 }
 
 
@@ -77,7 +78,10 @@ get_config()
 set_local_config()
 {
 	debug_msg "set_local_config ($@)"
-	set_config "$LOCAL_CONFIG" "$1" "$2"
+	local VAR
+	VAR=$1
+	shift
+	set_config "$LOCAL_CONFIG" "$VAR" "$@"
 }
 
 
