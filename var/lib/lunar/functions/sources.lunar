@@ -173,12 +173,7 @@ rm_source_dir() {
   DEAD_DIR=${DEAD_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
-  if [ "$TMPFS" != "off" ] ; then
-    umount $DEAD_DIR 2> /dev/null
-    rmdir $DEAD_DIR 2> /dev/null
-  else
-    rm -rf $DEAD_DIR 2> /dev/null
-  fi
+  rm -rf $DEAD_DIR 2> /dev/null
 }
 
 
@@ -196,21 +191,11 @@ mk_source_dir() {
   NEW_DIR=${NEW_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "creating building dir \"$NEW_DIR\""
-  if [ "$TMPFS" != "off" ] ; then 
-    if [ -d "$NEW_DIR" ] ; then
-      verbose_msg "Removing old source directory first!"
-      umount $NEW_DIR 2>/dev/null
-      rmdir $NEW_DIR 2>/dev/null
-    fi
-    mkdir -p $NEW_DIR &&
-    mount -o size=1g,nr_inodes=1m -t tmpfs tmpfs $NEW_DIR
-  else
-    if [ -d $NEW_DIR ] ; then
-      verbose_msg "Removing old source directory first!"
-      rm -rf $NEW_DIR 2>/dev/null
-    fi
-    mkdir -p $NEW_DIR
+  if [ -d $NEW_DIR ] ; then
+    verbose_msg "Removing old source directory first!"
+    rm -rf $NEW_DIR 2>/dev/null
   fi
+  mkdir -p $NEW_DIR
 }
 
 

@@ -197,12 +197,12 @@ lrm_module() {
     remove_depends $MODULE
     # remove alias if required
     if [ $MODULE != moonbase ] ; then
-    for ALIAS in `cut -d: -f1 $MOONBASE/aliases`; do
-      if [ "$(get_local_config `echo LUNAR_ALIAS_${ALIAS:1}`)" == "$MODULE" ]; then
-        verbose_msg "removing alias mapping from \"$ALIAS\" to \"$MODULE\""
-        unset_local_config `echo LUNAR_ALIAS_${ALIAS:1}`
-      fi
-    done
+      for ALIAS in `cut -d: -f1 $MOONBASE/aliases`; do
+        if [ "$(get_local_config `echo LUNAR_ALIAS_${ALIAS:1}`)" == "$MODULE" ]; then
+          verbose_msg "removing alias mapping from \"$ALIAS\" to \"$MODULE\""
+          unset_local_config `echo LUNAR_ALIAS_${ALIAS:1}`
+        fi
+      done
     fi
     # restart xinetd after xinetd.confs have been removed by lrm...
     if [ -n "$SERVICES" -a -n "$XINETD" ] ; then

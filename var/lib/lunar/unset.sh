@@ -87,7 +87,6 @@ unset SUSTAIN
 unset SUSTAINED
 unset SYM_CHECK
 unset SYMLINK_COLOR
-unset TMPFS
 unset TRACKED
 unset UNIQID
 unset USE_CACHE

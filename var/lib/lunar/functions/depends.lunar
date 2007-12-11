@@ -163,7 +163,7 @@ run_depends() {
     if module_installed $DEP ; then
       add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
       echo "$DEP" >> $TEMP_PREPAREDDEPS
-    elif ! module_installed $DEP && ! module_held $DEP ; then
+    elif ! is_depends $DEP ! module_installed $DEP && ! module_held $DEP ; then
       if module_exiled $DEP ; then
         message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
         return 1
@@ -378,7 +378,9 @@ create_depends_cache()
     }
 
     optional_depends() {
-      echo "$MODULE:$1:optional:$2:$3:$4"
+      # No quotes, this prevent us from parsing newlines
+      # if someone by accident add a newline in optional_depends
+      echo $MODULE:$1:optional:$2:$3:$4
     }
 
     # yeah, this sucks:

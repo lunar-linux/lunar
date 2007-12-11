@@ -138,7 +138,7 @@ expand_cache_safe() {(
   # the sed trick is advanced: a non-greedy pattern that returns all
   # directory names listed in the input
   for TARGET in $(cat $TMP_TARGETS | sed 's/\/[^\/]*$/\//g' ) ; do
-	if [ ! -d $TARGET ]; then
+    if [ ! -d $TARGET ]; then
       debug_msg "mkdir -p $TARGET"
       mkdir -p $TARGET
     fi
@@ -269,7 +269,7 @@ lin_module()  {
     fi
   fi
   check_blacklist             &&
-  
+
   # here we run CONFLICTS, DEPENDS and CONFIGURE stuff
   run_conflicts               &&
   satisfy_depends             &&
