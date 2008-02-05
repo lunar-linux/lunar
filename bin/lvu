@@ -845,7 +845,7 @@ submit_module() {
     edit_file $TMP_MSG
     sed -i '/^#/d' $TMP_MSG
     (
-      head -n 1 $TMP_MSG | sed 's/^/Subject: //g'
+      head -n 1 $TMP_MSG | sed 's/^/Subject: /g'
       echo ''
       echo "From: $REALNAME <$ADMIN>"
       tail +2 $TMP_MSG
