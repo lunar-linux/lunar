@@ -838,12 +838,14 @@ submit_module() {
       echo ""
       echo "# type a changelog message here. The first line should start with"
       echo "# the module name and summarize your change. All lines starting with '#'"
-      echo "# will be removed automatically"
+      echo "# will be removed automatically. Example: 'foo: version update'."
+      echo "# "
+      echo "# PLEASE FORMAT THE FIRST LINE ACCORDING TO ABOVE NOTES!!! THANK YOU!!!"
     ) > $TMP_MSG
     edit_file $TMP_MSG
     sed -i '/^#/d' $TMP_MSG
     (
-      head -n 1 $TMP_MSG
+      head -n 1 $TMP_MSG | sed 's/^/Subject: //g'
       echo ''
       echo "From: $REALNAME <$ADMIN>"
       tail +2 $TMP_MSG
@@ -1106,7 +1108,29 @@ main()  {
         echo "$MODULE ($(installed_version $MODULE) -> $(run_details $MODULE > /dev/null ; echo $VERSION))"
       done
       ;;
-		
+    failed)
+      while read DATE COMMAND MODULE VERSION STATE JUNK ; do
+        if [ "$STATE" == "failed" ] && [ "$COMMAND" == "lin" ] ; then
+          # add to list of failed modules
+          if ! echo "$FAILED" | grep -qw $MODULE ; then
+            FAILED="$FAILED $MODULE "
+          fi
+        fi
+        # no need to remove if $MODULE is not in the list - speeds things up
+        if ! echo "$FAILED" | grep -qw "$MODULE" ; then
+          continue
+        fi
+        if ([ "$STATE" == "success" ] && [ "$COMMAND" == "lin" ]) ||
+             ([ "$STATE" == "success" ] && [ "$COMMAND" == "lrm" ]) ; then
+          # remove from failed modules
+          FAILED=`echo "$FAILED" | sed "s/ $MODULE //g"`
+        fi
+      done < $ACTIVITY_LOG
+      for MODULE in $FAILED ; do
+        echo $MODULE
+      done
+      ;;
+
     sum)
       if [ -n "$2" ] ; then
         if ! checksum  "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
