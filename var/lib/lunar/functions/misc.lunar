@@ -46,16 +46,17 @@ ld_add() {
 
 ld_remove() {
 	debug_msg "ld_remove ($@)"
+	TMP_LD_CONF=$(temp_create "ldsoconf")
 
 	if [ ! -z "$1" ] && [ -d "$1" ] ; then
 		if [ `grep -s $1 /etc/ld.so.conf` ] ; then
 			verbose_msg "Removing $1 from ld.so.conf"
-			grep -v $1 /etc/ld.so.conf > /etc/ld.so.conf.new
-			rm /etc/ld.so.conf
-			mv /etc/ld.so.conf.new /etc/ld.so.conf
+			grep -v $1 /etc/ld.so.conf > $TMP_LD_CONF
+			cat $TMP_LD_CONF > /etc/ld.so.conf
 			ldconfig
 		fi
 	fi
+	temp_destroy $TMP_LD_CONF
 }
 
 # function : directories
