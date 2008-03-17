@@ -40,9 +40,7 @@ set_config()
 
 	lock_file $FILE &&
 	if [ -n "$LINE" ] ; then
-		# make sure we escape those ':' characters:
-		LINE=$(echo $LINE | sed 's/:/\\:/g')
-		sedit "/[^ ]$VAR=/d" $FILE
+		sedit "/$VAR=/d" $FILE
 	fi
 	echo "$NEW" >> $FILE
 	unlock_file $FILE
