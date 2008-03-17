@@ -40,7 +40,7 @@ set_config()
 
 	lock_file $FILE &&
 	if [ -n "$LINE" ] ; then
-		sedit "/$VAR=/d" $FILE
+		sedit "/\b$VAR=/d" $FILE
 	fi
 	echo "$NEW" >> $FILE
 	unlock_file $FILE
