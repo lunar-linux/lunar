@@ -23,9 +23,13 @@ set_config()
 	local LINE NEW FILE VAR
 	debug_msg "set_config ($@)"
 
-	LINE=$(grep -w "$2=.*" $1)
+	# remove leading/trailing whitespace
+	VAR=${2#"${2%%[![:space:]]*}"}
+	VAR=${VAR%%+([[:space:]])}
+
+	LINE=$(grep -w "$VAR=.*" $1)
 	FILE=$1
-	VAR=$2
+
 	shift 2
 	if [ "$FILE" == "$LOCAL_CONFIG" ] ; then
 		NEW="$(printf "%16s" "$VAR")=\"$@\""
@@ -40,9 +44,7 @@ set_config()
 
 	lock_file $FILE &&
 	if [ -n "$LINE" ] ; then
-		# make sure we escape those ':' characters:
-		LINE=$(echo $LINE | sed 's/:/\\:/g')
-		sedit "/[^ ]$VAR=/d" $FILE
+		sedit "/^\s*$VAR=/d" $FILE
 	fi
 	echo "$NEW" >> $FILE
 	unlock_file $FILE
