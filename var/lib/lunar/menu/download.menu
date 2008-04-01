@@ -113,17 +113,17 @@ Example: enter 8000 for downloading no faster then \
   fi
 }
 
-set_cvs_threshold()  {
-  PROMPT="Please enter the minimum time between CVS updates in minutes, \
+set_repository_threshold()  {
+  PROMPT="Please enter the minimum time between repository updates in minutes, \
 enter 0 for no threshold. Default threshold is 10 minutes"
 
-  if  CVS_THRESHOLD=`$DIALOG  --title "CVS threshold" \
+  if  REPOSITORY_THRESHOLD=`$DIALOG  --title "Repository threshold" \
                               --ok-label  "Commit"    \
                               --inputbox              \
                               "$PROMPT"               \
-                               0 0  "$CVS_THRESHOLD"`
+                               0 0  "$REPOSITORY_THRESHOLD"`
   then
-    set_local_config "CVS_THRESHOLD" "$CVS_THRESHOLD"
+    set_local_config "REPOSITORY_THRESHOLD" "$REPOSITORY_THRESHOLD"
   fi
 }
 
@@ -286,7 +286,7 @@ while
     R_HELP="Per process download rate"
     P_HELP="Proxy Settings"
     E_HELP="Test all mirrors available on download"
-    T_HELP="CVS update threshold time"
+    T_HELP="Repository update threshold time"
 
     COMMAND=`$DIALOG  --title "Download Options"               \
                       --item-help                              \
@@ -295,25 +295,25 @@ while
                       --menu                                   \
                       ""                                       \
                       0 40 8                                   \
-                      "A"  "Ftp Active/Passive"     "$A_HELP"  \
-                      "C"  "Partial Downloads"      "$C_HELP"  \
-                      "H"  "Cache Usage"            "$H_HELP"  \
-                      "N"  "Number of Retries"      "$N_HELP"  \
-                      "P"  "Proxies"                "$P_HELP"  \
-                      "R"  "Download Rate"          "$R_HELP"  \
-		      "E"  "Exhaustive mirrors"     "$E_HELP"  \
-		      "T"  "CVS update threshold"   "$T_HELP"`
+                      "A"  "Ftp Active/Passive"          "$A_HELP"  \
+                      "C"  "Partial Downloads"           "$C_HELP"  \
+                      "H"  "Cache Usage"                 "$H_HELP"  \
+                      "N"  "Number of Retries"           "$N_HELP"  \
+                      "P"  "Proxies"                     "$P_HELP"  \
+                      "R"  "Download Rate"               "$R_HELP"  \
+		      "E"  "Exhaustive mirrors"          "$E_HELP"  \
+		      "T"  "Repository update threshold" "$T_HELP"`
 
   do
     case  $COMMAND in
-      A)  set_ftp_active         ;;
-      C)  set_partial_downloads  ;;
-      H)  set_cache_usage        ;;
-      N)  set_retries            ;;
-      P)  proxy_menu             ;;
-      R)  set_download_rate      ;;
-      E)  set_exhaustive         ;;
-      T)  set_cvs_threshold      ;;
+      A)  set_ftp_active           ;;
+      C)  set_partial_downloads    ;;
+      H)  set_cache_usage          ;;
+      N)  set_retries              ;;
+      P)  proxy_menu               ;;
+      R)  set_download_rate        ;;
+      E)  set_exhaustive           ;;
+      T)  set_repository_threshold ;;
     esac
   done
 }
