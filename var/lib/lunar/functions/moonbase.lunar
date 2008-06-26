@@ -41,7 +41,7 @@ get_moonbase () {
   if [ ! -d "$SYSTEM_MOONBASE" ] ; then
     mkdir -p $SYSTEM_MOONBASE
   fi
-  
+
   if [ ! -d "$SYSTEM_MOONBASE/zlocal" ] ; then
     mkdir -p $SYSTEM_MOONBASE/zlocal
   fi
@@ -72,7 +72,7 @@ get_moonbase () {
       # create an md5sum log
       create_md5sum_log &&
 
-      add_module $MODULE installed $VERSION $(du -hs $SYSTEM_MOONBASE | cut -f1) &&
+      add_module $MODULE installed $VERSION $(du -ks $SYSTEM_MOONBASE | cut -f1)KB &&
       # get ready to regenerate the module index cache file
       create_module_index &&
       create_depends_cache &&
