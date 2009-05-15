@@ -1,0 +1,32 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# verify-sha256.plugin - plugin that performs sha256check   #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2005 by Auke Kok under GPLv2                    #
+# Copyright 2009 by Stefan Wold under GPLv2                 #
+#                                                           #
+#############################################################
+
+
+plugin_source_verify_sha256() {
+  # check if we can handle this type of VFY:
+  if [ "${2:0:7}" != "sha256:" ] ; then
+    return 2
+  fi
+  debug_msg "plugin_source_verify_sha256 ($@)"
+  TMP_SHA=$(sha256sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
+  if [ "${2:7}" != "$TMP_SHA" ] ; then
+    message "${PROBLEM_COLOR}! sha256sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
+    verbose_msg "offending sha256sum: $TMP_SHA"
+    verbose_msg "should be sha256sum: ${2:7}"
+    return 1
+  else
+    # always return 'continue' plugin value
+    return 2
+  fi
+}
+
+plugin_register SOURCE_VERIFY plugin_source_verify_sha256
