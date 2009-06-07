@@ -1,3 +1,2 @@
-There are some functions in this directory. These functions are called
-by subroutines. This place is defined in /etc/lunar/config, via
-FUNCTIONS variable.
+There are some functions in this directory. These functions are called by
+subroutines. This place is defined in /etc/lunar/config, via FUNCTIONS variable.
