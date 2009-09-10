@@ -1,4 +1,4 @@
-.TH "LVU" "1" "August 2003" "Lunar Linux" "LUNAR"
+.TH "LVU" "1" "June 2009" "Lunar Linux" "LUNAR"
 .SH "NAME"
 lvu \- query/view lunar package management information
 .SH "SYNOPSIS"
@@ -31,6 +31,9 @@ from <path/file>
 .PP 
 .B lvu
 installed [module]
+.PP
+.B lvu
+conflicts
 .PP
 .B lvu
 held|exiled|expired
@@ -141,6 +144,10 @@ display the modules that this module's ELF binary files actually links to
 <module>
 .IP 
 used to determine what files were installed by a module and where those files are located
+.PP
+.B conflicts
+.IP
+display modules with conflicting files
 .PP
 .B held
 .IP
@@ -293,10 +300,12 @@ Converted to Lunar by Terry Chan 03/23/2002
 Edited and new functions added by Chuck Mead 05/21/2002
 .PP
 Updated again by Terry Chan 08/08/2003
+.PP
+Updated by Stefan Wold 06/07/2009
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
-lunar(8), lin(8), lrm(8), lget(8), moonbase(1)
+lunar(8), lin(8), lrm(8), lget(8), moonbase(5)
 .SH "WARRANTY"
 This is free software with ABSOLUTELY NO WARRANTY
 

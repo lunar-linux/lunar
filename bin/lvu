@@ -830,6 +830,18 @@ submit_module() {
       message "so that module changes can be tracked properly!"
       exit 1
     fi
+
+    # sanity checks
+    lvu diff $1 | diffstat -p0 -l | grep -e '.patch$' -e '.diff$' && (
+      echo ""
+      echo "Sanity check failed: patch files are not allowed inside moonbase"
+      echo "Please submit your patch files to the lunar-dev mailinglist and"
+      echo "Wait for one of the developers to upload them to \$PATCH_URL."
+      echo "Once that is done you can resubmit using that URL for the patch(es)"
+      exit 1
+    )
+
+
     TMP_MSG=$(temp_create "submission")
     TMP_MSG2=$(temp_create "submission")
     (
