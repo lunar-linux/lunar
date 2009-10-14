@@ -238,12 +238,12 @@ run_details() {
     fi
 
     if [[ -z "$WANT_VERSION" ]] ; then
-      run_module_file $1 DETAILS &> /dev/null || return -1
+      run_module_file $1 DETAILS &> /dev/null || return 255
     else
       TMP_DETAILS=$(temp_create "details.version")
       cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^\s*VERSION=/d' > $TMP_DETAILS
       VERSION="$WANT_VERSION"
-      . $TMP_DETAILS &> /dev/null || return -1
+      . $TMP_DETAILS &> /dev/null || return 255
       temp_destroy $TMP_DETAILS
     fi
     SOURCE_DIRECTORY=${SOURCE_DIRECTORY:-$BUILD_DIRECTORY/$1-$VERSION}
@@ -564,7 +564,7 @@ module_is_expired() {
       fi
     fi
     # nope... it's not expired
-    return -1
+    return 255
   )
 }
 
