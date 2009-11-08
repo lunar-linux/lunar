@@ -17,7 +17,7 @@ view_file()  {
        gzip) zcat $1  | ${PAGER:-less} ;;
           *)
              # default fallback
-             verbose_msg "view_file using fallback for ($1}"
+             verbose_msg "view_file using fallback for ($1)"
              cat $1   | ${PAGER:-less} ;;
     esac
   else
