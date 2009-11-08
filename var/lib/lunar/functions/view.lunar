@@ -13,15 +13,15 @@ view_file()  {
   if [ -n "$1" ] ; then
     # show a file $1
     case $(file -b $1 | cut -d' ' -f1) in
-      ASCII) cat $1         | ${PAGER:-less} ;;
-      UTF-8) cat $1         | ${PAGER:-less} ;;
-      bzip2) cat $1 | bzcat | ${PAGER:-less} ;;
-       gzip) cat $1 | zcat  | ${PAGER:-less} ;;
-       data) cat $1         | ${PAGER:-less} ;;
+      bzip2) bzcat $1 | ${PAGER:-less} ;;
+       gzip) zcat $1  | ${PAGER:-less} ;;
+          *)
+             # default fallback
+             verbose_msg "view_file using fallback for ($1}"
+             cat $1   | ${PAGER:-less} ;;
     esac
   else
     cat | ${PAGER:-less}
   fi
 }
-
 
