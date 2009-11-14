@@ -60,7 +60,8 @@ unalias() {
         error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR} ${MESSAGE_COLOR}(Not installed)${DEFAULT_COLOR}"
       fi
     done
-    read CHOICE
+    echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
+    read -t $PROMPT_DELAY CHOICE
     # test directly first
     if echo $TARGETS | grep -qw "$CHOICE" ; then
       verbose_msg "Stored alias mapping $1 -> $TARGET"
