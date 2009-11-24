@@ -27,6 +27,7 @@
 # Parts Copyrighted Jason Johnston 2002 under GPLv2        #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
 # Parts Copyrighted Auke Kok 2003 under GPLv2              #
+# Parts Copyrighted Stefan Wold 2007-2009 under GPLv2      #
 #                                                          #
 ############################################################
 
@@ -429,7 +430,11 @@ show_orphans()  {
 }
 
 show_conflicts()  {
+  declare -A conflicts
+  declare -A conflicts2
+
   TMP_CONFLICTS=$(temp_create "conflicts")
+  TMP_CONFLICTS2=$(temp_create "conflicts")
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
     cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | 
@@ -438,8 +443,34 @@ show_conflicts()  {
         [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
     done
   done
-  sort -k 2,2 < $TMP_CONFLICTS | uniq -D -f 1
-  trap "rm -f $TMP_CONFLICTS ; exit" INT TERM KILL EXIT
+
+  sort -k 2,2 < $TMP_CONFLICTS | uniq -D -f 1 > $TMP_CONFLICTS2
+  while read MOD FILE; do
+    if [ -z "${conflicts[$FILE]}" ]; then
+      conflicts[$FILE]=$MOD
+    else
+      conflicts[$FILE]+=",$MOD"
+    fi
+  done < $TMP_CONFLICTS2
+
+  for i in ${!conflicts[@]}; do
+    var=${conflicts[$i]}
+    if [ -z "${conflicts2[$var]}" ]; then
+      conflicts2[$var]="$i"
+    else
+      conflicts2[$var]+=" $i"
+    fi
+  done
+
+  for i in ${!conflicts2[@]}; do
+    echo -e "${MESSAGE_COLOR}Conflicting files for modules ${MODULE_COLOR}${i/,/, }${DEFAULT_COLOR}:"
+    for i in ${conflicts2[$i]}; do
+      echo -e " ${FILE_COLOR}$i${DEFAULT_COLOR}"
+    done
+    echo
+  done
+
+  trap "rm -f $TMP_CONFLICTS $TMP_CONFLICTS2 ; exit" INT TERM KILL EXIT
 }
 
 show_depends()  {
