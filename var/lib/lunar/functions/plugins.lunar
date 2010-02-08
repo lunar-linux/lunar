@@ -85,6 +85,7 @@ update_plugin() {
 				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
 					debug_msg "Installed \"$(basename $PLUGIN)\""
 					install -m644 $PLUGIN $PLUGIN_DIR/
+					reload_plugins
 				done
 			elif [ "$2" == "remove" ] || ! module_installed $1 ; then
 				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
@@ -112,5 +113,17 @@ update_plugins() {
 	done
 }
 
+
+reload_plugins() {
+    local ITERATOR
+    debug_msg "reload_plugins($@)"
+
+    # Unload current plugins
+    unset LUNAR_PLUGINS
+
+    for ITERATOR in $PLUGIN_DIR/*.plugin; do
+        . $ITERATOR
+    done
+}
 
 
