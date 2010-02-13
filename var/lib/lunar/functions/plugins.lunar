@@ -98,6 +98,7 @@ update_plugin() {
 				done
 			fi
 		fi
+		reload_plugins
 	fi
 }
 
@@ -112,5 +113,17 @@ update_plugins() {
 	done
 }
 
+
+reload_plugins() {
+    local ITERATOR
+    debug_msg "reload_plugins($@)"
+
+    # Unload current plugins
+    unset LUNAR_PLUGINS
+
+    for ITERATOR in $PLUGIN_DIR/*.plugin; do
+        . $ITERATOR
+    done
+}
 
 
