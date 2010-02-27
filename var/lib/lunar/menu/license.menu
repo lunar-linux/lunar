@@ -21,12 +21,12 @@ set_accepted_licenses()
 
     PROMPT="Please select acceptable licenses
 
-Lunar by default only accepts osi-approved licenses. You will
+Lunar by default only accept osi-approved licenses. You will
 need to tell lunar to explicitly accept or reject licenses if
 you wish to change this behaviour.
 
 You have several ways of doing so:
- o Enter \"all\" in this field to except every license.
+ o Enter \"all\" in this field to accept every license.
  o Enter \"osi\" to accept any known osi approved license.
  o Or enter any specific license name in here to accept it.
  o Enter licenses in the REJECTED_LICENSES and leave this
