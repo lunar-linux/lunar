@@ -109,24 +109,25 @@ add_pkgs()  { (
     SECTION=`select_section`
   do
     while
-    show_modules $SECTION ; read
-      MODULE=`$DIALOG  --title "Select module to install please"  \
+      SECTION_MODULES=$(show_modules $SECTION)
+      MODULE=`$DIALOG  --title "Select module to install please" \
                        --item-help                               \
                        --menu                                    \
-                       "$SECTION"                                \
+                       "Section: $SECTION"                       \
                        0 60 10                                   \
-                       $(show_modules $SECTION)`
+                       $SECTION_MODULES`
     do
-      DESCRIPTION=`$MOONBASE/$SECTION/$MODULE/DETAILS`
+      SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+      DESCRIPTION=$(run_module_file $MODULE DETAILS)
 
       if  $DIALOG  --title      "Install $MODULE"  \
                    --yesno      "$DESCRIPTION"    \
-                   0 0
+                   14 76
       then
         push_install_queue  $MODULE
-        $DIALOG  --msgbox  "$MODULE added to the install queue."  0 0
+        $DIALOG  --msgbox  "$MODULE added to the install queue."  5 60
       else
-        $DIALOG  --msgbox  "$MODULE will not be installed."  0 0
+        $DIALOG  --msgbox  "$MODULE will not be installed."  5 60
       fi
     done
   done
@@ -200,15 +201,17 @@ remove_pkgs()	{
                     $INSTALLED_MODULES`
   do
    (
+    SECTION=$(find_section $MODULE)
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
     DESCRIPTION=$(run_module_file $MODULE DETAILS)
 
-    if  $DIALOG  --title      "Removal $MODULE"  \
+    if  $DIALOG  --title      "Remove $MODULE"  \
                  --yesno      "$DESCRIPTION"    \
-                 0 0
+                 12 76
     then
       push_remove_queue  $MODULE                                    &&
-      $DIALOG  --msgbox  "$MODULE added to the remove queue."  0 0  ||
-      $DIALOG  --msgbox  "$MODULE is not really installed?"    0 0
+      $DIALOG  --msgbox  "$MODULE added to the remove queue."  5 60  ||
+      $DIALOG  --msgbox  "$MODULE is not really installed?"    5 60
     fi
    )
   done
