@@ -188,7 +188,6 @@ show_installed_modules()  {
 remove_pkgs()	{
   while
     if  [  -z  "$INSTALLED_MODULES"  ];  then
-      echo  "Discovering installed modules..."
       INSTALLED_MODULES=$(show_installed_modules)
     fi
 
