@@ -686,7 +686,14 @@ show_eert() {
 show_urls() { (
   # function overrides:
   plugin_call() { return 0 ; }
-  download_url() { echo $1$2 ; return 1 ; }
+  download_url() { 
+    URL=$1
+    if [ "${URL#${URL%?}}" != "/" ]; then
+      URL="${URL}/"
+    fi
+    echo $URL$2
+    return 1
+  }
   connect() { return 0 ; }
 
   LRESORT_URL=
