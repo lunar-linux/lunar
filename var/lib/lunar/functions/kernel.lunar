@@ -10,6 +10,7 @@
 # Parts Copyright Niki Guldbrand 2003 GPLv2                #
 # Parts Copyright FW Systems llc 2003 GPLv2                #
 # Parts Copyright Auke Kok 2005 GPLv2                      #
+# Parts Copyright Stefan Wold 2010 GPLv2                   #
 #                                                          #
 ############################################################
 
@@ -44,3 +45,43 @@ update_bootloader() {
 }
 
 
+# function: kernel_config_exists
+# usage: kernel_config_exists
+# purpose: Verify that a readable kernel config is available
+# returns: Config file path, (0) if successful, (1) if config not found
+kernel_config_exists() {
+    if [ -e /proc/config.gz ]; then
+        echo "/proc/config.gz"
+    elif [ -e /usr/src/linux/.config ]; then
+        echo "/usr/src/linux/.config"
+    elif [ -e $CONFIG_CACHE/.config.2.6.stable ]; then
+        echo "$CONFIG_CACHE/.config.2.6.stable"
+    else
+        return 1
+    fi
+    return 0
+}
+
+# function: kernel_option_present
+# usage: kernel_option_present config_option
+# purpose: Check if a kernel option is configured
+# returns: (0) if option is found and enabled, (1) if option is not found or disabled, (255) if kernel config not found
+kernel_option_present() {
+    local KERNEL_CONFIG KERNEL_OPTION CAT
+    KERNEL_CONFIG=$(kernel_config_exists) || return 255
+    KERNEL_OPTION=$1
+
+    case $KERNEL_CONFIG in
+        *.gz)
+            CAT=zcat
+            ;;
+        *)
+            CAT=cat
+            ;;
+    esac
+
+    if $CAT $KERNEL_CONFIG | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
+        return 0
+    fi
+    return 1
+}
