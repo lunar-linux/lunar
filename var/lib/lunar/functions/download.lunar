@@ -210,7 +210,7 @@ show_downloading()
 			cat $DOWNLOAD_LOG
 			rm -f $DOWNLOAD_LOG
 		elif [ -f "$DOWNLOAD_LOG" ]; then
-			tail -s 0.0 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
 			sleep 1
 			rm -f $DOWNLOAD_LOG
 		fi

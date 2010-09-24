@@ -202,7 +202,6 @@ alien() {
 
   diff -B -a -d $TMP_FOUND $TMP_KNOWN | grep -e "^< " | cut -c 3-
 
-read
   temp_destroy $TMP_FOUND
   temp_destroy $TMP_KNOWN
 }

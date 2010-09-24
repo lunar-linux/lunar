@@ -95,14 +95,14 @@ create_module_index() {
   if [[ ! -f $MODULE_INDEX ]] ; then
     touch $MODULE_INDEX &> /dev/null
   fi
-  
+
   # silently fail if we cannot write to $MODULE_INDEX, it is okay
   # for this to fail in case we are a mere user using lvu's search
   # functionality
   if [[ ! -w "$MODULE_INDEX" ]] ; then
     return 0
   fi
- 
+
   verbose_msg "Updating module index file..."
   # doing this allows us to ctrl-C the process without breaking the
   # index file
@@ -130,7 +130,7 @@ create_module_index() {
   # do not forget to do these at any time:
   unlock_file $MODULE_INDEX
   temp_destroy $TMP_INDEX
-}  
+}
 
 
 # function: check_module_index
@@ -220,7 +220,7 @@ run_details() {
   local TMP_DETAILS
   debug_msg "run_details ($@)"
   # Note: run_details doesn't EXIT the code, but merely drops a warning
-  # (return 1), which means that the calling code needs to decide 
+  # (return 1), which means that the calling code needs to decide
   # if this is a problem or not... -sofar
 
   SECTION=$(find_section $1)
@@ -269,7 +269,7 @@ has_module_file()
 
 
 # function : run_module_file
-# usage    : run_module_file $MODULE $SCRIPTNAME 
+# usage    : run_module_file $MODULE $SCRIPTNAME
 # purpose  : runs the given script for a pre-defined module
 run_module_file() {
 	debug_msg "run_module_file ($@)"
@@ -487,7 +487,7 @@ remove_module() {
 
   verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS_BACKUP                              &&
-  lock_file $MODULE_STATUS                                     && 
+  lock_file $MODULE_STATUS                                     &&
   grep -v "^$1:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
   cp $MODULE_STATUS_BACKUP $MODULE_STATUS
   unlock_file $MODULE_STATUS
@@ -509,7 +509,9 @@ add_module()  {
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS_BACKUP                             &&
   lock_file $MODULE_STATUS                                    &&
-  grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null &&
+  if [ -s $MODULE_STATUS ]; then
+    grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null
+  fi &&
   echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
   cp $MODULE_STATUS $MODULE_STATUS_BACKUP
   unlock_file $MODULE_STATUS
@@ -541,7 +543,7 @@ purge_modules() {
       fi
     fi
   )
-  done 
+  done
 }
 
 
@@ -594,12 +596,12 @@ update_modules() {
 
   verbose_msg "Searching for modules to update"
   LIST=$(list_expired_modules)
-  
+
   if [ -z "$LIST" ] ; then
     verbose_msg "Nothing to update!"
     return
   fi
-  
+
   verbose_msg "Sorting update queue"
   QUEUE=$(sort_by_dependency $LIST)
 
