@@ -1355,15 +1355,17 @@ main()  {
       ;;
 
     compile)
-      run_details $2 ;
-        if [ -f $COMPILE_LOGS/$2-$(module_version $2).bz2 ] ; then
-          view_file $COMPILE_LOGS/$2-$(module_version $2).bz2
-        else
-          VERSION=$(installed_version $2)
-          view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
-             "Compile log for $2 does not exist"
+      if [ ! -z "$2" ]; then
+        if run_details $2 ; then
+          if [ -f $COMPILE_LOGS/$2-$(module_version $2).bz2 ] ; then
+            view_file $COMPILE_LOGS/$2-$(module_version $2).bz2
+          else
+            VERSION=$(installed_version $2)
+            view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+              "Compile log for $2 does not exist"
+          fi
         fi
-      #fi
+      fi
       ;;
 
    install)
