@@ -1070,7 +1070,7 @@ main()  {
       if [ -n "$2" ] ; then
         list_modules $2
       elif [ -z "$2" ] ; then
-	list_sections
+        list_sections
       fi
       ;;
 
@@ -1082,7 +1082,7 @@ main()  {
       for MODULE in $(list_installed); do
         VERSION=$(installed_version $MODULE)
         if grep -q "$2" $INSTALL_LOGS/$MODULE-$VERSION ; then
-		  for FILE in $(grep "$2" $INSTALL_LOGS/$MODULE-$VERSION | cut -d: -f2) ; do
+          for FILE in $(grep "$2" $INSTALL_LOGS/$MODULE-$VERSION | cut -d: -f2) ; do
             echo "$MODULE:$FILE"
           done
         fi
@@ -1184,14 +1184,14 @@ main()  {
       if [ -n "$2" ] ; then
         if ! checksum  "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
           checksum  "$INSTALL_LOGS/*"
-	fi
+        fi
       fi
       ;;
 
     md5sum)
       if [ -n "$2" ] ; then
         if ! md5sum_files "$INSTALL_LOGS/$2-$(installed_version $2)" ; then
-	  md5sum_files  "$INSTALL_LOGS/*"
+          md5sum_files  "$INSTALL_LOGS/*"
         fi
       fi
       ;;
@@ -1270,10 +1270,10 @@ main()  {
     service)
       cat $MODULE_INDEX | while read ENTRY ; do
         MOD=$(echo $ENTRY | cut -d: -f1)
-	SEC=$(echo $ENTRY | cut -d: -f2)
-	if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
-	  echo $MOONBASE/$SEC/$MOD/services
-	fi
+        SEC=$(echo $ENTRY | cut -d: -f2)
+        if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
+          echo $MOONBASE/$SEC/$MOD/services
+        fi
       done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
 
@@ -1290,7 +1290,7 @@ main()  {
             echo $WEB_SITE
           else
             echo "http://lunar-linux.org"
-	  fi
+          fi
         fi
       fi
       ;;
@@ -1298,26 +1298,25 @@ main()  {
     version)
       if [ -n "$2" ] ; then
         if run_details $2 ; then
-  	  echo $VERSION
-	fi
+          echo $VERSION
+        fi
       fi
       ;;
 
     versions)
       if [ -n "$2" ] ; then
         if run_details $2 ; then
-  	  echo "main-version $VERSION"
-	fi
-	if  [ $(echo $MOONBASE/*/$2/*/DETAILS | wc -w) -lt 2 ] ; then
-	  message "${MESSAGE_COLOR} This module has no alt-versions${DEFAULT_COLOR}"
-	  exit 1
-	fi
-	for i in $MOONBASE/*/$2/*/DETAILS ; do
-	  x=`echo $i | sed 's:/DETAILS::'`
-	  run_details $2/`basename $x`
-	  echo "alt-version  $VERSION"
-	done
-
+          echo "main-version $VERSION"
+        fi
+        if  [ $(echo $MOONBASE/*/$2/*/DETAILS | wc -w) -lt 2 ] ; then
+          message "${MESSAGE_COLOR} This module has no alt-versions${DEFAULT_COLOR}"
+          exit 1
+        fi
+        for i in $MOONBASE/*/$2/*/DETAILS ; do
+          x=`echo $i | sed 's:/DETAILS::'`
+          run_details $2/`basename $x`
+          echo "alt-version  $VERSION"
+        done
       fi
       ;;
 
