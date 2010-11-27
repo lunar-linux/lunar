@@ -462,7 +462,7 @@ show_conflicts()  {
   done
 
   for i in ${!conflicts2[@]}; do
-    echo -e "${MESSAGE_COLOR}Conflicting files for modules ${MODULE_COLOR}${i/,/, }${DEFAULT_COLOR}:"
+    echo -e "${MESSAGE_COLOR}Conflicting file(s) for modules ${MODULE_COLOR}${i//,/, }${DEFAULT_COLOR}:"
     for i in ${conflicts2[$i]}; do
       echo -e " ${FILE_COLOR}$i${DEFAULT_COLOR}"
     done
