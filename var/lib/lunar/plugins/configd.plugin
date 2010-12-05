@@ -1,0 +1,37 @@
+#!/bin/bash
+######################################################
+#                                                    #
+# configd.plugin - handling of /etc/config.d files   #
+#                                                    #
+######################################################
+#                                                    #
+# Copyright 2010 by Stefan Wold under GPLv2          #
+#                                                    #
+######################################################
+
+
+plugin_configd_post_build()
+{
+  local FILE
+
+  debug_msg "plugin_configd_post_build ($@)"
+
+  if [ -d $SCRIPT_DIRECTORY/config.d ]; then
+    verbose_msg "Handling 'config.d' files"
+    invoke_installwatch
+
+    [ -d /etc/config.d ] || mkdir -p /etc/config.d
+
+    for FILE in $SCRIPT_DIRECTORY/config.d/*; do
+      if [ ! -f /etc/config.d/${FILE##*/} ]; then
+        verbose_msg "Installing ${FILE##*/} into /etc/config.d"
+        /usr/bin/install -g 0 -o 0 -m 0644 $FILE /etc/config.d/
+      fi
+    done
+    devoke_installwatch
+  fi
+
+  return 2
+}
+
+plugin_register BUILD_POST_BUILD plugin_configd_post_build
