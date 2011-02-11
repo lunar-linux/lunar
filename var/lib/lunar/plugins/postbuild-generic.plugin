@@ -85,7 +85,7 @@ plugin_postbuild_gather_docs()
     # No parameters were passed in, install the default docs
     for FILE in ${DEFAULT_DOCS}; do
       # copy all of the default docs (prune Makefiles)
-      if [ -e $FILE -a ! -f ${FILE}/Makefile ] ; then
+      if [ -s $FILE -a ! -f ${FILE}/Makefile ] ; then
         verbose_msg "Installing default documentation to: ${DOC_DIR}/${FILE}"
         cp -a $FILE $DOC_DIR 2> /dev/null
       fi
