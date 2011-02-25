@@ -403,18 +403,16 @@ voyeur()  {
 
 
 show_leafs()  {
-  for  MODULE  in  $(cat  $MODULE_STATUS  |  cut  -d :  -f1) ;  do
-    if    !  cut  -d :  -f2-  $DEPENDS_STATUS  |
-             grep             "^$MODULE:"       |
-             grep  -q         ":on:"
-    then     echo   $MODULE
+  for MODULE in $(list_installed) ;  do
+    if !  cut  -d : -f2- $DEPENDS_STATUS | grep "^$MODULE:" | grep  -q ":on:"; then
+      echo $MODULE
     fi
   done
 }
 
 
 show_orphans()  {
-  for MODULE in $(grep :installed: $MODULE_STATUS | cut -d: -f1 | sort | uniq) ; do
+  for MODULE in $(list_installed) ; do
     debug_msg "checking \"$MODULE\""
     for LINE in $(grep "^${MODULE}:" $DEPENDS_STATUS) ; do
       DEPENDS=$(echo $LINE | cut -d: -f2)
@@ -1322,7 +1320,7 @@ main()  {
 
     size)
       if [ -z "$2" ] ; then
-        MODULES=$(cat $MODULE_STATUS | cut -d: -f1 | sort)
+        MODULES=$(list_installed)
         for MODULE in $MODULES ; do
           echo $MODULE $(find_module_size $MODULE)
         done
