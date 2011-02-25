@@ -30,17 +30,20 @@ renew() {
 
   update_modules
 
-  if [ "$AUTOFIX" == "on" ] ; then
-    message "${MESSAGE_COLOR}Executing AUTOFIX : lunar fix${DEFAULT_COLOR}"
-    run_fix
-  fi
+  # Only run this if there was something to update
+  if [ $? -ne "255" ]; then
+    if [ "$AUTOFIX" == "on" ] ; then
+      message "${MESSAGE_COLOR}Executing AUTOFIX : lunar fix${DEFAULT_COLOR}"
+      run_fix
+    fi
 
-  if [ "$AUTOPRUNE" == "on" ] ; then
-    message "${MESSAGE_COLOR}Executing AUTOPRUNE : lunar prune${DEFAULT_COLOR}"
-    prune
-  fi
+    if [ "$AUTOPRUNE" == "on" ] ; then
+      message "${MESSAGE_COLOR}Executing AUTOPRUNE : lunar prune${DEFAULT_COLOR}"
+      prune
+    fi
 
-  display_update_log renew
+    display_update_log renew
+  fi
 
   temp_destroy $TMP_LIN_SUCCESS
   temp_destroy $TMP_LIN_FAIL
@@ -73,7 +76,7 @@ update() {
   fi
 
   if lin moonbase ; then
-    if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) )) 
+    if (( $(lvu installed $LUNAR_MODULE) < $(lvu version $LUNAR_MODULE) ))
     then
       lin $LUNAR_MODULE && lunar renew
     else
@@ -316,7 +319,7 @@ lin_module()  {
       report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
-    fi  
+    fi
 
     if ! finish_install ; then
       LIN_ERROR="POST_BUILD"

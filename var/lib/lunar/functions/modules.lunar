@@ -603,7 +603,7 @@ update_modules() {
 
   if [ -z "$LIST" ] ; then
     verbose_msg "Nothing to update!"
-    return
+    return 255
   fi
 
   verbose_msg "Sorting update queue"
@@ -625,6 +625,9 @@ update_modules() {
 
   if [ -n "$QUEUE" ] ; then
     lin -c $QUEUE
+  else
+    verbose_msg "Nothing to update!"
+    return 255
   fi
 }
 
