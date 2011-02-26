@@ -1133,7 +1133,7 @@ main()  {
 
     installed)
       if [ -z "$2" ] ; then
-        view_file $MODULE_STATUS
+        grep -E ':(installed|held):' $MODULE_STATUS | view_file
       elif [ -n "$(installed_version $2)" ] ; then
         echo "$(installed_version $2)"
       else
