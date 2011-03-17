@@ -32,7 +32,7 @@ ld_add() {
 	debug_msg "ld_add ($@)"
 
 	if [ ! -z "$1" ] && [ -d "$1" ] ; then
-		if [ ! `grep -s $1 /etc/ld.so.conf` ] ; then
+		if ! grep -q $1 /etc/ld.so.conf; then
 			verbose_msg "Adding $1 to ld.so.conf"
 			echo "$1" >> /etc/ld.so.conf
 			ldconfig
