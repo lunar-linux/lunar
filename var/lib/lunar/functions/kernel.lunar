@@ -67,9 +67,10 @@ kernel_config_exists() {
 # purpose: Check if a kernel option is configured
 # returns: (0) if option is found and enabled, (1) if option is not found or disabled, (255) if kernel config not found
 kernel_option_present() {
-    local KERNEL_CONFIG KERNEL_OPTION CAT
+    local KERNEL_CONFIG KERNEL_OPTION KERNEL_VALUE CAT
     KERNEL_CONFIG=$(kernel_config_exists) || return 255
     KERNEL_OPTION=$1
+    KERNEL_VALUE=$2
 
     case $KERNEL_CONFIG in
         *.gz)
@@ -79,9 +80,16 @@ kernel_option_present() {
             CAT=cat
             ;;
     esac
-
-    if $CAT $KERNEL_CONFIG | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
+    
+    if [ -n "$KERNEL_VALUE" ]; then
+      if $CAT $KERNEL_CONFIG | grep -Eq "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
         return 0
+      fi
+    else
+      if $CAT $KERNEL_CONFIG | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
+        return 0
+      fi
     fi
+    
     return 1
 }
