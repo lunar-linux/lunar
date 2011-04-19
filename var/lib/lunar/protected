@@ -7,6 +7,7 @@
 ^/bin/cut
 ^/bin/date
 ^/bin/grep
+^/bin/login
 ^/bin/mkdir
 ^/bin/mknod
 ^/bin/mv
@@ -15,6 +16,7 @@
 ^/bin/sed
 ^/bin/sleep
 ^/bin/sh
+^/bin/su
 ^/bin/sort
 ^/bin/tail
 ^/bin/tr
@@ -95,6 +97,7 @@
 ^/etc/yp.conf
 /fonts.dir$
 ^/lib/ld-linux.so.2
+^/lib/ld-linux-x86-64.so.2
 ^/lib/modules/
 /perllocal.pod$
 ^/usr/bin/dirname
@@ -108,7 +111,6 @@
 ^/usr/include/bits/syscall.h
 ^/usr/include/gnu/stubs.h
 ^/usr/lib/installwatch.so
-^/usr/lib/perl5/5.8.0/i686-linux-thread-multi/perllocal.pod
 ^/usr/lib/sasl/smtpd.conf
 ^/usr/share/httpd/
 ^/usr/share/httpsd/
