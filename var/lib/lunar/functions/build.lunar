@@ -163,6 +163,19 @@ _configure()
 }
 
 
+# cmake can be run two ways: in source and out of source. The determinante method is
+# to look for a cmake macro, if it exists then do out of source.
+cmake_build_target() {
+  debug_msg "cmake_build_target ($@)"
+  if [ -e cmake/modules/MacroEnsureOutOfSourceBuild.cmake ]; then
+    verbose_msg "running \"Out of source build is required; configuring\""
+    OOSB_DIR="$SOURCE_DIRECTORY/$MODULE-oosb"  &&
+    mkdir $OOSB_DIR                            &&
+    cd $OOSB_DIR
+  fi
+}
+
+
 default_config() {
   debug_msg "default_config ($@)"
   verbose_msg "running \"default_config\""
@@ -206,6 +219,19 @@ default_cvs_config() {
 } > $C_FIFO 2>&1
 
 
+default_cmake_config() {
+  debug_msg "default_cmake_config ($@)"
+  verbose_msg "running \"default_cmake_config\""
+  verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
+
+  cmake_build_target
+
+  cmake -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
+        -DCMAKE_BUILD_TYPE=RELEASE             \
+        $OPTS $SOURCE_DIRECTORY
+} > $C_FIFO 2>&1
+
+
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
@@ -222,6 +248,13 @@ default_game_build() {
   default_make
 } > $C_FIFO 2>&1
 
+
+default_cmake_build() {
+  debug_msg "default_cmake_build ($@)"
+  verbose_msg "running \"default_cmake_build\""
+  default_cmake_config &&
+  default_make
+} > $C_FIFO 2>&1
 
 default_build() {
   debug_msg "default_build ($@)"
