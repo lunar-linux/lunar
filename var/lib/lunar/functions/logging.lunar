@@ -49,12 +49,13 @@ progress() {
       if [ $STATUS -gt 128 ]; then
         sleep 2
       elif [ $STATUS -eq 1 ]; then
-        echo -ne "\r [${X:0:60}] (100%)\r"
+        echo -ne "\r [${X:0:60}] (100%)\n"
         exit
       fi
       (( S += ${#LINE} ))
       if [[ $S -gt OLDSZ ]]; then
-        S=$OLDSZ
+        # never print 100% - subtract 1 :)
+        S=$((OLDSZ - 1))
       fi
       PC=$((S * 100 / OLDSZ))
       L=$((S * 60 / OLDSZ))
