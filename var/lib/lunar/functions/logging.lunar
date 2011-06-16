@@ -48,6 +48,7 @@ progress() {
       STATUS=$?
       if [ $STATUS -gt 128 ]; then
         sleep 2
+	continue
       elif [ $STATUS -eq 1 ]; then
         echo -ne "\r [${X:0:60}] (100%)\n"
         exit
@@ -69,6 +70,7 @@ progress() {
       STATUS=$?
       if [ $STATUS -gt 128 ]; then
         sleep 2
+	continue
       elif [ $STATUS -eq 1 ]; then
         exit
       fi
