@@ -164,15 +164,16 @@ _configure()
 
 
 # cmake can be run two ways: in source and out of source. The determinante method is
-# to look for a cmake macro, if it exists then do out of source.
+# to look for a cmake macro, if it exists then do out of source. There have been inconsistancies
+# with this, some apps compile fine out of source and others do not with the leaning towards 
+# more wanting out of source even though they do not say so. Making this the default and
+# for those that do not want it, specify it in the BUILD.
 cmake_build_target() {
   debug_msg "cmake_build_target ($@)"
-  if [ -e cmake/modules/MacroEnsureOutOfSourceBuild.cmake ]; then
     verbose_msg "running \"Out of source build is required; configuring\""
     OOSB_DIR="$SOURCE_DIRECTORY/$MODULE-oosb"  &&
     mkdir $OOSB_DIR                            &&
     cd $OOSB_DIR
-  fi
 }
 
 
