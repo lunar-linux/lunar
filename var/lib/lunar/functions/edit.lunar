@@ -36,6 +36,8 @@ patch_it () {
     GZCMD="bzcat"
   elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
     GZCMD="zcat"
+  elif [[ -n `echo $PATCH | grep -e '\.xz$' -e '\.lzma$'` ]] ; then
+    GZCMD="xzcat"
   else
     GZCMD="cat"
   fi
