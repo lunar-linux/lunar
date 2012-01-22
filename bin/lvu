@@ -914,7 +914,7 @@ submit_module() {
     ) >> $TMP_MSG2
     cat $TMP_MSG2
     if query "Submit this module now?" y; then
-      curl -F file=@$TMP_MSG2 -F module=$1 -F id=$UNIQID "http://lunar-linux.org/submit.php"
+      curl -F file=@$TMP_MSG2 -F module=$1 -F id=$UNIQID "http://www.lunar-linux.org/submit.php"
       temp_destroy $TMP_MSG2
       temp_destroy $TMP_MSG
     else
