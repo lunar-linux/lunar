@@ -236,7 +236,7 @@ default_cmake_config() {
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
-  make                               &&
+  make ${MAKES:+-j${MAKES}}          &&
   prepare_install                    &&
   make install
 }
