@@ -39,15 +39,7 @@ download_url() {
 	verbose_msg "trying to download \"${2}\" from \"${1}\""
 	connect &&
 	plugin_call SOURCE_DOWNLOAD $1 $2 $3
-	RETVAL=$?
-	if [ $RETVAL == 2 ]; then
-		# refuse to continue - it's useless to have the user attempt to
-		# download cvs/svn etc snapshots from the cache URLs
-		error_message "${PROBLEM_COLOR}I don't know how to download ${QUERY_COLOR}\"$1\".${DEFAULT_COLOR}"
-		error_message "${MESSAGE_COLOR}Install the package that provides the method and plugin to download it.${DEFAULT_COLOR}"
-		exit 1
-	fi
-	return $RETVAL
+	return $?
 }
 
 
@@ -94,6 +86,7 @@ download_module() {
 		add_url() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
+echo Inserting $1...
 					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
@@ -120,6 +113,8 @@ download_module() {
 			add_url $FRESORT_URL
 			for URL in $URLS ; do
 				add_url $URL
+			done
+			for URL in $URLS ; do
 				if [ "$EXHAUSTIVE" != "on" ]; then
 					continue
 				fi
@@ -142,17 +137,20 @@ download_module() {
 
 		for URL in $ALL_URLS; do
 			# and download
-			if download_url $URL $SRC $SOURCE_CACHE ; then
+			if download_url $URL $SRC $SOURCE_CACHE == 0 ; then
 				# done for this file!
-				FAILED=1
+				SUCCESS=1
 				break
 			fi
 		done
-		if [ ${FAILED:-0} == 0 ] ; then
+		if [ ${SUCCESS:-0} == 0 ] ; then
 			FAILALL=1
+			error_message "${PROBLEM_COLOR}I don't know how to download ${QUERY_COLOR}\"$1\".${DEFAULT_COLOR}"
+			error_message "${MESSAGE_COLOR}Install the package that provides the method and plugin to download it.${DEFAULT_COLOR}"
 		fi
 
 	done
+
 	return ${FAILALL:-0}
 )
 }
