@@ -86,7 +86,6 @@ download_module() {
 		add_url() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1 "; then
-echo Inserting $1...
 					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
