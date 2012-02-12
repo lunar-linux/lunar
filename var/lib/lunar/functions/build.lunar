@@ -187,7 +187,7 @@ default_config() {
               --infodir=$MODULE_PREFIX/share/info \
               --mandir=$MODULE_PREFIX/share/man   \
               $OPTS
-} > $C_FIFO 2>&1
+}
 
 
 default_game_config() {
@@ -202,7 +202,7 @@ default_game_config() {
               --infodir=$MODULE_PREFIX/share/info  \
               --mandir=$MODULE_PREFIX/share/man    \
               $OPTS
-} > $C_FIFO 2>&1
+}
 
 
 default_cvs_config() {
@@ -217,7 +217,7 @@ default_cvs_config() {
                 --infodir=$MODULE_PREFIX/share/info \
                 --mandir=$MODULE_PREFIX/share/man   \
                 $OPTS
-} > $C_FIFO 2>&1
+}
 
 
 default_cmake_config() {
@@ -230,16 +230,16 @@ default_cmake_config() {
   cmake -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
         -DCMAKE_BUILD_TYPE=RELEASE             \
         $OPTS $SOURCE_DIRECTORY
-} > $C_FIFO 2>&1
+}
 
 
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
-  make                               &&
+  make ${MAKES:+-j${MAKES}}          &&
   prepare_install                    &&
   make install
-} > $C_FIFO 2>&1
+}
 
 
 default_game_build() {
@@ -247,7 +247,7 @@ default_game_build() {
   verbose_msg "running \"default_game_build\""
   default_game_config  &&
   default_make
-} > $C_FIFO 2>&1
+}
 
 
 default_cmake_build() {
@@ -255,21 +255,22 @@ default_cmake_build() {
   verbose_msg "running \"default_cmake_build\""
   default_cmake_config &&
   default_make
-} > $C_FIFO 2>&1
+}
+
 
 default_build() {
   debug_msg "default_build ($@)"
   verbose_msg "running \"default_build\""
   default_config  &&
   default_make
-} > $C_FIFO 2>&1
+}
 
 
 default_cvs_build() {
   debug_msg "default_cvs_build ($@)"
   default_cvs_config  &&
   default_make
-} > $C_FIFO 2>&1
+}
 
 
 default_cpan_pre_build() {
@@ -300,7 +301,7 @@ default_cpan_build() {
 	install $CPAN_MODULE
 	quit" | /usr/bin/cpan || exit 1
   rm_source_dir $SOURCE_DIRECTORY
-} > $C_FIFO 2>&1
+}
 
 
 default_post_build() {
@@ -409,12 +410,15 @@ run_build()  {
   if [[ "${USE_WRAPPERS:-yes}" == "yes" ]]; then
     export PATH=/var/lib/lunar/compilers:$PATH
   fi
-  if has_module_file $MODULE BUILD ; then
-    run_module_file $MODULE BUILD
-  else
-    default_build
-  fi
-
+  (
+    # fix errors, don't avoid them. This makes all errors fatal
+    shopt -s execfail
+    if has_module_file $MODULE BUILD ; then
+      run_module_file $MODULE BUILD
+    else
+      default_build
+    fi
+  ) > $C_FIFO 2>&1
 }
 
 

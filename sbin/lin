@@ -103,9 +103,13 @@ main() {
     # this runs as a background process, so we are off to step #3 right away
     if [ -z "$DEPS_ONLY" ] ; then
       verbose_msg "Spawning download manager"
-      for M in $MODULES ; do
-        LIST="$(for D in `find_depends $M`; do if ! module_installed $D ; then echo $D ; fi ; done | uniq) $LIST"
-      done
+
+      # this code hurts more than it helps - it can stall forever (minutes)
+      # even when just linning 2-3 modules
+      # for M in $MODULES ; do
+      #  LIST="$(for D in `find_depends $M`; do if ! module_installed $D ; then echo $D ; fi ; done | uniq) $LIST"
+      # done
+
       verbose_msg "download queue: $LIST $MODULES"
       for M in $LIST $MODULES; do
           THIS_TEMP=$(temp_create "$M.download.log")

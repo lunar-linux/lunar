@@ -36,11 +36,60 @@ stop_logging() {
 }
 
 
+progress() {
+  local OLDLOG OLDSZ S PC
+  OLDLOG=$(ls -1d $COMPILE_LOGS/$MODULE-*.bz2 2>&- | head -n 1)
+  if [[ -f $OLDLOG ]]; then
+    X="############################################################"
+    Y="                                                            "
+    OLDSZ=$(bzcat $OLDLOG | wc -c)
+    while true ; do
+      read -t 2 LINE
+      STATUS=$?
+      if [ $STATUS -gt 128 ]; then
+        sleep 2
+	continue
+      elif [ $STATUS -eq 1 ]; then
+        echo -ne "\r [${X:0:60}] (100%)\n"
+        exit
+      fi
+      (( S += ${#LINE} ))
+      if [[ $S -gt OLDSZ ]]; then
+        # never print 100% - subtract 1 :)
+        S=$((OLDSZ - 1))
+      fi
+      PC=$((S * 100 / OLDSZ))
+      L=$((S * 60 / OLDSZ))
+      echo -ne "\r [${X:0:$L}${Y:0:$((60 - L))}] ($PC%)\r"
+    done
+  else
+    SPINNER="/-\|"
+    # spinerrrrrr!!!!
+    while true ; do
+      read -t 2 LINE
+      STATUS=$?
+      if [ $STATUS -gt 128 ]; then
+        sleep 2
+	continue
+      elif [ $STATUS -eq 1 ]; then
+        exit
+      fi
+      ((C++))
+      if [[ $C -gt ${#SPINNER} ]]; then
+        C=0
+      fi
+      echo -en "\r [${SPINNER:$C:1}]\r"
+    done
+  fi
+}
+
+
 activate_voyeur()  {
   debug_msg "activate_voyeur ($@)"
   if [ -z "$SILENT" ] ; then
     case $VOYEUR in
       on) tee -a $C_LOG < $C_FIFO              & ;;
+      p*) tee -a $C_LOG < $C_FIFO | progress   & ;;
        *) tee -a $C_LOG < $C_FIFO >/dev/null   & ;;
     esac
   else
