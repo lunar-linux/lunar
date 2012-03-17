@@ -629,6 +629,7 @@ option_menu()  {
     I_HELP="Select the test that lunar fix, and AUTOFIX execute"
     D_HELP="Options for downloads"
     L_HELP="Select default lunar module"
+    T_HELP="Select default moonbase branch"
     A_HELP="Select accepted licenses"
     R_HELP="Select rejected licenses"
 
@@ -640,6 +641,7 @@ option_menu()  {
                       ""                                       \
                       0 40 8                                   \
                       "L"  "Default Lunar Module"   "$L_HELP"  \
+                      "T"  "Default Moonbase Branch" "$T_HELP" \
                       "P"  "Prompt Delay"           "$P_HELP"  \
                       "D"  "Download Options"       "$D_HELP"  \
                       "E"  "Admin's Email"          "$E_HELP"  \
@@ -660,6 +662,7 @@ option_menu()  {
       M)  mirror_menu            ;;
       O)  optimize_menu          ;;
       L)  set_default_module     ;;
+      T)  set_default_moonbase   ;;
       A)  set_accepted_licenses  ;;
       R)  set_rejected_licenses  ;;
     esac
@@ -784,6 +787,7 @@ main() {
 
   export IFS="$TAB_ENTER_IFS"
 
+  MOONBASE_TYPE=${MOONBASE_TYPE:-stable}
   LUNAR_MODULE=${LUNAR_MODULE:-lunar}
   LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
 
