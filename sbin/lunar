@@ -787,7 +787,6 @@ main() {
 
   export IFS="$TAB_ENTER_IFS"
 
-  MOONBASE_TYPE=${MOONBASE_TYPE:-stable}
   LUNAR_MODULE=${LUNAR_MODULE:-lunar}
   LUNAR_VERSION=$(run_details $LUNAR_MODULE && echo $UPDATED)
 

@@ -9,6 +9,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
                MIRRORS=/etc/lunar/mirrors
 
          LUNAR_MODULES="lunar theedge"
+        MOONBASE_TYPES="stable unstable"
 
        BUILD_DIRECTORY=/usr/src
     DOCUMENT_DIRECTORY=/usr/share/doc
