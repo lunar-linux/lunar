@@ -1152,7 +1152,49 @@ main()  {
 
     expired)
       for MODULE in $(list_expired_modules); do
-        echo "$MODULE ($(installed_version $MODULE) -> $(run_details $MODULE > /dev/null ; echo $VERSION))"
+        L=$(installed_version $MODULE)
+	R=$(run_details $MODULE > /dev/null ; echo $VERSION)
+
+	CL=( `echo $L | sed 's/[.]/ /g'` )
+	CR=( `echo $R | sed 's/[.]/ /g'` )
+	
+	S="(equal)"
+
+	for N in $(seq 0 $(( ${#CL[@]} - 1 ))); do
+	
+	  TL="${CL[$N]}"
+	  TR="${CR[$N]}"
+
+          if [ "$TL" == "$TR" ]; then
+	    continue
+	  fi
+
+	  if [ -z "$(echo $TL$TR | sed 's/[0-9]//g')" ] ; then
+	    # numerical
+	    if [ "$TL" -eq "$TR" ] ; then
+	      continue
+	    elif [ "$TL" -lt "$TR" ] ; then
+	      # normal upgrade
+	      S="" 
+	      break
+	    else
+	      S="(downgrade)"
+	      break
+	    fi
+	  else
+	    # string order
+	    if [[ "$TL" < "$TR" ]] ; then
+	      # normal upgrade
+	      S=""
+	      break
+	    else
+	      S="(downgrade)"
+	      break
+	    fi
+	  fi
+	done
+
+        echo "$MODULE ($L -> $R) $S"
       done
       ;;
     failed)
