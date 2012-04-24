@@ -25,10 +25,14 @@ get_moonbase () {
 
   # the following overrides run_details:
   run_details() {
-  debug_msg "  run_details ($@)"
+    debug_msg "  run_details ($@)"
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
+    if [ "$MOONBASE_TYPE" == "unstable" ]; then
         SOURCE=$MODULE.tar.bz2
+    else
+        SOURCE=$MODULE-stable.tar.bz2
+    fi
     SOURCE_URL=$MOONBASE_URL
        PARTIAL=off
    CLEAR_CACHE=on
