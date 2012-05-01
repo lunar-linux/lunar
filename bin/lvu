@@ -74,6 +74,7 @@ install     module         display an install log
 size        [module]       find and show installed size of a module
                                or ALL (slow)
 installed   [module]       display installed modules/version of module
+missing                    display installed but deleted modules from moonbase
 compile     module         display a compile log
 compiler    module         display the compiler version used
 links       module         display a list of modules that this module links to
@@ -1279,6 +1280,10 @@ main()  {
       show_module_component $1 $2
       ;;
 
+    INSTALL)
+      show_module_component $1 $22
+      ;;
+
     PRE_BUILD)
       show_module_component $1 $2
       ;;
@@ -1473,6 +1478,14 @@ main()  {
          echo $(find_section $2)
        fi
      fi
+     ;;
+
+   missing)
+     for MODULE in $(list_installed) ; do
+       if ! find_section $MODULE > /dev/null ; then
+         echo "$MODULE"
+       fi
+     done
      ;;
 
    cd)
