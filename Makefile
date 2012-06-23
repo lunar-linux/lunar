@@ -65,6 +65,8 @@ install: .PHONY
 	install -d $(DESTDIR)/var/log/lunar/install
 	install -d $(DESTDIR)/var/log/lunar/md5sum
 	install -d $(DESTDIR)/var/log/lunar/queue
+	install -d $(DESTDIR)/var/cache/lunar
+	install -d $(DESTDIR)/var/spool/lunar
 	for F in $(mans) ; do \
 	  EXT=`echo $$F | sed 's/.*[.]//'` ; \
 	  install -d $(DESTDIR)/usr/share/man/man$$EXT ; \
