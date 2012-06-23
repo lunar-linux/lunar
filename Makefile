@@ -18,49 +18,49 @@ all:
 install: .PHONY
 	install -d $(DESTDIR)/etc/lunar
 	for F in $(etc) ; do \
-	  install $$F $(DESTDIR)/etc/lunar/ ; \
+	  install -m0644 $$F $(DESTDIR)/etc/lunar/ ; \
 	done
 	install -d $(DESTDIR)/etc/lunar/local/depends
 	install -d $(DESTDIR)/var/lib/lunar/menu
 	for F in $(menu_LIBS) ; do \
-	  install $$F $(DESTDIR)/var/lib/lunar/menu/ ; \
+	  install -m0644 $$F $(DESTDIR)/var/lib/lunar/menu/ ; \
 	done
 	install -d $(DESTDIR)/var/lib/lunar/functions
 	for F in $(core_LIBS) ; do \
-	  install $$F $(DESTDIR)/var/lib/lunar/functions/ ; \
+	  install -m0644 $$F $(DESTDIR)/var/lib/lunar/functions/ ; \
 	done
 	install -d $(DESTDIR)/var/lib/lunar/plugins
 	for F in $(plug_LIBS) ; do \
-	  install $$F $(DESTDIR)/var/lib/lunar/plugins/ ; \
+	  install -m0644 $$F $(DESTDIR)/var/lib/lunar/plugins/ ; \
 	done
 	install -d $(DESTDIR)/bin
 	for F in $(bin_PROGS) ; do \
-	  install $$F $(DESTDIR)/bin/ ; \
+	  install -m0755 $$F $(DESTDIR)/bin/ ; \
 	done
 	install -d $(DESTDIR)/sbin
 	for F in $(sbin_PROGS) ; do \
-	  install $$F $(DESTDIR)/sbin/ ; \
+	  install -m0755 $$F $(DESTDIR)/sbin/ ; \
 	done
 	install -d $(DESTDIR)/etc/lunar/mirrors
 	for F in $(mirrors) ; do \
-	  install $$F $(DESTDIR)/etc/lunar/mirrors/ ; \
+	  install -m0644 $$F $(DESTDIR)/etc/lunar/mirrors/ ; \
 	done
 	install -d $(DESTDIR)/var/state/lunar
 	for F in $(blacklist) ; do \
-	  install $$F $(DESTDIR)/var/state/lunar/ ; \
+	  install -m0644 $$F $(DESTDIR)/var/state/lunar/ ; \
 	done
 	install -d $(DESTDIR)/var/lib/lunar/compilers ; \
 	for F in $(compilers) ; do \
-	  install $$F $(DESTDIR)/var/lib/lunar/compilers/ ; \
+	  install -m0755 $$F $(DESTDIR)/var/lib/lunar/compilers/ ; \
 	done
 	install -d $(DESTDIR)/var/lib/lunar
-	install misc/excluded $(DESTDIR)/var/lib/lunar/
-	install misc/protected $(DESTDIR)/var/lib/lunar/
-	install misc/solo $(DESTDIR)/var/lib/lunar/
-	install misc/sustained $(DESTDIR)/var/lib/lunar/
-	install misc/unset.sh $(DESTDIR)/var/lib/lunar/
+	install -m0644 misc/excluded $(DESTDIR)/var/lib/lunar/
+	install -m0644 misc/protected $(DESTDIR)/var/lib/lunar/
+	install -m0644 misc/solo $(DESTDIR)/var/lib/lunar/
+	install -m0644 misc/sustained $(DESTDIR)/var/lib/lunar/
+	install -m0755 misc/unset.sh $(DESTDIR)/var/lib/lunar/
 	install -d $(DESTDIR)/lib/lsb
-	install misc/init-functions $(DESTDIR)/lib/lsb/
+	install -m0644 misc/init-functions $(DESTDIR)/lib/lsb/
 	install -d $(DESTDIR)/var/log/lunar/compile
 	install -d $(DESTDIR)/var/log/lunar/install
 	install -d $(DESTDIR)/var/log/lunar/md5sum
@@ -70,7 +70,7 @@ install: .PHONY
 	for F in $(mans) ; do \
 	  EXT=`echo $$F | sed 's/.*[.]//'` ; \
 	  install -d $(DESTDIR)/usr/share/man/man$$EXT ; \
-	  install $$F $(DESTDIR)/usr/share/man/man$$EXT/ ; \
+	  install -m0644 $$F $(DESTDIR)/usr/share/man/man$$EXT/ ; \
 	done
 	# easy way out for the docs:
 	install -d $(DESTDIR)/usr/share/doc/lunar
