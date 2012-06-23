@@ -1,8 +1,0 @@
-"/etc/lunar/local"  is the cache for locally stored 
-configuration files.
-
-"/etc/lunar/local/config"  contains the variables that 
-you wish to override in /etc/lunar/config.
-
-Additionally, "/etc/lunar/local"  stores your config for 
-Linus Torvalds' Linux Kernel, net-tools and XFree86/XOrg.
