@@ -236,9 +236,9 @@ default_cmake_config() {
 default_make() {
   debug_msg "default_make ($@)"
   verbose_msg "running \"default_make\""
-  make ${MAKES:+-j${MAKES}}          &&
+  default_compile                    &&
   prepare_install                    &&
-  make install
+  default_install
 }
 
 
@@ -263,6 +263,21 @@ default_build() {
   verbose_msg "running \"default_build\""
   default_config  &&
   default_make
+}
+
+
+default_compile() {
+  debug_msg "default_compile ($@)"
+  verbose_msg "running \"default_compile\""
+  default_config  &&
+  make ${MAKES:+-j${MAKES}}
+}
+
+
+default_install() {
+  debug_msg "default_install ($@)"
+  verbose_msg "running \"default_install\""
+  make install
 }
 
 
@@ -414,9 +429,21 @@ run_build()  {
     # fix errors, don't avoid them. This makes all errors fatal
     shopt -s execfail
     if has_module_file $MODULE BUILD ; then
+      # this MUST call `prepare_install` !!!
       run_module_file $MODULE BUILD
     else
-      default_build
+      # split build code hooks in here:
+      if has_module_file $MODULE COMPILE ; then
+        run_module_file $MODULE COMPILE
+      else
+        default_compile
+      fi
+      prepare_install &&
+      if has_module_file $MODULE INSTALL ; then
+        run_module_file $MODULE INSTALL
+      else
+        default_install
+      fi
     fi
   ) > $C_FIFO 2>&1
 }
