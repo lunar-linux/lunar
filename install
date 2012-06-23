@@ -3,7 +3,6 @@
 if [ "x$1" = "x" ] ; then
   make install
 else
-  make DESTDIR=$1
-   ROOT=$1
+  make DESTDIR=$1 install
 fi
 
