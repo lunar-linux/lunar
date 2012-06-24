@@ -219,7 +219,7 @@ sound()
   debug_msg "sound ($@)"
   if [ "$SOUND" == "on" ]; then
     if [ -f "$SOUND_DIRECTORY/$SOUND_THEME/$1" ]; then
-	  ( cd / ; play "$SOUND_DIRECTORY/$SOUND_THEME/$1" & )
+	  ( cd / ; play "$SOUND_DIRECTORY/$SOUND_THEME/$1" > /dev/null 2>&1 & )
 	fi
   fi
 }
