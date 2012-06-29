@@ -12,13 +12,19 @@ findutils
 gawk
 gcc
 gettext
+glib-2
 glibc
+gmp
 grep
 gzip
 installwatch
 less
+libcap
+libffi
+libmpc
 lunar
 make
+mpfr
 modutils
 nano
 ncurses
@@ -32,4 +38,5 @@ theedge
 util-linux
 util-linux-crypto
 wget
+xz
 zlib
