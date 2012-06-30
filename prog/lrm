@@ -168,7 +168,7 @@ lrm_module() {
   # yields the files that may be removed
   if [ "$REAP" == "on" ] ; then
     cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
-      if [ -e "$TARGET" ] ; then
+      if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
         if [ -d "$TARGET" ] ; then
           echo "$TARGET" >> $TMP_DIRS
         else
