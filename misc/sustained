@@ -6,6 +6,7 @@ bzip2
 coreutils
 cracklib
 dialog
+diffutils
 e2fsprogs
 file
 findutils
