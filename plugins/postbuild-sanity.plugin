@@ -1,0 +1,66 @@
+#!/bin/bash
+#############################################################
+#                                                           #
+# postbuild-sanity.plugin - postbuild running of sanity     #
+#                           checks on installed files       #
+#                                                           #
+#############################################################
+#                                                           #
+# Copyright 2012 by Auke Kok under GPLv2                    #
+#                                                           #
+#############################################################
+
+
+plugin_sanity_post_build()
+{
+    (
+	local TESTS PATTERN SEVERITY REASON
+
+	IFS=$'\n'
+
+	TESTS=(
+		"^/opt/:E:Installs files in /opt"
+		"^/bin:W:Installs files in /bin"
+		"^/sbin:W:Installs files in /sbin"
+		"^/lib:W:Installs files in /lib"
+		"^/share:E:Installs files in /share"
+		"^/include:E:Installs files in /include"
+		"^/usr/etc:E:Installs files in /usr/etc"
+		"^/usr/local:E:Installs files in /usr/local"
+		"^/usr/var:E:Installs files in /usr/var"
+		"^/home:E:Installs files in /home"
+		"^/root:E:Installs files in /root"
+	      )
+
+	for TEST in ${TESTS[@]} ; do
+		PATTERN=$(echo $TEST | cut -d: -f1)
+
+		parse_iw | grep -q $PATTERN
+		if [ $? == 0 ]; then
+			SEVERITY=$(echo $TEST | cut -d: -f2)
+			REASON=$(echo $TEST | cut -d: -f3)
+
+			if [ $SEVERITY == "W" ]; then
+				message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+				parse_iw | sort | uniq | grep $PATTERN
+				export SILENT=""
+				query "Ignore this warning" "y"
+				if [ $? != 0 ]; then
+					return 1
+				fi
+				continue
+			else
+				message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+				parse_iw | sort | uniq | grep $PATTERN
+				return 1
+			fi
+		fi
+	done
+
+	# return 2, on success for other plugins
+	return 2
+    )
+}
+
+
+plugin_register BUILD_POST_BUILD plugin_sanity_post_build
