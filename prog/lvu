@@ -61,6 +61,7 @@ leafs                      display installed modules that have no explicit
 orphans                    display installed modules that are missing
                                dependencies
 conflicts                  display conflicting files
+moonalyze                  analyze the current moonbase for common issues
 held                       display held modules
 exiled                     display exiled modules
 expired                    display a list of modules which need an update
@@ -469,6 +470,101 @@ show_conflicts()  {
   done
 
   trap "rm -f $TMP_CONFLICTS $TMP_CONFLICTS2 ; exit" INT TERM KILL EXIT
+}
+
+# function: moonalyze
+# usage: moonalyze
+# purpose: analyze the moonbase for issues and display them
+moonalyze() {
+  # Variable defines
+  declare -A missing_deps
+  declare -a broken_deps
+  declare -a broken_optional_deps
+  declare -a warning_optional_deps
+
+  # Local function definitions
+  add_if_missing_dep() {
+    if ! find_section $1 &> /dev/null; then
+      if [ -z "${missing_deps[$1]}" ]; then
+        missing_deps[$1]=$mod
+      else
+        missing_deps[$1]+=", $mod"
+      fi
+    fi
+  }
+
+  sort_uniq() {
+    for i in $@; do
+      echo $i
+    done | sort | uniq
+  }
+
+  run_depends() {
+    module_installed() {
+      true
+    }
+
+    depends() {
+      debug_msg "depends ($@)"
+      DEP=$(NEVER_ASK=1 unalias $1)
+      add_if_missing_dep $DEP
+      if [ -z "$DEP" ]; then
+        broken_deps=("${broken_deps[@]}" "$mod")
+      fi
+    }
+
+    optional_depends() {
+      debug_msg "optional_depends ($@)"
+      DEP=$(NEVER_ASK=1 unalias $1)
+      add_if_missing_dep $DEP
+      if [ -n "$DEP" ] && [ -z "$2" ] && [ -z "$3" ] && [ -n "$4" ]; then
+        warning_optional_deps=("${warning_optional_deps[@]}" "$mod")
+      elif [ -z "$DEP" ] || [ -z "$4" ]; then
+        broken_optional_deps=("${broken_optional_deps[@]}" "$mod")
+      fi
+    }
+
+    debug_msg "run_depends ($@)"
+    SECTION=$(find_section $1)
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
+    if has_module_file $1 DEPENDS ; then
+      run_module_file $1 DEPENDS
+    fi
+  }
+
+  # Main
+  echo -e "${MESSAGE_COLOR}Please wait, this may take a couple of minutes...${DEFAULT_COLOR}\n"
+  for mod in $(list_moonbase); do
+    run_depends $mod
+  done
+
+  # Display results
+  echo -e "${MESSAGE_COLOR}Missing ${PROBLEM_COLOR}${#missing_deps[@]} ${MESSAGE_COLOR}modules:${DEFAULT_COLOR}"
+  for i in ${!missing_deps[@]}; do
+    echo -e " ${MODULE_COLOR}$i ${PROBLEM_COLOR}is missing but required by: ${MODULE_COLOR}${missing_deps[$i]}${DEFAULT_COLOR}"
+  done | sort
+
+  if [ "${#broken_deps[@]}" -gt 0 ]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
+    done < <(sort_uniq "${broken_deps[@]}")
+  fi
+
+  if [ "${#broken_optional_deps[@]}" -gt 0 ]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
+    done < <(sort_uniq "${broken_optional_deps[@]}")
+  fi
+
+  if [ "${#warning_optional_deps[@]}" -gt 0 ]; then
+    echo -e "\n${MESSAGE_COLOR}Warnings for 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
+    done < <(sort_uniq "${warning_optional_deps[@]}")
+  fi
+
 }
 
 show_depends()  {
@@ -1110,6 +1206,10 @@ main()  {
 
     conflicts)
       show_conflicts
+      ;;
+
+    moonalyze)
+      moonalyze
       ;;
 
     updatelog)
