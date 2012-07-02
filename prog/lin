@@ -168,6 +168,8 @@ main() {
     temp_destroy $TEMP_PREPAREDDEPS
     temp_destroy $TEMP_CONFIGOPTS
 
+    return $lin_EXIT_STATUS
+
   else
     # we are only doing one module, drop down to:
     MODULE=$MODULES
