@@ -422,7 +422,7 @@ show_orphans()  {
       if ! module_installed $DEPENDS ; then
         if [ "$OPTIONAL" == "required" ]; then
           echo "$MODULE: $DEPENDS is missing"
-	fi
+	      fi
       fi
     done
   done
@@ -436,9 +436,9 @@ show_conflicts()  {
   TMP_CONFLICTS2=$(temp_create "conflicts")
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
-    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | 
-    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" | 
-    while read LINE; do 
+    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
+    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" |
+    while read LINE; do
         [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
     done
   done
@@ -479,8 +479,8 @@ moonalyze() {
   # Variable defines
   declare -A missing_deps
   declare -a broken_deps
-  declare -a broken_optional_deps
-  declare -a warning_optional_deps
+  declare -A broken_optional_deps
+  declare -a broken_optional_args
 
   # Local function definitions
   add_if_missing_dep() {
@@ -490,6 +490,18 @@ moonalyze() {
       else
         missing_deps[$1]+=", $mod"
       fi
+    fi
+  }
+
+  add_broken_optional_dep() {
+    if [[ "$VERBOSE" = "on" ]]; then
+      if [ -z "${broken_optional_deps[$mod:$DEP]}" ]; then
+        broken_optional_deps[$mod:$DEP]=$1
+      else
+        broken_optional_deps[$mod:$DEP]+=", $1"
+      fi
+    else
+      broken_optional_args=("${broken_optional_args[@]}" "$mod")
     fi
   }
 
@@ -515,12 +527,18 @@ moonalyze() {
 
     optional_depends() {
       debug_msg "optional_depends ($@)"
+
       DEP=$(NEVER_ASK=1 unalias $1)
       add_if_missing_dep $DEP
-      if [ -n "$DEP" ] && [ -z "$2" ] && [ -z "$3" ] && [ -n "$4" ]; then
-        warning_optional_deps=("${warning_optional_deps[@]}" "$mod")
-      elif [ -z "$DEP" ] || [ -z "$4" ]; then
-        broken_optional_deps=("${broken_optional_deps[@]}" "$mod")
+
+      if [ -z "$DEP" ]; then
+        add_broken_optional_dep "\$1"
+      elif [[ -z "$2" && -z "$3" ]]; then
+        add_broken_optional_dep "\$2, \$3"
+      elif [ -z "$4" ]; then
+        add_broken_optional_dep "\$4"
+      elif [ $# -gt 4 ]; then
+        add_broken_optional_dep "more than 4 arguments"
       fi
     }
 
@@ -539,10 +557,12 @@ moonalyze() {
   done
 
   # Display results
-  echo -e "${MESSAGE_COLOR}Missing ${PROBLEM_COLOR}${#missing_deps[@]} ${MESSAGE_COLOR}modules:${DEFAULT_COLOR}"
-  for i in ${!missing_deps[@]}; do
-    echo -e " ${MODULE_COLOR}$i ${PROBLEM_COLOR}is missing but required by: ${MODULE_COLOR}${missing_deps[$i]}${DEFAULT_COLOR}"
-  done | sort
+  if [ "${#missing_deps[@]}" -gt 0 ]; then
+    echo -e "${MESSAGE_COLOR}Missing ${PROBLEM_COLOR}${#missing_deps[@]} ${MESSAGE_COLOR}modules:${DEFAULT_COLOR}"
+    while read i; do
+      echo -e " ${MODULE_COLOR}$i ${PROBLEM_COLOR}is missing but required by: ${MODULE_COLOR}${missing_deps[$i]}${DEFAULT_COLOR}"
+    done < <(sort_uniq "${!missing_deps[@]}")
+  fi
 
   if [ "${#broken_deps[@]}" -gt 0 ]; then
     echo -e "\n${MESSAGE_COLOR}Possible errenous 'depends' lines in the following modules:${DEFAULT_COLOR}"
@@ -551,21 +571,25 @@ moonalyze() {
     done < <(sort_uniq "${broken_deps[@]}")
   fi
 
-  if [ "${#broken_optional_deps[@]}" -gt 0 ]; then
+  if [[ "$VERBOSE" == "on" && "${#broken_optional_deps[@]}" > 0 ]]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      cur_mod=$(echo $m | cut -d: -f1)
+      cur_dep=$(echo $m | cut -d: -f2)
+      if [[ "$cur_mod" != "$prev_mod" ]]; then
+        echo -e "${MODULE_COLOR}$cur_mod ${MESSAGE_COLOR}has optional_depends issues:${DEFAULT_COLOR}"
+      fi
+      echo -e "  ${MODULE_COLOR}$cur_dep ${MESSAGE_COLOR}empty arguments: ${PROBLEM_COLOR}${broken_optional_deps[$m]}${DEFAULT_COLOR}"
+      prev_mod=$cur_mod
+    done < <(sort_uniq "${!broken_optional_deps[@]}")
+  elif [[ "${broken_optional_args[@]}" > 0 ]]; then
     echo -e "\n${MESSAGE_COLOR}Possible errenous 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
     while read m; do
       echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
-    done < <(sort_uniq "${broken_optional_deps[@]}")
+    done < <(sort_uniq "${broken_optional_args[@]}")
   fi
-
-  if [ "${#warning_optional_deps[@]}" -gt 0 ]; then
-    echo -e "\n${MESSAGE_COLOR}Warnings for 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
-    while read m; do
-      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
-    done < <(sort_uniq "${warning_optional_deps[@]}")
-  fi
-
 }
+
 
 show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
@@ -780,7 +804,7 @@ show_eert() {
 show_urls() { (
   # function overrides:
   plugin_call() { return 0 ; }
-  download_url() { 
+  download_url() {
     URL=$1
     if [ "${URL#${URL%?}}" != "/" ]; then
       URL="${URL}/"
@@ -1258,11 +1282,11 @@ main()  {
 
 	CL=( `echo $L | sed 's/[.]/ /g'` )
 	CR=( `echo $R | sed 's/[.]/ /g'` )
-	
+
 	S="(equal)"
 
 	for N in $(seq 0 $(( ${#CL[@]} - 1 ))); do
-	
+
 	  TL="${CL[$N]}"
 	  TR="${CR[$N]}"
 
@@ -1276,7 +1300,7 @@ main()  {
 	      continue
 	    elif [ "$TL" -lt "$TR" ] ; then
 	      # normal upgrade
-	      S="" 
+	      S=""
 	      break
 	    else
 	      S="(downgrade)"
