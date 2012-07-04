@@ -1280,12 +1280,12 @@ main()  {
         L=$(installed_version $MODULE)
 	R=$(run_details $MODULE > /dev/null ; echo $VERSION)
 
-	CL=( `echo $L | sed 's/[.]/ /g'` )
-	CR=( `echo $R | sed 's/[.]/ /g'` )
+	CL=( `echo $L | sed 's/[0-9]\+/ \0 /g'` )
+	CR=( `echo $R | sed 's/[0-9]\+/ \0 /g'` )
 
 	S="(equal)"
 
-	for N in $(seq 0 $(( ${#CL[@]} - 1 ))); do
+	for N in $(seq 0 $(( ( ${#CL[@]} > ${#CR[@]} ? ${#CL[@]} : ${#CR[@]} ) - 1 ))); do
 
 	  TL="${CL[$N]}"
 	  TR="${CR[$N]}"
@@ -1294,7 +1294,16 @@ main()  {
 	    continue
 	  fi
 
-	  if [ -z "$(echo $TL$TR | sed 's/[0-9]//g')" ] ; then
+	  if [ -z "$TL" ] ; then
+	    # normal upgrade
+	    S=""
+	    break
+	  elif [ -z "$TR" ] ; then
+	    S="(downgrade)"
+	    break
+	  fi
+
+	  if [ -z "$(echo $TLx$TR | sed 's/[0-9]//g')" ] ; then
 	    # numerical
 	    if [ "$TL" -eq "$TR" ] ; then
 	      continue
