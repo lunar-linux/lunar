@@ -61,6 +61,7 @@ leafs                      display installed modules that have no explicit
 orphans                    display installed modules that are missing
                                dependencies
 conflicts                  display conflicting files
+moonalyze                  analyze the current moonbase for common issues
 held                       display held modules
 exiled                     display exiled modules
 expired                    display a list of modules which need an update
@@ -421,7 +422,7 @@ show_orphans()  {
       if ! module_installed $DEPENDS ; then
         if [ "$OPTIONAL" == "required" ]; then
           echo "$MODULE: $DEPENDS is missing"
-	fi
+	      fi
       fi
     done
   done
@@ -435,9 +436,9 @@ show_conflicts()  {
   TMP_CONFLICTS2=$(temp_create "conflicts")
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
-    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | 
-    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" | 
-    while read LINE; do 
+    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
+    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" |
+    while read LINE; do
         [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
     done
   done
@@ -470,6 +471,125 @@ show_conflicts()  {
 
   trap "rm -f $TMP_CONFLICTS $TMP_CONFLICTS2 ; exit" INT TERM KILL EXIT
 }
+
+# function: moonalyze
+# usage: moonalyze
+# purpose: analyze the moonbase for issues and display them
+moonalyze() {
+  # Variable defines
+  declare -A missing_deps
+  declare -a broken_deps
+  declare -A broken_optional_deps
+  declare -a broken_optional_args
+
+  # Local function definitions
+  add_if_missing_dep() {
+    if ! find_section $1 &> /dev/null; then
+      if [ -z "${missing_deps[$1]}" ]; then
+        missing_deps[$1]=$mod
+      else
+        missing_deps[$1]+=", $mod"
+      fi
+    fi
+  }
+
+  add_broken_optional_dep() {
+    if [[ "$VERBOSE" = "on" ]]; then
+      if [ -z "${broken_optional_deps[$mod:$DEP]}" ]; then
+        broken_optional_deps[$mod:$DEP]=$1
+      else
+        broken_optional_deps[$mod:$DEP]+=", $1"
+      fi
+    else
+      broken_optional_args=("${broken_optional_args[@]}" "$mod")
+    fi
+  }
+
+  sort_uniq() {
+    for i in $@; do
+      echo $i
+    done | sort | uniq
+  }
+
+  run_depends() {
+    module_installed() {
+      true
+    }
+
+    depends() {
+      debug_msg "depends ($@)"
+      DEP=$(NEVER_ASK=1 unalias $1)
+      add_if_missing_dep $DEP
+      if [ -z "$DEP" ]; then
+        broken_deps=("${broken_deps[@]}" "$mod")
+      fi
+    }
+
+    optional_depends() {
+      debug_msg "optional_depends ($@)"
+
+      DEP=$(NEVER_ASK=1 unalias $1)
+      add_if_missing_dep $DEP
+
+      if [ -z "$DEP" ]; then
+        add_broken_optional_dep "\$1"
+      elif [[ -z "$2" && -z "$3" ]]; then
+        add_broken_optional_dep "\$2, \$3"
+      elif [ -z "$4" ]; then
+        add_broken_optional_dep "\$4"
+      elif [ $# -gt 4 ]; then
+        add_broken_optional_dep "more than 4 arguments"
+      fi
+    }
+
+    debug_msg "run_depends ($@)"
+    SECTION=$(find_section $1)
+    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
+    if has_module_file $1 DEPENDS ; then
+      run_module_file $1 DEPENDS
+    fi
+  }
+
+  # Main
+  echo -e "${MESSAGE_COLOR}Please wait, this may take a couple of minutes...${DEFAULT_COLOR}\n"
+  for mod in $(list_moonbase); do
+    run_depends $mod
+  done
+
+  # Display results
+  if [ "${#missing_deps[@]}" -gt 0 ]; then
+    echo -e "${MESSAGE_COLOR}Missing ${PROBLEM_COLOR}${#missing_deps[@]} ${MESSAGE_COLOR}modules:${DEFAULT_COLOR}"
+    while read i; do
+      echo -e " ${MODULE_COLOR}$i ${PROBLEM_COLOR}is missing but required by: ${MODULE_COLOR}${missing_deps[$i]}${DEFAULT_COLOR}"
+    done < <(sort_uniq "${!missing_deps[@]}")
+  fi
+
+  if [ "${#broken_deps[@]}" -gt 0 ]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
+    done < <(sort_uniq "${broken_deps[@]}")
+  fi
+
+  if [[ "$VERBOSE" == "on" && "${#broken_optional_deps[@]}" > 0 ]]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      cur_mod=$(echo $m | cut -d: -f1)
+      cur_dep=$(echo $m | cut -d: -f2)
+      if [[ "$cur_mod" != "$prev_mod" ]]; then
+        echo -e "${MODULE_COLOR}$cur_mod ${MESSAGE_COLOR}has optional_depends issues:${DEFAULT_COLOR}"
+      fi
+      echo -e "  ${MODULE_COLOR}$cur_dep ${MESSAGE_COLOR}empty arguments: ${PROBLEM_COLOR}${broken_optional_deps[$m]}${DEFAULT_COLOR}"
+      prev_mod=$cur_mod
+    done < <(sort_uniq "${!broken_optional_deps[@]}")
+  elif [[ "${broken_optional_args[@]}" > 0 ]]; then
+    echo -e "\n${MESSAGE_COLOR}Possible errenous 'optional_depends' lines in the following modules:${DEFAULT_COLOR}"
+    while read m; do
+      echo -e " ${MODULE_COLOR}$m${DEFAULT_COLOR}"
+    done < <(sort_uniq "${broken_optional_args[@]}")
+  fi
+}
+
 
 show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
@@ -684,7 +804,7 @@ show_eert() {
 show_urls() { (
   # function overrides:
   plugin_call() { return 0 ; }
-  download_url() { 
+  download_url() {
     URL=$1
     if [ "${URL#${URL%?}}" != "/" ]; then
       URL="${URL}/"
@@ -1112,6 +1232,10 @@ main()  {
       show_conflicts
       ;;
 
+    moonalyze)
+      moonalyze
+      ;;
+
     updatelog)
       if [ -e /var/log/lunar/update ]; then
         view_file /var/log/lunar/update
@@ -1158,11 +1282,11 @@ main()  {
 
 	CL=( `echo $L | sed 's/[.]/ /g'` )
 	CR=( `echo $R | sed 's/[.]/ /g'` )
-	
+
 	S="(equal)"
 
 	for N in $(seq 0 $(( ${#CL[@]} - 1 ))); do
-	
+
 	  TL="${CL[$N]}"
 	  TR="${CR[$N]}"
 
@@ -1176,7 +1300,7 @@ main()  {
 	      continue
 	    elif [ "$TL" -lt "$TR" ] ; then
 	      # normal upgrade
-	      S="" 
+	      S=""
 	      break
 	    else
 	      S="(downgrade)"
