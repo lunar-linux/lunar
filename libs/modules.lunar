@@ -120,7 +120,7 @@ create_module_index() {
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
     find $MOONBASE -type f -name DETAILS ! -regex "$MOONBASE/zlocal/.*" \
-        -printf "%h\n" | sed "s:$MOONBASE/::g;s:^\(.*\)/\(.*\)$:\2\:\1:g" > $TMP_INDEX
+        -printf "%h\n" | sed "s:$MOONBASE::;s:^/::;s:^\(.*\)/\([^/]*\)$:\2\:\1:" > $TMP_INDEX
   fi
 
   # this should be safe enough:
