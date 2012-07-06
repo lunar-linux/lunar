@@ -32,7 +32,7 @@ ld_add() {
 	debug_msg "ld_add ($@)"
 
 	if [ ! -z "$1" ] && [ -d "$1" ] ; then
-		if ! grep -q $1 /etc/ld.so.conf; then
+		if ! grep -q "$1" /etc/ld.so.conf; then
 			verbose_msg "Adding $1 to ld.so.conf"
 			echo "$1" >> /etc/ld.so.conf
 			ldconfig
@@ -48,13 +48,13 @@ ld_remove() {
 	debug_msg "ld_remove ($@)"
 
 	if [ ! -z "$1" ]; then
-		if grep -q $1 /etc/ld.so.conf ; then
+		if grep -q "$1" /etc/ld.so.conf ; then
 
 			TMP_LD_CONF=$(temp_create "ldsoconf")
 			verbose_msg "Removing $1 from ld.so.conf"
 
-			grep -v $1 /etc/ld.so.conf > $TMP_LD_CONF
-			cat $TMP_LD_CONF > /etc/ld.so.conf
+			grep -v "$1" /etc/ld.so.conf > $TMP_LD_CONF
+			cat "$TMP_LD_CONF" > /etc/ld.so.conf
 			ldconfig
 
 			temp_destroy $TMP_LD_CONF
@@ -142,7 +142,7 @@ filter() {
 		files       < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
 		symlinks    < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
 		read
-		grep -v -f $TMP_GREPRE
+		grep -v -f "$TMP_GREPRE"
 		temp_destroy $TMP_GREPRE
 	else
 		cat

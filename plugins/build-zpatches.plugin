@@ -46,9 +46,9 @@ plugin_zpatches_apply()
       TMPFILE1=$(temp_create "zpatch_1")
       TMPFILE2=$(temp_create "zpatch_2")
 
-      if $GZCMD $FPATCH > $TMPFILE1 ; then
+      if $GZCMD "$FPATCH" > $TMPFILE1 ; then
         # uncompress OK
-        if cat $TMPFILE1 | $TARCMD > $TMPFILE2 ; then
+        if cat "$TMPFILE1" | $TARCMD > $TMPFILE2 ; then
           # untar OK
           # Trying -p1 first or else we try -p0
           # An error will be visible if -p1 fail which is normal

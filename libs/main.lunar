@@ -94,7 +94,7 @@ rebuild()  {
   message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
   run_fix
 
-  LIST=$(grep ":installed:" $MODULE_STATUS | cut -d: -f1 | grep -v moonbase | grep -v $LUNAR_MODULE)
+  LIST=$(grep ":installed:" "$MODULE_STATUS" | cut -d: -f1 | grep -v moonbase | grep -v $LUNAR_MODULE)
 
   message "${MESSAGE_COLOR}Sorting modules by dependency${DEFAULT_COLOR}"
   QUEUE=$(sort_by_dependency $LIST)
@@ -109,7 +109,7 @@ rebuild()  {
     edit_file $TMP_QUEUE
   fi
 
-  QUEUE=$(cat $TMP_QUEUE)
+  QUEUE=$(cat "$TMP_QUEUE")
   temp_destroy $TMP_QUEUE
 
   if [ -n "$QUEUE" ] ; then
@@ -140,7 +140,7 @@ expand_cache_safe() {(
   # do directories: we don't care here
   # the sed trick is advanced: a non-greedy pattern that returns all
   # directory names listed in the input
-  for TARGET in $(cat $TMP_TARGETS | sed 's/\/[^\/]*$/\//g' ) ; do
+  for TARGET in $(cat "$TMP_TARGETS" | sed 's/\/[^\/]*$/\//g' ) ; do
     if [ ! -d $TARGET ]; then
       debug_msg "mkdir -p $TARGET"
       mkdir -p $TARGET
@@ -156,9 +156,9 @@ expand_cache_safe() {(
     echo "$TARGET" >> $TMP_TARGETS_OK
   done
   # do files - bulk process the normal ones
-  cat $TMP_TARGETS | grep -v -f $EXCLUDED >> $TMP_TARGETS_OK
+  cat "$TMP_TARGETS" | grep -v -f "$EXCLUDED" >> $TMP_TARGETS_OK
   # now double check the EXCLUDED ones
-  for TARGET in $(cat $TMP_TARGETS | grep -f $EXCLUDED ) ; do
+  for TARGET in $(cat "$TMP_TARGETS" | grep -f "$EXCLUDED" ) ; do
     if [ -e "$TARGET" ] ; then
       debug_msg "Cowardishly not overwriting \"$TARGET\""
     else
@@ -278,7 +278,7 @@ lin_module()  {
   satisfy_depends             &&
   show_downloading            &&
 
-  OPTS="$OPTS `grep ^$MODULE: $TEMP_CONFIGOPTS | cut -d: -f2`"
+  OPTS="$OPTS `grep "^$MODULE:" "$TEMP_CONFIGOPTS" | cut -d: -f2`"
 
   # last minute source code presence check:
   (

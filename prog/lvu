@@ -140,7 +140,7 @@ import_snapshot()  {
 	message "${MESSAGE_COLOR}Restoring lunar configuration${DEFAULT_COLOR}"
     cp -a etc/lunar /etc
 
-    for LINE in $(cat .$MODULE_STATUS) ; do
+    for LINE in $(cat ".$MODULE_STATUS") ; do
       LIST="$LIST $(echo $LINE | cut -d: -f1)"
     done
     verbose_msg "Sorting update queue"
@@ -157,7 +157,7 @@ import_snapshot()  {
       edit_file $TMP_QUEUE
     fi
 
-    QUEUE=$(cat $TMP_QUEUE)
+    QUEUE=$(cat "$TMP_QUEUE")
     temp_destroy $TMP_QUEUE
 
     if [ -n "$QUEUE" ] ; then
@@ -175,15 +175,15 @@ import_snapshot()  {
 
 
 checksum() {
-  for FILE in $(cat $1 | files) ; do
-    sum -s  $FILE
+  for FILE in $(cat "$1" | files) ; do
+    sum -s "$FILE"
   done
 }
 
 
 md5sum_files() {
-  for FILE in $(cat $1 | files) ; do
-    md5sum  $FILE
+  for FILE in $(cat "$1" | files) ; do
+    md5sum "$FILE"
   done
 }
 
@@ -327,7 +327,7 @@ older()  {
   if [ ! -z "$1" ] ; then
     if [ -z `echo $1 | sed 's/[[:digit:]]//g'` ] ; then
       if [ "$1" -gt "20010101" -a "$1" -lt "20310101" ] ; then
-        for LINE in $(cat $MODULE_STATUS) ; do
+        for LINE in $(cat "$MODULE_STATUS") ; do
           LIN_DATE=$(echo $LINE | cut -d: -f2)
           if [ "$LIN_DATE" -gt "$1" ] 2>/dev/null ; then
             true
@@ -353,7 +353,7 @@ show_module_component()  {
 
 find_active_lin()  {
   for FILE in $(ls /var/lock/installing.* 2>/dev/null) ; do
-    if [ -d /proc/$(cat $FILE) ] ; then
+    if [ -d /proc/$(cat "$FILE") ] ; then
       echo $FILE | sed "s:/var/lock/installing.::"
       return  0
     fi
@@ -363,9 +363,9 @@ find_active_lin()  {
 
 
 follow_active_lin()  {
-  if [ -f /var/lock/installing.$1 -a -d /proc/$(cat /var/lock/installing.$1) ] ; then
-    if  [ -f $TMPDIR/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* ] ; then
-      tail -f $TMPDIR/lunar.lin.$(cat /var/lock/installing.$1).$1.compile-log.* --follow=name --pid=$(cat /var/lock/installing.$1)  2>/dev/null
+  if [ -f /var/lock/installing.$1 -a -d /proc/$(cat "/var/lock/installing.$1") ] ; then
+    if  [ -f $TMPDIR/lunar.lin.$(cat "/var/lock/installing.$1").$1.compile-log.* ] ; then
+      tail -f $TMPDIR/lunar.lin.$(cat "/var/lock/installing.$1").$1.compile-log.* --follow=name --pid=$(cat "/var/lock/installing.$1")  2>/dev/null
     fi
   fi
 }
@@ -406,7 +406,7 @@ voyeur()  {
 
 show_leafs()  {
   for MODULE in $(list_installed) ;  do
-    if !  cut  -d : -f2- $DEPENDS_STATUS | grep "^$MODULE:" | grep  -q ":on:"; then
+    if !  cut  -d : -f2- "$DEPENDS_STATUS" | grep "^$MODULE:" | grep  -q ":on:"; then
       echo $MODULE
     fi
   done
@@ -416,7 +416,7 @@ show_leafs()  {
 show_orphans()  {
   for MODULE in $(list_installed) ; do
     debug_msg "checking \"$MODULE\""
-    for LINE in $(grep "^${MODULE}:" $DEPENDS_STATUS) ; do
+    for LINE in $(grep "^${MODULE}:" "$DEPENDS_STATUS") ; do
       DEPENDS=$(echo $LINE | cut -d: -f2)
       OPTIONAL=$(echo $LINE | cut -d: -f4)
       if ! module_installed $DEPENDS ; then
@@ -436,14 +436,14 @@ show_conflicts()  {
   TMP_CONFLICTS2=$(temp_create "conflicts")
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
-    cat $INSTALL_LOGS/$MODULE-$VERSION | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
+    cat "$INSTALL_LOGS/$MODULE-$VERSION" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
     grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" |
     while read LINE; do
         [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
     done
   done
 
-  sort -k 2,2 < $TMP_CONFLICTS | uniq -D -f 1 > $TMP_CONFLICTS2
+  sort -k 2,2 "$TMP_CONFLICTS" | uniq -D -f 1 > $TMP_CONFLICTS2
   while read MOD FILE; do
     if [ -z "${conflicts[$FILE]}" ]; then
       conflicts[$FILE]=$MOD
@@ -595,7 +595,7 @@ show_depends()  {
   if  !  echo  "$DONE"  |  grep  -q  "$1";  then
     DONE="$DONE  $1"
 
-    grep ":$1:" $DEPENDS_STATUS | while read LINE ; do
+    grep ":$1:" "$DEPENDS_STATUS" | while read LINE ; do
       MODULE=${LINE%%:*}
       STATUS=$(echo  $LINE  |  cut  -d :  -f3)
 
@@ -721,7 +721,7 @@ function show_tree() {
   INDENT="$INDENT|    "
   # and recurse:
   for DEP in $DEPS ; do
-    grep -q "^$DEP$" $TMP_SEEN
+    grep -q "^$DEP$" "$TMP_SEEN"
     TEST=$?
     if [ "$TEST" == "1" -o -z "$SHORTTREE" ] ; then
       echo "$DEP" >> $TMP_SEEN
@@ -758,7 +758,7 @@ show_eert() {
 
   show_rtree() {
     # we need to do an reverse tree for $1
-    RDEPS=$(grep ":$1:" $DEPENDS | cut -d: -f1 | sort | uniq)
+    RDEPS=$(grep ":$1:" "$DEPENDS" | cut -d: -f1 | sort | uniq)
 
     if module_installed $1 ; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -767,7 +767,7 @@ show_eert() {
     fi
 
     for DEP in $RDEPS ; do
-      REL=$(grep "^$DEP:$1:" $DEPENDS)
+      REL=$(grep "^$DEP:$1:" "$DEPENDS")
       CUR=$(echo $REL | cut -d: -f1)
       if echo $REL | grep -q :required: ; then
         if module_installed $DEP ; then
@@ -849,10 +849,10 @@ show_info() {
     if module_exiled $1 ; then
       echo -n "exiled "
     fi
-    if grep -qw $1 $SUSTAINED ; then
+    if grep -qw "$1" "$SUSTAINED" ; then
       echo -n "sustained "
     fi
-    if grep -qw $1 $SOLO ; then
+    if grep -qw "$1" "$SOLO" ; then
       echo -n "solo "
     fi
     echo
@@ -861,10 +861,10 @@ show_info() {
       echo -n "  Provides Service"
       if [ 1 -lt $LINES ]; then
         echo "s:"
-        echo "`cat $MOONBASE/$SECTION/$MODULE/services | sed "s:\t: :g" | sed 's:^:    :g'`"
+        echo "`cat "$MOONBASE/$SECTION/$MODULE/services" | sed "s:\t: :g" | sed 's:^:    :g'`"
       else
         echo -n ": "
-        echo "`cat $MOONBASE/$SECTION/$MODULE/services`"
+        echo "`cat "$MOONBASE/$SECTION/$MODULE/services"`"
       fi
     fi
 
@@ -1011,12 +1011,12 @@ submit_module() {
       echo "# PLEASE FORMAT THE FIRST LINE ACCORDING TO ABOVE NOTES!!! THANK YOU!!!"
     ) > $TMP_MSG
     edit_file $TMP_MSG
-    sed -i '/^#/d' $TMP_MSG
+    sed -i '/^#/d' "$TMP_MSG"
     (
-      head -n 1 $TMP_MSG | sed 's/^/Subject: /g'
+      head -n 1 "$TMP_MSG" | sed 's/^/Subject: /g'
       echo ''
       echo "From: $REALNAME <$ADMIN>"
-      tail +2 $TMP_MSG
+      tail +2 "$TMP_MSG"
       echo '---'
       echo 'module:' $1
       echo "id: $UNIQID"
@@ -1033,7 +1033,7 @@ submit_module() {
       echo '---'
       lvu diff $1
     ) >> $TMP_MSG2
-    cat $TMP_MSG2
+    cat "$TMP_MSG2"
     if query "Submit this module now?" y; then
       curl -F file=@$TMP_MSG2 -F module=$1 -F id=$UNIQID "http://www.lunar-linux.org/submit.php"
       temp_destroy $TMP_MSG2
@@ -1162,7 +1162,7 @@ EOFDETA
            SHORT="$SHORT"
 cat <<EOF
 EOFDETB
-		cat $LONG | fmt -72
+		cat "$LONG" | fmt -72
 		echo "EOF"
 	) > $MOONBASE/zlocal/$1/DETAILS
 
@@ -1200,8 +1200,8 @@ main()  {
     from)
       for MODULE in $(list_installed); do
         VERSION=$(installed_version $MODULE)
-        if grep -q "$2" $INSTALL_LOGS/$MODULE-$VERSION ; then
-          for FILE in $(grep "$2" $INSTALL_LOGS/$MODULE-$VERSION | cut -d: -f2) ; do
+        if grep -q "$2" "$INSTALL_LOGS/$MODULE-$VERSION" ; then
+          for FILE in $(grep "$2" "$INSTALL_LOGS/$MODULE-$VERSION" | cut -d: -f2) ; do
             echo "$MODULE:$FILE"
           done
         fi
@@ -1258,7 +1258,7 @@ main()  {
 
     installed)
       if [ -z "$2" ] ; then
-        grep -E ':(installed|held):' $MODULE_STATUS | view_file
+        grep -E ':(installed|held):' "$MODULE_STATUS" | view_file
       elif [ -n "$(installed_version $2)" ] ; then
         echo "$(installed_version $2)"
       else
@@ -1268,11 +1268,11 @@ main()  {
       ;;
 
     held)
-      grep ":held:" $MODULE_STATUS | cut -d: -f1
+      grep ":held:" "$MODULE_STATUS" | cut -d: -f1
       ;;
 
     exiled)
-      grep ":exiled:" $MODULE_STATUS | cut -d: -f1
+      grep ":exiled:" "$MODULE_STATUS" | cut -d: -f1
       ;;
 
     expired)
@@ -1442,13 +1442,13 @@ main()  {
       ;;
 
     search)
-      grep -irle $2 "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
+      grep -irle "$2" "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
 
     service)
-      cat $MODULE_INDEX | while read ENTRY ; do
-        MOD=$(echo $ENTRY | cut -d: -f1)
-        SEC=$(echo $ENTRY | cut -d: -f2)
+      cat "$MODULE_INDEX" | while read ENTRY ; do
+        MOD=$(echo "$ENTRY" | cut -d: -f1)
+        SEC=$(echo "$ENTRY" | cut -d: -f2)
         if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
           echo $MOONBASE/$SEC/$MOD/services
         fi
@@ -1559,10 +1559,10 @@ main()  {
            echo "Install log for $2 does not exist"
            return 1
          else
-           cat $INSTALL_LOGS/$2-$(installed_version $2) | while read LINE ; do
+           cat "$INSTALL_LOGS/$2-$(installed_version $2)" | while read LINE ; do
              if file $LINE | grep -q "ELF " ; then
                echo -n "$LINE "
-               strings -a $LINE | grep GCC: | sort -r | head -n 1
+               strings -a "$LINE" | grep GCC: | sort -r | head -n 1
              fi
            done
          fi

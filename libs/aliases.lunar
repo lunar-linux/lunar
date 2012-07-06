@@ -36,7 +36,7 @@ unalias() {
     fi
   fi
 
-  TARGETS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' $ALIASES)
+  TARGETS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$ALIASES")
 
   # shortcut out when explicitly instructed so
   if [[ -n "$NEVER_ASK" ]] ; then

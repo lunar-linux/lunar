@@ -30,7 +30,7 @@
 list_sections() {
 	debug_msg "list_sections ($@)"
 	check_module_index
-	cut -d: -f2 < $MODULE_INDEX | sort | uniq
+	cut -d: -f2 "$MODULE_INDEX" | sort | uniq
 	find $MOONBASE/zlocal -name DETAILS | sed "s:^$MOONBASE\/::g;s:\/[^\/]*\/DETAILS$::g" | sort | uniq
 	return 0
 }
@@ -51,8 +51,8 @@ list_modules() {
 		exit 1
 	fi
 
-	if grep -q ":$1$" $MODULE_INDEX; then
-		grep ":$1$" $MODULE_INDEX | cut -d: -f1
+	if grep -q ":$1$" "$MODULE_INDEX"; then
+		grep ":$1$" "$MODULE_INDEX" | cut -d: -f1
 		return 0
 	else
 	 (
@@ -80,7 +80,7 @@ list_moonbase() {
 # purpose  : return a list of installed (or held) modules
 list_installed() {
 	debug_msg "list_installed ($@)"
-	grep -e ":installed:" -e ":held:" $MODULE_STATUS | cut -d: -f1 | sort
+	grep -e ":installed:" -e ":held:" "$MODULE_STATUS" | cut -d: -f1 | sort
 }
 
 
@@ -112,7 +112,7 @@ create_module_index() {
   if [[ "$MOONBASE" == "/var/lib/lunar/moonbase" ]] && [[ -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ]] ; then
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
-    grep "/DETAILS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase) | \
+    grep "/DETAILS$" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" | \
         sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
         -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
   else
@@ -178,7 +178,7 @@ find_section() {
 	fi
 
 	# otherwise check for ordinary modules named that way
-	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
+	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" "$MODULE_INDEX")
 	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
 		echo "$SECTION"
 		return 0
@@ -201,7 +201,7 @@ find_section() {
 	fi
 
 	# and search again, this should be quick now
-	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" $MODULE_INDEX)
+	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" "$MODULE_INDEX")
 	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
 		echo "$SECTION"
 		return 0
@@ -242,9 +242,9 @@ run_details() {
     else
       TMP_DETAILS=$(temp_create "details.version")
       if [[ -e "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" ]]; then
-        cat $MOONBASE/$SECTION/$1/DETAILS.$PLATFORM | sed '/^\s*VERSION=/d' > $TMP_DETAILS
+        cat "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" | sed '/^\s*VERSION=/d' > $TMP_DETAILS
       else
-        cat $MOONBASE/$SECTION/$1/DETAILS | sed '/^\s*VERSION=/d' > $TMP_DETAILS
+        cat "$MOONBASE/$SECTION/$1/DETAILS" | sed '/^\s*VERSION=/d' > $TMP_DETAILS
       fi        
       VERSION="$WANT_VERSION"
       . $TMP_DETAILS &> /dev/null || return 255
@@ -293,7 +293,7 @@ run_module_file() {
 # purpose  : check if $MODULE is installed (or held)
 module_installed()
 {
-	grep -q "^$1:[[:digit:]]*:installed:\|^$1:[[:digit:]]*:held:" $MODULE_STATUS
+	grep -q "^$1:[[:digit:]]*:installed:\|^$1:[[:digit:]]*:held:" "$MODULE_STATUS"
 }
 
 
@@ -302,7 +302,7 @@ module_installed()
 # purpose  : check if $MODULE is held
 module_held() {
 	debug_msg "module_held ($@)"
-	grep -q "^$1:[[:digit:]]*:held:" $MODULE_STATUS
+	grep -q "^$1:[[:digit:]]*:held:" "$MODULE_STATUS"
 }
 
 
@@ -372,7 +372,7 @@ module_license_accepted() {
 # purpose  : check if $MODULE is exiled
 module_exiled() {
   debug_msg "module_exiled ($@)"
-  $(cut -d: -f1,3 $MODULE_STATUS | grep -q "^$1:exiled")
+  $(cut -d: -f1,3 "$MODULE_STATUS" | grep -q "^$1:exiled")
 }
 
 
@@ -381,7 +381,7 @@ module_exiled() {
 # purpose  : return the installed version of $MODULE
 installed_version() {
   debug_msg "installed_version ($@)"
-  grep "^$1:" $MODULE_STATUS | cut -d: -f4
+  grep "^$1:" "$MODULE_STATUS" | cut -d: -f4
 }
 
 
@@ -408,7 +408,7 @@ hold_modules() {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "installed") {print $1":"$2":held:"$4":"$5}  else print;}' $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "installed") {print $1":"$2":held:"$4":"$5}  else print;}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
     done
     unlock_file $MODULE_STATUS
@@ -427,7 +427,7 @@ unhold_modules () {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "held") {print $1":"$2":installed:"$4":"$5}  else print;}' $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "held") {print $1":"$2":installed:"$4":"$5}  else print;}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
     done
     unlock_file $MODULE_STATUS
@@ -469,7 +469,7 @@ unexile_modules () {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      grep -v "^$MODULE:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+      grep -v "^$MODULE:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
       cp $MODULE_STATUS_BACKUP $MODULE_STATUS
     done
     unlock_file $MODULE_STATUS
@@ -492,7 +492,7 @@ remove_module() {
   verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS_BACKUP                              &&
   lock_file $MODULE_STATUS                                     &&
-  grep -v "^$1:" $MODULE_STATUS > $MODULE_STATUS_BACKUP
+  grep -v "^$1:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
   cp $MODULE_STATUS_BACKUP $MODULE_STATUS
   unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
@@ -514,7 +514,7 @@ add_module()  {
   lock_file $MODULE_STATUS_BACKUP                             &&
   lock_file $MODULE_STATUS                                    &&
   if [ -s $MODULE_STATUS ]; then
-    grep -v "^$1:" $MODULE_STATUS_BACKUP > $MODULE_STATUS 2>/dev/null
+    grep -v "^$1:" "$MODULE_STATUS_BACKUP" > $MODULE_STATUS 2>/dev/null
   fi &&
   echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
   cp $MODULE_STATUS $MODULE_STATUS_BACKUP
@@ -557,7 +557,7 @@ module_is_expired() {
     if [ -z "$MODULE" ] ; then
       MODULE=$1
     fi
-    LINE=$(grep "^$MODULE:" $MODULE_STATUS | grep -v "^moonbase" | awk -F: '{print "IDATE="$2" STATUS="$3" IVERSION="$4}')
+    LINE=$(grep "^$MODULE:" "$MODULE_STATUS" | grep -v "^moonbase" | awk -F: '{print "IDATE="$2" STATUS="$3" IVERSION="$4}')
     eval $LINE
     if run_details $MODULE &> /dev/null ; then
       if [[ "$STATUS" == "installed" ]] ; then
@@ -620,7 +620,7 @@ update_modules() {
   if query "Do you wish to edit the update queue ? " n ; then
     edit_file $TMP_QUEUE
   fi
-  QUEUE=$(cat $TMP_QUEUE)
+  QUEUE=$(cat "$TMP_QUEUE")
   temp_destroy $TMP_QUEUE
 
   if [ -n "$QUEUE" ] ; then
@@ -636,7 +636,7 @@ update_modules() {
 check_blacklist() {
   debug_msg "check_blacklist ($@)"
   if [ -f /var/state/lunar/blacklist.$PLATFORM ] ; then
-    if grep "^$MODULE$" /var/state/lunar/blacklist.$PLATFORM ; then
+    if grep "^$MODULE$" "/var/state/lunar/blacklist.$PLATFORM" ; then
       error_message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is blacklisted and will not be installed!${DEFAULT_COLOR}"
       exit 0
     fi
