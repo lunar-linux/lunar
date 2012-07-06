@@ -94,7 +94,7 @@ rebuild()  {
   message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
   run_fix
 
-  LIST=$(grep ":installed:" "$MODULE_STATUS" | cut -d: -f1 | grep -v moonbase | grep -v $LUNAR_MODULE)
+  LIST=$(grep ":installed:" "$MODULE_STATUS" | cut -d: -f1 | grep -v moonbase | grep -v "$LUNAR_MODULE")
 
   message "${MESSAGE_COLOR}Sorting modules by dependency${DEFAULT_COLOR}"
   QUEUE=$(sort_by_dependency $LIST)

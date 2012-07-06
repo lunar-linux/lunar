@@ -894,7 +894,7 @@ show_info() {
     fi
 
     echo ""
-	ACTIVITY=$(view_file $ACTIVITY_LOG | awk "(\$3 == \"$1\")")
+	ACTIVITY=$(view_file "$ACTIVITY_LOG" | awk "(\$3 == \"$1\")")
 
     if [ `echo "$ACTIVITY" | wc -l` -gt 10 ]; then
       ACTIVITY="`echo "$ACTIVITY" | tail -n10`"
@@ -1247,9 +1247,9 @@ main()  {
     activity)
       if [ -e $ACTIVITY_LOG ]; then
         if [ -z "$2" ]; then
-          view_file $ACTIVITY_LOG
+          view_file "$ACTIVITY_LOG"
         else
-         view_file $ACTIVITY_LOG | awk "(\$3 == \"$2\")"
+         view_file "$ACTIVITY_LOG" | awk "(\$3 == \"$2\")"
        fi
       else
         echo "No update log available."
@@ -1535,10 +1535,10 @@ main()  {
       if [ ! -z "$2" ]; then
         if run_details $2 ; then
           if [ -f $COMPILE_LOGS/$2-$(module_version $2).bz2 ] ; then
-            view_file $COMPILE_LOGS/$2-$(module_version $2).bz2
+            view_file "$COMPILE_LOGS/$2-$(module_version $2).bz2"
           else
             VERSION=$(installed_version $2)
-            view_file $COMPILE_LOGS/$2-$(installed_version $2).bz2 \
+            view_file "$COMPILE_LOGS/$2-$(installed_version $2).bz2" \
               "Compile log for $2 does not exist"
           fi
         fi
@@ -1547,7 +1547,7 @@ main()  {
 
    install)
      if run_details $2 ; then
-       view_file $INSTALL_LOGS/$2-$(installed_version $2) \
+       view_file "$INSTALL_LOGS/$2-$(installed_version $2)" \
            "Install log for $2 does not exist"
      fi
      ;;

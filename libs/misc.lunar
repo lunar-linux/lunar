@@ -145,7 +145,7 @@ filter() {
 		grep -v -f "$TMP_GREPRE"
 		temp_destroy $TMP_GREPRE
 	else
-		cat
+		cat -
 	fi
 }
 
