@@ -83,3 +83,6 @@ tag:
 
 dist:
 	git archive --format=tar --prefix="lunar-$(VERSION)/" v$(VERSION) | bzip2 > lunar-$(VERSION).tar.bz2
+
+tell:
+	@echo "lunar-$(VERSION).tar.bz2"
