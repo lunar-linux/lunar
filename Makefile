@@ -1,4 +1,6 @@
 
+VERSION = 1
+
 bin_PROGS = prog/lvu prog/lvis prog/lsh
 sbin_PROGS = prog/lin prog/lrm prog/lunar prog/lget
 
@@ -75,3 +77,9 @@ install: .PHONY
 	# easy way out for the docs:
 	install -d $(DESTDIR)/usr/share/doc/lunar
 	cp -av doc $(DESTDIR)/usr/share/doc/lunar/
+
+tag:
+	git tag v$(VERSION)
+
+dist:
+	git archive --format=tar --prefix="lunar-$(VERSION)/" v$(VERSION) | bzip2 > lunar-$(VERSION).tar.bz2
