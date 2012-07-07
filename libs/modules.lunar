@@ -563,9 +563,7 @@ module_is_expired() {
       if [[ "$STATUS" == "installed" ]] ; then
         if [[ "$VERSION" != "$IVERSION" ]] || [[ -z "$IDATE" ]] ||
 	  (( "$UPDATED" > "$IDATE" )) ; then
-	  if [[ "$MODULE" != "lunar" ]] && [[ "$MODULE" != "theedge" ]] ; then
-	    return 0
-	  fi
+	  return 0
 	fi
       fi
     fi
@@ -605,6 +603,19 @@ update_modules() {
     verbose_msg "Nothing to update!"
     return 255
   fi
+
+  verbose_msg "Checking for lunar or theedge"
+  for MODULE in $LIST ; do
+    if [[ "$MODULE" == "lunar" ]] || [[ "$MODULE" == "theedge" ]] ; then
+      message "${MODULE_COLOR}$MODULE${MESSAGE_COLOR} will be updated${DEFAULT_COLOR}"
+      message "${MESSAGE_COLOR}Run lunar renew afterwards to update other modules${DEFAULT_COLOR}"
+      if query "Do you wish to continue ? " y ; then
+	lin -c $MODULE
+	exit $?
+      fi
+      return 255
+    fi
+  done
 
   verbose_msg "Sorting update queue"
   QUEUE=$(sort_by_dependency $LIST)
