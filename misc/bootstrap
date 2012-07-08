@@ -1,0 +1,36 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# bootstrap - Lunar initialization code                    #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2012 by Peter de Ridder under GPLv2            #
+#                                                          #
+############################################################
+
+# check if /etc/lunar/config is loaded
+if [ -z "$BOOTSTRAP" ] ; then
+  . /etc/lunar/config
+fi
+
+for FUNCTION in $FUNCTIONS/*.lunar ; do
+  . $FUNCTION
+done
+
+if [ -s "$LOCAL_CONFIG" ] ; then
+  . $LOCAL_CONFIG
+fi
+
+# validate and correct config variables from $LOCAL_CONFIG
+for DIR_VAR in CONFIG_CACHE DEPENDS_CONFIG BUILD_DIRECTORY DOCUMENT_DIRECTORY DEFAULT_PREFIX MOONBASE FUNCTIONS MENUS PLUGIN_DIR SOUND_DIRECTORY INSTALL_LOGS COMPILE_LOGS MD5SUM_LOGS INSTALL_CACHE SOURCE_CACHE TMPDIR ; do
+  # dir configuration values shouldn't end with a /
+  eval $DIR_VAR=\${$DIR_VAR/%\\/}
+done
+
+sound $SOUND
+color $COLOR
+
+for LUNAR_PLUGIN in $PLUGIN_DIR/*.plugin; do
+  . $LUNAR_PLUGIN
+done

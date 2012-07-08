@@ -56,6 +56,7 @@ install: .PHONY
 	  install -m0755 $$F $(DESTDIR)/var/lib/lunar/compilers/ ; \
 	done
 	install -d $(DESTDIR)/var/lib/lunar
+	install -m0755 misc/bootstrap $(DESTDIR)/var/lib/lunar/
 	install -m0644 misc/excluded $(DESTDIR)/var/lib/lunar/
 	install -m0644 misc/protected $(DESTDIR)/var/lib/lunar/
 	install -m0644 misc/solo $(DESTDIR)/var/lib/lunar/

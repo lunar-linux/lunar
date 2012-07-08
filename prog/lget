@@ -84,6 +84,7 @@ main() {
 
 
 . /etc/lunar/config
+. $BOOTSTRAP
 
 GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vw:" -l "all,debug,from:,help,url:,verbose,want:" -- "$@")
 
