@@ -112,7 +112,7 @@ report() {
   if [ "$VIEW_REPORTS" == "on" ] ; then
     sound REPORT
     if query "View $2 for ${MODULE_COLOR}${3}-${VERSION_COLOR}${4}${DEFAULT_COLOR}${QUERY_COLOR} ?" n ; then
-      view_file $1
+      view_file "$1"
     fi
   fi
 
@@ -120,7 +120,7 @@ report() {
     TMP_MAIL=$(temp_create "mailreport")
     date -u > $TMP_MAIL
     echo >> $TMP_MAIL
-    view_file $1 >> $TMP_MAIL
+    view_file "$1" >> $TMP_MAIL
     mail -s "Lunar Report from $HOSTNAME : $2 for $3-$4"  \
               $ADMIN < $TMP_MAIL 2>/dev/null
     temp_destroy $TMP_MAIL

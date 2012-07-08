@@ -45,9 +45,9 @@ patch_it () {
   TMPFILE1=$(temp_create "patch_1")
   TMPFILE2=$(temp_create "patch_2")
 
-  if $GZCMD $PATCH > $TMPFILE1 ; then
+  if $GZCMD "$PATCH" > $TMPFILE1 ; then
     # uncompress OK
-    if cat $TMPFILE1 | $TARCMD > $TMPFILE2 ; then
+    if cat "$TMPFILE1" | $TARCMD > $TMPFILE2 ; then
       # untar OK
       if patch -N -p$2 < $TMPFILE2 ; then
         # patch cmd is OK

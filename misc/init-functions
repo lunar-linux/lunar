@@ -62,15 +62,15 @@ export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 # default_{start|stop|restart|probe|reload|status}
 #
 
-  CHKCONFIG=`grep '^# chkconfig:'   $0 | cut -d : -f 2-2`
-CONFIGFILES=`grep '^# config:'      $0 | cut -d : -f 2-2 | tr -d " "`
-# DESCRIPTION=`grep '^# description: ' $0 | cut -d : -f 2-2 | tr -d " "`
-      SHORT=`grep '^# short:'       $0 | cut -d : -f 2-2 | tr -d " "`
-    PIDFILE=`grep '^# pidfile:'     $0 | cut -d : -f 2-2 | tr -d " "`
-    PROCESS=`grep '^# processname:' $0 | cut -d : -f 2-2 | tr -d " "`
-    SIGSTOP=`grep '^# sigstop:'     $0 | cut -d : -f 2-2 | tr -d " "`
-  SIGRELOAD=`grep '^# sigreload:'   $0 | cut -d : -f 2-2 | tr -d " "`
-      RUNAS=`grep '^# runas:'       $0 | cut -d : -f 2-2 | tr -d " "`
+  CHKCONFIG=`grep '^# chkconfig:'   "$0" | cut -d : -f 2-2`
+CONFIGFILES=`grep '^# config:'      "$0" | cut -d : -f 2-2 | tr -d " "`
+# DESCRIPTION=`grep '^# description: ' "$0" | cut -d : -f 2-2 | tr -d " "`
+      SHORT=`grep '^# short:'       "$0" | cut -d : -f 2-2 | tr -d " "`
+    PIDFILE=`grep '^# pidfile:'     "$0" | cut -d : -f 2-2 | tr -d " "`
+    PROCESS=`grep '^# processname:' "$0" | cut -d : -f 2-2 | tr -d " "`
+    SIGSTOP=`grep '^# sigstop:'     "$0" | cut -d : -f 2-2 | tr -d " "`
+  SIGRELOAD=`grep '^# sigreload:'   "$0" | cut -d : -f 2-2 | tr -d " "`
+      RUNAS=`grep '^# runas:'       "$0" | cut -d : -f 2-2 | tr -d " "`
 
 get_data () {
   # define these
@@ -99,7 +99,7 @@ get_data () {
   # VITAL INFO: SERVPID
   if [ -f "$PIDFILE" ] ; then
     if [ -d "/proc/$(cat $PIDFILE)" ] ; then
-      SERVPID=$(cat $PIDFILE)
+      SERVPID=$(cat "$PIDFILE")
     fi
   fi
 }
