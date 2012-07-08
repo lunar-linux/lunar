@@ -16,6 +16,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
 
         DEFAULT_PREFIX=/usr
 
+             BOOTSTRAP=/var/lib/lunar/bootstrap
               EXCLUDED=/var/lib/lunar/excluded
               MOONBASE=/var/lib/lunar/moonbase
              PROTECTED=/var/lib/lunar/protected
@@ -115,23 +116,4 @@ export        DIALOGRC=/etc/lunar/dialogrc
         TAB_ENTER_IFS=$'\t\n'
         ENTER_IFS=$'\n'
         STANDARD_IFS=$' \t\n'
-
-for FUNCTION in $FUNCTIONS/*.lunar ; do
-  . $FUNCTION
-done
-
-if [ -s "$LOCAL_CONFIG" ] ; then
-  . $LOCAL_CONFIG
-fi
-
-for DIR_VAR in CONFIG_CACHE DEPENDS_CONFIG BUILD_DIRECTORY DOCUMENT_DIRECTORY DEFAULT_PREFIX MOONBASE FUNCTIONS MENUS PLUGIN_DIR SOUND_DIRECTORY INSTALL_LOGS COMPILE_LOGS MD5SUM_LOGS INSTALL_CACHE SOURCE_CACHE TMPDIR ; do
-  eval $DIR_VAR=\${$DIR_VAR/%\\/}
-done
-
-sound $SOUND
-color $COLOR
-
-for LUNAR_PLUGIN in $PLUGIN_DIR/*.plugin; do
-  . $LUNAR_PLUGIN
-done
 

@@ -212,6 +212,7 @@ main() {
 
 
 . /etc/lunar/config
+. $BOOTSTRAP
 
 GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:w:" -l "compile,debug,deps,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
 

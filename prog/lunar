@@ -794,6 +794,7 @@ main() {
 }
   
 . /etc/lunar/config
+. $BOOTSTRAP
 
 GETOPT_ARGS=$(getopt -q -n lunar -o "dhv" -l "debug,help,verbose" -- "$@")
 
