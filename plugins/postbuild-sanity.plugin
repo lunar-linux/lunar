@@ -20,11 +20,12 @@ plugin_sanity_post_build()
 
 	TESTS=(
 		"^/opt/:E:Installs files in /opt"
-		"^/bin:W:Installs files in /bin"
-		"^/sbin:W:Installs files in /sbin"
-		"^/lib:W:Installs files in /lib"
+		"^/bin:N:Installs files in /bin"
+		"^/sbin:N:Installs files in /sbin"
+		"^/lib:N:Installs files in /lib"
 		"^/share:E:Installs files in /share"
 		"^/include:E:Installs files in /include"
+		"^/usr/doc:E:Installs files in /usr/doc"
 		"^/usr/etc:E:Installs files in /usr/etc"
 		"^/usr/local:E:Installs files in /usr/local"
 		"^/usr/var:E:Installs files in /usr/var"
@@ -40,7 +41,13 @@ plugin_sanity_post_build()
 			SEVERITY=$(echo $TEST | cut -d: -f2)
 			REASON=$(echo $TEST | cut -d: -f3)
 
-			if [ $SEVERITY == "W" ]; then
+			case $SEVERITY in
+			N)
+				message "${PROBLEM_COLOR}NOTICE:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+				parse_iw | sort | uniq | grep $PATTERN
+				continue
+				;;
+			W)
 				message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
 				parse_iw | sort | uniq | grep $PATTERN
 				export SILENT=""
@@ -49,11 +56,13 @@ plugin_sanity_post_build()
 					return 1
 				fi
 				continue
-			else
+				;;
+			E)
 				message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
 				parse_iw | sort | uniq | grep $PATTERN
 				return 1
-			fi
+				;;
+			esac
 		fi
 	done
 
