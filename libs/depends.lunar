@@ -72,7 +72,7 @@ sort_by_dependency() {
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
-  tsort $TMP_TSRT 2> /dev/null | tac > $TMP_ALL
+  tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
   temp_destroy $TMP_TSRT
 
   # append all modules that do not have a DEPENDS file at all at the end
