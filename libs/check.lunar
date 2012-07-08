@@ -78,9 +78,9 @@ rework_module() {
 	# append the new output:
 	lock_file $DEPENDS_STATUS_BACKUP                              &&
 	lock_file $DEPENDS_STATUS                                     &&
-	grep -v "^$MODULE:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS  &&
+	grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS  &&
 	run_depends $MODULE >> $DEPENDS_STATUS
-	cat $DEPENDS_STATUS > $DEPENDS_STATUS_BACKUP
+	cat "$DEPENDS_STATUS" > $DEPENDS_STATUS_BACKUP
 	unlock_file $DEPENDS_STATUS
 	unlock_file $DEPENDS_STATUS_BACKUP
 }
@@ -94,7 +94,7 @@ fix_depends () {
 	if [ -n "$1" ] ; then
 		LIST="$@"
 	else
-		LIST=$(grep -v moonbase: $MODULE_STATUS | cut -d: -f1 | sort )
+		LIST=$(grep -v moonbase: "$MODULE_STATUS" | cut -d: -f1 | sort )
 	fi
 
 	for MODULE in $LIST ; do

@@ -12,7 +12,7 @@
 
 alias_menu_list_aliases()
 {
-	for A in `cut -d: -f1 $MOONBASE/aliases`; do
+	for A in `cut -d: -f1 "$MOONBASE/aliases"`; do
 		echo ${A:1}
 		CHOICE=$(get_local_config `echo LUNAR_ALIAS_${A:1}`)
 		if [ -n "$CHOICE" ] ; then
@@ -34,7 +34,7 @@ alias_menu_list_alias_choices()
 		echo "off"
 	fi
 	IFS=$STANDARD_IFS
-	for C in `grep "^%$1:" $MOONBASE/aliases | cut -d: -f2`; do
+	for C in `grep "^%$1:" "$MOONBASE/aliases" | cut -d: -f2`; do
 		echo "$C"
 		echo "$C"
 		if [ $(get_local_config `echo LUNAR_ALIAS_$1`) == "$C" ] ; then

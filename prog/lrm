@@ -56,7 +56,7 @@ handle_config_files() {
     debug_msg "considering config file \"$1\""
 
     TARGET_MD5=$(md5sum "$1" | cut -d " " -f 1-1)
-    OLD_MD5=$(grep -w "$1\$" $MD5_LOG | cut -d " " -f 1-1)
+    OLD_MD5=$(grep -w "$1\$" "$MD5_LOG" | cut -d " " -f 1-1)
 
     if [ -z "$TARGET_MD5" ] ; then
       verbose_msg "Skipping removal of \"$1\" due to problem with md5sum"
@@ -126,7 +126,7 @@ process_directories() {
     return 1
   fi
 
-  cat $1 | sort -r | while read LINE ; do
+  cat "$1" | sort -r | while read LINE ; do
     remove_something "$LINE"
   done
 }
@@ -167,7 +167,7 @@ lrm_module() {
   # grep -v the install logs over the protected stuff, this
   # yields the files that may be removed
   if [ "$REAP" == "on" ] ; then
-    cat $INST_LOG | grep -v -f $PROTECTED | while read TARGET ; do
+    cat "$INST_LOG" | grep -v -f "$PROTECTED" | while read TARGET ; do
       if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
         if [ -d "$TARGET" ] ; then
           echo "$TARGET" >> $TMP_DIRS
@@ -197,7 +197,7 @@ lrm_module() {
     remove_depends $MODULE
     # remove alias if required
     if [ $MODULE != moonbase ] ; then
-      for ALIAS in `cut -d: -f1 $MOONBASE/aliases`; do
+      for ALIAS in `cut -d: -f1 "$MOONBASE/aliases"`; do
         if [ "$(get_local_config `echo LUNAR_ALIAS_${ALIAS:1}`)" == "$MODULE" ]; then
           verbose_msg "removing alias mapping from \"$ALIAS\" to \"$MODULE\""
           unset_local_config `echo LUNAR_ALIAS_${ALIAS:1}`

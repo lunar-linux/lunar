@@ -17,10 +17,10 @@ view_file()  {
        gzip) zcat $1  | ${PAGER:-less} ;;
           *)
              # default fallback
-             cat $1   | ${PAGER:-less} ;;
+             cat "$1" | ${PAGER:-less} ;;
     esac
   else
-    cat | ${PAGER:-less}
+    cat - | ${PAGER:-less}
   fi
 }
 

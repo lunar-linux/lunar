@@ -27,7 +27,7 @@ find_module_size() {
       local SIZE
       unset SIZE
       [ -e "$MODULE_STATUS" ] &&
-      SIZE=`grep  "^$1\:" $MODULE_STATUS | cut -d ":" -f 5-5`
+      SIZE=`grep  "^$1\:" "$MODULE_STATUS" | cut -d ":" -f 5-5`
       [ -n "$SIZE" ] && echo ${SIZE} || false
    }
 

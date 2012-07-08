@@ -19,7 +19,7 @@ lget_lock() {
 lget_locked() {
 	debug_msg "lget_locked ($@)"
 	if [ -f "/var/lock/lgetting.$MODULE" ] &&
-			ps `cat /var/lock/lgetting.$MODULE` | grep	-q	"lget" ; then
+			ps `cat "/var/lock/lgetting.$MODULE"` | grep	-q	"lget" ; then
 		true
 	else
 		false
@@ -120,11 +120,11 @@ download_module() {
 
 				# scan for hits against known clusters of mirrors
 				for MLIST in $MIRRORS/*; do
-					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST | grep -v "^Custom$"); do
+					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST" | grep -v "^Custom$"); do
 						if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
 							# compose the list of valid mirrors
 							REST=${URL:${#ALT}}
-							for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' $MLIST); do
+							for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST"); do
 								add_url ${HIT}${REST}
 							done
 						fi
@@ -200,14 +200,14 @@ show_downloading()
 {
 	local DOWNLOAD_PID DOWNLOAD_LOG
 	debug_msg "show_downloading ($@)"
-	DOWNLOAD_PID=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f2)
+	DOWNLOAD_PID=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f2)
 	if [ -n "$DOWNLOAD_PID" ]; then
-		DOWNLOAD_LOG=$(grep ^$MODULE: $TEMP_DOWNLOAD_PIDS | cut -d: -f3)
+		DOWNLOAD_LOG=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f3)
 		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
-			cat $DOWNLOAD_LOG
+			cat "$DOWNLOAD_LOG"
 			rm -f $DOWNLOAD_LOG
 		elif [ -f "$DOWNLOAD_LOG" ]; then
-			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID $DOWNLOAD_LOG
+			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID "$DOWNLOAD_LOG"
 			sleep 1
 			rm -f $DOWNLOAD_LOG
 		fi

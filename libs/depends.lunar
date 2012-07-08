@@ -30,12 +30,12 @@ function find_depends() {
 
   find_depends_intern() {
     local DEP
-    for DEP in $(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' $DEPENDS_CACHE) ; do
+    for DEP in $(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$DEPENDS_CACHE") ; do
       DEP=$(unalias "$DEP")
       # this is our shortcut out:
-      if ! grep -qx "$DEP" $TMP_FDEPS ; then
+      if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
-        if grep -q "^$1:$DEP:required:" $DEPENDS_CACHE ; then
+        if grep -q "^$1:$DEP:required:" "$DEPENDS_CACHE" ; then
           echo "$DEP"
           find_depends_intern "$DEP"
         elif module_installed "$DEP" ; then
@@ -68,7 +68,7 @@ sort_by_dependency() {
 
   # tsort the existing dep relations in all of moonbase
   TMP_TSRT=$(temp_create "dependency.sort")
-  awk -F: '{print $1,$2}' $DEPENDS_CACHE | while read A B ; do
+  awk -F: '{print $1,$2}' "$DEPENDS_CACHE" | while read A B ; do
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
@@ -79,13 +79,13 @@ sort_by_dependency() {
   # note that this is logically WRONG, but it actually will help with
   # unincluded depends, and therefore is *better* behaviour
   for M in $* ; do
-    if ! grep -q -x $M $TMP_ALL ; then
+    if ! grep -q -x "$M" "$TMP_ALL" ; then
       echo $M >> $TMP_ALL
     fi
   done
 
   # now reverse grep over the files:
-  cat $TMP_ALL | grep -x -f $TMP_LIST
+  cat "$TMP_ALL" | grep -x -f "$TMP_LIST"
   
   temp_destroy $TMP_LIST
   temp_destroy $TMP_ALL
@@ -95,14 +95,14 @@ sort_by_dependency() {
 is_depends()  {
   debug_msg "is_depends ($@)"
   # Is $1 a previously selected dependency of any module.
-  return $(grep -q ":$1:on:" $DEPENDS_STATUS)
+  return $(grep -q ":$1:on:" "$DEPENDS_STATUS")
 }
 
 
 in_depends()  {
   debug_msg "in_depends ($@)"
   # Was $2 presented as a dependency for module $1
-  return $(grep -q "^$1:$2:on:" $DEPENDS_STATUS)
+  return $(grep -q "^$1:$2:on:" "$DEPENDS_STATUS")
 }
 
 
@@ -113,12 +113,12 @@ remove_depends() {
   return 1
 
   if [ -n "$2" ] ; then
-    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
+    if grep -q "^$1:$2:" "$DEPENDS_STATUS" ; then
       grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
       verbose_msg "removing depends for \"$1\" on \"$2\""
     fi
-  elif grep -q "^$1:" $DEPENDS_STATUS ; then
-    grep -v "^$1:" $DEPENDS_STATUS_BACKUP | \
+  elif grep -q "^$1:" "$DEPENDS_STATUS" ; then
+    grep -v "^$1:" "$DEPENDS_STATUS_BACKUP" | \
     grep -v ":$1:on:optional:" > $DEPENDS_STATUS
     verbose_msg "removing all depends for and optional on \"$1\""
   fi
@@ -132,11 +132,11 @@ remove_depends() {
 
 add_depends() {
   debug_msg "add_depends ($@)"
-  if ! grep -q "^$1:$2:$3:$4:$5:$6$" $DEPENDS_STATUS ; then
+  if ! grep -q "^$1:$2:$3:$4:$5:$6$" "$DEPENDS_STATUS" ; then
     lock_file $DEPENDS_STATUS_BACKUP                       &&
     lock_file $DEPENDS_STATUS                              &&
-    if grep -q "^$1:$2:" $DEPENDS_STATUS ; then
-      grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
+    if grep -q "^$1:$2:" "$DEPENDS_STATUS" ; then
+      grep -v "^$1:$2:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
     else
       verbose_msg "adding \"$4\" depends for \"$1\" on \"$2\" ($3)"
     fi
@@ -156,7 +156,7 @@ run_depends() {
     local DEP
     debug_msg "  depends ($@)"
     DEP=$(unalias $1)
-    if grep -q "^$DEP\$" $TEMP_PREPAREDDEPS 2>/dev/null ; then
+    if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
       return 0
     fi
 
@@ -187,7 +187,7 @@ run_depends() {
     #              $4 = description of why to use this module
 
     DEP=$(unalias $1)
-    if ! grep -q "^$MODULE:$DEP:" $DEPENDS_STATUS ; then
+    if ! grep -q "^$MODULE:$DEP:" "$DEPENDS_STATUS" ; then
 
       if module_exiled $DEP ; then
         verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
@@ -221,7 +221,7 @@ run_depends() {
     fi
   }
 
-  grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
+  grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
   if has_module_file $MODULE DEPENDS ; then
     if [ -n "$SINGLE_MODULE" ] ; then
       # we only need to show this once, but we get here twice per module
@@ -254,7 +254,7 @@ satisfy_depends()  {
   fi
 
   TMP_FILE=$(temp_create "${MODULE}.satify-depends")
-  grep "^$MODULE:" $DEPENDS_STATUS > $TMP_FILE
+  grep "^$MODULE:" "$DEPENDS_STATUS" > $TMP_FILE
 
   # first recursively check if all required dependencies are installed
   for DEP_MODULE in $(find_depends $MODULE | grep -v '%') ; do
@@ -390,7 +390,7 @@ create_depends_cache()
 
     # speedups for system moonbases:
     if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
-      DEPFILES=$(grep "/DEPENDS$" $INSTALL_LOGS/moonbase-$(installed_version moonbase))
+      DEPFILES=$(grep "/DEPENDS$" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)")
       # don't forget zlocal:
       DEPFILES="$DEPFILES $(find $MOONBASE/zlocal -type f -name DEPENDS)"
     else
@@ -414,7 +414,7 @@ create_depends_cache()
 list_installed_depending() {
   local SUBDEP
   debug_msg "list_installed_depending($2)"
-  for SUBDEP in $(grep ":$1:" $DEPENDS_CACHE | cut -d: -f1) ; do
+  for SUBDEP in $(grep ":$1:" "$DEPENDS_CACHE" | cut -d: -f1) ; do
     if $(module_installed $SUBDEP ) ; then
       list_installed_depending $SUBDEP | sort | uniq
       echo $SUBDEP

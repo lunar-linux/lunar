@@ -48,13 +48,13 @@ display_success_info() {
   
   if  [  "$NUMSUCCESS" -gt "0"  ]; then   
     message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"  
-    cat $TMP_LIN_SUCCESS  
+    cat "$TMP_LIN_SUCCESS" 
     message  
   fi  
  
   if  [  "$NUMFAILURES" -gt "0"  ]; then    
     message  "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
-    cat $TMP_LIN_FAIL
+    cat "$TMP_LIN_FAIL"
     message   
   fi   
 
@@ -71,10 +71,10 @@ display_moonbase_changes()  {
     MODULE_CHANGES=$(temp_create "module-changes")
     diff -U0 $TMP_MODULE_INDEX $MODULE_INDEX | grep -v -e '^@@' -e '^---' -e '^+++' > $MODULE_CHANGES
 
-    MODULES=$(cat $MODULE_CHANGES | cut -d: -f1 | sed 's:^[+-]::' | sort -t : | uniq)
+    MODULES=$(cat "$MODULE_CHANGES" | cut -d: -f1 | sed 's:^[+-]::' | sort -t : | uniq)
 	for M in $MODULES; do
-	  IN=$(grep "^-$M:" $MODULE_CHANGES)
-	  OUT=$(grep "^+$M:" $MODULE_CHANGES)
+	  IN=$(grep "^-$M:" "$MODULE_CHANGES")
+	  OUT=$(grep "^+$M:" "$MODULE_CHANGES")
 	  if [ -z "$IN" -a -n "$OUT" ] ; then
 	    # new module:
 		NEW_MODULES="$NEW_MODULES $M"
@@ -106,8 +106,8 @@ display_moonbase_changes()  {
     if [ -n "$MOV_MODULES" ]; then
       message "${MESSAGE_COLOR}Moved modules:${DEFAULT_COLOR}"
 	  for M in $MOV_MODULES; do
-	    INS=$(grep "^[-]$M:" $MODULE_CHANGES | cut -d: -f2)
-		OUTS=$(grep "^[+]$M:" $MODULE_CHANGES | cut -d: -f2)
+	    INS=$(grep "^[-]$M:" "$MODULE_CHANGES" | cut -d: -f2)
+		OUTS=$(grep "^[+]$M:" "$MODULE_CHANGES" | cut -d: -f2)
 		message "  $M: $INS -> $OUTS"
 	  done
       message

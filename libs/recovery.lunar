@@ -56,7 +56,7 @@ rebuild_status_files() {
         lock_file $MODULE_STATUS &&
         lock_file $MODULE_STATUS_BACKUP &&
         echo "$REAL_NAME:$DATE:installed:$VERSION:$SIZE" >>$MODULE_STATUS &&
-        cat $MODULE_STATUS >$MODULE_STATUS_BACKUP &&
+        cat "$MODULE_STATUS" >$MODULE_STATUS_BACKUP &&
         unlock_file $MODULE_STATUS_BACKUP &&
         unlock_file $MODULE_STATUS &&
 

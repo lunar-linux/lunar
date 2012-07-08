@@ -44,7 +44,7 @@ save_libraries()  {
   SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-  grep   "/lib/"  $OLD_LOG  |
+  grep   "/lib/"  "$OLD_LOG"  |
   while  read  LINE;  do
 
     if [ -f "$LINE"  ]  &&
@@ -360,7 +360,7 @@ run_configure() {
   fi
 
   prepare_module_config
-  grep -q "^"$MODULE"\$" $TEMP_PREPAREDDEPS 2>/dev/null && return 0
+  grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
 
   # add custom passed OPTS before retrieving them
   if [ -n "$PASS_OPTS" ] ; then

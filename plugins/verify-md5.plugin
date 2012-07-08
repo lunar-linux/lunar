@@ -16,7 +16,7 @@ plugin_source_verify_md5() {
     return 2
   fi
   debug_msg "plugin_source_verify_md5 ($@)"
-  TMP_MD5=$(md5sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
+  TMP_MD5=$(md5sum "$SOURCE_CACHE/$1" | cut -d " " -f 1-1)
   if [ "${2:4}" != "$TMP_MD5" ] ; then
     message "${PROBLEM_COLOR}! md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
     verbose_msg "offending md5sum: $TMP_MD5"
