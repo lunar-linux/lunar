@@ -275,7 +275,7 @@ satisfy_depends()  {
        DEP_OFF=$(echo $LINE | cut -d: -f6)
 
     if [ -n "$FIX" ] ; then
-      if DEP_STATUS="on" ; then
+      if [ $DEP_STATUS == "on" ] ; then
         lin $FIX $DEP_MODULE
       fi
     elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
