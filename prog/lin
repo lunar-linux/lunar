@@ -175,6 +175,13 @@ main() {
     MODULE=$MODULES
     unset RECONFIGURE
 
+    if [ -z "$TEMP_DOWNLOAD_PIDS" ] ; then
+      export TEMP_DOWNLOAD_PIDS=$(temp_create "download-pids")
+      export TEMP_PREPAREDDEPS=$(temp_create "prepared-depends")
+      export TEMP_CONFIGOPTS=$(temp_create "configopts")
+      CLEAN_TEMP=1
+    fi
+
     run_details $MODULE &&
     run_depends $MODULE &&
     WANT_VERSION= satisfy_depends $MODULE
@@ -186,6 +193,10 @@ main() {
           if ! module_installed $MODULE ; then
             if ! lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
+	      if [ -n "$CLEAN_TEMP" ] ; then
+	        temp_destroy $TEMP_DOWNLOAD_PIDS
+	        temp_destroy $TEMP_CONFIGOPTS
+	      fi
               exit 1
             fi
           elif [ "$PROBE_EXPIRED" == "on" ] && module_is_expired $MODULE ; then
@@ -193,6 +204,10 @@ main() {
             verbose_msg "module \"$MODULE\" needs to be updated"
             if ! SINGLE_MODULE= lin_module $MODULE ; then
               temp_destroy $TEMP_PREPAREDDEPS
+	      if [ -n "$CLEAN_TEMP" ] ; then
+		temp_destroy $TEMP_DOWNLOAD_PIDS
+		temp_destroy $TEMP_CONFIGOPTS
+	      fi
               exit 1
             fi
           fi
@@ -200,12 +215,21 @@ main() {
           # normal install - not probed
           if ! lin_module $MODULE ; then
             temp_destroy $TEMP_PREPAREDDEPS
+	    if [ -n "$CLEAN_TEMP" ] ; then
+	      temp_destroy $TEMP_DOWNLOAD_PIDS
+	      temp_destroy $TEMP_CONFIGOPTS
+	    fi
             exit 1
           fi
         fi
       else
         verbose_msg "Skipping held module \"$MODULE\""
       fi
+    fi
+    if [ -n "$CLEAN_TEMP" ] ; then
+      temp_destroy $TEMP_DOWNLOAD_PIDS
+      temp_destroy $TEMP_PREPAREDDEPS
+      temp_destroy $TEMP_CONFIGOPTS
     fi
   fi
 }
