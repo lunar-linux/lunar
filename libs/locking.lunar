@@ -93,14 +93,14 @@ function unlock_file() {
 lin_locked()  {
   debug_msg "lin_locked ($@)"
   [     -f        /var/lock/installing.$1  ]  &&
-  ps        `cat  /var/lock/installing.$1`    |
+  ps        `cat "/var/lock/installing.$1"`    |
   grep  -q  "lin"
 }
 
 
 solo_locked()  {
   debug_msg "solo_locked ($@)"
-  for SOLO_MODULE in `cat $SOLO` ; do
+  for SOLO_MODULE in `cat "$SOLO"` ; do
     if lin_locked $SOLO_MODULE ; then
       message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}${MESSAGE_COLOR} of other modules is disabled during a lin ${MODULE_COLOR}$SOLO_MODULE${DEFAULT_COLOR}"
       return

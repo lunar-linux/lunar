@@ -165,7 +165,7 @@ file_menu() {
 
 
 show_installed_modules()  {
-  for LINE in $(sort  $MODULE_STATUS_BACKUP) ; do
+  for LINE in $(sort "$MODULE_STATUS_BACKUP") ; do
   (
      MODULE=`echo "$LINE" | cut -d : -f1`
      STATUS=`echo "$LINE" | cut -d : -f3`
@@ -274,7 +274,7 @@ select_pkgs()  {
 
 
 make_hold_checklist()  {
-  for LINE in $(sort $MODULE_STATUS_BACKUP) ; do
+  for LINE in $(sort "$MODULE_STATUS_BACKUP") ; do
   (
     MODULE=$(echo "$LINE" | cut -d: -f1)
     STATUS=$(echo "$LINE" | cut -d: -f3)
@@ -307,7 +307,7 @@ hold_pkgs()  {
                         0 0 10                 \
                         $(make_hold_checklist)`
   then
-    unhold_modules $(cut -d: -f1 < $MODULE_STATUS)
+    unhold_modules $(cut -d: -f1 "$MODULE_STATUS")
     hold_modules $OUTLIST
   fi
 
@@ -680,12 +680,12 @@ background_execute() {
   $DIALOG  --msgbox  "Processing queues in the background."  0 0
 
   [  -f         $REMOVE_QUEUE  ]  &&
-  lrm  `cat  $REMOVE_QUEUE`   1>/dev/null 2>&1
+  lrm  `cat  "$REMOVE_QUEUE"`   1>/dev/null 2>&1
   rm  -f        $REMOVE_QUEUE
 
   if  [  -f            $INSTALL_QUEUE  ];  then
-    lin  --deps  `cat  $INSTALL_QUEUE`
-    (  lin       `cat  $INSTALL_QUEUE` 1>/dev/null 2>&1  &&
+    lin  --deps  `cat "$INSTALL_QUEUE"`
+    (  lin       `cat "$INSTALL_QUEUE"` 1>/dev/null 2>&1  &&
          rm -f         $INSTALL_QUEUE
     )  &
   fi
@@ -695,10 +695,10 @@ background_execute() {
 
 
 foreground_execute() {
-  [ -f $REMOVE_QUEUE ] && lrm `cat $REMOVE_QUEUE`
+  [ -f $REMOVE_QUEUE ] && lrm `cat "$REMOVE_QUEUE"`
   rm -f $REMOVE_QUEUE
 
-  [ -f $INSTALL_QUEUE ] && lin `cat $INSTALL_QUEUE`
+  [ -f $INSTALL_QUEUE ] && lin `cat "$INSTALL_QUEUE"`
   rm  -f $INSTALL_QUEUE
 
   goodbye
@@ -707,7 +707,7 @@ foreground_execute() {
 
 setvar() {
   if [ -z "$*" ] ; then
-    sort -n $LOCAL_CONFIG | grep -v -e UNIQID -e color | while read LINE ; do
+    sort -n "$LOCAL_CONFIG" | grep -v -e UNIQID -e color | while read LINE ; do
       printf "%32s %s\n" "$(echo $LINE|cut -d= -f1)" "$(echo $LINE|cut -d= -f2-)"
     done
   else
