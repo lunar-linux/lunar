@@ -29,8 +29,36 @@ function find_depends() {
   debug_msg "find_depends ($@)"
 
   find_depends_intern() {
-    local DEP
-    for DEP in $(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$DEPENDS_CACHE") ; do
+    local DEP DEPS DEPFILE SECTION
+    SECTION=$(find_section $1)
+    if echo $SECTION | grep -q '^zlocal' ; then
+      # this module lives in zlocal
+      # now we need to run the depends file
+
+      # you guessed it: local decls.
+      depends() {
+	echo "$1"
+      }
+
+      optional_depends() {
+	# No quotes, this prevent us from parsing newlines
+	# if someone by accident add a newline in optional_depends
+	echo $1
+      }
+
+      # yeah, this sucks:
+      message() {
+	:
+      }
+
+      DEPFILE=$MOONBASE/$SECTION/$1/DEPENDS
+      if [ -e $DEPFILE ] ; then
+        DEPS=$(MODULE=$1 . $DEPFILE)
+      fi
+    else
+      DEPS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$DEPENDS_CACHE")
+    fi
+    for DEP in $DEPS ; do
       DEP=$(unalias "$DEP")
       # this is our shortcut out:
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
@@ -72,7 +100,7 @@ sort_by_dependency() {
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
     echo "$A $B" >> $TMP_TSRT
   done
-  tsort $TMP_TSRT 2> /dev/null | tac > $TMP_ALL
+  tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
   temp_destroy $TMP_TSRT
 
   # append all modules that do not have a DEPENDS file at all at the end
@@ -275,7 +303,7 @@ satisfy_depends()  {
        DEP_OFF=$(echo $LINE | cut -d: -f6)
 
     if [ -n "$FIX" ] ; then
-      if DEP_STATUS="on" ; then
+      if [ $DEP_STATUS == "on" ] ; then
         lin $FIX $DEP_MODULE
       fi
     elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
@@ -392,9 +420,15 @@ create_depends_cache()
     if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] ; then
       DEPFILES=$(grep "/DEPENDS$" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)")
       # don't forget zlocal:
-      DEPFILES="$DEPFILES $(find $MOONBASE/zlocal -type f -name DEPENDS)"
+      if [ "$ZLOCAL_OVERRIDES" == "on" ] ; then
+        DEPFILES="$DEPFILES $(find $MOONBASE/zlocal -type f -name DEPENDS)"
+      fi
     else
-      DEPFILES=$(find $MOONBASE -type f -name DEPENDS)
+      if [ "$ZLOCAL_OVERRIDES" != "on" ] ; then
+        DEPFILES=$(find $MOONBASE -type f -name DEPENDS ! -regex "$MOONBASE/zlocal/.*")
+      else
+        DEPFILES=$(find $MOONBASE -type f -name DEPENDS)
+      fi
     fi
 
     # fast method for re-creating the depends.cache, might take long though
