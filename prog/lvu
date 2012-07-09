@@ -1668,6 +1668,7 @@ main()  {
 
 
 . /etc/lunar/config
+. $BOOTSTRAP
 
 GETOPT_ARGS=$(getopt -q -n lvu -o "dhv" -l "debug,help,verbose" -- "$@")
 

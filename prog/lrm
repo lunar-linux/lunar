@@ -306,6 +306,7 @@ downgrade() {
 
 
 . /etc/lunar/config
+. $BOOTSTRAP
 
 
 GETOPT_ARGS=$(getopt -q -n lrm -o "dD:hknuvp" -l "debug,downgrade:,help,keepconfig,nosustain,upgrade,verbose,purge" -- "$@")
