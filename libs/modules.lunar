@@ -145,12 +145,15 @@ function check_module_index() {
     create_depends_cache
     RESULT=0
   else
-    if [[ -n "$(find $MOONBASE -type f -name "DEPENDS" -cnewer $DEPENDS_CACHE)" ]]; then
-      create_depends_cache
-      RESULT=0
-    fi
     if [[ -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ]]; then
       create_module_index
+      RESULT=0
+    fi
+    if [[ -n "$(find $MOONBASE -type f -name "DEPENDS" -cnewer $DEPENDS_CACHE)" ]]; then
+      # the module index needs to be newer
+      # touch will assure this
+      touch $MODULE_INDEX
+      create_depends_cache
       RESULT=0
     fi
   fi
