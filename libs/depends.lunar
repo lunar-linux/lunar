@@ -24,6 +24,7 @@
 # function : find_depends
 # usage    : find_depends "module name"
 # purpose  : recursive dependency finder, no need to be installed
+# NOTE: this only finds required dependencies!
 function find_depends() {
   local TMP_FDEPS
   debug_msg "find_depends ($@)"
@@ -43,7 +44,7 @@ function find_depends() {
       optional_depends() {
 	# No quotes, this prevent us from parsing newlines
 	# if someone by accident add a newline in optional_depends
-	echo $1
+	:
       }
 
       # yeah, this sucks:
@@ -64,9 +65,6 @@ function find_depends() {
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
         if grep -q "^$1:$DEP:required:" "$DEPENDS_CACHE" ; then
-          echo "$DEP"
-          find_depends_intern "$DEP"
-        elif module_installed "$DEP" ; then
           echo "$DEP"
           find_depends_intern "$DEP"
         fi
