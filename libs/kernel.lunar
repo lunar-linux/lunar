@@ -19,24 +19,29 @@
 # Arg 1       : Filename of the kernel to backup (With or without full path)
 #               With the format $VERSION_$EXTRAVERSION
 backup_mods_krnl() {
-	debug_msg "backup_mods_krnl ($@)"
+  local ARCH=$(arch)
+  debug_msg "backup_mods_krnl ($@)"
 
-	devoke_installwatch
+  devoke_installwatch
 
-	if [ -f /boot/$1.old ]; then
-		verbose_msg "moving old kernel backup"
-		mv -f /boot/$1.old /boot/$1.old_2
-	fi
-	if [ -f /boot/$1 ]; then
-		verbose_msg "copying $1"
-		cp -p /boot/$1 /boot/$1.old
-	fi
-	if [ -d /lib/modules/$1 ]; then
-		rm -rf /lib/modules/$1.old
-		cp -a /lib/modules/$1 /lib/modules/$1.old
-	fi
+  if [ -f /boot/vmlinuz-$1-$ARCH ]; then
+    verbose_msg "copying vmlinuz-$1.$ARCH"
+    cp -p /boot/vmlinuz-$1-$ARCH{,.old}
+  fi
+  if [ -d /lib/modules/$1 ]; then
+    rm -rf /lib/modules/$1.old
+    cp -a /lib/modules/$1{,.old}
+  fi
+  if [ -f /boot/config-${1}-$ARCH.gz ]; then
+    verbose_msg "copying config-$1.$ARCH.gz"
+    cp -p /boot/config-${1}-$ARCH{,.old}.gz
+  fi
+  if [ -f /boot/System.map-${1}-$ARCH ]; then
+    verbose_msg "copying System.map-$1-$ARCH"
+    cp -p /boot/System.map-${1}-$ARCH{,.old}
+  fi
 
-	invoke_installwatch 
+  invoke_installwatch
 }
 
 
@@ -80,7 +85,7 @@ kernel_option_present() {
             CAT=cat
             ;;
     esac
-    
+
     if [ -n "$KERNEL_VALUE" ]; then
       if $CAT "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
         return 0
@@ -90,6 +95,6 @@ kernel_option_present() {
         return 0
       fi
     fi
-    
+
     return 1
 }
