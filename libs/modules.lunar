@@ -733,6 +733,11 @@ update_modules() {
     return 255
   fi
 
+  verbose_msg "Rework all module dependencies"
+  for MODULE in $LIST ; do
+    rework_module $MODULE
+  done
+
   verbose_msg "Checking for lunar or theedge"
   for MODULE in $LIST ; do
     if [[ "$MODULE" == "lunar" ]] || [[ "$MODULE" == "theedge" ]] ; then
