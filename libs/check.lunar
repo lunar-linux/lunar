@@ -51,11 +51,9 @@ rework_module() {
 		local DEP
 		debug_msg "  depends ($@)"
 		DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
-		if ! module_installed $DEP && ! module_held $DEP ; then
+		if ! module_installed $DEP ; then
 			if ! is_depends $DEP && module_exiled $DEP ; then
 				return  1
-			else
-				CHANGED_MODULES="$CHANGED_MODULES $DEP"
 			fi
 		fi
 
