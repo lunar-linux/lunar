@@ -879,12 +879,9 @@ show_info() {
         echo ""
       fi
       echo -n "  Last compile time: "
-      if module_installed "TimeDate" ; then
-        CTIME=$(main compile $1 | grep 'Mark Compile ' | cut -d \" -f6 | perl -e 'use Date::Parse; my $start = <> ; my $stop = <> ; print str2time($stop) - str2time($start) . "\n";')
-        echo "$((CTIME / 60))m$((CTIME % 60))s"
-      else
-        echo "(unable to calculate without \"TimeDate\" installed)"
-      fi
+      TIMES=($(main compile $1 | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
+      CTIME=$((${TIMES[1]} - ${TIMES[0]}))
+      echo "$((CTIME / 60))m$((CTIME % 60))s"
       echo -n "  Approx. Size:      "
       main size $1
       echo -n "  Files Installed:   "
