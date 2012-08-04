@@ -41,10 +41,14 @@ stop_logging() {
 progress() {
   local OLDLOG OLDSZ S PC
   OLDLOG=$(ls -1d $COMPILE_LOGS/$MODULE-*.bz2 2>&- | head -n 1)
+  STIME=$(date +%s)
   if [[ -f $OLDLOG ]]; then
     X="############################################################"
     Y="                                                            "
     OLDSZ=$(bzcat $OLDLOG | wc -c)
+    OLDTIMES=($(bzcat $OLDLOG | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
+    CTIME=$((${OLDTIMES[1]} - ${OLDTIMES[0]}))
+    echo "Last compile time: $((CTIME / 60))m$((CTIME % 60))s"
     while true ; do
       read -t 2 LINE
       STATUS=$?
@@ -62,7 +66,8 @@ progress() {
       fi
       PC=$((S * 100 / OLDSZ))
       L=$((S * 60 / OLDSZ))
-      echo -ne "\r [${X:0:$L}${Y:0:$((60 - L))}] ($PC%)\r"
+      CTIME=$(($(date +%s) - $STIME))
+      echo -ne "\r [${X:0:$L}${Y:0:$((60 - L))}] ($PC%)  $((CTIME / 60))m$((CTIME % 60))s \r"
     done
   else
     SPINNER="/-\|"
@@ -74,13 +79,15 @@ progress() {
         sleep 2
 	continue
       elif [ $STATUS -eq 1 ]; then
+	echo -ne "\r [#]\n"
         exit
       fi
       ((C++))
-      if [[ $C -gt ${#SPINNER} ]]; then
+      if [[ $C -gt $((${#SPINNER} - 1)) ]]; then
         C=0
       fi
-      echo -en "\r [${SPINNER:$C:1}]\r"
+      CTIME=$(($(date +%s) - $STIME))
+      echo -en "\r [${SPINNER:$C:1}] $((CTIME / 60))m$((CTIME % 60))s \r"
     done
   fi
 }
