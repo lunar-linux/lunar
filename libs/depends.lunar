@@ -300,7 +300,10 @@ satisfy_depends()  {
   for DEP_MODULE in $(find_depends $MODULE | grep -v '%') ; do
     if [ $DEP_MODULE != $MODULE ]; then
       if ! module_installed $DEP_MODULE ; then
-        if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
+        if module_exiled $DEP_MODULE ; then
+          message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP_MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
+          exit 1
+        elif ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
           exit 1
         fi
       fi
