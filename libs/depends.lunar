@@ -335,8 +335,7 @@ satisfy_depends()  {
       fi
     elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
       OPTS="$OPTS $DEP_OFF"
-    elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
-        ! module_held $DEP_MODULE ; then
+    elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE ; then
       if SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
         OPTS="$OPTS $DEP_ON"
       else
