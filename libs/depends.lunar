@@ -38,18 +38,18 @@ function find_depends() {
 
       # you guessed it: local decls.
       depends() {
-	echo "$1"
+        echo "$1"
       }
 
       optional_depends() {
-	# No quotes, this prevent us from parsing newlines
-	# if someone by accident add a newline in optional_depends
-	:
+        # No quotes, this prevent us from parsing newlines
+        # if someone by accident add a newline in optional_depends
+        :
       }
 
       # yeah, this sucks:
       message() {
-	:
+        :
       }
 
       DEPFILE=$MOONBASE/$SECTION/$1/DEPENDS
@@ -196,7 +196,7 @@ run_depends() {
       fi
       # don't check depends if there are already checked
       if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-	return 0
+        return 0
       fi
       lin --deps $DEP
       echo "$DEP" >> $TEMP_PREPAREDDEPS
@@ -229,15 +229,15 @@ run_depends() {
       else
         if module_installed $DEP ; then
           DEFAULT="y"
-	  DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
-	else
+          DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
+        else
           DEFAULT="n"
-	  DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
+          DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
         fi
 
         # this is shortcut case s1) as discussed in lunar-dev ML
-	if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
-	  verbose_msg "Auto-adding optional dependency \"$DEP\""
+        if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
+          verbose_msg "Auto-adding optional dependency \"$DEP\""
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
           if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
@@ -245,7 +245,7 @@ run_depends() {
           fi
           lin --deps $DEP
           echo "$DEP" >> $TEMP_PREPAREDDEPS
-	elif query  "$DEPMOD_AVAIL 
+        elif query  "$DEPMOD_AVAIL 
           ${QUERY_COLOR}Purpose: ${DEFAULT_COLOR}${MESSAGE_COLOR}$4 ${QUERY_COLOR}?" $DEFAULT ; then
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
@@ -256,7 +256,7 @@ run_depends() {
           echo "$DEP" >> $TEMP_PREPAREDDEPS
         else
           add_depends  "$MODULE"  "$DEP"  "off"  "optional"  "$2"  "$3"
-	fi
+        fi
       fi
     fi
   }
