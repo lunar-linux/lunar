@@ -466,17 +466,13 @@ update_module_depends()
     local DEP
     debug_msg "  optional_depends ($@)"
     DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
-    if module_exiled $DEP ; then
+    # check for the current depend selection
+    if grep -q "^$MODULE:$DEP:on:" "$DEPENDS_STATUS_BACKUP" ; then
+      echo "$MODULE:$DEP:on:optional:$2:$3"
+    elif grep -q "^$MODULE:$DEP:off:" "$DEPENDS_STATUS_BACKUP" ; then
       echo "$MODULE:$DEP:off:optional:$2:$3"
-    else
-      # check for the current depend selection
-      if $(grep -q "^$1:$2:on:" "$DEPENDS_STATUS_BACKUP") ; then
-        echo "$MODULE:$DEP:on:optional:$2:$3"
-      elif $(grep -q "^$1:$2:off:" "$DEPENDS_STATUS_BACKUP") ; then
-        echo "$MODULE:$DEP:off:optional:$2:$3"
-      fi
-      # if we don't know the answer we leave it open for the user to decide
     fi
+    # if we don't know the answer we leave it open for the user to decide
   }
 
   depends()  {
@@ -487,12 +483,14 @@ update_module_depends()
   }
 
   run_depends() {
+    local SECTION SCRIPT_DIRECTORY MODULE
     debug_msg "  run_depends ($@)"
     (
-      if run_details $1 &> /dev/null ; then
-        if has_module_file $MODULE DEPENDS ; then
-          run_module_file $MODULE DEPENDS | grep -v '%'
-        fi
+      MODULE=$1
+      SECTION=$(find_section $MODULE)
+      SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+      if has_module_file $MODULE DEPENDS ; then
+        run_module_file $MODULE DEPENDS | grep -v '%'
       fi
     ) 
   }
@@ -504,9 +502,11 @@ update_module_depends()
   # append the new output:
   lock_file $DEPENDS_STATUS_BACKUP                              &&
   lock_file $DEPENDS_STATUS                                     &&
-  grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS  &&
-  run_depends $MODULE >> $DEPENDS_STATUS
-  cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  (
+    grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
+    run_depends $MODULE >> $DEPENDS_STATUS
+    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  )
   unlock_file $DEPENDS_STATUS
   unlock_file $DEPENDS_STATUS_BACKUP
 }
@@ -518,7 +518,7 @@ update_depends()
   local MODULE
   debug_msg "update_depends($@)"
 
-  for MODULE in $(cut -d: -f1 $DEPENDS_STATUS) ; do
+  for MODULE in $(cut -d: -f1 $DEPENDS_STATUS | sort -u) ; do
     update_module_depends $MODULE
   done
 }

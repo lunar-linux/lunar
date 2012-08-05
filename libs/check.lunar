@@ -70,9 +70,11 @@ rework_module() {
 	# append the new output:
 	lock_file $DEPENDS_STATUS_BACKUP                              &&
 	lock_file $DEPENDS_STATUS                                     &&
-	grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS  &&
-	run_depends $MODULE >> $DEPENDS_STATUS
-	cat "$DEPENDS_STATUS" > $DEPENDS_STATUS_BACKUP
+	(
+		grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
+		run_depends $MODULE >> $DEPENDS_STATUS
+		cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+	)
 	unlock_file $DEPENDS_STATUS
 	unlock_file $DEPENDS_STATUS_BACKUP
 }
