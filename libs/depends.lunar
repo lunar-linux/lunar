@@ -467,7 +467,7 @@ update_module_depends()
     debug_msg "  optional_depends ($@)"
     DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
     # check for the current depend selection
-    if grep -q "^$MODULE:$DEP:on:" "$DEPENDS_STATUS_BACKUP" ; then
+    if grep -q "^$MODULE:$DEP:on:optional:" "$DEPENDS_STATUS_BACKUP" ; then
       echo "$MODULE:$DEP:on:optional:$2:$3"
     elif grep -q "^$MODULE:$DEP:off:" "$DEPENDS_STATUS_BACKUP" ; then
       echo "$MODULE:$DEP:off:optional:$2:$3"
