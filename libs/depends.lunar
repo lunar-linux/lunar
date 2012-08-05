@@ -442,6 +442,80 @@ create_depends_cache()
 )}
 
 
+update_module_depends()
+{
+  local MODULE
+  debug_msg "update_module_depends($@)"
+  
+  # we declare these local to override the systems default ones:
+  optional_depends()  {
+    local DEP
+    debug_msg "  optional_depends ($@)"
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    if module_exiled $DEP ; then
+      echo "$MODULE:$DEP:off:optional:$2:$3"
+    else
+      # check for the current depend selection
+      if $(grep -q "^$1:$2:on:" "$DEPENDS_STATUS_BACKUP") ; then
+        echo "$MODULE:$DEP:on:optional:$2:$3"
+      elif $(grep -q "^$1:$2:off:" "$DEPENDS_STATUS_BACKUP") ; then
+        echo "$MODULE:$DEP:off:optional:$2:$3"
+      fi
+      # if we don't know the answer we leave it open for the user to decide
+    fi
+  }
+
+  depends()  {
+    local DEP
+    debug_msg "  depends ($@)"
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    if ! module_installed $DEP ; then
+      if ! is_depends $DEP && module_exiled $DEP ; then
+        return  1
+      fi
+    fi
+
+    echo "$MODULE:$DEP:on:required:$2:$3"
+  }
+
+  run_depends() {
+    debug_msg "  run_depends ($@)"
+    (
+      if run_details $1 &> /dev/null ; then
+        if has_module_file $MODULE DEPENDS ; then
+          run_module_file $MODULE DEPENDS | grep -v '%'
+        fi
+      fi
+    ) 
+  }
+
+  # here starts the real work:
+  MODULE=$1
+
+  # remove whatever depends was residing in the depends state file and
+  # append the new output:
+  lock_file $DEPENDS_STATUS_BACKUP                              &&
+  lock_file $DEPENDS_STATUS                                     &&
+  grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS  &&
+  run_depends $MODULE >> $DEPENDS_STATUS
+  cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  unlock_file $DEPENDS_STATUS
+  unlock_file $DEPENDS_STATUS_BACKUP
+}
+
+
+# updates the depends file for the changed module depends
+update_depends()
+{
+  local MODULE
+  debug_msg "update_depends($@)"
+
+  for MODULE in $(cut -d: -f1 $DEPENDS_STATUS) ; do
+    update_module_depends $MODULE
+  done
+}
+
+
 # list all installed modules depending on $1
 list_installed_depending() {
   local SUBDEP

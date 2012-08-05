@@ -24,7 +24,7 @@ run_checks() {
 }
 
 
-# rework_module : check depends database for a module
+# rework_module : re-create depends database for a module
 rework_module() {
 	local MODULE
 	debug_msg "rework_module ($@)"

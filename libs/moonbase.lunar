@@ -81,6 +81,7 @@ get_moonbase () {
     # get ready to regenerate the module index cache file
     create_module_index &&
     create_depends_cache &&
+    update_depends &&
     update_plugins &&
     display_moonbase_changes &&
     temp_destroy $TMP_MODULE_INDEX &&
