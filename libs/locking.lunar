@@ -113,7 +113,7 @@ solo_locked()  {
 current_locked() {
   debug_msg "current_locked ($@)"
   if  lin_locked  $MODULE;  then
-    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}$linING${DEFAULT_COLOR_COLOR}"
+    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}$linING${DEFAULT_COLOR}"
     message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR} to finish installing or for the lock to clear.${DEFAULT_COLOR}"
 
     while  lin_locked  $MODULE;  do  sleep  2;  done

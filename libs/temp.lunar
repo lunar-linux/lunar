@@ -24,8 +24,8 @@ temp_create() {
   if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$TMPFILE.XXXXXXXXXX ) ; then
     echo $TMPFILE
   else
-    message "${PROBLEM_COLOR}ERROR:${NORMAL_COLOR}${DEFAULT_COLOR}" \
-            "Cannot create temp file${NORMAL_COLOR}"
+    message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}" \
+            "Cannot create temp file${DEFAULT_COLOR}"
     exit 1
   fi  
 }
