@@ -524,11 +524,11 @@ feature_menu()  {
     VIEW_REPORTS=${VIEW_REPORTS:-off}
         PRESERVE=${PRESERVE:-on}
            SOUND=${SOUND:-off}
-         SUSTAIN=${SUSTAIN:on}
+         SUSTAIN=${SUSTAIN:-on}
           VOYEUR=${VOYEUR:-on}
             REAP=${REAP:-on}
          GARBAGE=${GARBAGE:-on}
-	 VERBOSE=${VERBOSE:off}
+	 VERBOSE=${VERBOSE:-off}
 
   if  TOGGLES=`$DIALOG  --title "Feature Menu"  \
                         --no-cancel             \
