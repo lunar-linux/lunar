@@ -109,7 +109,6 @@ export        DIALOGRC=/etc/lunar/dialogrc
            FILE_COLOR="${GREEN}${BOLD}"
         SYMLINK_COLOR="${CYAN}${BOLD}"
         PROBLEM_COLOR="${RED}${BOLD}"
-        MESSAGE_COLOR="${BLUE}${BOLD}"
         MESSAGE_COLOR="${CYAN}"
         DEFAULT_COLOR="${DEFAULT}"
 
