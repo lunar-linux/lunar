@@ -19,6 +19,7 @@ gmp
 grep
 gzip
 installwatch
+kmod
 less
 libcap
 libffi
@@ -26,7 +27,6 @@ libmpc
 lunar
 make
 mpfr
-modutils
 nano
 ncurses
 net-tools
