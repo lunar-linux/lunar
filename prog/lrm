@@ -101,7 +101,7 @@ remove_something() {
     return 1
   fi
 
-  if [ -d "$1" ] ; then
+  if [ -d "$1" ] && ! [ -L "$1" ]; then
     if rmdir "$1" 2> /dev/null ; then
       debug_msg "ok    : rmdir \"$1\""
     else
