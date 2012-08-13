@@ -509,7 +509,8 @@ feature_menu()  {
   S_HELP="Play audio with prompts?"
   T_HELP="Disallow lrm of modules that would cause terrible malfunctions?"
   U_HELP="Automatically remove old sources and install caches upon lunar update?"
-  V_HELP="View compilation as it happens?"
+  V_HELP="View compilation as it happens? Deselect VOYEUR_progress"
+  VP_HELP="Display progressbar during compilation? Deselect VOYEUR"
   W_HELP="Verbose display of compilation process?"
   X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
@@ -528,7 +529,13 @@ feature_menu()  {
           VOYEUR=${VOYEUR:-on}
             REAP=${REAP:-on}
          GARBAGE=${GARBAGE:-on}
-	 VERBOSE=${VERBOSE:-off}
+         VERBOSE=${VERBOSE:-off}
+
+  case  $VOYEUR  in
+    off) VOYEUR=off ; VOYEUR_progress=off  ;;
+    p*)  VOYEUR=off ; VOYEUR_progress=on   ;;
+    *)   VOYEUR=on  ; VOYEUR_progress=off  ;;
+  esac
 
   if  TOGGLES=`$DIALOG  --title "Feature Menu"  \
                         --no-cancel             \
@@ -549,7 +556,8 @@ feature_menu()  {
       "SOUND"            "Toggle"  "$SOUND"         "$S_HELP"   \
       "SUSTAIN"          "Toggle"  "$SUSTAIN"       "$T_HELP"   \
       "VIEW_REPORTS"     "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
-      "VOYEUR"           "Toggle"  "$VOYEUR"        "$V_HELP"   \
+      "VOYEUR"           "Choice"  "$VOYEUR"        "$V_HELP"   \
+      "VOYEUR_progress"  "Choice"  "$VOYEUR_progress" "$VP_HELP" \
       "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
       "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
       "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
@@ -589,6 +597,11 @@ ZLOCAL_OVERRIDES=off
              SUSTAIN)       SUSTAIN=on  ;;
         VIEW_REPORTS)  VIEW_REPORTS=on  ;;
               VOYEUR)        VOYEUR=on  ;;
+     VOYEUR_progress) if [ $VOYEUR_progress == off ] ; then
+                        VOYEUR=progress
+                      else
+                        VOYEUR=${VOYEUR/off/progress}
+                      fi                ;;
                 REAP)          REAP=on  ;;
              GARBAGE)       GARBAGE=on  ;;
 	     VERBOSE)       VERBOSE=on  ;;
