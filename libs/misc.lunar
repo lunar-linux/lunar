@@ -123,7 +123,7 @@ exists() {
 	debug_msg "exists ($@)"
 	local ITEM
 	while read ITEM ; do
-		if [ -e "$ITEM" ] ; then
+		if [ -e "$ITEM" ] || [ -L "$ITEM" ]; then
 			echo "$ITEM"
 		fi
 	done
