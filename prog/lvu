@@ -1020,7 +1020,7 @@ submit_module() {
       echo "lvu submit: $1"
       echo "lvu: $(cat /bin/lvu | md5sum)"
       echo "uname -r: $(uname -r)"
-      echo "kernel headers: $(installed_version kernel-headers-2.6)"
+      echo "kernel headers: $(installed_version kernel-headers)"
       echo "gcc: $(installed_version gcc)"
       echo "glibc: $(installed_version glibc)"
       echo ''
