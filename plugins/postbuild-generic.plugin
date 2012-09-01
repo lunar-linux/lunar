@@ -37,7 +37,6 @@ gather_docs()
 
   DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
   if [ -d "$SOURCE_DIRECTORY" ] ; then
-    cd $SOURCE_DIRECTORY
     mkdir -p $DOC_DIR
     # For each parameter that is an existing file
     for FILE in ${@}; do
