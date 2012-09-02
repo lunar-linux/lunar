@@ -18,7 +18,7 @@ plugin_services_post_build()
   if [ -f $SCRIPT_DIRECTORY/services ]; then
     export IFS="$ENTER_IFS"
     while read LINE; do
-      grep -q "$LINE" /etc/services || echo "$LINE" >> /etc/services
+      fgrep -q "$LINE" /etc/services || echo "$LINE" >> /etc/services
     done < $SCRIPT_DIRECTORY/services
   fi
   return 2

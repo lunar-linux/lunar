@@ -198,12 +198,12 @@ alien() {
   TMP_KNOWN=$(temp_create "lvu.known")
 
   message  "Discovering ambient files..." 1>&2
-  find $TRACKED | files | grep -v -f "$EXCLUDED" | grep -v -f "$PROTECTED" | sort | uniq > $TMP_FOUND
+  find $TRACKED | files | grep -v -f "$EXCLUDED" -f "$PROTECTED" | sort | uniq > $TMP_FOUND
   message  "Discovering installed files..." 1>&2
   ( cat $INSTALL_LOGS/* ; ls $INSTALL_CACHE/* ; ls $SOURCE_CACHE/*
   )| files | sort | uniq > $TMP_KNOWN
 
-  diff -B -a -d $TMP_FOUND $TMP_KNOWN | grep -e "^< " | cut -c 3-
+  diff -B -a -d $TMP_FOUND $TMP_KNOWN | grep -e '^< ' | cut -c 3-
 
   temp_destroy $TMP_FOUND
   temp_destroy $TMP_KNOWN
@@ -407,7 +407,7 @@ voyeur()  {
 
 show_leafs()  {
   for MODULE in $(list_installed) ;  do
-    if !  cut  -d : -f2- "$DEPENDS_STATUS" | grep "^$MODULE:" | grep  -q ":on:"; then
+    if !  cut  -d : -f2- "$DEPENDS_STATUS" | grep "^$MODULE:" | fgrep  -q ':on:'; then
       echo $MODULE
     fi
   done
@@ -417,7 +417,7 @@ show_leafs()  {
 show_orphans()  {
   for MODULE in $(list_installed) ; do
     debug_msg "checking \"$MODULE\""
-    for LINE in $(grep "^${MODULE}:" "$DEPENDS_STATUS") ; do
+    for LINE in $(grep "^$MODULE:" "$DEPENDS_STATUS") ; do
       DEPENDS=$(echo $LINE | cut -d: -f2)
       OPTIONAL=$(echo $LINE | cut -d: -f4)
       if ! module_installed $DEPENDS ; then
@@ -437,8 +437,8 @@ show_conflicts()  {
   TMP_CONFLICTS2=$(temp_create "conflicts")
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
-    cat "$INSTALL_LOGS/$MODULE-$VERSION" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
-    grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/\|/lib/modules\|/site-packages/\|/lib/perl5" |
+    cat "$INSTALL_LOGS/$MODULE-$VERSION" | fgrep -e '/bin/' -e '/games/' -e '/include/' -e '/lib/' -e '/sbin/' |
+    fgrep -v -e '/doc/' -e '/etc/' -e '/fonts/' -e '/man/' -e '/var/' -e '/lib/modules' -e '/site-packages/' -e '/lib/perl5' |
     while read LINE; do
         [ ! -d "$LINE" ] && echo "${MODULE} ${LINE}" >> $TMP_CONFLICTS
     done
@@ -593,10 +593,10 @@ moonalyze() {
 
 
 show_depends()  {
-  if  !  echo  "$DONE"  |  grep  -q  "$1";  then
+  if  !  echo  " $DONE "  |  fgrep  " $1 ";  then
     DONE="$DONE  $1"
 
-    grep ":$1:" "$DEPENDS_STATUS" | while read LINE ; do
+    fgrep ":$1:" "$DEPENDS_STATUS" | while read LINE ; do
       MODULE=${LINE%%:*}
       STATUS=$(echo  $LINE  |  cut  -d :  -f3)
 
@@ -722,7 +722,7 @@ function show_tree() {
   INDENT="$INDENT|    "
   # and recurse:
   for DEP in $DEPS ; do
-    grep -q "^$DEP$" "$TMP_SEEN"
+    fgrep -xq "$DEP" "$TMP_SEEN"
     TEST=$?
     if [ "$TEST" == "1" -o -z "$SHORTTREE" ] ; then
       echo "$DEP" >> $TMP_SEEN
@@ -759,7 +759,7 @@ show_eert() {
 
   show_rtree() {
     # we need to do an reverse tree for $1
-    RDEPS=$(grep ":$1:" "$DEPENDS" | cut -d: -f1 | sort | uniq)
+    RDEPS=$(fgrep ":$1:" "$DEPENDS" | cut -d: -f1 | sort | uniq)
 
     if module_installed $1 ; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -770,7 +770,7 @@ show_eert() {
     for DEP in $RDEPS ; do
       REL=$(grep "^$DEP:$1:" "$DEPENDS")
       CUR=$(echo $REL | cut -d: -f1)
-      if echo $REL | grep -q :required: ; then
+      if echo $REL | fgrep -q :required: ; then
         if module_installed $DEP ; then
           STR="$STR${FILE_COLOR}$DEP ${DEFAULT_COLOR}"
         else
@@ -850,10 +850,10 @@ show_info() {
     if module_exiled $1 ; then
       echo -n "exiled "
     fi
-    if grep -qw "$1" "$SUSTAINED" ; then
+    if fgrep -xq "$1" "$SUSTAINED" ; then
       echo -n "sustained "
     fi
-    if grep -qw "$1" "$SOLO" ; then
+    if fgrep -xq "$1" "$SOLO" ; then
       echo -n "solo "
     fi
     echo
@@ -880,7 +880,7 @@ show_info() {
         echo ""
       fi
       echo -n "  Last compile time: "
-      TIMES=($(main compile $1 | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
+      TIMES=($(main compile $1 | fgrep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
       CTIME=$((${TIMES[1]} - ${TIMES[0]}))
       echo "$((CTIME / 60))m$((CTIME % 60))s"
       echo -n "  Approx. Size:      "
@@ -922,7 +922,7 @@ diff_module() {
     message "diff requires an existing zlocal module"
     exit 1
   fi
-  if ! echo $SECTION | grep -q zlocal ; then
+  if ! echo $SECTION | fgrep -q zlocal ; then
     message "$1 is not a zlocal module, cannot diff"
     exit 1
   fi
@@ -1202,11 +1202,9 @@ main()  {
     from)
       for MODULE in $(list_installed); do
         VERSION=$(installed_version $MODULE)
-        if grep -q "$2" "$INSTALL_LOGS/$MODULE-$VERSION" ; then
-          for FILE in $(grep "$2" "$INSTALL_LOGS/$MODULE-$VERSION" | cut -d: -f2) ; do
-            echo "$MODULE:$FILE"
-          done
-        fi
+        for FILE in $(fgrep "$2" "$INSTALL_LOGS/$MODULE-$VERSION" | cut -d: -f2) ; do
+          echo "$MODULE:$FILE"
+        done
       done
       ;;
 
@@ -1341,18 +1339,18 @@ main()  {
       while read DATE COMMAND MODULE VERSION STATE JUNK ; do
         if [ "$STATE" == "failed" ] && [ "$COMMAND" == "lin" ] ; then
           # add to list of failed modules
-          if ! echo "$FAILED" | grep -qw $MODULE ; then
+          if ! echo " $FAILED " | fgrep " $MODULE " ; then
             FAILED="$FAILED $MODULE "
           fi
         fi
         # no need to remove if $MODULE is not in the list - speeds things up
-        if ! echo "$FAILED" | grep -qw "$MODULE" ; then
+        if ! echo " $FAILED " | fgrep " $MODULE " ; then
           continue
         fi
         if ([ "$STATE" == "success" ] && [ "$COMMAND" == "lin" ]) ||
              ([ "$STATE" == "success" ] && [ "$COMMAND" == "lrm" ]) ; then
           # remove from failed modules
-          FAILED=`echo "$FAILED" | sed "s/ $MODULE //g"`
+          FAILED=`echo " $FAILED " | sed "s/ $MODULE / /g"`
         fi
       done < $ACTIVITY_LOG
       for MODULE in $FAILED ; do
@@ -1448,7 +1446,7 @@ main()  {
       ;;
 
     search)
-      grep -irle "$2" "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
+      grep -irle "$2" --include DETAILS "$MOONBASE" | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
 
     service)
@@ -1458,7 +1456,7 @@ main()  {
         if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
           echo $MOONBASE/$SEC/$MOD/services
         fi
-      done | xargs -d '\n' egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
+      done | xargs -d '\n' fgrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
 
     depends)
@@ -1567,9 +1565,9 @@ main()  {
            return 1
          else
            cat "$INSTALL_LOGS/$2-$(installed_version $2)" | while read LINE ; do
-             if file $LINE | grep -q "ELF " ; then
+             if file $LINE | fgrep -q 'ELF ' ; then
                echo -n "$LINE "
-               strings -a "$LINE" | grep GCC: | sort -r | head -n 1
+               strings -a "$LINE" | fgrep GCC: | sort -r | head -n 1
              fi
            done
          fi

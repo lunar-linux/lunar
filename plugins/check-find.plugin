@@ -27,7 +27,7 @@ plugin_module_check_find() {
     IFS_OLD="$IFS"
     export IFS=$'\n'
 
-    LOG=$(cat "$I_LOG" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | grep -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/")
+    LOG=$(cat "$I_LOG" | fgrep -e '/bin/' -e '/games/' -e '/include/' -e '/lib/' -e '/sbin/' | fgrep -v -e '/doc/' -e '/etc/' -e '/fonts/' -e '/man/' -e '/var/')
 
     for ITEM in $LOG ; do
       if [ ! -e "$ITEM" ]; then

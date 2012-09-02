@@ -29,7 +29,7 @@ plugin_zpatches_apply()
     find $PATCHDIRS -maxdepth 1 -type f | sed 's;[^/]*$;& &;' | sort -t ' ' -k 2 | while read FPATCH PATCH; do
       verbose_msg "Applying custom patch for $MODULE ($PATCH)"
 
-      if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
+      if [[ -n `echo $PATCH | fgrep '.tar'` ]] ; then
         TARCMD="tar x -O"
       else
         TARCMD="cat"

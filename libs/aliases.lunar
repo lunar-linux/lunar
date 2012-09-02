@@ -26,6 +26,12 @@ unalias() {
     return
   fi
 
+  # shortcut out when explicitly instructed so
+  if [[ -n "$NEVER_ASK" ]] ; then
+    echo $1
+    return
+  fi
+
   debug_msg "unalias($@)"
   # try to figure out where the aliases file is:
   if [[ -z "$ALIASES" ]] || [[ ! -f "$ALIASES" ]]; then
@@ -37,12 +43,6 @@ unalias() {
   fi
 
   TARGETS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$ALIASES")
-
-  # shortcut out when explicitly instructed so
-  if [[ -n "$NEVER_ASK" ]] ; then
-    echo $1
-    return
-  fi
 
   # propose one and let the user pick it from a list:
   debug_msg "unalias: starting selection loop"
@@ -62,11 +62,11 @@ unalias() {
     done
     echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
     read -t $PROMPT_DELAY CHOICE
-    # test directly first
-    if echo $TARGETS | grep -qw "$CHOICE" ; then
-      verbose_msg "Stored alias mapping $1 -> $TARGET"
-      set_local_config `echo LUNAR_ALIAS_${1:1}` $TARGET
-      echo $TARGET
+    # test directly first; this is prone to invalid unput as a combination of the sequential aliases
+    if echo " "$TARGETS" " | fgrep -q " $CHOICE " ; then
+      verbose_msg "Stored alias mapping $1 -> $CHOICE"
+      set_local_config `echo LUNAR_ALIAS_${1:1}` $CHOICE
+      echo $CHOICE
       return
     # then the number, resolving the default
     elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]] ; then

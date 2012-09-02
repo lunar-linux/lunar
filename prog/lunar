@@ -255,7 +255,7 @@ process_section()  {
 
   for  LINE in `list_modules "$1"`;  do
     if  echo  -e  "$KEEP_LIST"  |
-        grep  -q  "^$LINE\$"
+        fgrep  -xq "$LINE"
     then  push_install_queue  $LINE
     else  push_remove_queue   $LINE
     fi
@@ -741,7 +741,7 @@ foreground_execute() {
 
 setvar() {
   if [ -z "$*" ] ; then
-    sort -n "$LOCAL_CONFIG" | grep -v -e UNIQID -e color | while read LINE ; do
+    sort -n "$LOCAL_CONFIG" | fgrep -wv -e UNIQID -e color | while read LINE ; do
       printf "%32s %s\n" "$(echo $LINE|cut -d= -f1)" "$(echo $LINE|cut -d= -f2-)"
     done
   else

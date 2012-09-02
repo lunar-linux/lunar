@@ -32,7 +32,7 @@ ld_add() {
 	debug_msg "ld_add ($@)"
 
 	if [ ! -z "$1" ] && [ -d "$1" ] ; then
-		if ! grep -q "$1" /etc/ld.so.conf; then
+		if ! fgrep -xq "$1" /etc/ld.so.conf; then
 			verbose_msg "Adding $1 to ld.so.conf"
 			echo "$1" >> /etc/ld.so.conf
 			ldconfig
@@ -48,12 +48,12 @@ ld_remove() {
 	debug_msg "ld_remove ($@)"
 
 	if [ ! -z "$1" ]; then
-		if grep -q "$1" /etc/ld.so.conf ; then
+		if fgrep -xq "$1" /etc/ld.so.conf ; then
 
 			TMP_LD_CONF=$(temp_create "ldsoconf")
 			verbose_msg "Removing $1 from ld.so.conf"
 
-			grep -v "$1" /etc/ld.so.conf > $TMP_LD_CONF
+			fgrep -xv "$1" /etc/ld.so.conf > $TMP_LD_CONF
 			cat "$TMP_LD_CONF" > /etc/ld.so.conf
 			ldconfig
 
@@ -207,9 +207,9 @@ custom_filters()
 last_kernel()
 {
 	if [ -f /usr/src/linux/include/linux/utsrelease.h ]; then
-		grep UTS_RELEASE /usr/src/linux/include/linux/utsrelease.h | cut -d'"' -f2
+		fgrep UTS_RELEASE /usr/src/linux/include/linux/utsrelease.h | cut -d'"' -f2
 	else
-		grep UTS_RELEASE /usr/src/linux/include/linux/version.h | cut -d'"' -f2
+		fgrep UTS_RELEASE /usr/src/linux/include/linux/version.h | cut -d'"' -f2
 	fi
 }
 

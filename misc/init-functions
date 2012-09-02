@@ -387,7 +387,7 @@ default_install () {
   ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
     echo "Warning: some links already exist!"
   for LEVEL in 0 1 2 3 4 5 6 ; do
-    echo $LEVELS | grep -q $LEVEL && {
+    echo $LEVELS | fgrep -wq "$LEVEL" && {
       # make start link
       echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME
       ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME || true
@@ -407,7 +407,7 @@ default_uninstall () {
   LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
   LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
   for LEVEL in 0 1 2 3 4 5 6 ; do
-    echo $LEVELS | grep -q $LEVEL && {
+    echo $LEVELS | fgrep -wq "$LEVEL" && {
       # remove start link
       echo rm /etc/rc$LEVEL.d/S$LSTART$BASENAME
       rm /etc/rc$LEVEL.d/S$LSTART$BASENAME || true

@@ -17,7 +17,7 @@ prune() {
   debug_msg "prune ($@)"
 
   if [ -z "$BUILD" ] ; then
-    eval $(grep BUILD= /etc/lunar/local/optimizations)
+    eval $(fgrep BUILD= /etc/lunar/local/optimizations)
   fi
   
   TMP_SPOOL_KEEP=$(temp_create "spool-keep")
@@ -42,7 +42,7 @@ prune() {
 
   verbose_msg "finding stale source files"
   for FILE in $(ls -1 $SOURCE_CACHE); do
-    if ! grep -q "$FILE" "$TMP_SPOOL_KEEP" ; then
+    if ! fgrep -xq "$FILE" "$TMP_SPOOL_KEEP" ; then
       message "Removing stale source: $SOURCE_CACHE/$FILE"
       rm -f $SOURCE_CACHE/$FILE      
     fi
@@ -51,7 +51,7 @@ prune() {
 
   verbose_msg "finding stale install caches"
   for FILE in $(ls -1 $INSTALL_CACHE); do
-    if ! grep -q "$FILE" "$TMP_CACHE_KEEP" ; then
+    if ! fgrep -xq "$FILE" "$TMP_CACHE_KEEP" ; then
       message "Removing stale install cache: $INSTALL_CACHE/$FILE"
       rm -f $INSTALL_CACHE/$FILE
     fi
@@ -63,7 +63,7 @@ prune() {
 
   verbose_msg "finding stale install logs"
   for FILE in $(ls -1 $INSTALL_LOGS) ; do
-    if ! echo -e "$LOGS" | grep -q $FILE ; then
+    if ! echo "$LOGS" | fgrep -xq $FILE ; then
       message "Removing stale log: $INSTALL_LOGS/$FILE"
       rm $INSTALL_LOGS/$FILE
     fi
@@ -71,7 +71,7 @@ prune() {
 
   verbose_msg "finding stale compile logs"
   for FILE in $(ls -1 $COMPILE_LOGS) ; do
-    if ! echo -e "$LOGS" | grep -q $(echo $FILE | sed "s/\.\(xz\|bz2\)$//") ; then
+    if ! echo -e "$LOGS" | grep -q $(echo "^$FILE" | sed "s/\.\(xz\|bz2\)$//") ; then
       message "Removing stale log: $COMPILE_LOGS/$FILE"
       rm $COMPILE_LOGS/$FILE
     fi
@@ -79,7 +79,7 @@ prune() {
 
   verbose_msg "finding stale md5sum logs"
   for FILE in $(ls -1 $MD5SUM_LOGS) ; do
-    if ! echo -e "$LOGS" | grep -q $FILE ; then
+    if ! echo "$LOGS" | fgrep -xq $FILE ; then
       message  "Removing stale log: $MD5SUM_LOGS/$FILE"
       rm $MD5SUM_LOGS/$FILE
     fi

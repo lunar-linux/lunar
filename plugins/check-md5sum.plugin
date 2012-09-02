@@ -28,13 +28,13 @@ plugin_module_check_md5sum()  {
   if [ -e "$MD5_LOG" ]; then
     export IFS=$'\t\n'
 
-    cat "$MD5_LOG" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
-            grep -v "/doc/\|/etc/\|/fonts/\|/man/\|/var/" |
+    cat "$MD5_LOG" | fgrep -e '/bin/' -e '/games/' -e '/include/' -e '/lib/' -e '/sbin/' |
+            fgrep -v -e '/doc/' -e '/etc/' -e '/fonts/' -e '/man/' -e '/var/' |
             while read LINE ; do
       if ! echo $LINE | md5sum --check --status ; then
         FILE=$(echo $LINE | awk '{ print $2 }')
         if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" |
-              egrep -q "executable|shared object|current ar archive|ASCII C?? program" ; then
+              egrep -q 'executable|shared object|current ar archive|ASCII C?? program' ; then
           message "${FILE_COLOR}$FILE${DEFAULT_COLOR} of ${MODULE_COLOR}$MODULE${PROBLEM_COLOR} has wrong md5sum.${DEFAULT_COLOR}"
           MD5SUM_STATUS=1
         fi

@@ -93,11 +93,11 @@ kernel_option_present() {
     esac
 
     if [ -n "$KERNEL_VALUE" ]; then
-      if $CAT "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
+      if $CAT "$KERNEL_CONFIG" | grep -q "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
         return 0
       fi
     else
-      if $CAT "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
+      if $CAT "$KERNEL_CONFIG" | grep -q "^$KERNEL_OPTION=[ym]$"; then
         return 0
       fi
     fi

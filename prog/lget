@@ -62,11 +62,11 @@ main() {
     MODULES=$(list_moonbase | sort)
   fi
 
-  if echo $MODULES | grep -qw moonbase ; then
+  if echo " "$MODULES" " | fgrep ' moonbase ' ; then
     # just update moonbase, no other modules
     get_moonbase
     # remove moonbase from MODULES and continue
-    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+    MODULES=$(echo " "$MODULES" " | sed 's/ moonbase / /g')
   fi
 
   for MODULE in $MODULES; do
