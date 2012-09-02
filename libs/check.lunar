@@ -24,7 +24,7 @@ run_checks() {
 }
 
 
-# rework_module : check depends database for a module
+# rework_module : re-create depends database for a module
 rework_module() {
 	local MODULE
 	debug_msg "rework_module ($@)"
@@ -37,7 +37,7 @@ rework_module() {
 		if module_exiled $DEP ; then
 			echo "$MODULE:$DEP:off:optional:$2:$3"
 		else
-			if module_installed $DEP || module_held $DEP ; then
+			if module_installed $DEP ; then
 				echo "$MODULE:$DEP:on:optional:$2:$3"
 			else
 				echo "$MODULE:$DEP:off:optional:$2:$3"
@@ -49,14 +49,6 @@ rework_module() {
 		local DEP
 		debug_msg "  depends ($@)"
 		DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
-		if ! module_installed $DEP && ! module_held $DEP ; then
-			if ! is_depends $DEP && module_exiled $DEP ; then
-				return  1
-			else
-				CHANGED_MODULES="$CHANGED_MODULES $DEP"
-			fi
-		fi
-
 		echo "$MODULE:$DEP:on:required:$2:$3"
 	}
 
@@ -78,9 +70,11 @@ rework_module() {
 	# append the new output:
 	lock_file $DEPENDS_STATUS_BACKUP                              &&
 	lock_file $DEPENDS_STATUS                                     &&
-	grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS  &&
-	run_depends $MODULE >> $DEPENDS_STATUS
-	cat "$DEPENDS_STATUS" > $DEPENDS_STATUS_BACKUP
+	(
+		grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
+		run_depends $MODULE >> $DEPENDS_STATUS
+		cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+	)
 	unlock_file $DEPENDS_STATUS
 	unlock_file $DEPENDS_STATUS_BACKUP
 }

@@ -38,18 +38,18 @@ function find_depends() {
 
       # you guessed it: local decls.
       depends() {
-	echo "$1"
+        echo "$1"
       }
 
       optional_depends() {
-	# No quotes, this prevent us from parsing newlines
-	# if someone by accident add a newline in optional_depends
-	:
+        # No quotes, this prevent us from parsing newlines
+        # if someone by accident add a newline in optional_depends
+        :
       }
 
       # yeah, this sucks:
       message() {
-	:
+        :
       }
 
       DEPFILE=$MOONBASE/$SECTION/$1/DEPENDS
@@ -182,25 +182,24 @@ run_depends() {
     local DEP
     debug_msg "  depends ($@)"
     DEP=$(unalias $1)
-    if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-      return 0
-    fi
 
-    if module_installed $DEP ; then
-      add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
-      echo "$DEP" >> $TEMP_PREPAREDDEPS
-    elif ! is_depends $DEP ! module_installed $DEP && ! module_held $DEP ; then
+    add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
+
+    if ! module_installed $DEP ; then
       if module_exiled $DEP ; then
         message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
         return 1
-      else
+      elif ! in_depends $MODULE $DEP ; then
         message "${MODULE_COLOR}${MODULE}:${DEFAULT_COLOR}" \
                 "${MESSAGE_COLOR}Adding required dependency${DEFAULT_COLOR}" \
                 "${MODULE_COLOR}$DEP${DEFAULT_COLOR}"
-        add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
-        lin --deps $DEP
-        echo "$DEP" >> $TEMP_PREPAREDDEPS
       fi
+      # don't check depends if there are already checked
+      if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+        return 0
+      fi
+      lin --deps $DEP
+      echo "$DEP" >> $TEMP_PREPAREDDEPS
     fi
   }
 
@@ -213,7 +212,16 @@ run_depends() {
     #              $4 = description of why to use this module
 
     DEP=$(unalias $1)
-    if ! grep -q "^$MODULE:$DEP:" "$DEPENDS_STATUS" ; then
+    if in_depends $MODULE $DEP ; then
+      if ! module_installed $DEP ; then
+        # don't check depends if there are already checked
+        if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+          return 0
+        fi
+        lin --deps $DEP
+        echo "$DEP" >> $TEMP_PREPAREDDEPS
+      fi
+    elif ! grep -q "^$MODULE:$DEP:" "$DEPENDS_STATUS" ; then
 
       if module_exiled $DEP ; then
         verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
@@ -221,28 +229,34 @@ run_depends() {
       else
         if module_installed $DEP ; then
           DEFAULT="y"
-	else
+          DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
+        else
           DEFAULT="n"
+          DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
         fi
 
-	if module_installed $DEP ; then
-	  DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
-	else
-	  DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
-	fi
-
         # this is shortcut case s1) as discussed in lunar-dev ML
-	if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
-	  verbose_msg "Auto-adding optional dependency \"$DEP\""
+        if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
+          verbose_msg "Auto-adding optional dependency \"$DEP\""
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
-	  lin --deps $DEP
-	elif query  "$DEPMOD_AVAIL 
+          # don't check depends if there are already checked
+          if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+            return 0
+          fi
+          lin --deps $DEP
+          echo "$DEP" >> $TEMP_PREPAREDDEPS
+        elif query  "$DEPMOD_AVAIL 
           ${QUERY_COLOR}Purpose: ${DEFAULT_COLOR}${MESSAGE_COLOR}$4 ${QUERY_COLOR}?" $DEFAULT ; then
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
+          # don't check depends if there are already checked
+          if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+            return 0
+          fi
           lin --deps $DEP
+          echo "$DEP" >> $TEMP_PREPAREDDEPS
         else
           add_depends  "$MODULE"  "$DEP"  "off"  "optional"  "$2"  "$3"
-	fi
+        fi
       fi
     fi
   }
@@ -286,7 +300,10 @@ satisfy_depends()  {
   for DEP_MODULE in $(find_depends $MODULE | grep -v '%') ; do
     if [ $DEP_MODULE != $MODULE ]; then
       if ! module_installed $DEP_MODULE ; then
-        if ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
+        if module_exiled $DEP_MODULE ; then
+          message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP_MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
+          exit 1
+        elif ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
           exit 1
         fi
       fi
@@ -440,6 +457,74 @@ create_depends_cache()
     verbose_msg "Skipping depends cache regeneration"
   fi
 )}
+
+
+update_module_depends()
+{
+  local MODULE
+  debug_msg "update_module_depends($@)"
+  
+  # we declare these local to override the systems default ones:
+  optional_depends()  {
+    local DEP
+    debug_msg "  optional_depends ($@)"
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    # check for the current depend selection
+    if grep -q "^$MODULE:$DEP:on:optional:" "$DEPENDS_STATUS_BACKUP" ; then
+      echo "$MODULE:$DEP:on:optional:$2:$3"
+    elif grep -q "^$MODULE:$DEP:off:" "$DEPENDS_STATUS_BACKUP" ; then
+      echo "$MODULE:$DEP:off:optional:$2:$3"
+    fi
+    # if we don't know the answer we leave it open for the user to decide
+  }
+
+  depends()  {
+    local DEP
+    debug_msg "  depends ($@)"
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    echo "$MODULE:$DEP:on:required:$2:$3"
+  }
+
+  run_depends() {
+    local SECTION SCRIPT_DIRECTORY MODULE
+    debug_msg "  run_depends ($@)"
+    (
+      MODULE=$1
+      SECTION=$(find_section $MODULE)
+      SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+      if has_module_file $MODULE DEPENDS ; then
+        run_module_file $MODULE DEPENDS | grep -v '%'
+      fi
+    ) 
+  }
+
+  # here starts the real work:
+  MODULE=$1
+
+  # remove whatever depends was residing in the depends state file and
+  # append the new output:
+  lock_file $DEPENDS_STATUS_BACKUP                              &&
+  lock_file $DEPENDS_STATUS                                     &&
+  (
+    grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
+    run_depends $MODULE >> $DEPENDS_STATUS
+    cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+  )
+  unlock_file $DEPENDS_STATUS
+  unlock_file $DEPENDS_STATUS_BACKUP
+}
+
+
+# updates the depends file for the changed module depends
+update_depends()
+{
+  local MODULE
+  debug_msg "update_depends($@)"
+
+  for MODULE in $(cut -d: -f1 $DEPENDS_STATUS | sort -u) ; do
+    update_module_depends $MODULE
+  done
+}
 
 
 # list all installed modules depending on $1
