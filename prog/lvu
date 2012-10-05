@@ -1134,6 +1134,9 @@ new_module()
 	VERSION=${VERSION/.bz2}
 	VERSION=${VERSION/.gz}
 	VERSION=${VERSION/.xz}
+	VERSION=${VERSION/.zip}
+	VERSION=${VERSION/.7z}
+	VERSION=${VERSION/.lzma}
 
 	SOURCE=$(echo $SOURCE | sed "s/$MODULE/\${MODULE}/")
 	SOURCE=$(echo $SOURCE | sed "s/$VERSION/\${VERSION}/")
