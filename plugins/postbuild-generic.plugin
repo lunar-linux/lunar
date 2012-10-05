@@ -27,6 +27,7 @@ plugin_services_post_build()
 
 gather_docs()
 {
+  local DOC_DIR FILE
   # function : gather_docs
   # usage    : gather_docs LIST OF FILES
   # purpose  : Installs extra documentation that came with the
@@ -60,6 +61,7 @@ gather_docs()
 
 plugin_postbuild_gather_docs()
 {
+  local DOC_DIR DEFAULT_DOCS
   # pre-conditions : user must have $GARBAGE="on" to have any
   #                  of this actually happen.
   debug_msg "plugin_postbuild_gather_docs ($@)"

@@ -12,6 +12,7 @@
 
 
 plugin_source_verify_sha256() {
+  local TMP_SHA
   # check if we can handle this type of VFY:
   if [ "${2:0:7}" != "sha256:" ] ; then
     return 2

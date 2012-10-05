@@ -11,6 +11,7 @@
 
 
 plugin_source_download_generic()  {
+  local URL TMP_FILE
   # check if we can handle this type of URL:
   if [ ${1:0:7} != "http://" -a ${1:0:8} != "https://" -a ${1:0:6} != "ftp://" ]; then
     return 2
