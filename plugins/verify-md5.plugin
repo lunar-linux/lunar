@@ -11,6 +11,7 @@
 
 
 plugin_source_verify_md5() {
+  local TMP_MD5
   # check if we can handle this type of VFY:
   if [ "${2:0:4}" != "md5:" ] ; then
     return 2

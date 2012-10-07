@@ -12,6 +12,7 @@
 
 
 plugin_module_check_find() {
+  local MODULE VERSION I_LOG FIND_STATUS IFS_OLD IFS LOG ITEM
   if [ "$FIND_CHECK" == "off" ] ; then
     return 2
   fi
@@ -24,8 +25,7 @@ plugin_module_check_find() {
 
   if [ -e "$I_LOG" ]; then
     IFS_OLD="$IFS"
-    export IFS="
-"
+    export IFS=$'\n'
 
     LOG=$(cat "$I_LOG" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" | grep -v  "/doc/\|/etc/\|/fonts/\|/man/\|/var/")
 
@@ -39,10 +39,7 @@ plugin_module_check_find() {
       fi
     done
   else
-    (
-      export IFS="$IFS_OLD"
-      message "${MODULE_COLOR}${MODULE}${PROBLEM_COLOR} is missing an install log.${DEFAULT_COLOR}"
-    )
+    message "${MODULE_COLOR}${MODULE}${PROBLEM_COLOR} is missing an install log.${DEFAULT_COLOR}"
     FIND_STATUS=1
   fi
   return $FIND_STATUS

@@ -14,7 +14,7 @@
 plugin_sanity_post_build()
 {
     (
-	local TESTS PATTERN SEVERITY REASON
+	local IFS TESTS PATTERN SEVERITY REASON
 
 	IFS=$'\n'
 

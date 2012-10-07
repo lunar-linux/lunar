@@ -11,6 +11,7 @@
 
 
 plugin_module_check_ldd() {
+  local MODULE VERSION I_LOG LDD_STATUS IFS_OLD IFS NEW_LD LOG FILE
   if [ "$LDD_CHECK" == "off" ]; then
     return 2
   fi
@@ -23,8 +24,7 @@ plugin_module_check_ldd() {
 
   if [ -e "$I_LOG" ]; then
     IFS_OLD="$IFS"
-    export IFS="
-"
+    export IFS=$'\n'
 
     # fast-construct per-module LD path including all /lib/ like directories
     NEW_LD=$(cat "$I_LOG" | grep "/lib/" | files | sed 's/\(.*\)\/\([^\/]*\)$/\1/g' | uniq | tr '\n' ':')
