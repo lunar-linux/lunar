@@ -12,6 +12,7 @@
 
 
 plugin_module_check_md5sum()  {
+  local MODULE VERSION MD5_LOG MD5SUM_STATUS IFS LINE FILE
   # return CONTINUE if we're disabled
   if [ "$MD5SUM_CHECK" == "off" ]; then
     return 2
@@ -25,7 +26,6 @@ plugin_module_check_md5sum()  {
   MD5SUM_STATUS=2
 
   if [ -e "$MD5_LOG" ]; then
-    IFS_OLD="$IFS"
     export IFS=$'\t\n'
 
     cat "$MD5_LOG" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |

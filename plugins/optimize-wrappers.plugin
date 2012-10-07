@@ -20,6 +20,7 @@ plugin_wrappers_optimize()
 
 plugin_wrappers_optimize_menu()
 {
+	local IFS TITLE RESULT
 	# The main code calls this function WITHOUT $1 to find out which
 	# compiler optimization plugins exist. It then returns the version
 	# number which will be saved in $LUNAR_COMPILER as the user's
