@@ -1574,19 +1574,10 @@ main()  {
    links)
      [[ -z "$2" ]] && return 1
 
-     REGEX=""
-     for LINK in `lvu install $2 | xargs file | awk -F: '/ELF/ { print $1 }' | xargs ldd | egrep -v ':$' | cut -d' ' -f3 | sort | uniq`
-     do
-	 if [[ -z $REGEX ]]
-	 then
-	 	REGEX="($LINK)"
-	 else
-	 	REGEX="${REGEX}|($LINK)"
-	 fi
-     done
+     REGEX=$(lvu install $2 | xargs file | awk -F: '/ELF/ { print $1 }' | xargs ldd | fgrep '=>' | cut -d' ' -f3 | sort | uniq)
 
      pushd $INSTALL_LOGS >/dev/null
-     egrep -l "$REGEX" *
+     fgrep -xl "$REGEX" *
      popd >/dev/null
      ;;
 
