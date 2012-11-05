@@ -311,7 +311,7 @@ satisfy_depends()  {
   done
 
   # then parse $OPTS
-  while read LINE; do
+  while read -u3 LINE; do
     DEP_MODULE=$(echo $LINE | cut -d: -f2)
     DEP_STATUS=$(echo $LINE | cut -d: -f3)
         DEP_ON=$(echo $LINE | cut -d: -f5)
@@ -333,7 +333,7 @@ satisfy_depends()  {
     else
       OPTS="$OPTS $DEP_ON"
     fi
-  done < $TMP_FILE
+  done 3< $TMP_FILE
 
   temp_destroy $TMP_FILE
 }
