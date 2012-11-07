@@ -57,8 +57,12 @@ update_bootloader() {
 kernel_config_exists() {
     if [ -e /proc/config.gz ]; then
         echo "/proc/config.gz"
+    elif [ -e /boot/config-$(uname -r)-$(arch).gz ]; then
+        echo "/boot/config-$(uname -r)-$(arch).gz"
     elif [ -e /usr/src/linux/.config ]; then
         echo "/usr/src/linux/.config"
+    elif [ -e $CONFIG_CACHE/.config.current ]; then
+        echo "$CONFIG_CACHE/.config.current"
     elif [ -e $CONFIG_CACHE/.config.2.6.stable ]; then
         echo "$CONFIG_CACHE/.config.2.6.stable"
     else
