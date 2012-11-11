@@ -94,7 +94,7 @@ rebuild()  {
   message  "${MESSAGE_COLOR}Running FIX on all modules${DEFAULT_COLOR}"
   run_fix
 
-  LIST=$(grep ":installed:" "$MODULE_STATUS" | cut -d: -f1 | grep -v moonbase | grep -v "$LUNAR_MODULE")
+  LIST=$(list_installed | fgrep -v -x -e moonbase -e "$LUNAR_MODULE")
 
   message "${MESSAGE_COLOR}Sorting modules by dependency${DEFAULT_COLOR}"
   QUEUE=$(sort_by_dependency $LIST)
@@ -192,7 +192,7 @@ resurrect()  {
 
   if module_held $MODULE ; then
     VERSION=$(installed_version $MODULE)
-    STATUS=held
+    STATUS="installed+held"
     lrm --keepconfig $MODULE
   elif module_installed $MODULE ; then
     lrm --keepconfig $MODULE

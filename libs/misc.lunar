@@ -176,7 +176,7 @@ find_pam_aware()  {
 			     [ "$MODULE" != "Linux-PAM" ]; then
 			echo $MODULE
 		fi
-	done < $MODULE_STATUS
+	done
 }
 
 

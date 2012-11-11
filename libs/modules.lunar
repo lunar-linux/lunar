@@ -10,7 +10,9 @@
 #          list_sections, list_modules, list_installed     #
 #          check_module_index, run_details                 #
 #          module_installed, module_held, module_exiled    #
-#          hold_modules, unhold_modules                    #
+#          module_enforced, hold_modules, unhold_modules   #
+#          exile_modules, unexile_modules, enforce_modules #
+#          unenforce_modules                               #
 # 20020528                                                 #
 # 20030113 merging more functions in here - sofar          #
 # 20030417 adding hold routines - sofar                    #
@@ -79,8 +81,8 @@ list_moonbase() {
 # usage    : list_installed
 # purpose  : return a list of installed (or held) modules
 list_installed() {
-	debug_msg "list_installed ($@)"
-	grep -e ":installed:" -e ":held:" "$MODULE_STATUS" | cut -d: -f1 | sort
+  debug_msg "list_installed ($@)"
+  sed "s/:[[:digit:]]*:\\([^:]\\++\\)\\?installed\\(+[^:]\\+\\)\\?:.*$//" "$MODULE_STATUS"
 }
 
 
@@ -296,7 +298,9 @@ run_module_file() {
 # purpose  : check if $MODULE is installed (or held)
 module_installed()
 {
-	grep -q "^$1:[[:digit:]]*:installed:\|^$1:[[:digit:]]*:held:" "$MODULE_STATUS"
+  debug_msg "module_installed ($@)"
+
+  has_module_state $1 "installed"
 }
 
 
@@ -304,8 +308,9 @@ module_installed()
 # usage    : module_held $MODULE
 # purpose  : check if $MODULE is held
 module_held() {
-	debug_msg "module_held ($@)"
-	grep -q "^$1:[[:digit:]]*:held:" "$MODULE_STATUS"
+  debug_msg "module_held ($@)"
+
+  has_module_state $1 "held"
 }
 
 
@@ -375,7 +380,18 @@ module_license_accepted() {
 # purpose  : check if $MODULE is exiled
 module_exiled() {
   debug_msg "module_exiled ($@)"
-  $(cut -d: -f1,3 "$MODULE_STATUS" | grep -q "^$1:exiled")
+
+  has_module_state $1 "exiled"
+}
+
+
+# function : module_exiled
+# usage    : module_exiled $MODULE
+# purpose  : check if $MODULE is exiled
+module_enforced() {
+  debug_msg "module_enforced ($@)"
+
+  has_module_state $1 "enforced"
 }
 
 
@@ -411,8 +427,11 @@ hold_modules() {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "installed") {print $1":"$2":held:"$4":"$5}  else print;}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
-      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+      if ! module_installed $MODULE; then
+        error_message "${PROBLEM_COLOR}Cannot hold not installed module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
+      else
+        add_module_state $MODULE "held"
+      fi
     done
     unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
@@ -430,8 +449,7 @@ unhold_modules () {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      awk -F: -v mod=$MODULE '{if ($1==mod && $3 == "held") {print $1":"$2":installed:"$4":"$5}  else print;}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
-      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+      remove_module_state $MODULE "held"
     done
     unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
@@ -452,8 +470,7 @@ exile_modules() {
       if $(module_installed $MODULE); then
         error_message "${PROBLEM_COLOR}Cannot exile installed module ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}"
       else
-        echo "$MODULE::exiled::" >> $MODULE_STATUS_BACKUP
-        cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+        change_module_state $MODULE "exiled" "(installed|held|enforced)"
       fi
     done
     unlock_file $MODULE_STATUS
@@ -472,8 +489,43 @@ unexile_modules () {
     lock_file $MODULE_STATUS_BACKUP &&
     lock_file $MODULE_STATUS &&
     for MODULE in "$@" ; do
-      grep -v "^$MODULE:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
-      cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+      remove_module_state $MODULE "exiled"
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+# function : enforce_modules
+# usage    : enforce_modules $MODULE [$MODULE....]
+# purpose  : enforce module selection
+enforce_modules() {
+  local MODULE
+  debug_msg "enforce_modules ($@)"
+  if [[ -n "$1" ]] ; then
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
+    for MODULE in "$@" ; do
+      change_module_state $MODULE "enforced" "exiled"
+    done
+    unlock_file $MODULE_STATUS
+    unlock_file $MODULE_STATUS_BACKUP
+  fi
+}
+
+
+# function : unenforce_modules
+# usage    : unenforce_modules $MODULE [$MODULE....]
+# purpose  : remove enforced module selection
+unenforce_modules () {
+  local MODULE
+  debug_msg "unenforce_modules  ($@)"
+  if [ -n "$1" ] ; then
+    lock_file $MODULE_STATUS_BACKUP &&
+    lock_file $MODULE_STATUS &&
+    for MODULE in "$@" ; do
+      remove_module_state $MODULE "enforced"
     done
     unlock_file $MODULE_STATUS
     unlock_file $MODULE_STATUS_BACKUP
@@ -485,6 +537,8 @@ unexile_modules () {
 # usage    : remove_module; but $MODULE must be defined earlier
 # purpose  : removed a module from the MODULE_STATUS files, no source removal
 remove_module() {
+  local OLD_STATE
+
   debug_msg "remove_module ($@)"
 
   # catch this on new boxes:
@@ -495,17 +549,24 @@ remove_module() {
   verbose_msg "updating lunar state files after module removal"
   lock_file $MODULE_STATUS_BACKUP                              &&
   lock_file $MODULE_STATUS                                     &&
-  grep -v "^$1:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
-  cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  {
+    OLD_STATE=$(get_module_state $1 "(installed|held)")
+    grep -v "^$1:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
+    if [ -n "$OLD_STATE" ]; then
+      echo "$1::$OLD_STATE::" >> $MODULE_STATUS_BACKUP
+    fi
+    cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  }
   unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
 }
 
 
 # function: add_module
-# usage   : add_module <module_name>
+# usage   : add_module <module_name> <state> <version> <size>
 # purpose : adds the 1st parameter as the module name to the MODULE_STATUS files
 add_module()  {
+  local OLD_STATE
   debug_msg "add_module ($@)"
 
   # catch this on new boxes:
@@ -516,13 +577,75 @@ add_module()  {
   verbose_msg "updating lunar state files after module installation"
   lock_file $MODULE_STATUS_BACKUP                             &&
   lock_file $MODULE_STATUS                                    &&
-  if [ -s $MODULE_STATUS ]; then
-    grep -v "^$1:" "$MODULE_STATUS_BACKUP" > $MODULE_STATUS 2>/dev/null
-  fi &&
-  echo "$1:$(date -u +%Y%m%d):$2:$3:$4" >> $MODULE_STATUS     &&
-  cp $MODULE_STATUS $MODULE_STATUS_BACKUP
+  {
+    OLD_STATE=$(get_module_state $1 $2)
+    grep -v "^$1:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
+    if [ -n "$OLD_STATE" ]; then
+      OLD_STATE="+$OLD_STATE"
+    fi
+    echo "$1:$(date -u +%Y%m%d):$2$OLD_STATE:$3:$4" >> $MODULE_STATUS_BACKUP     &&
+    cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  }
   unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
+}
+
+
+# function: add_module_state
+# usage   : add_module_state <module_name> <state>
+# purpose : adds <state> to the module. add an empty new line to the MODULE_STATUS files if net there yet
+# pre     : the MODULE_STATUS files need to be locked
+add_module_state() {
+  debug_msg "add_module_state ($@)"
+
+  awk -F: -v mod="$1" -v state="$2" 'BEGIN {OFS=FS ; ret=0} ; $1==mod {if ($3 !~ /(^|\+)'"$2"'(\+|$)/) {$3=$3"+"state} ret=1} ; {print} ; END {exit ret}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP &&
+  echo "$MODULE::$2::" >> $MODULE_STATUS_BACKUP
+  cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+}
+
+
+# function: remove_module_state
+# usage   : remove_module_state <module_name> <state>
+# purpose : removes <state> from the module. remove the line completely from the MODULE_STATUS files if no state left
+# pre     : the MODULE_STATUS files need to be locked
+remove_module_state() {
+  debug_msg "remove_module_state ($@)"
+
+  awk -F: -v mod="$1" 'BEGIN {OFS=FS} ; $1==mod {$3=gensub(/(^|\+)('"$2"'\+)+|((^|\+)'"$2"')+$/,"\\1","g",$3) ; if ($3=="") {next}} ; {print}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP  &&
+  cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+}
+
+
+# function: change_module_state
+# usage   : change_module_state <module_name> <new_state> <old_state>
+# purpose : removes <old_state> from the module and adds <new_state> to the module. add an empty new line to the MODULE_STATUS files if net there yet
+# pre     : the MODULE_STATUS files need to be locked
+change_module_state() {
+  debug_msg "change_module_state ($@)"
+
+  awk -F: -v mod="$1" -v state="$2" 'BEGIN {OFS=FS ; ret=0} ; $1==mod {{$3=gensub(/(^|\+)('"$3"'\+)+|((^|\+)'"$3"')+$/,"\\1","g",$3) ; if ($3=="") {$3=state} ; if ($3 !~ /(^|\+)'"$2"'(\+|$)/) {$3=$3"+"state}} ret=1} ; {print} ; END {exit ret}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP &&
+  echo "$MODULE::$2::" >> $MODULE_STATUS_BACKUP
+  cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+}
+
+
+# function: has_module_state
+# usage   : has_module_state <module_name> <state>
+# purpose : checks for the presence of <state> the MODULE_STATUS file
+has_module_state() {
+  debug_msg "has_module_state ($@)"
+
+  grep -q "^$1:[[:digit:]]*:\\([^:]\\++\\)\\?$2\\(+[^:]\\+\\)\\?:" "$MODULE_STATUS"
+}
+
+
+# function: get_module_state
+# usage   : get_module_state <module_name> <state>
+# purpose : get the state of the module leaving out <state>
+get_module_state() {
+  debug_msg "get_module_state ($@)"
+
+  awk -F: -v mod="$1" '$1==mod {print gensub(/(^|\+)('"$2"'\+)+|((^|\+)'"$2"')+$/,"\\1","g",$3)}' "$MODULE_STATUS"
 }
 
 
@@ -538,7 +661,7 @@ purge_modules() {
     error_message "${PROBLEM_COLOR}Error: ${DEFAULT_COLOR}${MESSAGE_COLOR} your moonbase seems damaged. Re-lin moonbase to fix.${DEFAULT_COLOR}"
     exit 1
   fi
-  for MODULE in $(list_installed | grep -v "^moonbase$") ; do
+  for MODULE in $(list_installed | fgrep -v -x moonbase) ; do
   (
     if ! run_details $MODULE &> /dev/null ; then
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
@@ -560,10 +683,13 @@ module_is_expired() {
     if [ -z "$MODULE" ] ; then
       MODULE=$1
     fi
-    LINE=$(grep "^$MODULE:" "$MODULE_STATUS" | grep -v "^moonbase" | awk -F: '{print "IDATE="$2" STATUS="$3" IVERSION="$4}')
-    eval $LINE
-    if run_details $MODULE &> /dev/null ; then
-      if [[ "$STATUS" == "installed" ]] ; then
+    if [ "$MODULE" == moonbase ] ; then
+      return 255
+    fi
+    LINE=$(awk -F: -v mod=$MODULE '$1==mod && $3 ~ /(^|\+)installed(\+|$)/ {print "IDATE="$2" IVERSION="$4}' "$MODULE_STATUS")
+    if [ -n "$LINE" ] ; then
+      eval $LINE
+      if run_details $MODULE &> /dev/null ; then
         if [[ "$VERSION" != "$IVERSION" ]] || [[ -z "$IDATE" ]] ||
 	  (( "$UPDATED" > "$IDATE" )) ; then
 	  return 0

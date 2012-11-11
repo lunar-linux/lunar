@@ -27,7 +27,7 @@ find_module_size() {
       local SIZE
       unset SIZE
       [ -e "$MODULE_STATUS" ] &&
-      SIZE=`grep  "^$1\:" "$MODULE_STATUS" | cut -d ":" -f 5-5`
+      SIZE=$(sed -n "s/^$1:.*://p" "$MODULE_STATUS")
       [ -n "$SIZE" ] && echo ${SIZE} || false
    }
 
@@ -42,14 +42,14 @@ find_module_size() {
    module_size $1 $VERSION && return
 
    # no :( lets dig through logs
-   [ -e "$INSTALL_LOGS/$MODULE-$VERSION" ]  &&
+   [ -e "$INSTALL_LOGS/$1-$VERSION" ]  &&
    while read LINE
    do
       [ -f "$LINE" ]            &&
       SIZE0=`du "$LINE"         | 
              cut -f 1-1`        &&
       SIZE=$((SIZE0+SIZE))
-   done <$INSTALL_LOGS/$MODULE-$VERSION     &&
+   done <$INSTALL_LOGS/$1-$VERSION     &&
    echo ${SIZE}KB                      ||
    message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
 }
