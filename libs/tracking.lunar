@@ -78,14 +78,7 @@ create_install_log() {
   echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
-  MISOWNED_SYMLINKS=$(syms_not_owned  $TMP_INST_LOG
-                      echo  -n  "/dev/null")
-
-  if [ "$MISOWNED_SYMLINKS" == "/dev/null" ] ; then
-    install -m644 $TMP_INST_LOG $INST_LOG
-  else
-    grep -v "$MISOWNED_SYMLINKS" "$TMP_INST_LOG" > $INST_LOG
-  fi
+  install -m644 $TMP_INST_LOG $INST_LOG
 
   temp_destroy $TMP_INST_LOG
 }
