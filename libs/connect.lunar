@@ -37,14 +37,14 @@ connect()  {
   local TIMEOUT
   debug_msg "connect ($@)"
 
-  if ! ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|^ra[0-9]\|^usb[0-9]"
+  if ! ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb)[0-9]+.*state UP'
   then
     pon
 
     # Timeout in deciseconds to wait for Interface to come up.
     TIMEOUT=30
 
-    until ifconfig | grep -q "^eth[0-9]\|^wlan[0-9]\|^ppp[0-9]\|^ath[0-9]\|^tun[0-9]\|^ra[0-9]\|^usb[0-9]" || [ $TIMEOUT == 0  ]
+    until ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb)[0-9]+.*state UP' || [ $TIMEOUT == 0  ]
     do
       sleep  10
       (( TIMEOUT-- ))
