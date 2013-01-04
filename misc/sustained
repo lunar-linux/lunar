@@ -19,6 +19,7 @@ gmp
 grep
 gzip
 installwatch
+iproute2
 kmod
 less
 libcap
@@ -29,7 +30,6 @@ make
 mpfr
 nano
 ncurses
-net-tools
 patch
 procps
 readline
