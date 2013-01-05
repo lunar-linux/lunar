@@ -37,14 +37,14 @@ connect()  {
   local TIMEOUT
   debug_msg "connect ($@)"
 
-  if ! ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb)[0-9]+.*state UP'
+  if ! ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb|br)[0-9]+.*state UP'
   then
     pon
 
     # Timeout in deciseconds to wait for Interface to come up.
     TIMEOUT=30
 
-    until ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb)[0-9]+.*state UP' || [ $TIMEOUT == 0  ]
+    until ip link | egrep -q '^[0-9]*: (eth|wlan|ppp|ath|tun|ra|usb|br)[0-9]+.*state UP' || [ $TIMEOUT == 0  ]
     do
       sleep  10
       (( TIMEOUT-- ))
