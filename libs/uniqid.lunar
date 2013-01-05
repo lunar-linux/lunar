@@ -6,6 +6,8 @@
 #                                                          #
 # Copyright Fw systems LLC Under eitherGPL v2 or BSD Lic.  #
 #                                                          #
+# Parts Copyrighted  Stefan Wold 2013 under GPLv2          #
+#                                                          #
 ############################################################
 
 
@@ -28,21 +30,10 @@ create_uniq_id() {
     return
   fi
 
-  OS=$(uname -s)
+  IFACE=$(ip route | grep ^default | awk '{print $5}')
+  UNIQID=$(ip addr show $IFACE | grep 'link/ether' | awk '{print $2}' |\
+      tr 'A-Z' 'a-z' | md5sum | awk '{print $1}')
 
-  if [  "$OS"  == "OpenBSD" ]; then
-    HASH="sha1"
-    IFACE=`netstat -r | grep default | awk '{print $7}'`
-  elif [  "$OS"  == "Linux" ]; then
-    HASH="md5sum"
-    IFACE=`netstat -r | grep default | awk '{print $8}'`
-  else
-    exit 1
-  fi
-
-  UNIQID=`ifconfig $IFACE |\
-      awk '/addr.*[:]* [0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/ {print $NF}' |\
-      tr 'A-Z' 'a-z' | $HASH | awk '{print $1}'`
   export UNIQID
 
   verbose_msg "id(\"$IFACE\")=\"$UNIQID\""
