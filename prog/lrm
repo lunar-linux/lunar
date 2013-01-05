@@ -240,6 +240,8 @@ check_status() {
 
 
 downgrade() {
+  local CACHE_XZ XZBZ
+
   # a local function for listing the contents of install cache
   list_available_cache() {
     ls -1 $INSTALL_CACHE/$MODULE-* | while read LINE ; do
@@ -259,7 +261,17 @@ downgrade() {
     list_available_cache   
   fi
 
-  if [ ! -s $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 ] ; then 
+  CACHE_XZ="$INSTALL_CACHE/$MODULE-$1-$BUILD.tar.xz"
+  XZBZ=xzcat
+  if [ ! -f $CACHE_XZ ] ; then
+    CACHE_BZ="$INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz"
+    if [ -f $CACHE_BZ ] ; then
+      CACHE_XZ="$CACHE_BZ"
+      XZBZ=bzcat
+    fi
+  fi
+
+  if [ ! -s $CACHE_XZ ] ; then 
     message "Desired version is not available. Here is the available files"
     list_available_cache
   fi
@@ -285,11 +297,10 @@ downgrade() {
   verbose_msg "installing \"$MODULE-$1\""
   verbose_msg "extracting cached install file..."
   
-  bzcat $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 | tar -kt $TAR_P -C / >/dev/null
+  $XZBZ $CACHE_XZ | tar -kt $TAR_P -C / >/dev/null
   verbose_msg "adding module to installed list"
 
-  bzcat $INSTALL_CACHE/$MODULE-$1-$BUILD.tar.bz2 | 
-  tar -kx $TAR_P -C / 2>/dev/null >/dev/null
+  $XZBZ $CACHE_XZ | tar -kx $TAR_P -C / 2>/dev/null >/dev/null
   verbose_msg "adding module to installed list"
   add_module $MODULE installed  $1
   activity_log  "lrm downgrade"  "$MODULE"  "$1"  "success"

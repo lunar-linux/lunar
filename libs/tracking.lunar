@@ -108,8 +108,8 @@ create_install_cache() {
     return
   fi
 
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2${DEFAULT_COLOR}"
-  tar cPjf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz${DEFAULT_COLOR}"
+  tar cPJf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
 
 }
 

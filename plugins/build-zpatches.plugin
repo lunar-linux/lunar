@@ -39,6 +39,8 @@ plugin_zpatches_apply()
         GZCMD="bzcat"
       elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
         GZCMD="zcat"
+      elif [[ -n `echo $PATCH | grep '\.xz$'` ]] ; then
+        GZCMD="xzcat"
       else
         GZCMD="cat"
       fi

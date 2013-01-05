@@ -132,10 +132,10 @@ expand_cache_safe() {(
   export SOURCE_DIRECTORY=$BUILD_DIRECTORY/resurrect-$MODULE-$VERSION
   mk_source_dir $SOURCE_DIRECTORY
   # untar the file so we can compare first
-  tar -pkxjf $1 -C $SOURCE_DIRECTORY 1>/dev/null 2>&1
+  tar -pkxf $1 -C $SOURCE_DIRECTORY 1>/dev/null 2>&1
   # make a md5sum list of files
   TMP_TARGETS=$(temp_create "resurrect.targets.$MODULE")
-  tar j --list < $1 > $TMP_TARGETS
+  tar tf $1 > $TMP_TARGETS
   TMP_TARGETS_OK=$(temp_create "resurrect.targets_OK.$MODULE")
   # do directories: we don't care here
   # the sed trick is advanced: a non-greedy pattern that returns all
@@ -167,7 +167,7 @@ expand_cache_safe() {(
   done
 
   debug_msg "tar xjf $1 -P -k -T $TMP_TARGETS_OK"
-  tar xjf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
+  tar xf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
 
   temp_destroy $TMP_TARGETS
   temp_destroy $TMP_TARGETS_OK
@@ -198,11 +198,19 @@ resurrect()  {
     lrm --keepconfig $MODULE
   fi &&
 
-  CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
+  CACHE_XZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz"
+  XZBZ=xz
+  if [ ! -f "$CACHE_XZ" ] ; then
+    CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
+    if [ -f "$CACHE_BZ" ] ; then
+      CACHE_XZ="$CACHE_BZ"
+      XZBZ=bzip2
+    fi
+  fi
 
-  if [ -f "$CACHE_BZ" ] && bzip2 -tf $CACHE_BZ ; then
+  if [ -f "$CACHE_XZ" ] && $XZBZ -tf $CACHE_XZ ; then
     message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
-    expand_cache_safe $CACHE_BZ &&
+    expand_cache_safe $CACHE_XZ &&
     add_module $MODULE $STATUS $VERSION &&
     verbose_msg "running \"lunar fix $MODULE\"" &&
     if run_fix $MODULE ; then
