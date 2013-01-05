@@ -121,6 +121,7 @@ bin/uname
 ^/var/lib/lunar/excluded
 ^/var/lib/lunar/protected
 ^/var/lib/mysql/
+^/var/lock$
 ^/var/mailman/Mailman/mm_cfg.py
 ^/var/mailman/archives
 ^/var/mailman/data
@@ -128,6 +129,7 @@ bin/uname
 ^/var/mailman/qfiles
 ^/var/named/
 ^/var/nis/
+^/var/run$
 ^/var/spool/
 ^/var/state/
 ^/var/state/dhcpd.leases
