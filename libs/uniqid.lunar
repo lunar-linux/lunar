@@ -30,8 +30,8 @@ create_uniq_id() {
     return
   fi
 
-  IFACE=$(ip route | grep ^default | awk '{print $5}')
-  UNIQID=$(ip addr show $IFACE | grep 'link/ether' | awk '{print $2}' |\
+  IFACE=$(ip route | awk '/^default/ {print $5}')
+  UNIQID=$(ip addr show $IFACE | awk '/link\/ether/ {print $2}' |\
       tr 'A-Z' 'a-z' | md5sum | awk '{print $1}')
 
   export UNIQID
