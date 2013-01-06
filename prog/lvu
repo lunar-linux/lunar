@@ -1535,11 +1535,12 @@ main()  {
     compile)
       if [ ! -z "$2" ]; then
         if run_details $2 ; then
-          if [ -f $COMPILE_LOGS/$2-$(module_version $2).bz2 ] ; then
-            view_file "$COMPILE_LOGS/$2-$(module_version $2).bz2"
+          LOG_FILE=$(xzbz_file "$COMPILE_LOGS/$2-$(module_version $2)")
+          if [ -f "$LOG_FILE" ] ; then
+            view_file "$LOG_FILE"
           else
-            VERSION=$(installed_version $2)
-            view_file "$COMPILE_LOGS/$2-$(installed_version $2).bz2" \
+            LOG_FILE=$(xzbz_file "$COMPILE_LOGS/$2-$(installed_version $2)")
+            view_file "$LOG_FILE" \
               "Compile log for $2 does not exist"
           fi
         fi

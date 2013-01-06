@@ -75,7 +75,7 @@ create_install_log() {
 
   parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
   echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
-  echo "$COMPILE_LOGS/$MODULE-$VERSION.bz2"             >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.xz"              >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
   MISOWNED_SYMLINKS=$(syms_not_owned  $TMP_INST_LOG

@@ -198,17 +198,9 @@ resurrect()  {
     lrm --keepconfig $MODULE
   fi &&
 
-  CACHE_XZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz"
-  XZBZ=xz
-  if [ ! -f "$CACHE_XZ" ] ; then
-    CACHE_BZ="$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.bz2"
-    if [ -f "$CACHE_BZ" ] ; then
-      CACHE_XZ="$CACHE_BZ"
-      XZBZ=bzip2
-    fi
-  fi
+  CACHE_XZ=$(xzbz_file "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar")
 
-  if [ -f "$CACHE_XZ" ] && $XZBZ -tf $CACHE_XZ ; then
+  if [ -f "$CACHE_XZ" ] && xzbz -tf $CACHE_XZ ; then
     message  "${RESURRECT_COLOR}Resurrecting ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR}"
     expand_cache_safe $CACHE_XZ &&
     add_module $MODULE $STATUS $VERSION &&
@@ -324,7 +316,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.xz "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
@@ -345,7 +337,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.xz "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
@@ -360,7 +352,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.bz2 "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.xz "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
       return 1
     fi

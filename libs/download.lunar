@@ -184,6 +184,9 @@ testpack () {
 			*.CAB|*.cab)
 				echo $FILEMAGIC | grep -qw "Cabinet"
 				;;
+			*.xz|*.XZ)
+				echo $FILEMAGIC | grep -qw "XZ"
+				;;
 			*)
 				# we don't know how to handle this type of file
 				true

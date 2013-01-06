@@ -70,10 +70,10 @@ prune() {
   done
 
   verbose_msg "finding stale compile logs"
-  for FILE in $(ls -1 $COMPILE_LOGS | sed "s/\.bz2//") ; do
-    if ! echo -e "$LOGS" | grep -q $FILE ; then
-      message "Removing stale log: $COMPILE_LOGS/$FILE.bz2"
-      rm $COMPILE_LOGS/$FILE.bz2
+  for FILE in $(ls -1 $COMPILE_LOGS) ; do
+    if ! echo -e "$LOGS" | grep -q $(echo $FILE | sed "s/\.\(xz\|bz2\)$//") ; then
+      message "Removing stale log: $COMPILE_LOGS/$FILE"
+      rm $COMPILE_LOGS/$FILE
     fi
   done
 
