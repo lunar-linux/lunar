@@ -95,7 +95,7 @@ xterm_msg() {
   debug_msg "xterm_bar ($@)"
   case $TERM in
     xterm*|gnome*|konsole*|rxvt*)
-      MSG="$(hostname) $(basename $0)[$$]: $@"
+      MSG="$HOSTNAME $(basename $0)[$$]: $@"
       echo -n "]0; $MSG "
       ;;
   esac
