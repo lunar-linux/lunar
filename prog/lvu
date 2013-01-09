@@ -812,7 +812,6 @@ show_urls() { (
     echo $URL$2
     return 1
   }
-  connect() { return 0 ; }
 
   LRESORT_URL=
   FRESORT_URL=
