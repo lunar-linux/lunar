@@ -251,7 +251,6 @@ downgrade() {
   root_check
 
   verbose_msg "running \"$MODULE\" DETAILS file"
-  optimize
   run_details $MODULE &> /dev/null || return 1
 
   if [ -z "$1" ] ; then
