@@ -820,6 +820,7 @@ show_urls() { (
   SILENT=on
   VERBOSE=off
   CLEAR_CACHE=off
+  SUCCESS=1
 
   if [ -z "$1" ] ; then
     MODULES=$(list_moonbase|sort)
