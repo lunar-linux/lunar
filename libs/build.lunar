@@ -327,21 +327,6 @@ default_post_build() {
 }
 
 
-syms_not_owned()  {
-  local DEST
-  debug_msg "syms_not_owned ($@)"
-  while read ITEM ; do
-    if [ -h "$ITEM" ] && [ -f "$ITEM" ]; then
-      DEST=$(basename $(ls -la "$ITEM" | cut -d '>' -f2 | cut -c 2- ) )
-      if ! grep -q "$DEST" "$1" ; then
-	    echo -n "$ITEM\|"
-        echo "$ITEM" >> $TMPDIR/$MODULE.rejected.symlinks
-      fi
-    fi
-  done < $1
-}
-
-
 prepare_module_config()  {
   debug_msg "prepare_module_config ($@)"
   if [ ! -e "$MODULE_CONFIG" ] ; then
