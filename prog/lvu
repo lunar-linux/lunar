@@ -123,7 +123,7 @@ EOF
 
 export_snapshot()  {
   SNAPSHOT=snapshot-$HOSTNAME-$(date -u +%Y%m%d)
-  tar cjfP "/root/$SNAPSHOT.tar.bz2" $CONFIG_CACHE $MODULE_STATUS
+  tar cJfP "/root/$SNAPSHOT.tar.xz" $CONFIG_CACHE $MODULE_STATUS
   message "${MESSAGE_COLOR}Snapshot ${DEFAULT_COLOR}${FILE_COLOR}$SNAPSHOT${DEFAULT_COLOR}${MESSAGE_COLOR} created.${DEFAULT_COLOR}"
 }
 
@@ -134,7 +134,7 @@ import_snapshot()  {
 
   if [ -f "$1" ] ; then
     ( mk_source_dir $SOURCE_DIRECTORY )
-    tar xj -C $SOURCE_DIRECTORY -f $SNAPSHOT 2> /dev/null
+    tar x -C $SOURCE_DIRECTORY -f $SNAPSHOT 2> /dev/null
     cd $SOURCE_DIRECTORY
 
 	message "${MESSAGE_COLOR}Restoring lunar configuration${DEFAULT_COLOR}"
@@ -1535,11 +1535,12 @@ main()  {
     compile)
       if [ ! -z "$2" ]; then
         if run_details $2 ; then
-          if [ -f $COMPILE_LOGS/$2-$(module_version $2).bz2 ] ; then
-            view_file "$COMPILE_LOGS/$2-$(module_version $2).bz2"
+          LOG_FILE=$(xzbz_file "$COMPILE_LOGS/$2-$(module_version $2)")
+          if [ -f "$LOG_FILE" ] ; then
+            view_file "$LOG_FILE"
           else
-            VERSION=$(installed_version $2)
-            view_file "$COMPILE_LOGS/$2-$(installed_version $2).bz2" \
+            LOG_FILE=$(xzbz_file "$COMPILE_LOGS/$2-$(installed_version $2)")
+            view_file "$LOG_FILE" \
               "Compile log for $2 does not exist"
           fi
         fi

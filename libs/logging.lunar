@@ -29,10 +29,10 @@ stop_logging() {
   echo > $C_FIFO
   echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >> $C_LOG
   message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.bz2"  \
+           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.xz"  \
            "${DEFAULT_COLOR}"
 
-  bzip2 -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.bz2
+  xz -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.xz
   temp_destroy $C_LOG
   temp_destroy $C_FIFO
 }
@@ -40,13 +40,13 @@ stop_logging() {
 
 progress() {
   local OLDLOG OLDSZ S PC
-  OLDLOG=$(ls -1d $COMPILE_LOGS/$MODULE-*.bz2 2>&- | head -n 1)
+  OLDLOG=$(ls -1d $COMPILE_LOGS/$MODULE-*.{xz,bz2} 2>&- | head -n 1)
   STIME=$(date +%s)
   if [[ -f $OLDLOG ]]; then
     X="############################################################"
     Y="                                                            "
-    OLDSZ=$(bzcat $OLDLOG | wc -c)
-    OLDTIMES=($(bzcat $OLDLOG | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
+    OLDSZ=$(xzbz -dc $OLDLOG | wc -c)
+    OLDTIMES=($(xzbz -dc $OLDLOG | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
     CTIME=$((${OLDTIMES[1]} - ${OLDTIMES[0]}))
     echo "Last compile time: $((CTIME / 60))m$((CTIME % 60))s"
     while true ; do

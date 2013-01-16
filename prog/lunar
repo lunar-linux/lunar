@@ -136,11 +136,10 @@ add_pkgs()  { (
 
 show_file()	{
   if  [  -f  $1  ];  then
-    if  [  "`file  -b  $1  |  cut  -d ' '  -f1`"  == "bzip2" ];  then
-      bzcat  $1  |  view_file
-    else
-      $DIALOG  --textbox  $1  10  0
-    fi
+    case  `file  -b  $1  |  cut  -d ' '  -f1` in
+      bzip2|gzip|XZ)  view_file $1  ;;
+      *)  $DIALOG  --textbox  $1  10  0  ;;
+    esac
   else
     $DIALOG  --msgbox  "File not found."  0  0
     return  1

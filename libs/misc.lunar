@@ -204,12 +204,6 @@ custom_filters()
 }
 
 
-source_basename()
-{
-	echo $1 | sed 's/.tar.\(bz2\|gz\)$//g'
-}
-
-
 last_kernel()
 {
 	if [ -f /usr/src/linux/include/linux/utsrelease.h ]; then
@@ -217,4 +211,30 @@ last_kernel()
 	else
 		grep UTS_RELEASE /usr/src/linux/include/linux/version.h | cut -d'"' -f2
 	fi
+}
+
+
+xzbz_file()
+{
+  local FILE FILE_BZ
+  FILE="$1.xz"
+  if [ ! -f $FILE ] ; then
+    FILE_BZ="$1.bz2"
+    if [ -f $FILE_BZ ] ; then
+      FILE="$FILE_BZ"
+    fi
+  fi
+  echo $FILE
+}
+
+xzbz()
+{
+  local XZBZ
+  case $(file -b $2 | cut -d' ' -f1) in
+    bzip2) XZBZ=bzip2 ;;
+     gzip) XZBZ=gzip ;;
+       XZ) XZBZ=xz ;;
+	*) XZBZ=xz ;;
+  esac
+  $XZBZ "$@"
 }
