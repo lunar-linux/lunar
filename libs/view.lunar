@@ -15,6 +15,7 @@ view_file()  {
     case $(file -b $1 | cut -d' ' -f1) in
       bzip2) bzcat $1 | ${PAGER:-less} ;;
        gzip) zcat $1  | ${PAGER:-less} ;;
+         XZ) xzcat $1 | ${PAGER:-less} ;;
           *)
              # default fallback
              cat "$1" | ${PAGER:-less} ;;
