@@ -303,7 +303,7 @@ satisfy_depends()  {
         if module_exiled $DEP_MODULE ; then
           message "${MODULE_COLOR}${MODULE}:${PROBLEM_COLOR} ! Error: required dependency ${MODULE_COLOR}$DEP_MODULE${DEFAULT_COLOR}${PROBLEM_COLOR} is exiled and cannot be installed${DEFAULT_COLOR}"
           exit 1
-        elif ! SINGLE_MODULE=1 lin $SILENT $COMPILE $DEP_MODULE ; then
+        elif ! SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
           exit 1
         fi
       fi
@@ -325,7 +325,7 @@ satisfy_depends()  {
       OPTS="$OPTS $DEP_OFF"
     elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
         ! module_held $DEP_MODULE ; then
-      if SINGLE_MODULE=1 lin $DEPS_ONLY $SILENT $COMPILE $DEP_MODULE ; then
+      if SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
         OPTS="$OPTS $DEP_ON"
       else
         exit 1

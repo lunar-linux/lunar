@@ -290,8 +290,11 @@ lin_module()  {
     done
   ) &&
 
+  # only download and verify ?
+  if [ -n "$DOWNLOAD_ONLY" ] ; then
+    verify_all_sources $MODULE
   # now entering the physical BUILD stage
-  if ! current_locked && ! solo_locked ; then
+  elif ! current_locked && ! solo_locked ; then
     echo $$ > $linING  &&
     start_logging
 
