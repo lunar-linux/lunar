@@ -88,11 +88,11 @@ fix_depends () {
 	if [ -n "$1" ] ; then
 		LIST="$@"
 	else
-		LIST=$(grep -v moonbase: "$MODULE_STATUS" | cut -d: -f1 | sort )
+		LIST=$(list_installed | fgrep -v -x moonbase)
 	fi
 
 	for MODULE in $LIST ; do
-		module_exiled $MODULE || rework_module $MODULE
+		rework_module $MODULE
 	done
 }
 
@@ -103,7 +103,7 @@ run_fix()  {
 	MODULES=$*
 
 	if [ -z "$MODULES" ] ; then
-		MODULES=$(list_installed | grep -v moonbase)
+		MODULES=$(list_installed | fgrep -v -x moonbase)
 	fi
 
 	if [[ -n "$FIXDEPENDS" ]] ; then

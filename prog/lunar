@@ -61,6 +61,8 @@ hold       module(s)   Place a hold on a checklist of modules
 unhold     module(s)   Remove a hold on a checklist of modules
 exile      module(s)   Remove a module a/o prevent it from being resurrected
 unexile    module(s)   Allows a module to be compiled|resurrected again
+enforce    module(s)   Enforce optinal selection on a list of modules
+unenforce  module(s)   Remove enforce  on a list of modules
 EOF
   exit  1
 }
@@ -273,20 +275,18 @@ select_pkgs()  {
 
 
 make_hold_checklist()  {
-  for LINE in $(sort "$MODULE_STATUS_BACKUP") ; do
+  for LINE in $(grep -E '[:+](installed|held)[:+]' "$MODULE_STATUS_BACKUP" | sort) ; do
   (
     MODULE=$(echo "$LINE" | cut -d: -f1)
     STATUS=$(echo "$LINE" | cut -d: -f3)
     VERSION=$(echo "$LINE" | cut -d: -f4)
-    if [ "$STATUS" == "installed" ] || [ "$STATUS" == "held" ] ; then
-      [ "$STATUS" == "held" ] && HELD="on" || HELD="off"
-      SHORT="Short description unavailable"
-      if run_details $MODULE &> /dev/null ; then
-        echo $MODULE
-        echo $VERSION
-        echo $HELD
-        echo $SHORT
-      fi
+    echo "$STATUS" | grep -q -E '[:+]held[:+]' && HELD="on" || HELD="off"
+    SHORT="Short description unavailable"
+    if run_details $MODULE &> /dev/null ; then
+      echo $MODULE
+      echo $VERSION
+      echo $HELD
+      echo $SHORT
     fi
   )
   done
@@ -847,6 +847,8 @@ else
     unhold     ) shift && unhold_modules $@             ;;
     exile      ) shift && exile_modules $@              ;;
     unexile    ) shift && unexile_modules $@            ;;
+    enforce    ) shift && enforce_modules $@            ;;
+    unenforce  ) shift && unenforce_modules $@          ;;
     *) main ;; 
   esac
 fi
