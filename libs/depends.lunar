@@ -236,7 +236,16 @@ run_depends() {
         fi
 
         # this is shortcut case s1) as discussed in lunar-dev ML
-        if module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
+        if module_enforced $DEP ; then
+          verbose_msg "Enforcing optional dependency \"$DEP\""
+          add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
+          # don't check depends if there are already checked
+          if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+            return 0
+          fi
+          lin --deps $DEP
+          echo "$DEP" >> $TEMP_PREPAREDDEPS
+        elif module_installed $DEP && [ -z "$2" -a -z "$3" ] ; then
           verbose_msg "Auto-adding optional dependency \"$DEP\""
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked

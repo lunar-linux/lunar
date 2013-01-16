@@ -64,6 +64,7 @@ conflicts                  display conflicting files
 moonalyze                  analyze the current moonbase for common issues
 held                       display held modules
 exiled                     display exiled modules
+enforced                   display enforced modules
 expired                    display a list of modules which need an update
 info        module         display terse summary information about module
 
@@ -1259,7 +1260,7 @@ main()  {
 
     installed)
       if [ -z "$2" ] ; then
-        grep -E ':(installed|held):' "$MODULE_STATUS" | view_file
+        grep -E '[:+](installed|held)[:+]' "$MODULE_STATUS" | view_file
       elif [ -n "$(installed_version $2)" ] ; then
         echo "$(installed_version $2)"
       else
@@ -1269,11 +1270,15 @@ main()  {
       ;;
 
     held)
-      grep ":held:" "$MODULE_STATUS" | cut -d: -f1
+      grep -E '[:+]held[:+]' "$MODULE_STATUS" | cut -d: -f1
       ;;
 
     exiled)
-      grep ":exiled:" "$MODULE_STATUS" | cut -d: -f1
+      grep -E '[:+]exiled[:+]' "$MODULE_STATUS" | cut -d: -f1
+      ;;
+
+    enforced)
+      grep -E '[:+]enforced[:+]' "$MODULE_STATUS" | cut -d: -f1
       ;;
 
     expired)

@@ -6,7 +6,7 @@ lunar \- menu\-driven software package management utility
 -d|--debug|-h|--help|-v|--verbose
 .PP
 .B lunar
-[prune|renew|update|rebuild|optimize|fix|nofix|fixdepends|resurrect|install|remove|hold|unhold|exile|unexile]
+[prune|renew|update|rebuild|optimize|fix|nofix|fixdepends|resurrect|install|remove|hold|unhold|exile|unexile|enforce|unenforce]
 .SH "COPYRIGHT"
 .if n lunar(8) is Copyright (C) 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
 .if t lunar(8) is Copyright \(co 2002-2003 Terry Chan with portions copyrighted by previous authors 2001\-2002
@@ -106,6 +106,14 @@ Prevents a module from being installed or resurrected. Perhaps because you've in
 .I unexile
 .IP 
 Removes a module from exiled status.
+.PP
+.I enforce
+.IP 
+Automatically select yes for optional dependency to this module.
+.PP
+.I unenforce
+.IP 
+Removes a module from enforce list.
 .PP
 .SH "REQUIREMENTS"
 .I lunar
