@@ -213,6 +213,10 @@ last_kernel()
 	fi
 }
 
+source_basename()
+{
+  echo $1 | sed 's/.tar.\(bz2\|gz\|xz\)$//g'
+}
 
 xzbz_file()
 {
