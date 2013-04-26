@@ -84,9 +84,22 @@ show_modules()	{
 }
 
 
+has_modules()	{ 
+  for  MODULE in `list_modules "$1"`;  do
+    if  !  module_installed  $MODULE  &&
+        !  module_held       $MODULE  &&
+        !  module_exiled     $MODULE
+    then
+      return 0
+    fi
+  done
+  return 1
+}
+
+
 show_sections()  {
   for SECTION in $(list_sections);  do
-    [ -z "$(list_modules $SECTION)" ] || {
+    has_modules $SECTION && {
       echo  "$SECTION"
       echo  "section"
     }
