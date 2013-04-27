@@ -300,7 +300,7 @@ module_installed()
 {
   debug_msg "module_installed ($@)"
 
-  has_module_state $1 "(installed|held)"
+  has_module_state $1 "\\(installed\\|held\\)"
 }
 
 
