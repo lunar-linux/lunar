@@ -126,9 +126,12 @@ is_depends()  {
 
 
 in_depends()  {
+  local DEP
   debug_msg "in_depends ($@)"
+
+  DEP=$(unalias $2)
   # Was $2 presented as a dependency for module $1
-  return $(grep -q "^$1:$2:on:" "$DEPENDS_STATUS")
+  return $(grep -q "^$1:$DEP:on:" "$DEPENDS_STATUS")
 }
 
 
