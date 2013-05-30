@@ -82,7 +82,7 @@ list_moonbase() {
 # purpose  : return a list of installed (or held) modules
 list_installed() {
   debug_msg "list_installed ($@)"
-  sed "s/:[[:digit:]]*:\\([^:]\\++\\)\\?\\(installed\\|held\\)\\(+[^:]\\+\\)\\?:.*$//" "$MODULE_STATUS"
+  sed -n "s/:[[:digit:]]*:\\([^:]\\++\\)\\?\\(installed\\|held\\)\\(+[^:]\\+\\)\\?:.*$//p" "$MODULE_STATUS"
 }
 
 
