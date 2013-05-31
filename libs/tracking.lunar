@@ -91,7 +91,7 @@ create_md5sum_log()  {
   rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-  IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -i md5sum '{}' >> $MD5SUM_LOGS/$MODULE-$VERSION
+  IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
 }
 
 create_install_cache() {
