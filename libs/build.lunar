@@ -142,7 +142,8 @@ default_pre_build() {
     fi
   else
     mk_source_dir        $SOURCE_DIRECTORY &&
-    unpack               $SOURCE
+    unpack               $SOURCE           &&
+    cd                   $SOURCE_DIRECTORY
   fi
 }
 
