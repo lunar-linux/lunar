@@ -686,7 +686,7 @@ module_is_expired() {
     if [ "$MODULE" == moonbase ] ; then
       return 255
     fi
-    LINE=$(awk -F: -v mod=$MODULE '$1==mod && $3 ~ /(^|\+)installed(\+|$)/ {print "IDATE="$2" IVERSION="$4}' "$MODULE_STATUS")
+    LINE=$(awk -F: -v mod=$MODULE '$1==mod && $3 ~ /(^|\+)installed(\+|$)/ && $3 !~ /(^|\+)held(\+|$)/ {print "IDATE="$2" IVERSION="$4}' "$MODULE_STATUS")
     if [ -n "$LINE" ] ; then
       eval $LINE
       if run_details $MODULE &> /dev/null ; then
