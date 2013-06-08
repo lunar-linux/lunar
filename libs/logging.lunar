@@ -29,10 +29,10 @@ stop_logging() {
   echo > $C_FIFO
   echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >> $C_LOG
   message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.xz"  \
+           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD:=xz}"  \
            "${DEFAULT_COLOR}"
 
-  xz -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.xz
+  ${COMPRESS_METHOD/bz2/bzip2} -9f < $C_LOG > $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}
   temp_destroy $C_LOG
   temp_destroy $C_FIFO
 }
