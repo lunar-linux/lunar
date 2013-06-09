@@ -43,7 +43,7 @@ Optional Parameters:
 -c  |  --compile		Ignore $INSTALL_CACHE and compiles
 -d  |  --debug                  Enables debug messages
        --deps			Configure modules and determine dependencies
-       --download		Configure modules, determine dependencies
+-g  |  --download		Configure modules, determine dependencies
                                 and download the sources
 -f  |  --from  directory	Specify an alternate for $SOURCE_CACHE
 -h  |  --help                   Displays this help text
@@ -262,7 +262,7 @@ else
       -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
       -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
          --deps        ) export DEPS_ONLY="$1" ;                    shift   ;;
-         --download    ) export DOWNLOAD_ONLY="$1" ;                shift   ;;
+      -g|--download    ) export DOWNLOAD_ONLY="$1" ;                shift   ;;
       -f|--from        ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
       -h|--help        ) help ; exit                                        ;;
          --opts        ) export PASS_OPTS="$2" ;                    shift 2 ;;
