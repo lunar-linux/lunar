@@ -319,7 +319,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD:-xz} "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD} "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
@@ -340,7 +340,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected during ${FILE_COLOR}$LIN_ERROR${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD:-xz} "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD} "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during $LIN_ERROR"
       return 1
     fi
@@ -355,7 +355,7 @@ lin_module()  {
       sound FAILURE
       message "${PROBLEM_COLOR}! Problem detected${DEFAULT_COLOR}"
       rm -f $linING
-      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD:-xz} "compile log" $MODULE $VERSION
+      report $COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD} "compile log" $MODULE $VERSION
       activity_log  "lin"  "$MODULE"  "$VERSION"  "failed" "Due to build errors during or after $LIN_ERROR"
       return 1
     fi
