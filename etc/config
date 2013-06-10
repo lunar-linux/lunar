@@ -35,6 +35,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
            MD5SUM_LOGS=/var/log/lunar/md5sum
          INSTALL_QUEUE=/var/log/lunar/queue/install
           REMOVE_QUEUE=/var/log/lunar/queue/remove
+       COMPRESS_METHOD=xz
 
         DEPENDS_STATUS=/var/state/lunar/depends
  DEPENDS_STATUS_BACKUP=/var/state/lunar/depends.backup
