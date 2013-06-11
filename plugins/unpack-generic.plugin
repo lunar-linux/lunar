@@ -13,13 +13,9 @@
 
 plugin_unpack_generic() {
 	case $1 in
-		*tar.bz2|*tbz2)
-			debug_msg "Unpacking tar.bz2 file \"$1\""
-			tar jxf $1 --no-same-owner --no-same-permissions || return 1
-			;;
-		*tar.gz|*tgz|*tar.Z)
-			debug_msg "Unpacking tar.gz file \"$1\""
-			tar zxf $1 --no-same-owner --no-same-permissions || return 1
+		*tar.bz2|*tbz2|*.tar.gz|*.tgz|*.tar.Z|*.tar.xz|*.txz|*.tar)
+			debug_msg "Unpacking tar file \"$1\""
+			tar xf $1 --no-same-owner --no-same-permissions || return 1
 			;;
 		*.bz2)
 			debug_msg "Unpacking bz2 file \"$1\""
@@ -30,10 +26,6 @@ plugin_unpack_generic() {
 			debug_msg "Unpacking gz file \"$1\""
 			cp $1 . || return 1
 			gunzip $1 || return 1
-			;;
-		*.tar)
-			debug_msg "Unpacking tar  file \"$1\""
-			tar xf $1 --no-same-owner --no-same-permissions || return 1
 			;;
 		*)
 			# fallback: we don't know what to do!
