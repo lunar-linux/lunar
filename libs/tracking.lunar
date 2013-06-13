@@ -75,7 +75,7 @@ create_install_log() {
 
   parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
   echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
-  echo "$COMPILE_LOGS/$MODULE-$VERSION.xz"              >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
   echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
   install -m644 $TMP_INST_LOG $INST_LOG
@@ -101,8 +101,8 @@ create_install_cache() {
     return
   fi
 
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz${DEFAULT_COLOR}"
-  tar cPJf "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.xz" --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}${DEFAULT_COLOR}"
+  tar cP --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION | ${COMPRESS_METHOD/bz2/bzip2} > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
 
 }
 
