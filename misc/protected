@@ -107,6 +107,15 @@ bin/uname
 /fonts.dir$
 ^/lib/ld-linux.so.2
 ^/lib/ld-linux-x86-64.so.2
+^/lib/libc.so.6
+^/lib/libdl.so.2
+^/lib/libm.so.6
+^/lib/librt.so.1
+^/lib/libpthread.so.0
+^/lib/libnss_files.so.2
+^/lib/libutil.so.1
+^/lib/libnsl.so.1
+^/lib/libcrypt.so.1
 ^/lib/modules/
 /perllocal.pod$
 ^/usr/include/bits/syscall.h
