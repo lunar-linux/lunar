@@ -13,6 +13,11 @@
 
 plugin_sanity_post_build()
 {
+    # Don't check the Filesystem Hierarchy Standard
+    if [ "$1" == fhs ] ; then
+        return 2;
+    fi
+
     (
 	local IFS TESTS PATTERN SEVERITY REASON
 
