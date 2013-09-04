@@ -206,7 +206,7 @@ show_downloading()
 	if [ -n "$DOWNLOAD_PID" ]; then
 		DOWNLOAD_LOG=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f3)
 		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
-			cat "$DOWNLOAD_LOG"
+			sed -e 's/^.*\r//' "$DOWNLOAD_LOG"
 			rm -f $DOWNLOAD_LOG
 		elif [ -f "$DOWNLOAD_LOG" ]; then
 			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID "$DOWNLOAD_LOG"
