@@ -240,7 +240,7 @@ main() {
 . /etc/lunar/config
 . $BOOTSTRAP
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdf:hprRsvV:w:" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
 
 # the following trap makes sure all threads exit in case something weird
 # happens:

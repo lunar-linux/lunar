@@ -58,7 +58,7 @@ plugin_source_download_generic()  {
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
   verbose_msg "calling \"wget $WGET_OPTS \"$URL$2\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget $WGET_OPTS "$URL$2" --output-document "$TMP_FILE" ; then
+  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL$2" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
