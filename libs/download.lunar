@@ -37,14 +37,14 @@ download_url() {
 	local RETVAL
 	debug_msg "download_url($@)"
 	verbose_msg "trying to download \"${2}\" from \"${1}\""
-	plugin_call SOURCE_DOWNLOAD $1 $2 $3
+	plugin_call SOURCE_DOWNLOAD $1 $2 $3 $4
 	return $?
 }
 
 
 download_module() {
 (
-	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT
+	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT UPSTREAM SECOND
 	debug_msg "download_module ($@)"
 	if ! run_details $1 ; then
 		return 1
@@ -65,6 +65,7 @@ download_module() {
 		# get the URL part
 		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
 		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
+		eval UPSTREAM=\${$(echo SOURCE${N}_UPSTREAM | sed s/SOURCE0/SOURCE/ )[@]}
 
 		# continue (to next) if empty once, break if empty twice
 		if [ -z "$SRC" ] ; then
@@ -90,7 +91,7 @@ download_module() {
 			fi
 		}
 
-		if ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE && [ -f $SOURCE_CACHE/$SRC ] ; then
+		if  [ -f $SOURCE_CACHE/$SRC ] && ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE $SOURCE_UPSTREAM ; then
 			# break out of the loop if the cache has it:
 			verbose_msg "Skipping download of \"$SRC\" (in cache)"
 			continue
@@ -135,7 +136,7 @@ download_module() {
 
 		for URL in $ALL_URLS; do
 			# and download
-			if download_url $URL $SRC $SOURCE_CACHE == 0 ; then
+			if download_url $URL $SRC $SOURCE_CACHE $UPSTREAM == 0 ; then
 				# done for this file!
 				SUCCESS=1
 				break

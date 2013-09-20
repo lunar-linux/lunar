@@ -810,7 +810,7 @@ show_urls() { (
     if [ "${URL#${URL%?}}" != "/" ]; then
       URL="${URL}/"
     fi
-    echo $URL$2
+    echo $URL${4:-$2}
     return 1
   }
 
