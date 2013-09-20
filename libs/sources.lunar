@@ -46,22 +46,15 @@ sources() {
     return 1
   fi
 
-  for (( CNT=0; CNT<=$MAX_SOURCES; CNT++ )) ; do
+  for (( CNT=1; CNT<=$MAX_SOURCES; CNT++ )) ; do
     TEMP=SOURCE$((CNT))
-    TEMP=${TEMP/SOURCE0/SOURCE}
+    TEMP=${TEMP/%SOURCE1/SOURCE}
 
-    eval SRC1=\$${TEMP}
-    eval SRC2=\$SOURCE$((CNT+1))
-    eval SRC3=\$SOURCE$((CNT+2))
+    eval SRC=\$${TEMP}
 
-    if [ -n "$SRC1" ] ; then
-      echo $SRC1
-    fi
+    [ -z "$SRC" ] && break
 
-    #if two consequtive empty sources, then break
-    [ -z "$SRC2" ] && [ -z "$SRC3" ] && {
-      break
-    }
+    echo $SRC
   done
 )
 }
@@ -107,13 +100,15 @@ verify_all_sources() {
     return 0
   fi
 
-  for (( C=0 ; C<=$MAX_SOURCES ; C++ )) ; do
+  for (( C=1 ; C<=$MAX_SOURCES ; C++ )) ; do
     TEMP=SOURCE$((C))
-    TEMP=${TEMP/SOURCE0/SOURCE}
-    eval SRC1=\$${TEMP}
+    TEMP=${TEMP/%SOURCE1/SOURCE}
+    eval SRC=\$${TEMP}
+
+    [ -z "$SRC" ] && break
    
     # it needs to exist prior before we can check it:
-    if ! verify_source $SRC1 ; then
+    if ! verify_source $SRC ; then
       return 1
     fi
     eval VFYS=\${${TEMP}_VFY[@]}
@@ -124,7 +119,7 @@ verify_all_sources() {
       # we need to check ALL args for validity... if one fails we should not
       # trust the source
       for VFY in $VFYS ; do
-        plugin_call SOURCE_VERIFY $SRC1 $VFY
+        plugin_call SOURCE_VERIFY $SRC $VFY
 		if [ $? == 1 ]; then
 		  RESULT=1
 		fi
@@ -133,18 +128,13 @@ verify_all_sources() {
       if [ "$RESULT" == "1" ] ; then
         # remove?
         MODULE=$1
-        message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC1${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
+        message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
 	
-        if query "Remove \"$SOURCE_CACHE/$SRC1\" ? " y ; then
-          rm -f $SOURCE_CACHE/$SRC1
+        if query "Remove \"$SOURCE_CACHE/$SRC\" ? " y ; then
+          rm -f $SOURCE_CACHE/$SRC
         fi
       fi
     fi
-
-    # our fallthrough as usual:
-    eval SRC2=\$SOURCE$((C+1));
-    eval SRC3=\$SOURCE$((C+2));
-    [ -z "$SRC2" ] && [ -z "$SRC3" ] && break
   done
  
   # result?
