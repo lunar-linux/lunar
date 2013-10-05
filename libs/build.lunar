@@ -420,10 +420,11 @@ run_post_build() {
 
 run_post_install() {
   debug_msg "run_post_install ($@)"
-  plugin_call BUILD_POST_INSTALL $MODULE
   if has_module_file $MODULE POST_INSTALL ; then
     run_module_file $MODULE POST_INSTALL
   fi
+  plugin_call BUILD_POST_INSTALL $MODULE
+  if [ $? == 2 ]; then
+    return 0
+  fi
 }
-
-
