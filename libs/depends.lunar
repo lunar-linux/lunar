@@ -60,7 +60,7 @@ function find_depends() {
       DEPS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$DEPENDS_CACHE")
     fi
     for DEP in $DEPS ; do
-      DEP=$(unalias "$DEP")
+      DEP=$(expand_alias "$DEP")
       # this is our shortcut out:
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
@@ -73,7 +73,7 @@ function find_depends() {
   }
 
   TMP_FDEPS=$(temp_create "found.depends")
-  find_depends_intern $(unalias $1)
+  find_depends_intern $(expand_alias $1)
   temp_destroy $TMP_FDEPS
 }
 
@@ -95,7 +95,7 @@ sort_by_dependency() {
   # tsort the existing dep relations in all of moonbase
   TMP_TSRT=$(temp_create "dependency.sort")
   awk -F: '{print $1,$2}' "$DEPENDS_CACHE" | while read A B ; do
-    B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= unalias $B)
+    B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= expand_alias $B)
     echo "$A $B" >> $TMP_TSRT
   done
   tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
@@ -129,7 +129,7 @@ in_depends()  {
   local DEP
   debug_msg "in_depends ($@)"
 
-  DEP=$(unalias $2)
+  DEP=$(expand_alias $2)
   # Was $2 presented as a dependency for module $1
   return $(grep -q "^$1:$DEP:on:" "$DEPENDS_STATUS")
 }
@@ -184,7 +184,7 @@ run_depends() {
   depends() {
     local DEP
     debug_msg "  depends ($@)"
-    DEP=$(unalias $1)
+    DEP=$(expand_alias $1)
 
     add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
 
@@ -215,7 +215,7 @@ run_depends() {
     #              $4 = description of why to use this module
     #              $5 = optional default choice (recommended)
 
-    DEP=$(unalias $1)
+    DEP=$(expand_alias $1)
     if in_depends $MODULE $DEP ; then
       if ! module_installed $DEP ; then
         # don't check depends if there are already checked
@@ -419,7 +419,7 @@ create_depends_cache()
   local TMP_DEP_CACHE DEPFILES DEPFILE MODULE
   debug_msg "create_depends_cache($@)"
 
-  if [ ! -w $DEPENDS_CACHE -a -e $DEPENDS_CACHE ] ; then
+  if [[ ! -w $DEPENDS_CACHE && -e $DEPENDS_CACHE ]] ; then
     return 1
   fi
 
@@ -480,7 +480,7 @@ update_module_depends()
   optional_depends()  {
     local DEP
     debug_msg "  optional_depends ($@)"
-    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
     # check for the current depend selection
     if grep -q "^$MODULE:$DEP:on:optional:" "$DEPENDS_STATUS_BACKUP" ; then
       echo "$MODULE:$DEP:on:optional:$2:$3"
@@ -493,7 +493,7 @@ update_module_depends()
   depends()  {
     local DEP
     debug_msg "  depends ($@)"
-    DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+    DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
     echo "$MODULE:$DEP:on:required:$2:$3"
   }
 
