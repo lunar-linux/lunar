@@ -80,7 +80,7 @@
 ^/etc/samba/
 ^/etc/security/
 ^/etc/services$
-^/etc/sgml/catalog $
+^/etc/sgml/catalog$
 ^/etc/shadow$
 ^/etc/shadow-$
 ^/etc/snort$
