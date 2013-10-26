@@ -1056,7 +1056,7 @@ edit_module()
 			else
 				cp -a $MOONBASE/$SECTION/$1 $MOONBASE/zlocal/
 				# clean out SCM directories
-				find $MOONBASE/zlocal/$1 -type d -name CVS -o -name .svn | xargs rm -rf
+				find $MOONBASE/zlocal/$1 -type d -name CVS -o -name .svn -exec rm -rf '{}' +
 				message "Copied \"$1\" from \"$SECTION\""
 				message "Edit your module in \"$MOONBASE/zlocal/$1\""
 			fi
@@ -1458,7 +1458,7 @@ main()  {
         if [ -f $MOONBASE/$SEC/$MOD/services ] ; then
           echo $MOONBASE/$SEC/$MOD/services
         fi
-      done | xargs egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
+      done | xargs -d '\n' egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
 
     depends)
@@ -1580,7 +1580,7 @@ main()  {
    links)
      [[ -z "$2" ]] && return 1
 
-     REGEX=$(lvu install $2 | xargs file | awk -F: '/ELF/ { print $1 }' | xargs ldd | fgrep '=>' | cut -d' ' -f3 | sort | uniq)
+     REGEX=$(lvu install $2 | xargs -d '\n' file | awk -F: '/ELF/ { print $1 }' | xargs -d '\n' ldd | fgrep '=>' | cut -d' ' -f3 | sort | uniq)
 
      pushd $INSTALL_LOGS >/dev/null
      fgrep -xl "$REGEX" *
