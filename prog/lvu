@@ -858,7 +858,7 @@ show_info() {
     fi
     echo
     if [ -e $MOONBASE/$SECTION/$MODULE/services ] ; then
-      LINES="`wc -l $MOONBASE/$SECTION/$MODULE/services | cut -d' ' -f1`"
+      LINES="`wc -l "$MOONBASE/$SECTION/$MODULE/services" | cut -d' ' -f1`"
       echo -n "  Provides Service"
       if [ 1 -lt $LINES ]; then
         echo "s:"
