@@ -70,7 +70,6 @@ EOF
 show_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
-        !  module_held       $MODULE  &&
         !  module_exiled     $MODULE
     then
       (
@@ -87,7 +86,6 @@ show_modules()	{
 has_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
-        !  module_held       $MODULE  &&
         !  module_exiled     $MODULE
     then
       return 0
@@ -237,7 +235,7 @@ make_checklist()  {
     (
     run_details $MODULE
 
-    if module_installed $MODULE || module_held $MODULE; then
+    if module_installed $MODULE; then
       STATUS="on"
     else
       STATUS="off"

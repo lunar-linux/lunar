@@ -109,7 +109,7 @@ export_ld()  {
 
 prepare_install() {
   debug_msg "prepare_install ($@)"
-  if module_installed $MODULE || module_held $MODULE ; then
+  if module_installed $MODULE ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
     save_libraries
@@ -309,7 +309,7 @@ default_cpan_build() {
 default_post_build() {
   debug_msg "default_post_build ($@)"
 
-  if [ $(wc -l $INSTALLWATCHFILE | awk '{print$1}') == "0" ] &&
+  if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
       [ "$PROFILE" != "yes" ] ; then
     message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
   fi
