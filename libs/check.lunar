@@ -37,11 +37,13 @@ rework_module() {
 		if module_exiled $DEP ; then
 			echo "$MODULE:$DEP:off:optional:$2:$3"
 		else
-			if module_installed $DEP ; then
+			# check for the current depend selection
+			if grep -q "^$1:$2:on:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:on:optional:$2:$3"
-			else
+			elif grep -q "^$1:$2:off:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:off:optional:$2:$3"
 			fi
+			# if we don't know the answer we leave it open for the user to decide
 		fi
 	}
 

@@ -37,8 +37,8 @@ display_success_info() {
   local NUMSUCCESS NUMFAILURES
   debug_msg "display_success_info ($@)"
 
-  NUMSUCCESS=$(wc -l $TMP_LIN_SUCCESS | cut -d" " -f1)
-  NUMFAILURES=$(wc -l $TMP_LIN_FAIL | cut -d" " -f1)
+  NUMSUCCESS=$(wc -l "$TMP_LIN_SUCCESS" | cut -d" " -f1)
+  NUMFAILURES=$(wc -l "$TMP_LIN_FAIL" | cut -d" " -f1)
 
   message
   message  "${MESSAGE_COLOR}Lunar $1 completed at `date`${DEFAULT_COLOR}"

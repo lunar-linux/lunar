@@ -213,6 +213,7 @@ run_depends() {
     #              $2 = configure parameter if module wanted
     #              $3 = configure parameter if module declined
     #              $4 = description of why to use this module
+    #              $5 = optional default choice (recommended)
 
     DEP=$(expand_alias $1)
     if in_depends $MODULE $DEP ; then
@@ -231,10 +232,10 @@ run_depends() {
         add_depends "$MODULE" "$DEP" "off" "optional" "$2" "$3"
       else
         if module_installed $DEP ; then
-          DEFAULT="y"
+          DEFAULT="${5:-y}"
           DEPMOD_AVAIL="Use optional (${FILE_COLOR}installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
         else
-          DEFAULT="n"
+          DEFAULT="${5:-n}"
           DEPMOD_AVAIL="Install & use optional (${PROBLEM_COLOR}not installed${QUERY_COLOR}) module ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
         fi
 
@@ -335,8 +336,7 @@ satisfy_depends()  {
       fi
     elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
       OPTS="$OPTS $DEP_OFF"
-    elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE && \
-        ! module_held $DEP_MODULE ; then
+    elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE ; then
       if SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
         OPTS="$OPTS $DEP_ON"
       else
