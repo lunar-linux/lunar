@@ -62,11 +62,11 @@ unalias() {
     done
     echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
     read -t $PROMPT_DELAY CHOICE
-    # test directly first; this is prone to invalid unput as a combination of the sequential aliases
-    if echo " "$TARGETS" " | fgrep -q " $CHOICE " ; then
-      verbose_msg "Stored alias mapping $1 -> $CHOICE"
-      set_local_config `echo LUNAR_ALIAS_${1:1}` $CHOICE
-      echo $CHOICE
+    # test directly first
+    if for TARGET in $TARGETS ; do [[ "$TARGET" == "$CHOICE" ]] && break ; done ; then
+      verbose_msg "Stored alias mapping $1 -> $TARGET"
+      set_local_config `echo LUNAR_ALIAS_${1:1}` $TARGET
+      echo $TARGET
       return
     # then the number, resolving the default
     elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]] ; then
