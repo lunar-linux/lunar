@@ -21,7 +21,7 @@ temp_create() {
   local TMPFILE
   debug_msg "temp_create ($@)"
   TMPFILE="$@"
-  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$$.$TMPFILE.XXXXXXXXXX ) ; then
+  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$TMPFILE.$$.XXXXXXXXXX ) ; then
     echo $TMPFILE
   else
     message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}" \
