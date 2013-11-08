@@ -64,7 +64,7 @@ expand_alias() {
     echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
     read -t $PROMPT_DELAY CHOICE
     # test directly first
-    if echo $TARGETS | grep -qw "$CHOICE" ; then
+    if [[ $TARGETS =~ $CHOICE ]] ; then
       verbose_msg "Stored alias mapping $1 -> $TARGET"
       set_local_config `echo LUNAR_ALIAS_${1:1}` $TARGET
       echo $TARGET

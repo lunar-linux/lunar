@@ -186,7 +186,7 @@ custom_filters()
 	if [[ "${COMPRESS_MANPAGES:-on}" == "on" ]]; then
 		while read FILE; do
 			if [[ -f "$FILE" ]] ; then
-				if echo "$FILE" | grep '^/usr/share/man/.*\..$' | grep -q -v '\.gz$'; then
+				if [[ $FILE =~ ^/usr/share/man/.*\..$ && ! $FILE =~ \.gz$ ]]; then
 					gzip -9 < "$FILE" > "$FILE.gz"
 					debug_msg "Compressing man page \"$FILE\""
 					rm -f "$FILE"
