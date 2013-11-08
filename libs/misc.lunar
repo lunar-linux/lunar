@@ -215,7 +215,8 @@ last_kernel()
 
 source_basename()
 {
-  echo $1 | sed 's/.tar.\(bz2\|gz\|xz\)$//g'
+  local filename=$1
+  echo ${filename%.tar.?z*} # xz, bz2, gz
 }
 
 xzbz_file()

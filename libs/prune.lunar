@@ -71,10 +71,10 @@ prune() {
 
   verbose_msg "finding stale compile logs"
   for FILE in $(ls -1 $COMPILE_LOGS) ; do
-    local base_file
-    base_file=${FILE%.xz}
-    base_file=${FILE%.bz2}
-    if [[ $LOGS =~ $base_file ]]; then
+    local file_base
+    file_base=${FILE%.xz}
+    file_base=${FILE%.bz2} # compile logs can be either
+    if [[ ! $LOGS =~ $file_base ]]; then
       message "Removing stale log: $COMPILE_LOGS/$FILE"
       rm $COMPILE_LOGS/$FILE
     fi
@@ -82,7 +82,7 @@ prune() {
 
   verbose_msg "finding stale md5sum logs"
   for FILE in $(ls -1 $MD5SUM_LOGS) ; do
-    if [[ "$LOGS" =~ $FILE ]]; then
+    if [[ ! $LOGS =~ $FILE ]]; then
       message  "Removing stale log: $MD5SUM_LOGS/$FILE"
       rm $MD5SUM_LOGS/$FILE
     fi
