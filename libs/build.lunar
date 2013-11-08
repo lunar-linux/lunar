@@ -44,12 +44,12 @@ save_libraries()  {
   SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-  grep   "/lib/"  "$OLD_LOG"  |
+  fgrep  '/lib/'  "$OLD_LOG"  |
   while  read  LINE;  do
 
     if [ -f "$LINE"  ]  &&
          file  -bL  $LINE   |
-         grep  -q   "shared object"
+         fgrep -wq  'shared object'
     then
       verbose_msg "saving library \"$LINE\""
       if  [  -h  $LINE  ];  then
@@ -96,7 +96,7 @@ export_ld()  {
   local DIRECTORY
   debug_msg "export_ld ($@)"
   for DIRECTORY in $* ; do
-    if file -b $DIRECTORY/*.so* | grep  -q  "shared object" ; then
+    if file -b $DIRECTORY/*.so* | fgrep  -wq  'shared object' ; then
       if [ -z "$LD_LIBRARY_PATH" ] ; then
         export LD_LIBRARY_PATH="$DIRECTORY"
       else
@@ -346,7 +346,7 @@ run_configure() {
   fi
 
   prepare_module_config
-  grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
+  fgrep -xq "$MODULE" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
 
   # add custom passed OPTS before retrieving them
   if [ -n "$PASS_OPTS" ] ; then

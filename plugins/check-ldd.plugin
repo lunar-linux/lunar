@@ -27,15 +27,15 @@ plugin_module_check_ldd() {
     export IFS=$'\n'
 
     # fast-construct per-module LD path including all /lib/ like directories
-    NEW_LD=$(cat "$I_LOG" | grep "/lib/" | files | sed 's/\(.*\)\/\([^\/]*\)$/\1/g' | uniq | tr '\n' ':')
-    LOG=$(cat "$I_LOG" | grep "/bin/\|/games/\|/lib/\|/sbin/\|/libexec/" | grep -v "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/")
+    NEW_LD=$(cat "$I_LOG" | fgrep '/lib/' | files | sed 's/\(.*\)\/\([^\/]*\)$/\1/g' | uniq | tr '\n' ':')
+    LOG=$(cat "$I_LOG" | fgrep -e '/bin/' -e '/games/' -e '/lib/' -e '/sbin/' -e '/libexec/' | fgrep -v -e '/doc/' -e '/fonts/' -e '/include/' -e '/locale/' -e '/man/' -e '/modules/' -e '/var/')
 
     for FILE in $LOG; do
-      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | grep -q "not found" ; then
+      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | fgrep -wq 'ELF' && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | fgrep -wq 'not found' ; then
         (
           export IFS="$IFS_OLD"
           message "${FILE_COLOR}${FILE}${DEFAULT_COLOR} of ${MODULE_COLOR}${MODULE} ${PROBLEM_COLOR}is broken. ${DEFAULT_COLOR}"
-          LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | grep "not found"
+          LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | fgrep -w 'not found'
         )
         LDD_STATUS=1
       fi

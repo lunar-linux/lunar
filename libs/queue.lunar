@@ -29,7 +29,7 @@ add_queue() {
   debug_msg "add_queue ($@)"
    in_queue() {
   debug_msg "   in_queue ($@)"
-      grep -q "^"$2"\$" "$1" && return 0 || return 1
+      fgrep -xq "$2" "$1" && return 0 || return 1
    }
 
    [ "$#" -ne 2 ] && return 1
@@ -55,7 +55,7 @@ remove_queue() {
       TMP_QUEUE="$TMPDIR/lunar_remove_queue.$$"
       rm -f $TMP_QUEUE 2>/dev/null
       lock_file $1                 &&
-      cat "$1" | grep -v "^"$2"\$" > $TMP_QUEUE
+      cat "$1" | fgrep -xv "$2" > $TMP_QUEUE
       cat "$TMP_QUEUE" > $1
       unlock_file $1 
       rm -f $TMP_QUEUE 2>/dev/null 

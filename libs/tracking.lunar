@@ -53,8 +53,8 @@ parse_iw() {
   debug_msg "parse_iw ($@)"
   OMIT_IN="	rename\|	symlink\|	unlink"
 
-  grep -v "$OMIT_IN" "$INSTALLWATCHFILE" | cut -f3 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED"
-  cat                "$INSTALLWATCHFILE" | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED" | grep "^/"
+  grep -v "$OMIT_IN" "$INSTALLWATCHFILE" | cut -f3 | grep -v -e "^$SOURCE_DIRECTORY" -f "$EXCLUDED"
+  cat                "$INSTALLWATCHFILE" | cut -f4 | grep -v -e "^$SOURCE_DIRECTORY" -f "$EXCLUDED" | grep '^/'
 }
 
 

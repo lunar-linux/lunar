@@ -27,7 +27,7 @@ set_config()
 	VAR=${2#"${2%%[![:space:]]*}"}
 	VAR=${VAR%%+([[:space:]])}
 
-	LINE=$(grep -w "$VAR=.*" "$1")
+	LINE=$(grep "\<$VAR=.*" "$1")
 	FILE=$1
 
 	shift 2
@@ -72,7 +72,7 @@ unset_config()
 get_config()
 {
 	if [[ -f $1 ]] ; then
-		grep -w "$2=.*" "$1" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
+		grep "\<$2=.*" "$1" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
 	fi
 }
 

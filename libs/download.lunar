@@ -19,7 +19,7 @@ lget_lock() {
 lget_locked() {
 	debug_msg "lget_locked ($@)"
 	if [ -f "/var/lock/lgetting.$MODULE" ] &&
-			ps `cat "/var/lock/lgetting.$MODULE"` | grep	-q	"lget" ; then
+			ps `cat "/var/lock/lgetting.$MODULE"` | fgrep -wq 'lget' ; then
 		true
 	else
 		false
@@ -84,7 +84,7 @@ download_module() {
 
 		add_url() {
 			if [ -n "$1" ]; then
-				if ! echo " $ALL_URLS " | grep -q " $1 "; then
+				if ! echo " $ALL_URLS " | fgrep -q " $1 "; then
 					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
@@ -119,7 +119,7 @@ download_module() {
 
 				# scan for hits against known clusters of mirrors
 				for MLIST in $MIRRORS/*; do
-					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST" | grep -v "^Custom$"); do
+					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST" | fgrep -xv 'Custom'); do
 						if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
 							# compose the list of valid mirrors
 							REST=${URL:${#ALT}}
@@ -166,25 +166,25 @@ testpack () {
 		FILEMAGIC=$(file -b $FILENAME)
 		case $FILENAME in
 			*.bz2|*.BZ2)
-				echo $FILEMAGIC | grep -qw "bzip2"
+				echo $FILEMAGIC | fgrep -qw 'bzip2'
 				;;
 			*.gz|*.GZ|*.tgz|*.TGZ)
-				echo $FILEMAGIC | grep -qw "gzip"
+				echo $FILEMAGIC | fgrep -qw 'gzip'
 				;;
 			*.z|*.Z)
-				echo $FILEMAGIC | grep -qw "compress"
+				echo $FILEMAGIC | fgrep -qw 'compress'
 				;;
 			*.zip|*.ZIP)
-				echo $FILEMAGIC | grep -qw "Zip"
+				echo $FILEMAGIC | fgrep -qw 'Zip'
 				;;
 			*.rpm|*.RPM)
-				echo $FILEMAGIC | grep -qw "RPM"
+				echo $FILEMAGIC | fgrep -qw 'RPM'
 				;;
 			*.CAB|*.cab)
-				echo $FILEMAGIC | grep -qw "Cabinet"
+				echo $FILEMAGIC | fgrep -qw 'Cabinet'
 				;;
 			*.xz|*.XZ)
-				echo $FILEMAGIC | grep -qw "XZ"
+				echo $FILEMAGIC | fgrep -qw 'XZ'
 				;;
 			*)
 				# we don't know how to handle this type of file

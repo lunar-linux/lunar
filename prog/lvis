@@ -7,7 +7,7 @@
 ############################################################
 process_parameters()  {
   while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
+    if  echo  "" $1  |  grep  -q  '^ -';  then
       case  $1  in
                   --from)  export  SOURCE_CACHE="$2";       shift  2  ;;
                    --url)  export  BASE_URL="$2";           shift  2  ;;
@@ -25,7 +25,7 @@ process_parameters()  {
 }
 strip_parameters()  {
   while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
+    if  echo  "" $1  |  grep  -q  '^ -';  then
       case  $1  in
         --from)  shift 2  ;;
          --url)  shift 2  ;;

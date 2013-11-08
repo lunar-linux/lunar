@@ -38,7 +38,7 @@ function add_priv_group() {
   else
     # add the group:
     for (( N=0 ; N<100 ; N++)) ; do
-      if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
+      if [ -z "$(cat /etc/group | cut -d: -f3 | fgrep  -x "$N" )" ] ; then
         break
       fi
     done
@@ -92,7 +92,7 @@ function add_priv_user() {
 
     # add the user:
     for (( N=0 ; N<100 ; N++)) ; do
-      if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$" )" ] ; then
+      if [ -z "$(cat /etc/passwd | cut -d: -f3 | fgrep -x "$N" )" ] ; then
         break
       fi
     done

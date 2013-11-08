@@ -47,7 +47,7 @@ exit 1
 
 handle_config_files() {
   debug_msg "handle_config_files ($@)"
-  if dirname "$1" | grep -q "^/etc" ; then
+  if dirname "$1" | grep -q '^/etc' ; then
     # we can safely delete symlinks without md5sum checks
     if [ -L "$1" ] ; then
       return 0
@@ -56,7 +56,7 @@ handle_config_files() {
     debug_msg "considering config file \"$1\""
 
     TARGET_MD5=$(md5sum "$1" | cut -d " " -f 1-1)
-    OLD_MD5=$(grep -w "$1\$" "$MD5_LOG" | cut -d " " -f 1-1)
+    OLD_MD5=$(grep " $1\$" "$MD5_LOG" | cut -d " " -f 1-1)
 
     if [ -z "$TARGET_MD5" ] ; then
       verbose_msg "Skipping removal of \"$1\" due to problem with md5sum"
@@ -229,7 +229,7 @@ check_status() {
 
   if [ "$NOSUSTAIN" != "on" -a "$UPGRADE" != "on" ] ; then
     debug_msg "checking if \"$1\" is sustained"
-    if grep -q "^$MODULE$" "$SUSTAINED" ; then
+    if fgrep -xq "$MODULE" "$SUSTAINED" ; then
       message  "${MODULE_COLOR}${MODULE}"       \
                "${PROBLEM_COLOR}is sustained."  \
                "${DEFAULT_COLOR}"
@@ -352,7 +352,7 @@ else
           # skip held modules
           if ! module_held $DEP ; then
 	    # no duplicates
-	    if ! $(echo $LIST | grep -qw $DEP) ; then
+	    if ! $(echo " "$LIST" " | fgrep " $DEP ") ; then
               message "${MESSAGE_COLOR}Inserting ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR} into the removal queue${DEFAULT_COLOR}"
               LIST="$LIST $DEP"
 	    fi

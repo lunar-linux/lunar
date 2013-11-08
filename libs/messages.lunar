@@ -81,7 +81,7 @@ debug_msg() {
       fi
       set | grep '^[A-Z]' | sed 's/^/VAR /' > $TMPDIR/l_debug_var.$$
       diff -U0 $TMPDIR/l_debug_var.$$.old $TMPDIR/l_debug_var.$$ | \
-          grep -v "^@@" | grep "VAR" | tee -a $TMPDIR/lp_debuglog.$$ >&2
+          grep -v '^@@' | fgrep 'VAR' | tee -a $TMPDIR/lp_debuglog.$$ >&2
     fi
   fi
 }

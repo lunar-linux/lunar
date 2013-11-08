@@ -59,7 +59,7 @@ rework_module() {
 	 (
 		if run_details $1 &> /dev/null ; then
 			if has_module_file $MODULE DEPENDS ; then
-				run_module_file $MODULE DEPENDS | grep -v '%'
+				run_module_file $MODULE DEPENDS | fgrep -v '%'
 			fi
 		fi
 	 ) 

@@ -46,7 +46,7 @@ progress() {
     X="############################################################"
     Y="                                                            "
     OLDSZ=$(xzbz -dc $OLDLOG | wc -c)
-    OLDTIMES=($(xzbz -dc $OLDLOG | grep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
+    OLDTIMES=($(xzbz -dc $OLDLOG | fgrep 'Mark Compile ' | cut -d \" -f6 | while read TIME ; do date +%s -d "$TIME" ; done))
     CTIME=$((${OLDTIMES[1]} - ${OLDTIMES[0]}))
     echo "Last compile time: $((CTIME / 60))m$((CTIME % 60))s"
     while true ; do

@@ -41,7 +41,7 @@ plugin_sanity_post_build()
 	for TEST in ${TESTS[@]} ; do
 		PATTERN=$(echo $TEST | cut -d: -f1)
 
-		parse_iw | grep -q $PATTERN
+		parse_iw | grep -q "$PATTERN"
 		if [ $? == 0 ]; then
 			SEVERITY=$(echo $TEST | cut -d: -f2)
 			REASON=$(echo $TEST | cut -d: -f3)
@@ -49,12 +49,12 @@ plugin_sanity_post_build()
 			case $SEVERITY in
 			N)
 				message "${PROBLEM_COLOR}NOTICE:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
+				parse_iw | sort | uniq | grep "$PATTERN"
 				continue
 				;;
 			W)
 				message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
+				parse_iw | sort | uniq | grep "$PATTERN"
 				export SILENT=""
 				query "Ignore this warning" "y"
 				if [ $? != 0 ]; then
@@ -64,7 +64,7 @@ plugin_sanity_post_build()
 				;;
 			E)
 				message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
+				parse_iw | sort | uniq | grep "$PATTERN"
 				return 1
 				;;
 			esac

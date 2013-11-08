@@ -64,13 +64,13 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
-  if echo $MODULES | grep -qw moonbase ; then
+  if echo " "$MODULES" " | fgrep ' moonbase ' ; then
     # just update moonbase, no other modules
     if ! lget moonbase ; then
       exit 1
     fi
     # remove moonbase from MODULES and continue
-    MODULES=$(echo $MODULES | sed 's/moonbase//g')
+    MODULES=$(echo " "$MODULES" " | sed -e 's/ moonbase / /g' -e 's/^ *//;s/ *$//')
     if [ -z "$MODULES" ] ; then
       return
     fi

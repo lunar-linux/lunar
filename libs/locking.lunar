@@ -94,7 +94,7 @@ lin_locked()  {
   debug_msg "lin_locked ($@)"
   [     -f        /var/lock/installing.$1  ]  &&
   ps        `cat "/var/lock/installing.$1"`    |
-  grep  -q  "lin"
+  fgrep  -wq  'lin'
 }
 
 
