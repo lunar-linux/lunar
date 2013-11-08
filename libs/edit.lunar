@@ -26,21 +26,18 @@ patch_it () {
     PATCH="$1"
   fi
 
-  if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
+  if [[ $PATCH =~ '.tar' ]] ; then
     TARCMD="tar x -O"
   else
     TARCMD="cat"
   fi
 
-  if [[ -n `echo $PATCH | grep '\.bz2$'` ]] ; then
-    GZCMD="bzcat"
-  elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
-    GZCMD="zcat"
-  elif [[ -n `echo $PATCH | grep -e '\.xz$' -e '\.lzma$'` ]] ; then
-    GZCMD="xzcat"
-  else
-    GZCMD="cat"
-  fi
+  case "$PATCH" in
+    *.bz2)       GZCMD=bzcat ;;
+    *.gz)        GZCMD=zcat ;;
+    *.xz|*.lzma) GZCMD=zxcat ;;
+    *)           GZCMD=cat ;;
+  esac
 
   TMPFILE1=$(temp_create "patch_1")
   TMPFILE2=$(temp_create "patch_2")
