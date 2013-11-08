@@ -24,10 +24,10 @@ bad_flags()
 		unset LDFLAGS
 	else
 		for BAD_FLAG in "$@" ; do
-			CFLAGS=$(echo $CFLAGS | sed "s/$BAD_FLAG//")
-			CXXFLAGS=$(echo $CXXFLAGS | sed "s/$BAD_FLAG//")
-			CPPFLAGS=$(echo $CPPFLAGS | sed "s/$BAD_FLAG//")
-			LDFLAGS=$(echo $LDFLAGS | sed "s/$BAD_FLAG//")
+			CFLAGS="${CFLAGS/$BAD_FLAG/}"
+			CXXFLAGS="${CXXFLAGS/$BAD_FLAG/}"
+			CPPFLAGS="${CPPFLAGS/$BAD_FLAG/}"
+			LDFLAGS="${LDFLAGS/$BAD_FLAG/}"
 		done
 	fi
 }
