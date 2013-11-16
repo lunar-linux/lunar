@@ -192,7 +192,7 @@ find_section() {
 	# assuming we're not using ZLOCAL, we haven't looked there yet!
 	# perhaps it's a zlocal module ? search zlocal for it now
 	if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
-		if [[ -n "$SECTION" ]]; then
+		if [[ -f "$MOONBASE/zlocal/$SECTION/$1/DETAILS" ]]; then
 			echo $SECTION
 			return 0
 		fi
