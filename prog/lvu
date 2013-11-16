@@ -1448,7 +1448,7 @@ main()  {
       ;;
 
     search)
-      grep -irle "$2" "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
+      grep -irle "$2" "$MOONBASE" --include=DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
 
     service)
