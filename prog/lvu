@@ -1309,7 +1309,7 @@ main()  {
 	    break
 	  fi
 
-	  if [ -z "$(echo $TLx$TR | sed 's/[0-9]//g')" ] ; then
+	  if [ -z "$(echo $TL$TR | sed 's/[0-9]//g')" ] ; then
 	    # numerical
 	    if [ "$TL" -eq "$TR" ] ; then
 	      continue
