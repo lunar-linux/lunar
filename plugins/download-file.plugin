@@ -20,6 +20,9 @@ plugin_source_download_file()  {
   debug_msg "plugin_source_download_file ($@)"
 
   FILE=${1:7}
+  if [[ $4 == old ]] ; then
+    FILE="${FILE%/}/$2"
+  fi
 
   cp "$FILE" "$3/$2"
 }
