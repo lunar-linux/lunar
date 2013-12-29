@@ -66,7 +66,7 @@ download_module() {
 		TEMP=SOURCE$((N))
 		TEMP=${TEMP/%SOURCE1/SOURCE}
 		eval SRC=\${$TEMP}
-		eval URLS=\${${TEMP}_URL[@]}
+		eval URLS=\${${TEMP}_URL_FULL[@]}
 
 		if [ -z "$SRC" ] ; then
 			break
@@ -80,13 +80,13 @@ download_module() {
 
 		add_url() {
 			if [ -n "$1" ]; then
-				if ! echo " $ALL_URLS " | grep -q " $1 "; then
-					ALL_URLS="$ALL_URLS $1"
+				if ! echo " $ALL_URLS " | grep -q " $1$2 "; then
+					ALL_URLS="$ALL_URLS $1$2"
 				fi
 			fi
 		}
 
-		if ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE && [ -f $SOURCE_CACHE/$SRC ] ; then
+		if  [ -f $SOURCE_CACHE/$SRC ] && ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE ; then
 			# break out of the loop if the cache has it:
 			verbose_msg "Skipping download of \"$SRC\" (in cache)"
 			continue
@@ -104,7 +104,7 @@ download_module() {
 		else
 			# compose a list of URLS
 			ALL_URLS=
-			add_url $FRESORT_URL
+			add_url "$FRESORT_URL" /$SRC
 			for URL in $URLS ; do
 				add_url $URL
 			done
@@ -126,12 +126,12 @@ download_module() {
 					done
 				done
 			done
-			add_url $LRESORT_URL
+			add_url "$LRESORT_URL" /$SRC
 		fi
 
 		for URL in $ALL_URLS; do
 			# and download
-			if download_url $URL $SRC $SOURCE_CACHE == 0 ; then
+			if download_url $URL $SRC $SOURCE_CACHE ; then
 				# done for this file!
 				SUCCESS=1
 				break
