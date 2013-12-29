@@ -57,8 +57,8 @@ plugin_source_download_generic()  {
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  verbose_msg "calling \"wget $WGET_OPTS \"$URL$2\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL$2" --output-document "$TMP_FILE" ; then
+  verbose_msg "calling \"wget $WGET_OPTS \"$URL${4:-$2}\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL${4:-$2}" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
@@ -73,7 +73,7 @@ plugin_source_download_generic()  {
   else
     # don't report errors against cache misses
     if [ "$URL" != "$LRESORT_URL/" ]; then
-      activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
+      activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL${4:-$2}\""
     fi
     return 2
   fi
