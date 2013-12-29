@@ -44,7 +44,7 @@ download_url() {
 
 download_module() {
 (
-	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT
+	local TEMP SRC ALL_URLS URLS URL MLIST ALT REST HIT
 	debug_msg "download_module ($@)"
 	if ! run_details $1 ; then
 		return 1
@@ -61,19 +61,15 @@ download_module() {
 	MAX_SOURCES=${MAX_SOURCES:-100}
 
 	# loop over all sources
-	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
+	for (( N = 1 ; N <= MAX_SOURCES ; N++ )) ; do
 		# get the URL part
-		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
-		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
+		TEMP=SOURCE$((N))
+		TEMP=${TEMP/%SOURCE1/SOURCE}
+		eval SRC=\${$TEMP}
+		eval URLS=\${${TEMP}_URL[@]}
 
-		# continue (to next) if empty once, break if empty twice
 		if [ -z "$SRC" ] ; then
-			if [ -z "$SECOND" ] ; then
-				SECOND="yes"
-				continue
-			else
-				break
-			fi
+			break
 		fi
 
 		# silly that this exists:
