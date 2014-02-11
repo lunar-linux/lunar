@@ -11,22 +11,23 @@
 
 # translate %ALIAS if needed to a module name that is installed
 # and add it to the dependency chain if needed
-unalias() {
-  # quick exit code
-  if [[ "${1:0:1}" != "%" ]] ; then
+expand_alias() {
+  # If param doesn't start with "%", or if NEVER_ASK
+  # is set, just echo the param and return immediately
+  if [[ "${1:0:1}" != "%" || -n "$NEVER_ASK" ]] ; then
     echo $1
     return
   fi
 
   local TARGET TARGETS TARGETBYNUM N CHOICE CACHED_ALIAS
   # lookup in cache
-  CACHED_ALIAS=$(get_local_config `echo LUNAR_ALIAS_${1:1}`)
-  if [ -n "$CACHED_ALIAS" ]; then
+  CACHED_ALIAS=$(get_local_config LUNAR_ALIAS_${1:1})
+  if [[ -n "$CACHED_ALIAS" ]]; then
     echo $CACHED_ALIAS
     return
   fi
 
-  debug_msg "unalias($@)"
+  debug_msg "expand_alias($@)"
   # try to figure out where the aliases file is:
   if [[ -z "$ALIASES" ]] || [[ ! -f "$ALIASES" ]]; then
     if [ -f "$MOONBASE/aliases" ] ; then
@@ -36,16 +37,10 @@ unalias() {
     fi
   fi
 
-  TARGETS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$ALIASES")
-
-  # shortcut out when explicitly instructed so
-  if [[ -n "$NEVER_ASK" ]] ; then
-    echo $1
-    return
-  fi
+  TARGETS=$(awk -F: -v mod=$1 '$1 == mod {print $2}' "$ALIASES")
 
   # propose one and let the user pick it from a list:
-  debug_msg "unalias: starting selection loop"
+  debug_msg "expand_alias: starting selection loop"
   error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
   while true ; do
     error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module"
@@ -63,7 +58,7 @@ unalias() {
     echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
     read -t $PROMPT_DELAY CHOICE
     # test directly first
-    if echo $TARGETS | grep -qw "$CHOICE" ; then
+    if [[ $TARGETS =~ $CHOICE ]] ; then
       verbose_msg "Stored alias mapping $1 -> $TARGET"
       set_local_config `echo LUNAR_ALIAS_${1:1}` $TARGET
       echo $TARGET
@@ -78,5 +73,3 @@ unalias() {
     error_message "${MESSAGE_COLOR}Sorry, I can't do anything with \"${DEFAULT_COLOR}${QUERY_COLOR}$CHOICE${DEFAULT_COLOR}${MESSAGE_COLOR}\", please try again${DEFAULT_COLOR}"
   done
 }
-
-

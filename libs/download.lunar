@@ -84,7 +84,7 @@ download_module() {
 
 		add_url() {
 			if [ -n "$1" ]; then
-				if ! echo " $ALL_URLS " | grep -q " $1 "; then
+				if [[ ! $ALL_URLS =~ $1 ]]; then
 					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
@@ -151,50 +151,6 @@ download_module() {
 
 	return ${FAILALL:-0}
 )
-}
-
-
-testpack () {
-	local FILENAME
-	debug_msg "testpack ($@)"
-	if [ -f "$1" ]; then
-		FILENAME=$1
-	else
-		FILENAME=$SOURCE_CACHE/$1
-	fi
-	if [ -f "$FILENAME" ] ; then
-		FILEMAGIC=$(file -b $FILENAME)
-		case $FILENAME in
-			*.bz2|*.BZ2)
-				echo $FILEMAGIC | grep -qw "bzip2"
-				;;
-			*.gz|*.GZ|*.tgz|*.TGZ)
-				echo $FILEMAGIC | grep -qw "gzip"
-				;;
-			*.z|*.Z)
-				echo $FILEMAGIC | grep -qw "compress"
-				;;
-			*.zip|*.ZIP)
-				echo $FILEMAGIC | grep -qw "Zip"
-				;;
-			*.rpm|*.RPM)
-				echo $FILEMAGIC | grep -qw "RPM"
-				;;
-			*.CAB|*.cab)
-				echo $FILEMAGIC | grep -qw "Cabinet"
-				;;
-			*.xz|*.XZ)
-				echo $FILEMAGIC | grep -qw "XZ"
-				;;
-			*)
-				# we don't know how to handle this type of file
-				true
-				;;
-	  	esac
-	else
-		# filename does not exist!
-		false
-	fi
 }
 
 
