@@ -63,8 +63,8 @@ download_module() {
 	# loop over all sources
 	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
 		# get the URL part
-		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
-		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
+        eval SRC=\${SOURCE${N/#0/}} # SOURCE0 turns into just SOURCE
+        eval URLS=\${SOURCE${N/#0/}_URL[@]}
 
 		# continue (to next) if empty once, break if empty twice
 		if [ -z "$SRC" ] ; then
