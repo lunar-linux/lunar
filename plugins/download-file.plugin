@@ -11,13 +11,20 @@
 
 
 plugin_source_download_file()  {
+  local FILE
+
   # check if we can handle this type of URL:
   if [ ${1:0:7} != "file://" ]; then
     return 2
   fi
   debug_msg "plugin_source_download_file ($@)"
 
-  cp "${1:7}$2" $3
+  FILE=${1:7}
+  if [[ $4 == old ]] ; then
+    FILE="${FILE%/}/$2"
+  fi
+
+  cp "$FILE" "$3/$2"
 }
 
 

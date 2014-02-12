@@ -807,10 +807,10 @@ show_urls() { (
   plugin_call() { return 0 ; }
   download_url() {
     URL=$1
-    if [ "${URL#${URL%?}}" != "/" ]; then
-      URL="${URL}/"
+    if [[ $4 == old ]] ; then
+      URL="${URL%/}/$2"
     fi
-    echo $URL$2
+    echo $URL
     return 1
   }
 
