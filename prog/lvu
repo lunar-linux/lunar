@@ -807,10 +807,10 @@ show_urls() { (
   plugin_call() { return 0 ; }
   download_url() {
     URL=$1
-    if [ "${URL#${URL%?}}" != "/" ]; then
-      URL="${URL}/"
+    if [[ $4 == old ]] ; then
+      URL="${URL%/}/$2"
     fi
-    echo $URL$2
+    echo $URL
     return 1
   }
 
@@ -1011,10 +1011,9 @@ submit_module() {
     edit_file $TMP_MSG
     sed -i '/^#/d' "$TMP_MSG"
     (
-      head -n 1 "$TMP_MSG" | sed 's/^/Subject: /g'
-      echo ''
       echo "From: $REALNAME <$ADMIN>"
-      tail +2 "$TMP_MSG"
+      echo -n "Subject: "
+      cat "$TMP_MSG"
       echo '---'
       echo 'module:' $1
       echo "id: $UNIQID"
@@ -1284,7 +1283,7 @@ main()  {
     expired)
       for MODULE in $(list_expired_modules); do
         L=$(installed_version $MODULE)
-	R=$(run_details $MODULE > /dev/null ; echo $VERSION)
+	R=$(module_version $MODULE)
 
 	CL=( `echo $L | sed 's/[0-9]\+/ \0 /g'` )
 	CR=( `echo $R | sed 's/[0-9]\+/ \0 /g'` )
@@ -1309,7 +1308,7 @@ main()  {
 	    break
 	  fi
 
-	  if [ -z "$(echo $TLx$TR | sed 's/[0-9]//g')" ] ; then
+	  if [ -z "$(echo $TL$TR | sed 's/[0-9]//g')" ] ; then
 	    # numerical
 	    if [ "$TL" -eq "$TR" ] ; then
 	      continue
@@ -1448,7 +1447,7 @@ main()  {
       ;;
 
     search)
-      grep -irle "$2" "$MOONBASE" | grep DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
+      grep -irle "$2" "$MOONBASE" --include=DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
       ;;
 
     service)

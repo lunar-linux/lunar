@@ -19,9 +19,8 @@ plugin_source_download_generic()  {
   debug_msg "plugin_source_download_generic ($@)"
 
   URL=$1
-  # add trailing '/'
-  if [ "${URL:((${#URL}-1)):1}" != "/" ] ; then
-    URL="${URL}/"
+  if [[ $4 == old ]] ; then
+    URL="${URL%/}/$2"
   fi
 
   # this is what the download will be stored as initially:
@@ -57,8 +56,8 @@ plugin_source_download_generic()  {
   [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
   [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
 
-  verbose_msg "calling \"wget $WGET_OPTS \"$URL$2\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL$2" --output-document "$TMP_FILE" ; then
+  verbose_msg "calling \"wget $WGET_OPTS \"$URL\" --output-document $TMP_FILE\""
+  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL" --output-document "$TMP_FILE" ; then
     # looks like it worked
     if testpack $TMP_FILE ; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
@@ -72,8 +71,8 @@ plugin_source_download_generic()  {
     fi
   else
     # don't report errors against cache misses
-    if [ "$URL" != "$LRESORT_URL/" ]; then
-      activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL$2\""
+    if [ "$URL" != "$LRESORT_URL/$2" ]; then
+      activity_log "lget" "$MODULE" "$VERSION" "failed" "broken URL: \"$URL\""
     fi
     return 2
   fi

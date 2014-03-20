@@ -38,6 +38,8 @@ plugin_wrappers_optimize_menu()
 	# load previous optimizations
 	if [ -e /etc/lunar/local/optimizations.WRAPPERS ]; then
 		. /etc/lunar/local/optimizations.WRAPPERS
+	else
+		USE_WRAPPERS="yes"
 	fi
 
 	save_optimizations()

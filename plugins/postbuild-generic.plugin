@@ -41,14 +41,14 @@ gather_docs()
     mkdir -p $DOC_DIR
     # For each parameter that is an existing file
     for FILE in ${@}; do
-      if [ -e ${FILE} -a -f ${FILE} ] ; then
+      if [ -e "${FILE}" -a -f "${FILE}" ] ; then
         # copy it over to the doc directory creating directories as needed
         verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
-        install -D -m 644 ${FILE} ${DOC_DIR}/${FILE}
-      elif [ -d ${FILE} ] ; then
+        install -D -m 644 "${FILE}" "${DOC_DIR}/${FILE}"
+      elif [ -d "${FILE}" ] ; then
         # copy the directory to the docdir
         verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
-        cp -a ${FILE} ${DOC_DIR}/
+        cp -a "${FILE}" ${DOC_DIR}/
       fi
     done
         # do not return 2 here: this function is called directly and
@@ -86,9 +86,9 @@ plugin_postbuild_gather_docs()
     # No parameters were passed in, install the default docs
     for FILE in ${DEFAULT_DOCS}; do
       # copy all of the default docs (prune Makefiles)
-      if [ -s $FILE -a ! -f ${FILE}/Makefile ] ; then
+      if [ -s "$FILE" -a ! -f "${FILE}/Makefile" ] ; then
         verbose_msg "Installing default documentation to: ${DOC_DIR}/${FILE}"
-        cp -a $FILE $DOC_DIR 2> /dev/null
+        cp -a "$FILE" $DOC_DIR 2> /dev/null
       fi
     done
     devoke_installwatch
