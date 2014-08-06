@@ -231,6 +231,7 @@ default_cmake_config() {
   cmake -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
         -DCMAKE_BUILD_TYPE=RELEASE             \
         -DSYSCONF_INSTALL_DIR:PATH=/etc        \
+        -Wno-dev                               \
         $OPTS $SOURCE_DIRECTORY
 }
 
