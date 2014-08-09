@@ -17,6 +17,10 @@ plugin_unpack_generic() {
 			debug_msg "Unpacking tar file \"$1\""
 			tar xf $1 --no-same-owner --no-same-permissions || return 1
 			;;
+		*.zip)
+			debug_msg "Unpacking zip file \"$1\""
+			unzip -q $1 || return 1
+			;;
 		*.bz2)
 			debug_msg "Unpacking bz2 file \"$1\""
 			cp $1 . || return 1
