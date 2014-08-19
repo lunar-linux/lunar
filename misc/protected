@@ -121,6 +121,7 @@
 ^/usr/include/bits/syscall.h$
 ^/usr/include/gnu/stubs.h$
 ^/usr/lib\(32\|64\)\?/installwatch.so$
+^/usr/lib\(32\|64\)\?/libgcc_s.so.1$
 ^/usr/lib\(32\|64\)\?/sasl/smtpd.conf$
 ^/usr/share/httpd/
 ^/usr/share/httpsd/
