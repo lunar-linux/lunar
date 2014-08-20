@@ -3,6 +3,9 @@
 ^/proc/
 ^/root/
 ^/tmp/
+^/usr/lib/gio/modules/giomodule.cache
+^/usr/share/icons/hicolor/icon-theme.cache
+^/usr/share/mime/mime.cache
 ^/usr/src/
 ^/var/cache/ccache/
 ^/var/lock/

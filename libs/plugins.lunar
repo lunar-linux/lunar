@@ -34,8 +34,8 @@ plugin_register() {
 	#  9 - BUILD_BUILD               ,,     ,,     ,,    BUILD
 	# 10 - BUILD_INSTALL             ,,     ,,     ,,    INSTALL
 	# 11 - BUILD_POST_BUILD          ,,     ,,     ,,    POST_BUILD
-	# 12 - BUILD_POST_INSTALL        ,,     ,,     ,,    POST_INSTALL
-	# 13 - BUILD_PRE_REMOVE          ,,     ,,     ,,    PRE_REMOVE
+	# 12 - BUILD_POST_INSTALL      called after running  POST_INSTALL
+	# 13 - BUILD_PRE_REMOVE        called before running PRE_REMOVE
 	# 14 - BUILD_POST_REMOVE         ,,     ,,     ,,    POST_REMOVE
 	# 15 - OPTIMIZE_MENU           Display optimization menu's
 	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")

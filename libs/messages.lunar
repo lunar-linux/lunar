@@ -142,7 +142,7 @@ query() {
       if [ -n "$MODULE" ]; then
         echo -e -n "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}: "
       fi
-      echo -e -n "${QUERY_COLOR}$1 [$2] ${DEFAULT_COLOR}"
+      echo -e -n "${QUERY_COLOR}$1${QUERY_COLOR} [$2] ${DEFAULT_COLOR}"
       read -t $PROMPT_DELAY -n 1 RESPONSE
       if [ -z "$RESPONSE" ]; then
         RESPONSE=${RESPONSE:-$2}

@@ -37,14 +37,14 @@ download_url() {
 	local RETVAL
 	debug_msg "download_url($@)"
 	verbose_msg "trying to download \"${2}\" from \"${1}\""
-	plugin_call SOURCE_DOWNLOAD $1 $2 $3
+	plugin_call SOURCE_DOWNLOAD $1 $2 $3 $4
 	return $?
 }
 
 
 download_module() {
 (
-	local MAX_SOURCES SRC ALL_URLS URLS URL MLIST ALT REST HIT
+	local TEMP SRC ALL_URLS URLS URL MLIST ALT REST HIT OLD_URLS COMPATIBLE RESORT_SRC
 	debug_msg "download_module ($@)"
 	if ! run_details $1 ; then
 		return 1
@@ -61,19 +61,24 @@ download_module() {
 	MAX_SOURCES=${MAX_SOURCES:-100}
 
 	# loop over all sources
-	for (( N = 0 ; N < MAX_SOURCES ; N++ )) ; do
+	for (( N = 1 ; N <= MAX_SOURCES ; N++ )) ; do
 		# get the URL part
-		eval SRC=\$$(echo SOURCE$N | sed s/SOURCE0/SOURCE/ )
-		eval URLS=\${$(echo SOURCE${N}_URL | sed s/SOURCE0/SOURCE/ )[@]}
+		TEMP=SOURCE$((N))
+		TEMP=${TEMP/%SOURCE1/SOURCE}
+		eval SRC=\${$TEMP}
+		eval URLS=\${${TEMP}_URL_FULL[@]}
+		eval OLD_URLS=\${${TEMP}_URL[@]}
 
-		# continue (to next) if empty once, break if empty twice
 		if [ -z "$SRC" ] ; then
-			if [ -z "$SECOND" ] ; then
-				SECOND="yes"
-				continue
-			else
-				break
-			fi
+			break
+		fi
+
+		COMPATIBLE=
+		RESORT_SRC=/$SRC
+		if [ -n "$OLD_URLS" ] ; then
+		  URLS=${OLD_URLS[@]}
+		  COMPATIBLE=old
+		  RESORT_SRC=
 		fi
 
 		# silly that this exists:
@@ -84,13 +89,13 @@ download_module() {
 
 		add_url() {
 			if [ -n "$1" ]; then
-				if ! echo " $ALL_URLS " | grep -q " $1 "; then
-					ALL_URLS="$ALL_URLS $1"
+				if ! echo " $ALL_URLS " | grep -q " $1$2 "; then
+					ALL_URLS="$ALL_URLS $1$2"
 				fi
 			fi
 		}
 
-		if ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE && [ -f $SOURCE_CACHE/$SRC ] ; then
+		if  [ -f $SOURCE_CACHE/$SRC ] && ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE $COMPATIBLE ; then
 			# break out of the loop if the cache has it:
 			verbose_msg "Skipping download of \"$SRC\" (in cache)"
 			continue
@@ -105,10 +110,11 @@ download_module() {
 		if [ -n "$BASE_URL" ] ; then
 			# in case -u was passed:
 			ALL_URLS=$BASE_URL
+			COMPATIBLE=
 		else
 			# compose a list of URLS
 			ALL_URLS=
-			add_url $FRESORT_URL
+			add_url "$FRESORT_URL" $RESORT_SRC
 			for URL in $URLS ; do
 				add_url $URL
 			done
@@ -130,12 +136,12 @@ download_module() {
 					done
 				done
 			done
-			add_url $LRESORT_URL
+			add_url "$LRESORT_URL" $RESORT_SRC
 		fi
 
 		for URL in $ALL_URLS; do
 			# and download
-			if download_url $URL $SRC $SOURCE_CACHE == 0 ; then
+			if download_url $URL $SRC $SOURCE_CACHE $COMPATIBLE ; then
 				# done for this file!
 				SUCCESS=1
 				break
@@ -206,7 +212,7 @@ show_downloading()
 	if [ -n "$DOWNLOAD_PID" ]; then
 		DOWNLOAD_LOG=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f3)
 		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
-			cat "$DOWNLOAD_LOG"
+			sed -e 's/^.*\r//' "$DOWNLOAD_LOG"
 			rm -f $DOWNLOAD_LOG
 		elif [ -f "$DOWNLOAD_LOG" ]; then
 			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID "$DOWNLOAD_LOG"

@@ -30,7 +30,7 @@ function add_priv_group() {
 
   if [ -z "$GROUPNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
-    exit 1
+    return 1
   fi
 
   if grep -q "^$GROUPNAME:" /etc/group ; then
@@ -44,7 +44,7 @@ function add_priv_group() {
     done
     if [ "$N" == "100" ] ; then
       message "${PROBLEM_COLOR}!add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
-      exit 1
+      return 1
     fi
     verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
     groupadd -g $N $GROUPNAME
@@ -71,12 +71,12 @@ function add_priv_user() {
 
   if [ -z "$USERNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no username specified${DEFAULT_COLOR}"
-    exit 1
+    return 1
   fi
 
   if [ -z "$GROUPNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
-    exit 1
+    return 1
   fi
 
   if id $USERNAME &> /dev/null ; then
@@ -86,7 +86,7 @@ function add_priv_user() {
       verbose_msg "group \"$GROUPNAME\" already exists, not creating"
     else
       if ! add_priv_group $GROUPNAME ; then
-        exit 1
+        return 1
       fi
     fi
 
@@ -98,7 +98,7 @@ function add_priv_user() {
     done
     if [ "$N" == "100" ] ; then
       message "${PROBLEM_COLOR}!add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
-      exit 1
+      return 1
     fi
 
     shift

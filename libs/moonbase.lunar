@@ -29,7 +29,7 @@ get_moonbase () {
         MODULE=moonbase
        VERSION=`date -u +%Y%m%d.%H`
         SOURCE=$MODULE.tar.bz2
-    SOURCE_URL=$MOONBASE_URL
+SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
        PARTIAL=off
    CLEAR_CACHE=on
   }

@@ -70,7 +70,6 @@ EOF
 show_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
-        !  module_held       $MODULE  &&
         !  module_exiled     $MODULE
     then
       (
@@ -87,7 +86,6 @@ show_modules()	{
 has_modules()	{ 
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
-        !  module_held       $MODULE  &&
         !  module_exiled     $MODULE
     then
       return 0
@@ -237,7 +235,7 @@ make_checklist()  {
     (
     run_details $MODULE
 
-    if module_installed $MODULE || module_held $MODULE; then
+    if module_installed $MODULE; then
       STATUS="on"
     else
       STATUS="off"
@@ -526,6 +524,7 @@ feature_menu()  {
   W_HELP="Verbose display of compilation process?"
   X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
+  L_HELP="Use xz compression for logs and caches?"
 
          ARCHIVE=${ARCHIVE:-on}
    AUTORESURRECT=${AUTORESURRECT:-on}
@@ -547,6 +546,12 @@ feature_menu()  {
     off) VOYEUR=off ; VOYEUR_progress=off  ;;
     p*)  VOYEUR=off ; VOYEUR_progress=on   ;;
     *)   VOYEUR=on  ; VOYEUR_progress=off  ;;
+  esac
+
+  case  $COMPRESS_METHOD  in
+    xz)  COMPRESS_XZ=on   ;;
+    bz2) COMPRESS_XZ=off  ;;
+    *)   COMPRESS_XZ=on   ;;
   esac
 
   if  TOGGLES=`$DIALOG  --title "Feature Menu"  \
@@ -573,7 +578,8 @@ feature_menu()  {
       "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
       "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
       "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
-      "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"`
+      "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"   \
+      "COMPRESS_XZ"      "Toggle"  "$COMPRESS_XZ"   "$L_HELP"`
 
   then
   
@@ -594,6 +600,7 @@ feature_menu()  {
 	 VERBOSE=off
 ZLOCAL_OVERRIDES=off
    PROBE_EXPIRED=off
+ COMPRESS_METHOD=bz2
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -619,6 +626,7 @@ ZLOCAL_OVERRIDES=off
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
        PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
+         COMPRESS_XZ) COMPRESS_METHOD=xz ;;
       esac
     done
 
@@ -639,6 +647,7 @@ ZLOCAL_OVERRIDES=off
     set_local_config "ZLOCAL_OVERRIDES" "$ZLOCAL_OVERRIDES"
     set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
     set_local_config "COLOR" "$COLOR"
+    set_local_config "COMPRESS_METHOD" "$COMPRESS_METHOD"
 
   fi
 }

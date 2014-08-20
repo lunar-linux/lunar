@@ -33,22 +33,24 @@ rework_module() {
 	optional_depends()  {
 		local DEP
 		debug_msg "  optional_depends ($@)"
-		DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+		DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
 		if module_exiled $DEP ; then
 			echo "$MODULE:$DEP:off:optional:$2:$3"
 		else
-			if module_installed $DEP ; then
+			# check for the current depend selection
+			if grep -q "^$1:$2:on:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:on:optional:$2:$3"
-			else
+			elif grep -q "^$1:$2:off:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:off:optional:$2:$3"
 			fi
+			# if we don't know the answer we leave it open for the user to decide
 		fi
 	}
 
 	depends()  {
 		local DEP
 		debug_msg "  depends ($@)"
-		DEP=$(NEVER_ASK=1 DEPS_ONLY= unalias $1)
+		DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
 		echo "$MODULE:$DEP:on:required:$2:$3"
 	}
 
