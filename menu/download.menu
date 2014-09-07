@@ -166,6 +166,38 @@ FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
    set_local_config "FTP_ACTIVE" "$FTP_ACTIVE"
 }
 
+set_ipv46() {
+  local USE_IPV4 USE_IPV6 USE_IPVANY
+
+  PROMPT="Please select the internet protocol version
+to use when downloading modules."
+  USE_IPV4=off
+  USE_IPV6=off
+  USE_IPVANY=off
+
+  if [ "$USE_IPV46" == "4" ]; then
+    USE_IPV4=on
+  elif [ "$USE_IPV46" == "6" ]; then
+    USE_IPV6=on
+  else
+    USE_IPVANY=on
+  fi
+
+  USE_IPV46=$($DIALOG  --title "Internet protocol version" \
+                    --ok-label  "Commit"     \
+                    --radiolist              \
+                    "$PROMPT"                \
+                    0 0 0                   \
+                    "Any" "Use system default" $USE_IPVANY \
+                    "4" "Internet protocol version 4 (ipv4)" $USE_IPV4  \
+                    "6" "Internet protocol version 6 (ipv6)"  $USE_IPV6)
+  if [ "$USE_IPV46" = "Any" ]; then
+    unset_local_config "USE_IPV46"
+  else
+    set_local_config "USE_IPV46" "$USE_IPV46"
+  fi
+}
+
 set_partial_downloads(){
 
    PROMPT="Please enable/disable the partial download option.
@@ -283,6 +315,7 @@ while
     C_HELP="Continue to get or re-get the partial downloads"
     N_HELP="How many times will wget try to download the file?"
     H_HELP="Cache usage for http downloads"
+    I_HELP="Internet protocol version to use when downloading a file"
     R_HELP="Per process download rate"
     P_HELP="Proxy Settings"
     E_HELP="Test all mirrors available on download"
@@ -298,6 +331,7 @@ while
                       "A"  "Ftp Active/Passive"          "$A_HELP"  \
                       "C"  "Partial Downloads"           "$C_HELP"  \
                       "H"  "Cache Usage"                 "$H_HELP"  \
+                      "I"  "Internet protocol version"   "$I_HELP"  \
                       "N"  "Number of Retries"           "$N_HELP"  \
                       "P"  "Proxies"                     "$P_HELP"  \
                       "R"  "Download Rate"               "$R_HELP"  \
@@ -309,6 +343,7 @@ while
       A)  set_ftp_active           ;;
       C)  set_partial_downloads    ;;
       H)  set_cache_usage          ;;
+      I)  set_ipv46                ;;
       N)  set_retries              ;;
       P)  proxy_menu               ;;
       R)  set_download_rate        ;;

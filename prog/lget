@@ -46,6 +46,8 @@ Optional Parameters:
    -v | --verbose               Increases the level of message output
    -w | --want version          Try to download a different version that is
                                 not in moonbase
+   -4 | --ipv4                  Download sources using ipv4
+   -6 | --ipv6                  Download sources using ipv6
 EOF
 
   exit  1
@@ -86,7 +88,7 @@ main() {
 . /etc/lunar/config
 . $BOOTSTRAP
 
-GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vw:" -l "all,debug,from:,help,url:,verbose,want:" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vw:46" -l "all,debug,from:,help,url:,verbose,want:ipv4,ipv6" -- "$@")
 
 if [ -z "$?" ] ; then
   help | view_file
@@ -106,6 +108,8 @@ else
       -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
       -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
       -w|--want    ) export WANT_VERSION=$2 ;                   shift 2 ;;
+      -4|--ipv4    ) export USE_IPV46=4 ;                       shift   ;;
+      -6|--ipv6    ) export USE_IPV46=6 ;                       shift   ;;
       --) shift ; break ;;
       *) help ; exit ;;
     esac

@@ -55,6 +55,8 @@ Optional Parameters:
 -v  |  --verbose                Increases the level of message output
 -w  |  --want version           Try to install a different version that is
                                 not in moonbase
+-4  | --ipv4                    Download sources using ipv4
+-6  | --ipv6                    Download sources using ipv6
 EOF
   exit  1
 }
@@ -240,7 +242,7 @@ main() {
 . /etc/lunar/config
 . $BOOTSTRAP
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:46" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:,ipv4,ipv6" -- "$@")
 
 # the following trap makes sure all threads exit in case something weird
 # happens:
@@ -272,6 +274,8 @@ else
       -s|--silent      ) export SILENT="$1" ;                       shift   ;;
       -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
       -w|--want        ) export WANT_VERSION=$2 ;                   shift 2 ;;
+      -4|--ipv4        ) export USE_IPV46=4 ;                       shift   ;;
+      -6|--ipv6        ) export USE_IPV46=6 ;                       shift   ;;
       --) shift ; break ;;
       *) help ; break ;;
     esac
