@@ -14,7 +14,7 @@
 expand_alias() {
   # If param doesn't start with "%", or if NEVER_ASK
   # is set, just echo the param and return immediately
-  if [[ "${1:0:1}" != "%" || -n "$NEVER_ASK" ]] ; then
+  if [[ "${1:0:1}" != "%" ]]; then
     echo $1
     return
   fi
@@ -24,6 +24,12 @@ expand_alias() {
   CACHED_ALIAS=$(get_local_config LUNAR_ALIAS_${1:1})
   if [[ -n "$CACHED_ALIAS" ]]; then
     echo $CACHED_ALIAS
+    return
+  fi
+
+  if [[ -n "$NEVER_ASK" ]]; then
+    # there's no stored value for the alias and we mustn't ask for one...
+    echo $1
     return
   fi
 
