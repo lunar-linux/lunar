@@ -519,7 +519,7 @@ moonalyze() {
 
     depends() {
       debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 unalias $1)
+      DEP=$(NEVER_ASK=1 expand_alias $1)
       add_if_missing_dep $DEP
       if [ -z "$DEP" ]; then
         broken_deps=("${broken_deps[@]}" "$mod")
@@ -529,7 +529,7 @@ moonalyze() {
     optional_depends() {
       debug_msg "optional_depends ($@)"
 
-      DEP=$(NEVER_ASK=1 unalias $1)
+      DEP=$(NEVER_ASK=1 expand_alias $1)
       add_if_missing_dep $DEP
 
       if [ -z "$DEP" ]; then
@@ -634,13 +634,13 @@ function show_tree() {
     # local definitions
     function depends() {
       debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 unalias $1)
+      DEP=$(NEVER_ASK=1 expand_alias $1)
       echo "+$DEP"
     }
 
     optional_depends() {
       debug_msg "optional_depends ($@)"
-      DEP=$(NEVER_ASK=1 unalias $1)
+      DEP=$(NEVER_ASK=1 expand_alias $1)
       echo "-$DEP"
     }
 
@@ -1202,7 +1202,7 @@ main()  {
       for MODULE in $(list_installed); do
         VERSION=$(installed_version $MODULE)
         if grep -q "$2" "$INSTALL_LOGS/$MODULE-$VERSION" ; then
-          for FILE in $(grep "$2" "$INSTALL_LOGS/$MODULE-$VERSION" | cut -d: -f2) ; do
+          for FILE in $(grep "$2" "$INSTALL_LOGS/$MODULE-$VERSION") ; do
             echo "$MODULE:$FILE"
           done
         fi

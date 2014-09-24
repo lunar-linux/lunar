@@ -275,7 +275,7 @@ run_details() {
       [ -z "$URLS" ] && continue
 
       for IDX in ${!URLS[@]} ; do
-        eval $FULL_URL[$IDX]=\${URLS\[$IDX\]}-\${SRC}
+        eval $FULL_URL[$IDX]=\${URLS\[$IDX\]}\${SRC}
       done
     done
     MAX_SOURCES=$((CNT-1))

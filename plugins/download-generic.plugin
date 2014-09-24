@@ -50,6 +50,12 @@ plugin_source_download_generic()  {
     WGET_OPTS+=" --no-check-certificate"
   fi
 
+  if [ "$USE_IPV46" == "6" ]; then
+    WGET_OPTS+=" -6"
+  elif [ "$USE_IPV46" == "4" ]; then
+    WGET_OPTS+=" -4"
+  fi
+
   WGET_OPTS+=" --tries=${NUM_RETRY:-5}"
 
   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
