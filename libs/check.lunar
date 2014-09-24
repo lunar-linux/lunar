@@ -38,9 +38,9 @@ rework_module() {
 			echo "$MODULE:$DEP:off:optional:$2:$3"
 		else
 			# check for the current depend selection
-			if grep -q "^$1:$2:on:" "$DEPENDS_STATUS_BACKUP" ; then
+			if grep -q "^$MODULE:$DEP:on:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:on:optional:$2:$3"
-			elif grep -q "^$1:$2:off:" "$DEPENDS_STATUS_BACKUP" ; then
+			elif grep -q "^$MODULE:$DEP:off:" "$DEPENDS_STATUS_BACKUP" ; then
 				echo "$MODULE:$DEP:off:optional:$2:$3"
 			fi
 			# if we don't know the answer we leave it open for the user to decide
