@@ -1,4 +1,4 @@
-.TH "LIN" "8" "August 2003" "Lunar Linux" "LUNAR"
+.TH "LIN" "8" "October 2014" "Lunar Linux" "LUNAR"
 .SH "NAME"
 lin \- Lunar install software modules
 .SH "SYNOPSIS"
@@ -59,6 +59,15 @@ Decreases the level of message output.
 .TP
 .B "\-v, \-\-verbose"
 Increases the level of message output.
+.TP
+.B \-w, \-\-want
+Try to install a different version that is not in moonbase.
+.TP
+.B \-4, \-\-ipv4
+Download sources using ipv4.
+.TP
+.B \-6, \-\-ipv6
+Download sources using ipv6.
 .SH "FILES"
 All files can be edited by hand, but its easier to edit them with
 .B lunar.
@@ -164,6 +173,8 @@ Converted to Lunar by Terry Chan 03/23/2002
 Updated by Chuck Mead 07/17/2003
 .PP
 Updated by Terry Chan 08/08/2003
+.PP
+Updated by Stefan Wold <ratler@lunar-linux.org> 10/11/2014
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
