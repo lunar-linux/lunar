@@ -27,11 +27,9 @@ or
 .LP
 at your console.
 .LP
-.B Please remember that the Lunar Install/Rescue ISO is not a full featured system.
-.LP 
 A list of things to do:
 .TP 
-\fBNetwork settings\fP
+.B Network settings
 This step is crucial to your future success with 
 .B Lunar Linux.
 If you haven't configured your network yet try it with 
@@ -54,7 +52,7 @@ if you are not familiar with the content of this file.
 .TP
 .B Check the network device
 If pinging the IP address fails, check if your network interface is up
-and running. You may use the command \fBip\fP to view the interface's
+and running. You may use the command \fBip addr list\fP to view the interface's
 status.
 .IP
 If you cannot, then check if your \fBNIC (network interface card)\fP
@@ -78,7 +76,7 @@ found in \fI/etc/config.d/network/'interface'\fP (i.e. 'eth0' \->
 configuration manually it is required to restart the interface using
 \fBsystemctl\fP.
 .IP
-Example eth0 using DHCP: \fBsystemcl restart lnet-dhpcd@eth0\fP
+Example eth0 using DHCP: \fBsystemctl restart lnet-dhpcd@eth0\fP
 .IP
 Example eth0 using static ip: \fBsystemctl restart lnet-static@eth0\fP
 .TP
@@ -221,9 +219,12 @@ Lunar website for more information.
 .SH SEE ALSO
 Documentation at the Lunar Linux website at http://lunar\-linux.org
 .PP
-\fIlunar\fR\|(8), \fImoonbase\fR\|(1), \fIlin\fR\|(8), \fIlvu\fR\|(1), \fIlget\fR\|(8), \fIlrm\fR\|(8), \fIlnet\fR\|(8)
+\fIlunar\fR\|(8), \fImoonbase\fR\|(1), \fIlin\fR\|(8), \fIlvu\fR\|(1),
+\fIlget\fR\|(8), \fIlrm\fR\|(8), \fIlnet\fR\|(8)
 .SH DISCLAIMER
-The information and examples given here are for illustrative purposes. If you encounter any inaccuracies please send an email to the authors.
+The information and examples given here are for illustrative
+purposes. If you encounter any inaccuracies please send an email to
+the authors.
 .SH COPYRIGHT
 This document is originally Copyrighted Kagan Kongar 2002.
 .PP
