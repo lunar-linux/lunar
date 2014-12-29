@@ -1,31 +1,43 @@
-.TH "lcrash" "8" "Release $Revision$" "Terry Chan" "Lunar Crash Recovery"
+.TH "lcrash" "8" "October 2014" "Lunar Linux" "Lunar Crash Recovery"
 .SH "NAME"
 .LP 
 \fBlcrash\fR \- Lunar Crash Recovery manual
 .SH "OVERVIEW"
 .LP 
-This manual page was written to give some pointers on how to recover from a "lunar update" crash, or an otherwise broken set of lunar tools.
+This manual page was written to give some pointers on how to recover
+from a "lunar update" crash, or an otherwise broken set of lunar
+tools.
 .SH "DO NOT PANIC"
 .LP 
-These are the suggested steps after your system has been able to successfully boot back into a \fBLunar Linux\fR bash command prompt but you are not able to do a "lunar update" because of a crash/abort/power failure/whatever occuring in the middle of a "lunar update" and it did not finish installing the lunar commands and Moonbase.  All of these instructions should be run as "root".
+These are the suggested steps after your system has been able to
+successfully boot back into a \fBLunar Linux\fR bash command prompt
+but you are not able to do a "lunar update" because of a
+crash/abort/power failure/whatever occuring in the middle of a "lunar
+update" and it did not finish installing the lunar commands and
+Moonbase.  All of these instructions should be run as "root".
 
-\fB1. Update Your Lunar or Theedge: \fRUsing a web browser or wget, download a copy of http://www.lunar-linux.com/lunar/lunar.tar.bz2 or http://www.lunar-linux.com/lunar/theedge.tar.bz2.  If you use wget please do these steps: 
+\fB1. Update lunar coretools: \fRUsing a web browser or wget, download
+a copy of http://www.lunar-linux.org/lunar/lunar/lunar-XX.tar.bz2
+where XX is the latest version. If you use wget please do these steps:
 .IP
 cd /var/spool/lunar
 .IP
-wget http://www.lunar-linux.com/lunar/lunar.tar.bz2
+wget http://www.lunar-linux.org/lunar/lunar/lunar-XX.tar.bz2
 .LP
-If you use a web browser then go to the location mentioned above and download lunar.tar.bz2 and save it to the /var/spool/lunar directory. 
+If you use a web browser then go to the location mentioned above and
+download lunar.tar.bz2 and save it to the /var/spool/lunar directory.
 .LP 
 \fB2. Manually unpack Lunar: \fRNow unpack the tar.bz2 file with these commands:
 .IP
 cd /
 .IP
-bzcat /var/spool/lunar/lunar.tar.bz2 | tar xv
+tar xf /var/spool/lunar/lunar-XX.tar.bz2
 .IP
-cd lunar ; ./install
+cd lunar-XX ; make install
 .LP 
-Now your system should be able to run a \fBlunar update\fR.  This process will update the base scripts and the package collection (Moonbase). 
+Now your system should be able to run a \fBlunar update\fR.  This
+process will update the base scripts and the package collection
+(Moonbase).
 .LP 
 
 .SH "LIFESAVERS"
@@ -36,7 +48,7 @@ Below are some useful addresses
 \fBWebsite: \fRhttp://www.lunar\-linux.org/
 .P 
 
-\fBMaillist: \fRhttp://www.lunar\-linux.org/mailman/listinfo/lunar
+\fBMaillist: \fRhttp://lists.lunar\-linux.org/mailman/listinfo/lunar
 .P 
 
 \fBIRC: \fRirc.freenode.net #lunar
@@ -55,7 +67,10 @@ document was accurate when written. If you find inaccuracies, please send me
 clarifications.
 .SH "COPYRIGHT"
 .LP 
-This document is Copyrighted Terry Chan 2002-2003. It may be reproduced and distributed in whole or in part, in any medium physical or electronic, as long as this copyright notice is retained on all copies.
+This document is Copyrighted Terry Chan 2002-2003. It may be
+reproduced and distributed in whole or in part, in any medium physical
+or electronic, as long as this copyright notice is retained on all
+copies.
 .SH "AUTHOR"
 .LP 
 Terry Chan <tchan@lunar-linux.org>

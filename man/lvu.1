@@ -1,9 +1,9 @@
-.TH "LVU" "1" "June 2009" "Lunar Linux" "LUNAR"
+.TH "LVU" "1" "October 2014" "Lunar Linux" "LUNAR"
 .SH "NAME"
 lvu \- query/view lunar package management information
 .SH "SYNOPSIS"
 .B lvu
-alien|leafs|orphans|pam
+alien|leafs|orphans|conflicts|moonalyze|pam
 .PP 
 .B lvu
 cd|what|where|website|sources|urls|maintainer|version <module>
@@ -80,6 +80,14 @@ displays installed modules that have no explicit dependencies on them
 .B orphans
 .IP 
 displays installed modules that are missing required dependencies
+.PP
+.B conflicts
+.IP
+display conflicting files
+.PP
+.B moonalyze
+.IP
+analyze the current moonbase for common issues
 .PP 
 .B pam
 .IP 

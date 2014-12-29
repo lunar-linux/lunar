@@ -1,4 +1,4 @@
-.TH LGET 8 "August 2003" "Lunar Linux" LUNAR
+.TH LGET 8 "October 2014" "Lunar Linux" LUNAR
 .SH NAME
 lget \- downloads module source files
 .SH SYNOPSIS
@@ -62,6 +62,14 @@ Attempt to download version version of the module by substituting the current
 version of the module with the wanted version. May fail if the package requires
 more than one file download, or other reasons.
 .TP
+.B lget -4|--ipv4
+.PP
+Download sources using ipv4.
+.TP
+.B lget -6|--ipv6
+.PP
+Download sources using ipv6.
+.TP
 .B lget -v|--verbose
 .PP
 Increases the level of message output
@@ -97,6 +105,8 @@ Thomas Stewart
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
 Updated by Terry Chan 08/08/2003
+.PP
+Updated by Stefan Wold <ratler@lunar-linux.org> 10/11/2014
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
