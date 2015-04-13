@@ -28,7 +28,7 @@ plugin_module_check_ldd() {
 
     # fast-construct per-module LD path including all /lib/ like directories
     NEW_LD=$(cat "$I_LOG" | grep "/lib/" | files | sed 's/\(.*\)\/\([^\/]*\)$/\1/g' | uniq | tr '\n' ':')
-    LOG=$(cat "$I_LOG" | grep "/bin/\|/games/\|/lib/\|/sbin/\|/libexec/" | grep -v "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/")
+    LOG=$(cat "$I_LOG" | grep "/bin/\|/games/\|/lib/\|/sbin/\|/libexec/" | grep -v "/doc/\|/fonts/\|/include/\|/locale/\|/man/\|/modules/\|/var/\|/share/")
 
     for FILE in $LOG; do
       if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | grep -q "not found" ; then
