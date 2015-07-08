@@ -91,14 +91,8 @@ debug_msg() {
 # usage : xterm_msg MESSAGE
 # purpose : To display a short message in the title bar of a X terminal
 xterm_msg() {
-  local MSG
   debug_msg "xterm_bar ($@)"
-  case $TERM in
-    xterm*|gnome*|konsole*|rxvt*)
-      MSG="$HOSTNAME $(basename $0)[$$]: $@"
-      echo -n "]0; $MSG "
-      ;;
-  esac
+  echo -ne "\033]0;$HOSTNAME $(basename $0)[$$]: $@ \007"
 }
 
 # function : report FILE [description] MODULE VERSION
