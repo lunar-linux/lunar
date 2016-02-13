@@ -327,6 +327,8 @@ lin_module()  {
     if ! finish_install ; then
       LIN_ERROR="POST_BUILD"
     else
+      # unlock module before runing POST_INSTALL
+      rm -f $linING &&
       if ! run_post_install ; then
         LIN_ERROR="POST_INSTALL"
       fi
@@ -347,7 +349,6 @@ lin_module()  {
 
     rm_source_dir               &&
     report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
-    rm -f $linING               &&
     sound SUCCESS               &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
 
