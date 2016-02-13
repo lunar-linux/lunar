@@ -64,7 +64,7 @@ update() {
       if module_installed $ALT ; then
         lunar set LUNAR_MODULE $ALT
         export LUNAR_MODULE=$ALT
-	verbose_msg "LUNAR_MODULE set to \"$ALT\""
+        verbose_msg "LUNAR_MODULE set to \"$ALT\""
       fi
     done
     if [ -z "$LUNAR_MODULE" ] ; then
@@ -306,7 +306,7 @@ lin_module()  {
       else
         if ! run_post_build ; then
           LIN_ERROR="POST_BUILD"
-	fi
+        fi
       fi
     fi
 
