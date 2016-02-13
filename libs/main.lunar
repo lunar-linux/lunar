@@ -137,7 +137,7 @@ expand_cache_safe() {(
   TMP_TARGETS=$(temp_create "resurrect.targets.$MODULE")
   tar tf $1 > $TMP_TARGETS
   TMP_TARGETS_OK=$(temp_create "resurrect.targets_OK.$MODULE")
-  # do directories: we don't care here
+  # do directories: we don`t care here
   # the sed trick is advanced: a non-greedy pattern that returns all
   # directory names listed in the input
   for TARGET in $(cat "$TMP_TARGETS" | sed 's/\/[^\/]*$/\//g' ) ; do
