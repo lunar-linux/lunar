@@ -64,7 +64,7 @@ update() {
       if module_installed $ALT ; then
         lunar set LUNAR_MODULE $ALT
         export LUNAR_MODULE=$ALT
-	verbose_msg "LUNAR_MODULE set to \"$ALT\""
+        verbose_msg "LUNAR_MODULE set to \"$ALT\""
       fi
     done
     if [ -z "$LUNAR_MODULE" ] ; then
@@ -137,7 +137,7 @@ expand_cache_safe() {(
   TMP_TARGETS=$(temp_create "resurrect.targets.$MODULE")
   tar tf $1 > $TMP_TARGETS
   TMP_TARGETS_OK=$(temp_create "resurrect.targets_OK.$MODULE")
-  # do directories: we don't care here
+  # do directories: we don`t care here
   # the sed trick is advanced: a non-greedy pattern that returns all
   # directory names listed in the input
   for TARGET in $(cat "$TMP_TARGETS" | sed 's/\/[^\/]*$/\//g' ) ; do
@@ -306,7 +306,7 @@ lin_module()  {
       else
         if ! run_post_build ; then
           LIN_ERROR="POST_BUILD"
-	fi
+        fi
       fi
     fi
 
@@ -327,6 +327,8 @@ lin_module()  {
     if ! finish_install ; then
       LIN_ERROR="POST_BUILD"
     else
+      # unlock module before runing POST_INSTALL
+      rm -f $linING &&
       if ! run_post_install ; then
         LIN_ERROR="POST_INSTALL"
       fi
@@ -347,7 +349,6 @@ lin_module()  {
 
     rm_source_dir               &&
     report $INSTALL_LOGS/$MODULE-$VERSION "install log" $MODULE $VERSION &&
-    rm -f $linING               &&
     sound SUCCESS               &&
     activity_log  "lin"  "$MODULE"  "$VERSION"  "success"
 
