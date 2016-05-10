@@ -72,7 +72,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
             SYM_CHECK=${SYM_CHECK:-off}
 
               GNU_URL=ftp://ftp.gnu.org/pub/gnu
-              KDE_URL=ftp://ftp.kde.org/pub/kde
+              KDE_URL=http://download.kde.org
             GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
            KERNEL_URL=ftp://ftp.kernel.org
            SFORGE_URL=http://downloads.sourceforge.net/sourceforge
