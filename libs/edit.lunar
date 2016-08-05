@@ -12,11 +12,11 @@
 
 
 # function : patch_it
-# usage    : patch_it patch_file patch_level
-# purpose  : calls "patch -px < $filename", where filename may be a variety
+# usage    : patch_it patch_file [patch_level]
+# purpose  : calls "cmd $filename | patch -N -px -t", where filename may be a variety
 #            of formats
 patch_it () { 
-  local PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
+  local PATCH CMD
   verbose_msg "patch_it \"$1\" \"$2\"";
 
   # get patch from $SOURCE_CACHE automatically
@@ -26,42 +26,36 @@ patch_it () {
     PATCH="$1"
   fi
 
-  if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
-    TARCMD="tar x -O"
-  else
-    TARCMD="cat"
-  fi
+  case $PATCH in
+    *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.Z|*.tar)
+      CMD="tar xOf"
+      ;;
+    *.bz2)
+      CMD="bzcat"
+      ;;
+    *.gz)
+      CMD="zcat"
+      ;;
+    *.xz|*.lzma)
+      CMD="xzcat"
+      ;;
+    *)
+      CMD="cat"
+      ;;
+  esac
 
-  if [[ -n `echo $PATCH | grep '\.bz2$'` ]] ; then
-    GZCMD="bzcat"
-  elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
-    GZCMD="zcat"
-  elif [[ -n `echo $PATCH | grep -e '\.xz$' -e '\.lzma$'` ]] ; then
-    GZCMD="xzcat"
-  else
-    GZCMD="cat"
-  fi
-
-  TMPFILE1=$(temp_create "patch_1")
-  TMPFILE2=$(temp_create "patch_2")
-
-  if $GZCMD "$PATCH" > $TMPFILE1 ; then
-    # uncompress OK
-    if cat "$TMPFILE1" | $TARCMD > $TMPFILE2 ; then
-      # untar OK
-      if patch -N -p$2 < $TMPFILE2 ; then
-        # patch cmd is OK
-        temp_destroy $TMPFILE1
-        temp_destroy $TMPFILE2
-        return 0
-      fi
+  # If no patch level was supplied lets try auto patching using plevel 1 or 0
+  if [ -z "$2" ]; then
+    if $CMD $PATCH | patch -N -p1 -t || $CMD $PATCH | patch -N -p0 -t; then
+      return 0
     fi
+  elif $CMD $PATCH | patch -N -p$2 -t; then
+    # patch cmd is OK
+    return 0
   fi
 
   message "${PROBLEM_COLOR}! Broken patch file ${DEFAULT_COLOR}${FILE_COLOR}$PATCH${DEFAULT_COLOR}"
 
-  temp_destroy $TMPFILE1
-  temp_destroy $TMPFILE2
   return 255
 }
 
