@@ -190,7 +190,7 @@ testpack () {
 				echo $FILEMAGIC | grep -qw "Cabinet"
 				;;
 			*.xz|*.XZ)
-				echo $FILEMAGIC | grep -qw "XZ"
+				echo $FILEMAGIC | grep -qw "xz"
 				;;
 			*)
 				# we don't know how to handle this type of file
