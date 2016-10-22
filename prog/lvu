@@ -68,6 +68,8 @@ enforced                   display enforced modules
 expired                    display a list of modules which need an update
 info        module         display terse summary information about module
 
+find        "keyword"      displays modules with 'keyword' in their names,
+                              with their section
 search      "phrase"       searches all modules long descriptions for phrase.
 service     port|acronym   displays modules that provide that service
 
@@ -908,6 +910,19 @@ show_info() {
   fi
 }
 
+find_modules() {
+	shift
+    NSTR="-e \"$1.*:\""
+
+    if [ ! -z "$2" ]; then
+        shift
+        for MODNAME in "$@"; do
+            NSTR="$NSTR -e \"$MODNAME.*:\""
+        done
+    fi
+
+    bash -c "grep -i $NSTR /var/lib/lunar/moonbase/module.index"
+}
 
 diff_module() {
   if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
@@ -1444,6 +1459,10 @@ main()  {
 
     POST_REMOVE)
       show_module_component $1 $2
+      ;;
+
+    find)
+      find_modules $@
       ;;
 
     search)
