@@ -911,7 +911,7 @@ show_info() {
 }
 
 find_modules() {
-	shift
+    shift
     NSTR="-e \"$1.*:\""
 
     if [ ! -z "$2" ]; then
