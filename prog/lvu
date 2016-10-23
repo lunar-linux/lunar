@@ -921,7 +921,7 @@ find_modules() {
         done
     fi
 
-    bash -c "grep -i $NSTR /var/lib/lunar/moonbase/module.index"
+    bash -c "grep -i $NSTR $MODULE_INDEX"
 }
 
 diff_module() {
