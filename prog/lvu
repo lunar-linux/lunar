@@ -912,7 +912,7 @@ show_info() {
 
 find_modules() {
     shift
-    NSTR="-e \"$1.*:\""
+    NSTR="-e $1.*:"
 
     if [ ! -z "$2" ]; then
         shift
@@ -921,7 +921,7 @@ find_modules() {
         done
     fi
 
-    bash -c "grep -i $NSTR $MODULE_INDEX"
+    grep -i $NSTR $MODULE_INDEX
 }
 
 diff_module() {
