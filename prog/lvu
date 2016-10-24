@@ -917,7 +917,7 @@ find_modules() {
     if [ ! -z "$2" ]; then
         shift
         for MODNAME in "$@"; do
-            NSTR="$NSTR -e \"$MODNAME.*:\""
+            NSTR="$NSTR -e $MODNAME.*:"
         done
     fi
 
