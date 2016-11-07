@@ -177,7 +177,7 @@ mquery()
             fi
         fi
         # and lookup the result in case of yes/no opts
-        if [ $(get_module_config $1) == "y" ] ; then
+        if [ "$(get_module_config $1)" == "y" ] ; then
             OPTS="$OPTS $4"
         else
             OPTS="$OPTS $5"
