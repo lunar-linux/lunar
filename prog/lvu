@@ -919,7 +919,7 @@ apropos_modules() {
         shift
         for modname
         do
-            NSTR="$NSTR -e $MODNAME.*:"
+            NSTR="$NSTR -e $modname.*:"
         done
     fi
 
