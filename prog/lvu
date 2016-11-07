@@ -68,7 +68,7 @@ enforced                   display enforced modules
 expired                    display a list of modules which need an update
 info        module         display terse summary information about module
 
-apropos     "keyword"      Displays modules with "keyword" in their names,
+apropos     "keyword"      display modules with "keyword" in their names,
                            with their section
 
 search      "phrase"       searches all modules long descriptions for phrase.
