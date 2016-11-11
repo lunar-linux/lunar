@@ -68,6 +68,9 @@ enforced                   display enforced modules
 expired                    display a list of modules which need an update
 info        module         display terse summary information about module
 
+apropos     "keyword"      display modules with "keyword" in their names,
+                           with their section
+
 search      "phrase"       searches all modules long descriptions for phrase.
 service     port|acronym   displays modules that provide that service
 
@@ -908,6 +911,21 @@ show_info() {
   fi
 }
 
+apropos_modules() {
+    shift
+    NSTR="-e $1.*"
+
+    if [[ -v $2 ]]; then
+        shift
+        for modname
+        do
+            NSTR="$NSTR -e $modname.*:"
+        done
+    fi
+
+    grep -i $NSTR $MODULE_INDEX
+
+}
 
 diff_module() {
   if [ "$ZLOCAL_OVERRIDES" != "on" ]; then
@@ -1445,6 +1463,10 @@ main()  {
     POST_REMOVE)
       show_module_component $1 $2
       ;;
+
+    apropos)
+        apropos_modules $@
+        ;;
 
     search)
       grep -irle "$2" "$MOONBASE" --include=DETAILS | sed "s;${MOONBASE}/\(.*\)/DETAILS;\1;"
