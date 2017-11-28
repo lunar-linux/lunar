@@ -71,13 +71,13 @@ export        DIALOGRC=/etc/lunar/dialogrc
          MD5SUM_CHECK=${MD5SUM_CHECK:-on}
             SYM_CHECK=${SYM_CHECK:-off}
 
-              GNU_URL=ftp://ftp.gnu.org/pub/gnu
-              KDE_URL=http://download.kde.org
-            GNOME_URL=ftp://ftp.gnome.org/pub/GNOME
+              GNU_URL=https://ftpmirror.gnu.org
+              KDE_URL=https://download.kde.org
+            GNOME_URL=https://download.gnome.org
            KERNEL_URL=https://cdn.kernel.org
-           SFORGE_URL=http://downloads.sourceforge.net/sourceforge
-          XFREE86_URL=ftp://ftp.xfree86.org/pub/XFree86
-             XORG_URL=ftp://ftp.freedesktop.org/pub/xorg
+           SFORGE_URL=https://downloads.sourceforge.net/sourceforge
+          XFREE86_URL=http://ftp.xfree86.org/pub/XFree86
+             XORG_URL=https://www.x.org/releases
           LRESORT_URL=http://download.lunar-linux.org/lunar/cache
 
       MOONBASE_URL[0]=http://lunar-linux.org/lunar/
