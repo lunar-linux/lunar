@@ -116,6 +116,7 @@
 ^\(/usr\)\?/lib\(32\|64\)\?/libutil.so.1$
 ^\(/usr\)\?/lib\(32\|64\)\?/libnsl.so.1$
 ^\(/usr\)\?/lib\(32\|64\)\?/libcrypt.so.1$
+^\(/usr\)\?/lib\(32\|64\)\?/libstdc++.so
 ^\(/usr\)\?/lib\(32\|64\)\?/modules/
 /perllocal.pod$
 ^/usr/include/bits/syscall.h$
