@@ -18,8 +18,8 @@ Canada		http://gnu.mirror.iweb.com/gnu
 Canada		http://gnu.mirror.vexxhost.com
 Canada		http://mirror.csclub.uwaterloo.ca/gnu
 China		ftp://mirrors.ustc.edu.cn/gnu
-China		http://mirror.bjtu.edu.cn/gnu
-China		http://mirrors.ustc.edu.cn/gnu
+China		https://mirrors.tuna.tsinghua.edu.cn/gnu/
+China		https://mirrors.ustc.edu.cn/gnu
 "Custom Mirror"	Custom
 Czeck Republic	ftp://ftp.sh.cvut.cz/MIRRORS/gnu/pub/gnu
 Czeck Republic	http://ftp.sh.cvut.cz/MIRRORS/gnu/pub/gnu
