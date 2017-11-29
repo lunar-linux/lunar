@@ -193,10 +193,9 @@ validate_source_dir()  {
   debug_msg "validate_source_dir ($@)"
 
   verbose_msg "validating \"$SOURCE_DIRECTORY\""
-  if  [[ -n $SOURCE_DIRECTORY                     &&
-      [[    $SOURCE_DIRECTORY != $BUILD_DIRECTORY &&
-      [[    $SOURCE_DIRECTORY =~ $BUILD_DIRECTORY ]]
-  then
+  if  [[ -n $SOURCE_DIRECTORY &&
+            $SOURCE_DIRECTORY != $BUILD_DIRECTORY &&
+            $SOURCE_DIRECTORY =~ $BUILD_DIRECTORY ]]; then
     true
   else
     message  "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."

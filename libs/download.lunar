@@ -88,8 +88,9 @@ download_module() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1$2 "; then
 					ALL_URLS="$ALL_URLS $1$2"
-				if [[ ! $ALL_URLS =~ $1 ]]; then
-					ALL_URLS="$ALL_URLS $1"
+					if [[ ! $ALL_URLS =~ $1 ]]; then
+						ALL_URLS="$ALL_URLS $1"
+					fi
 				fi
 			fi
 		}
