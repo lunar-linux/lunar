@@ -1,3 +1,5 @@
+
+
 Australia, KDDI R&D Laboratories	http://ftp.kddlabs.co.jp/pub/X11/kde
 Australia, KDDI R&D Laboratories	ftp://ftp.kddlabs.co.jp/pub/X11/kde
 Australia, UberGlobal				http://kde.mirror.uber.com.au
@@ -5,7 +7,7 @@ Austria, Easyname					http://mirror.easyname.at/kde
 Austria, Easyname					ftp://mirror.easyname.at/kde
 Austria, Klaus-Uwe Mitterer			http://mirror.klaus-uwe.me/kde/ftp
 Austria, Klaus-Uwe Mitterer			ftp://mirror.klaus-uwe.me/kde/ftp
-Belgium, Cu.be					http://kde.cu.be
+Belgium, Cu.be Solutions			http://kde.cu.be
 Brazil, NB Telecom		http://mirror.nbtelecom.com.br/KDE/kdeftp
 Brazil, Universidade de Sao Paulo			http://linorg.usp.br/kde/downloads
 Brazil, Universidade Federal do Parana		http://kde.c3sl.ufpr.br
@@ -13,7 +15,7 @@ Brazil, Universidade Federal do Parana		ftp://kde.c3sl.ufpr.br/kde
 Canada, Dalhousie University			http://mirror.its.dal.ca/kde
 Canada, Dalhousie University			ftp://mirror.its.dal.ca/kde
 Canada, Waterloo University			http://mirror.csclub.uwaterloo.ca/kde
-China, University of Science and Technology	http://mirrors.ustc.edu.cn/kde
+China, University of Science and Technology	https://mirrors.ustc.edu.cn/kde
 "Custom Mirror"		Custom
 Czech Republic, Karneval		http://mirror.karneval.cz/pub/kde
 Czech Republic, Karneval		ftp://mirror.karneval.cz/pub/kde
@@ -40,16 +42,22 @@ Germany, mirror.ga			http://kde.alpha.mirror.ga
 Germany, mirror.ga			ftp://alpha.mirror.ga/kde
 Germany, mirror.ga			http://kde.beta.mirror.ga
 Germany, mirror.ga			ftp://beta.mirror.ga/kde
+Germany, Hochschule Esslingen	https://mirror.hs-esslingen.de/Mirrors/ftp.kde.org/pub/kde/
+Germany, Hochschule Esslingen	ftp://mirror.hs-esslingen.de/pub/Mirrors/ftp.kde.org/pub/kde/
 Germany, NetCologne GmbH	http://mirror.netcologne.de/kde
 Germany, NetCologne GmbH	ftp://mirror.netcologne.de/kde
 Germany, SunSITE Central Europe	http://vesta.informatik.rwth-aachen.de/ftp/pub/mirror/kde
 Germany, SunSITE Central Europe	ftp://vesta.informatik.rwth-aachen.de/pub/mirror/kde
 Germany, Wuerzburg University		http://ftp.rz.uni-wuerzburg.de/pub/unix/kde
 Germany, Wuerzburg University		ftp://ftp.rz.uni-wuerzburg.de/pub/unix/kde
+Greece, University of Crete	http://ftp.cc.uoc.gr/mirrors/kde/
+Greece, University of Crete	ftp://ftp.cc.uoc.gr/mirrors/kde/
 Iceland, RHnet			http://ftp.rhnet.is/pub/kde
 Iceland, RHnet			ftp://ftp.rhnet.is/pub/kde
 Ireland, HEAnet			http://ftp.heanet.ie/mirrors/ftp.kde.org
 Ireland, HEAnet			ftp://ftp.heanet.ie/mirrors/ftp.kde.org
+Italy, BA mirror	http://ba.mirror.garr.it/mirrors/KDE/
+Italy, CT mirror	http://ct.mirror.garr.it/mirrors/KDE/
 "Master Site"		http://download.kde.org
 Netherlands, NLUUG		http://ftp.nluug.nl/pub/windowing/kde
 Netherlands, NLUUG		ftp://ftp.nluug.nl/pub/windowing/kde
@@ -70,10 +78,9 @@ Republic of Korea, Advanced Institute of Science and Technology	http://ftp.kaist
 Republic of Korea, NeowizGames		ftp://ftp.neowiz.com/X/KDE
 Republic of Korea, NeowizGames		http://ftp.neowiz.com/X/KDE
 Romania, RoEduNet			http://ftp.iasi.roedu.net/pub/mirrors/ftp.kde.org
-South Africa, Internet Solutions		ftp://ftp.is.co.za/mirror/ftp.kde.org
-South Africa, Internet Solutions		http://ftp.is.co.za/mirror/ftp.kde.org
-Sweden			ftp://archive.sunet.se/pub/X11/kde
-Sweden			http://archive.sunet.se/pub/X11/kde
+South Africa, Internet Solutions	ftp://ftp.is.co.za/mirror/ftp.kde.org
+South Africa, Internet Solutions	http://ftp.is.co.za/mirror/ftp.kde.org/
+Sweden, Academic Computer Club - Umea University	https://ftp.acc.umu.se/mirror/kde.org/ftp/
 Taiwan, Providence University			ftp://ftp.cs.pu.edu.tw/pub/kde
 Taiwan, Providence University			http://ftp.cs.pu.edu.tw/pub/kde
 Ukraine, ip-connect			http://kde.ip-connect.vn.ua
@@ -95,4 +102,6 @@ USA, MIT			http://mirrors.mit.edu/kde
 USA, MIT			ftp://mirrors.mit.edu/kde
 USA, TDS			http://kde.mirrors.tds.net/pub/kde
 USA, TDS			ftp://kde.mirrors.tds.net/pub/kde
+Viet Nam, Freedif.org	http://mirror.freedif.org/KDE/ftp/
+Viet Nam, VinaHost	http://mirror.vinahost.vn/kde/
 
