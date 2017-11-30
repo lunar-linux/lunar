@@ -112,4 +112,3 @@ function add_priv_user() {
     invoke_installwatch
   fi
 }
-

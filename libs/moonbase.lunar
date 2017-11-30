@@ -76,7 +76,7 @@ SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
       OUTCOME=success || OUTCOME=failed
     fi
   fi
-  
+
   if [ "$OUTCOME" != "failed" ] ; then
     # get ready to regenerate the module index cache file
     create_module_index &&
@@ -94,5 +94,3 @@ SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
   fi
 )
 }
-
-

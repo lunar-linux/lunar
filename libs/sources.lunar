@@ -106,7 +106,7 @@ verify_all_sources() {
     eval SRC=\$${TEMP}
 
     [ -z "$SRC" ] && break
-   
+
     # it needs to exist prior before we can check it:
     if ! verify_source $SRC ; then
       return 1
@@ -136,7 +136,7 @@ verify_all_sources() {
       fi
     fi
   done
- 
+
   # result?
   if [ -n "$RESULT" ] ; then
     return 1

@@ -16,21 +16,21 @@
 ############################################################
 
 
-# function : display_update_log 
-# usage    : display_update_log update|rebuild 
+# function : display_update_log
+# usage    : display_update_log update|rebuild
 # purpose  : display a log describing update successes, failures, and summaries
 display_update_log() {
   debug_msg "display_update_log ($@)"
-  rm -f /var/log/lunar/update 
-  { 
-    if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then 
+  rm -f /var/log/lunar/update
+  {
+    if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then
       display_success_info $1
     fi
-  } | tee /var/log/lunar/update 
+  } | tee /var/log/lunar/update
 }
 
 
-# function : display_success_info 
+# function : display_success_info
 # usage    : display_success_info update|rebuild
 # purpose  : display a list of update successes and failures
 display_success_info() {
@@ -43,20 +43,18 @@ display_success_info() {
   message
   message  "${MESSAGE_COLOR}Lunar $1 completed at `date`${DEFAULT_COLOR}"
   message  "Successful  : $NUMSUCCESS"
-  message  "Failed      : $NUMFAILURES"  
-  message  
-  
-  if  [  "$NUMSUCCESS" -gt "0"  ]; then   
-    message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"  
-    cat "$TMP_LIN_SUCCESS" 
-    message  
-  fi  
- 
-  if  [  "$NUMFAILURES" -gt "0"  ]; then    
+  message  "Failed      : $NUMFAILURES"
+  message
+    message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"
+    cat "$TMP_LIN_SUCCESS"
+    message
+  fi
+
+  if  [  "$NUMFAILURES" -gt "0"  ]; then
     message  "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
     cat "$TMP_LIN_FAIL"
-    message   
-  fi   
+    message
+  fi
 
 }
 
@@ -115,4 +113,3 @@ display_moonbase_changes()  {
   temp_destroy $MODULE_CHANGES
   fi
 }
-

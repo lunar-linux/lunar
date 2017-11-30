@@ -62,7 +62,7 @@ rework_module() {
 				run_module_file $MODULE DEPENDS | grep -v '%'
 			fi
 		fi
-	 ) 
+	 )
 	}
 
 	# here starts the real work:

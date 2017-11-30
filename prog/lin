@@ -254,11 +254,11 @@ if [ -z "$?" ] ; then
 else
   eval set -- $GETOPT_ARGS
   export IFS="$STANDARD_IFS"
-  
+ 
   root_check
   enviro_check
   set_priority
-  
+ 
   while true ; do
     case "$1" in
       -c|--compile     ) export COMPILE="$1" ;                      shift   ;;
