@@ -7,4 +7,3 @@ if [[ -n "$LUNAR_DEBUG" ]] ; then
 fi
  
 exec $CC_EXT $PROG "$@"
-

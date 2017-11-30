@@ -226,5 +226,3 @@ show_fancy_progress () {
   debug_msg "show_fancy_progress  ($@)"
    echo -en "\r                                                                            \r$1\r"
 }
-
-

@@ -6,7 +6,7 @@
 #                                                          #
 ############################################################
 #                                                          #
-# lrm is for removing installed packages                   # 
+# lrm is for removing installed packages                   #
 #                                                          #
 # 20020610                                                 #
 #                                                          #
@@ -30,15 +30,15 @@ usage: lrm [options] [module ...]
    -v | --verbose       Increases the level of message output
    -p | --purge         Delete all modules that depend on the module(s)
                           being removed as well
-   
+
 lrm is a script for removing installed modules.
-   If invoked without options, lrm will remove all installed files 
+   If invoked without options, lrm will remove all installed files
 belonging to the module(s) and remove the module(s) from the list
-of installed modules. 
+of installed modules.
    Downgrading a module means removing the current installed version
-of the module and installing a specific version; given that the 
+of the module and installing a specific version; given that the
 specific version is already in $INSTALL_CACHE/.
-   Some modules (such as bash and gcc)  are marked "non-removable" by the 
+   Some modules (such as bash and gcc)  are marked "non-removable" by the
 system. In order to remove "sustained" modules, use the nosustain option.
 END
 exit 1
@@ -249,7 +249,7 @@ downgrade() {
     done
     exit 1
   }
-   
+
   root_check
 
   verbose_msg "running \"$MODULE\" DETAILS file"
@@ -257,24 +257,24 @@ downgrade() {
 
   if [ -z "$1" ] ; then
     message "No version is entered. The below is the list of available files."
-    list_available_cache   
+    list_available_cache
   fi
 
   CACHE_XZ=$(xzbz_file "$INSTALL_CACHE/$MODULE-$1-$BUILD.tar")
 
-  if [ ! -s $CACHE_XZ ] ; then 
+  if [ ! -s $CACHE_XZ ] ; then
     message "Desired version is not available. Here is the available files"
     list_available_cache
   fi
 
   verbose_msg "checking if \"$MODULE\" is installed"
 
-  if [ -n "$(installed_version $MODULE)" ] ; then 
+  if [ -n "$(installed_version $MODULE)" ] ; then
     verbose_msg "\"$(installed_version $MODULE)\" of \"$MODULE\" is installed at the moment"
 
     if [ "$1" == "$I_VERSION" ] ; then
       message "The downgrade version is the same as the installed version"
-      message "Here is the available files." 
+      message "Here is the available files."
       list_available_cache
     fi
 
@@ -287,7 +287,7 @@ downgrade() {
 
   verbose_msg "installing \"$MODULE-$1\""
   verbose_msg "extracting cached install file..."
-  
+
   xzbz -dc $CACHE_XZ | tar -kt $TAR_P -C / >/dev/null
   verbose_msg "adding module to installed list"
 
@@ -301,8 +301,8 @@ downgrade() {
            "${DEFAULT_COLOR}"                      \
            "version"                               \
            "${VERSION_COLOR}${1}"                  \
-           "${DEFAULT_COLOR}" 
-   
+           "${DEFAULT_COLOR}"
+
   exit
 }
 
@@ -319,7 +319,7 @@ if [ -z "$?" ] ; then
 else
   eval set -- $GETOPT_ARGS
 
-  root_check 
+  root_check
   enviro_check
   set_priority
 

@@ -250,7 +250,7 @@ run_details() {
         cat "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" | sed '/^\s*VERSION=/d' > $TMP_DETAILS
       else
         cat "$MOONBASE/$SECTION/$1/DETAILS" | sed '/^\s*VERSION=/d' > $TMP_DETAILS
-      fi        
+      fi
       VERSION="$WANT_VERSION"
       . $TMP_DETAILS &> /dev/null || return 255
       temp_destroy $TMP_DETAILS
@@ -805,5 +805,3 @@ check_blacklist() {
     fi
   fi
 }
-
-

@@ -36,7 +36,7 @@ save_libraries()  {
   OLD_VERSION=`installed_version  $MODULE`
   OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
 
-  [ -e "$OLD_LOG" ] || return 0      
+  [ -e "$OLD_LOG" ] || return 0
 
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
   mkdir  -p  $OLD_LIBS
@@ -117,7 +117,7 @@ prepare_install() {
     lrm --upgrade $MODULE
     true
   fi
-  # turn on tracking now 
+  # turn on tracking now
   invoke_installwatch
   plugin_call BUILD_INSTALL $MODULE
   if [ $? == 2 ]; then
@@ -129,10 +129,10 @@ prepare_install() {
 default_pre_build() {
   debug_msg "default_pre_build ($@)"
   verbose_msg "running \"default_pre_build\""
-  validate_source_dir  $SOURCE_DIRECTORY 
+  validate_source_dir  $SOURCE_DIRECTORY
   if [[ -d $SOURCE_DIRECTORY ]] &&
      [[ $KEEP_SOURCE == "on" ]]; then
-    cd $SOURCE_DIRECTORY && 
+    cd $SOURCE_DIRECTORY &&
     make clean
     if [ $? -ne 0 ]; then
       message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}The source for ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}: could not be made clean for build."
@@ -164,11 +164,13 @@ _configure()
 }
 
 
-# cmake can be run two ways: in source and out of source. The determinante method is
-# to look for a cmake macro, if it exists then do out of source. There have been inconsistancies
-# with this, some apps compile fine out of source and others do not with the leaning towards 
-# more wanting out of source even though they do not say so. Making this the default and
-# for those that do not want it, specify it in the BUILD.
+# cmake can be run two ways: in source and out of source. The
+# determinante method is to look for a cmake macro, if it exists then do
+# out of source. There have been inconsistancies with this, some apps
+# compile fine out of source and others do not with the leaning towards
+# more wanting out of source even though they do not say so. Making this
+# the default and for those that do not want it, specify it in the
+# BUILD.
 cmake_build_target() {
   debug_msg "cmake_build_target ($@)"
     verbose_msg "running \"Out of source build is required; configuring\""
@@ -297,7 +299,7 @@ default_cpan_build() {
   if [ ! -x /usr/bin/cpan ] ; then
     return 1
   fi
-  
+
   CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
   echo "o conf cpan_root $STATE_DIRECTORY
         o conf build_dir $SOURCE_DIRECTORY
@@ -392,7 +394,7 @@ run_build()  {
   fi
 
   verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
-  
+
   # this calls optimizations and others:
   plugin_call BUILD_BUILD $MODULE
   # now override compile wrappers if needed:

@@ -41,7 +41,7 @@ function lock_file() {
       if [ ! -f "$1" ]; then
         touch "$1"
       fi
-	  
+
       # set lockfile
       if ln $TEMPFILE $LOCKFILE 2>/dev/null ; then
         rm -f $TEMPFILE
@@ -122,5 +122,3 @@ current_locked() {
     false
   fi
 }
-
-

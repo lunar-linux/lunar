@@ -170,9 +170,9 @@ find_pam_aware()  {
 	debug_msg "find_pam_aware ($@)"
 	local MODULE SECTION
 
-	for MODULE in $(list_installed); do 
+	for MODULE in $(list_installed); do
 		SECTION=$(find_section $MODULE)
-		if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] && 
+		if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] &&
 			     [ "$MODULE" != "Linux-PAM" ]; then
 			echo $MODULE
 		fi

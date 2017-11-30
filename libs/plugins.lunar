@@ -30,7 +30,7 @@ plugin_register() {
 	#  5 - MODULE_CHECK            integrity checking on installed modules
 	#  6 - KERNEL_UPDATEBOOTLOADER automate bootloader maintenance
 	#  7 - BUILD_CONFIGURE         called before running CONFIGURE
-	#  8 - BUILD_PRE_BUILD           ,,     ,,     ,,    PRE_BUILD 
+	#  8 - BUILD_PRE_BUILD           ,,     ,,     ,,    PRE_BUILD
 	#  9 - BUILD_BUILD               ,,     ,,     ,,    BUILD
 	# 10 - BUILD_INSTALL             ,,     ,,     ,,    INSTALL
 	# 11 - BUILD_POST_BUILD          ,,     ,,     ,,    POST_BUILD
@@ -127,5 +127,3 @@ reload_plugins() {
         . $ITERATOR
     done
 }
-
-

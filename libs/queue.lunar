@@ -37,8 +37,8 @@ add_queue() {
    [ -f "$1" ] || touch $1 2>/dev/null || return 1
 
    lock_file $1    &&
-   ! in_queue $1 $2 && echo "$2" >> $1 
-   unlock_file $1 
+   ! in_queue $1 $2 && echo "$2" >> $1
+   unlock_file $1
 }
 
 # function: remove_queue
@@ -57,10 +57,10 @@ remove_queue() {
       lock_file $1                 &&
       cat "$1" | grep -v "^"$2"\$" > $TMP_QUEUE
       cat "$TMP_QUEUE" > $1
-      unlock_file $1 
-      rm -f $TMP_QUEUE 2>/dev/null 
+      unlock_file $1
+      rm -f $TMP_QUEUE 2>/dev/null
    else
-      lock_file $1                 && 
+      lock_file $1                   &&
       echo `cat "$1" | sed 1!d`      &&
       cat "$1" | sed "1d" > $1       &&
       unlock_file $1
@@ -84,5 +84,3 @@ push_remove_queue() {
   module_installed               "$1"  &&
   add_queue  $REMOVE_QUEUE       "$1"
 }
-
-
