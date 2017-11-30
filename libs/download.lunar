@@ -63,11 +63,8 @@ download_module() {
 	# loop over all sources
 	for (( N = 1 ; N <= MAX_SOURCES ; N++ )) ; do
 		# get the URL part
-		TEMP=SOURCE$((N))
-		TEMP=${TEMP/%SOURCE1/SOURCE}
-		eval SRC=\${$TEMP}
-		eval URLS=\${${TEMP}_URL_FULL[@]}
-		eval OLD_URLS=\${${TEMP}_URL[@]}
+        eval SRC=\${SOURCE${N/#0/}} # SOURCE0 turns into just SOURCE
+        eval URLS=\${SOURCE${N/#0/}_URL[@]}
 
 		if [ -z "$SRC" ] ; then
 			break
@@ -91,6 +88,8 @@ download_module() {
 			if [ -n "$1" ]; then
 				if ! echo " $ALL_URLS " | grep -q " $1$2 "; then
 					ALL_URLS="$ALL_URLS $1$2"
+				if [[ ! $ALL_URLS =~ $1 ]]; then
+					ALL_URLS="$ALL_URLS $1"
 				fi
 			fi
 		}
@@ -157,50 +156,6 @@ download_module() {
 
 	return ${FAILALL:-0}
 )
-}
-
-
-testpack () {
-	local FILENAME
-	debug_msg "testpack ($@)"
-	if [ -f "$1" ]; then
-		FILENAME=$1
-	else
-		FILENAME=$SOURCE_CACHE/$1
-	fi
-	if [ -f "$FILENAME" ] ; then
-		FILEMAGIC=$(file -b $FILENAME)
-		case $FILENAME in
-			*.bz2|*.BZ2)
-				echo $FILEMAGIC | grep -qw "bzip2"
-				;;
-			*.gz|*.GZ|*.tgz|*.TGZ)
-				echo $FILEMAGIC | grep -qw "gzip"
-				;;
-			*.z|*.Z)
-				echo $FILEMAGIC | grep -qw "compress"
-				;;
-			*.zip|*.ZIP)
-				echo $FILEMAGIC | grep -qw "Zip"
-				;;
-			*.rpm|*.RPM)
-				echo $FILEMAGIC | grep -qw "RPM"
-				;;
-			*.CAB|*.cab)
-				echo $FILEMAGIC | grep -qw "Cabinet"
-				;;
-			*.xz|*.XZ)
-				echo $FILEMAGIC | grep -qw "XZ"
-				;;
-			*)
-				# we don't know how to handle this type of file
-				true
-				;;
-	  	esac
-	else
-		# filename does not exist!
-		false
-	fi
 }
 
 

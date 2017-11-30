@@ -32,7 +32,7 @@ function find_depends() {
   find_depends_intern() {
     local DEP DEPS DEPFILE SECTION
     SECTION=$(find_section $1)
-    if echo $SECTION | grep -q '^zlocal' ; then
+    if [[ $SECTION =~ ^zlocal ]]; then
       # this module lives in zlocal
       # now we need to run the depends file
 

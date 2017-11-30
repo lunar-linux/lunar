@@ -109,7 +109,9 @@ update_plugins() {
 	# find all plugins in moonbase and run update_plugin() on them
 	verbose_msg "Updating plugins"
 	find $MOONBASE -wholename "*/plugin.d/*.plugin" | while read PLUGIN ; do
-		update_plugin `basename $(echo $PLUGIN | sed 's/\/plugin.d\/.*//g')`
+        local baseplugin
+        pluginbase=${PLUGIN%/plugin.d/*}
+        update_plugin ${pluginbase##*/}
 	done
 }
 
