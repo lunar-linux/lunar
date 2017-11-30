@@ -33,7 +33,7 @@ Lunar -- a menu-driven software package management utility
 
 Example:        lunar
   This invokes the full-screen interface
-  
+
 Usage:		lunar [general options] [command [command parameters]]
 
 General options:
@@ -67,7 +67,7 @@ EOF
   exit  1
 }
 
-show_modules()	{ 
+show_modules()	{
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
         !  module_exiled     $MODULE
@@ -83,7 +83,7 @@ show_modules()	{
 }
 
 
-has_modules()	{ 
+has_modules()	{
   for  MODULE in `list_modules "$1"`;  do
     if  !  module_installed  $MODULE  &&
         !  module_exiled     $MODULE
@@ -531,7 +531,7 @@ feature_menu()  {
          AUTOFIX=${AUTOFIX:-on}
        AUTOPRUNE=${AUTOPRUNE:-off}
            COLOR=${COLOR:-on}
-     KEEP_SOURCE=${KEEP_SOURCE:-off}      
+     KEEP_SOURCE=${KEEP_SOURCE:-off}
     MAIL_REPORTS=${MAIL_REPORTS:-off}
     VIEW_REPORTS=${VIEW_REPORTS:-off}
         PRESERVE=${PRESERVE:-on}
@@ -582,13 +582,13 @@ feature_menu()  {
       "COMPRESS_XZ"      "Toggle"  "$COMPRESS_XZ"   "$L_HELP"`
 
   then
-  
+
          ARCHIVE=off
    AUTORESURRECT=off
          AUTOFIX=off
        AUTOPRUNE=off
            COLOR=off
-     KEEP_SOURCE=off    
+     KEEP_SOURCE=off
     MAIL_REPORTS=off
         PRESERVE=off
            SOUND=off
@@ -609,7 +609,7 @@ ZLOCAL_OVERRIDES=off
              AUTOFIX)       AUTOFIX=on  ;;
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                COLOR)         COLOR=on  ;;
-         KEEP_SOURCE)   KEEP_SOURCE=on  ;;      
+         KEEP_SOURCE)   KEEP_SOURCE=on  ;;
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
             PRESERVE)      PRESERVE=on  ;;
                SOUND)         SOUND=on  ;;
@@ -760,7 +760,7 @@ setvar() {
 unsetvar() {
   if [ ! -z "$*" ] ; then
     unset_local_config "$1"
-  fi   
+  fi
 }
 
 
@@ -826,7 +826,7 @@ main() {
 
   main_menu
 }
-  
+
 . /etc/lunar/config
 . $BOOTSTRAP
 
@@ -837,8 +837,8 @@ if [ -z "$?" ] ; then
   exit
 else
   eval set -- $GETOPT_ARGS
-  root_check 
-  enviro_check 
+  root_check
+  enviro_check
   set_priority
 
   while true ; do
@@ -871,7 +871,7 @@ else
     unexile    ) shift && unexile_modules $@            ;;
     enforce    ) shift && enforce_modules $@            ;;
     unenforce  ) shift && unenforce_modules $@          ;;
-    *) main ;; 
+    *) main ;;
   esac
 fi
 

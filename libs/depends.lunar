@@ -112,7 +112,7 @@ sort_by_dependency() {
 
   # now reverse grep over the files:
   cat "$TMP_ALL" | grep -x -f "$TMP_LIST"
-  
+
   temp_destroy $TMP_LIST
   temp_destroy $TMP_ALL
 }
@@ -258,7 +258,7 @@ run_depends() {
           fi
           lin --deps $DEP
           echo "$DEP" >> $TEMP_PREPAREDDEPS
-        elif query  "$DEPMOD_AVAIL 
+        elif query  "$DEPMOD_AVAIL
           ${QUERY_COLOR}Purpose: ${DEFAULT_COLOR}${MESSAGE_COLOR}$4 ${QUERY_COLOR}?" $DEFAULT ; then
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
@@ -295,10 +295,10 @@ run_depends() {
 satisfy_depends()  {
   local TMP_FILE DEP_MODULE DEP_STATUS DEP_ON DEP_OFF LINE
   debug_msg "satisfy_depends ($@)"
-  if [ -n "$DEPS_ONLY" ] ; then 
+  if [ -n "$DEPS_ONLY" ] ; then
     return 0
   fi
-  
+
   # make sure we start with clean OPTS here:
   unset OPTS
 
@@ -367,7 +367,7 @@ conflicts() {
   fi
 
   true
-} 
+}
 
 
 run_conflicts() {
@@ -462,7 +462,7 @@ create_depends_cache()
     for DEPFILE in $DEPFILES ; do
       TMP=${DEPFILE%/*} MODULE=${TMP##*/} . $DEPFILE
     done > $TMP_DEP_CACHE &&
-    install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE 
+    install -m644 $TMP_DEP_CACHE $DEPENDS_CACHE
 
     temp_destroy $TMP_DEP_CACHE
   else
@@ -475,7 +475,7 @@ update_module_depends()
 {
   local MODULE
   debug_msg "update_module_depends($@)"
-  
+
   # we declare these local to override the systems default ones:
   optional_depends()  {
     local DEP
@@ -507,7 +507,7 @@ update_module_depends()
       if has_module_file $MODULE DEPENDS ; then
         run_module_file $MODULE DEPENDS | grep -v '%'
       fi
-    ) 
+    )
   }
 
   # here starts the real work:
@@ -550,5 +550,3 @@ list_installed_depending() {
     fi
   done
 }
-
-

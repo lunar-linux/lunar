@@ -19,7 +19,7 @@ prune() {
   if [ -z "$BUILD" ] ; then
     eval $(grep BUILD= /etc/lunar/local/optimizations)
   fi
-  
+
   TMP_SPOOL_KEEP=$(temp_create "spool-keep")
   TMP_CACHE_KEEP=$(temp_create "cache-keep")
 
@@ -32,7 +32,7 @@ prune() {
       done
     # cache:
       VERSION=$(installed_version $MODULE)
-    
+
       echo "$MODULE-$VERSION-$BUILD.tar.xz" >> $TMP_CACHE_KEEP
       echo "$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_CACHE_KEEP
     fi
@@ -44,7 +44,7 @@ prune() {
   for FILE in $(ls -1 $SOURCE_CACHE); do
     if ! grep -q "$FILE" "$TMP_SPOOL_KEEP" ; then
       message "Removing stale source: $SOURCE_CACHE/$FILE"
-      rm -f $SOURCE_CACHE/$FILE      
+      rm -f $SOURCE_CACHE/$FILE
     fi
   done
   temp_destroy $TMP_SPOOL_KEEP

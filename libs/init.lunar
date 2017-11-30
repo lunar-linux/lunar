@@ -33,7 +33,7 @@ enviro_check() {
   if [ -z $LUNAR_INSTALL ]; then
     if [ -z "$SHELL" ] || [ "$(getent passwd $USER | cut -d: -f3)" != "0" ] ; then
       message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
-              "You are not running a fully initialized root shell, consider" 
+              "You are not running a fully initialized root shell, consider"
       message "running a proper root shell with 'su -'" \
               "${DEFAULT_COLOR}"
     fi
@@ -62,5 +62,3 @@ set_priority() {
   LUNAR_PRIORITY=${LUNAR_PRIORITY:-"+10"}
   renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
 }
-
-

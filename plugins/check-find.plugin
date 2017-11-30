@@ -17,7 +17,7 @@ plugin_module_check_find() {
     return 2
   fi
   debug_msg "plugin_module_check_find ($@)"
-  
+
   MODULE=$1
   VERSION=$(installed_version $MODULE)
   I_LOG=$INSTALL_LOGS/$MODULE-$VERSION
@@ -47,5 +47,3 @@ plugin_module_check_find() {
 
 
 plugin_register MODULE_CHECK plugin_module_check_find
-
-

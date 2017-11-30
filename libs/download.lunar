@@ -223,5 +223,3 @@ show_downloading()
 		done
 	fi
 }
-
-

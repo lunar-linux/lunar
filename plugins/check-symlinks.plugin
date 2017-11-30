@@ -52,5 +52,3 @@ plugin_module_check_symlinks()  {
 
 
 plugin_register MODULE_CHECK plugin_module_check_symlinks
-
-

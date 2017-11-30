@@ -15,7 +15,7 @@
 # usage    : patch_it patch_file patch_level
 # purpose  : calls "patch -px < $filename", where filename may be a variety
 #            of formats
-patch_it () { 
+patch_it () {
   local PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
   verbose_msg "patch_it \"$1\" \"$2\"";
 
@@ -85,5 +85,3 @@ edit_file() {
   debug_msg "edit_file ($@)"
   ${EDITOR:-nano} $1
 }
-
-

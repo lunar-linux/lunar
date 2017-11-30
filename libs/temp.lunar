@@ -27,7 +27,7 @@ temp_create() {
     message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}" \
             "Cannot create temp file${DEFAULT_COLOR}"
     exit 1
-  fi  
+  fi
 }
 
 
@@ -37,5 +37,3 @@ temp_destroy() {
     rm -f "$1"
   fi
 }
-
-

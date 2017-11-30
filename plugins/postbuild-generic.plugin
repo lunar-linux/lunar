@@ -68,7 +68,7 @@ plugin_postbuild_gather_docs()
 
   DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
 
-  # This is the list of default extra documentation that is to be 
+  # This is the list of default extra documentation that is to be
   # installed automatically if the user has $GARBAGE=on.  Any other
   # docs are left up to the module writer to get installed.
   DEFAULT_DOCS="README* INSTALL* FAQ* CHAN* doc* DOC* *doc \

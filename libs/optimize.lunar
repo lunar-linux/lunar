@@ -59,7 +59,7 @@ optimize_menu()
 
 # PLATFORM - translated uname -m / arch
 PLATFORM=$(uname -m | sed 's/i[3456]86/x86/')
-# BUILD - 
+# BUILD -
 case $PLATFORM in
 	x86|x86_64)
 		BUILD=$(uname -m)-pc-linux-gnu ;;

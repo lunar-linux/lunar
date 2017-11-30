@@ -46,11 +46,10 @@ find_module_size() {
    while read LINE
    do
       [ -f "$LINE" ]            &&
-      SIZE0=`du "$LINE"         | 
+      SIZE0=`du "$LINE"         |
              cut -f 1-1`        &&
       SIZE=$((SIZE0+SIZE))
    done <$INSTALL_LOGS/$1-$VERSION     &&
    echo ${SIZE}KB                      ||
    message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
 }
-

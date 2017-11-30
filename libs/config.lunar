@@ -133,5 +133,3 @@ get_other_module_config()
 		get_config "$DEPENDS_CONFIG/$1" "$2"
 	fi
 }
-
-

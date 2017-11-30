@@ -5,6 +5,5 @@ PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p ${0##*/})
 if [[ -n "$LUNAR_DEBUG" ]] ; then
 	echo "++ $CXX_EXT $PROG $@" >&2
 fi
- 
-exec $CXX_EXT $PROG "$@"
 
+exec $CXX_EXT $PROG "$@"
