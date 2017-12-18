@@ -240,7 +240,7 @@ default_cmake_config() {
 
 
 default_install() {
-    prepare_install
+    prepare_install &&
     make install
 }
 
