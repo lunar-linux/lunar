@@ -33,7 +33,7 @@ list_sections() {
 	debug_msg "list_sections ($@)"
 	check_module_index
 	cut -d: -f2 "$MODULE_INDEX" | sort | uniq
-	find $MOONBASE/zlocal -name DETAILS | sed "s:^$MOONBASE\/::g;s:\/[^\/]*\/DETAILS$::g" | sort | uniq
+	find $MOONBASE/zlocal \( -name DETAILS.$PLATFORM -o -name DETAILS \) | sed "s:^$MOONBASE\/::g;s:\/[^\/]*\/DETAILS.*::g" | sort | uniq
 	return 0
 }
 
@@ -59,7 +59,7 @@ list_modules() {
 	else
 	 (
 		 cd $MOONBASE/$1
-		 find . -maxdepth 2 -name DETAILS -type f | sed 's/\.\///g;s/\/DETAILS$//g'
+		 find . -maxdepth 2 \( -name DETAILS.$PLATFORM -o -name DETAILS \) -type f | sed 's/\.\///g;s/\/DETAILS.*//g' | uniq
 	 )
 	fi
 }
@@ -114,15 +114,15 @@ create_module_index() {
   if [[ "$MOONBASE" == "/var/lib/lunar/moonbase" ]] && [[ -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ]] ; then
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
-    grep "/DETAILS$" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" | \
-        sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS::g' \
-        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' > $TMP_INDEX
+    egrep "/DETAILS(\.$PLATFORM|$)" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" | \
+        sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS.*::g' \
+        -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' | uniq > $TMP_INDEX
   else
     # this *really* is the fastest way to do it, no guarantees, we
     # do have to make sure MOONBASE is coherent and tidy though
     debug_msg "Regenerating \$MODULE_INDEX manually..."
-    find $MOONBASE -type f -name DETAILS ! -regex "$MOONBASE/zlocal/.*" \
-        -printf "%h\n" | sed "s:$MOONBASE::;s:^/::;s:^\(.*\)/\([^/]*\)$:\2\:\1:" > $TMP_INDEX
+    find $MOONBASE -type f \( -name DETAILS.$PLATFORM -o -name DETAILS \) ! -regex "$MOONBASE/zlocal/.*" \
+        -printf "%h\n" | sed "s:$MOONBASE::;s:^/::;s:^\(.*\)/\([^/]*\)$:\2\:\1:" | uniq > $TMP_INDEX
   fi
 
   # this should be safe enough:
@@ -147,7 +147,7 @@ function check_module_index() {
     create_depends_cache
     RESULT=0
   else
-    if [[ -n "$(find $MOONBASE -type f -name "DETAILS" -cnewer $MODULE_INDEX)" ]]; then
+    if [[ -n "$(find $MOONBASE -type f \( -name "DETAILS.$PLATFORM" -o -name "DETAILS" \) -cnewer $MODULE_INDEX)" ]]; then
       create_module_index
       RESULT=0
     fi
@@ -175,7 +175,7 @@ find_section() {
 	# if using ZLOCAL, we must search there first
 	if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
 		for SECTION in $(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; do
-			if [[ -f "$MOONBASE/$SECTION/$1/DETAILS" ]]; then
+			if [[ -f "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" || -f "$MOONBASE/$SECTION/$1/DETAILS" ]]; then
 				echo $SECTION
 				return 0
 			fi
@@ -192,7 +192,7 @@ find_section() {
 	# assuming we're not using ZLOCAL, we haven't looked there yet!
 	# perhaps it's a zlocal module ? search zlocal for it now
 	if SECTION=$(find "$MOONBASE/zlocal/" -type d -name $1 | sed -e "s|$MOONBASE/||;s|/$1$||" ) ; then
-		if [[ -f "$MOONBASE/zlocal/$SECTION/$1/DETAILS" ]]; then
+		if [[ -f "$MOONBASE/zlocal/$SECTION/$1/DETAILS.$PLATFORM" || -f "$MOONBASE/zlocal/$SECTION/$1/DETAILS" ]]; then
 			echo $SECTION
 			return 0
 		fi
