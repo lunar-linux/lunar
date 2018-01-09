@@ -22,8 +22,10 @@ mirror_list()  {
 }
 
 select_mirror()  {
+  DEFAULT_URL=${1}_URL
   $DIALOG  --title "Select Mirror Please"  \
            --ok-label  "Select"            \
+           --default-item "${!DEFAULT_URL}" \
            --menu                          \
            ""                              \
            0 80 10                         \
@@ -40,6 +42,7 @@ mirror_menu()  {
    LR_HELP="Select the mirror for a last resort download place."
     X_HELP="Select mirror for downloading XFree86 related sources."
  XORG_HELP="Select mirror for downloading XOrg related sources."
+    N_HELP="Select mirror for downloading NVIDIA drivers."
       HELP="Selecting a mirror site can speed your downloads."
 
     COMMAND=`$DIALOG  --title "Mirror Menu"        \
@@ -53,8 +56,9 @@ mirror_menu()  {
                       "KERNEL"   ""  "$L_HELP"     \
                       "SFORGE"   ""  "$SF_HELP"    \
                       "LRESORT"  ""  "$LR_HELP"    \
+                      "NVIDIA"   ""  "$N_HELP"     \
                       "XFREE86"  ""  "$X_HELP"     \
-                      "XORG"     ""  "$XORG_HELP"`											
+                      "XORG"     ""  "$XORG_HELP"`
 
   do
     case  $COMMAND in
@@ -64,6 +68,7 @@ mirror_menu()  {
           KERNEL)   MIRROR="  KERNEL_URL"    ;;
           XFREE86)  MIRROR=" XFREE86_URL"    ;;
           XORG)     MIRROR="    XORG_URL"    ;;
+          NVIDIA)   MIRROR="  NVIDIA_URL"    ;;
           SFORGE)   MIRROR="  SFORGE_URL"    ;;
           LRESORT)  MIRROR=" LRESORT_URL"    ;;
     esac
@@ -76,6 +81,7 @@ mirror_menu()  {
       if [ -n "$MIRROR_URL" ] ; then
         set_local_config "$MIRROR" "$MIRROR_URL" &&
         $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+        export ${MIRROR// }="$MIRROR_URL"
       fi
     fi
   done
