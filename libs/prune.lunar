@@ -73,7 +73,7 @@ prune() {
   for FILE in $(ls -1 $COMPILE_LOGS) ; do
     local file_base
     file_base=${FILE%.xz}
-    file_base=${FILE%.bz2} # compile logs can be either
+    file_base=${file_base%.bz2} # compile logs can be either
     if [[ ! $LOGS =~ $file_base ]]; then
       message "Removing stale log: $COMPILE_LOGS/$FILE"
       rm $COMPILE_LOGS/$FILE
