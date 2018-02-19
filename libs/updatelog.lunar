@@ -45,6 +45,8 @@ display_success_info() {
   message  "Successful  : $NUMSUCCESS"
   message  "Failed      : $NUMFAILURES"
   message
+
+  if  [  "$NUMSUCCESS" -gt "0"  ]; then
     message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"
     cat "$TMP_LIN_SUCCESS"
     message

@@ -35,7 +35,7 @@ patch_it () {
   case "$PATCH" in
     *.bz2)       GZCMD=bzcat ;;
     *.gz)        GZCMD=zcat ;;
-    *.xz|*.lzma) GZCMD=zxcat ;;
+    *.xz|*.lzma) GZCMD=xzcat ;;
     *)           GZCMD=cat ;;
   esac
 

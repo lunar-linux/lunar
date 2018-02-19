@@ -79,6 +79,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
           XFREE86_URL=http://ftp.xfree86.org/pub/XFree86
              XORG_URL=https://www.x.org/releases
           LRESORT_URL=http://download.lunar-linux.org/lunar/cache
+           NVIDIA_URL=https://download.nvidia.com/XFree86
 
       MOONBASE_URL[0]=http://lunar-linux.org/lunar/
       MOONBASE_URL[1]=http://download.lunar-linux.org/lunar/
