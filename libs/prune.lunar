@@ -63,7 +63,7 @@ prune() {
 
   verbose_msg "finding stale install logs"
   for FILE in $(ls -1 $INSTALL_LOGS) ; do
-    if [[ ! $LOGS =~ $FILE ]]; then
+    if ! grep -q "$FILE" <<< $LOGS; then
       message "Removing stale log: $INSTALL_LOGS/$FILE"
       rm $INSTALL_LOGS/$FILE
     fi
@@ -74,7 +74,7 @@ prune() {
     local file_base
     file_base=${FILE%.xz}
     file_base=${file_base%.bz2} # compile logs can be either
-    if [[ ! $LOGS =~ $file_base ]]; then
+    if ! grep -q "$file_base" <<< $LOGS; then
       message "Removing stale log: $COMPILE_LOGS/$FILE"
       rm $COMPILE_LOGS/$FILE
     fi
@@ -82,7 +82,7 @@ prune() {
 
   verbose_msg "finding stale md5sum logs"
   for FILE in $(ls -1 $MD5SUM_LOGS) ; do
-    if [[ ! $LOGS =~ $FILE ]]; then
+    if ! grep -q "$FILE" <<< $LOGS; then
       message  "Removing stale log: $MD5SUM_LOGS/$FILE"
       rm $MD5SUM_LOGS/$FILE
     fi
