@@ -8,7 +8,7 @@
 #                                                           #
 #############################################################
 #                                                           #
-# Copyright 2007 by Stefan Wold under GPLv2                 #
+# Copyright 2007-2018 by Stefan Wold under GPLv2            #
 #                                                           #
 #############################################################
 
@@ -16,18 +16,26 @@
 plugin_zpatches_apply()
 {
   local PATCHDIRS FPATCH PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
-  if [ -d $MOONBASE/zlocal/_patches/$MODULE ]; then
+  if [[ -d $MOONBASE/zlocal/_patches/$MODULE || -d $SCRIPT_DIRECTORY/patch.d ]]; then
     cd $SOURCE_DIRECTORY
-    PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE"
+
+    if [ -d $SCRIPT_DIRECTORY/patch.d ]; then
+      PATCHDIRS+=" $SCRIPT_DIRECTORY/patch.d"
+    fi
+
+    if [ -d $MOONBASE/zlocal/_patches/$MODULE ]; then
+      PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE"
+    fi
+
     # Check for version based patch dir
     if [ -d $MOONBASE/zlocal/_patches/$MODULE/$VERSION ]; then
       PATCHDIRS+=" $MOONBASE/zlocal/_patches/$MODULE/$VERSION"
     fi
     # Now find all patches and apply them
     # We also sort them so it possible to apply patch order
-        # by prefixing a patch with 01, 02, 03 etc
+    # by prefixing a patch with 01, 02, 03 etc
     find $PATCHDIRS -maxdepth 1 -type f | sed 's;[^/]*$;& &;' | sort -t ' ' -k 2 | while read FPATCH PATCH; do
-      verbose_msg "Applying custom patch for $MODULE ($PATCH)"
+      verbose_msg "Applying $PATCH for $MODULE"
 
       if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
         TARCMD="tar x -O"
