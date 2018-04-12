@@ -181,8 +181,8 @@ cmake_build_target() {
 
 
 default_config() {
-  debug_msg "default_gnu_config ($@)"
-  verbose_msg "running \"default_gnu_config\""
+  debug_msg "default_config ($@)"
+  verbose_msg "running \"default_config\""
   _configure  --build=$BUILD                      \
               --prefix=$MODULE_PREFIX             \
               --sysconfdir=/etc                   \
@@ -301,6 +301,7 @@ default_build() {
         python3) default_python3_build ;;
         cpan)    default_cpan_build    ;;
         perl)    default_perl_build    ;;
+        game)    default_game_build    ;;
         cmake)   default_cmake_build   ;;
         *)       default_gnu_build     ;;
     esac
