@@ -216,7 +216,6 @@ find_section() {
 	return 1
 }
 
-
 # function : run_details
 # usage    : run_details module_name ($MODULE is pre-defined or param)
 # purpose  : runs the DETAILS file of a module
@@ -804,4 +803,14 @@ check_blacklist() {
       exit 0
     fi
   fi
+}
+
+rename_module() {
+    debug_msg "rename_module ($@)"
+    local old=$1
+    local new=$2
+
+    rename_module_in_depends $old $new
+
+    create_module_index
 }

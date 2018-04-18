@@ -550,3 +550,24 @@ list_installed_depending() {
     fi
   done
 }
+
+rename_module_in_depends()
+{
+    debug_msg "rename_module_in_depends ($@)"
+
+    local old=$1
+    local new=$2
+
+    lock_file $DEPENDS_STATUS_BACKUP
+    lock_file $DEPENDS_STATUS
+    lock_file $DEPENDS_CACHE
+
+    for file in $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP $DEPENDS_CACHE
+    do
+        perl -pi -e 's/\b'${old}'\b/'${new}'/g'$file
+    done
+
+    unlock_file $DEPENDS_CACHE
+    unlock_file $DEPENDS_STATUS
+    unlock_file $DEPENDS_STATUS_BACKUP
+}
