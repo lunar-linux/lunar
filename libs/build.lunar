@@ -238,12 +238,10 @@ default_cmake_config() {
         $OPTS $SOURCE_DIRECTORY
 }
 
-
 default_install() {
     prepare_install &&
     make install
 }
-
 
 default_make() {
   debug_msg "default_make ($@)"
@@ -268,14 +266,50 @@ default_cmake_build() {
   default_make
 }
 
+default_perl_build() {
+    debug_msg "default_perl_build ($@)"
+    verbose_msg "running \"default_perl_build\""
+    perl Makefile.PL &&
+    default_make
+}
 
-default_build() {
-  debug_msg "default_build ($@)"
-  verbose_msg "running \"default_build\""
+default_python2_build() {
+    debug_msg "default_python2_build ($@)"
+    verbose_msg "running \"default_python2_build\""
+    python2 setup.py build &&
+    prepare_install &&
+    python2 setup.py install
+}
+
+default_python3_build() {
+    debug_msg "default_python3_build ($@)"
+    verbose_msg "running \"default_python3_build\""
+    python3 setup.py build &&
+    prepare_install &&
+    python3 setup.py install
+}
+
+default_gnu_build() {
+  debug_msg "default_gnu_build ($@)"
+  verbose_msg "running \"default_gnu_build\""
   default_config  &&
   default_make
 }
 
+default_build() {
+  debug_msg "default_build ($@)"
+  verbose_msg "running \"default_build\""
+
+    case "$TYPE" in
+        python2) default_python2_build ;;
+        python3) default_python3_build ;;
+        cpan)    default_cpan_build    ;;
+        perl)    default_perl_build    ;;
+        game)    default_game_build    ;;
+        cmake)   default_cmake_build   ;;
+        *)       default_gnu_build     ;;
+    esac
+}
 
 default_cvs_build() {
   debug_msg "default_cvs_build ($@)"
