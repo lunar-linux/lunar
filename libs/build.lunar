@@ -49,7 +49,7 @@ save_libraries()  {
 
     if [ -f "$LINE"  ]  &&
          file  -bL  $LINE   |
-         grep  -q   "shared object"
+         grep  -E -q   "shared object|pie executable"
     then
       verbose_msg "saving library \"$LINE\""
       if  [  -h  $LINE  ];  then
@@ -96,7 +96,7 @@ export_ld()  {
   local DIRECTORY
   debug_msg "export_ld ($@)"
   for DIRECTORY in $* ; do
-    if file -b $DIRECTORY/*.so* | grep  -q  "shared object" ; then
+    if file -b $DIRECTORY/*.so* | grep  -q -E "shared object|pie executable" ; then
       if [ -z "$LD_LIBRARY_PATH" ] ; then
         export LD_LIBRARY_PATH="$DIRECTORY"
       else
