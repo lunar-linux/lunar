@@ -242,11 +242,7 @@ default_meson_config() {
   debug_msg "default_meson_config ($@)"
   verbose_msg "running \"default_meson_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
-
-  mkdir -p build &&
-  OPTS=" --prefix /usr \
-        $OPTS" &&
-  meson build $OPTS
+  meson build --prefix /usr $OPTS
 }
 
 default_install() {
