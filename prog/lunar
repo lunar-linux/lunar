@@ -626,7 +626,10 @@ ZLOCAL_OVERRIDES=off
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
        PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
-         COMPRESS_XZ) COMPRESS_METHOD=xz ;;
+         COMPRESS_XZ)
+           COMPRESS_METHOD=xz
+           COMPRESS_METHOD_ARGS="-T 0"
+           ;;
       esac
     done
 
@@ -648,7 +651,11 @@ ZLOCAL_OVERRIDES=off
     set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
     set_local_config "COLOR" "$COLOR"
     set_local_config "COMPRESS_METHOD" "$COMPRESS_METHOD"
-
+    if [ "$COMPRESS_METHOD" = "xz" ]; then
+      set_local_config "COMPRESS_METHOD_ARGS" "$COMPRESS_METHOD_ARGS"
+    else
+      unset_local_config "COMPRESS_METHOD_ARGS"
+    fi
   fi
 }
 
