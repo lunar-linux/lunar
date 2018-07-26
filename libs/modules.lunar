@@ -16,13 +16,13 @@
 # 20020528                                                 #
 # 20030113 merging more functions in here - sofar          #
 # 20030417 adding hold routines - sofar                    #
-#                                                          #
+# 20180726 added module replacement functions - Ratler     #
 ############################################################
 #                                                          #
 # Copyrighted Kagan Kongar 2002 under GPLv2                #
 # Portions Copyrighted Chuck Mead 2002 under GPLv2         #
 # Portions Copyrighted Auke Kok 2003 under GPLv2           #
-#                                                          #
+# Portions Copyrighted Stefan Wold 2018 under GPLv2        #
 ############################################################
 
 
@@ -144,11 +144,13 @@ function check_module_index() {
   local RESULT=1
   if [[ ! -e $MODULE_INDEX ]] || [[ ! -e $DEPENDS_CACHE ]]; then
     create_module_index
+    create_replacement_index
     create_depends_cache
     RESULT=0
   else
     if [[ -n "$(find $MOONBASE -type f \( -name "DETAILS.$PLATFORM" -o -name "DETAILS" \) -cnewer $MODULE_INDEX)" ]]; then
       create_module_index
+      create_replacement_index
       RESULT=0
     fi
     if [[ -n "$(find $MOONBASE -type f -name "DEPENDS" -cnewer $DEPENDS_CACHE)" ]]; then
@@ -681,7 +683,7 @@ purge_modules() {
   fi
   for MODULE in $(list_installed | fgrep -v -x moonbase) ; do
   (
-    if ! run_details $MODULE &> /dev/null ; then
+    if ! run_details $MODULE &> /dev/null && ! grep -q "^$MODULE:" $REPLACEMENT_INDEX; then
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
         lrm $MODULE
@@ -803,5 +805,93 @@ check_blacklist() {
       error_message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Module ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is blacklisted and will not be installed!${DEFAULT_COLOR}"
       exit 0
     fi
+  fi
+}
+
+
+# function: create_replacement_index
+# usage   : create_replacement_index
+# purpose : creates an index with renamed or replaced modules and their replacement
+create_replacement_index() {
+  local TMP_IDX MODULE REPLACEMENT REPLACES
+  debug_msg "create_replacement_index (@)"
+
+  TMP_IDX=$(temp_create "replacement.index")
+
+  find $MOONBASE \( -name DETAILS.$PLATFORM -o -name DETAILS \) -type f |
+  xargs fgrep 'REPLACES=' |
+  awk -v dregex="/DETAILS(|.$PLATFORM):" '{gsub(dregex, "")} !_[$1]++' |
+  while read MODULE REPLACEMENT; do
+    (
+      eval $(echo $REPLACEMENT)
+      if [ -n "$REPLACES" ]; then
+        for rep in ${REPLACES[@]}; do
+          echo "$rep:${MODULE##*/}" >> $TMP_IDX
+        done
+      fi
+    )
+  done
+
+  lock_file $REPLACEMENT_INDEX &&
+  install -m644 $TMP_IDX $REPLACEMENT_INDEX
+  unlock_file $REPLACEMENT_INDEX
+  temp_destroy $TMP_IDX
+}
+
+
+# function : replace_modules
+# usage    : replace_modules
+# purpose  : replace modules that were renamed or replaced by another module
+replace_modules() {
+  local MODULE REPLACEMENT IMOD RMOD RESPONSE TMP_REM_QUEUE TMP_INS_QUEUE QUEUE
+  debug_msg "replace_modules ($@)"
+  verbose_msg "Discovering modules that has been renamed or replaced in moonbase"
+
+  # safetynet: don't wipe everything
+  if [ $(list_moonbase | wc -l) -lt 100 ]; then
+    error_message "${PROBLEM_COLOR}Error: ${DEFAULT_COLOR}${MESSAGE_COLOR} your moonbase seems damaged. Re-lin moonbase to fix.${DEFAULT_COLOR}"
+    exit 1
+  fi
+
+  TMP_REM_QUEUE=$(temp_create "replacement-rem-queue")
+  TMP_INS_QUEUE=$(temp_create "replacement-queue")
+
+  for MODULE in $(list_installed | fgrep -v -x moonbase); do
+    for REPLACEMENT in $(grep "^$MODULE:" $REPLACEMENT_INDEX); do
+      IMOD=${REPLACEMENT%:*}
+      RMOD=${REPLACEMENT#*:}
+      (
+        if ! run_details $IMOD &> /dev/null && run_details $RMOD &> /dev/null; then
+          message "\n${MODULE_COLOR}${IMOD}${MESSAGE_COLOR} has been replaced by ${MODULE_COLOR}${RMOD}${MESSAGE_COLOR} in moonbase${DEFAULT_COLOR}"
+          unset MODULE
+          if query "Do you want replace ${MODULE_COLOR}${IMOD} ${QUERY_COLOR}with ${MODULE_COLOR}${RMOD}${QUERY_COLOR}?${DEFAULT_COLOR}" y; then
+            echo "$IMOD" >> $TMP_REM_QUEUE
+            echo "$RMOD" >> $TMP_INS_QUEUE
+            continue
+          else
+            message "${MODULE_COLOR}${IMOD}${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed or replaced manually later${DEFAULT_COLOR}"
+          fi
+        fi
+      )
+    done
+  done
+
+  lrm $(cat $TMP_REM_QUEUE | sort -u)
+  temp_destroy $TMP_REM_QUEUE
+
+  verbose_msg "Rework all module dependencies"
+  for MODULE in $(cat $TMP_INS_QUEUE); do
+    rework_module $MODULE
+  done
+
+  verbose_msg "Sorting replacement queue"
+  QUEUE=$(sort_by_dependency $(cat $TMP_INS_QUEUE))
+  temp_destroy $TMP_INS_QUEUE
+
+  if [ -n "$QUEUE" ]; then
+    lin -c $QUEUE
+  else
+    verbose_msg "Nothing to replace!"
+    return 255
   fi
 }

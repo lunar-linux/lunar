@@ -23,6 +23,7 @@ renew() {
   debug_msg "renew ($@)"
   message "${MESSAGE_COLOR}Starting update of installed modules${DEFAULT_COLOR}"
 
+  replace_modules
   purge_modules
 
   export TMP_LIN_SUCCESS=$(temp_create "successful")
