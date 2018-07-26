@@ -8,7 +8,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
         LOCAL_EXCLUDED=/etc/lunar/local/excluded
                MIRRORS=/etc/lunar/mirrors
 
-         LUNAR_MODULES="lunar theedge"
+         LUNAR_MODULES="lunar"
         MOONBASE_TYPES="stable unstable"
 
        BUILD_DIRECTORY=/usr/src
