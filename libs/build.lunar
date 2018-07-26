@@ -238,6 +238,13 @@ default_cmake_config() {
         $OPTS $SOURCE_DIRECTORY
 }
 
+default_meson_config() {
+  debug_msg "default_meson_config ($@)"
+  verbose_msg "running \"default_meson_config\""
+  verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
+  meson build --prefix /usr $OPTS
+}
+
 default_install() {
     prepare_install &&
     make install
@@ -264,6 +271,15 @@ default_cmake_build() {
   verbose_msg "running \"default_cmake_build\""
   default_cmake_config &&
   default_make
+}
+
+default_meson_build() {
+  debug_msg "default_meson_build ($@)"
+  verbose_msg "running \"default_meson_build\""
+  default_meson_config &&
+  ninja -C build &&
+  prepare_install &&
+  ninja -C build install
 }
 
 default_perl_build() {
@@ -307,6 +323,7 @@ default_build() {
         perl)    default_perl_build    ;;
         game)    default_game_build    ;;
         cmake)   default_cmake_build   ;;
+        meson)   default_meson_build   ;;
         *)       default_gnu_build     ;;
     esac
 }
@@ -343,8 +360,8 @@ default_cpan_build() {
   echo "o conf cpan_root $STATE_DIRECTORY
         o conf build_dir $SOURCE_DIRECTORY
         o conf keep_source_where $SOURCE_DIRECTORY
-	install $CPAN_MODULE
-	quit" | /usr/bin/cpan || exit 1
+        install $CPAN_MODULE
+        quit" | /usr/bin/cpan || exit 1
   rm_source_dir $SOURCE_DIRECTORY
 }
 
