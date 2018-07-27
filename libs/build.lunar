@@ -242,7 +242,14 @@ default_meson_config() {
   debug_msg "default_meson_config ($@)"
   verbose_msg "running \"default_meson_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
-  meson build --prefix /usr $OPTS
+  MESON_BUILD_TYPE=${MESON_BUILD_TYPE:-release}
+  verbose_msg "MESON_BUILD_TYPE=\"$MESON_BUILD_TYPE\""
+  meson --prefix $MODULE_PREFIX \
+        --buildtype $MESON_BUILD_TYPE \
+        --default-library shared \
+        --libdir lib \
+        $OPTS \
+        . build/
 }
 
 default_install() {
@@ -277,9 +284,9 @@ default_meson_build() {
   debug_msg "default_meson_build ($@)"
   verbose_msg "running \"default_meson_build\""
   default_meson_config &&
-  ninja -C build &&
+  ninja -C build/ &&
   prepare_install &&
-  ninja -C build install
+  ninja -C build/ install
 }
 
 default_perl_build() {
