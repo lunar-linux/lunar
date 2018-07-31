@@ -847,6 +847,10 @@ replace_modules() {
   debug_msg "replace_modules ($@)"
   verbose_msg "Discovering modules that has been renamed or replaced in moonbase"
 
+  if [ ! -f "$REPLACEMENT_INDEX" ]; then
+    touch "$REPLACEMENT_INDEX" &> /dev/null
+  fi
+
   # safetynet: don't wipe everything
   if [ $(list_moonbase | wc -l) -lt 100 ]; then
     error_message "${PROBLEM_COLOR}Error: ${DEFAULT_COLOR}${MESSAGE_COLOR} your moonbase seems damaged. Re-lin moonbase to fix.${DEFAULT_COLOR}"
