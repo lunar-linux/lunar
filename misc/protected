@@ -105,6 +105,7 @@
 ^/etc/xml/docbook$
 ^/etc/yp.conf$
 /fonts.dir$
+^\(/usr\)\?/lib\(32\|64\)$
 ^\(/usr\)\?/lib\(32\)\?/ld-linux.so.2$
 ^\(/usr\)\?/lib\(64\)\?/ld-linux-x86-64.so.2$
 ^\(/usr\)\?/lib\(32\|64\)\?/libc.so.6$
