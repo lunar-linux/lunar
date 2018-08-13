@@ -1,4 +1,6 @@
-AUTO (Auto-GEO)		http://downloads.sourceforge.net/sourceforge
+AUTO (Auto-GEO)		https://downloads.sourceforge.net/sourceforge
+Tainan (TW)		https://nchc.dl.sourceforge.net/sourceforge
+Ishikawa (JP)		https://jaist.dl.sourceforge.net/sourceforge
 Sydney (AU)		http://optusnet.dl.sourceforge.net/sourceforge
 flow (AU)		http://flow.dl.sourceforge.net/sourceforge
 Brussels (BE)		http://belnet.dl.sourceforge.net/sourceforge
@@ -10,10 +12,8 @@ Berlin (DE)		http://dfn.dl.sourceforge.net/sourceforge
 Duesseldorf (DE)	http://mesh.dl.sourceforge.net/sourceforge
 Paris (FR)		http://ovh.dl.sourceforge.net/sourceforge
 Dublin (IE)		http://heanet.dl.sourceforge.net/sourceforge
-Ishikawa (JP)		http://jaist.dl.sourceforge.net/sourceforge
 Amsterdam (NL)		http://surfnet.dl.sourceforge.net/sourceforge
 citkit (RU)		http://citkit.dl.sourceforge.net/sourceforge
-Tainan (TW)		http://nchc.dl.sourceforge.net/sourceforge
 nvhv (TW)		http://nvhv.dl.sourceforge.net/sourceforge
 Kent (UK)		http://kent.dl.sourceforge.net/sourceforge
 San Jose CA (US)	http://internap.dl.sourceforge.net/sourceforge
