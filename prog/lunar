@@ -626,7 +626,10 @@ ZLOCAL_OVERRIDES=off
 	     VERBOSE)       VERBOSE=on  ;;
     ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
        PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
-         COMPRESS_XZ) COMPRESS_METHOD=xz ;;
+         COMPRESS_XZ)
+           COMPRESS_METHOD=xz
+           COMPRESS_METHOD_ARGS="-T 0"
+           ;;
       esac
     done
 
@@ -648,7 +651,11 @@ ZLOCAL_OVERRIDES=off
     set_local_config "PROBE_EXPIRED" "$PROBE_EXPIRED"
     set_local_config "COLOR" "$COLOR"
     set_local_config "COMPRESS_METHOD" "$COMPRESS_METHOD"
-
+    if [ "$COMPRESS_METHOD" = "xz" ]; then
+      set_local_config "COMPRESS_METHOD_ARGS" "$COMPRESS_METHOD_ARGS"
+    else
+      unset_local_config "COMPRESS_METHOD_ARGS"
+    fi
   fi
 }
 
@@ -662,8 +669,6 @@ option_menu()  {
     O_HELP="Select architecture optimizations"
     I_HELP="Select the test that lunar fix, and AUTOFIX execute"
     D_HELP="Options for downloads"
-    L_HELP="Select default lunar module"
-    T_HELP="Select default moonbase branch"
     A_HELP="Select accepted licenses"
     R_HELP="Select rejected licenses"
 
@@ -674,8 +679,6 @@ option_menu()  {
                       --menu                                   \
                       ""                                       \
                       0 40 8                                   \
-                      "L"  "Default Lunar Module"   "$L_HELP"  \
-                      "T"  "Default Moonbase Branch" "$T_HELP" \
                       "P"  "Prompt Delay"           "$P_HELP"  \
                       "D"  "Download Options"       "$D_HELP"  \
                       "E"  "Admin's Email"          "$E_HELP"  \
@@ -695,8 +698,6 @@ option_menu()  {
       I)  integrity_menu         ;;
       M)  mirror_menu            ;;
       O)  optimize_menu          ;;
-      L)  set_default_module     ;;
-      T)  set_default_moonbase   ;;
       A)  set_accepted_licenses  ;;
       R)  set_rejected_licenses  ;;
     esac

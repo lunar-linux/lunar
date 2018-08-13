@@ -8,8 +8,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
         LOCAL_EXCLUDED=/etc/lunar/local/excluded
                MIRRORS=/etc/lunar/mirrors
 
-         LUNAR_MODULES="lunar theedge"
-        MOONBASE_TYPES="stable unstable"
+         LUNAR_MODULES="lunar"
 
        BUILD_DIRECTORY=/usr/src
     DOCUMENT_DIRECTORY=/usr/share/doc
@@ -43,6 +42,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
          MODULE_STATUS=/var/state/lunar/packages
   MODULE_STATUS_BACKUP=/var/state/lunar/packages.backup
           MODULE_INDEX=/var/state/lunar/module.index
+     REPLACEMENT_INDEX=/var/state/lunar/replacement.index
 
          INSTALL_CACHE=/var/cache/lunar
           SOURCE_CACHE=${SOURCE_CACHE:-/var/spool/lunar}
