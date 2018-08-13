@@ -63,7 +63,7 @@ plugin_zpatches_apply()
           # Trying -p1 first or else we try -p0
           # An error will be visible if -p1 fail which is normal
           # Only return error if both -p1 and -p0 fail
-          patch -p1 -t < $TMPFILE2 || patch -p0 -t < $TMPFILE2
+          patch -N -p1 -t < $TMPFILE2 || patch -N -p0 -t < $TMPFILE2
           if [ $? -ne 0 ]; then
             message "${PROBLEM_COLOR}ERROR: Failed to apply ${PATCH} for ${MODULE}${DEFAULT_COLOR}"
             temp_destroy $TMPFILE1
