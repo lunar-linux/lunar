@@ -24,6 +24,8 @@
 #                                                          #
 # Parts Copyrighted Steven Michalske 2004 under GPLv2      #
 #                                                          #
+# Parts Copyrighted Dave Brown 2018 under GPLv2            #
+#                                                          #
 ############################################################
 
 
@@ -252,10 +254,79 @@ default_meson_config() {
         . build/
 }
 
-default_install() {
-    prepare_install &&
-    make install
-}
+if [[ ${DESTDIR_BUILD:-n} == n ]];
+then
+    default_install() {
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+
+        mkdir ${DESTDIR} &&
+        make install DESTDIR=${DESTDIR}
+    }
+
+    default_python2_build() {
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+
+        debug_msg "default_python2_build DESTDIR version ($@)"
+        verbose_msg "running \"default_python2_build\""
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+        python2 setup.py build &&
+        prepare_install &&
+        python2 setup.py install --root=$DESTDIR $OPTS
+    }
+
+    default_python3_build() {
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+
+        debug_msg "default_python3_build ($@)"
+        verbose_msg "running \"default_python3_build\""
+        python3 setup.py build &&
+        prepare_install &&
+        python3 setup.py install --root=$DESTDIR $OPTS
+    }
+
+    default_meson_build() {
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+
+        debug_msg "default_meson_build ($@)"
+        verbose_msg "running \"default_meson_build\""
+        default_meson_config &&
+            ninja -C build/ &&
+            prepare_install &&
+            DESTDIR=${DESTDIR} ninja -C build/ install
+    }
+else
+    default_install() {
+        prepare_install &&
+        make install
+    }
+
+    default_python2_build() {
+        debug_msg "default_python2_build DESTDIR version ($@)"
+        verbose_msg "running \"default_python2_build\""
+        DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+        python2 setup.py build &&
+        prepare_install &&
+        python2 setup.py install --root=/ $OPTS
+    }
+
+    default_python3_build() {
+        debug_msg "default_python3_build ($@)"
+        verbose_msg "running \"default_python3_build\""
+        python3 setup.py build &&
+        prepare_install &&
+        python3 setup.py install --root=/ $OPTS
+    }
+
+    default_meson_build() {
+      debug_msg "default_meson_build ($@)"
+      verbose_msg "running \"default_meson_build\""
+      default_meson_config &&
+      ninja -C build/ &&
+      prepare_install &&
+      ninja -C build/ install
+    }
+
+fi
 
 default_make() {
   debug_msg "default_make ($@)"
@@ -280,36 +351,11 @@ default_cmake_build() {
   default_make
 }
 
-default_meson_build() {
-  debug_msg "default_meson_build ($@)"
-  verbose_msg "running \"default_meson_build\""
-  default_meson_config &&
-  ninja -C build/ &&
-  prepare_install &&
-  ninja -C build/ install
-}
-
 default_perl_build() {
     debug_msg "default_perl_build ($@)"
     verbose_msg "running \"default_perl_build\""
     perl Makefile.PL &&
     default_make
-}
-
-default_python2_build() {
-    debug_msg "default_python2_build ($@)"
-    verbose_msg "running \"default_python2_build\""
-    python2 setup.py build &&
-    prepare_install &&
-    python2 setup.py install --root=/ $OPTS
-}
-
-default_python3_build() {
-    debug_msg "default_python3_build ($@)"
-    verbose_msg "running \"default_python3_build\""
-    python3 setup.py build &&
-    prepare_install &&
-    python3 setup.py install --root=/ $OPTS
 }
 
 default_gnu_build() {
