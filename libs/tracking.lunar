@@ -58,62 +58,119 @@ parse_iw() {
 }
 
 
-# function : create_install_log
-# usage    : create_install_log
-# purpose  : create an install log
-create_install_log() {
-  local TMP_INST_LOG INST_LOG IFS MISOWNED_SYMLINKS
-  debug_msg "create_install_log ($@)"
+if [[ ${DESTDIR_BUILD:-n} == y ]]
+then
+  create_install_log() {
+    (
+    cd $DESTDIR
 
-  TMP_INST_LOG=$(temp_create "install-log")
-  INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
-  rm -f $INST_LOG &> /dev/null
+    TMP_INST_LOG=$(temp_create "install-log")
 
-  message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
+    INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
 
-  export IFS="$TAB_ENTER_IFS"
+    rm -f $INST_LOG >/dev/null 2>&1
+    message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
 
-  parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
-  echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
-  echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
-  echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
+    find . -print | sed 's/^.//' | sort                       > $TMP_INST_LOG
+    echo "$INSTALL_LOGS/$MODULE-$VERSION"                    >> $TMP_INST_LOG
+    echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
+    echo "$MD5SUM_LOGS/$MODULE-$VERSION"                     >> $TMP_INST_LOG
 
-  install -m644 $TMP_INST_LOG $INST_LOG
+    install -m644 $TMP_INST_LOG $INST_LOG
 
-  temp_destroy $TMP_INST_LOG
-}
+    temp_destroy $TMP_INST_LOG
+    )
+  }
+
+  create_md5sum_log() {
+    (
+    cd $DESTDIR
+    rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+
+    sed 's;^/;;' < $INSTALL_LOGS/$MODULE-VERSION | files | xargs -d '\n' md5sum > $MD5SUM_LOGS/$MODULE-$VERSION
+    )
+  }
+
+  create_install_cache() {
+    if [[ $ARCHIVE == off ]]
+    then
+      return
+    fi
+
+    (
+    cd $DESTDIR
+    tar cf - * | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
+    )
+  }
+
+  finish_install() {
+    debug_msg "finish_install ($@)"
+
+    create_install_log    &&
+    create_md5sum_log     &&
+    create_install_cache  &&
+    expand_cache_safe $MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}
+
+    add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+    verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+  }
+else
+  # function : create_install_log
+  # usage    : create_install_log
+  # purpose  : create an install log
+  create_install_log() {
+    local TMP_INST_LOG INST_LOG IFS MISOWNED_SYMLINKS
+    debug_msg "create_install_log DESTDIR version ($@)"
+
+    TMP_INST_LOG=$(temp_create "install-log")
+    INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
+    rm -f $INST_LOG &> /dev/null
+
+    message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
+
+    export IFS="$TAB_ENTER_IFS"
+
+    parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
+    echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
+    echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
+    echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
+
+    install -m644 $TMP_INST_LOG $INST_LOG
+
+    temp_destroy $TMP_INST_LOG
+  }
 
 
-create_md5sum_log()  {
-  local FILE
-  debug_msg "create_md5sum_log ($@)"
+  create_md5sum_log()  {
+    local FILE
+    debug_msg "create_md5sum_log ($@)"
 
-  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+    rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-  IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
-}
+    IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
+  }
 
-create_install_cache() {
-  debug_msg "create_install_cache($@)"
+  create_install_cache() {
+    debug_msg "create_install_cache($@)"
 
-  if [ "$ARCHIVE" == "off" ] ; then
-    return
-  fi
+    if [ "$ARCHIVE" == "off" ] ; then
+      return
+    fi
 
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}${DEFAULT_COLOR}"
-  tar cP --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}${DEFAULT_COLOR}"
+    tar cP --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
 
-}
+  }
+  finish_install() {
+    debug_msg "finish_install ($@)"
 
+    create_install_log    &&
+    create_md5sum_log     &&
+    create_install_cache  &&
 
-finish_install() {
-  debug_msg "finish_install ($@)"
-
-  create_install_log    &&
-  create_md5sum_log     &&
-  create_install_cache  &&
-
-  add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
-  verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
-}
+    add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+    verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+  }
+fi
