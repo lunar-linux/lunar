@@ -164,6 +164,11 @@ rm_source_dir() {
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
   rm -rf $DEAD_DIR 2> /dev/null
+
+  if [[ ${DESTDIR_BUILD:-n} == y ]]
+  then
+      rm -rf $DESTDIR
+  fi
 }
 
 
