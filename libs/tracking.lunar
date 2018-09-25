@@ -88,7 +88,7 @@ then
     rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
     message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-    sed 's;^/;;' < $INSTALL_LOGS/$MODULE-VERSION | files | xargs -d '\n' md5sum > $MD5SUM_LOGS/$MODULE-$VERSION
+    sed 's;^/;;' < $INSTALL_LOGS/$MODULE-$VERSION | files | xargs -d '\n' md5sum > $MD5SUM_LOGS/$MODULE-$VERSION
     )
   }
 
