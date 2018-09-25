@@ -375,9 +375,17 @@ default_cvs_build() {
 default_post_build() {
   debug_msg "default_post_build ($@)"
 
-  if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
+  if [[ ${DESTDIR_BUILD:-n} == y ]]
+  then
+    if [ $(find $DESTDIR \! -type d | wc -l) -eq 0 ]
+    then
+      message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} installs zero files!${DEFAULT_COLOR}"
+    fi
+  else
+    if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
       [ "$PROFILE" != "yes" ] ; then
-    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
+          message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
+    fi
   fi
 
   update_plugin $MODULE install
