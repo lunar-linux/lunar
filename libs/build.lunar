@@ -335,14 +335,12 @@ default_make() {
   default_install
 }
 
-
 default_game_build() {
   debug_msg "default_game_build ($@)"
   verbose_msg "running \"default_game_build\""
   default_game_config  &&
   default_make
 }
-
 
 default_cmake_build() {
   debug_msg "default_cmake_build ($@)"
@@ -386,38 +384,6 @@ default_cvs_build() {
   default_cvs_config  &&
   default_make
 }
-
-
-default_cpan_pre_build() {
-  local CPAN_MODULE CPAN_SOURCE_BRANCH
-  debug_msg "default_cpan_pre_build ($@)"
-  mk_source_dir $SOURCE_DIRECTORY
-  cd $SOURCE_DIRECTORY
-  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  CPAN_SOURCE_BRANCH=$(dirname $CPAN_MODULE)
-  mkdir -p authors/id/${CPAN_SOURCE_BRANCH}
-  install -m 444 $SOURCE_CACHE/$SOURCE authors/id/${CPAN_SOURCE_BRANCH}
-}
-
-
-default_cpan_build() {
-  local CPAN_MODULE
-  debug_msg "default_cpan_build ($@)"
-  prepare_install
-  verbose_msg "running \"default_cpan_build\""
-  if [ ! -x /usr/bin/cpan ] ; then
-    return 1
-  fi
-
-  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  echo "o conf cpan_root $STATE_DIRECTORY
-        o conf build_dir $SOURCE_DIRECTORY
-        o conf keep_source_where $SOURCE_DIRECTORY
-        install $CPAN_MODULE
-        quit" | /usr/bin/cpan || exit 1
-  rm_source_dir $SOURCE_DIRECTORY
-}
-
 
 default_post_build() {
   debug_msg "default_post_build ($@)"
