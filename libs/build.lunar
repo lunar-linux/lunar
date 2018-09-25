@@ -377,7 +377,7 @@ default_post_build() {
 
   if [[ ${DESTDIR_BUILD:-n} == y ]]
   then
-    if [ $(find $DESTDIR \! -type d | wc -l) -eq 0 ]
+    if [ ! -d $DESTDIR ]
     then
       message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} installs zero files!${DEFAULT_COLOR}"
     fi

@@ -167,7 +167,9 @@ rm_source_dir() {
 
   if [[ ${DESTDIR_BUILD:-n} == y ]]
   then
-      rm -rf $DESTDIR
+      if [[ -d $DESTDIR ]];then
+          rm -rf $DESTDIR
+      fi
   fi
 }
 
