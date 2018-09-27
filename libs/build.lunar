@@ -257,7 +257,10 @@ default_meson_config() {
 if [[ ${DESTDIR_BUILD:-n} == y ]];
 then
     default_install() {
-        mkdir ${DESTDIR} &&
+        if [ ! -d $DESTDIR ]
+        then
+            mkdir ${DESTDIR}
+        fi
         make install DESTDIR=${DESTDIR}
     }
 
