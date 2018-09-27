@@ -262,6 +262,7 @@ run_details() {
     MODULE_PREFIX=${MODULE_PREFIX:-$DEFAULT_PREFIX}
     if [[ ${DESTDIR_BUILD:-n} == y ]]; then
       DESTDIR=${SOURCE_DIRECTORY}_lunar_supply_pod
+      export DESTDIR  # I wonder how many modules this will magically fix
     fi
     if [ "$MODULE_PREFIX" != "$DEFAULT_PREFIX" ]; then
       export PKG_CONFIG_PATH=$MODULE_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
