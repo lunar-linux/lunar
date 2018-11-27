@@ -163,6 +163,10 @@ rm_source_dir() {
   DEAD_DIR=${DEAD_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
+  if grep -q $DEAD_DIR /proc/mounts
+  then
+    umount $DEAD_DIR
+  fi
   rm -rf $DEAD_DIR 2> /dev/null
 }
 
@@ -186,6 +190,10 @@ mk_source_dir() {
     rm -rf $NEW_DIR 2>/dev/null
   fi
   mkdir -p $NEW_DIR
+  if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]
+  then
+    mount -t tmpfs tmpfs $NEW_DIR
+  fi
 }
 
 
