@@ -192,6 +192,10 @@ mk_source_dir() {
   mkdir -p $NEW_DIR
   if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]
   then
+    if grep $NEW_DIR /proc/mounts > /dev/null
+    then
+      umount $NEW_DIR
+    fi
     mount -t tmpfs tmpfs $NEW_DIR
   fi
 }
