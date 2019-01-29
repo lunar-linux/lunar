@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -187,7 +187,7 @@ mk_source_dir() {
   verbose_msg "creating building dir \"$NEW_DIR\""
   if [ -d $NEW_DIR ] ; then
     verbose_msg "Removing old source directory first!"
-    rm -rf $NEW_DIR 2>/dev/null
+    rm_source_dir $NEW_DIR
   fi
   mkdir -p $NEW_DIR
   if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]
