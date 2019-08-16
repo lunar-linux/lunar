@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -163,6 +163,10 @@ rm_source_dir() {
   DEAD_DIR=${DEAD_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
+  if grep -q $DEAD_DIR /proc/mounts
+  then
+    umount $DEAD_DIR
+  fi
   rm -rf $DEAD_DIR 2> /dev/null
 }
 
@@ -183,9 +187,17 @@ mk_source_dir() {
   verbose_msg "creating building dir \"$NEW_DIR\""
   if [ -d $NEW_DIR ] ; then
     verbose_msg "Removing old source directory first!"
-    rm -rf $NEW_DIR 2>/dev/null
+    rm_source_dir $NEW_DIR
   fi
   mkdir -p $NEW_DIR
+  if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]
+  then
+    if grep $NEW_DIR /proc/mounts > /dev/null
+    then
+      umount $NEW_DIR
+    fi
+    mount -t tmpfs tmpfs $NEW_DIR
+  fi
 }
 
 

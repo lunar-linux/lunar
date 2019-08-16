@@ -65,6 +65,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
          PROMPT_DELAY=${PROMPT_DELAY:-150}
         PROBE_EXPIRED=${PROBE_EXPIRED:-on}
        LUNAR_PRIORITY="+10"
+          TMPFS_BUILD=${TMPFS_BUILD:-off}
 
             LDD_CHECK=${LDD_CHECK:-on}
            FIND_CHECK=${FIND_CHECK:-on}

@@ -51,7 +51,7 @@ devoke_installwatch() {
 parse_iw() {
   local OMIT_IN
   debug_msg "parse_iw ($@)"
-  OMIT_IN="	rename\|	symlink\|	unlink"
+  OMIT_IN="	rename\|	symlink\|	unlink\|	fchmod\|	access"
 
   grep -v "$OMIT_IN" "$INSTALLWATCHFILE" | cut -f3 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED"
   cat                "$INSTALLWATCHFILE" | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED" | grep "^/"
