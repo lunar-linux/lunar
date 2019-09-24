@@ -246,7 +246,7 @@ GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:46" -l "compile,debug,deps,dow
 
 # the following trap makes sure all threads exit in case something weird
 # happens:
-trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOAD_PIDS \$INSTALLWATCHFILE) ; exit 1" INT TERM EXIT
+trap "rm -f $(eval echo \$TEMP_PREPAREDDEPS \$TEMP_DOWNLOAD_PIDS \$INSTALLWATCHFILE) ; exit 1" INT TERM
 
 if [ -z "$?" ] ; then
   help | view_file
