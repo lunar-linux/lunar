@@ -167,8 +167,11 @@ expand_cache_safe() {(
     fi
   done
 
-  debug_msg "tar xjf $1 -P -k -T $TMP_TARGETS_OK"
-  tar xf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
+  (
+    cd /
+    debug_msg "tar xjf $1 -P -k -T $TMP_TARGETS_OK"
+    tar xf $1 -P -k -T $TMP_TARGETS_OK > /dev/null 2>&1
+  )
 
   temp_destroy $TMP_TARGETS
   temp_destroy $TMP_TARGETS_OK

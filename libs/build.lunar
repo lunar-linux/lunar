@@ -24,6 +24,8 @@
 #                                                          #
 # Parts Copyrighted Steven Michalske 2004 under GPLv2      #
 #                                                          #
+# Parts Copyrighted Dave Brown 2018 under GPLv2            #
+#                                                          #
 ############################################################
 
 
@@ -252,10 +254,69 @@ default_meson_config() {
         . build/
 }
 
-default_install() {
-    prepare_install &&
-    make install
-}
+if [[ ${DESTDIR_BUILD:-n} == y ]];
+then
+    default_install() {
+        if [ ! -d $DESTDIR ]
+        then
+            mkdir ${DESTDIR}
+        fi
+        make install DESTDIR=${DESTDIR}
+    }
+
+    default_python2_build() {
+        debug_msg "default_python2_build DESTDIR version ($@)"
+        verbose_msg "running \"default_python2_build\""
+        python2 setup.py build &&
+        python2 setup.py install --root=$DESTDIR $OPTS
+    }
+
+    default_python3_build() {
+        debug_msg "default_python3_build DESTDIR version ($@)"
+        verbose_msg "running \"default_python3_build\""
+        python3 setup.py build &&
+        python3 setup.py install --root=$DESTDIR $OPTS
+    }
+
+    default_meson_build() {
+        debug_msg "default_meson_build DESTDIR version ($@)"
+        verbose_msg "running \"default_meson_build\""
+        default_meson_config &&
+        ninja -C build/ &&
+        DESTDIR=${DESTDIR} ninja -C build/ install
+    }
+else
+    default_install() {
+        prepare_install &&
+        make install
+    }
+
+    default_python2_build() {
+        debug_msg "default_python2_build DESTDIR version ($@)"
+        verbose_msg "running \"default_python2_build\""
+        python2 setup.py build &&
+        prepare_install &&
+        python2 setup.py install --root=/ $OPTS
+    }
+
+    default_python3_build() {
+        debug_msg "default_python3_build ($@)"
+        verbose_msg "running \"default_python3_build\""
+        python3 setup.py build &&
+        prepare_install &&
+        python3 setup.py install --root=/ $OPTS
+    }
+
+    default_meson_build() {
+      debug_msg "default_meson_build ($@)"
+      verbose_msg "running \"default_meson_build\""
+      default_meson_config &&
+      ninja -C build/ &&
+      prepare_install &&
+      ninja -C build/ install
+    }
+
+fi
 
 default_make() {
   debug_msg "default_make ($@)"
@@ -264,14 +325,12 @@ default_make() {
   default_install
 }
 
-
 default_game_build() {
   debug_msg "default_game_build ($@)"
   verbose_msg "running \"default_game_build\""
   default_game_config  &&
   default_make
 }
-
 
 default_cmake_build() {
   debug_msg "default_cmake_build ($@)"
@@ -280,36 +339,11 @@ default_cmake_build() {
   default_make
 }
 
-default_meson_build() {
-  debug_msg "default_meson_build ($@)"
-  verbose_msg "running \"default_meson_build\""
-  default_meson_config &&
-  ninja -C build/ &&
-  prepare_install &&
-  ninja -C build/ install
-}
-
 default_perl_build() {
     debug_msg "default_perl_build ($@)"
     verbose_msg "running \"default_perl_build\""
     perl Makefile.PL &&
     default_make
-}
-
-default_python2_build() {
-    debug_msg "default_python2_build ($@)"
-    verbose_msg "running \"default_python2_build\""
-    python2 setup.py build &&
-    prepare_install &&
-    python2 setup.py install --root=/ $OPTS
-}
-
-default_python3_build() {
-    debug_msg "default_python3_build ($@)"
-    verbose_msg "running \"default_python3_build\""
-    python3 setup.py build &&
-    prepare_install &&
-    python3 setup.py install --root=/ $OPTS
 }
 
 default_gnu_build() {
@@ -341,44 +375,20 @@ default_cvs_build() {
   default_make
 }
 
-
-default_cpan_pre_build() {
-  local CPAN_MODULE CPAN_SOURCE_BRANCH
-  debug_msg "default_cpan_pre_build ($@)"
-  mk_source_dir $SOURCE_DIRECTORY
-  cd $SOURCE_DIRECTORY
-  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  CPAN_SOURCE_BRANCH=$(dirname $CPAN_MODULE)
-  mkdir -p authors/id/${CPAN_SOURCE_BRANCH}
-  install -m 444 $SOURCE_CACHE/$SOURCE authors/id/${CPAN_SOURCE_BRANCH}
-}
-
-
-default_cpan_build() {
-  local CPAN_MODULE
-  debug_msg "default_cpan_build ($@)"
-  prepare_install
-  verbose_msg "running \"default_cpan_build\""
-  if [ ! -x /usr/bin/cpan ] ; then
-    return 1
-  fi
-
-  CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  echo "o conf cpan_root $STATE_DIRECTORY
-        o conf build_dir $SOURCE_DIRECTORY
-        o conf keep_source_where $SOURCE_DIRECTORY
-        install $CPAN_MODULE
-        quit" | /usr/bin/cpan || exit 1
-  rm_source_dir $SOURCE_DIRECTORY
-}
-
-
 default_post_build() {
   debug_msg "default_post_build ($@)"
 
-  if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
+  if [[ ${DESTDIR_BUILD:-n} == y ]]
+  then
+    if [ ! -d $DESTDIR ]
+    then
+      message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} installs zero files!${DEFAULT_COLOR}"
+    fi
+  else
+    if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
       [ "$PROFILE" != "yes" ] ; then
-    message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
+          message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
+    fi
   fi
 
   update_plugin $MODULE install
