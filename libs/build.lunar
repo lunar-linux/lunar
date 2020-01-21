@@ -299,9 +299,14 @@ default_perl_build() {
 default_python2_build() {
     debug_msg "default_python2_build ($@)"
     verbose_msg "running \"default_python2_build\""
+
+    local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest2
+    mkdir -p "$_PYDESTDIR"
+
     python2 setup.py build &&
+    python2 setup.py install --root="$_PYDESTDIR" $OPTS
     prepare_install &&
-    python2 setup.py install --root=/ $OPTS
+    cp -rfv --remove-destination "$_PYDESTDIR"/* /
 }
 
 default_python3_build() {
