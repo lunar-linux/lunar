@@ -307,9 +307,14 @@ default_python2_build() {
 default_python3_build() {
     debug_msg "default_python3_build ($@)"
     verbose_msg "running \"default_python3_build\""
+
+    local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest3
+    mkdir -p "$_PYDESTDIR"
+
     python3 setup.py build &&
+    python3 setup.py install --root="$_PYDESTDIR" $OPTS
     prepare_install &&
-    python3 setup.py install --root=/ $OPTS
+    cp -rfv --remove-destination "$_PYDESTDIR"/* /
 }
 
 default_gnu_build() {
