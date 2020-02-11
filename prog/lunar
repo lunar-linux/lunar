@@ -514,6 +514,7 @@ feature_menu()  {
   I_HELP="Create archives of installed software?"
   K_HELP="Keep source code in /usr/src on good compiles? (gcc profiling needs it)"
   M_HELP="Email reports?"
+  O_HELP="Preserve old libaries on module upgrade until lunar fix has completed?"
   P_HELP="Preserve modified files or backup them up and overwrite with defaults?"
   R_HELP="Prompt to view reports?"
   S_HELP="Play audio with prompts?"
@@ -526,21 +527,22 @@ feature_menu()  {
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
   L_HELP="Use xz compression for logs and caches?"
 
-         ARCHIVE=${ARCHIVE:-on}
-   AUTORESURRECT=${AUTORESURRECT:-on}
-         AUTOFIX=${AUTOFIX:-on}
-       AUTOPRUNE=${AUTOPRUNE:-off}
-           COLOR=${COLOR:-on}
-     KEEP_SOURCE=${KEEP_SOURCE:-off}
-    MAIL_REPORTS=${MAIL_REPORTS:-off}
-    VIEW_REPORTS=${VIEW_REPORTS:-off}
-        PRESERVE=${PRESERVE:-on}
-           SOUND=${SOUND:-off}
-         SUSTAIN=${SUSTAIN:-on}
-          VOYEUR=${VOYEUR:-on}
-            REAP=${REAP:-on}
-         GARBAGE=${GARBAGE:-on}
-         VERBOSE=${VERBOSE:-off}
+           ARCHIVE=${ARCHIVE:-on}
+     AUTORESURRECT=${AUTORESURRECT:-on}
+           AUTOFIX=${AUTOFIX:-on}
+         AUTOPRUNE=${AUTOPRUNE:-off}
+             COLOR=${COLOR:-on}
+       KEEP_SOURCE=${KEEP_SOURCE:-off}
+KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
+      MAIL_REPORTS=${MAIL_REPORTS:-off}
+      VIEW_REPORTS=${VIEW_REPORTS:-off}
+          PRESERVE=${PRESERVE:-on}
+             SOUND=${SOUND:-off}
+           SUSTAIN=${SUSTAIN:-on}
+            VOYEUR=${VOYEUR:-on}
+              REAP=${REAP:-on}
+           GARBAGE=${GARBAGE:-on}
+           VERBOSE=${VERBOSE:-off}
 
   case  $VOYEUR  in
     off) VOYEUR=off ; VOYEUR_progress=off  ;;
@@ -561,46 +563,48 @@ feature_menu()  {
                         --checklist             \
                         ""                      \
                         0 40 14                 \
-      "ARCHIVE"          "Toggle"  "$ARCHIVE"       "$I_HELP"   \
-      "AUTORESURRECT"    "Toggle"  "$AUTORESURRECT" "$H_HELP"   \
-      "AUTOFIX"          "Toggle"  "$AUTOFIX"       "$F_HELP"   \
-      "AUTOPRUNE"        "Toggle"  "$AUTOPRUNE"     "$U_HELP"   \
-      "COLOR"            "Toggle"  "$COLOR"         "$C_HELP"   \
-      "KEEP_SOURCE"      "Toggle"  "$KEEP_SOURCE"   "$K_HELP"   \
-      "GARBAGE"          "Toggle"  "$GARBAGE"       "$G_HELP"   \
-      "MAIL_REPORTS"     "Toggle"  "$MAIL_REPORTS"  "$M_HELP"   \
-      "PRESERVE"         "Toggle"  "$PRESERVE"      "$P_HELP"   \
-      "SOUND"            "Toggle"  "$SOUND"         "$S_HELP"   \
-      "SUSTAIN"          "Toggle"  "$SUSTAIN"       "$T_HELP"   \
-      "VIEW_REPORTS"     "Toggle"  "$VIEW_REPORTS"  "$R_HELP"   \
-      "VOYEUR"           "Choice"  "$VOYEUR"        "$V_HELP"   \
-      "VOYEUR_progress"  "Choice"  "$VOYEUR_progress" "$VP_HELP" \
-      "REAP"             "Toggle"  "$REAP"          "$E_HELP"   \
-      "VERBOSE"          "Toggle"  "$VERBOSE"       "$W_HELP"   \
-      "ZLOCAL_OVERRIDES" "Toggle"  "$ZLOCAL_OVERRIDES" "$Z_HELP" \
-      "PROBE_EXPIRED"    "Toggle"  "$PROBE_EXPIRED" "$X_HELP"   \
-      "COMPRESS_XZ"      "Toggle"  "$COMPRESS_XZ"   "$L_HELP"`
+      "ARCHIVE"            "Toggle"  "$ARCHIVE"            "$I_HELP"   \
+      "AUTORESURRECT"      "Toggle"  "$AUTORESURRECT"      "$H_HELP"   \
+      "AUTOFIX"            "Toggle"  "$AUTOFIX"            "$F_HELP"   \
+      "AUTOPRUNE"          "Toggle"  "$AUTOPRUNE"          "$U_HELP"   \
+      "COLOR"              "Toggle"  "$COLOR"              "$C_HELP"   \
+      "KEEP_SOURCE"        "Toggle"  "$KEEP_SOURCE"        "$K_HELP"   \
+      "KEEP_OBSOLETE_LIBS" "Toggle"  "$KEEP_OBSOLETE_LIBS" "$O_HELP"   \
+      "GARBAGE"            "Toggle"  "$GARBAGE"            "$G_HELP"   \
+      "MAIL_REPORTS"       "Toggle"  "$MAIL_REPORTS"       "$M_HELP"   \
+      "PRESERVE"           "Toggle"  "$PRESERVE"           "$P_HELP"   \
+      "SOUND"              "Toggle"  "$SOUND"              "$S_HELP"   \
+      "SUSTAIN"            "Toggle"  "$SUSTAIN"            "$T_HELP"   \
+      "VIEW_REPORTS"       "Toggle"  "$VIEW_REPORTS"       "$R_HELP"   \
+      "VOYEUR"             "Choice"  "$VOYEUR"             "$V_HELP"   \
+      "VOYEUR_progress"    "Choice"  "$VOYEUR_progress"    "$VP_HELP"  \
+      "REAP"               "Toggle"  "$REAP"               "$E_HELP"   \
+      "VERBOSE"            "Toggle"  "$VERBOSE"            "$W_HELP"   \
+      "ZLOCAL_OVERRIDES"   "Toggle"  "$ZLOCAL_OVERRIDES"   "$Z_HELP"   \
+      "PROBE_EXPIRED"      "Toggle"  "$PROBE_EXPIRED"      "$X_HELP"   \
+      "COMPRESS_XZ"        "Toggle"  "$COMPRESS_XZ"        "$L_HELP"`
 
   then
 
-         ARCHIVE=off
-   AUTORESURRECT=off
-         AUTOFIX=off
-       AUTOPRUNE=off
-           COLOR=off
-     KEEP_SOURCE=off
-    MAIL_REPORTS=off
-        PRESERVE=off
-           SOUND=off
-         SUSTAIN=off
-    VIEW_REPORTS=off
-          VOYEUR=off
-            REAP=off
-         GARBAGE=off
-	 VERBOSE=off
-ZLOCAL_OVERRIDES=off
-   PROBE_EXPIRED=off
- COMPRESS_METHOD=bz2
+           ARCHIVE=off
+     AUTORESURRECT=off
+           AUTOFIX=off
+         AUTOPRUNE=off
+             COLOR=off
+       KEEP_SOURCE=off
+KEEP_OBSOLETE_LIBS=off
+      MAIL_REPORTS=off
+          PRESERVE=off
+             SOUND=off
+           SUSTAIN=off
+      VIEW_REPORTS=off
+            VOYEUR=off
+              REAP=off
+           GARBAGE=off
+	         VERBOSE=off
+  ZLOCAL_OVERRIDES=off
+     PROBE_EXPIRED=off
+   COMPRESS_METHOD=xz
 
     for  TOGGLE  in  $TOGGLES;  do
       case  $TOGGLE  in
@@ -610,6 +614,7 @@ ZLOCAL_OVERRIDES=off
            AUTOPRUNE)     AUTOPRUNE=on  ;;
                COLOR)         COLOR=on  ;;
          KEEP_SOURCE)   KEEP_SOURCE=on  ;;
+  KEEP_OBSOLETE_LIBS) KEEP_OBSOLETE_LIBS=on ;;
         MAIL_REPORTS)  MAIL_REPORTS=on  ;;
             PRESERVE)      PRESERVE=on  ;;
                SOUND)         SOUND=on  ;;
@@ -638,6 +643,7 @@ ZLOCAL_OVERRIDES=off
     set_local_config "AUTOFIX" "$AUTOFIX"
     set_local_config "AUTOPRUNE" "$AUTOPRUNE"
     set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
+    set_local_config "KEEP_OBSOLETE_LIBS" "$KEEP_OBSOLETE_LIBS"
     set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"
     set_local_config "PRESERVE" "$PRESERVE"
     set_local_config "SOUND" "$SOUND"

@@ -100,12 +100,14 @@ fix_depends () {
 
 
 run_fix()  {
-	local MODULES MODULE
+	local MODULES MODULE KEEP_OBSOLETE
 	debug_msg "run_fix ($@)"
+  KEEP_OBSOLETE=1
 	MODULES=$*
 
 	if [ -z "$MODULES" ] ; then
 		MODULES=$(list_installed | fgrep -v -x moonbase)
+    unset KEEP_OBSOLETE
 	fi
 
 	if [[ -n "$FIXDEPENDS" ]] ; then
@@ -136,7 +138,7 @@ run_fix()  {
 	export TMP_LIN_SUCCESS=$(temp_create "successful")
 	export TMP_LIN_FAIL=$(temp_create "failed")
 
-        if [[ ! -n "$NOFIX" ]] ; then
+  if [[ ! -n "$NOFIX" ]] ; then
 		for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do
 			if module_installed $MODULE && ! module_held $MODULE ; then
 				if ! run_checks $MODULE ; then
@@ -150,13 +152,20 @@ run_fix()  {
 							continue
 						elif ! run_checks $MODULE ; then
 							verbose_msg "Attempt to recompile \"$MODULE\" succeeded but \"$MODULE\" still is broken!"
+              KEEP_OBSOLETE=1
 							continue
 						fi
 					fi
 				fi
 			fi
 		done
-		
+
+    # Only remove OBSOLETE if `lunar fix` pass all checks
+    # not perfect but it will have to do for now
+    if [ ! -n "$KEEP_OBSOLETE" ]; then
+      remove_obsolete_libraries
+    fi
+
 		display_update_log fix
 	else
 		display_update_log nofix

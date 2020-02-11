@@ -24,6 +24,8 @@
 #                                                          #
 # Parts Copyrighted Steven Michalske 2004 under GPLv2      #
 #                                                          #
+# Parts Copyrighted Stefan Wold 2020 under GPLv2           #
+#                                                          #
 ############################################################
 
 
@@ -33,23 +35,22 @@ save_libraries()  {
 
   [ "$MODULE" == "glibc" ] && return 0
 
-  OLD_VERSION=`installed_version  $MODULE`
+  OLD_VERSION=$(installed_version $MODULE)
   OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
 
   [ -e "$OLD_LOG" ] || return 0
 
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
-  mkdir  -p  $OLD_LIBS
+  mkdir -p $OLD_LIBS
 
   SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-  grep   "/lib/"  "$OLD_LOG"  |
+  egrep "/lib(32|64)?/" "$OLD_LOG" |
   while  read  LINE;  do
-
     if [ -f "$LINE"  ]  &&
          file  -bL  $LINE   |
-         grep  -E -q   "shared object|pie executable"
+         egrep -q "shared object|pie executable"
     then
       verbose_msg "saving library \"$LINE\""
       if  [  -h  $LINE  ];  then
@@ -58,11 +59,11 @@ save_libraries()  {
                                cut  -c  2-
                             )
               )
-        ln  -sf  $DEST  $OLD_LIBS/`basename  $LINE`
+        ln -sf $DEST $OLD_LIBS/$(basename $LINE)
       else
-        cp  $LINE  $OLD_LIBS
+        cp $LINE $OLD_LIBS
       fi
-      echo  $OLD_LIBS/`basename  $LINE`  >>  $SAVED
+      echo  $OLD_LIBS/$(basename $LINE) >> $SAVED
     fi
   done
 
@@ -72,6 +73,40 @@ save_libraries()  {
   then  export  LD_LIBRARY_PATH="$OLD_LIBS"
   else  export  LD_LIBRARY_PATH="$OLD_LIBS:$LD_LIBRARY_PATH"
   fi
+}
+
+
+save_obsolete_libraries() {
+  local OLD_LIBS LIB
+  debug_msg "save_obsolete_libraries($@)"
+  OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+
+  if [[ "$KEEP_OBSOLETE_LIBS" != "on" ]]; then
+    verbose_msg "KEEP_OBSOLETE_LIBS is currently disabled"
+    return
+  fi
+
+  if [ ! -d "$OBSOLETE_LIB_DIR" ]; then
+    mkdir -p "$OBSOLETE_LIB_DIR"
+  fi
+
+  for f in $(ls -1 $OLD_LIBS/*.so* 2> /dev/null); do
+    LIB=$(basename $f)
+    if ! parse_iw | grep -q $LIB; then
+      verbose_msg "saving obsolete library ($LIB)"
+      cp -P $f "$OBSOLETE_LIB_DIR"/
+    fi
+  done
+
+  ldconfig $OBSOLETE_LIB_DIR
+}
+
+
+remove_obsolete_libraries() {
+  debug_msg "remove_obsolete_libraries($@)"
+  verbose_msg "Removing OBSOLETE libraries"
+  rm -rf "$OBSOLETE_LIB_DIR"
+  ldconfig
 }
 
 
@@ -400,6 +435,7 @@ default_post_build() {
   fi
 
   ldconfig
+  save_obsolete_libraries
   release_saved_libraries
   cd /
 }

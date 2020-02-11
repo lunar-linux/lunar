@@ -7,6 +7,8 @@
 #                                                           #
 # Copyright 2005 by Auke Kok under GPLv2                    #
 #                                                           #
+# Copyright 2020 by Stefan Wold under GPLv2                 #
+#                                                           #
 #############################################################
 
 
@@ -31,11 +33,11 @@ plugin_module_check_ldd() {
     LOG=$(egrep "/(bin|games|lib(32|64)?|sbin|libexec)/" $I_LOG | egrep -v "/(doc|fonts|include|locale|man|modules|var|share|pkgconfig)/")
 
     for FILE in $LOG; do
-      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | grep -q "not found" ; then
+      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | egrep -q "(not found|lunar/OBSOLETE/)" ; then
         (
           export IFS="$IFS_OLD"
           message "${FILE_COLOR}${FILE}${DEFAULT_COLOR} of ${MODULE_COLOR}${MODULE} ${PROBLEM_COLOR}is broken. ${DEFAULT_COLOR}"
-          LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | grep "not found"
+          LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | egrep "(not found|lunar/OBSOLETE/)"
         )
         LDD_STATUS=1
       fi
