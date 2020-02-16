@@ -81,9 +81,11 @@ save_obsolete_libraries() {
   debug_msg "save_obsolete_libraries($@)"
   OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
 
+  [ ! -d "$OLD_LIBS" ] && return 0
+
   if [[ "$KEEP_OBSOLETE_LIBS" != "on" ]]; then
     verbose_msg "KEEP_OBSOLETE_LIBS is currently disabled"
-    return
+    return 0
   fi
 
   if [ ! -d "$OBSOLETE_LIB_DIR" ]; then
