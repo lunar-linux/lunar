@@ -19,22 +19,28 @@
 # Copyright 2001 by Kyle Sallee                            #
 #                                                          #
 # Parts Copyrighted Hendrik Visage 2002 under GPLv2        #
-#                                                          #
 # Parts Copyrighted Kagan Kongar 2002 under GPLv2          #
-#                                                          #
+# Parts Copyrighted Stefan Wold 2020 under GPLv2           #
 ############################################################
 
 # function : ld_add
 # usage    : ld_add <directory>
-# purpose  : Add a path to ld.so.conf
+# purpose  : Add a path to ld.so.conf.d/<module>.conf
 
 ld_add() {
+  local ld_conf_path
 	debug_msg "ld_add ($@)"
 
 	if [ ! -z "$1" ] && [ -d "$1" ] ; then
-		if ! grep -q "$1" /etc/ld.so.conf; then
-			verbose_msg "Adding $1 to ld.so.conf"
-			echo "$1" >> /etc/ld.so.conf
+    if [ ! -d "/etc/ld.so.conf.d" ]; then
+      mkdir -p "/etc/ld.so.conf.d"
+    fi
+
+    ld_conf_path="/etc/ld.so.conf.d/${MODULE}.conf"
+
+		if ! grep -q "$1" $ld_conf_path 2> /dev/null; then
+			verbose_msg "Adding $1 to $ld_conf_path"
+			echo "$1" >> $ld_conf_path
 			ldconfig
 		fi
 	fi
@@ -42,19 +48,26 @@ ld_add() {
 
 # function : ld_remove
 # usage    : ld_remove <directory>
-# purpose  : Remove a path from ld.so.conf
+# purpose  : Remove a path from ld.so.conf/<module>.conf
 
 ld_remove() {
+  local ld_conf_path
 	debug_msg "ld_remove ($@)"
 
-	if [ ! -z "$1" ]; then
-		if grep -q "$1" /etc/ld.so.conf ; then
+  ld_conf_path="/etc/ld.so.conf.d/${MODULE}.conf"
 
+	if [[ ! -z "$1" && -f "$ld_conf_path" ]]; then
+		if grep -q "$1" $ld_conf_path; then
 			TMP_LD_CONF=$(temp_create "ldsoconf")
 			verbose_msg "Removing $1 from ld.so.conf"
 
-			grep -v "$1" /etc/ld.so.conf > $TMP_LD_CONF
-			cat "$TMP_LD_CONF" > /etc/ld.so.conf
+			grep -v "$1" $ld_conf_path > $TMP_LD_CONF
+			cat "$TMP_LD_CONF" > $ld_conf_path
+
+      if [ ! -s "$ld_so_conf" ]; then
+        rm $ld_conf_path
+      fi
+
 			ldconfig
 
 			temp_destroy $TMP_LD_CONF
