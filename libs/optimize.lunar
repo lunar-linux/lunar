@@ -24,11 +24,13 @@ bad_flags()
         unset LDFLAGS
     else
         for BAD_FLAG in "$@" ; do
-            # XXX should probably figure whether these variables are
-            # guaranteed to start and end with spaces or not
+            CFLAGS=" $CFLAGS "
             CFLAGS="${CFLAGS// $BAD_FLAG / }"
+            CXXFLAGS=" $CXXFLAGS "
             CXXFLAGS="${CXXFLAGS// $BAD_FLAG / }"
+            CPPFLAGS=" $CPPFLAGS "
             CPPFLAGS="${CPPFLAGS// $BAD_FLAG / }"
+            LDFLAGS=" $LDFLAGS "
             LDFLAGS="${LDFLAGS// $BAD_FLAG / }"
         done
     fi
