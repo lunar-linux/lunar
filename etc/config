@@ -16,6 +16,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
         DEFAULT_PREFIX=/usr
 
       OBSOLETE_LIB_DIR=/usr/lib/lunar/OBSOLETE
+      OBSOLETE_LD_CONF=/etc/ld.so.conf.d/obsolete-libs.conf
 
              BOOTSTRAP=/var/lib/lunar/bootstrap
               EXCLUDED=/var/lib/lunar/excluded

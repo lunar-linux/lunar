@@ -92,6 +92,10 @@ save_obsolete_libraries() {
     mkdir -p "$OBSOLETE_LIB_DIR"
   fi
 
+  if [[ -d "/etc/ld.so.conf.d" && ! -f "$OBSOLETE_LD_CONF" ]]; then
+    echo "/usr/lib/lunar/OBSOLETE" > $OBSOLETE_LD_CONF
+  fi
+
   for f in $(ls -1 $OLD_LIBS/*.so* 2> /dev/null); do
     LIB=$(basename $f)
     if ! parse_iw | grep -q $LIB; then
@@ -108,6 +112,7 @@ remove_obsolete_libraries() {
   debug_msg "remove_obsolete_libraries($@)"
   verbose_msg "Removing OBSOLETE libraries"
   rm -rf "$OBSOLETE_LIB_DIR"
+  rm -f "$OBSOLETE_LD_CONF"
   ldconfig
 }
 
