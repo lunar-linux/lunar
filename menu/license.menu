@@ -1,3 +1,4 @@
+#! /bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -18,7 +19,6 @@
 
 set_accepted_licenses()
 {
-
     PROMPT="Please select acceptable licenses
 
 Lunar by default only accept osi-approved licenses. You will
@@ -35,17 +35,15 @@ You have several ways of doing so:
 Currently known osi licenses: gpl gpl2 lgpl gfdl bsd mpl cc apache
 artistic qpl."
 
-    ACCEPTED_LICENSES=`$DIALOG --title "Select accepted licenses" \
-        --ok-label "Commit" --inputbox                            \
-	"$PROMPT" 0 0 "$ACCEPTED_LICENSES"`
+    ACCEPTED_LICENSES=$("$DIALOG" --title "Select accepted licenses" \
+                                  --ok-label "Commit" --inputbox     \
+	                              "$PROMPT" 0 0 "$ACCEPTED_LICENSES")
 
     set_local_config ACCEPTED_LICENSES "$ACCEPTED_LICENSES"
-
 }
 
 set_rejected_licenses()
 {
-
     PROMPT="Please select rejected licenses
 
 Lunar by default only accepts osi-approved licenses. You will
@@ -61,11 +59,9 @@ You have several ways of doing so:
 Remember that if you leave ACCEPTED_LICENSES empty, all licenses will
 be accepted that do not match the REJECTED_LICENSES list."
 
-    REJECTED_LICENSES=`$DIALOG --title "Select rejected licenses" \
-        --ok-label "Commit" --inputbox                            \
-	"$PROMPT" 0 0 "$REJECTED_LICENSES"`
+    REJECTED_LICENSES=$("$DIALOG" --title "Select rejected licenses" \
+                                  --ok-label "Commit" --inputbox     \
+	                              "$PROMPT" 0 0 "$REJECTED_LICENSES")
 
     set_local_config REJECTED_LICENSES "$REJECTED_LICENSES"
-
 }
-
