@@ -31,7 +31,7 @@ You have several ways of doing so:
  o Or enter any specific license name in here to accept it.
  o Enter licenses in the REJECTED_LICENSES and leave this
    field empty to reject only those licenses.
-  
+
 Currently known osi licenses: gpl gpl2 lgpl gfdl bsd mpl cc apache
 artistic qpl."
 
