@@ -1,3 +1,4 @@
+#! /bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -29,7 +30,7 @@ select_mirror()  {
            --menu                          \
            ""                              \
            0 80 10                         \
-           $(mirror_list $1)
+           "$(mirror_list "$1")"
 }
 
 mirror_menu()  {
@@ -43,22 +44,21 @@ mirror_menu()  {
     X_HELP="Select mirror for downloading XFree86 related sources."
  XORG_HELP="Select mirror for downloading XOrg related sources."
     N_HELP="Select mirror for downloading NVIDIA drivers."
-      HELP="Selecting a mirror site can speed your downloads."
 
-    COMMAND=`$DIALOG  --title "Mirror Menu"        \
-                      --ok-label      "Select"     \
-                      --cancel-label  "Exit"       \
-                      --item-help                  \
-                      --menu     ""  0 0 0         \
-                      "GNOME"    ""  "$N_HELP"     \
-                      "GNU"      ""  "$G_HELP"     \
-                      "KDE"      ""  "$K_HELP"     \
-                      "KERNEL"   ""  "$L_HELP"     \
-                      "SFORGE"   ""  "$SF_HELP"    \
-                      "LRESORT"  ""  "$LR_HELP"    \
-                      "NVIDIA"   ""  "$N_HELP"     \
-                      "XFREE86"  ""  "$X_HELP"     \
-                      "XORG"     ""  "$XORG_HELP"`
+    COMMAND=$("$DIALOG"  --title "Mirror Menu"        \
+                         --ok-label      "Select"     \
+                         --cancel-label  "Exit"       \
+                         --item-help                  \
+                         --menu     ""  0 0 0         \
+                         "GNOME"    ""  "$N_HELP"     \
+                         "GNU"      ""  "$G_HELP"     \
+                         "KDE"      ""  "$K_HELP"     \
+                         "KERNEL"   ""  "$L_HELP"     \
+                         "SFORGE"   ""  "$SF_HELP"    \
+                         "LRESORT"  ""  "$LR_HELP"    \
+                         "NVIDIA"   ""  "$N_HELP"     \
+                         "XFREE86"  ""  "$X_HELP"     \
+                         "XORG"     ""  "$XORG_HELP")
 
   do
     case  $COMMAND in
@@ -73,7 +73,7 @@ mirror_menu()  {
           LRESORT)  MIRROR=" LRESORT_URL"    ;;
     esac
 
-    if  MIRROR_URL=$(select_mirror $COMMAND);  then
+    if  MIRROR_URL=$(select_mirror "$COMMAND");  then
       if  [  "$MIRROR_URL" == "Custom"  ];  then
          MIRROR_URL=$($DIALOG  --inputbox  "Please enter the URL."  0 0)
       fi
@@ -81,7 +81,7 @@ mirror_menu()  {
       if [ -n "$MIRROR_URL" ] ; then
         set_local_config "$MIRROR" "$MIRROR_URL" &&
         $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
-        export ${MIRROR// }="$MIRROR_URL"
+        export "${MIRROR// }"="$MIRROR_URL"
       fi
     fi
   done
