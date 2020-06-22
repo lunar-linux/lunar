@@ -21,7 +21,7 @@
 # purpose : locks a file or wait until. Better use as lock_file <file> && || etc
 function lock_file() {
    local TEMPFILE LOCKFILE STALE_PID
-   debug_msg "lock_file ($@)"
+   debug_msg "lock_file ($*)"
    function file_lock() {
       #locking is disabled if ln or rm not found!!
       [ -x "/bin/ln" ] || return 0
@@ -31,7 +31,7 @@ function lock_file() {
       LOCKFILE="$1.lock"
 
       # test permission
-      if ! echo $$ > $TEMPFILE 2>/dev/null; then
+      if ! echo $$ > "$TEMPFILE" 2>/dev/null; then
         message "${PROBLEM_COLOR}You don't have permission to access" \
                 "$TEMPFILE ${DEFAULT_COLOR}"
         exit 1
@@ -43,34 +43,34 @@ function lock_file() {
       fi
 
       # set lockfile
-      if ln $TEMPFILE $LOCKFILE 2>/dev/null ; then
-        rm -f $TEMPFILE
+      if ln "$TEMPFILE" "$LOCKFILE" 2>/dev/null ; then
+        rm -f "$TEMPFILE"
         return 0
       # failed due to other lock?
       elif [ ! -f "$LOCKFILE" ]; then
         return 1
       fi
       # stale lock?
-      STALE_PID=`< $LOCKFILE`
+      STALE_PID=$(< "$LOCKFILE")
       if [ "$STALE_PID" -le "0" ]; then
         return 1
       fi
-      if kill -0 $STALE_PID 2>/dev/null; then
-        rm -f $TEMPFILE
+      if kill -0 "$STALE_PID" 2>/dev/null; then
+        rm -f "$TEMPFILE"
         return 1
       fi
       # yes, stale
-      rm -f $LOCKFILE 2>/dev/null &&
+      rm -f "$LOCKFILE" 2>/dev/null &&
           echo "Removed stale lock file of process $STALE_PID"
-      if ln $TEMPFILE $LOCKFILE 2>/dev/null; then
-        rm -f $TEMPFILE
+      if ln "$TEMPFILE" "$LOCKFILE" 2>/dev/null; then
+        rm -f "$TEMPFILE"
         return 0
       fi
-      rm -f $TEMPFILE
+      rm -f "$TEMPFILE"
       return 1
    }
 
-   while ! file_lock $1; do
+   while ! file_lock "$1" ; do
       message "${MESSAGE_COLOR}Waiting to lock the file $1${DEFAULT_COLOR}"
       sleep 1
    done
@@ -82,26 +82,26 @@ function lock_file() {
 # usage   : unlock_file <absolute file name>
 # purpose : unlocks a file
 function unlock_file() {
-  debug_msg "unlock_file ($@)"
+  debug_msg "unlock_file ($*)"
   #unlocking is disabled if rm not found!!
   [ -x "/bin/rm" ] || return 0
-  rm -f $1.lock 2>/dev/null && return 0
+  rm -f "$1".lock 2>/dev/null && return 0
   return 1
 }
 
 
 lin_locked()  {
-  debug_msg "lin_locked ($@)"
-  [     -f        /var/lock/installing.$1  ]  &&
-  ps        `cat "/var/lock/installing.$1"`    |
-  grep  -q  "lin"
+  debug_msg "lin_locked ($*)"
+  [ -f /var/lock/installing."$1" ] &&
+      ps $(cat "/var/lock/installing.$1") |
+     grep -q "lin"
 }
 
 
 solo_locked()  {
-  debug_msg "solo_locked ($@)"
-  for SOLO_MODULE in `cat "$SOLO"` ; do
-    if lin_locked $SOLO_MODULE ; then
+  debug_msg "solo_locked ($*)"
+  for SOLO_MODULE in $(cat "$SOLO") ; do
+    if lin_locked "$SOLO_MODULE" ; then
       message  "${PROBLEM_COLOR}lining${DEFAULT_COLOR}${MESSAGE_COLOR} of other modules is disabled during a lin ${MODULE_COLOR}$SOLO_MODULE${DEFAULT_COLOR}"
       return
     fi
@@ -111,12 +111,12 @@ solo_locked()  {
 
 
 current_locked() {
-  debug_msg "current_locked ($@)"
-  if  lin_locked  $MODULE;  then
-    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}$linING${DEFAULT_COLOR}"
+  debug_msg "current_locked ($*)"
+  if  lin_locked "$MODULE" ; then
+    message  "${QUERY_COLOR}Detected lin lock file: ${FILE_COLOR}${linING}${DEFAULT_COLOR}"
     message  "${MESSAGE_COLOR}Now waiting for ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}${MESSAGE_COLOR} to finish installing or for the lock to clear.${DEFAULT_COLOR}"
 
-    while  lin_locked  $MODULE;  do  sleep  2;  done
+    while lin_locked "$MODULE" ; do sleep 2 ; done
     false
   else
     false

@@ -20,36 +20,36 @@ patch_it () {
   verbose_msg "patch_it \"$1\" \"$2\"";
 
   # get patch from $SOURCE_CACHE automatically
-  if [ ! -f "$1" -a -f "$SOURCE_CACHE/$1" ] ; then
+  if [ ! -f "$1" ] && [ -f "$SOURCE_CACHE/$1" ] ; then
     PATCH="$SOURCE_CACHE/$1"
   else
     PATCH="$1"
   fi
 
-  if [[ $PATCH =~ '.tar' ]] ; then
+  if [[ "$PATCH" =~ .tar ]] ; then
     TARCMD="tar x -O"
   else
     TARCMD="cat"
   fi
 
   case "$PATCH" in
-    *.bz2)       GZCMD=bzcat ;;
-    *.gz)        GZCMD=zcat ;;
-    *.xz|*.lzma) GZCMD=xzcat ;;
-    *)           GZCMD=cat ;;
+      *.bz2)     GZCMD="bzcat" ;;
+      *.gz)      GZCMD="zcat"  ;;
+    *.xz|*.lzma) GZCMD="xzcat" ;;
+    *)           GZCMD="cat"   ;;
   esac
 
   TMPFILE1=$(temp_create "patch_1")
   TMPFILE2=$(temp_create "patch_2")
 
-  if $GZCMD "$PATCH" > $TMPFILE1 ; then
+  if "$GZCMD" "$PATCH" > "$TMPFILE1" ; then
     # uncompress OK
-    if cat "$TMPFILE1" | $TARCMD > $TMPFILE2 ; then
+    if cat "$TMPFILE1" | "$TARCMD" > "$TMPFILE2" ; then
       # untar OK
-      if patch -N -p$2 < $TMPFILE2 ; then
+      if patch -N -p"$2" < "$TMPFILE2" ; then
         # patch cmd is OK
-        temp_destroy $TMPFILE1
-        temp_destroy $TMPFILE2
+        temp_destroy "$TMPFILE1"
+        temp_destroy "$TMPFILE2"
         return 0
       fi
     fi
@@ -57,8 +57,8 @@ patch_it () {
 
   message "${PROBLEM_COLOR}! Broken patch file ${DEFAULT_COLOR}${FILE_COLOR}$PATCH${DEFAULT_COLOR}"
 
-  temp_destroy $TMPFILE1
-  temp_destroy $TMPFILE2
+  temp_destroy "$TMPFILE1"
+  temp_destroy "$TMPFILE2"
   return 255
 }
 
@@ -68,10 +68,10 @@ patch_it () {
 # purpose  : edit [files] with a sed function
 sedit () {
   local SEDIT
-  debug_msg "sedit ($@)"
-  SEDIT=$1
+  debug_msg "sedit ($*)"
+  SEDIT="$1"
   shift
-  for FILE in $@ ; do
+  for FILE in "$@" ; do
     verbose_msg "Editing \"$FILE\""
     sed -i "$SEDIT" "$FILE"
   done
@@ -82,6 +82,6 @@ sedit () {
 # usage    : edit_file FILENAME
 # purpose  : to edit a file
 edit_file() {
-  debug_msg "edit_file ($@)"
-  ${EDITOR:-nano} $1
+  debug_msg "edit_file ($*)"
+  ${EDITOR:-nano} "$1"
 }

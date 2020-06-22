@@ -29,9 +29,9 @@
 # usage    : enviro_check
 # purpose  : check if the shell is proper
 enviro_check() {
-  debug_msg "enviro_check ($@)"
-  if [ -z $LUNAR_INSTALL ]; then
-    if [ -z "$SHELL" ] || [ "$(getent passwd $USER | cut -d: -f3)" != "0" ] ; then
+  debug_msg "enviro_check ($*)"
+  if [ -z "$LUNAR_INSTALL" ]; then
+    if [ -z "$SHELL" ] || [ "$(getent passwd "$USER" | cut -d: -f3)" != "0" ] ; then
       message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
               "You are not running a fully initialized root shell, consider"
       message "running a proper root shell with 'su -'" \
@@ -44,7 +44,7 @@ enviro_check() {
 # usage    : root_check
 # purpose  : check if the user is root
 root_check() {
-  debug_msg "root_check ($@)"
+  debug_msg "root_check ($*)"
   if [ "$UID" != "0" ] ; then
     message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR}" \
             "User must have root privileges to run this program" \
@@ -58,7 +58,7 @@ root_check() {
 # usage    : set_priority
 # purpose  : force niceness on lunar's processes
 set_priority() {
-  debug_msg "set_priority ($@)"
+  debug_msg "set_priority ($*)"
   LUNAR_PRIORITY=${LUNAR_PRIORITY:-"+10"}
   renice "$LUNAR_PRIORITY" -p $$ 2> /dev/null >/dev/null
 }
