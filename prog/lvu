@@ -499,10 +499,11 @@ moonalyze() {
 
   add_broken_optional_dep() {
     if [[ "$VERBOSE" = "on" ]]; then
-      if [ -z "${broken_optional_deps[$mod:$DEP]}" ]; then
-        broken_optional_deps[$mod:$DEP]=$1
+      key="${mod}:${DEP}"
+      if [ -z "${broken_optional_deps[$key]}" ]; then
+        broken_optional_deps[$key]=$1
       else
-        broken_optional_deps[$mod:$DEP]+=", $1"
+        broken_optional_deps[$key]+=", $1"
       fi
     else
       broken_optional_args=("${broken_optional_args[@]}" "$mod")
