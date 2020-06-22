@@ -687,7 +687,6 @@ purge_modules() {
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
         lrm "$MODULE"
-        continue
       else
         message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed manually later${DEFAULT_COLOR}"
       fi

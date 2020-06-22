@@ -21,7 +21,7 @@
 set_config()
 {
 	local LINE NEW FILE VAR
-	debug_msg "set_config ($@)"
+	debug_msg "set_config ($*)"
 
 	# remove leading/trailing whitespace
 	VAR=${2#"${2%%[![:space:]]*}"}
@@ -32,46 +32,46 @@ set_config()
 
 	shift 2
 	if [ "$FILE" == "$LOCAL_CONFIG" ] ; then
-		NEW="$(printf "%16s" "$VAR")=\"$@\""
+		NEW="$(printf "%16s" "$VAR")=\"$*\""
 	else
-		NEW="$VAR=\"$@\""
+		NEW="$VAR=\"$*\""
 	fi
 
 	# on-demand creation
-	if [ ! -f $FILE ] ; then
-		touch $FILE
+	if [ ! -f "$FILE" ] ; then
+		touch "$FILE"
 	fi
 
-	lock_file $FILE &&
+	lock_file "$FILE" &&
 	if [ -n "$LINE" ] ; then
-		sedit "/^\s*$VAR=/d" $FILE
+		sedit "/^\s*$VAR=/d" "$FILE"
 	fi
-	echo "$NEW" >> $FILE
-	unlock_file $FILE
+	echo "$NEW" >> "$FILE"
+	unlock_file "$FILE"
 }
 
 
 unset_config()
 {
-	debug_msg "unset_config ($@)"
+	debug_msg "unset_config ($*)"
 
 	# on-demand creation
-	if [ ! -f $1 ] ; then
-		touch $1
+	if [ ! -f "$1" ] ; then
+		touch "$1"
 	fi
 
-	lock_file $1 &&
+	lock_file "$1" &&
 	if [ -n "$2" ] ; then
 		# make sure we escape those ':' characters:
-		sedit "/^[ ]*$2=/d" $1
+		sedit "/^[ ]*$2=/d" "$1"
 	fi
-	unlock_file $1
+	unlock_file "$1"
 }
 
 
 get_config()
 {
-	if [[ -f $1 ]] ; then
+	if [[ -f "$1" ]] ; then
 		grep -w "$2=.*" "$1" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
 	fi
 }
@@ -79,9 +79,9 @@ get_config()
 
 set_local_config()
 {
-	debug_msg "set_local_config ($@)"
+	debug_msg "set_local_config ($*)"
 	local VAR
-	VAR=$1
+	VAR="$1"
 	shift
 	set_config "$LOCAL_CONFIG" "$VAR" "$@"
 }
@@ -89,7 +89,7 @@ set_local_config()
 
 unset_local_config()
 {
-	debug_msg "unset_local_config ($@)"
+	debug_msg "unset_local_config ($*)"
 	unset_config "$LOCAL_CONFIG" "$1"
 }
 
@@ -101,7 +101,7 @@ get_local_config() {
 
 set_module_config()
 {
-	debug_msg "set_module_config ($@)"
+	debug_msg "set_module_config ($*)"
 	if [ -n "$MODULE" ] ; then
 		set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
 	fi
@@ -110,7 +110,7 @@ set_module_config()
 
 unset_module_config()
 {
-	debug_msg "unset_module_config ($@)"
+	debug_msg "unset_module_config ($*)"
 	if [ -n "$MODULE" ] ; then
 		unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
 	fi
@@ -119,7 +119,7 @@ unset_module_config()
 
 get_module_config()
 {
-	debug_msg "get_module_config ($@)"
+	debug_msg "get_module_config ($*)"
 	if [ -n "$MODULE" ] ; then
 		get_config "$DEPENDS_CONFIG/$MODULE" "$1"
 	fi
@@ -128,7 +128,7 @@ get_module_config()
 
 get_other_module_config()
 {
-	debug_msg "get_other_module_config ($@)"
+	debug_msg "get_other_module_config ($*)"
 	if [ -n "$1" ] ; then
 		get_config "$DEPENDS_CONFIG/$1" "$2"
 	fi

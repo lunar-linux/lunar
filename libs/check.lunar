@@ -11,11 +11,11 @@
 
 
 run_checks() {
-	debug_msg "run_checks ($@)"
+	debug_msg "run_checks ($*)"
 	verbose_msg "Running sanity checks for module \"$1\""
 	(
-		run_details $1
-		plugin_call MODULE_CHECK $1
+		run_details "$1"
+		plugin_call MODULE_CHECK "$1"
 		if [ $? == 2 ]; then
 			return 0
 		fi
@@ -27,14 +27,14 @@ run_checks() {
 # rework_module : re-create depends database for a module
 rework_module() {
 	local MODULE
-	debug_msg "rework_module ($@)"
+	debug_msg "rework_module ($*)"
 
 	# we declare these local to override the systems default ones:
-	optional_depends()  {
+	optional_depends() {
 		local DEP
-		debug_msg "  optional_depends ($@)"
-		DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
-		if module_exiled $DEP ; then
+		debug_msg "  optional_depends ($*)"
+		DEP=$(NEVER_ASK=1 DEPS_ONLY=expand_alias "$1")
+		if module_exiled "$DEP" ; then
 			echo "$MODULE:$DEP:off:optional:$2:$3"
 		else
 			# check for the current depend selection
@@ -47,86 +47,86 @@ rework_module() {
 		fi
 	}
 
-	depends()  {
+	depends() {
 		local DEP
-		debug_msg "  depends ($@)"
-		DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
+		debug_msg "  depends ($*)"
+		DEP=$(NEVER_ASK=1 DEPS_ONLY=expand_alias "$1")
 		echo "$MODULE:$DEP:on:required:$2:$3"
 	}
 
 	run_depends() {
-	debug_msg "  run_depends ($@)"
-	 (
-		if run_details $1 &> /dev/null ; then
-			if has_module_file $MODULE DEPENDS ; then
-				run_module_file $MODULE DEPENDS | grep -v '%'
+	debug_msg "  run_depends ($*)"
+	  (
+		if run_details "$1" &> /dev/null ; then
+			if has_module_file "$MODULE" DEPENDS ; then
+			   run_module_file "$MODULE" DEPENDS | grep -v '%'
 			fi
 		fi
-	 )
+	  )
 	}
 
 	# here starts the real work:
-	MODULE=$1
+	MODULE="$1"
 
 	# remove whatever depends was residing in the depends state file and
 	# append the new output:
-	lock_file $DEPENDS_STATUS_BACKUP                              &&
-	lock_file $DEPENDS_STATUS                                     &&
+	lock_file "$DEPENDS_STATUS_BACKUP" &&
+	lock_file "$DEPENDS_STATUS"        &&
 	(
-		grep -v "^$MODULE:" "$DEPENDS_STATUS_BACKUP" > $DEPENDS_STATUS
-		run_depends $MODULE >> $DEPENDS_STATUS
-		cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
+		grep -v "^""${MODULE}"":" "${DEPENDS_STATUS_BACKUP}" > "$DEPENDS_STATUS"
+		run_depends "$MODULE" >> "$DEPENDS_STATUS"
+		cp "$DEPENDS_STATUS" "$DEPENDS_STATUS_BACKUP"
 	)
-	unlock_file $DEPENDS_STATUS
-	unlock_file $DEPENDS_STATUS_BACKUP
+	unlock_file "$DEPENDS_STATUS"
+	unlock_file "$DEPENDS_STATUS_BACKUP"
 }
 
 
 # fix_depends : single pass to fix depends database
 fix_depends () {
 	local LIST
-	debug_msg "fix_depends  ($@)"
+	debug_msg "fix_depends ($*)"
 
 	if [ -n "$1" ] ; then
 		LIST="$@"
 	else
-		LIST=$(list_installed | fgrep -v -x moonbase)
+		LIST=$(list_installed | grep -F -v -x moonbase)
 	fi
 
-	for MODULE in $LIST ; do
-		rework_module $MODULE
+	for MODULE in ${LIST} ; do
+		rework_module "$MODULE"
 	done
 }
 
 
 run_fix()  {
 	local MODULES MODULE KEEP_OBSOLETE
-	debug_msg "run_fix ($@)"
-  KEEP_OBSOLETE=1
+	debug_msg "run_fix ($*)"
+    KEEP_OBSOLETE=1
 	MODULES=$*
 
 	if [ -z "$MODULES" ] ; then
-		MODULES=$(list_installed | fgrep -v -x moonbase)
+		MODULES=$(list_installed | grep -F -v -x moonbase)
     unset KEEP_OBSOLETE
 	fi
 
 	if [[ -n "$FIXDEPENDS" ]] ; then
-		for MODULE in $MODULES ; do
-			fix_depends $MODULE
+		for MODULE in ${MODULES} ; do
+			fix_depends "$MODULE"
 		done
 		return
 	fi
 
 	# discover BROKEN modules and note them if we plan on fixing them
-	if [[ ! -n "$NOFIX" ]] ; then
-		for MODULE in $MODULES ; do
-			if ! run_checks $MODULE ; then
-				 BROKEN_MODULES=( ${BROKEN_MODULES[@]} $MODULE )
+	if [[ -z "$NOFIX" ]] ; then
+		for MODULE in ${MODULES} ; do
+			if ! run_checks "$MODULE" ; then
+				 BROKEN_MODULES=( "${BROKEN_MODULES[@]}" "$MODULE" )
 			fi
 		done
 	else
-		for MODULE in $MODULES ; do
-			run_checks $MODULE
+		for MODULE in ${MODULES} ; do
+			run_checks "$MODULE"
 		done
 	fi
 
@@ -135,22 +135,23 @@ run_fix()  {
 		return
 	fi
 
-	export TMP_LIN_SUCCESS=$(temp_create "successful")
-	export TMP_LIN_FAIL=$(temp_create "failed")
+	TMP_LIN_SUCCESS=$(temp_create "successful")
+	TMP_LIN_FAIL=$(temp_create "failed")
+    export TMP_LIN_SUCCESS TMP_LIN_FAIL
 
-  if [[ ! -n "$NOFIX" ]] ; then
-		for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do
-			if module_installed $MODULE && ! module_held $MODULE ; then
-				if ! run_checks $MODULE ; then
-					NEVER_ASK=1 DEPS_ONLY= satisfy_depends      &&
-					NEVER_ASK=1 DEPS_ONLY= FIX= satisfy_depends &&
+  if [[ -z "$NOFIX" ]] ; then
+		for MODULE in $(sort_by_dependency "${BROKEN_MODULES[@]}") ; do
+			if module_installed "$MODULE" && ! module_held "$MODULE" ; then
+				if ! run_checks "$MODULE" ; then
+					NEVER_ASK=1 DEPS_ONLY=satisfy_depends     &&
+					NEVER_ASK=1 DEPS_ONLY=FIX=satisfy_depends &&
 
-					if ! run_checks $MODULE ; then
+					if ! run_checks "$MODULE" ; then
 						verbose_msg "Attempting to recompile \"$MODULE\""
-						if ! FIX= lin --compile $MODULE ; then
+                        if ! FIX=$(lin --compile "$MODULE") ; then
 							verbose_msg "Attempt to recompile \"$MODULE\" FAILED"
 							continue
-						elif ! run_checks $MODULE ; then
+						elif ! run_checks "$MODULE" ; then
 							verbose_msg "Attempt to recompile \"$MODULE\" succeeded but \"$MODULE\" still is broken!"
               KEEP_OBSOLETE=1
 							continue
@@ -162,15 +163,14 @@ run_fix()  {
 
     # Only remove OBSOLETE if `lunar fix` pass all checks
     # not perfect but it will have to do for now
-    if [ ! -n "$KEEP_OBSOLETE" ]; then
-      remove_obsolete_libraries
+    if [ -z "$KEEP_OBSOLETE" ]; then
+      remove_obsolete_libraries "$@"
     fi
-
-		display_update_log fix
+		display_update_log fix "$@"
 	else
-		display_update_log nofix
+		display_update_log nofix "$@"
 	fi
 
-	temp_destroy $TMP_LIN_SUCCESS
-	temp_destroy $TMP_LIN_FAIL
+	temp_destroy "$TMP_LIN_SUCCESS"
+	temp_destroy "$TMP_LIN_FAIL"
 }

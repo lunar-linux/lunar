@@ -31,45 +31,45 @@
 
 save_libraries()  {
   local OLD_VERSION OLD_LOG OLD_LIBS SAVED LINE
-  debug_msg "save_libraries ($@)"
+  debug_msg "save_libraries ($*)"
 
   [ "$MODULE" == "glibc" ] && return 0
 
-  OLD_VERSION=$(installed_version $MODULE)
-  OLD_LOG=$INSTALL_LOGS/$MODULE-$OLD_VERSION
+  OLD_VERSION=$(installed_version "$MODULE")
+  OLD_LOG="$INSTALL_LOGS/$MODULE-$OLD_VERSION"
 
   [ -e "$OLD_LOG" ] || return 0
 
-  OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
-  mkdir -p $OLD_LIBS
+  OLD_LIBS="$SOURCE_DIRECTORY/old.libraries"
+  mkdir -p "$OLD_LIBS"
 
-  SAVED=$OLD_LIBS/$MODULE.saved.libraries
-  rm  -rf  $SAVED
+  SAVED="$OLD_LIBS/$MODULE.saved.libraries"
+  rm  -rf  "$SAVED"
 
-  egrep "/lib(32|64)?/" "$OLD_LOG" |
-  while  read  LINE;  do
-    if [ -f "$LINE"  ]  &&
-         file  -bL  $LINE   |
-         egrep -q "shared object|pie executable"
+  grep -E "/lib(32|64)?/" "$OLD_LOG" |
+  while  read -r  LINE ;  do
+    if [ -f "$LINE" ]  &&
+         file  -bL  "$LINE" |
+         grep -E -q "shared object|pie executable"
     then
       verbose_msg "saving library \"$LINE\""
-      if  [  -h  $LINE  ];  then
-        DEST=$(  basename  $(  ls   -la  "$LINE"  |
-                               cut  -d  '>'  -f2  |
-                               cut  -c  2-
-                            )
-              )
-        ln -sf $DEST $OLD_LIBS/$(basename $LINE)
+      if  [  -h  "$LINE"  ];  then
+        DEST="$( basename "$( ls  -la "${LINE}" |
+                              cut -d  '>'  -f2  |
+                              cut -c  2-
+                            )"
+              )"
+        ln -sf "$DEST" "${OLD_LIBS}"/"$(basename "${LINE}")"
       else
-        cp $LINE $OLD_LIBS
+        cp "$LINE" "$OLD_LIBS"
       fi
-      echo  $OLD_LIBS/$(basename $LINE) >> $SAVED
+      echo "${OLD_LIBS}"/"$(basename "${LINE}")" >> "$SAVED"
     fi
   done
 
-  ldconfig  $OLD_LIBS
+  ldconfig "$OLD_LIBS"
 
-  if  [  -z   "$LD_LIBRARY_PATH"  ]
+  if  [ -z "$LD_LIBRARY_PATH" ]
   then  export  LD_LIBRARY_PATH="$OLD_LIBS"
   else  export  LD_LIBRARY_PATH="$OLD_LIBS:$LD_LIBRARY_PATH"
   fi
@@ -78,8 +78,8 @@ save_libraries()  {
 
 save_obsolete_libraries() {
   local OLD_LIBS LIB
-  debug_msg "save_obsolete_libraries($@)"
-  OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
+  debug_msg "save_obsolete_libraries($*)"
+  OLD_LIBS="$SOURCE_DIRECTORY/old.libraries"
 
   [ ! -d "$OLD_LIBS" ] && return 0
 
@@ -92,53 +92,48 @@ save_obsolete_libraries() {
     mkdir -p "$OBSOLETE_LIB_DIR"
   fi
 
-  if [[ -d "/etc/ld.so.conf.d" && ! -f "$OBSOLETE_LD_CONF" ]]; then
-    echo "/usr/lib/lunar/OBSOLETE" > $OBSOLETE_LD_CONF
-  fi
-
-  for f in $(ls -1 $OLD_LIBS/*.so* 2> /dev/null); do
-    LIB=$(basename $f)
-    if ! parse_iw | grep -q $LIB; then
+  for f in "${OLD_LIBS}"/*.so* ; do
+    LIB=$(basename "$f")
+    if ! parse_iw | grep -q "$LIB"; then
       verbose_msg "saving obsolete library ($LIB)"
-      cp -P $f "$OBSOLETE_LIB_DIR"/
+      cp -P "$f" "$OBSOLETE_LIB_DIR"/
     fi
   done
 
-  ldconfig $OBSOLETE_LIB_DIR
+  ldconfig "$OBSOLETE_LIB_DIR"
 }
 
 
 remove_obsolete_libraries() {
-  debug_msg "remove_obsolete_libraries($@)"
+  debug_msg "remove_obsolete_libraries($*)"
   verbose_msg "Removing OBSOLETE libraries"
   rm -rf "$OBSOLETE_LIB_DIR"
-  rm -f "$OBSOLETE_LD_CONF"
   ldconfig
 }
 
 
 release_saved_libraries()  {
   local OLD_LIBS SAVED FILE
-  debug_msg "release_saved_libraries ($@)"
-  OLD_LIBS=$SOURCE_DIRECTORY/old.libraries
-  SAVED=$OLD_LIBS/$MODULE.saved.libraries
+  debug_msg "release_saved_libraries ($*)"
+  OLD_LIBS="$SOURCE_DIRECTORY/old.libraries"
+  SAVED="$OLD_LIBS/${MODULE}.saved.libraries"
 
-  if [ -f $SAVED ] ; then
-    while read FILE ; do
+  if [ -f "$SAVED" ] ; then
+    while  read -r  FILE ; do
       verbose_msg "releasing library \"$FILE\""
       rm -f "$FILE"
-    done < $SAVED
+    done < "$SAVED"
   fi
 
-  ldconfig $OLD_LIBS
+  ldconfig "$OLD_LIBS"
 }
 
 
 export_ld()  {
-  local DIRECTORY
-  debug_msg "export_ld ($@)"
-  for DIRECTORY in $* ; do
-    if file -b $DIRECTORY/*.so* | grep  -q -E "shared object|pie executable" ; then
+#  debug_msg "export_ld ($@)"
+  debug_msg "export_ld ($*)"
+  for DIRECTORY in "$@" ; do
+    if file -b "$DIRECTORY"/*.so* | grep  -q -E "shared object|pie executable" ; then
       if [ -z "$LD_LIBRARY_PATH" ] ; then
         export LD_LIBRARY_PATH="$DIRECTORY"
       else
@@ -150,18 +145,18 @@ export_ld()  {
 
 
 prepare_install() {
-  debug_msg "prepare_install ($@)"
-  if module_installed $MODULE ; then
+  debug_msg "prepare_install ($*)"
+  if module_installed "$MODULE" ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-    save_libraries
+    save_libraries "$@"
     verbose_msg "calling \"lrm --upgrade $MODULE\""
-    lrm --upgrade $MODULE
+    lrm --upgrade "$MODULE"
     true
   fi
   # turn on tracking now
   invoke_installwatch
-  plugin_call BUILD_INSTALL $MODULE
+  plugin_call BUILD_INSTALL "$MODULE"
   if [ $? == 2 ]; then
     return 0
   fi
@@ -169,23 +164,22 @@ prepare_install() {
 
 
 default_pre_build() {
-  debug_msg "default_pre_build ($@)"
+  debug_msg "default_pre_build ($*)"
   verbose_msg "running \"default_pre_build\""
-  validate_source_dir  $SOURCE_DIRECTORY
-  if [[ -d $SOURCE_DIRECTORY ]] &&
-     [[ $KEEP_SOURCE == "on" ]]; then
-    cd $SOURCE_DIRECTORY &&
-    make clean
-    if [ $? -ne 0 ]; then
+  validate_source_dir  "$SOURCE_DIRECTORY"
+  if [[ -d "$SOURCE_DIRECTORY" ]] &&
+     [[ "$KEEP_SOURCE" == "on" ]] ; then
+    cd "$SOURCE_DIRECTORY" &&
+    if ! make clean ; then
       message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}The source for ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}: could not be made clean for build."
       # Thoughts on forcing a new source directory?
       # More of how should we handle this, currently we will bail out
       # A vast majority of the moonbase will fail,  (w/o: make clean)
     fi
   else
-    mk_source_dir        $SOURCE_DIRECTORY &&
-    unpack               $SOURCE           &&
-    cd                   $SOURCE_DIRECTORY
+    mk_source_dir "$SOURCE_DIRECTORY" &&
+    unpack        "$SOURCE"           &&
+    cd            "$SOURCE_DIRECTORY"
   fi
 }
 
@@ -193,11 +187,11 @@ default_pre_build() {
 # wrapper function to call ./configure
 _configure()
 {
-  debug_msg "_configure($@)"
+  debug_msg "_configure($*)"
   if [ -e ./configure ]; then
-    verbose_msg "./configure $@"
-    ./configure $@
-  elif [ -e Makefile -o -e makefile ]; then
+    verbose_msg "./configure $*"
+    ./configure "$@"
+  elif [ -e Makefile ] || [ -e makefile ] ; then
     verbose_msg "Missing \"configure\": skipping configure stage."
   else
     error_message "${PROBLEM_COLOR}Missing ${FILE_COLOR}configure${PROBLEM_COLOR} and/or ${FILE_COLOR}Makefile${PROBLEM_COLOR}!${DEFAULT_COLOR}"
@@ -214,202 +208,212 @@ _configure()
 # the default and for those that do not want it, specify it in the
 # BUILD.
 cmake_build_target() {
-  debug_msg "cmake_build_target ($@)"
+  debug_msg "cmake_build_target ($*)"
     verbose_msg "running \"Out of source build is required; configuring\""
     OOSB_DIR="$SOURCE_DIRECTORY/$MODULE-oosb"  &&
-    mkdir $OOSB_DIR                            &&
-    cd $OOSB_DIR
+    mkdir "$OOSB_DIR"                          &&
+    cd "$OOSB_DIR"
 }
 
 
 default_config() {
-  debug_msg "default_config ($@)"
+  debug_msg "default_config ($*)"
   verbose_msg "running \"default_config\""
-  _configure  --build=$BUILD                      \
-              --prefix=$MODULE_PREFIX             \
-              --sysconfdir=/etc                   \
-              --localstatedir=/var                \
-              --infodir=$MODULE_PREFIX/share/info \
-              --mandir=$MODULE_PREFIX/share/man   \
-              $OPTS
+  _configure  --build="$BUILD"                      \
+              --prefix="$MODULE_PREFIX"             \
+              --sysconfdir=/etc                     \
+              --localstatedir=/var                  \
+              --infodir="$MODULE_PREFIX/share/info" \
+              --mandir="$MODULE_PREFIX/share/man"   \
+              "$OPTS"
 }
 
 
 default_game_config() {
-  debug_msg "default_game_config ($@)"
+  debug_msg "default_game_config ($*)"
   verbose_msg "running \"default_game_config\""
-  _configure  --build=$BUILD                       \
-              --prefix=$MODULE_PREFIX              \
-              --bindir=$MODULE_PREFIX/games        \
-              --datadir=$MODULE_PREFIX/share/games \
-              --sysconfdir=/etc                    \
-              --localstatedir=/var/games           \
-              --infodir=$MODULE_PREFIX/share/info  \
-              --mandir=$MODULE_PREFIX/share/man    \
-              $OPTS
+  _configure  --build="$BUILD"                       \
+              --prefix="$MODULE_PREFIX"              \
+              --bindir="$MODULE_PREFIX/games"        \
+              --datadir="$MODULE_PREFIX/share/games" \
+              --sysconfdir=/etc                      \
+              --localstatedir=/var/games             \
+              --infodir="$MODULE_PREFIX/share/info"  \
+              --mandir="$MODULE_PREFIX/share/man"    \
+              "$OPTS"
 }
 
 
 default_cvs_config() {
-  debug_msg "default_cvs_config ($@)"
+  debug_msg "default_cvs_config ($*)"
   verbose_msg "running \"default_cvs_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
-  ./autogen.sh  --build=$BUILD                      \
-                --prefix=$MODULE_PREFIX             \
-                --sysconfdir=/etc                   \
-                --localstatedir=/var                \
-                --infodir=$MODULE_PREFIX/share/info \
-                --mandir=$MODULE_PREFIX/share/man   \
-                $OPTS
+  ./autogen.sh  --build="$BUILD"                      \
+                --prefix="$MODULE_PREFIX"             \
+                --sysconfdir=/etc                     \
+                --localstatedir=/var                  \
+                --infodir="$MODULE_PREFIX/share/info" \
+                --mandir="$MODULE_PREFIX/share/man"   \
+                "$OPTS"
 }
 
 
 default_cmake_config() {
-  debug_msg "default_cmake_config ($@)"
+  debug_msg "default_cmake_config ($*)"
   verbose_msg "running \"default_cmake_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
-  cmake_build_target
+  cmake_build_target "$@"
 
-  cmake -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
-        -DCMAKE_BUILD_TYPE=RELEASE             \
-        -DSYSCONF_INSTALL_DIR:PATH=/etc        \
-        -DBUILD_TESTING=0                      \
-        -Wno-dev                               \
-        $OPTS $SOURCE_DIRECTORY
+  cmake -DCMAKE_INSTALL_PREFIX="$MODULE_PREFIX"  \
+        -DCMAKE_BUILD_TYPE=RELEASE               \
+        -DSYSCONF_INSTALL_DIR:PATH=/etc          \
+        -DBUILD_TESTING=0                        \
+        -Wno-dev                                 \
+        "$OPTS" "$SOURCE_DIRECTORY"
 }
 
+
 default_meson_config() {
-  debug_msg "default_meson_config ($@)"
+  debug_msg "default_meson_config ($*)"
   verbose_msg "running \"default_meson_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
   MESON_BUILD_TYPE=${MESON_BUILD_TYPE:-release}
   verbose_msg "MESON_BUILD_TYPE=\"$MESON_BUILD_TYPE\""
-  meson --prefix $MODULE_PREFIX \
-        --buildtype $MESON_BUILD_TYPE \
+  meson --prefix "$MODULE_PREFIX" \
+        --buildtype "$MESON_BUILD_TYPE" \
         --default-library shared \
         --libdir lib \
-        $OPTS \
+        "$OPTS" \
         . build/
 }
 
+
 default_install() {
-    prepare_install &&
+    prepare_install "$@" &&
     make install
 }
 
+
 default_make() {
-  debug_msg "default_make ($@)"
+  debug_msg "default_make ($*)"
   verbose_msg "running \"default_make\""
-  make ${MAKES:+-j${MAKES}}          &&
-  default_install
+  make ${MAKES:+-j${MAKES}} &&
+  default_install "$@"
 }
 
 
 default_game_build() {
-  debug_msg "default_game_build ($@)"
+  debug_msg "default_game_build ($*)"
   verbose_msg "running \"default_game_build\""
-  default_game_config  &&
-  default_make
+  default_game_config "$@" &&
+  default_make "$@"
 }
 
 
 default_cmake_build() {
-  debug_msg "default_cmake_build ($@)"
+  debug_msg "default_cmake_build ($*)"
   verbose_msg "running \"default_cmake_build\""
-  default_cmake_config &&
-  default_make
+  default_cmake_config "$@" &&
+  default_make "$@"
 }
 
+
 default_meson_build() {
-  debug_msg "default_meson_build ($@)"
+  debug_msg "default_meson_build ($*)"
   verbose_msg "running \"default_meson_build\""
-  default_meson_config &&
+  default_meson_config "$@" &&
   ninja -C build/ &&
-  prepare_install &&
+  prepare_install "$@" &&
   ninja -C build/ install
 }
 
+
 default_perl_build() {
-    debug_msg "default_perl_build ($@)"
+    debug_msg "default_perl_build ($*)"
     verbose_msg "running \"default_perl_build\""
     perl Makefile.PL &&
-    default_make
+    default_make "$@"
 }
 
+
 default_python2_build() {
-    debug_msg "default_python2_build ($@)"
+    debug_msg "default_python2_build ($*)"
     verbose_msg "running \"default_python2_build\""
 
-    local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest2
+    local _PYDESTDIR="$SOURCE_DIRECTORY"/__pythondest2
     mkdir -p "$_PYDESTDIR"
 
     python2 setup.py build &&
-    python2 setup.py install --root="$_PYDESTDIR" $OPTS
-    prepare_install &&
+    python2 setup.py install --root="$_PYDESTDIR" "$OPTS"
+    prepare_install "$@" &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
 }
 
+
 default_python3_build() {
-    debug_msg "default_python3_build ($@)"
+    debug_msg "default_python3_build ($*)"
     verbose_msg "running \"default_python3_build\""
 
-    local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest3
+    local _PYDESTDIR="$SOURCE_DIRECTORY"/__pythondest3
     mkdir -p "$_PYDESTDIR"
 
     python3 setup.py build &&
-    python3 setup.py install --root="$_PYDESTDIR" $OPTS
-    prepare_install &&
+    python3 setup.py install --root="$_PYDESTDIR" "$OPTS"
+    prepare_install "$@" &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
 }
 
+
 default_gnu_build() {
-  debug_msg "default_gnu_build ($@)"
+  debug_msg "default_gnu_build ($*)"
   verbose_msg "running \"default_gnu_build\""
-  default_config  &&
-  default_make
+  default_config "$@" &&
+  default_make "$@"
 }
 
+
 default_build() {
-  debug_msg "default_build ($@)"
+  debug_msg "default_build ($*)"
   verbose_msg "running \"default_build\""
 
     case "$TYPE" in
-        python2) default_python2_build ;;
-        python3) default_python3_build ;;
-        cpan)    default_cpan_build    ;;
-        perl)    default_perl_build    ;;
-        game)    default_game_build    ;;
-        cmake)   default_cmake_build   ;;
-        meson)   default_meson_build   ;;
-        *)       default_gnu_build     ;;
+        python2) default_python2_build "$@" ;;
+        python3) default_python3_build "$@" ;;
+        cpan)    default_cpan_build    "$@" ;;
+        perl)    default_perl_build    "$@" ;;
+        game)    default_game_build    "$@" ;;
+        cmake)   default_cmake_build   "$@" ;;
+        meson)   default_meson_build   "$@" ;;
+        *)       default_gnu_build     "$@" ;;
     esac
 }
 
+
 default_cvs_build() {
-  debug_msg "default_cvs_build ($@)"
-  default_cvs_config  &&
-  default_make
+  debug_msg "default_cvs_build ($*)"
+  default_cvs_config "$@" &&
+  default_make "$@"
 }
 
 
 default_cpan_pre_build() {
   local CPAN_MODULE CPAN_SOURCE_BRANCH
-  debug_msg "default_cpan_pre_build ($@)"
-  mk_source_dir $SOURCE_DIRECTORY
-  cd $SOURCE_DIRECTORY
+  debug_msg "default_cpan_pre_build ($*)"
+  mk_source_dir "$SOURCE_DIRECTORY"
+  cd "$SOURCE_DIRECTORY"
   CPAN_MODULE=${SOURCE_URL/cpan:\/\//}
-  CPAN_SOURCE_BRANCH=$(dirname $CPAN_MODULE)
-  mkdir -p authors/id/${CPAN_SOURCE_BRANCH}
-  install -m 444 $SOURCE_CACHE/$SOURCE authors/id/${CPAN_SOURCE_BRANCH}
+  CPAN_SOURCE_BRANCH=$(dirname "$CPAN_MODULE")
+  mkdir -p authors/id/"${CPAN_SOURCE_BRANCH}"
+  install -m 444 "$SOURCE_CACHE/$SOURCE" authors/id/"${CPAN_SOURCE_BRANCH}"
 }
 
 
 default_cpan_build() {
   local CPAN_MODULE
-  debug_msg "default_cpan_build ($@)"
-  prepare_install
+  debug_msg "default_cpan_build ($*)"
+  prepare_install "$@"
   verbose_msg "running \"default_cpan_build\""
   if [ ! -x /usr/bin/cpan ] ; then
     return 1
@@ -421,79 +425,80 @@ default_cpan_build() {
         o conf keep_source_where $SOURCE_DIRECTORY
         install $CPAN_MODULE
         quit" | /usr/bin/cpan || exit 1
-  rm_source_dir $SOURCE_DIRECTORY
+  rm_source_dir "$SOURCE_DIRECTORY"
 }
 
 
 default_post_build() {
-  debug_msg "default_post_build ($@)"
+  debug_msg "default_post_build ($*)"
 
-  if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] &&
+  if [ "$(wc -l "${INSTALLWATCHFILE}" | awk '{print$1}')" == "0" ] &&
       [ "$PROFILE" != "yes" ] ; then
     message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
   fi
 
-  update_plugin $MODULE install
+  update_plugin "$MODULE" install
 
-  plugin_call BUILD_POST_BUILD $MODULE
+  plugin_call BUILD_POST_BUILD "$MODULE"
   if [ $? != 2 ]; then
     message "${PROBLEM_COLOR}ERROR: problems running POST_BUILD plugins!${PROBLEM_COLOR}"
     return 1
   fi
 
   ldconfig
-  save_obsolete_libraries
-  release_saved_libraries
+  save_obsolete_libraries "$@"
+  release_saved_libraries "$@"
   cd /
 }
 
 
 prepare_module_config()  {
-  debug_msg "prepare_module_config ($@)"
+  debug_msg "prepare_module_config ($*)"
   if [ ! -e "$MODULE_CONFIG" ] ; then
-    > $MODULE_CONFIG
+    # empty the file
+    > "$MODULE_CONFIG"
   fi
 }
 
 
 # run the CONFIGURE script
 run_configure() {
-  debug_msg "run_configure ($@)"
+  debug_msg "run_configure ($*)"
   if [ -n "$RECONFIGURE" ];  then
     verbose_msg "Reconfiguring \"$MODULE\""
-    rm -f $DEPENDS_CONFIG/$MODULE
-    remove_depends $MODULE
+    rm -f "$DEPENDS_CONFIG/$MODULE"
+    remove_depends "$MODULE"
   fi
 
-  prepare_module_config
-  grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
+  prepare_module_config "$@"
+  grep -q "^""$MODULE""\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
 
   # add custom passed OPTS before retrieving them
   if [ -n "$PASS_OPTS" ] ; then
     SAVE_OPTS="$(get_module_config OPTS) $PASS_OPTS"
     set_module_config OPTS "$SAVE_OPTS"
   fi
-  plugin_call BUILD_CONFIGURE $MODULE
-  if has_module_file $MODULE CONFIGURE ; then
-    run_module_file $MODULE CONFIGURE
+  plugin_call BUILD_CONFIGURE "$MODULE"
+  if has_module_file "$MODULE" CONFIGURE ; then
+    run_module_file "$MODULE" CONFIGURE
   fi
   # store $OPTS for later use
-  echo "$MODULE:$OPTS" >> $TEMP_CONFIGOPTS
+  echo "$MODULE:$OPTS" >> "$TEMP_CONFIGOPTS"
 }
 
 
 run_pre_build() {
-  debug_msg "run_pre_build ($@)"
+  debug_msg "run_pre_build ($*)"
   message "${MESSAGE_COLOR}Building ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} version ${MODULE_COLOR}$VERSION${DEFAULT_COLOR}"
 
-  cd $BUILD_DIRECTORY
+  cd "$BUILD_DIRECTORY"
 
-  if verify_all_sources $MODULE ; then
-    plugin_call BUILD_PRE_BUILD $MODULE
-    if has_module_file $MODULE PRE_BUILD ; then
-      run_module_file $MODULE PRE_BUILD
+  if verify_all_sources "$MODULE" ; then
+    plugin_call BUILD_PRE_BUILD "$MODULE"
+    if has_module_file "$MODULE PRE_BUILD" ; then
+      run_module_file "$MODULE PRE_BUILD"
     else
-      if ! default_pre_build ; then
+      if ! default_pre_build "$@" ; then
         return 1
       fi
     fi
@@ -504,46 +509,46 @@ run_pre_build() {
 
 
 run_build()  {
-  debug_msg "run_build ($@)"
+  debug_msg "run_build ($*)"
   if [[ -d "$SOURCE_DIRECTORY" ]] ; then
-    cd $SOURCE_DIRECTORY
+    cd "$SOURCE_DIRECTORY"
   fi
 
-  verbose_msg "building \"$MODULE\" version \"$VERSION\" in `pwd`"
+  verbose_msg "building \"$MODULE\" version \"$VERSION\" in $(pwd)"
 
   # this calls optimizations and others:
-  plugin_call BUILD_BUILD $MODULE
+  plugin_call BUILD_BUILD "$MODULE"
   # now override compile wrappers if needed:
   if [[ "${USE_WRAPPERS:-yes}" == "yes" ]]; then
-    export PATH=/var/lib/lunar/compilers:$PATH
+    export PATH=/var/lib/lunar/compilers:"$PATH"
   fi
   (
     # fix errors, don't avoid them. This makes all errors fatal
     shopt -s execfail
-    if has_module_file $MODULE BUILD ; then
-      run_module_file $MODULE BUILD
+    if has_module_file "$MODULE BUILD" ; then
+      run_module_file "$MODULE BUILD"
     else
-      default_build
+      default_build "$@"
     fi
-  ) > $C_FIFO 2>&1
+  ) > "$C_FIFO" 2>&1
 }
 
 
 run_post_build() {
-  debug_msg "run_post_build ($@)"
-  if has_module_file $MODULE POST_BUILD ; then
-    run_module_file $MODULE POST_BUILD
+  debug_msg "run_post_build ($*)"
+  if has_module_file "$MODULE" POST_BUILD ; then
+    run_module_file "$MODULE" POST_BUILD
   fi
-  default_post_build
+  default_post_build "$@"
 }
 
 
 run_post_install() {
-  debug_msg "run_post_install ($@)"
-  if has_module_file $MODULE POST_INSTALL ; then
-    run_module_file $MODULE POST_INSTALL
+  debug_msg "run_post_install ($*)"
+  if has_module_file "$MODULE" POST_INSTALL ; then
+    run_module_file "$MODULE" POST_INSTALL
   fi
-  plugin_call BUILD_POST_INSTALL $MODULE
+  plugin_call BUILD_POST_INSTALL "$MODULE"
   if [ $? == 2 ]; then
     return 0
   fi

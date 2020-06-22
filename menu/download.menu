@@ -1,3 +1,4 @@
+#! /bin/bash
 ############################################################
 #                                                          #
 # This code is written for Lunar Linux, see                #
@@ -20,58 +21,55 @@
 
 
 inputbox()  {
-
   $DIALOG  --nocancel                     \
            --inputbox                     \
            "$1"  0 0  "$2"
 }
 
 configure_proxy() {
-
-   HTTP_PROMPT="Please enter the HTTP proxy server. \
+    HTTP_PROMPT="Please enter the HTTP proxy server. \
 Example: http://192.168.1.1:8080/"
 
     FTP_PROMPT="Please enter the FTP proxy server. \
 Example: http://192.168.1.1:8080/"
 
-     NO_PROMPT="Please enter all domains/ip addresses \
+    NO_PROMPT="Please enter all domains/ip addresses \
 (comma-separated) proxy should NOT be used for: \
 Example: .mit.edu,mysite.com"
 
-    HPROXY=`inputbox "$HTTP_PROMPT" "$http_proxy"` &&
-    
+    HPROXY=$(inputbox "$HTTP_PROMPT" "$http_proxy") &&
+
     [ "$ftp_proxy" == "" ] && ftp_proxy="$HPROXY"
 
-    FPROXY=`inputbox "$FTP_PROMPT" "$ftp_proxy"`   &&
-    NPROXY=`inputbox "$NO_PROMPT"  "$no_proxy"`
-    
+    FPROXY=$(inputbox "$FTP_PROMPT" "$ftp_proxy")   &&
+    NPROXY=$(inputbox "$NO_PROMPT"  "$no_proxy")
+
 }
 
 confirm_proxy_settings() {
+    confirm() {
+        $DIALOG "$2" --nocancel --yesno  "$1"  8 50
+    }
 
-  confirm()  {
-    $DIALOG  $2  --nocancel  --yesno  "$1"  8 50
-  }
+    FINISHED=NO
 
-  FINISHED=NO
+    while [ "$FINISHED" != "YES" ] ; do
+        PROMPT="Are these settings correct?"
+        PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
+        PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
+        PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
 
-  while [ "$FINISHED" != "YES" ] ; do
-    PROMPT="Are these settings correct?"
-    PROMPT="$PROMPT\nHTTP Proxy:  $HPROXY"
-    PROMPT="$PROMPT\n FTP Proxy:  $FPROXY"
-    PROMPT="$PROMPT\n  No Proxy:  $NPROXY"
+        if confirm "$PROMPT" "--cr-wrap" ; then
+            FINISHED=YES
+        else
+            configure_proxy
+            FINISHED=NO
+        fi
+    done
 
-    if confirm "$PROMPT" "--cr-wrap" ; then
-       FINISHED=YES
-    else
-       configure_proxy
-       FINISHED=NO
-    fi
-  done
-
-  set_local_config "http_proxy" "$HPROXY" 
-  set_local_config "ftp_proxy" "$FPROXY"
-  set_local_config "no_proxy" "$NPROXY"
+    set_local_config "http_proxy" "$HPROXY"
+    set_local_config "ftp_proxy" "$FPROXY"
+    set_local_config "no_proxy" "$NPROXY"
 }
 
 proxy_exit_message() {
@@ -79,255 +77,245 @@ proxy_exit_message() {
     $DIALOG  --cr-wrap                                 \
              --title  "Lunar Proxy Settings Complete"  \
              --msgbox                                  \
-"Your proxy configuration has been saved.
+             "Your proxy configuration has been saved.
 
-Please note that these proxy settings will only be used by 
+Please note that these proxy settings will only be used by
 Lunar (wget) and possibly some other command-line utilities.
 
-You will still have to configure proxy settings in your 
+You will still have to configure proxy settings in your
 favorite web browser, etc..." 12 65
-
 }
 
-proxy_menu()
-{
-   configure_proxy
-   confirm_proxy_settings
-   proxy_exit_message
+proxy_menu() {
+    configure_proxy
+    confirm_proxy_settings
+    proxy_exit_message
 }
 
 download_options() {
+    set_download_rate() {
+        PROMPT="Please enter the maximum bytes per second for lgeting. \
+    Example: enter 8000 for downloading no faster then \
+    8 kBps, 80k for 80 kBps, or 1m for 1mBps"
 
-set_download_rate()  {
-  PROMPT="Please enter the maximum bytes per second for lgeting. \
-Example: enter 8000 for downloading no faster then \
-8 kBps, 80k for 80 kBps, or 1m for 1mBps"
+        if  DOWNLOAD_RATE=$($DIALOG  --title "Download Rate" \
+                                     --ok-label  "Commit"    \
+                                     --inputbox              \
+                                     "$PROMPT"               \
+                                     0 0  "$DOWNLOAD_RATE")
+      then
+          set_local_config "DOWNLOAD_RATE" "$DOWNLOAD_RATE"
+      fi
+    }
 
-  if  DOWNLOAD_RATE=`$DIALOG  --title "Download Rate" \
-                              --ok-label  "Commit"    \
-                              --inputbox              \
-                              "$PROMPT"               \
-                               0 0  "$DOWNLOAD_RATE"`
-  then
-    set_local_config "DOWNLOAD_RATE" "$DOWNLOAD_RATE"
-  fi
-}
+    set_repository_threshold() {
+        PROMPT="Please enter the minimum time between repository updates in minutes, \
+    enter 0 for no threshold. Default threshold is 10 minutes"
 
-set_repository_threshold()  {
-  PROMPT="Please enter the minimum time between repository updates in minutes, \
-enter 0 for no threshold. Default threshold is 10 minutes"
+        if  REPOSITORY_THRESHOLD=$($DIALOG  --title "Repository threshold" \
+                                            --ok-label  "Commit"           \
+                                            --inputbox                     \
+                                            "$PROMPT"                      \
+                                             0 0  "$REPOSITORY_THRESHOLD")
+        then
+            set_local_config "REPOSITORY_THRESHOLD" "$REPOSITORY_THRESHOLD"
+        fi
+    }
 
-  if  REPOSITORY_THRESHOLD=`$DIALOG  --title "Repository threshold" \
-                              --ok-label  "Commit"    \
-                              --inputbox              \
-                              "$PROMPT"               \
-                               0 0  "$REPOSITORY_THRESHOLD"`
-  then
-    set_local_config "REPOSITORY_THRESHOLD" "$REPOSITORY_THRESHOLD"
-  fi
-}
+    set_ftp_active() {
+        PROMPT="Please select the connection type for ftp downloads.
 
+    Passive ftp is the safe and default option. However, if you
+    are behind a weird firewall, or if you are experiencing
+    download problems, select active ftp option.
 
+    This option can also be set per module basis. Add
+    FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
 
-set_ftp_active(){
+        FTP_ACTIVE=${FTP_ACTIVE:-off}
+        FTP_PASSIVE=${FTP_PASSIVE:-on}
 
-   PROMPT="Please select the connection type for ftp downloads.
+        [ "$FTP_ACTIVE" == "on" ] &&
+            FTP_PASSIVE=off ||
+            FTP_PASSIVE=on
 
-Passive ftp is the safe and default option. However, if you
-are behind a weird firewall, or if you are experiencing
-download problems, select active ftp option.
+        FTP_CONNECTION=$("$DIALOG" --title "Ftp Connection"           \
+                                   --ok-label  "Commit"               \
+                                   --radiolist                        \
+                                   "$PROMPT"                          \
+                                   0 0 0                              \
+                       "Passive" "normal behaviour"   "$FTP_PASSIVE"  \
+                       "Active"  "behind a firewall"  "$FTP_ACTIVE")
 
-This option can also be set per module basis. Add
-FTP_ACTIVE=on in DETAILS file :=) or vice-versa."
+        case $FTP_CONNECTION in
+            Active)  FTP_ACTIVE=on ;;
+            Passive) FTP_ACTIVE=off ;;
+        esac
 
-   FTP_ACTIVE=${FTP_ACTIVE:-off}
-   FTP_PASSIVE=${FTP_PASSIVE:-on}
+        set_local_config "FTP_ACTIVE" "$FTP_ACTIVE"
+    }
 
-   [ "$FTP_ACTIVE" == "on" ] && 
-   FTP_PASSIVE=off || 
-   FTP_PASSIVE=on
+    set_ipv46() {
+        local USE_IPV4 USE_IPV6 USE_IPVANY
 
-   FTP_CONNECTION=`$DIALOG  --title "Ftp Connection" \
-                            --ok-label  "Commit"     \
-                            --radiolist              \
-                            "$PROMPT"                \
-                             0 0 0                   \
-                  "Passive" "normal behaviour"   $FTP_PASSIVE  \
-                  "Active"  "behind a firewall"  $FTP_ACTIVE`
+        PROMPT="Please select the internet protocol version
+    to use when downloading modules."
+        USE_IPV4=off
+        USE_IPV6=off
+        USE_IPVANY=off
 
-   case $FTP_CONNECTION in
-      Active)  FTP_ACTIVE=on
-               ;;
+        if [ "$USE_IPV46" == "4" ]; then
+            USE_IPV4=on
+        elif [ "$USE_IPV46" == "6" ]; then
+            USE_IPV6=on
+        else
+            USE_IPVANY=on
+        fi
 
-      Passive)  FTP_ACTIVE=off
-               ;;
-   esac
-   
-   set_local_config "FTP_ACTIVE" "$FTP_ACTIVE"
-}
+        USE_IPV46=$($DIALOG  --title "Internet protocol version"                \
+                             --ok-label  "Commit"                               \
+                             --radiolist                                        \
+                             "$PROMPT"                                          \
+                             0 0 0                                              \
+                             "Any" "Use system default" $USE_IPVANY             \
+                             "4" "Internet protocol version 4 (ipv4)" $USE_IPV4 \
+                             "6" "Internet protocol version 6 (ipv6)"  $USE_IPV6)
+        if [ "$USE_IPV46" = "Any" ]; then
+            unset_local_config "USE_IPV46"
+        else
+            set_local_config "USE_IPV46" "$USE_IPV46"
+        fi
+    }
 
-set_ipv46() {
-  local USE_IPV4 USE_IPV6 USE_IPVANY
+    set_partial_downloads() {
+        PROMPT="Please enable/disable the partial download option.
 
-  PROMPT="Please select the internet protocol version
-to use when downloading modules."
-  USE_IPV4=off
-  USE_IPV6=off
-  USE_IPVANY=off
+    This is the -c option of wget. Enable is default
+    and works fine on almost all cases.
 
-  if [ "$USE_IPV46" == "4" ]; then
-    USE_IPV4=on
-  elif [ "$USE_IPV46" == "6" ]; then
-    USE_IPV6=on
-  else
-    USE_IPVANY=on
-  fi
+    This option can also be set per module basis. Add
+    CONTINUE=off in DETAILS file :=) or vice-versa."
 
-  USE_IPV46=$($DIALOG  --title "Internet protocol version" \
-                    --ok-label  "Commit"     \
-                    --radiolist              \
-                    "$PROMPT"                \
-                    0 0 0                   \
-                    "Any" "Use system default" $USE_IPVANY \
-                    "4" "Internet protocol version 4 (ipv4)" $USE_IPV4  \
-                    "6" "Internet protocol version 6 (ipv6)"  $USE_IPV6)
-  if [ "$USE_IPV46" = "Any" ]; then
-    unset_local_config "USE_IPV46"
-  else
-    set_local_config "USE_IPV46" "$USE_IPV46"
-  fi
-}
+        CONTINUE="${CONTINUE:-on}"
 
-set_partial_downloads(){
+        PARTIAL=$("$DIALOG" --title "Partial Downloads" \
+                            --ok-label  "Commit"        \
+                            --checklist                 \
+                            "$PROMPT"                   \
+                            0 0 0                       \
+                            "Enable" "partial downloads" "$CONTINUE")
 
-   PROMPT="Please enable/disable the partial download option.
+        #lets get rid of " and spaces in the variable
+        PARTIAL="${PARTIAL//\"/}"
+        PARTIAL="${PARTIAL// /}"
 
-This is the -c option of wget. Enable is default
-and works fine on almost all cases.
+        if [ "$PARTIAL" == "Enable" ] ; then
+            set_local_config "CONTINUE" "on"
+        else
+            set_local_config "CONTINUE" "off"
+        fi
+    }
 
-This option can also be set per module basis. Add
-CONTINUE=off in DETAILS file :=) or vice-versa."
+    set_cache_usage() {
+        PROMPT="Please enable/disable the cache usage.
 
-   CONTINUE=${CONTINUE:-on}
+    This options controls the use of cache for http downloads.
+    Default is ON. If this option is set to off, wget will send
+    a Pragma: no-cache directive to http server.
 
-   PARTIAL=`$DIALOG  --title "Partial Downloads" \
-                            --ok-label  "Commit" \
-                            --checklist          \
-                            "$PROMPT"            \
-                             0 0 0               \
-                  "Enable" "partial downloads" $CONTINUE`
+    This option can also be set per module basis. Add
+    USE_CACHE=off in DETAILS file :=) or vice-versa."
 
-   #lets get rid of " and spaces in the variable
-   PARTIAL=`echo $PARTIAL | sed s/\"//g | tr -d " "`
+        USE_CACHE=${USE_CACHE:-on}
 
-   if [ "$PARTIAL" == "Enable" ] ; then
-     set_local_config "CONTINUE" "on"
-   else
-     set_local_config "CONTINUE" "off"
-   fi
-}
+        CACHE=$("$DIALOG" --title "Cache Usage" \
+                          --ok-label  "Commit"  \
+                          --checklist           \
+                          "$PROMPT"             \
+                          0 0 0                 \
+                          "Enable" "http cache usage" "$USE_CACHE")
 
+        # let's get rid of " and spaces in the variable
+        CACHE="${CACHE//\"/}"
+        CACHE="${CACHE// /}"
 
-set_cache_usage(){
+        if [ "$CACHE" == "Enable" ] ; then
+            set_local_config "USE_CACHE" "on"
+        else
+            set_local_config "USE_CACHE" "off"
+        fi
+    }
 
-   PROMPT="Please enable/disable the cache usage.
+    set_retries() {
+        PROMPT="Please enter the maximum number of retries.
 
-This options controls the use of cache for http downloads.
-Default is ON. If this option is set to off, wget will send
-a Pragma: no-cache directive to http server.
+    Example: enter 3 for retrying the download three times.
+    The default value (if unset) is 5. Enter 0 for infinite
+    number of retries.
 
-This option can also be set per module basis. Add
-USE_CACHE=off in DETAILS file :=) or vice-versa."
+    This option can also be set per module basis. Add
+    NUM_RETRY=<n> in DETAILS file :=)"
 
-   USE_CACHE=${USE_CACHE:-on}
+        NUM_RETRY=${NUM_RETRY:-5}
 
-   CACHE=`$DIALOG  --title "Cache Usage" \
-                            --ok-label  "Commit" \
-                            --checklist          \
-                            "$PROMPT"            \
-                             0 0 0               \
-                  "Enable" "http cache usage" $USE_CACHE`
+        if  NUM_RETRY=$($DIALOG  --title "Number of Retries" \
+                                 --ok-label  "Commit"        \
+                                 --inputbox                  \
+                                 "$PROMPT"                   \
+                                  0 0  "$NUM_RETRY")
+        then
+            set_local_config "NUM_RETRY" "$NUM_RETRY"
+        fi
+    }
 
-   #lets get rid of " and spaces in the variable
-   CACHE=`echo $CACHE | sed s/\"//g | tr -d " "`
+    set_exhaustive() {
+        PROMPT="If you want, lget may try downloading the file from all
+    available mirrors, instead of the one you select from the mirror
+    menu. All mirrors will be tried until the file is found.
 
-   if [ "$CACHE" == "Enable" ] ; then
-     set_local_config "USE_CACHE" "on"
-   else
-     set_local_config "USE_CACHE" "off"
-   fi
-}
+    This is not recommended for normal downloads, broken downloads
+    should be reported to maintainer@lunar-linux.org.
+    "
 
-set_retries()  {
-  PROMPT="Please enter the maximum number of retries. 
+        EXHAUSTIVE=${EXHAUSTIVE:-off}
 
-Example: enter 3 for retrying the download three times.
-The default value (if unset) is 5. Enter 0 for infinite
-number of retries.
+        EXHAUSTIVE=$($DIALOG  --title "Exhaustive mirror testing: " \
+                              --ok-label  "Commit" \
+                              --checklist          \
+                              "$PROMPT"            \
+                               0 0 0               \
+                              "Enable" "exhaustive mirror testing" "$EXHAUSTIVE")
 
-This option can also be set per module basis. Add
-NUM_RETRY=<n> in DETAILS file :=)"
-
-  NUM_RETRY=${NUM_RETRY:-5}
-
-  if  NUM_RETRY=`$DIALOG  --title "Number of Retries" \
-                          --ok-label  "Commit"        \
-                           --inputbox               \
-                           "$PROMPT"                \
-                            0 0  "$NUM_RETRY"`
-  then
-    set_local_config "NUM_RETRY" "$NUM_RETRY"
-  fi
-}
-
-set_exhaustive() {
-  PROMPT="If you want, lget may try downloading the file from all
-available mirrors, instead of the one you select from the mirror
-menu. All mirrors will be tried until the file is found.
-
-This is not recommended for normal downloads, broken downloads
-should be reported to maintainer@lunar-linux.org.
-"
-
-  EXHAUSTIVE=${EXHAUSTIVE:-off}
-
-  EXHAUSTIVE=`$DIALOG  --title "Exhaustive mirror testing: " \
-             --ok-label  "Commit" \
-             --checklist          \
-             "$PROMPT"            \
-              0 0 0               \
-             "Enable" "exhaustive mirror testing" $EXHAUSTIVE`
-
-  EXHAUSTIVE=`echo $EXHAUSTIVE | sed s/\"//g | tr -d " "`
-
-  if [ "$EXHAUSTIVE" == "Enable" ] ; then
-    set_local_config "EXHAUSTIVE" "on"
-  else
-    set_local_config "EXHAUSTIVE" "off"
-  fi
-
-}
+        # Get rid of " and spaces from the result
+        EXHAUSTIVE="${EXHAUSTIVE//\"/}"
+        EXHAUSTIVE="${EXHAUSTIVE// /}"
 
 
+        if [ "$EXHAUSTIVE" == "Enable" ] ; then
+            set_local_config "EXHAUSTIVE" "on"
+        else
+            set_local_config "EXHAUSTIVE" "off"
+        fi
+    }
 
-while
-    A_HELP="Active or passive connections while using ftp"
-    C_HELP="Continue to get or re-get the partial downloads"
-    N_HELP="How many times will wget try to download the file?"
-    H_HELP="Cache usage for http downloads"
-    I_HELP="Internet protocol version to use when downloading a file"
-    R_HELP="Per process download rate"
-    P_HELP="Proxy Settings"
-    E_HELP="Test all mirrors available on download"
-    T_HELP="Repository update threshold time"
+    while
+        A_HELP="Active or passive connections while using ftp"
+        C_HELP="Continue to get or re-get the partial downloads"
+        N_HELP="How many times will wget try to download the file?"
+        H_HELP="Cache usage for http downloads"
+        I_HELP="Internet protocol version to use when downloading a file"
+        R_HELP="Per process download rate"
+        P_HELP="Proxy Settings"
+        E_HELP="Test all mirrors available on download"
+        T_HELP="Repository update threshold time"
 
-    COMMAND=`$DIALOG  --title "Download Options"               \
-                      --item-help                              \
-                      --ok-label      "Select"                 \
-                      --cancel-label  "Exit"                   \
-                      --menu                                   \
-                      ""                                       \
-                      0 40 8                                   \
+        COMMAND=$($DIALOG  --title "Download Options"               \
+                           --item-help                              \
+                           --ok-label      "Select"                 \
+                           --cancel-label  "Exit"                   \
+                           --menu                                   \
+                           ""                                       \
+                           0 40 8                                   \
                       "A"  "Ftp Active/Passive"          "$A_HELP"  \
                       "C"  "Partial Downloads"           "$C_HELP"  \
                       "H"  "Cache Usage"                 "$H_HELP"  \
@@ -335,21 +323,20 @@ while
                       "N"  "Number of Retries"           "$N_HELP"  \
                       "P"  "Proxies"                     "$P_HELP"  \
                       "R"  "Download Rate"               "$R_HELP"  \
-		      "E"  "Exhaustive mirrors"          "$E_HELP"  \
-		      "T"  "Repository update threshold" "$T_HELP"`
+                      "E"  "Exhaustive mirrors"          "$E_HELP"  \
+                      "T"  "Repository update threshold" "$T_HELP")
 
-  do
-    case  $COMMAND in
-      A)  set_ftp_active           ;;
-      C)  set_partial_downloads    ;;
-      H)  set_cache_usage          ;;
-      I)  set_ipv46                ;;
-      N)  set_retries              ;;
-      P)  proxy_menu               ;;
-      R)  set_download_rate        ;;
-      E)  set_exhaustive           ;;
-      T)  set_repository_threshold ;;
-    esac
-  done
+    do
+        case  $COMMAND in
+            A)  set_ftp_active           ;;
+            C)  set_partial_downloads    ;;
+            H)  set_cahe_usage           ;;
+            I)  set_ipv46                ;;
+            N)  set_retries              ;;
+            P)  proxy_menu               ;;
+            R)  set_download_rate        ;;
+            E)  set_exhaustive           ;;
+            T)  set_repository_threshold ;;
+        esac
+    done
 }
-
