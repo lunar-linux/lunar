@@ -28,28 +28,27 @@ find_module_size() {
       unset SIZE
       [ -e "$MODULE_STATUS" ] &&
       SIZE=$(sed -n "s/^$1:.*://p" "$MODULE_STATUS")
-      [ -n "$SIZE" ] && echo ${SIZE} || false
+      [ [ -n "$SIZE" ] && echo "${SIZE}" ] || false
    }
 
    [ -z "$1" ] && return
 
-   [ -n "$2" ] && VERSION=$2 || VERSION=`installed_version $1`
+   [ -n "$2" ] && VERSION="$2" || VERSION=$(installed_version "$1")
    [ -z "$VERSION" ] &&
    message  "${PROBLEM_COLOR}$1 is not installed${DEFAULT_COLOR}" &&
    return
 
    # yes, there is a size entry
-   module_size $1 $VERSION && return
+   module_size "$1" "$VERSION" && return
 
    # no :( lets dig through logs
-   [ -e "$INSTALL_LOGS/$1-$VERSION" ]  &&
-   while read LINE
+   [ -e "$INSTALL_LOGS/$1-$VERSION" ] &&
+   while read -r LINE
    do
-      [ -f "$LINE" ]            &&
-      SIZE0=`du "$LINE"         |
-             cut -f 1-1`        &&
-      SIZE=$((SIZE0+SIZE))
-   done <$INSTALL_LOGS/$1-$VERSION     &&
-   echo ${SIZE}KB                      ||
+      [ -f "$LINE" ] &&
+         SIZE0=$(du "$LINE" | cut -f 1-1) &&
+         SIZE=$((SIZE0+SIZE))
+   done <"$INSTALL_LOGS/$1-$VERSION" &&
+   echo ${SIZE}KB ||
    message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
 }

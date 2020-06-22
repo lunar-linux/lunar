@@ -21,7 +21,7 @@
 # info    : adds groupname and passes addgroupopts to 'addgroup'
 function add_priv_group() {
   local GROUPNAME
-  debug_msg "function add_priv_group ($@)"
+  debug_msg "function add_priv_group ($*)"
 
   if [ -n "$INSTALLWATCHFILE" ] ; then
     devoke_installwatch
@@ -38,7 +38,7 @@ function add_priv_group() {
   else
     # add the group:
     for (( N=0 ; N<100 ; N++)) ; do
-      if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
+      if [ -z "$(cut -d: -f3 /etc/group | grep "^$N$")" ] ; then
         break
       fi
     done
@@ -47,7 +47,7 @@ function add_priv_group() {
       return 1
     fi
     verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
-    groupadd -g $N $GROUPNAME
+    groupadd -g "$N" "$GROUPNAME"
   fi
 
   if [ -n "$INSTALLWATCHFILE" ] ; then
@@ -61,13 +61,13 @@ function add_priv_group() {
 # info    : adds username:groupname and passes adduseropts to 'adduser'
 function add_priv_user() {
   local USERNAME GROUPNAME
-  debug_msg "function add_priv_user ($@)"
+  debug_msg "function add_priv_user ($*)"
 
   if [ -n "$INSTALLWATCHFILE" ] ; then
     devoke_installwatch
   fi
-  USERNAME=$(echo $1 | cut -d: -f1)
-  GROUPNAME=$(echo $1 | cut -d: -f2)
+  USERNAME=$(cut -d: -f1 "$1")
+  GROUPNAME=$(cut -d: -f2 "$1")
 
   if [ -z "$USERNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no username specified${DEFAULT_COLOR}"
@@ -79,20 +79,20 @@ function add_priv_user() {
     return 1
   fi
 
-  if id $USERNAME &> /dev/null ; then
+  if id "$USERNAME" &> /dev/null ; then
     verbose_msg "user \"$USERNAME\" already exists, not creating or modifying"
   else
     if grep -q "^$GROUPNAME:" /etc/group ; then
       verbose_msg "group \"$GROUPNAME\" already exists, not creating"
     else
-      if ! add_priv_group $GROUPNAME ; then
+      if ! add_priv_group "$GROUPNAME" ; then
         return 1
       fi
     fi
 
     # add the user:
     for (( N=0 ; N<100 ; N++)) ; do
-      if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$" )" ] ; then
+      if [ -z "$(cut -d: -f3 /etc/passwd | grep "^$N$")" ] ; then
         break
       fi
     done
@@ -103,8 +103,8 @@ function add_priv_user() {
 
     shift
 
-    verbose_msg "creating user \"$USERNAME\" (opts=\"-u $N -g $GROUPNAME $@\")"
-    useradd -u $N -g $GROUPNAME $USERNAME $@
+    verbose_msg "creating user \"$USERNAME\" (opts=\"-u $N -g $GROUPNAME $*\")"
+    useradd -u "$N" -g "$GROUPNAME" "$USERNAME" "$@"
 
   fi
 

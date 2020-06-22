@@ -14,10 +14,10 @@
 # purpose  : prune all old logs, source copy's, install caches
 prune() {
   local TMP_SPOOL_KEEP TMP_CACHE_KEEP MODULE SOURCE VERSION FILE LOGS
-  debug_msg "prune ($@)"
+  debug_msg "prune ($*)"
 
   if [ -z "$BUILD" ] ; then
-    eval $(grep BUILD= /etc/lunar/local/optimizations)
+    eval "$(grep BUILD= /etc/lunar/local/optimizations)"
   fi
 
   TMP_SPOOL_KEEP=$(temp_create "spool-keep")
@@ -27,64 +27,64 @@ prune() {
   for MODULE in $(list_installed) ; do
     # spool:
     if [ ! "$MODULE" == "moonbase" ]; then
-      for SOURCE in $(sources $MODULE) ; do
-        echo $SOURCE >> $TMP_SPOOL_KEEP
+      for SOURCE in $(sources "$MODULE") ; do
+        echo "$SOURCE" >> "$TMP_SPOOL_KEEP"
       done
     # cache:
-      VERSION=$(installed_version $MODULE)
+      VERSION=$(installed_version "$MODULE")
 
-      echo "$MODULE-$VERSION-$BUILD.tar.xz" >> $TMP_CACHE_KEEP
-      echo "$MODULE-$VERSION-$BUILD.tar.bz2" >> $TMP_CACHE_KEEP
+      echo "$MODULE-$VERSION-$BUILD.tar.xz"  >> "$TMP_CACHE_KEEP"
+      echo "$MODULE-$VERSION-$BUILD.tar.bz2" >> "$TMP_CACHE_KEEP"
     fi
   done
-  echo "README" >> $TMP_SPOOL_KEEP
-  echo "cpan" >> $TMP_SPOOL_KEEP
+  echo "README" >> "$TMP_SPOOL_KEEP"
+  echo "cpan" >> "$TMP_SPOOL_KEEP"
 
   verbose_msg "finding stale source files"
-  for FILE in $(ls -1 $SOURCE_CACHE); do
+  for FILE in $(ls -1 "$SOURCE_CACHE") ; do
     if ! grep -q "$FILE" "$TMP_SPOOL_KEEP" ; then
       message "Removing stale source: $SOURCE_CACHE/$FILE"
-      rm -f $SOURCE_CACHE/$FILE
+      rm -f "$SOURCE_CACHE/$FILE"
     fi
   done
-  temp_destroy $TMP_SPOOL_KEEP
+  temp_destroy "$TMP_SPOOL_KEEP"
 
   verbose_msg "finding stale install caches"
-  for FILE in $(ls -1 $INSTALL_CACHE); do
+  for FILE in $(ls -1 "$INSTALL_CACHE"); do
     if ! grep -q "$FILE" "$TMP_CACHE_KEEP" ; then
       message "Removing stale install cache: $INSTALL_CACHE/$FILE"
-      rm -f $INSTALL_CACHE/$FILE
+      rm -f "$INSTALL_CACHE/$FILE"
     fi
   done
-  temp_destroy $TMP_CACHE_KEEP
+  temp_destroy "$TMP_CACHE_KEEP"
 
   # the log files are easy:
-  LOGS=$(cat "$MODULE_STATUS" | cut -d: -f1,4 --output-delimiter="-")
+  LOGS=$(cut -d: -f1,4 --output-delimiter="-" "$MODULE_STATUS")
 
   verbose_msg "finding stale install logs"
-  for FILE in $(ls -1 $INSTALL_LOGS) ; do
-    if ! grep -q "$FILE" <<< $LOGS; then
+  for FILE in $(ls -1 "$INSTALL_LOGS") ; do
+    if ! grep -q "$FILE" <<< "$LOGS" ; then
       message "Removing stale log: $INSTALL_LOGS/$FILE"
-      rm $INSTALL_LOGS/$FILE
+      rm "$INSTALL_LOGS/$FILE"
     fi
   done
 
   verbose_msg "finding stale compile logs"
-  for FILE in $(ls -1 $COMPILE_LOGS) ; do
+  for FILE in $(ls -1 "$COMPILE_LOGS") ; do
     local file_base
-    file_base=${FILE%.xz}
-    file_base=${file_base%.bz2} # compile logs can be either
-    if ! grep -q "$file_base" <<< $LOGS; then
+    file_base="${FILE%.xz}"
+    file_base="${file_base%.bz2}" # compile logs can be either
+    if ! grep -q "$file_base" <<< "$LOGS" ; then
       message "Removing stale log: $COMPILE_LOGS/$FILE"
-      rm $COMPILE_LOGS/$FILE
+      rm "$COMPILE_LOGS/$FILE"
     fi
   done
 
   verbose_msg "finding stale md5sum logs"
-  for FILE in $(ls -1 $MD5SUM_LOGS) ; do
-    if ! grep -q "$FILE" <<< $LOGS; then
+  for FILE in $(ls -1 "$MD5SUM_LOGS") ; do
+    if ! grep -q "$FILE" <<< "$LOGS" ; then
       message  "Removing stale log: $MD5SUM_LOGS/$FILE"
-      rm $MD5SUM_LOGS/$FILE
+      rm "$MD5SUM_LOGS/$FILE"
     fi
   done
 }
