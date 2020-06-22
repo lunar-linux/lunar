@@ -54,11 +54,7 @@ save_libraries()  {
     then
       verbose_msg "saving library \"$LINE\""
       if  [  -h  "$LINE"  ];  then
-        DEST="$( basename "$( ls  -la "${LINE}" |
-                              cut -d  '>'  -f2  |
-                              cut -c  2-
-                            )"
-              )"
+        DEST="$(basename "$(realpath "$LINE")")"
         ln -sf "$DEST" "${OLD_LIBS}"/"$(basename "${LINE}")"
       else
         cp "$LINE" "$OLD_LIBS"
