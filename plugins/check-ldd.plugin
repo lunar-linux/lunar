@@ -11,7 +11,6 @@
 #                                                           #
 #############################################################
 
-
 plugin_module_check_ldd() {
   local MODULE VERSION I_LOG LDD_STATUS IFS_OLD IFS NEW_LD LOG FILE
   if [ "$LDD_CHECK" == "off" ]; then
@@ -33,7 +32,7 @@ plugin_module_check_ldd() {
     LOG=$(egrep "/(bin|games|lib(32|64)?|sbin|libexec)/" $I_LOG | egrep -v "/(doc|fonts|include|locale|man|modules|var|share|pkgconfig)/")
 
     for FILE in $LOG; do
-      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | egrep -q "(not found|lunar/OBSOLETE/)" ; then
+      if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" | grep -q "ELF" && LD_LIBRARY_PATH=$NEW_LD ldd "$FILE" 2>&1 | egrep -q "(not found|lunar/OBSOLETE/)"; then
         (
           export IFS="$IFS_OLD"
           message "${FILE_COLOR}${FILE}${DEFAULT_COLOR} of ${MODULE_COLOR}${MODULE} ${PROBLEM_COLOR}is broken. ${DEFAULT_COLOR}"
@@ -45,6 +44,5 @@ plugin_module_check_ldd() {
   fi
   return $LDD_STATUS
 }
-
 
 plugin_register MODULE_CHECK plugin_module_check_ldd
