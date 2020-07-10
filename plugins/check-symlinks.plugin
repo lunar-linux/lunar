@@ -10,8 +10,7 @@
 #                                                           #
 #############################################################
 
-
-plugin_module_check_symlinks()  {
+plugin_module_check_symlinks() {
   local MODULE VERSION I_LOG IFS_OLD IFS ITEM TRAGET
   # return CONTINUE if we're disabled
   if [ "$SYM_CHECK" == "off" ]; then
@@ -27,21 +26,21 @@ plugin_module_check_symlinks()  {
     IFS_OLD="$IFS"
     export IFS=$'\n'
 
-    cat "$I_LOG" | while read ITEM ; do
-      if [ -h "$ITEM" ] && [ -f "$ITEM" ] ; then
-      TARGET=$( basename $( ls -la "$ITEM" | cut -d '>' -f2 | cut -c 2- ) )
-        if ! grep -q "$TARGET" "$I_LOG" ; then
-         (
-          export IFS="$IFS_OLD"
-          F_TMP=$(temp_create "$MODULE.remove-line")
-          cp $I_LOG $F_TMP
-          grep -v "$ITEM" "$F_TMP" > $I_LOG
-          temp_destroy $F_TMP
-          message  "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-          message  "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
-          message  "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by $(grep "^$TARGET$" $INSTALL_LOGS/* | cut -d: -f1)"
-          message  "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
-         )
+    cat "$I_LOG" | while read ITEM; do
+      if [ -h "$ITEM" ] && [ -f "$ITEM" ]; then
+        TARGET=$(basename $(ls -la "$ITEM" | cut -d '>' -f2 | cut -c 2-))
+        if ! grep -q "$TARGET" "$I_LOG"; then
+          (
+            export IFS="$IFS_OLD"
+            F_TMP=$(temp_create "$MODULE.remove-line")
+            cp $I_LOG $F_TMP
+            grep -v "$ITEM" "$F_TMP" >$I_LOG
+            temp_destroy $F_TMP
+            message "Symbolic link: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} is owned by ${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+            message "Target of symbolic link is ${FILE_COLOR}${TARGET}${DEFAULT_COLOR}"
+            message "${FILE_COLOR}${TARGET}${DEFAULT_COLOR} is owned by $(grep "^$TARGET$" $INSTALL_LOGS/* | cut -d: -f1)"
+            message "Removed: ${SYMLINK_COLOR}${ITEM}${DEFAULT_COLOR} from ${I_LOG}"
+          )
         fi
       fi
     done
@@ -49,6 +48,5 @@ plugin_module_check_symlinks()  {
   # always return CONTINUE
   return 2
 }
-
 
 plugin_register MODULE_CHECK plugin_module_check_symlinks
