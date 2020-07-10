@@ -10,8 +10,7 @@
 #                                                           #
 #############################################################
 
-
-plugin_module_check_md5sum()  {
+plugin_module_check_md5sum() {
   local MODULE VERSION MD5_LOG MD5SUM_STATUS IFS LINE FILE
   # return CONTINUE if we're disabled
   if [ "$MD5SUM_CHECK" == "off" ]; then
@@ -28,25 +27,22 @@ plugin_module_check_md5sum()  {
   if [ -e "$MD5_LOG" ]; then
     export IFS=$'\t\n'
 
-      egrep "/(bin|games|include|lib(32|64)?|sbin)/" $MD5_LOG |
+    egrep "/(bin|games|include|lib(32|64)?|sbin)/" $MD5_LOG |
       egrep -v "/(doc|etc|fonts|man|var)/" |
-      while read LINE ; do
-      if ! echo $LINE | md5sum --check --status ; then
-        FILE=$(echo $LINE | awk '{ print $2 }')
-        if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" |
-              egrep -q "executable|shared object|current ar archive|C?? source, ASCII text" ; then
-          message "${FILE_COLOR}$FILE${DEFAULT_COLOR} of ${MODULE_COLOR}$MODULE${PROBLEM_COLOR} has wrong md5sum.${DEFAULT_COLOR}"
-          MD5SUM_STATUS=1
+      while read LINE; do
+        if ! echo $LINE | md5sum --check --status; then
+          FILE=$(echo $LINE | awk '{ print $2 }')
+          if [ -f "$FILE" ] && [ ! -h "$FILE" ] && file -b "$FILE" |
+            egrep -q "executable|shared object|current ar archive|C?? source, ASCII text"; then
+            message "${FILE_COLOR}$FILE${DEFAULT_COLOR} of ${MODULE_COLOR}$MODULE${PROBLEM_COLOR} has wrong md5sum.${DEFAULT_COLOR}"
+            MD5SUM_STATUS=1
+          fi
         fi
-      fi
-    done
+      done
   else
     message "${MODULE_COLOR}$MODULE${PROBLEM_COLOR} is missing a md5sum log.${DEFAULT_COLOR}"
   fi
   return $MD5SUM_STATUS
 }
 
-
 plugin_register MODULE_CHECK plugin_module_check_md5sum
-
-
