@@ -9,9 +9,7 @@
 #                                                    #
 ######################################################
 
-
-plugin_configd_post_build()
-{
+plugin_configd_post_build() {
   local FILE
 
   debug_msg "plugin_configd_post_build ($@)"
