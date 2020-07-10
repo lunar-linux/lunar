@@ -26,9 +26,8 @@
 #                                                          #
 ############################################################
 
-
-help()	{
-  cat  <<  EOF
+help() {
+  cat <<EOF
 Lunar -- a menu-driven software package management utility
 
 Example:        lunar
@@ -64,265 +63,245 @@ unexile    module(s)   Allows a module to be compiled|resurrected again
 enforce    module(s)   Enforce optinal selection on a list of modules
 unenforce  module(s)   Remove enforce  on a list of modules
 EOF
-  exit  1
+  exit 1
 }
 
-show_modules()	{
-  for  MODULE in `list_modules "$1"`;  do
-    if  !  module_installed  $MODULE  &&
-        !  module_exiled     $MODULE
-    then
+show_modules() {
+  for MODULE in $(list_modules "$1"); do
+    if ! module_installed $MODULE &&
+      ! module_exiled $MODULE; then
       (
         run_details $MODULE
-        echo  "$MODULE"
-        echo  "$VERSION"
-        echo  "${SHORT:-Short Description Unavailable}"
+        echo "$MODULE"
+        echo "$VERSION"
+        echo "${SHORT:-Short Description Unavailable}"
       )
     fi
   done
 }
 
-
-has_modules()	{
-  for  MODULE in `list_modules "$1"`;  do
-    if  !  module_installed  $MODULE  &&
-        !  module_exiled     $MODULE
-    then
+has_modules() {
+  for MODULE in $(list_modules "$1"); do
+    if ! module_installed $MODULE &&
+      ! module_exiled $MODULE; then
       return 0
     fi
   done
   return 1
 }
 
-
-show_sections()  {
-  for SECTION in $(list_sections);  do
+show_sections() {
+  for SECTION in $(list_sections); do
     has_modules $SECTION && {
-      echo  "$SECTION"
-      echo  "section"
+      echo "$SECTION"
+      echo "section"
     }
   done
 }
 
-
 select_section() {
-  $DIALOG  --title "Section Selection Menu"  \
-           --default-item  "$SECTION"        \
-           --ok-label      "Select"          \
-           --cancel-label  "Exit"            \
-           --menu                            \
-           ""                                \
-           0 40 15                           \
-           `show_sections`
+  $DIALOG --title "Section Selection Menu" \
+    --default-item "$SECTION" \
+    --ok-label "Select" \
+    --cancel-label "Exit" \
+    --menu \
+    "" \
+    0 40 15 \
+    $(show_sections)
 }
 
-
-add_pkgs()  { (
+add_pkgs() { (
   while
-    SECTION=`select_section`
+    SECTION=$(select_section)
   do
     while
       SECTION_MODULES=$(show_modules $SECTION)
-      MODULE=`$DIALOG  --title "Select module to install please" \
-                       --item-help                               \
-                       --menu                                    \
-                       "Section: $SECTION"                       \
-                       0 60 10                                   \
-                       $SECTION_MODULES`
+      MODULE=$($DIALOG --title "Select module to install please" \
+        --item-help \
+        --menu \
+        "Section: $SECTION" \
+        0 60 10 \
+        $SECTION_MODULES)
     do
       SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
       DESCRIPTION=$(run_module_file $MODULE DETAILS)
 
-      if  $DIALOG  --title      "Install $MODULE"  \
-                   --yesno      "$DESCRIPTION"    \
-                   14 76
-      then
-        push_install_queue  $MODULE
-        $DIALOG  --msgbox  "$MODULE added to the install queue."  5 60
+      if $DIALOG --title "Install $MODULE" \
+        --yesno "$DESCRIPTION" \
+        14 76; then
+        push_install_queue $MODULE
+        $DIALOG --msgbox "$MODULE added to the install queue." 5 60
       else
-        $DIALOG  --msgbox  "$MODULE will not be installed."  5 60
+        $DIALOG --msgbox "$MODULE will not be installed." 5 60
       fi
     done
   done
-) }
+); }
 
-
-show_file()	{
-  if  [  -f  $1  ];  then
-    case  `file  -b  $1  |  cut  -d ' '  -f1` in
-      bzip2|gzip|XZ)  view_file $1  ;;
-      *)  $DIALOG  --textbox  $1  10  0  ;;
+show_file() {
+  if [ -f $1 ]; then
+    case $(file -b $1 | cut -d ' ' -f1) in
+      bzip2 | gzip | XZ) view_file $1 ;;
+      *) $DIALOG --textbox $1 10 0 ;;
     esac
   else
-    $DIALOG  --msgbox  "File not found."  0  0
-    return  1
+    $DIALOG --msgbox "File not found." 0 0
+    return 1
   fi
 }
 
-
 file_list() {
-  pushd $1 > /dev/null
+  pushd $1 >/dev/null
   file -N -F ' ' * | cut -d ' ' -f1,3 --output-delimiter='
 	'
-  popd > /dev/null
+  popd >/dev/null
 }
-
 
 file_menu() {
-  FILE_LIST=`file_list $1`
-  echo  $1/`$DIALOG  --title  "Please select a file."  \
-                     --menu  "" 0 0 0                  \
-                     $FILE_LIST`
+  FILE_LIST=$(file_list $1)
+  echo $1/$($DIALOG --title "Please select a file." \
+    --menu "" 0 0 0 \
+    $FILE_LIST)
 }
 
-
-show_installed_modules()  {
-  for LINE in $(sort "$MODULE_STATUS_BACKUP") ; do
-  (
-     MODULE=`echo "$LINE" | cut -d : -f1`
-     STATUS=`echo "$LINE" | cut -d : -f3`
-    VERSION=`echo "$LINE" | cut -d : -f4`
-       SIZE=`echo "$LINE" | cut -d : -f5`
-	
-    # TODO THIS IS BROKEN
-    if module_installed $MODULE ; then
-      SHORT="Short Description Unavailable"
-      run_module_file $MODULE DETAILS &> /dev/null
-      echo -e "$MODULE\n"
-      echo -e "$VERSION,$SIZE\n"
-      echo -e "\"$SHORT\"\n"
-    fi
-  )
-  done
-}
-
-
-remove_pkgs()	{
-  while
-    if  [  -z  "$INSTALLED_MODULES"  ];  then
-      INSTALLED_MODULES=$(show_installed_modules)
-    fi
-
-    unset MODULE
-    MODULE=`$DIALOG --title "Select module to remove:" \
-                    --item-help                               \
-                    --ok-label      "Select"                  \
-                    --cancel-label  "Exit"                    \
-                    --menu  "" 0 60 10                        \
-                    $INSTALLED_MODULES`
-  do
-   (
-    SECTION=$(find_section $MODULE)
-    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
-    DESCRIPTION=$(run_module_file $MODULE DETAILS)
-
-    if  $DIALOG  --title      "Remove $MODULE"  \
-                 --yesno      "$DESCRIPTION"    \
-                 12 76
-    then
-      push_remove_queue  $MODULE                                    &&
-      $DIALOG  --msgbox  "$MODULE added to the remove queue."  5 60  ||
-      $DIALOG  --msgbox  "$MODULE is not really installed?"    5 60
-    fi
-   )
-  done
-}
-
-
-
-make_checklist()  {
-  for  MODULE in `list_modules "$1"`;  do
+show_installed_modules() {
+  for LINE in $(sort "$MODULE_STATUS_BACKUP"); do
     (
-    run_details $MODULE
+      MODULE=$(echo "$LINE" | cut -d : -f1)
+      STATUS=$(echo "$LINE" | cut -d : -f3)
+      VERSION=$(echo "$LINE" | cut -d : -f4)
+      SIZE=$(echo "$LINE" | cut -d : -f5)
 
-    if module_installed $MODULE; then
-      STATUS="on"
-    else
-      STATUS="off"
-    fi
-
-    echo $MODULE
-    echo $VERSION
-    echo $STATUS
-    echo ${SHORT:-Short Description Unavailable}
+      # TODO THIS IS BROKEN
+      if module_installed $MODULE; then
+        SHORT="Short Description Unavailable"
+        run_module_file $MODULE DETAILS &>/dev/null
+        echo -e "$MODULE\n"
+        echo -e "$VERSION,$SIZE\n"
+        echo -e "\"$SHORT\"\n"
+      fi
     )
   done
 }
 
+remove_pkgs() {
+  while
+    if [ -z "$INSTALLED_MODULES" ]; then
+      INSTALLED_MODULES=$(show_installed_modules)
+    fi
 
-process_section()  {
-     KEEP_LIST=$2
+    unset MODULE
+    MODULE=$($DIALOG --title "Select module to remove:" \
+      --item-help \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --menu "" 0 60 10 \
+      $INSTALLED_MODULES)
+  do
+    (
+      SECTION=$(find_section $MODULE)
+      SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$MODULE
+      DESCRIPTION=$(run_module_file $MODULE DETAILS)
 
-  for  LINE in `list_modules "$1"`;  do
-    if  echo  -e  "$KEEP_LIST"  |
-        grep  -q  "^$LINE\$"
-    then  push_install_queue  $LINE
-    else  push_remove_queue   $LINE
+      if $DIALOG --title "Remove $MODULE" \
+        --yesno "$DESCRIPTION" \
+        12 76; then
+        push_remove_queue $MODULE &&
+          $DIALOG --msgbox "$MODULE added to the remove queue." 5 60 ||
+          $DIALOG --msgbox "$MODULE is not really installed?" 5 60
+      fi
+    )
+  done
+}
+
+make_checklist() {
+  for MODULE in $(list_modules "$1"); do
+    (
+      run_details $MODULE
+
+      if module_installed $MODULE; then
+        STATUS="on"
+      else
+        STATUS="off"
+      fi
+
+      echo $MODULE
+      echo $VERSION
+      echo $STATUS
+      echo ${SHORT:-Short Description Unavailable}
+    )
+  done
+}
+
+process_section() {
+  KEEP_LIST=$2
+
+  for LINE in $(list_modules "$1"); do
+    if echo -e "$KEEP_LIST" |
+      grep -q "^$LINE\$"; then
+      push_install_queue $LINE
+    else
+      push_remove_queue $LINE
     fi
   done
 }
 
-
-select_pkgs()  {
+select_pkgs() {
   SELECT_TITLE="Module Toggle Selection Menu"
   SELECT_HELP="[X]=install  [ ]=remove"
 
-  while  SECTION=`select_section`;  do
+  while SECTION=$(select_section); do
     [ -z "$(list_modules $SECTION)" ] ||
-    CHECKLIST=`make_checklist  $SECTION`
+      CHECKLIST=$(make_checklist $SECTION)
 
-    if  OUTLIST=`$DIALOG  --title "$SELECT_TITLE"   \
-                          --ok-label  "Commit"      \
-                          --item-help               \
-                          --separate-output         \
-                          --checklist               \
-                          "$SELECT_HELP  $SECTION"  \
-                          0 0 10                    \
-                          $CHECKLIST`
-    then  process_section  "$SECTION"  "$OUTLIST"
+    if OUTLIST=$($DIALOG --title "$SELECT_TITLE" \
+      --ok-label "Commit" \
+      --item-help \
+      --separate-output \
+      --checklist \
+      "$SELECT_HELP  $SECTION" \
+      0 0 10 \
+      $CHECKLIST); then
+      process_section "$SECTION" "$OUTLIST"
     fi
   done
 }
 
-
-make_hold_checklist()  {
-  for LINE in $(grep -E '[:+](installed|held)[:+]' "$MODULE_STATUS_BACKUP" | sort) ; do
-  (
-    MODULE=$(echo "$LINE" | cut -d: -f1)
-    STATUS=$(echo "$LINE" | cut -d: -f3)
-    VERSION=$(echo "$LINE" | cut -d: -f4)
-    echo "$STATUS" | grep -q -E '[:+]held[:+]' && HELD="on" || HELD="off"
-    SHORT="Short description unavailable"
-    if run_details $MODULE &> /dev/null ; then
-      echo $MODULE
-      echo $VERSION
-      echo $HELD
-      echo $SHORT
-    fi
-  )
+make_hold_checklist() {
+  for LINE in $(grep -E '[:+](installed|held)[:+]' "$MODULE_STATUS_BACKUP" | sort); do
+    (
+      MODULE=$(echo "$LINE" | cut -d: -f1)
+      STATUS=$(echo "$LINE" | cut -d: -f3)
+      VERSION=$(echo "$LINE" | cut -d: -f4)
+      echo "$STATUS" | grep -q -E '[:+]held[:+]' && HELD="on" || HELD="off"
+      SHORT="Short description unavailable"
+      if run_details $MODULE &>/dev/null; then
+        echo $MODULE
+        echo $VERSION
+        echo $HELD
+        echo $SHORT
+      fi
+    )
   done
 }
 
-
-hold_pkgs()  {
+hold_pkgs() {
   HOLD_TITLE="Select modules to hold or unhold"
-   HOLD_HELP="[X]=held  [ ]=installed"
+  HOLD_HELP="[X]=held  [ ]=installed"
 
-  if  OUTLIST=`$DIALOG  --title "$HOLD_TITLE"  \
-                        --item-help            \
-                        --ok-label  "Commit"   \
-                        --separate-output      \
-                        --checklist            \
-                        "$HOLD_HELP"           \
-                        0 0 10                 \
-                        $(make_hold_checklist)`
-  then
+  if OUTLIST=$($DIALOG --title "$HOLD_TITLE" \
+    --item-help \
+    --ok-label "Commit" \
+    --separate-output \
+    --checklist \
+    "$HOLD_HELP" \
+    0 0 10 \
+    $(make_hold_checklist)); then
     unhold_modules $(cut -d: -f1 "$MODULE_STATUS")
     hold_modules $OUTLIST
   fi
 
 }
-
 
 module_menu() {
   while
@@ -333,69 +312,62 @@ module_menu() {
     B_HELP="Rebuild all installed modules"
     H_HELP="Held modules will not be upgraded until unheld or broken"
     E_HELP="Done managing modules"
-     TITLE="Module Menu"
-        OK="Select"
+    TITLE="Module Menu"
+    OK="Select"
     CANCEL="Exit"
 
-    COMMAND=`$DIALOG  --title "$TITLE"           \
-                      --item-help                \
-                      --ok-label      "$OK"      \
-                      --cancel-label  "$CANCEL"  \
-                      --menu  ""  0 0 0          \
-                      "A"  "Add"      "$A_HELP"  \
-                      "B"  "Rebuild"  "$B_HELP"  \
-                      "H"  "Hold"     "$H_HELP"  \
-                      "R"  "Remove"   "$R_HELP"  \
-                      "S"  "Select"   "$M_HELP"  \
-                      "U"  "Update"   "$U_HELP"`
+    COMMAND=$($DIALOG --title "$TITLE" \
+      --item-help \
+      --ok-label "$OK" \
+      --cancel-label "$CANCEL" \
+      --menu "" 0 0 0 \
+      "A" "Add" "$A_HELP" \
+      "B" "Rebuild" "$B_HELP" \
+      "H" "Hold" "$H_HELP" \
+      "R" "Remove" "$R_HELP" \
+      "S" "Select" "$M_HELP" \
+      "U" "Update" "$U_HELP")
   do
-    case  $COMMAND in
-      U)  update       ;;
-      S)  select_pkgs  ;;
-      A)  add_pkgs     ;;
-      R)  remove_pkgs  ;;
-      B)  rebuild      ;;
-      H)  hold_pkgs    ;;
-      E)  break        ;;
+    case $COMMAND in
+      U) update ;;
+      S) select_pkgs ;;
+      A) add_pkgs ;;
+      R) remove_pkgs ;;
+      B) rebuild ;;
+      H) hold_pkgs ;;
+      E) break ;;
     esac
   done
 }
 
-
 grep_install_logs() {
-  if  WHAT=`$DIALOG  --inputbox                                \
-                    "Please enter full path and name of file"  \
-                    0 0`
-  then
-    cd  $INSTALL_LOGS
-    grep  "$WHAT\$"  *  | view_file
+  if WHAT=$($DIALOG --inputbox \
+    "Please enter full path and name of file" \
+    0 0); then
+    cd $INSTALL_LOGS
+    grep "$WHAT\$" * | view_file
   fi
 }
 
-
-set_email()  {
-  if  ADMIN=`$DIALOG  --ok-label  "Commit"         \
-                         --inputbox                   \
-                "Please enter the email address of the person or role account that should receive reports from this box."  \
-                0 0  "$ADMIN"`
-  then
+set_email() {
+  if ADMIN=$($DIALOG --ok-label "Commit" \
+    --inputbox \
+    "Please enter the email address of the person or role account that should receive reports from this box." \
+    0 0 "$ADMIN"); then
     set_local_config "ADMIN" "$ADMIN"
   fi
 }
 
-
-set_delay()  {
-  if  PROMPT_DELAY=`$DIALOG  --ok-label  "Commit"  \
-                             --inputbox            \
-                             "Please enter the time in seconds to wait for a response when prompted with a question."  \
-                              0 0  "$PROMPT_DELAY"`
-  then
+set_delay() {
+  if PROMPT_DELAY=$($DIALOG --ok-label "Commit" \
+    --inputbox \
+    "Please enter the time in seconds to wait for a response when prompted with a question." \
+    0 0 "$PROMPT_DELAY"); then
     set_local_config "PROMPT_DELAY" "$PROMPT_DELAY"
   fi
 }
 
-
-queue_menu()  {
+queue_menu() {
   [ ! -d /var/log/lunar/queue ] || mkdir -p /var/log/lunar/queue
   while
     I_HELP="View the list of modules selected for installation"
@@ -404,35 +376,36 @@ queue_menu()  {
     r_HELP="Edit the list of modules selected for removal"
     M_HELP="View the datafile of installed modules"
     m_HELP="Edit the datafile of installed modules"
-	
-    COMMAND=`$DIALOG  --title "Queue Menu"                           \
-                      --ok-label      "Select"                       \
-                      --cancel-label  "Exit"                         \
-                      --default-item  $COMMAND                       \
-                      --item-help                                    \
-                      --menu                                         \
-                      ""                                             \
-                      0 40 6                                         \
-                      "I"     "View     install   queue"   "$I_HELP" \
-                      "i"     "Edit     install   queue"   "$i_HELP" \
-                      "R"     "View     removal   queue"   "$R_HELP" \
-                      "r"     "Edit     removal   queue"   "$r_HELP" \
-                      "M"     "View     module    status"  "$M_HELP" \
-                      "m"     "Edit     module    status"  "$m_HELP"`
+
+    COMMAND=$($DIALOG --title "Queue Menu" \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --default-item $COMMAND \
+      --item-help \
+      --menu \
+      "" \
+      0 40 6 \
+      "I" "View     install   queue" "$I_HELP" \
+      "i" "Edit     install   queue" "$i_HELP" \
+      "R" "View     removal   queue" "$R_HELP" \
+      "r" "Edit     removal   queue" "$r_HELP" \
+      "M" "View     module    status" "$M_HELP" \
+      "m" "Edit     module    status" "$m_HELP")
   do
-    case  $COMMAND in
-      M)  show_file  $MODULE_STATUS         ;;
-      m)  edit_file  $MODULE_STATUS
-          cp         $MODULE_STATUS         \
-                     $MODULE_STATUS_BACKUP  ;;
-      I)  show_file  $INSTALL_QUEUE        ;;
-      i)  edit_file  $INSTALL_QUEUE        ;;
-      R)  show_file  $REMOVE_QUEUE         ;;
-      r)  edit_file  $REMOVE_QUEUE         ;;
+    case $COMMAND in
+      M) show_file $MODULE_STATUS ;;
+      m)
+        edit_file $MODULE_STATUS
+        cp $MODULE_STATUS \
+          $MODULE_STATUS_BACKUP
+        ;;
+      I) show_file $INSTALL_QUEUE ;;
+      i) edit_file $INSTALL_QUEUE ;;
+      R) show_file $REMOVE_QUEUE ;;
+      r) edit_file $REMOVE_QUEUE ;;
     esac
   done
 }
-
 
 maintenance_menu() {
   while
@@ -442,36 +415,35 @@ maintenance_menu() {
     P_HELP="Prune old sources and install/compile logs"
     A_HELP="Change selected or select new alias mappings"
 
-    COMMAND=`$DIALOG  --title "Maintenance Menu"                         \
-                      --ok-label      "Select"                           \
-                      --cancel-label  "Exit"                             \
-                      --default-item  $COMMAND                           \
-                      --item-help                                        \
-                      --menu                                             \
-                      ""                                                 \
-                      0 40 6                                             \
-                      "F"     "Fix everything"                 "$F_HELP" \
-                      "N"     "Check everything but don't fix" "$N_HELP" \
-                      "D"     "Fix dependencies"               "$D_HELP" \
-                      "P"     "Prune old sources and logs"     "$P_HELP" \
-                      "A"     "Select or Change Aliases"       "$A_HELP"`
+    COMMAND=$($DIALOG --title "Maintenance Menu" \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --default-item $COMMAND \
+      --item-help \
+      --menu \
+      "" \
+      0 40 6 \
+      "F" "Fix everything" "$F_HELP" \
+      "N" "Check everything but don't fix" "$N_HELP" \
+      "D" "Fix dependencies" "$D_HELP" \
+      "P" "Prune old sources and logs" "$P_HELP" \
+      "A" "Select or Change Aliases" "$A_HELP")
   do
     case $COMMAND in
-     F)  lunar fix          ;;
-     N)  lunar nofix        ;;
-     D)  lunar fixdepends   ;;
-     P)  lunar prune        ;;
-     A)  select_aliases     ;;
+      F) lunar fix ;;
+      N) lunar nofix ;;
+      D) lunar fixdepends ;;
+      P) lunar prune ;;
+      A) select_aliases ;;
     esac
-    if [ $COMMAND != "A" ] ; then
+    if [ $COMMAND != "A" ]; then
       message "${MESSAGE_COLOR}Press enter to return...${DEFAULT_COLOR}"
       read
     fi
   done
 }
 
-
-log_menu()  {
+log_menu() {
   while
     C_HELP="View compile logs of previously installed software"
     G_HELP="Discover a file's origin"
@@ -479,32 +451,31 @@ log_menu()  {
     c_HELP="Remove a compile log"
     i_HELP="Edit a log of files previously installed"
 
-    COMMAND=`$DIALOG  --title "Log Menu"                          \
-                      --ok-label      "Select"                    \
-                      --cancel-label  "Exit"                      \
-                      --default-item  $COMMAND                    \
-                      --item-help                                 \
-                      --menu                                      \
-                      ""                                          \
-                      0 40 5                                      \
-                      "G"     "Grep    install logs"  "$G_HELP"   \
-                      "I"     "View    install log"   "$I_HELP"   \
-                      "i"     "Edit    install log"   "$i_HELP"   \
-                      "C"     "View    compile log"   "$C_HELP"   \
-                      "c"     "Remove  compile log"   "$c_HELP"`
+    COMMAND=$($DIALOG --title "Log Menu" \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --default-item $COMMAND \
+      --item-help \
+      --menu \
+      "" \
+      0 40 5 \
+      "G" "Grep    install logs" "$G_HELP" \
+      "I" "View    install log" "$I_HELP" \
+      "i" "Edit    install log" "$i_HELP" \
+      "C" "View    compile log" "$C_HELP" \
+      "c" "Remove  compile log" "$c_HELP")
   do
-    case  $COMMAND in
-      G)  grep_install_logs                      ;;
-      I)  show_file  `file_menu  $INSTALL_LOGS`  ;;
-      i)  edit_file  `file_menu  $INSTALL_LOGS`  ;;
-      C)  show_file  `file_menu  $COMPILE_LOGS`  ;;
-      c)  rm -f      `file_menu  $COMPILE_LOGS`  ;;
+    case $COMMAND in
+      G) grep_install_logs ;;
+      I) show_file $(file_menu $INSTALL_LOGS) ;;
+      i) edit_file $(file_menu $INSTALL_LOGS) ;;
+      C) show_file $(file_menu $COMPILE_LOGS) ;;
+      c) rm -f $(file_menu $COMPILE_LOGS) ;;
     esac
   done
 }
 
-
-feature_menu()  {
+feature_menu() {
   A_HELP="Create convenient auto-install scripts for common executables?"
   C_HELP="Colorized messages on lin and lrm?"
   E_HELP="Remove files when lrm?"
@@ -527,114 +498,121 @@ feature_menu()  {
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
   L_HELP="Use xz compression for logs and caches?"
 
-           ARCHIVE=${ARCHIVE:-on}
-     AUTORESURRECT=${AUTORESURRECT:-on}
-           AUTOFIX=${AUTOFIX:-on}
-         AUTOPRUNE=${AUTOPRUNE:-off}
-             COLOR=${COLOR:-on}
-       KEEP_SOURCE=${KEEP_SOURCE:-off}
-KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
-      MAIL_REPORTS=${MAIL_REPORTS:-off}
-      VIEW_REPORTS=${VIEW_REPORTS:-off}
-          PRESERVE=${PRESERVE:-on}
-             SOUND=${SOUND:-off}
-           SUSTAIN=${SUSTAIN:-on}
-            VOYEUR=${VOYEUR:-on}
-              REAP=${REAP:-on}
-           GARBAGE=${GARBAGE:-on}
-           VERBOSE=${VERBOSE:-off}
+  ARCHIVE=${ARCHIVE:-on}
+  AUTORESURRECT=${AUTORESURRECT:-on}
+  AUTOFIX=${AUTOFIX:-on}
+  AUTOPRUNE=${AUTOPRUNE:-off}
+  COLOR=${COLOR:-on}
+  KEEP_SOURCE=${KEEP_SOURCE:-off}
+  KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
+  MAIL_REPORTS=${MAIL_REPORTS:-off}
+  VIEW_REPORTS=${VIEW_REPORTS:-off}
+  PRESERVE=${PRESERVE:-on}
+  SOUND=${SOUND:-off}
+  SUSTAIN=${SUSTAIN:-on}
+  VOYEUR=${VOYEUR:-on}
+  REAP=${REAP:-on}
+  GARBAGE=${GARBAGE:-on}
+  VERBOSE=${VERBOSE:-off}
 
-  case  $VOYEUR  in
-    off) VOYEUR=off ; VOYEUR_progress=off  ;;
-    p*)  VOYEUR=off ; VOYEUR_progress=on   ;;
-    *)   VOYEUR=on  ; VOYEUR_progress=off  ;;
+  case $VOYEUR in
+    off)
+      VOYEUR=off
+      VOYEUR_progress=off
+      ;;
+    p*)
+      VOYEUR=off
+      VOYEUR_progress=on
+      ;;
+    *)
+      VOYEUR=on
+      VOYEUR_progress=off
+      ;;
   esac
 
-  case  $COMPRESS_METHOD  in
-    xz)  COMPRESS_XZ=on   ;;
-    bz2) COMPRESS_XZ=off  ;;
-    *)   COMPRESS_XZ=on   ;;
+  case $COMPRESS_METHOD in
+    xz) COMPRESS_XZ=on ;;
+    bz2) COMPRESS_XZ=off ;;
+    *) COMPRESS_XZ=on ;;
   esac
 
-  if  TOGGLES=`$DIALOG  --title "Feature Menu"  \
-                        --no-cancel             \
-                        --item-help             \
-                        --separate-output       \
-                        --checklist             \
-                        ""                      \
-                        0 40 14                 \
-      "ARCHIVE"            "Toggle"  "$ARCHIVE"            "$I_HELP"   \
-      "AUTORESURRECT"      "Toggle"  "$AUTORESURRECT"      "$H_HELP"   \
-      "AUTOFIX"            "Toggle"  "$AUTOFIX"            "$F_HELP"   \
-      "AUTOPRUNE"          "Toggle"  "$AUTOPRUNE"          "$U_HELP"   \
-      "COLOR"              "Toggle"  "$COLOR"              "$C_HELP"   \
-      "KEEP_SOURCE"        "Toggle"  "$KEEP_SOURCE"        "$K_HELP"   \
-      "KEEP_OBSOLETE_LIBS" "Toggle"  "$KEEP_OBSOLETE_LIBS" "$O_HELP"   \
-      "GARBAGE"            "Toggle"  "$GARBAGE"            "$G_HELP"   \
-      "MAIL_REPORTS"       "Toggle"  "$MAIL_REPORTS"       "$M_HELP"   \
-      "PRESERVE"           "Toggle"  "$PRESERVE"           "$P_HELP"   \
-      "SOUND"              "Toggle"  "$SOUND"              "$S_HELP"   \
-      "SUSTAIN"            "Toggle"  "$SUSTAIN"            "$T_HELP"   \
-      "VIEW_REPORTS"       "Toggle"  "$VIEW_REPORTS"       "$R_HELP"   \
-      "VOYEUR"             "Choice"  "$VOYEUR"             "$V_HELP"   \
-      "VOYEUR_progress"    "Choice"  "$VOYEUR_progress"    "$VP_HELP"  \
-      "REAP"               "Toggle"  "$REAP"               "$E_HELP"   \
-      "VERBOSE"            "Toggle"  "$VERBOSE"            "$W_HELP"   \
-      "ZLOCAL_OVERRIDES"   "Toggle"  "$ZLOCAL_OVERRIDES"   "$Z_HELP"   \
-      "PROBE_EXPIRED"      "Toggle"  "$PROBE_EXPIRED"      "$X_HELP"   \
-      "COMPRESS_XZ"        "Toggle"  "$COMPRESS_XZ"        "$L_HELP"`
+  if TOGGLES=$($DIALOG --title "Feature Menu" \
+    --no-cancel \
+    --item-help \
+    --separate-output \
+    --checklist \
+    "" \
+    0 40 14 \
+    "ARCHIVE" "Toggle" "$ARCHIVE" "$I_HELP" \
+    "AUTORESURRECT" "Toggle" "$AUTORESURRECT" "$H_HELP" \
+    "AUTOFIX" "Toggle" "$AUTOFIX" "$F_HELP" \
+    "AUTOPRUNE" "Toggle" "$AUTOPRUNE" "$U_HELP" \
+    "COLOR" "Toggle" "$COLOR" "$C_HELP" \
+    "KEEP_SOURCE" "Toggle" "$KEEP_SOURCE" "$K_HELP" \
+    "KEEP_OBSOLETE_LIBS" "Toggle" "$KEEP_OBSOLETE_LIBS" "$O_HELP" \
+    "GARBAGE" "Toggle" "$GARBAGE" "$G_HELP" \
+    "MAIL_REPORTS" "Toggle" "$MAIL_REPORTS" "$M_HELP" \
+    "PRESERVE" "Toggle" "$PRESERVE" "$P_HELP" \
+    "SOUND" "Toggle" "$SOUND" "$S_HELP" \
+    "SUSTAIN" "Toggle" "$SUSTAIN" "$T_HELP" \
+    "VIEW_REPORTS" "Toggle" "$VIEW_REPORTS" "$R_HELP" \
+    "VOYEUR" "Choice" "$VOYEUR" "$V_HELP" \
+    "VOYEUR_progress" "Choice" "$VOYEUR_progress" "$VP_HELP" \
+    "REAP" "Toggle" "$REAP" "$E_HELP" \
+    "VERBOSE" "Toggle" "$VERBOSE" "$W_HELP" \
+    "ZLOCAL_OVERRIDES" "Toggle" "$ZLOCAL_OVERRIDES" "$Z_HELP" \
+    "PROBE_EXPIRED" "Toggle" "$PROBE_EXPIRED" "$X_HELP" \
+    "COMPRESS_XZ" "Toggle" "$COMPRESS_XZ" "$L_HELP"); then
 
-  then
+    ARCHIVE=off
+    AUTORESURRECT=off
+    AUTOFIX=off
+    AUTOPRUNE=off
+    COLOR=off
+    KEEP_SOURCE=off
+    KEEP_OBSOLETE_LIBS=off
+    MAIL_REPORTS=off
+    PRESERVE=off
+    SOUND=off
+    SUSTAIN=off
+    VIEW_REPORTS=off
+    VOYEUR=off
+    REAP=off
+    GARBAGE=off
+    VERBOSE=off
+    ZLOCAL_OVERRIDES=off
+    PROBE_EXPIRED=off
+    COMPRESS_METHOD=xz
 
-           ARCHIVE=off
-     AUTORESURRECT=off
-           AUTOFIX=off
-         AUTOPRUNE=off
-             COLOR=off
-       KEEP_SOURCE=off
-KEEP_OBSOLETE_LIBS=off
-      MAIL_REPORTS=off
-          PRESERVE=off
-             SOUND=off
-           SUSTAIN=off
-      VIEW_REPORTS=off
-            VOYEUR=off
-              REAP=off
-           GARBAGE=off
-	         VERBOSE=off
-  ZLOCAL_OVERRIDES=off
-     PROBE_EXPIRED=off
-   COMPRESS_METHOD=xz
-
-    for  TOGGLE  in  $TOGGLES;  do
-      case  $TOGGLE  in
-             ARCHIVE)       ARCHIVE=on  ;;
-       AUTORESURRECT) AUTORESURRECT=on  ;;
-             AUTOFIX)       AUTOFIX=on  ;;
-           AUTOPRUNE)     AUTOPRUNE=on  ;;
-               COLOR)         COLOR=on  ;;
-         KEEP_SOURCE)   KEEP_SOURCE=on  ;;
-  KEEP_OBSOLETE_LIBS) KEEP_OBSOLETE_LIBS=on ;;
-        MAIL_REPORTS)  MAIL_REPORTS=on  ;;
-            PRESERVE)      PRESERVE=on  ;;
-               SOUND)         SOUND=on  ;;
-             SUSTAIN)       SUSTAIN=on  ;;
-        VIEW_REPORTS)  VIEW_REPORTS=on  ;;
-              VOYEUR)        VOYEUR=on  ;;
-     VOYEUR_progress) if [ $VOYEUR_progress == off ] ; then
-                        VOYEUR=progress
-                      else
-                        VOYEUR=${VOYEUR/off/progress}
-                      fi                ;;
-                REAP)          REAP=on  ;;
-             GARBAGE)       GARBAGE=on  ;;
-	     VERBOSE)       VERBOSE=on  ;;
-    ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
-       PROBE_EXPIRED)  PROBE_EXPIRED=on ;;
-         COMPRESS_XZ)
-           COMPRESS_METHOD=xz
-           COMPRESS_METHOD_ARGS="-T 0"
-           ;;
+    for TOGGLE in $TOGGLES; do
+      case $TOGGLE in
+        ARCHIVE) ARCHIVE=on ;;
+        AUTORESURRECT) AUTORESURRECT=on ;;
+        AUTOFIX) AUTOFIX=on ;;
+        AUTOPRUNE) AUTOPRUNE=on ;;
+        COLOR) COLOR=on ;;
+        KEEP_SOURCE) KEEP_SOURCE=on ;;
+        KEEP_OBSOLETE_LIBS) KEEP_OBSOLETE_LIBS=on ;;
+        MAIL_REPORTS) MAIL_REPORTS=on ;;
+        PRESERVE) PRESERVE=on ;;
+        SOUND) SOUND=on ;;
+        SUSTAIN) SUSTAIN=on ;;
+        VIEW_REPORTS) VIEW_REPORTS=on ;;
+        VOYEUR) VOYEUR=on ;;
+        VOYEUR_progress) if [ $VOYEUR_progress == off ]; then
+          VOYEUR=progress
+        else
+          VOYEUR=${VOYEUR/off/progress}
+        fi ;;
+        REAP) REAP=on ;;
+        GARBAGE) GARBAGE=on ;;
+        VERBOSE) VERBOSE=on ;;
+        ZLOCAL_OVERRIDES) ZLOCAL_OVERRIDES=on ;;
+        PROBE_EXPIRED) PROBE_EXPIRED=on ;;
+        COMPRESS_XZ)
+          COMPRESS_METHOD=xz
+          COMPRESS_METHOD_ARGS="-T 0"
+          ;;
       esac
     done
 
@@ -665,8 +643,7 @@ KEEP_OBSOLETE_LIBS=off
   fi
 }
 
-
-option_menu()  {
+option_menu() {
   while
     P_HELP="Enter the default delay time for prompts"
     E_HELP="Enter the email address for this box's administrator"
@@ -678,83 +655,80 @@ option_menu()  {
     A_HELP="Select accepted licenses"
     R_HELP="Select rejected licenses"
 
-    COMMAND=`$DIALOG  --title "Option Menu"                    \
-                      --item-help                              \
-                      --ok-label      "Select"                 \
-                      --cancel-label  "Exit"                   \
-                      --menu                                   \
-                      ""                                       \
-                      0 40 8                                   \
-                      "P"  "Prompt Delay"           "$P_HELP"  \
-                      "D"  "Download Options"       "$D_HELP"  \
-                      "E"  "Admin's Email"          "$E_HELP"  \
-                      "F"  "Feature Menu"           "$F_HELP"  \
-                      "I"  "Integrity Checking"     "$I_HELP"  \
-                      "M"  "Software Mirrors"       "$M_HELP"  \
-                      "O"  "Optimize Architecture"  "$O_HELP"  \
-		      "A"  "Accepted licenses"      "$A_HELP"  \
-		      "R"  "Rejected licenses"      "$R_HELP"`
-
+    COMMAND=$($DIALOG --title "Option Menu" \
+      --item-help \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --menu \
+      "" \
+      0 40 8 \
+      "P" "Prompt Delay" "$P_HELP" \
+      "D" "Download Options" "$D_HELP" \
+      "E" "Admin's Email" "$E_HELP" \
+      "F" "Feature Menu" "$F_HELP" \
+      "I" "Integrity Checking" "$I_HELP" \
+      "M" "Software Mirrors" "$M_HELP" \
+      "O" "Optimize Architecture" "$O_HELP" \
+      "A" "Accepted licenses" "$A_HELP" \
+      "R" "Rejected licenses" "$R_HELP")
   do
-    case  $COMMAND in
-      P)  set_delay              ;;
-      D)  download_options       ;;
-      E)  set_email              ;;
-      F)  feature_menu           ;;
-      I)  integrity_menu         ;;
-      M)  mirror_menu            ;;
-      O)  optimize_menu          ;;
-      A)  set_accepted_licenses  ;;
-      R)  set_rejected_licenses  ;;
+
+    case $COMMAND in
+      P) set_delay ;;
+      D) download_options ;;
+      E) set_email ;;
+      F) feature_menu ;;
+      I) integrity_menu ;;
+      M) mirror_menu ;;
+      O) optimize_menu ;;
+      A) set_accepted_licenses ;;
+      R) set_rejected_licenses ;;
     esac
   done
 }
 
-
 goodbye() {
-  echo  "Have a good day."
+  echo "Have a good day."
   exit
 }
 
-
 background_execute() {
-  $DIALOG  --msgbox  "Processing queues in the background."  0 0
+  $DIALOG --msgbox "Processing queues in the background." 0 0
 
-  [  -f         $REMOVE_QUEUE  ]  &&
-  lrm  `cat  "$REMOVE_QUEUE"`   1>/dev/null 2>&1
-  rm  -f        $REMOVE_QUEUE
+  [ -f $REMOVE_QUEUE ] &&
+    lrm $(cat "$REMOVE_QUEUE") 1>/dev/null 2>&1
+  rm -f $REMOVE_QUEUE
 
-  if  [  -f            $INSTALL_QUEUE  ];  then
-    lin  --deps  `cat "$INSTALL_QUEUE"`
-    (  lin       `cat "$INSTALL_QUEUE"` 1>/dev/null 2>&1  &&
-         rm -f         $INSTALL_QUEUE
-    )  &
+  if [ -f $INSTALL_QUEUE ]; then
+    lin --deps $(cat "$INSTALL_QUEUE")
+    (
+      lin $(cat "$INSTALL_QUEUE") 1>/dev/null 2>&1 &&
+        rm -f $INSTALL_QUEUE
+    ) &
   fi
 
   goodbye
 }
 
-
 foreground_execute() {
-  [ -f $REMOVE_QUEUE ] && lrm `cat "$REMOVE_QUEUE"`
+  [ -f $REMOVE_QUEUE ] && lrm $(cat "$REMOVE_QUEUE")
   rm -f $REMOVE_QUEUE
 
-  [ -f $INSTALL_QUEUE ] && lin `cat "$INSTALL_QUEUE"`
-  rm  -f $INSTALL_QUEUE
+  [ -f $INSTALL_QUEUE ] && lin $(cat "$INSTALL_QUEUE")
+  rm -f $INSTALL_QUEUE
 
   goodbye
 }
 
-
 setvar() {
-  if [ -z "$*" ] ; then
-    sort -n "$LOCAL_CONFIG" | grep -v -e UNIQID -e color | while read LINE ; do
-      printf "%32s %s\n" "$(echo $LINE|cut -d= -f1)" "$(echo $LINE|cut -d= -f2-)"
+  if [ -z "$*" ]; then
+    sort -n "$LOCAL_CONFIG" | grep -v -e UNIQID -e color | while read LINE; do
+      printf "%32s %s\n" "$(echo $LINE | cut -d= -f1)" "$(echo $LINE | cut -d= -f2-)"
     done
   else
     VAR=$1
     shift
-    if [ -z "$*" ] ; then
+    if [ -z "$*" ]; then
       VAL=$(get_local_config "$VAR")
       printf "%s=%s\n" "$VAR" "$VAL"
     else
@@ -763,15 +737,13 @@ setvar() {
   fi
 }
 
-
 unsetvar() {
-  if [ ! -z "$*" ] ; then
+  if [ ! -z "$*" ]; then
     unset_local_config "$1"
   fi
 }
 
-
-main_menu()  {
+main_menu() {
   while
     M_HELP="Easy module management"
     O_HELP="Change lunar options and features"
@@ -781,37 +753,35 @@ main_menu()  {
     N_HELP="Discover and fix internal problems"
     B_HELP="Process queues in the background"
     E_HELP="Exit without processing queues"
-        OK="Select"
+    OK="Select"
     CANCEL="Exit"
 
-    COMMAND=`$DIALOG --title "Main Menu"                   \
-                     --item-help                           \
-                     --ok-label      "$OK"                 \
-                     --cancel-label  "$CANCEL"             \
-                     --menu                                \
-                     "$LUNAR_MODULE version: $LUNAR_VERSION"       \
-                     0 0 0                                 \
-                     "M"  "Module      Menu"     "$M_HELP"  \
-                     "O"  "Option      Menu"     "$O_HELP"  \
-                     "L"  "Log         Menu"     "$L_HELP"  \
-                     "Q"  "Queue       Menu"     "$Q_HELP"  \
-		     "N"  "Maintenance Menu"     "$N_HELP"  \
-                     "F"  "Foreground  Execute"  "$F_HELP"  \
-                     "B"  "Background  Execute"  "$B_HELP"`
+    COMMAND=$($DIALOG --title "Main Menu" \
+      --item-help \
+      --ok-label "$OK" \
+      --cancel-label "$CANCEL" \
+      --menu \
+      "$LUNAR_MODULE version: $LUNAR_VERSION" \
+      0 0 0 \
+      "M" "Module      Menu" "$M_HELP" \
+      "O" "Option      Menu" "$O_HELP" \
+      "L" "Log         Menu" "$L_HELP" \
+      "Q" "Queue       Menu" "$Q_HELP" \
+      "N" "Maintenance Menu" "$N_HELP" \
+      "F" "Foreground  Execute" "$F_HELP" \
+      "B" "Background  Execute" "$B_HELP")
   do
-    case  $COMMAND in
-      M)  module_menu         ;;
-      O)  option_menu         ;;
-      L)  log_menu            ;;
-      Q)  queue_menu          ;;
-      N)  maintenance_menu    ;;
-      F)  foreground_execute  ;;
-      B)  background_execute  ;;
+    case $COMMAND in
+      M) module_menu ;;
+      O) option_menu ;;
+      L) log_menu ;;
+      Q) queue_menu ;;
+      N) maintenance_menu ;;
+      F) foreground_execute ;;
+      B) background_execute ;;
     esac
   done
 }
-
-
 
 DIALOG="dialog
 --backtitle
@@ -821,7 +791,7 @@ Lunar Module Management Utility
 main() {
   #lets load the menu code
   if [ -n "$MENUS" ]; then
-    for FILE in $(echo $MENUS/*.menu) ; do
+    for FILE in $(echo $MENUS/*.menu); do
       [ -s "$FILE" ] && . "$FILE"
     done
   fi
@@ -839,7 +809,7 @@ main() {
 
 GETOPT_ARGS=$(getopt -q -n lunar -o "dhv" -l "debug,help,verbose" -- "$@")
 
-if [ -z "$?" ] ; then
+if [ -z "$?" ]; then
   help | view_file
   exit
 else
@@ -848,37 +818,52 @@ else
   enviro_check
   set_priority
 
-  while true ; do
+  while true; do
     case "$1" in
-      -d|--debug       ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
-      -h|--help        ) help ;                                     exit 1  ;;
-      -v|--verbose     ) export VERBOSE="on" ;                      shift   ;;
-      --) shift ; break ;;
-      *) help ; break ;;
+      -d | --debug)
+        ((LUNAR_DEBUG++))
+        export LUNAR_DEBUG
+        shift
+        ;;
+      -h | --help)
+        help
+        exit 1
+        ;;
+      -v | --verbose)
+        export VERBOSE="on"
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        help
+        break
+        ;;
     esac
   done
 
   case "$1" in
-    prune      ) prune                                  ;;
-    renew      ) renew                                  ;;
-    update     ) update                                 ;;
-    rebuild    ) rebuild                                ;;
-    optimize   ) optimize_menu				;;
-    set        ) shift && setvar $@                     ;;
-    unset      ) shift && unsetvar $@                   ;;
-    fix        ) shift && run_fix $@                    ;;
-    nofix      ) shift && export NOFIX=on && run_fix $@ ;;
-    fixdepends ) shift && fix_depends $@                ;;
-    resurrect  ) shift && resurrect_modules $@          ;;
-    install    ) shift && lin $@                        ;;
-    remove     ) shift && lrm $@                        ;;
-    hold       ) shift && hold_modules $@               ;;
-    unhold     ) shift && unhold_modules $@             ;;
-    exile      ) shift && exile_modules $@              ;;
-    unexile    ) shift && unexile_modules $@            ;;
-    enforce    ) shift && enforce_modules $@            ;;
-    unenforce  ) shift && unenforce_modules $@          ;;
+    prune) prune ;;
+    renew) renew ;;
+    update) update ;;
+    rebuild) rebuild ;;
+    optimize) optimize_menu ;;
+    set) shift && setvar $@ ;;
+    unset) shift && unsetvar $@ ;;
+    fix) shift && run_fix $@ ;;
+    nofix) shift && export NOFIX=on && run_fix $@ ;;
+    fixdepends) shift && fix_depends $@ ;;
+    resurrect) shift && resurrect_modules $@ ;;
+    install) shift && lin $@ ;;
+    remove) shift && lrm $@ ;;
+    hold) shift && hold_modules $@ ;;
+    unhold) shift && unhold_modules $@ ;;
+    exile) shift && exile_modules $@ ;;
+    unexile) shift && unexile_modules $@ ;;
+    enforce) shift && enforce_modules $@ ;;
+    unenforce) shift && unenforce_modules $@ ;;
     *) main ;;
   esac
 fi
-
