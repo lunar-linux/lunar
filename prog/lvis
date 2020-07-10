@@ -5,59 +5,89 @@
 # lvis is front-end to lin to activate voyeurism in a      #
 # separate xterm if possible.                              #
 ############################################################
-process_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-                  --from)  export  SOURCE_CACHE="$2";       shift  2  ;;
-                   --url)  export  BASE_URL="$2";           shift  2  ;;
-              -n|--nofix)  NO_lget="$1";  NO_LVU="$1";    shift  1  ;;
-                --silent)  NO_lget="$1";  NO_LVU="$1";    shift  1  ;;
-                  --deps)  NO_lget="$1";                   shift  1  ;;
-                -f|--fix)  NO_lget="$1";                   shift  1  ;;
-                  --help)  HELP="$1";                       shift  1  ;;
-                      -s)  NO_lget="$1";                   shift  1  ;;
-                       *)                                   shift  1  ;;
+process_parameters() {
+  while [ -n "$1" ]; do
+    if echo "" $1 | grep -q "^ -"; then
+      case $1 in
+        --from)
+          export SOURCE_CACHE="$2"
+          shift 2
+          ;;
+        --url)
+          export BASE_URL="$2"
+          shift 2
+          ;;
+        -n | --nofix)
+          NO_lget="$1"
+          NO_LVU="$1"
+          shift 1
+          ;;
+        --silent)
+          NO_lget="$1"
+          NO_LVU="$1"
+          shift 1
+          ;;
+        --deps)
+          NO_lget="$1"
+          shift 1
+          ;;
+        -f | --fix)
+          NO_lget="$1"
+          shift 1
+          ;;
+        --help)
+          HELP="$1"
+          shift 1
+          ;;
+        -s)
+          NO_lget="$1"
+          shift 1
+          ;;
+        *) shift 1 ;;
       esac
-   else  shift
-   fi
-  done
-}
-strip_parameters()  {
-  while  [  -n  "$1"  ];  do
-    if  echo  "" $1  |  grep  -q  "^ -";  then
-      case  $1  in
-        --from)  shift 2  ;;
-         --url)  shift 2  ;;
-             *)  shift 1  ;;
-      esac
-    else  echo  $1;  shift
+    else
+      shift
     fi
   done
 }
-process_parameters        $*
-MODULES=`strip_parameters  $*`
+strip_parameters() {
+  while [ -n "$1" ]; do
+    if echo "" $1 | grep -q "^ -"; then
+      case $1 in
+        --from) shift 2 ;;
+        --url) shift 2 ;;
+        *) shift 1 ;;
+      esac
+    else
+      echo $1
+      shift
+    fi
+  done
+}
+process_parameters $*
+MODULES=$(strip_parameters $*)
 
-if  [  -z  "$*"     ]   ||
-    [  -n  "$HELP"  ];  then
-  lin;  exit  1
+if [ -z "$*" ] ||
+  [ -n "$HELP" ]; then
+  lin
+  exit 1
 fi
 
-if  [  -n  "$DISPLAY"  ];  then
-  if  [  -z  "$NO_LVU"  ];  then
-    xterm  -bg  black                       \
-           -fg  white                       \
-           $XTERM_OPTIONS                   \
-           -T   "lvu  voyeur  5  $MODULES"  \
-           -e   /bin/sh  -c  "lvu  voyeur  5  $MODULES"  &
+if [ -n "$DISPLAY" ]; then
+  if [ -z "$NO_LVU" ]; then
+    xterm -bg black \
+      -fg white \
+      $XTERM_OPTIONS \
+      -T "lvu  voyeur  5  $MODULES" \
+      -e /bin/sh -c "lvu  voyeur  5  $MODULES" &
   fi
 
-  if  [  -z  "$NO_lget"  ];  then
-    xterm  -bg  black             \
-           -fg  white             \
-           $XTERM_OPTIONS         \
-           -T   "lget  $MODULES"  \
-           -e   /bin/sh  -c  "lget  $MODULES"  &
+  if [ -z "$NO_lget" ]; then
+    xterm -bg black \
+      -fg white \
+      $XTERM_OPTIONS \
+      -T "lget  $MODULES" \
+      -e /bin/sh -c "lget  $MODULES" &
   fi
 fi
-lin  $@
+lin $@
