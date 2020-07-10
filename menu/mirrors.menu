@@ -18,72 +18,71 @@
 #                                                          #
 ############################################################
 
-mirror_list()  {
+mirror_list() {
   sort -r "$MIRRORS/$1" | tr -s "\t" | tr "\t" "\n" | tac
 }
 
-select_mirror()  {
+select_mirror() {
   DEFAULT_URL=${1}_URL
-  $DIALOG  --title "Select Mirror Please"  \
-           --ok-label  "Select"            \
-           --default-item "${!DEFAULT_URL}" \
-           --menu                          \
-           ""                              \
-           0 80 10                         \
-           "$(mirror_list "$1")"
+  $DIALOG --title "Select Mirror Please" \
+    --ok-label "Select" \
+    --default-item "${!DEFAULT_URL}" \
+    --menu \
+    "" \
+    0 80 10 \
+    "$(mirror_list "$1")"
 }
 
-mirror_menu()  {
+mirror_menu() {
   while
     G_HELP="Select mirror for downloading GNU sources."
     K_HELP="Select mirror for downloading KDE sources."
     N_HELP="Select mirror for downloading GNOME sources."
     L_HELP="Select mirror for downloading kernel related sources."
-   SF_HELP="Select mirror for downloading SourceForge sources."
-   LR_HELP="Select the mirror for a last resort download place."
+    SF_HELP="Select mirror for downloading SourceForge sources."
+    LR_HELP="Select the mirror for a last resort download place."
     X_HELP="Select mirror for downloading XFree86 related sources."
- XORG_HELP="Select mirror for downloading XOrg related sources."
+    XORG_HELP="Select mirror for downloading XOrg related sources."
     N_HELP="Select mirror for downloading NVIDIA drivers."
 
-    COMMAND=$("$DIALOG"  --title "Mirror Menu"        \
-                         --ok-label      "Select"     \
-                         --cancel-label  "Exit"       \
-                         --item-help                  \
-                         --menu     ""  0 0 0         \
-                         "GNOME"    ""  "$N_HELP"     \
-                         "GNU"      ""  "$G_HELP"     \
-                         "KDE"      ""  "$K_HELP"     \
-                         "KERNEL"   ""  "$L_HELP"     \
-                         "SFORGE"   ""  "$SF_HELP"    \
-                         "LRESORT"  ""  "$LR_HELP"    \
-                         "NVIDIA"   ""  "$N_HELP"     \
-                         "XFREE86"  ""  "$X_HELP"     \
-                         "XORG"     ""  "$XORG_HELP")
-
+    COMMAND=$("$DIALOG" --title "Mirror Menu" \
+      --ok-label "Select" \
+      --cancel-label "Exit" \
+      --item-help \
+      --menu "" 0 0 0 \
+      "GNOME" "" "$N_HELP" \
+      "GNU" "" "$G_HELP" \
+      "KDE" "" "$K_HELP" \
+      "KERNEL" "" "$L_HELP" \
+      "SFORGE" "" "$SF_HELP" \
+      "LRESORT" "" "$LR_HELP" \
+      "NVIDIA" "" "$N_HELP" \
+      "XFREE86" "" "$X_HELP" \
+      "XORG" "" "$XORG_HELP")
   do
-    case  $COMMAND in
-          GNOME)    MIRROR="   GNOME_URL"    ;;
-          GNU)      MIRROR="     GNU_URL"    ;;
-          KDE)      MIRROR="     KDE_URL"    ;;
-          KERNEL)   MIRROR="  KERNEL_URL"    ;;
-          XFREE86)  MIRROR=" XFREE86_URL"    ;;
-          XORG)     MIRROR="    XORG_URL"    ;;
-          NVIDIA)   MIRROR="  NVIDIA_URL"    ;;
-          SFORGE)   MIRROR="  SFORGE_URL"    ;;
-          LRESORT)  MIRROR=" LRESORT_URL"    ;;
+
+    case $COMMAND in
+      GNOME) MIRROR="   GNOME_URL" ;;
+      GNU) MIRROR="     GNU_URL" ;;
+      KDE) MIRROR="     KDE_URL" ;;
+      KERNEL) MIRROR="  KERNEL_URL" ;;
+      XFREE86) MIRROR=" XFREE86_URL" ;;
+      XORG) MIRROR="    XORG_URL" ;;
+      NVIDIA) MIRROR="  NVIDIA_URL" ;;
+      SFORGE) MIRROR="  SFORGE_URL" ;;
+      LRESORT) MIRROR=" LRESORT_URL" ;;
     esac
 
-    if  MIRROR_URL=$(select_mirror "$COMMAND");  then
-      if  [  "$MIRROR_URL" == "Custom"  ];  then
-         MIRROR_URL=$($DIALOG  --inputbox  "Please enter the URL."  0 0)
+    if MIRROR_URL=$(select_mirror "$COMMAND"); then
+      if [ "$MIRROR_URL" == "Custom" ]; then
+        MIRROR_URL=$($DIALOG --inputbox "Please enter the URL." 0 0)
       fi
 
-      if [ -n "$MIRROR_URL" ] ; then
+      if [ -n "$MIRROR_URL" ]; then
         set_local_config "$MIRROR" "$MIRROR_URL" &&
-        $DIALOG  --msgbox  "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
-        export "${MIRROR// }"="$MIRROR_URL"
+          $DIALOG --msgbox "$MIRROR=$MIRROR_URL saved in $LOCAL_CONFIG" 8 60
+        export "${MIRROR// /}"="$MIRROR_URL"
       fi
     fi
   done
 }
-
