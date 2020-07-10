@@ -9,8 +9,7 @@
 #                                                          #
 ############################################################
 
-
-start_logging () {
+start_logging() {
   debug_msg "start_logging  ($*)"
   C_LOG=$(temp_create "${MODULE}.compile-log")
   C_FIFO=$(temp_create "${MODULE}.compile-fifo")
@@ -19,25 +18,23 @@ start_logging () {
   # just remaking this as FIFO
   rm -f "$C_FIFO"
   mknod "$C_FIFO" p
-  echo "++ Mark Compile start  : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" > "$C_LOG"
-  activate_voyeur "$@" 
+  echo "++ Mark Compile start  : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >"$C_LOG"
+  activate_voyeur "$@"
 }
-
 
 stop_logging() {
   debug_msg "stop_logging ($*)"
   # Make sure the FIFO gets closed
-  echo > "$C_FIFO"
-  echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >> "$C_LOG"
-  message  "${MESSAGE_COLOR}Creating"                        \
-           "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" \
-           "${DEFAULT_COLOR}"
+  echo >"$C_FIFO"
+  echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >>"$C_LOG"
+  message "${MESSAGE_COLOR}Creating" \
+    "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" \
+    "${DEFAULT_COLOR}"
 
-  "${COMPRESS_METHOD/bz2/bzip2}" -9f "$COMPRESS_METHOD_ARGS" < "$C_LOG" > "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}"
+  "${COMPRESS_METHOD/bz2/bzip2}" -9f "$COMPRESS_METHOD_ARGS" <"$C_LOG" >"$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}"
   temp_destroy "$C_LOG"
   temp_destroy "$C_FIFO"
 }
-
 
 progress() {
   local OLDLOG OLDSZ S PC
@@ -47,20 +44,20 @@ progress() {
     X="############################################################"
     Y="                                                            "
     OLDSZ="$(xzbz -dc "$OLDLOG" | wc -c)"
-    OLDTIMES=($(xzbz -dc "$OLDLOG" | grep 'Mark Compile ' | cut -d \" -f6 | while read -r -a TIME ; do date +%s -d "$TIME" ; done))
+    OLDTIMES=($(xzbz -dc "$OLDLOG" | grep 'Mark Compile ' | cut -d \" -f6 | while read -r -a TIME; do date +%s -d "$TIME"; done))
     CTIME=$(("${OLDTIMES[1]}" - "${OLDTIMES[0]}"))
     echo "Last compile time: $((CTIME / 60))m$((CTIME % 60))s"
-    while true ; do
+    while true; do
       read -r -t 2 LINE
       STATUS=$?
       if [ "$STATUS" -gt 128 ]; then
         sleep 2
-	continue
+        continue
       elif [ "$STATUS" -eq 1 ]; then
         echo -ne "\r [${X:0:60}] (100%)\n"
         exit
       fi
-      (( S += "${#LINE}" ))
+      ((S += "${#LINE}"))
       if [[ $S -gt OLDSZ ]]; then
         # never print 100% - subtract 1 :)
         S=$((OLDSZ - 1))
@@ -73,14 +70,14 @@ progress() {
   else
     SPINNER="/-\|"
     # spinerrrrrr!!!!
-    while true ; do
+    while true; do
       read -r -t 2 LINE
       STATUS=$?
       if [ "$STATUS" -gt 128 ]; then
         sleep 2
-	continue
+        continue
       elif [ "$STATUS" -eq 1 ]; then
-	echo -ne "\r [#]\n"
+        echo -ne "\r [#]\n"
         exit
       fi
       ((C++))
@@ -93,24 +90,34 @@ progress() {
   fi
 }
 
-
-activate_voyeur()  {
+activate_voyeur() {
   debug_msg "activate_voyeur ($*)"
-  if [ -z "$SILENT" ] ; then
+  if [ -z "$SILENT" ]; then
     case "$VOYEUR" in
-      on) ( tee -a "$C_LOG" < "$C_FIFO"            ; rm -f "$C_FIFO" ) & ;;
-      p*) ( tee -a "$C_LOG" < "$C_FIFO" | progress ; rm -f "$C_FIFO" ) & ;;
-       *) ( tee -a "$C_LOG" < "$C_FIFO" >/dev/null ; rm -f "$C_FIFO" ) & ;;
+      on) (
+        tee -a "$C_LOG" <"$C_FIFO"
+        rm -f "$C_FIFO"
+      ) & ;;
+      p*) (
+        tee -a "$C_LOG" <"$C_FIFO" | progress
+        rm -f "$C_FIFO"
+      ) & ;;
+      *) (
+        tee -a "$C_LOG" <"$C_FIFO" >/dev/null
+        rm -f "$C_FIFO"
+      ) & ;;
     esac
   else
-    ( tee -a "$C_LOG" < "$C_FIFO" >/dev/null ; rm -f "$C_FIFO" ) &
+    (
+      tee -a "$C_LOG" <"$C_FIFO" >/dev/null
+      rm -f "$C_FIFO"
+    ) &
   fi
 }
 
-
-activity_log()  {
+activity_log() {
   debug_msg "activity_log ($*)"
   lock_file "$ACTIVITY_LOG" &&
-  echo -e "$(date -u +%Y%m%d-%T)\t$1\t$2\t$3\t$4\t$5" >> "$ACTIVITY_LOG"
+    echo -e "$(date -u +%Y%m%d-%T)\t$1\t$2\t$3\t$4\t$5" >>"$ACTIVITY_LOG"
   unlock_file "$ACTIVITY_LOG"
 }
