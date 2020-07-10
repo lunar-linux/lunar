@@ -10,23 +10,19 @@
 #                                                           #
 #############################################################
 
-
-plugin_services_post_build()
-{
+plugin_services_post_build() {
   local IFS LINE
   debug_msg "plugin_services_post_build ($@)"
   if [ -f $SCRIPT_DIRECTORY/services ]; then
     export IFS="$ENTER_IFS"
     while read LINE; do
-      grep -q "$LINE" /etc/services || echo "$LINE" >> /etc/services
-    done < $SCRIPT_DIRECTORY/services
+      grep -q "$LINE" /etc/services || echo "$LINE" >>/etc/services
+    done <$SCRIPT_DIRECTORY/services
   fi
   return 2
 }
 
-
-gather_docs()
-{
+gather_docs() {
   local DOC_DIR FILE
   # function : gather_docs
   # usage    : gather_docs LIST OF FILES
@@ -37,30 +33,28 @@ gather_docs()
   debug_msg "gather_docs ($@)"
 
   DOC_DIR=${DOCUMENT_DIRECTORY}/${MODULE}
-  if [ -d "$SOURCE_DIRECTORY" ] ; then
+  if [ -d "$SOURCE_DIRECTORY" ]; then
     mkdir -p $DOC_DIR
     # For each parameter that is an existing file
     for FILE in ${@}; do
-      if [ -e "${FILE}" -a -f "${FILE}" ] ; then
+      if [ -e "${FILE}" -a -f "${FILE}" ]; then
         # copy it over to the doc directory creating directories as needed
         verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
         install -D -m 644 "${FILE}" "${DOC_DIR}/${FILE}"
-      elif [ -d "${FILE}" ] ; then
+      elif [ -d "${FILE}" ]; then
         # copy the directory to the docdir
         verbose_msg "Installing extra documentation to: ${DOC_DIR}/${FILE}"
         cp -a "${FILE}" ${DOC_DIR}/
       fi
     done
-        # do not return 2 here: this function is called directly and
-        # must return true (0) here
-        return 0
+    # do not return 2 here: this function is called directly and
+    # must return true (0) here
+    return 0
   fi
   return 2
 }
 
-
-plugin_postbuild_gather_docs()
-{
+plugin_postbuild_gather_docs() {
   local DOC_DIR DEFAULT_DOCS
   # pre-conditions : user must have $GARBAGE="on" to have any
   #                  of this actually happen.
@@ -74,11 +68,11 @@ plugin_postbuild_gather_docs()
   DEFAULT_DOCS="README* INSTALL* FAQ* CHAN* doc* DOC* *doc \
                 *sample* conf SETUP NEWS Change* manual* Manual*"
 
-  if [ -d "$SOURCE_DIRECTORY" ] ; then
+  if [ -d "$SOURCE_DIRECTORY" ]; then
     cd $SOURCE_DIRECTORY
 
     # Bail if the user doesn't want to install any extra documentation
-    if [ "$GARBAGE" != "on" ] ; then
+    if [ "$GARBAGE" != "on" ]; then
       return 2
     fi
     invoke_installwatch
@@ -86,9 +80,9 @@ plugin_postbuild_gather_docs()
     # No parameters were passed in, install the default docs
     for FILE in ${DEFAULT_DOCS}; do
       # copy all of the default docs (prune Makefiles)
-      if [ -s "$FILE" -a ! -f "${FILE}/Makefile" ] ; then
+      if [ -s "$FILE" -a ! -f "${FILE}/Makefile" ]; then
         verbose_msg "Installing default documentation to: ${DOC_DIR}/${FILE}"
-        cp -a "$FILE" $DOC_DIR 2> /dev/null
+        cp -a "$FILE" $DOC_DIR 2>/dev/null
       fi
     done
     devoke_installwatch
@@ -96,9 +90,7 @@ plugin_postbuild_gather_docs()
   return 2
 }
 
-
-plugin_archive_module()
-{
+plugin_archive_module() {
   debug_msg "plugin_archive_module($@)"
   # keep a record of the module scripts used for every install
   if [ ! -e /var/state/lunar/module_history ]; then
@@ -107,7 +99,6 @@ plugin_archive_module()
   tar -cJ --exclude=.svn -C $MOONBASE/$SECTION -f /var/state/lunar/module_history/$MODULE-$VERSION-$(date -u +%Y%m%d).tar.xz $MODULE
   return 2
 }
-
 
 plugin_register BUILD_POST_BUILD plugin_services_post_build
 plugin_register BUILD_POST_BUILD plugin_postbuild_gather_docs
