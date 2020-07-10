@@ -26,10 +26,9 @@
 #                                                          #
 ############################################################
 
-
 help() {
 
-  cat  <<  EOF
+  cat <<EOF
 
 Lget downloads single or multiple module source files.
 
@@ -50,21 +49,20 @@ Optional Parameters:
    -6 | --ipv6                  Download sources using ipv6
 EOF
 
-  exit  1
+  exit 1
 
 }
-
 
 main() {
   cd $TMPDIR
 
   MODULES="$@"
-  if [ -z "$MODULES" ] ; then
+  if [ -z "$MODULES" ]; then
     verbose_msg "downloading entire moonbase"
     MODULES=$(list_moonbase | sort)
   fi
 
-  if echo $MODULES | grep -qw moonbase ; then
+  if echo $MODULES | grep -qw moonbase; then
     # just update moonbase, no other modules
     get_moonbase
     # remove moonbase from MODULES and continue
@@ -72,7 +70,7 @@ main() {
   fi
 
   for MODULE in $MODULES; do
-    if ! lget_locked $MODULE ; then
+    if ! lget_locked $MODULE; then
       lget_lock $MODULE
       verbose_msg "downloading module \"$MODULE\""
       download_module $MODULE
@@ -84,13 +82,12 @@ main() {
 
 }
 
-
 . /etc/lunar/config
 . $BOOTSTRAP
 
 GETOPT_ARGS=$(getopt -q -n lget -o "adf:hu:vw:46" -l "all,debug,from:,help,url:,verbose,want:ipv4,ipv6" -- "$@")
 
-if [ -z "$?" ] ; then
+if [ -z "$?" ]; then
   help | view_file
   exit
 else
@@ -99,23 +96,57 @@ else
   root_check
   enviro_check
   set_priority
-  while true ; do
+  while true; do
     case "$1" in
-      -a|--all     ) export LGET_ALL=yes ;                      shift   ;;
-      -d|--debug   ) (( LUNAR_DEBUG++ )) ; export LUNAR_DEBUG ; shift   ;;
-      -f|--from    ) export SOURCE_CACHE=$2 ;                   shift 2 ;;
-      -h|--help    ) help ;                                     exit  1 ;;
-      -u|--url     ) export BASE_URL="$2" ;                     shift 2 ;;
-      -v|--verbose ) export VERBOSE="on" ;                      shift   ;;
-      -w|--want    ) export WANT_VERSION=$2 ;                   shift 2 ;;
-      -4|--ipv4    ) export USE_IPV46=4 ;                       shift   ;;
-      -6|--ipv6    ) export USE_IPV46=6 ;                       shift   ;;
-      --) shift ; break ;;
-      *) help ; exit ;;
+      -a | --all)
+        export LGET_ALL=yes
+        shift
+        ;;
+      -d | --debug)
+        ((LUNAR_DEBUG++))
+        export LUNAR_DEBUG
+        shift
+        ;;
+      -f | --from)
+        export SOURCE_CACHE=$2
+        shift 2
+        ;;
+      -h | --help)
+        help
+        exit 1
+        ;;
+      -u | --url)
+        export BASE_URL="$2"
+        shift 2
+        ;;
+      -v | --verbose)
+        export VERBOSE="on"
+        shift
+        ;;
+      -w | --want)
+        export WANT_VERSION=$2
+        shift 2
+        ;;
+      -4 | --ipv4)
+        export USE_IPV46=4
+        shift
+        ;;
+      -6 | --ipv6)
+        export USE_IPV46=6
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        help
+        exit
+        ;;
     esac
   done
 
-  if [ -n "$LGET_ALL" -o -n "$1" ] ; then
+  if [ -n "$LGET_ALL" -o -n "$1" ]; then
     main $@
   else
     help
