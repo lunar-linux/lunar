@@ -10,74 +10,67 @@
 #                                                          #
 ############################################################
 
-
-alias_menu_list_aliases()
-{
-    cut -d: -f1 "$MOONBASE/aliases" | while read -r A; do
-        echo "${A:1}"
-        CHOICE=$(get_local_config "LUNAR_ALIAS_${A:1}")
-        if [ -n "$CHOICE" ] ; then
-            echo "$CHOICE"
-        else
-            echo "[unset]"
-        fi
-    done
-}
-
-
-alias_menu_list_alias_choices()
-{
-    echo "None"
-    echo "None"
-    if [ -z "$(get_local_config "LUNAR_ALIAS_$1")" ] ; then
-        echo "on"
+alias_menu_list_aliases() {
+  cut -d: -f1 "$MOONBASE/aliases" | while read -r A; do
+    echo "${A:1}"
+    CHOICE=$(get_local_config "LUNAR_ALIAS_${A:1}")
+    if [ -n "$CHOICE" ]; then
+      echo "$CHOICE"
     else
-        echo "off"
+      echo "[unset]"
     fi
-    IFS=$STANDARD_IFS
-    grep "^%$1:" "$MOONBASE/aliases" | cut -d: -f2 | while read -r C; do
-        echo "$C"
-        echo "$C"
-        if [ "$(get_local_config "LUNAR_ALIAS_$1")" == "$C" ] ; then
-            echo "on"
-        else
-            echo "off"
-        fi
-    done
+  done
 }
 
+alias_menu_list_alias_choices() {
+  echo "None"
+  echo "None"
+  if [ -z "$(get_local_config "LUNAR_ALIAS_$1")" ]; then
+    echo "on"
+  else
+    echo "off"
+  fi
+  IFS=$STANDARD_IFS
+  grep "^%$1:" "$MOONBASE/aliases" | cut -d: -f2 | while read -r C; do
+    echo "$C"
+    echo "$C"
+    if [ "$(get_local_config "LUNAR_ALIAS_$1")" == "$C" ]; then
+      echo "on"
+    else
+      echo "off"
+    fi
+  done
+}
 
-select_aliases()
-{
-    local CHOICE
-    export IFS=$ENTER_IFS
+select_aliases() {
+  local CHOICE
+  export IFS=$ENTER_IFS
 
-    while true ; do
-        DEFAULT="$CHOICE"
-        CHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
-                           --ok-label "Select" \
-                           --cancel-label "Close" \
-                           --default-item "$DEFAULT" \
-                           --menu "" 0 0 0 \
-                           "$(alias_menu_list_aliases)") || return
+  while true; do
+    DEFAULT="$CHOICE"
+    CHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
+      --ok-label "Select" \
+      --cancel-label "Close" \
+      --default-item "$DEFAULT" \
+      --menu "" 0 0 0 \
+      "$(alias_menu_list_aliases)") || return
 
-        # modify an alias
-        DEFAULT=$(get_local_config "LUNAR_ALIAS_$CHOICE")
-        if [ -z "$DEFAULT" ] ; then
-            DEFAULT="None"
-        fi
-        if ACHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
-                               --ok-label "Select" \
-                               --cancel-label "Close" \
-                               --default-item "$DEFAULT" \
-                               --radiolist "" 0 0 0 \
-                              "$(alias_menu_list_alias_choices "$CHOICE")")
-        then
-            if [ "$ACHOICE" != "None" ] ; then
-                set_local_config "LUNAR_ALIAS_$CHOICE" "$ACHOICE"
-            else
-                unset_local_config "LUNAR_ALIAS_$CHOICE"
-            fi
-        fi
-    done
+    # modify an alias
+    DEFAULT=$(get_local_config "LUNAR_ALIAS_$CHOICE")
+    if [ -z "$DEFAULT" ]; then
+      DEFAULT="None"
+    fi
+    if ACHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
+      --ok-label "Select" \
+      --cancel-label "Close" \
+      --default-item "$DEFAULT" \
+      --radiolist "" 0 0 0 \
+      "$(alias_menu_list_alias_choices "$CHOICE")"); then
+      if [ "$ACHOICE" != "None" ]; then
+        set_local_config "LUNAR_ALIAS_$CHOICE" "$ACHOICE"
+      else
+        unset_local_config "LUNAR_ALIAS_$CHOICE"
+      fi
+    fi
+  done
 }
