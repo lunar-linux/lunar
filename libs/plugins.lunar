@@ -20,110 +20,106 @@
 #
 
 plugin_register() {
-	# first arg: plugin type
-	# second arg: function hook name
-	# Defined plugin types:
-	#  1 - SOURCE_DOWNLOAD         download some source code
-	#  2 - SOURCE_NEEDREFRESH      source exists but needs refresh
-	#  3 - SOURCE_VERIFY           perform integrity verification on a file
-	#  4 - SOURCE_UNPACK           unpack a certain file to $(PWD)
-	#  5 - MODULE_CHECK            integrity checking on installed modules
-	#  6 - KERNEL_UPDATEBOOTLOADER automate bootloader maintenance
-	#  7 - BUILD_CONFIGURE         called before running CONFIGURE
-	#  8 - BUILD_PRE_BUILD           ,,     ,,     ,,    PRE_BUILD
-	#  9 - BUILD_BUILD               ,,     ,,     ,,    BUILD
-	# 10 - BUILD_INSTALL             ,,     ,,     ,,    INSTALL
-	# 11 - BUILD_POST_BUILD          ,,     ,,     ,,    POST_BUILD
-	# 12 - BUILD_POST_INSTALL      called after running  POST_INSTALL
-	# 13 - BUILD_PRE_REMOVE        called before running PRE_REMOVE
-	# 14 - BUILD_POST_REMOVE         ,,     ,,     ,,    POST_REMOVE
-	# 15 - OPTIMIZE_MENU           Display optimization menu's
-	LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
-	((LUNAR_PLUGIN_COUNT++))
-	debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
+  # first arg: plugin type
+  # second arg: function hook name
+  # Defined plugin types:
+  #  1 - SOURCE_DOWNLOAD         download some source code
+  #  2 - SOURCE_NEEDREFRESH      source exists but needs refresh
+  #  3 - SOURCE_VERIFY           perform integrity verification on a file
+  #  4 - SOURCE_UNPACK           unpack a certain file to $(PWD)
+  #  5 - MODULE_CHECK            integrity checking on installed modules
+  #  6 - KERNEL_UPDATEBOOTLOADER automate bootloader maintenance
+  #  7 - BUILD_CONFIGURE         called before running CONFIGURE
+  #  8 - BUILD_PRE_BUILD           ,,     ,,     ,,    PRE_BUILD
+  #  9 - BUILD_BUILD               ,,     ,,     ,,    BUILD
+  # 10 - BUILD_INSTALL             ,,     ,,     ,,    INSTALL
+  # 11 - BUILD_POST_BUILD          ,,     ,,     ,,    POST_BUILD
+  # 12 - BUILD_POST_INSTALL      called after running  POST_INSTALL
+  # 13 - BUILD_PRE_REMOVE        called before running PRE_REMOVE
+  # 14 - BUILD_POST_REMOVE         ,,     ,,     ,,    POST_REMOVE
+  # 15 - OPTIMIZE_MENU           Display optimization menu's
+  LUNAR_PLUGINS=(${LUNAR_PLUGINS[@]} "$1:$2")
+  ((LUNAR_PLUGIN_COUNT++))
+  debug_msg "Registered plugin #$LUNAR_PLUGIN_COUNT, $1 -> $2()"
 }
-
 
 plugin_call() {
-    local REQUESTED_TYPE COUNT THIS_TYPE THIS_HANDLER RETVAL
-	debug_msg "plugin_call($@)"
-	# scan available plugins for plugin_type $1 and pass args to it
-	REQUESTED_TYPE=$1
-	shift
-	for ((COUNT=0; COUNT < $LUNAR_PLUGIN_COUNT; COUNT++)); do
-		THIS_TYPE=${LUNAR_PLUGINS[$COUNT]%%:*}
-		THIS_HANDLER=${LUNAR_PLUGINS[$COUNT]#*:}
-		if [ "$REQUESTED_TYPE" == "$THIS_TYPE" ]; then
-			# we have identified a valid plugin for this type
-			$THIS_HANDLER $@
-			RETVAL=$?
-			if [ $RETVAL -eq 2 ]; then
-				continue
-			else
-				debug_msg "plugin $THIS_HANDLER returned \"$RETVAL\""
-				return $RETVAL
-			fi
-		fi
-	done
-	debug_msg "Finished running all plugins for type \"$REQUESTED_TYPE\""
-	return 2
+  local REQUESTED_TYPE COUNT THIS_TYPE THIS_HANDLER RETVAL
+  debug_msg "plugin_call($@)"
+  # scan available plugins for plugin_type $1 and pass args to it
+  REQUESTED_TYPE=$1
+  shift
+  for ((COUNT = 0; COUNT < $LUNAR_PLUGIN_COUNT; COUNT++)); do
+    THIS_TYPE=${LUNAR_PLUGINS[$COUNT]%%:*}
+    THIS_HANDLER=${LUNAR_PLUGINS[$COUNT]#*:}
+    if [ "$REQUESTED_TYPE" == "$THIS_TYPE" ]; then
+      # we have identified a valid plugin for this type
+      $THIS_HANDLER $@
+      RETVAL=$?
+      if [ $RETVAL -eq 2 ]; then
+        continue
+      else
+        debug_msg "plugin $THIS_HANDLER returned \"$RETVAL\""
+        return $RETVAL
+      fi
+    fi
+  done
+  debug_msg "Finished running all plugins for type \"$REQUESTED_TYPE\""
+  return 2
 }
-
 
 update_plugin() {
-	local SECTION PLUGIN
-	debug_msg "update_plugin($@)"
-	# update plugins of all modules or a specific one
-	#
-	# $1 - module name
-	# $2 - forced removal of plugin
-	#
-	# scan module for plugins, and add/delete them as needed
-	if SECTION=$(find_section $1); then
-		if [ -d $MOONBASE/$SECTION/$1/plugin.d ]; then
-			if [ "$2" == "install" ] ; then
-				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
-					debug_msg "Installed \"$(basename $PLUGIN)\""
-					install -m644 $PLUGIN $PLUGIN_DIR/
-				done
-			elif [ "$2" == "remove" ] || ! module_installed $1 ; then
-				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
-					debug_msg "Removed \"$(basename $PLUGIN)\""
-					rm -f $PLUGIN_DIR/$(basename $PLUGIN)
-				done
-			else
-				for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
-					debug_msg "Installed \"$(basename $PLUGIN)\""
-					install -m644 $PLUGIN $PLUGIN_DIR/
-				done
-			fi
-		fi
-		reload_plugins
-	fi
+  local SECTION PLUGIN
+  debug_msg "update_plugin($@)"
+  # update plugins of all modules or a specific one
+  #
+  # $1 - module name
+  # $2 - forced removal of plugin
+  #
+  # scan module for plugins, and add/delete them as needed
+  if SECTION=$(find_section $1); then
+    if [ -d $MOONBASE/$SECTION/$1/plugin.d ]; then
+      if [ "$2" == "install" ]; then
+        for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+          debug_msg "Installed \"$(basename $PLUGIN)\""
+          install -m644 $PLUGIN $PLUGIN_DIR/
+        done
+      elif [ "$2" == "remove" ] || ! module_installed $1; then
+        for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+          debug_msg "Removed \"$(basename $PLUGIN)\""
+          rm -f $PLUGIN_DIR/$(basename $PLUGIN)
+        done
+      else
+        for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
+          debug_msg "Installed \"$(basename $PLUGIN)\""
+          install -m644 $PLUGIN $PLUGIN_DIR/
+        done
+      fi
+    fi
+    reload_plugins
+  fi
 }
-
 
 update_plugins() {
-	local MODULE
-	debug_msg "update_plugins($@)"
-	# find all plugins in moonbase and run update_plugin() on them
-	verbose_msg "Updating plugins"
-	find $MOONBASE -wholename "*/plugin.d/*.plugin" | while read PLUGIN ; do
-        local baseplugin
-        pluginbase=${PLUGIN%/plugin.d/*}
-        update_plugin ${pluginbase##*/}
-	done
+  local MODULE
+  debug_msg "update_plugins($@)"
+  # find all plugins in moonbase and run update_plugin() on them
+  verbose_msg "Updating plugins"
+  find $MOONBASE -wholename "*/plugin.d/*.plugin" | while read PLUGIN; do
+    local baseplugin
+    pluginbase=${PLUGIN%/plugin.d/*}
+    update_plugin ${pluginbase##*/}
+  done
 }
 
-
 reload_plugins() {
-    local ITERATOR
-    debug_msg "reload_plugins($@)"
+  local ITERATOR
+  debug_msg "reload_plugins($@)"
 
-    # Unload current plugins
-    unset LUNAR_PLUGINS
+  # Unload current plugins
+  unset LUNAR_PLUGINS
 
-    for ITERATOR in $PLUGIN_DIR/*.plugin; do
-        . $ITERATOR
-    done
+  for ITERATOR in $PLUGIN_DIR/*.plugin; do
+    . $ITERATOR
+  done
 }
