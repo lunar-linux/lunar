@@ -27,18 +27,18 @@
 
 add_queue() {
   debug_msg "add_queue ($@)"
-   in_queue() {
-  debug_msg "   in_queue ($@)"
-      grep -q "^"$2"\$" "$1" && return 0 || return 1
-   }
+  in_queue() {
+    debug_msg "   in_queue ($@)"
+    grep -q "^"$2"\$" "$1" && return 0 || return 1
+  }
 
-   [ "$#" -ne 2 ] && return 1
+  [ "$#" -ne 2 ] && return 1
 
-   [ -f "$1" ] || touch $1 2>/dev/null || return 1
+  [ -f "$1" ] || touch $1 2>/dev/null || return 1
 
-   lock_file $1    &&
-   ! in_queue $1 $2 && echo "$2" >> $1
-   unlock_file $1
+  lock_file $1 &&
+    ! in_queue $1 $2 && echo "$2" >>$1
+  unlock_file $1
 }
 
 # function: remove_queue
@@ -48,39 +48,36 @@ add_queue() {
 remove_queue() {
   debug_msg "remove_queue ($@)"
 
-   [ -f "$1" ] || return 1
+  [ -f "$1" ] || return 1
 
-   if [ -n "$2" ];
-   then
-      TMP_QUEUE="$TMPDIR/lunar_remove_queue.$$"
-      rm -f $TMP_QUEUE 2>/dev/null
-      lock_file $1                 &&
-      cat "$1" | grep -v "^"$2"\$" > $TMP_QUEUE
-      cat "$TMP_QUEUE" > $1
-      unlock_file $1
-      rm -f $TMP_QUEUE 2>/dev/null
-   else
-      lock_file $1                   &&
-      echo `cat "$1" | sed 1!d`      &&
-      cat "$1" | sed "1d" > $1       &&
+  if [ -n "$2" ]; then
+    TMP_QUEUE="$TMPDIR/lunar_remove_queue.$$"
+    rm -f $TMP_QUEUE 2>/dev/null
+    lock_file $1 &&
+      cat "$1" | grep -v "^"$2"\$" >$TMP_QUEUE
+    cat "$TMP_QUEUE" >$1
+    unlock_file $1
+    rm -f $TMP_QUEUE 2>/dev/null
+  else
+    lock_file $1 &&
+      echo $(cat "$1" | sed 1!d) &&
+      cat "$1" | sed "1d" >$1 &&
       unlock_file $1
   fi
 }
 
-
 push_install_queue() {
   debug_msg "push_install_queue ($@)"
-  remove_queue   $REMOVE_QUEUE    "$1"
-  remove_queue   $INSTALL_QUEUE   "$1"
-  !  module_installed             "$1"  &&
-  add_queue  $INSTALL_QUEUE       "$1"
+  remove_queue $REMOVE_QUEUE "$1"
+  remove_queue $INSTALL_QUEUE "$1"
+  ! module_installed "$1" &&
+    add_queue $INSTALL_QUEUE "$1"
 }
-
 
 push_remove_queue() {
   debug_msg "push_remove_queue ($@)"
-  remove_queue   $INSTALL_QUEUE  "$1"
-  remove_queue   $REMOVE_QUEUE   "$1"
-  module_installed               "$1"  &&
-  add_queue  $REMOVE_QUEUE       "$1"
+  remove_queue $INSTALL_QUEUE "$1"
+  remove_queue $REMOVE_QUEUE "$1"
+  module_installed "$1" &&
+    add_queue $REMOVE_QUEUE "$1"
 }

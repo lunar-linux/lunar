@@ -12,8 +12,8 @@
 ############################################################
 
 # we really need to do this:
-trap    ":" QUIT TSTP SEGV
-export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
+trap ":" QUIT TSTP SEGV
+export PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 
 #
 # work notes:
@@ -22,9 +22,9 @@ export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 # Need to rectify daemon-restart test and script deletion of /var/run/<prog>.pid
 # Need to assess impact of the above changes elswehere
 #
-# 
 #
-# 
+#
+#
 
 #
 # for whoever called us, we would like to know the follofing data,
@@ -62,70 +62,68 @@ export  PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 # default_{start|stop|restart|probe|reload|status}
 #
 
-  CHKCONFIG=`grep '^# chkconfig:'   "$0" | cut -d : -f 2-2`
-CONFIGFILES=`grep '^# config:'      "$0" | cut -d : -f 2-2 | tr -d " "`
+CHKCONFIG=$(grep '^# chkconfig:' "$0" | cut -d : -f 2-2)
+CONFIGFILES=$(grep '^# config:' "$0" | cut -d : -f 2-2 | tr -d " ")
 # DESCRIPTION=`grep '^# description: ' "$0" | cut -d : -f 2-2 | tr -d " "`
-      SHORT=`grep '^# short:'       "$0" | cut -d : -f 2-2 | tr -d " "`
-    PIDFILE=`grep '^# pidfile:'     "$0" | cut -d : -f 2-2 | tr -d " "`
-    PROCESS=`grep '^# processname:' "$0" | cut -d : -f 2-2 | tr -d " "`
-    SIGSTOP=`grep '^# sigstop:'     "$0" | cut -d : -f 2-2 | tr -d " "`
-  SIGRELOAD=`grep '^# sigreload:'   "$0" | cut -d : -f 2-2 | tr -d " "`
-      RUNAS=`grep '^# runas:'       "$0" | cut -d : -f 2-2 | tr -d " "`
+SHORT=$(grep '^# short:' "$0" | cut -d : -f 2-2 | tr -d " ")
+PIDFILE=$(grep '^# pidfile:' "$0" | cut -d : -f 2-2 | tr -d " ")
+PROCESS=$(grep '^# processname:' "$0" | cut -d : -f 2-2 | tr -d " ")
+SIGSTOP=$(grep '^# sigstop:' "$0" | cut -d : -f 2-2 | tr -d " ")
+SIGRELOAD=$(grep '^# sigreload:' "$0" | cut -d : -f 2-2 | tr -d " ")
+RUNAS=$(grep '^# runas:' "$0" | cut -d : -f 2-2 | tr -d " ")
 
-get_data () {
+get_data() {
   # define these
   LINKNAME=${0##*/}
   BASENAME=${LINKNAME#*[SK][0-9][0-9]}
 
   # attempt to get these right:
-  if [ ! -z $PROCESS ] ; then
+  if [ ! -z $PROCESS ]; then
     if [ "${PROCESS:0:1}" = "/" ]; then
       PROCESS_FULL=$PROCESS
-      PROCESS_BASE=`basename $PROCESS`
+      PROCESS_BASE=$(basename $PROCESS)
     else
-      if ! which 2> /dev/null ; then 
-        PROCESS_FULL=`which $PROCESS`
-        PROCESS_BASE=`basename $PROCESS`
+      if ! which 2>/dev/null; then
+        PROCESS_FULL=$(which $PROCESS)
+        PROCESS_BASE=$(basename $PROCESS)
       else
         PROCESS=
       fi
     fi
-    [ -z $PIDFILE   ] &&   PIDFILE=/var/run/$PROCESS_BASE.pid
-    [ -z $SHORT     ] &&     SHORT=$BASENAME
-    [ -z $SIGSTOP   ] &&   SIGSTOP=TERM
+    [ -z $PIDFILE ] && PIDFILE=/var/run/$PROCESS_BASE.pid
+    [ -z $SHORT ] && SHORT=$BASENAME
+    [ -z $SIGSTOP ] && SIGSTOP=TERM
     [ -z $SIGRELOAD ] && SIGRELOAD=HUP
   fi
 
   # VITAL INFO: SERVPID
-  if [ -f "$PIDFILE" ] ; then
-    if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+  if [ -f "$PIDFILE" ]; then
+    if [ -d "/proc/$(cat $PIDFILE)" ]; then
       SERVPID=$(cat "$PIDFILE")
     fi
   fi
 }
 
-
 # define the output string colors and text
-        ESC=`echo -en "\033"`
-  RESULT_OK="${ESC}[\061;32m${ESC}[70G[\040\040\040OK\040\040\040]${ESC}[m"
+ESC=$(echo -en "\033")
+RESULT_OK="${ESC}[\061;32m${ESC}[70G[\040\040\040OK\040\040\040]${ESC}[m"
 RESULT_FAIL="${ESC}[\061;31m${ESC}[70G[\040FAILED\040]${ESC}[m"
 RESULT_WARN="${ESC}[\061;33m${ESC}[70G[\040\040WARN\040\040]${ESC}[m"
 JUNK="]]]]]]"
 
-
 # Handy
-pgrep () {
-  if [ -n "$SERVPID" ] ; then
+pgrep() {
+  if [ -n "$SERVPID" ]; then
     # we will kill the daemon:
-    if [ -d /proc/$SERVPID ] ; then
+    if [ -d /proc/$SERVPID ]; then
       return 0
     else
       return 1
     fi
   else
     # where is the new daemon???
-    if [ -f "$PIDFILE" ] ; then
-      if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+    if [ -f "$PIDFILE" ]; then
+      if [ -d "/proc/$(cat $PIDFILE)" ]; then
         return 0
       else
         return 255
@@ -133,12 +131,12 @@ pgrep () {
     else
       # sleep 1
       # second chance:
-      if [ -f "$PIDFILE" ] ; then
-        if [ -d "/proc/$(cat $PIDFILE)" ] ; then
+      if [ -f "$PIDFILE" ]; then
+        if [ -d "/proc/$(cat $PIDFILE)" ]; then
           return 0
         else
           return 255
-	fi
+        fi
       else
         return 255
       fi
@@ -146,13 +144,12 @@ pgrep () {
   fi
 }
 
-
-pkill () {
-  if [ -z "$SERVPID" ] ; then
+pkill() {
+  if [ -z "$SERVPID" ]; then
     return 255
   else
-    if kill -$SIGSTOP $SERVPID >& /dev/null ; then
-      if [ -f $PIDFILE ] ; then
+    if kill -$SIGSTOP $SERVPID >&/dev/null; then
+      if [ -f $PIDFILE ]; then
         rm -f $PIDFILE
       fi
       return 0
@@ -162,12 +159,11 @@ pkill () {
   fi
 }
 
-
-prload () {
-  if [ ! -f $PIDFILE ] ; then
+prload() {
+  if [ ! -f $PIDFILE ]; then
     return 255
   else
-    if kill -$SIGRELOAD $SERVPID >& /dev/null ; then
+    if kill -$SIGRELOAD $SERVPID >&/dev/null; then
       return 0
     else
       return 255
@@ -175,20 +171,18 @@ prload () {
   fi
 }
 
-
-mkpid () {
-  if [ ! -e $PIDFILE ] ; then
+mkpid() {
+  if [ ! -e $PIDFILE ]; then
     echo -n "[PID] "
-    /bin/pgrep -o -P 1 "^$PROCESS_BASE$" > $PIDFILE && return 0 || return 255
-  else 
-    return 
+    /bin/pgrep -o -P 1 "^$PROCESS_BASE$" >$PIDFILE && return 0 || return 255
+  else
+    return
   fi
 }
 
-
-pidok () {
-  if [ -e $PIDFILE ] ; then
-    if pgrep ; then 
+pidok() {
+  if [ -e $PIDFILE ]; then
+    if pgrep; then
       return 0
     else
       return 255
@@ -198,59 +192,54 @@ pidok () {
   fi
 }
 
-
-log_success_msg () {
+log_success_msg() {
   echo -e "$1 $RESULT_OK"
 }
 
-
-log_failure_msg () {
+log_failure_msg() {
   echo -e "$1 $RESULT_FAIL"
 }
 
-
-log_warning_msg () {
+log_warning_msg() {
   echo -e "$1 $RESULT_WARN"
 }
 
-
-start_process () {
+start_process() {
   if [ ! -z "$RUNAS" ]; then
     /bin/su $RUNAS -c "$PROCESS_FULL $ARGS" &&
       return 0 || return 255
   else
     $PROCESS_FULL $ARGS &&
-    return 0 || return 255
+      return 0 || return 255
   fi
 }
 
-
 # the main functions are defined as default_ so you may call these
 # directly from a script too
-default_start () {
+default_start() {
   get_data
   # start the daemon
   echo -n "Starting $SHORT: "
   # check to see if it's not already running
-  if ! pgrep ; then
+  if ! pgrep; then
     # sanity check:
-    if [ -f $PIDFILE ] ; then
+    if [ -f $PIDFILE ]; then
       rm -f $PIDFILE
     fi
     # start it up ourselves
-    if start_process ; then
+    if start_process; then
       # starup succeeded, now check if it really is running
-      if pgrep ; then
+      if pgrep; then
         echo -e $RESULT_OK
-      else 
+      else
         # here's the broken daemon case
-	mkpid
-	if pgrep ; then
-	  echo -e $RESULT_OK
-	else
+        mkpid
+        if pgrep; then
+          echo -e $RESULT_OK
+        else
           # startup failed on our side
           echo -e $RESULT_FAIL
-	fi
+        fi
       fi
     fi
   else
@@ -260,24 +249,23 @@ default_start () {
   fi
 }
 
-
-default_stop () {
+default_stop() {
   get_data
   # stop the daemon
   echo -n "Stopping $SHORT: "
-  if pgrep ; then
+  if pgrep; then
     pkill
-    for COUNT in 1 2 3 4 5 ; do
+    for COUNT in 1 2 3 4 5; do
       pgrep && pkill
       pgrep && echo -n "." && sleep 1
-      if ! pgrep ; then
+      if ! pgrep; then
         # killed OK
         [ -e $PIDFILE ] && rm $PIDFILE
         echo -e $RESULT_OK
         break
       fi
     done
-    if pgrep ; then
+    if pgrep; then
       # FAILED!
       mkpid
       echo -e "kill failed$RESULT_FAIL"
@@ -287,26 +275,24 @@ default_stop () {
   fi
 }
 
-
-default_restart () {
+default_restart() {
   get_data
   # restart ourselves
   $0 stop && $0 start
 }
 
-
-default_probe () {
+default_probe() {
   get_data
   # see if we need to reload it based on the configs
-  if [ -e $PIDFILE ] ; then
+  if [ -e $PIDFILE ]; then
     # is it really there?
-    if pidok ; then
+    if pidok; then
       # test date of config files against PID dile
       NEEDRELOAD="false"
-      for CONFIGFILE in $CONFIGFILES ; do
+      for CONFIGFILE in $CONFIGFILES; do
         [ $CONFIGFILE -nt $PIDFILE ] && NEEDRELOAD="true"
       done
-      if [ "X$NEEDRELOAD" == "Xtrue" ] ; then
+      if [ "X$NEEDRELOAD" == "Xtrue" ]; then
         # we need to reload
         $0 reload
       else
@@ -324,22 +310,21 @@ default_probe () {
   fi
 }
 
-
-default_reload () {
+default_reload() {
   get_data
   # reload it
   echo -n "Reloading $SHORT: "
-  if [ -e $PIDFILE ] ; then
+  if [ -e $PIDFILE ]; then
     # we have a pid file
     prload
     # test existence
-    if pidok ; then
+    if pidok; then
       # still running then
       touch $PIDFILE
       echo -e $RESULT_OK
     else
       # something went wrong
-      if pgrep ; then
+      if pgrep; then
         # changed PID
         mkpid
         echo -e $RESULT_OK
@@ -355,17 +340,16 @@ default_reload () {
   fi
 }
 
-
-default_status () {
+default_status() {
   get_data
   # check if it is running
   echo -n "Checking $SHORT: "
-  if pidok ; then
+  if pidok; then
     # we have a pid file and it's okay
     echo -e "$RESULT_OK"
   else
     # something went wrong
-    if pgrep ; then
+    if pgrep; then
       # changed PID
       mkpid
       echo -e "Was reloaded$RESULT_OK"
@@ -377,16 +361,15 @@ default_status () {
   fi
 }
 
-
-default_install () {
+default_install() {
   get_data
   # make the links for this file go to the right places
-  LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
-  LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
-  LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
-  ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
+  LEVELS=$(echo $CHKCONFIG | cut -d ' ' -f 1)
+  LSTART=$(echo $CHKCONFIG | cut -d ' ' -f 2)
+  LSTOP=$(echo $CHKCONFIG | cut -d ' ' -f 3)
+  ls /etc/rc?.d/???$BASENAME >/dev/null 2>&1 &&
     echo "Warning: some links already exist!"
-  for LEVEL in 0 1 2 3 4 5 6 ; do
+  for LEVEL in 0 1 2 3 4 5 6; do
     echo $LEVELS | grep -q $LEVEL && {
       # make start link
       echo ln -s ../init.d/$BASENAME /etc/rc$LEVEL.d/S$LSTART$BASENAME
@@ -399,14 +382,13 @@ default_install () {
   done
 }
 
-
-default_uninstall () {
+default_uninstall() {
   get_data
-     # remove the links for this script
-  LEVELS=`echo $CHKCONFIG | cut -d ' ' -f 1`
-  LSTART=`echo $CHKCONFIG | cut -d ' ' -f 2`
-  LSTOP=`echo $CHKCONFIG | cut -d ' ' -f 3`
-  for LEVEL in 0 1 2 3 4 5 6 ; do
+  # remove the links for this script
+  LEVELS=$(echo $CHKCONFIG | cut -d ' ' -f 1)
+  LSTART=$(echo $CHKCONFIG | cut -d ' ' -f 2)
+  LSTOP=$(echo $CHKCONFIG | cut -d ' ' -f 3)
+  for LEVEL in 0 1 2 3 4 5 6; do
     echo $LEVELS | grep -q $LEVEL && {
       # remove start link
       echo rm /etc/rc$LEVEL.d/S$LSTART$BASENAME
@@ -419,49 +401,52 @@ default_uninstall () {
       # tell me PLEASE!!!
     }
   done
-  ls /etc/rc?.d/???$BASENAME > /dev/null 2>&1 &&
+  ls /etc/rc?.d/???$BASENAME >/dev/null 2>&1 &&
     echo "Warning: some links still exist!"
 }
 
-
-default_usage () { 
+default_usage() {
   # default usage message
   echo "usage: $0 {start|stop|restart|reload|status}"
 }
-
 
 # default when no action passed
 [ -z $1 ] && ACTION=usage || ACTION=$1
 
 # and run the code
-if  set | grep -q "^$ACTION ()" ; then 
+if set | grep -q "^$ACTION ()"; then
   # do the custom function
   $ACTION $@
 else
   get_data
   # these are always available:
   case $ACTION in
-               (install) default_install   ; return ;;
-	     (uninstall) default_uninstall ; return ;;
+    install)
+      default_install
+      return
+      ;;
+    uninstall)
+      default_uninstall
+      return
+      ;;
   esac
   # double check these:
   if [ -z $PROCESS ]; then
-     echo -e "Processname is not defined!$RESULT_FAIL"
-     exit 1
+    echo -e "Processname is not defined!$RESULT_FAIL"
+    exit 1
   fi
   if [ ! -x $PROCESS_FULL ]; then
     echo -e "The executable $PROCESS_BASE does not exist!$RESULT_FAIL"
     exit 1
   fi
   # do the builtin function
-  case $ACTION in 
-    (start|start_daemon) default_start     ;;
-         (stop|killproc) default_stop      ;;
-               (restart) default_restart   ;;
-                 (probe) default_probe     ;;
-                (reload) default_reload    ;;
-                (status) default_status    ;;
-                      *) default_usage     ;;
+  case $ACTION in
+    start | start_daemon) default_start ;;
+    stop | killproc) default_stop ;;
+    restart) default_restart ;;
+    probe) default_probe ;;
+    reload) default_reload ;;
+    status) default_status ;;
+    *) default_usage ;;
   esac
 fi
-

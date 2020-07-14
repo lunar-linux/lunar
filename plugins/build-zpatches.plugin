@@ -12,9 +12,7 @@
 #                                                           #
 #############################################################
 
-
-plugin_zpatches_apply()
-{
+plugin_zpatches_apply() {
   local PATCHDIRS FPATCH PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
   if [[ -d $MOONBASE/zlocal/_patches/$MODULE || -d $SCRIPT_DIRECTORY/patch.d ]]; then
     cd $SOURCE_DIRECTORY
@@ -34,21 +32,21 @@ plugin_zpatches_apply()
     # Now find all patches and apply them
     # We also sort them so it possible to apply patch order
     # by prefixing a patch with 01, 02, 03 etc
-	 # ignore hidden files
+    # ignore hidden files
     find $PATCHDIRS -maxdepth 1 -type f -name '[^\.]*' | sed 's;[^/]*$;& &;' | sort -t ' ' -k 2 | while read FPATCH PATCH; do
       verbose_msg "Applying $PATCH for $MODULE"
 
-      if [[ -n `echo $PATCH | grep '\.tar'` ]] ; then
+      if [[ -n $(echo $PATCH | grep '\.tar') ]]; then
         TARCMD="tar x -O"
       else
         TARCMD="cat"
       fi
 
-      if [[ -n `echo $PATCH | grep '\.bz2$'` ]] ; then
+      if [[ -n $(echo $PATCH | grep '\.bz2$') ]]; then
         GZCMD="bzcat"
-      elif [[ -n `echo $PATCH | grep '\.gz$'` ]] ; then
+      elif [[ -n $(echo $PATCH | grep '\.gz$') ]]; then
         GZCMD="zcat"
-      elif [[ -n `echo $PATCH | grep '\.xz$'` ]] ; then
+      elif [[ -n $(echo $PATCH | grep '\.xz$') ]]; then
         GZCMD="xzcat"
       else
         GZCMD="cat"
@@ -57,14 +55,14 @@ plugin_zpatches_apply()
       TMPFILE1=$(temp_create "zpatch_1")
       TMPFILE2=$(temp_create "zpatch_2")
 
-      if $GZCMD "$FPATCH" > $TMPFILE1 ; then
+      if $GZCMD "$FPATCH" >$TMPFILE1; then
         # uncompress OK
-        if cat "$TMPFILE1" | $TARCMD > $TMPFILE2 ; then
+        if cat "$TMPFILE1" | $TARCMD >$TMPFILE2; then
           # untar OK
           # Trying -p1 first or else we try -p0
           # An error will be visible if -p1 fail which is normal
           # Only return error if both -p1 and -p0 fail
-          patch -N -p1 -t < $TMPFILE2 || patch -N -p0 -t < $TMPFILE2
+          patch -N -p1 -t <$TMPFILE2 || patch -N -p0 -t <$TMPFILE2
           if [ $? -ne 0 ]; then
             message "${PROBLEM_COLOR}ERROR: Failed to apply ${PATCH} for ${MODULE}${DEFAULT_COLOR}"
             temp_destroy $TMPFILE1

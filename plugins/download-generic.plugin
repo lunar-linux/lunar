@@ -9,8 +9,7 @@
 #                                                          #
 ############################################################
 
-
-plugin_source_download_generic()  {
+plugin_source_download_generic() {
   local URL TMP_FILE
   # check if we can handle this type of URL:
   if [ ${1:0:7} != "http://" -a ${1:0:8} != "https://" -a ${1:0:6} != "ftp://" ]; then
@@ -19,30 +18,30 @@ plugin_source_download_generic()  {
   debug_msg "plugin_source_download_generic ($@)"
 
   URL=$1
-  if [[ $4 == old ]] ; then
+  if [[ $4 == old ]]; then
     URL="${URL%/}/$2"
   fi
 
   # this is what the download will be stored as initially:
   TMP_FILE=$TMPDIR/$2
 
-  if [ "$FTP_ACTIVE" == "on" -o "$FTP_PASSIVE" == "off" ] ; then
+  if [ "$FTP_ACTIVE" == "on" -o "$FTP_PASSIVE" == "off" ]; then
     WGET_OPTS+=" --no-passive-ftp"
   fi
 
-  if [ "$CONTINUE" == "off" ] ; then
+  if [ "$CONTINUE" == "off" ]; then
     erase $TMP_FILE
   else
     WGET_OPTS+=" --continue"
   fi
 
-  if [ "$USE_CACHE" == "off" ] ; then
+  if [ "$USE_CACHE" == "off" ]; then
     WGET_OPTS+=" --cache=off"
   else
     WGET_OPTS+=" --cache=on"
   fi
 
-  if [ -n "$DOWNLOAD_RATE" ] ; then
+  if [ -n "$DOWNLOAD_RATE" ]; then
     WGET_OPTS+=" --limit-rate=${DOWNLOAD_RATE}"
   fi
 
@@ -59,13 +58,13 @@ plugin_source_download_generic()  {
   WGET_OPTS+=" --tries=${NUM_RETRY:-5}"
 
   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
-  [ -n  "$ftp_proxy" ] && export  ftp_proxy=$ftp_proxy
-  [ -n   "$no_proxy" ] && export   no_proxy=$no_proxy
+  [ -n "$ftp_proxy" ] && export ftp_proxy=$ftp_proxy
+  [ -n "$no_proxy" ] && export no_proxy=$no_proxy
 
   verbose_msg "calling \"wget $WGET_OPTS \"$URL\" --output-document $TMP_FILE\""
-  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL" --output-document "$TMP_FILE" ; then
+  if erase $TMP_FILE && wget --progress=bar:force $WGET_OPTS "$URL" --output-document "$TMP_FILE"; then
     # looks like it worked
-    if testpack $TMP_FILE ; then
+    if testpack $TMP_FILE; then
       if [ "$TMP_FILE" != "$3/$2" ]; then
         install -m644 $TMP_FILE "$3/$2"
         rm $TMP_FILE
@@ -83,6 +82,5 @@ plugin_source_download_generic()  {
     return 2
   fi
 }
-
 
 plugin_register SOURCE_DOWNLOAD plugin_source_download_generic

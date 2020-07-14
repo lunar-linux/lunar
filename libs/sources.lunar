@@ -18,13 +18,12 @@
 #                                                          #
 ############################################################
 
-
 verify_source() {
   local VERIFIED SOURCE_FILE
   debug_msg "verify_source ($@)"
   VERIFIED="true"
-  for SOURCE_FILE in $@ ; do
-    if [ ! -f $SOURCE_CACHE/$1 ] ; then
+  for SOURCE_FILE in $@; do
+    if [ ! -f $SOURCE_CACHE/$1 ]; then
       message "${PROBLEM_COLOR}Missing ${FILE_COLOR}${1}${DEFAULT_COLOR}"
       message "${PROBLEM_COLOR}Lunar Install aborting.${DEFAULT_COLOR}"
       activity_log "lin" "$MODULE" "$VERSION" "failed" "because it was missing source:  $1"
@@ -33,41 +32,38 @@ verify_source() {
   done
 }
 
-
 # function : sources
 # usage    : sources <module_name>
 # purpose  : displays the sources needed for a given module
 sources() {
-(
-  debug_msg "sources ($@)"
-  MAX_SOURCES=${MAX_SOURCES:-100}
+  (
+    debug_msg "sources ($@)"
+    MAX_SOURCES=${MAX_SOURCES:-100}
 
-  if ! run_details $1 ; then
-    return 1
-  fi
+    if ! run_details $1; then
+      return 1
+    fi
 
-  for (( CNT=1; CNT<=$MAX_SOURCES; CNT++ )) ; do
-    TEMP=SOURCE$((CNT))
-    TEMP=${TEMP/%SOURCE1/SOURCE}
+    for ((CNT = 1; CNT <= $MAX_SOURCES; CNT++)); do
+      TEMP=SOURCE$((CNT))
+      TEMP=${TEMP/%SOURCE1/SOURCE}
 
-    eval SRC=\$${TEMP}
+      eval SRC=\$${TEMP}
 
-    [ -z "$SRC" ] && break
+      [ -z "$SRC" ] && break
 
-    echo $SRC
-  done
-)
+      echo $SRC
+    done
+  )
 }
 
-
-erase()  {
+erase() {
   debug_msg "erase ($@)"
   if [ "$PARTIAL" == "off" ]; then
     debug_msg "erase: deleting \"$1\""
     rm -f $1
   fi
 }
-
 
 unpack() {
   local FILENAME
@@ -77,84 +73,82 @@ unpack() {
   verbose_msg "Unpacking \"$FILENAME\" in \"$(pwd)\""
   plugin_call SOURCE_UNPACK $SOURCE_CACHE/$1
 
-  if [ "$?" != 0 ] ; then
+  if [ "$?" != 0 ]; then
     message "${PROBLEM_COLOR}! Error while unpacking ${FILE_COLOR}$SOURCE_CACHE/$1${DEFAULT_COLOR}${PROBLEM_COLOR}${DEFAULT_COLOR}"
     return 1
   fi
 }
 
-
 # usage: verify_all_sources $MODULE
 # check all sources regarding verification method
 verify_all_sources() {
-(
-  debug_msg "verify_all_sources ($@)"
-  MAX_SOURCES=${MAX_SOURCES:-100}
+  (
+    debug_msg "verify_all_sources ($@)"
+    MAX_SOURCES=${MAX_SOURCES:-100}
 
-  if ! run_details $1 ; then
-    return 1
-  fi
-
-  if [ -n "$WANT_VERSION" ] ; then
-    message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Integrity checking is disabled when using \"--want\"!${DEFAULT_COLOR}"
-    return 0
-  fi
-
-  for (( C=1 ; C<=$MAX_SOURCES ; C++ )) ; do
-    TEMP=SOURCE$((C))
-    TEMP=${TEMP/%SOURCE1/SOURCE}
-    eval SRC=\$${TEMP}
-
-    [ -z "$SRC" ] && break
-
-    # it needs to exist prior before we can check it:
-    if ! verify_source $SRC ; then
+    if ! run_details $1; then
       return 1
     fi
-    eval VFYS=\${${TEMP}_VFY[@]}
 
-    # cumulate result:
-    unset RESULT
-    if [ -n "$VFYS" ] ; then
-      # we need to check ALL args for validity... if one fails we should not
-      # trust the source
-      for VFY in $VFYS ; do
-        plugin_call SOURCE_VERIFY $SRC $VFY
-		if [ $? == 1 ]; then
-		  RESULT=1
-		fi
-      done
-      # so what if?
-      if [ "$RESULT" == "1" ] ; then
-        # remove?
-        MODULE=$1
-        message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
-	
-        if query "Remove \"$SOURCE_CACHE/$SRC\" ? " y ; then
-          rm -f $SOURCE_CACHE/$SRC
+    if [ -n "$WANT_VERSION" ]; then
+      message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Integrity checking is disabled when using \"--want\"!${DEFAULT_COLOR}"
+      return 0
+    fi
+
+    for ((C = 1; C <= $MAX_SOURCES; C++)); do
+      TEMP=SOURCE$((C))
+      TEMP=${TEMP/%SOURCE1/SOURCE}
+      eval SRC=\$${TEMP}
+
+      [ -z "$SRC" ] && break
+
+      # it needs to exist prior before we can check it:
+      if ! verify_source $SRC; then
+        return 1
+      fi
+      eval VFYS=\${${TEMP}_VFY[@]}
+
+      # cumulate result:
+      unset RESULT
+      if [ -n "$VFYS" ]; then
+        # we need to check ALL args for validity... if one fails we should not
+        # trust the source
+        for VFY in $VFYS; do
+          plugin_call SOURCE_VERIFY $SRC $VFY
+          if [ $? == 1 ]; then
+            RESULT=1
+          fi
+        done
+        # so what if?
+        if [ "$RESULT" == "1" ]; then
+          # remove?
+          MODULE=$1
+          message "${MESSAGE_COLOR}You should remove ${DEFAULT_COLOR}${FILE_COLOR}$SRC${DEFAULT_COLOR}${MESSAGE_COLOR} !${DEFAULT_COLOR}"
+
+          if query "Remove \"$SOURCE_CACHE/$SRC\" ? " y; then
+            rm -f $SOURCE_CACHE/$SRC
+          fi
         fi
       fi
+    done
+
+    # result?
+    if [ -n "$RESULT" ]; then
+      return 1
     fi
-  done
 
-  # result?
-  if [ -n "$RESULT" ] ; then
-    return 1
-  fi
-
-  # if we removed something we better make sure we break:
-  if ! verify_source $(sources $1) ; then
-    return 1
-  fi
-)
+    # if we removed something we better make sure we break:
+    if ! verify_source $(sources $1); then
+      return 1
+    fi
+  )
 }
-
 
 rm_source_dir() {
   local DEAD_DIR
   debug_msg "rm_source_dir ($@)"
 
-  if [ "$KEEP_SOURCE" == "on" ] ; then
+  if [ "$KEEP_SOURCE" == "on" ]; then
     return 0
   fi
 
@@ -163,13 +157,11 @@ rm_source_dir() {
   DEAD_DIR=${DEAD_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "destroying building dir \"$DEAD_DIR\""
-  if grep -q $DEAD_DIR /proc/mounts
-  then
+  if grep -q $DEAD_DIR /proc/mounts; then
     umount $DEAD_DIR
   fi
-  rm -rf $DEAD_DIR 2> /dev/null
+  rm -rf $DEAD_DIR 2>/dev/null
 }
-
 
 mk_source_dir() {
   local NEW_DIR
@@ -177,7 +169,7 @@ mk_source_dir() {
 
   # yes this sounds weird but it might happen: no dir $BUILD_DIRECTORY on
   # clean boxes!
-  if [ ! -e "$BUILD_DIRECTORY" ] ; then
+  if [ ! -e "$BUILD_DIRECTORY" ]; then
     mkdir -p "$BUILD_DIRECTORY"
   fi
   cd "$BUILD_DIRECTORY"
@@ -185,34 +177,31 @@ mk_source_dir() {
   NEW_DIR=${NEW_DIR:-$SOURCE_DIRECTORY}
 
   verbose_msg "creating building dir \"$NEW_DIR\""
-  if [ -d $NEW_DIR ] ; then
+  if [ -d $NEW_DIR ]; then
     verbose_msg "Removing old source directory first!"
     rm_source_dir $NEW_DIR
   fi
   mkdir -p $NEW_DIR
-  if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]
-  then
-    if grep $NEW_DIR /proc/mounts > /dev/null
-    then
+  if [ ${KEEP_SOURCE:-off} != on -a ${TMPFS_BUILD:-off} == on ]; then
+    if grep $NEW_DIR /proc/mounts >/dev/null; then
       umount $NEW_DIR
     fi
     mount -t tmpfs tmpfs $NEW_DIR
   fi
 }
 
-
-validate_source_dir()  {
+validate_source_dir() {
   debug_msg "validate_source_dir ($@)"
 
   verbose_msg "validating \"$SOURCE_DIRECTORY\""
-  if  [[ -n $SOURCE_DIRECTORY &&
-            $SOURCE_DIRECTORY != $BUILD_DIRECTORY &&
-            $SOURCE_DIRECTORY =~ $BUILD_DIRECTORY ]]; then
+  if [[ -n $SOURCE_DIRECTORY && \
+    $SOURCE_DIRECTORY != $BUILD_DIRECTORY && \
+    $SOURCE_DIRECTORY =~ $BUILD_DIRECTORY ]]; then
     true
   else
-    message  "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."
-    message  "\$SOURCE_DIRECTORY must not be empty."
-    message  "\$SOURCE_DIRECTORY must be a subdirectory of \$BUILD_DIRECTORY"
+    message "\$SOURCE_DIRECTORY and \$BUILD_DIRECTORY must not be the same."
+    message "\$SOURCE_DIRECTORY must not be empty."
+    message "\$SOURCE_DIRECTORY must be a subdirectory of \$BUILD_DIRECTORY"
     false
   fi
 }

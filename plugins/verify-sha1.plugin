@@ -9,16 +9,15 @@
 #                                                           #
 #############################################################
 
-
 plugin_source_verify_sha1() {
   local TMP_MD5
   # check if we can handle this type of VFY:
-  if [ "${2:0:5}" != "sha1:" ] ; then
+  if [ "${2:0:5}" != "sha1:" ]; then
     return 2
   fi
   debug_msg "plugin_source_verify_sha1 ($@)"
   TMP_MD5=$(sha1sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
-  if [ "${2:5}" != "$TMP_MD5" ] ; then
+  if [ "${2:5}" != "$TMP_MD5" ]; then
     message "${PROBLEM_COLOR}! sha1sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
     verbose_msg "offending sha1sum: $TMP_MD5"
     verbose_msg "should be sha1sum: ${2:5}"
@@ -26,8 +25,7 @@ plugin_source_verify_sha1() {
   else
     # always return 'continue' plugin value
     return 2
-  fi  
+  fi
 }
-
 
 plugin_register SOURCE_VERIFY plugin_source_verify_sha1

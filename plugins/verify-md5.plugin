@@ -9,16 +9,15 @@
 #                                                           #
 #############################################################
 
-
 plugin_source_verify_md5() {
   local TMP_MD5
   # check if we can handle this type of VFY:
-  if [ "${2:0:4}" != "md5:" ] ; then
+  if [ "${2:0:4}" != "md5:" ]; then
     return 2
   fi
   debug_msg "plugin_source_verify_md5 ($@)"
   TMP_MD5=$(md5sum "$SOURCE_CACHE/$1" | cut -d " " -f 1-1)
-  if [ "${2:4}" != "$TMP_MD5" ] ; then
+  if [ "${2:4}" != "$TMP_MD5" ]; then
     message "${PROBLEM_COLOR}! md5sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
     verbose_msg "offending md5sum: $TMP_MD5"
     verbose_msg "should be md5sum: ${2:4}"
@@ -28,6 +27,5 @@ plugin_source_verify_md5() {
     return 2
   fi
 }
-
 
 plugin_register SOURCE_VERIFY plugin_source_verify_md5

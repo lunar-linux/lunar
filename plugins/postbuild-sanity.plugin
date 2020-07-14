@@ -10,71 +10,68 @@
 #                                                           #
 #############################################################
 
+plugin_sanity_post_build() {
+  # Don't check the Filesystem Hierarchy Standard
+  if [ "$1" == fhs ]; then
+    return 2
+  fi
 
-plugin_sanity_post_build()
-{
-    # Don't check the Filesystem Hierarchy Standard
-    if [ "$1" == fhs ] ; then
-        return 2;
-    fi
+  (
+    local IFS TESTS PATTERN SEVERITY REASON
 
-    (
-	local IFS TESTS PATTERN SEVERITY REASON
+    IFS=$'\n'
 
-	IFS=$'\n'
-
-	TESTS=(
-		"^/opt/:E:Installs files in /opt"
-		"^/bin:N:Installs files in /bin"
-		"^/sbin:N:Installs files in /sbin"
-		"^/lib:N:Installs files in /lib"
-		"^/share:E:Installs files in /share"
-		"^/include:E:Installs files in /include"
-		"^/usr/doc:E:Installs files in /usr/doc"
-		"^/usr/etc:E:Installs files in /usr/etc"
-		"^/usr/local:E:Installs files in /usr/local"
-		"^/usr/var:E:Installs files in /usr/var"
-		"^/home:E:Installs files in /home"
-		"^/root:E:Installs files in /root"
-	      )
-
-	for TEST in ${TESTS[@]} ; do
-		PATTERN=$(echo $TEST | cut -d: -f1)
-
-		parse_iw | grep -q $PATTERN
-		if [ $? == 0 ]; then
-			SEVERITY=$(echo $TEST | cut -d: -f2)
-			REASON=$(echo $TEST | cut -d: -f3)
-
-			case $SEVERITY in
-			N)
-				message "${PROBLEM_COLOR}NOTICE:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
-				continue
-				;;
-			W)
-				message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
-				export SILENT=""
-				query "Ignore this warning" "y"
-				if [ $? != 0 ]; then
-					return 1
-				fi
-				continue
-				;;
-			E)
-				message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
-				parse_iw | sort | uniq | grep $PATTERN
-				return 1
-				;;
-			esac
-		fi
-	done
-
-	# return 2, on success for other plugins
-	return 2
+    TESTS=(
+      "^/opt/:E:Installs files in /opt"
+      "^/bin:N:Installs files in /bin"
+      "^/sbin:N:Installs files in /sbin"
+      "^/lib:N:Installs files in /lib"
+      "^/share:E:Installs files in /share"
+      "^/include:E:Installs files in /include"
+      "^/usr/doc:E:Installs files in /usr/doc"
+      "^/usr/etc:E:Installs files in /usr/etc"
+      "^/usr/local:E:Installs files in /usr/local"
+      "^/usr/var:E:Installs files in /usr/var"
+      "^/home:E:Installs files in /home"
+      "^/root:E:Installs files in /root"
     )
-}
 
+    for TEST in ${TESTS[@]}; do
+      PATTERN=$(echo $TEST | cut -d: -f1)
+
+      parse_iw | grep -q $PATTERN
+      if [ $? == 0 ]; then
+        SEVERITY=$(echo $TEST | cut -d: -f2)
+        REASON=$(echo $TEST | cut -d: -f3)
+
+        case $SEVERITY in
+          N)
+            message "${PROBLEM_COLOR}NOTICE:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+            parse_iw | sort | uniq | grep $PATTERN
+            continue
+            ;;
+          W)
+            message "${PROBLEM_COLOR}WARNING:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+            parse_iw | sort | uniq | grep $PATTERN
+            export SILENT=""
+            query "Ignore this warning" "y"
+            if [ $? != 0 ]; then
+              return 1
+            fi
+            continue
+            ;;
+          E)
+            message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}${MESSAGE_COLOR} Package installs files in incorrect locations!${DEFAULT_COLOR}"
+            parse_iw | sort | uniq | grep $PATTERN
+            return 1
+            ;;
+        esac
+      fi
+    done
+
+    # return 2, on success for other plugins
+    return 2
+  )
+}
 
 plugin_register BUILD_POST_BUILD plugin_sanity_post_build

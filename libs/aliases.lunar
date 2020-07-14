@@ -36,7 +36,7 @@ expand_alias() {
   debug_msg "expand_alias($*)"
   # try to figure out where the aliases file is:
   if [[ -z "$ALIASES" ]] || [[ ! -f "$ALIASES" ]]; then
-    if [ -f "$MOONBASE/aliases" ] ; then
+    if [ -f "$MOONBASE/aliases" ]; then
       ALIASES="$MOONBASE/aliases"
     else
       ALIASES="/var/lib/lunar/aliases"
@@ -48,14 +48,14 @@ expand_alias() {
   # propose one and let the user pick it from a list:
   debug_msg "expand_alias: starting selection loop"
   error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
-  while true ; do
+  while true; do
     error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module"
     error_message "Press [ENTER] to select choice #1 (the recommended choice).${DEFAULT_COLOR}"
-    ((N=0))
-    for TARGET in ${TARGETS} ; do
+    ((N = 0))
+    for TARGET in ${TARGETS}; do
       ((N++))
       TARGETBYNUM["$N"]="$TARGET"
-      if module_installed "$TARGET" ; then
+      if module_installed "$TARGET"; then
         error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR} ${LRM_COLOR}(Installed)${DEFAULT_COLOR}"
       else
         error_message "  ${QUERY_COLOR}$N${MESSAGE_COLOR} - ${DEFAULT_COLOR}${MODULE_COLOR}$TARGET${DEFAULT_COLOR} ${MESSAGE_COLOR}(Not installed)${DEFAULT_COLOR}"
@@ -64,13 +64,13 @@ expand_alias() {
     echo -n -e "${MESSAGE_COLOR}Choice> ${DEFAULT_COLOR}" >&2
     read -r -t "$PROMPT_DELAY" CHOICE
     # test directly first
-    if [[ "$TARGETS" =~ $CHOICE ]] ; then
+    if [[ "$TARGETS" =~ $CHOICE ]]; then
       verbose_msg "Stored alias mapping $1 -> $CHOICE"
       set_local_config LUNAR_ALIAS_"${1:1}" "$CHOICE"
       echo "$TARGET"
       return
     # then the number, resolving the default
-    elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]] ; then
+    elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]]; then
       verbose_msg "Stored alias mapping $1 -> ${TARGETBYNUM[$CHOICE]}"
       set_local_config LUNAR_ALIAS_"${1:1}" "${TARGETBYNUM[$CHOICE]}"
       echo "${TARGETBYNUM[$CHOICE]}"

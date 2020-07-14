@@ -9,51 +9,46 @@
 #                                                          #
 ############################################################
 
+bad_flags() {
+  debug_msg "bad_flags ($@)"
+  verbose_msg "bad_flags \"$@\""
 
-bad_flags()
-{
-    debug_msg "bad_flags ($@)"
-    verbose_msg "bad_flags \"$@\""
-
-    # maintain some degree of backward compatibility here
-    if [[ "$1" == "ALL" ]]; then
-        unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
-    elif [[ "$1" == "compiler" ]]; then
-        unset CFLAGS CXXFLAGS CPPFLAGS
-    elif [[ "$1" == "linker" ]]; then
-        unset LDFLAGS
-    else
-        for BAD_FLAG in "$@" ; do
-            CFLAGS=" $CFLAGS "
-            CFLAGS="${CFLAGS// $BAD_FLAG / }"
-            CXXFLAGS=" $CXXFLAGS "
-            CXXFLAGS="${CXXFLAGS// $BAD_FLAG / }"
-            CPPFLAGS=" $CPPFLAGS "
-            CPPFLAGS="${CPPFLAGS// $BAD_FLAG / }"
-            LDFLAGS=" $LDFLAGS "
-            LDFLAGS="${LDFLAGS// $BAD_FLAG / }"
-        done
-    fi
+  # maintain some degree of backward compatibility here
+  if [[ "$1" == "ALL" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+  elif [[ "$1" == "compiler" ]]; then
+    unset CFLAGS CXXFLAGS CPPFLAGS
+  elif [[ "$1" == "linker" ]]; then
+    unset LDFLAGS
+  else
+    for BAD_FLAG in "$@"; do
+      CFLAGS=" $CFLAGS "
+      CFLAGS="${CFLAGS// $BAD_FLAG / }"
+      CXXFLAGS=" $CXXFLAGS "
+      CXXFLAGS="${CXXFLAGS// $BAD_FLAG / }"
+      CPPFLAGS=" $CPPFLAGS "
+      CPPFLAGS="${CPPFLAGS// $BAD_FLAG / }"
+      LDFLAGS=" $LDFLAGS "
+      LDFLAGS="${LDFLAGS// $BAD_FLAG / }"
+    done
+  fi
 }
 
+optimize_menu() { (
+  export IFS=$'\t\n'
+  while true; do
+    if [ -z "$(plugin_call OPTIMIZE_MENU)" ]; then
+      $DIALOG --msgbox "There are no configurable compontents. Please update your moonbase!" 6 60
+      return
+    fi
+    PLUGIN=$($DIALOG --cancel-label "Close" --default-item "$PLUGIN" --menu "Select a component for which to configure optimizations" 0 0 0 $(plugin_call OPTIMIZE_MENU))
+    if [ $? != 0 ]; then
+      return
+    fi
 
-optimize_menu()
-{(
-    export IFS=$'\t\n'
-    while true; do
-        if [ -z "$(plugin_call OPTIMIZE_MENU)" ]; then
-            $DIALOG --msgbox "There are no configurable compontents. Please update your moonbase!" 6 60
-            return
-        fi
-        PLUGIN=`$DIALOG --cancel-label "Close" --default-item "$PLUGIN" --menu "Select a component for which to configure optimizations" 0 0 0 $(plugin_call OPTIMIZE_MENU)`
-        if [ $? != 0 ]; then
-            return
-        fi
-
-        plugin_call OPTIMIZE_MENU $PLUGIN
-    done
-)}
-
+    plugin_call OPTIMIZE_MENU $PLUGIN
+  done
+); }
 
 # because we pretty much need to know our $BUILD string
 # everywhere this code is separate and guides all other
@@ -65,8 +60,10 @@ optimize_menu()
 PLATFORM=$(uname -m | sed 's/i[3456]86/x86/')
 # BUILD -
 case $PLATFORM in
-    x86|x86_64)
-        BUILD=$(uname -m)-pc-linux-gnu ;;
-    *)
-        BUILD=$(uname -m | sed 's/.*/\L&/g')-linux-gnu ;;
+  x86 | x86_64)
+    BUILD=$(uname -m)-pc-linux-gnu
+    ;;
+  *)
+    BUILD=$(uname -m | sed 's/.*/\L&/g')-linux-gnu
+    ;;
 esac

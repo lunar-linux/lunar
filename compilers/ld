@@ -2,8 +2,8 @@
 
 PROG=$(PATH=${PATH//\/var\/lib\/lunar\/compilers/} type -p ${0##*/})
 
-if [[ -n "$LUNAR_DEBUG" ]] ; then
-	echo "++ $PROG $@" >&2
+if [[ -n "$LUNAR_DEBUG" ]]; then
+  echo "++ $PROG $@" >&2
 fi
 
 exec $PROG "$@"

@@ -10,43 +10,42 @@
 #                                                                  #
 ####################################################################
 
-
 # function : patch_it
 # usage    : patch_it patch_file patch_level
 # purpose  : calls "patch -px < $filename", where filename may be a variety
 #            of formats
-patch_it () {
+patch_it() {
   local PATCH TARCMD GZCMD TMPFILE1 TMPFILE2
-  verbose_msg "patch_it \"$1\" \"$2\"";
+  verbose_msg "patch_it \"$1\" \"$2\""
 
   # get patch from $SOURCE_CACHE automatically
-  if [ ! -f "$1" ] && [ -f "$SOURCE_CACHE/$1" ] ; then
+  if [ ! -f "$1" ] && [ -f "$SOURCE_CACHE/$1" ]; then
     PATCH="$SOURCE_CACHE/$1"
   else
     PATCH="$1"
   fi
 
-  if [[ "$PATCH" =~ .tar ]] ; then
+  if [[ "$PATCH" =~ .tar ]]; then
     TARCMD="tar x -O"
   else
     TARCMD="cat"
   fi
 
   case "$PATCH" in
-      *.bz2)     GZCMD="bzcat" ;;
-      *.gz)      GZCMD="zcat"  ;;
-    *.xz|*.lzma) GZCMD="xzcat" ;;
-    *)           GZCMD="cat"   ;;
+    *.bz2) GZCMD="bzcat" ;;
+    *.gz) GZCMD="zcat" ;;
+    *.xz | *.lzma) GZCMD="xzcat" ;;
+    *) GZCMD="cat" ;;
   esac
 
   TMPFILE1=$(temp_create "patch_1")
   TMPFILE2=$(temp_create "patch_2")
 
-  if "$GZCMD" "$PATCH" > "$TMPFILE1" ; then
+  if "$GZCMD" "$PATCH" >"$TMPFILE1"; then
     # uncompress OK
-    if cat "$TMPFILE1" | "$TARCMD" > "$TMPFILE2" ; then
+    if cat "$TMPFILE1" | "$TARCMD" >"$TMPFILE2"; then
       # untar OK
-      if patch -N -p"$2" < "$TMPFILE2" ; then
+      if patch -N -p"$2" <"$TMPFILE2"; then
         # patch cmd is OK
         temp_destroy "$TMPFILE1"
         temp_destroy "$TMPFILE2"
@@ -62,21 +61,19 @@ patch_it () {
   return 255
 }
 
-
 # function : sedit
 # usage    : sedit sed-statement file [file [file] ...]
 # purpose  : edit [files] with a sed function
-sedit () {
+sedit() {
   local SEDIT
   debug_msg "sedit ($*)"
   SEDIT="$1"
   shift
-  for FILE in "$@" ; do
+  for FILE in "$@"; do
     verbose_msg "Editing \"$FILE\""
     sed -i "$SEDIT" "$FILE"
   done
 }
-
 
 # function : edit_file
 # usage    : edit_file FILENAME

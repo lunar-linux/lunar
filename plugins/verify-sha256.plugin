@@ -10,16 +10,15 @@
 #                                                           #
 #############################################################
 
-
 plugin_source_verify_sha256() {
   local TMP_SHA
   # check if we can handle this type of VFY:
-  if [ "${2:0:7}" != "sha256:" ] ; then
+  if [ "${2:0:7}" != "sha256:" ]; then
     return 2
   fi
   debug_msg "plugin_source_verify_sha256 ($@)"
   TMP_SHA=$(sha256sum $SOURCE_CACHE/$1 | cut -d " " -f 1-1)
-  if [ "${2:7}" != "$TMP_SHA" ] ; then
+  if [ "${2:7}" != "$TMP_SHA" ]; then
     message "${PROBLEM_COLOR}! sha256sum check failed for ${DEFAULT_COLOR}${FILE_COLOR}$1${DEFAULT_COLOR}"
     verbose_msg "offending sha256sum: $TMP_SHA"
     verbose_msg "should be sha256sum: ${2:7}"

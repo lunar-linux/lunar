@@ -4,21 +4,21 @@
 #                                                                  #
 ####################################################################
 
-
 # function : view_file
 # usage    : view_file FILENAME
 # purpose  : to view a file
-view_file()  {
+view_file() {
   debug_msg "view_file ($@)"
-  if [ -n "$1" ] ; then
+  if [ -n "$1" ]; then
     # show a file $1
     case $(file -b $1 | cut -d' ' -f1) in
       bzip2) bzcat $1 | ${PAGER:-less} ;;
-       gzip) zcat $1  | ${PAGER:-less} ;;
-         XZ) xzcat $1 | ${PAGER:-less} ;;
-          *)
-             # default fallback
-             cat "$1" | ${PAGER:-less} ;;
+      gzip) zcat $1 | ${PAGER:-less} ;;
+      XZ) xzcat $1 | ${PAGER:-less} ;;
+      *)
+        # default fallback
+        cat "$1" | ${PAGER:-less}
+        ;;
     esac
   else
     cat - | ${PAGER:-less}

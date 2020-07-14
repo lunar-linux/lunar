@@ -2,72 +2,67 @@
 # wrappers linker optimizations plugin
 #
 
-plugin_wrappers_optimize()
-{
-	if [[ -z "$USE_WRAPPERS" ]] ; then
-		if [ -f /etc/lunar/local/optimizations.WRAPPERS ]; then
-			. /etc/lunar/local/optimizations.WRAPPERS
-		fi
-	fi
-	
-	if [ "${USE_WRAPPERS:-yes}" == "yes" ]; then
-		verbose_msg "Enabled wrapper script usage"
-		export PATH=/var/lib/lunar/compilers/:${PATH}
-	fi
-	return 2
+plugin_wrappers_optimize() {
+  if [[ -z "$USE_WRAPPERS" ]]; then
+    if [ -f /etc/lunar/local/optimizations.WRAPPERS ]; then
+      . /etc/lunar/local/optimizations.WRAPPERS
+    fi
+  fi
+
+  if [ "${USE_WRAPPERS:-yes}" == "yes" ]; then
+    verbose_msg "Enabled wrapper script usage"
+    export PATH=/var/lib/lunar/compilers/:${PATH}
+  fi
+  return 2
 }
 
+plugin_wrappers_optimize_menu() {
+  local IFS TITLE RESULT
+  # The main code calls this function WITHOUT $1 to find out which
+  # compiler optimization plugins exist. It then returns the version
+  # number which will be saved in $LUNAR_COMPILER as the user's
+  # choice for COMPILERS
+  if [ -z "$1" ]; then
+    echo "WRAPPERS"
+    echo "Compiler wrappers"
+    return 2
+  elif [ "$1" != "WRAPPERS" ]; then
+    # we don't display anything when the user selected a
+    # different menu
+    return 2
+  fi
 
-plugin_wrappers_optimize_menu()
-{
-	local IFS TITLE RESULT
-	# The main code calls this function WITHOUT $1 to find out which
-	# compiler optimization plugins exist. It then returns the version
-	# number which will be saved in $LUNAR_COMPILER as the user's
-	# choice for COMPILERS
-	if [ -z "$1" ]; then
-		echo "WRAPPERS"
-		echo "Compiler wrappers"
-		return 2
-	elif [ "$1" != "WRAPPERS" ]; then
-		# we don't display anything when the user selected a
-		# different menu
-		return 2
-	fi
+  # load previous optimizations
+  if [ -e /etc/lunar/local/optimizations.WRAPPERS ]; then
+    . /etc/lunar/local/optimizations.WRAPPERS
+  else
+    USE_WRAPPERS="yes"
+  fi
 
-	# load previous optimizations
-	if [ -e /etc/lunar/local/optimizations.WRAPPERS ]; then
-		. /etc/lunar/local/optimizations.WRAPPERS
-	else
-		USE_WRAPPERS="yes"
-	fi
-
-	save_optimizations()
-	{
-		debug_msg "save_optimizations($@)"
-		cat > /etc/lunar/local/optimizations.WRAPPERS  <<EOF
+  save_optimizations() {
+    debug_msg "save_optimizations($@)"
+    cat >/etc/lunar/local/optimizations.WRAPPERS <<EOF
 USE_WRAPPERS=$USE_WRAPPERS
 EOF
-	}
+  }
 
-	export IFS=$'\t\n'
-	TITLE="Lunar CCache Optimizations"
-	
-	while true; do
-		RESULT=`$DIALOG --ok-label "Select" --cancel-label "Close" --menu "Use the Compiler wrapper scripts? This will enable all optimizations for most programs even if the Makefile doesn't support them, and allows for more debugging output." 0 0 0 "USE_WRAPPERS" "Use the compile wrappers         [$USE_WRAPPERS]"`
-		if [ $? != 0 ]; then
-			break
-		else
-			if [ $USE_WRAPPERS == 'yes' ]; then
-				USE_WRAPPERS=no
-			else
-				USE_WRAPPERS=yes
-			fi
-			save_optimizations
-		fi
-	done
+  export IFS=$'\t\n'
+  TITLE="Lunar CCache Optimizations"
+
+  while true; do
+    RESULT=$($DIALOG --ok-label "Select" --cancel-label "Close" --menu "Use the Compiler wrapper scripts? This will enable all optimizations for most programs even if the Makefile doesn't support them, and allows for more debugging output." 0 0 0 "USE_WRAPPERS" "Use the compile wrappers         [$USE_WRAPPERS]")
+    if [ $? != 0 ]; then
+      break
+    else
+      if [ $USE_WRAPPERS == 'yes' ]; then
+        USE_WRAPPERS=no
+      else
+        USE_WRAPPERS=yes
+      fi
+      save_optimizations
+    fi
+  done
 }
-
 
 plugin_register BUILD_BUILD plugin_wrappers_optimize
 plugin_register OPTIMIZE_MENU plugin_wrappers_optimize_menu
