@@ -831,9 +831,8 @@ replace_modules() {
           message "\n${MODULE_COLOR}${IMOD}${MESSAGE_COLOR} has been replaced by ${MODULE_COLOR}${RMOD}${MESSAGE_COLOR} in moonbase${DEFAULT_COLOR}"
           unset MODULE
           if query "Do you want replace ${MODULE_COLOR}${IMOD} ${QUERY_COLOR}with ${MODULE_COLOR}${RMOD}${QUERY_COLOR}?${DEFAULT_COLOR}" y; then
-            echo "$IMOD" >>$TMP_REM_QUEUE
-            echo "$RMOD" >>$TMP_INS_QUEUE
-            continue
+            echo "$IMOD" >> $TMP_REM_QUEUE
+            echo "$RMOD" >> $TMP_INS_QUEUE
           else
             message "${MODULE_COLOR}${IMOD}${DEFAULT_COLOR}${MESSAGE_COLOR} is kept and can be removed or replaced manually later${DEFAULT_COLOR}"
           fi
