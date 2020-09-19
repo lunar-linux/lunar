@@ -14,60 +14,63 @@
 #                                                          #
 ############################################################
 
+
 # Description : This function makes backups of the kernels and modules
 # Arg 1       : Filename of the kernel to backup (With or without full path)
 #               With the format $VERSION_$EXTRAVERSION
 backup_mods_krnl() {
   local ARCH=$(arch)
-  debug_msg "backup_mods_krnl ($*)"
+  debug_msg "backup_mods_krnl ($@)"
 
   devoke_installwatch
 
-  if [ -f /boot/vmlinuz-"$1"-"${ARCH}" ]; then
-    verbose_msg "copying vmlinuz-$1.${ARCH}"
-    cp -p /boot/vmlinuz-"$1"-"${ARCH}"{,.old}
+  if [ -f /boot/vmlinuz-$1-$ARCH ]; then
+    verbose_msg "copying vmlinuz-$1.$ARCH"
+    cp -p /boot/vmlinuz-$1-$ARCH{,.old}
   fi
-  if [ -d /lib/modules/"$1" ]; then
-    rm -rf /lib/modules/"$1".old
-    cp -a /lib/modules/"$1"{,.old}
+  if [ -d /lib/modules/$1 ]; then
+    rm -rf /lib/modules/$1.old
+    cp -a /lib/modules/$1{,.old}
   fi
-  if [ -f /boot/config-"$1"-"$ARCH".gz ]; then
-    verbose_msg "copying config-$1.${ARCH}.gz"
-    cp -p /boot/config-"$1"-"${ARCH}"{,.old}.gz
+  if [ -f /boot/config-${1}-$ARCH.gz ]; then
+    verbose_msg "copying config-$1.$ARCH.gz"
+    cp -p /boot/config-${1}-$ARCH{,.old}.gz
   fi
-  if [ -f /boot/System.map-"$1"-"${ARCH}" ]; then
-    verbose_msg "copying System.map-$1-${ARCH}"
-    cp -p /boot/System.map-"$1"-"${ARCH}"{,.old}
+  if [ -f /boot/System.map-${1}-$ARCH ]; then
+    verbose_msg "copying System.map-$1-$ARCH"
+    cp -p /boot/System.map-${1}-$ARCH{,.old}
   fi
 
   invoke_installwatch
 }
 
+
 update_bootloader() {
-  plugin_call KERNEL_UPDATEBOOTLOADER "$1" "$2"
+	plugin_call KERNEL_UPDATEBOOTLOADER $1 $2
 }
+
 
 # function: kernel_config_exists
 # usage: kernel_config_exists
 # purpose: Verify that a readable kernel config is available
 # returns: Config file path, (0) if successful, (1) if config not found
 kernel_config_exists() {
-  if [ -e /proc/config.gz ]; then
-    echo "/proc/config.gz"
-  elif [ -e /lib/modules/"$(uname -r)"/source/.config ]; then
-    echo "/lib/modules/$(uname -r)/source/.config"
-  elif [ -e /boot/config-"$(uname -r)"-"$(arch)".gz ]; then
-    echo "/boot/config-$(uname -r)-$(arch).gz"
-  elif [ -e /usr/src/linux/.config ]; then
-    echo "/usr/src/linux/.config"
-  elif [ -e "$CONFIG_CACHE"/.config.current ]; then
-    echo "${CONFIG_CACHE}/.config.current"
-  elif [ -e "$CONFIG_CACHE"/.config.2.6.stable ]; then
-    echo "${CONFIG_CACHE}/.config.2.6.stable"
-  else
-    return 1
-  fi
-  return 0
+    if [ -e /proc/config.gz ]; then
+        echo "/proc/config.gz"
+    elif [ -e /lib/modules/$(uname -r)/source/.config ]; then
+        echo "/lib/modules/$(uname -r)/source/.config"
+    elif [ -e /boot/config-$(uname -r)-$(arch).gz ]; then
+        echo "/boot/config-$(uname -r)-$(arch).gz"
+    elif [ -e /usr/src/linux/.config ]; then
+        echo "/usr/src/linux/.config"
+    elif [ -e $CONFIG_CACHE/.config.current ]; then
+        echo "$CONFIG_CACHE/.config.current"
+    elif [ -e $CONFIG_CACHE/.config.2.6.stable ]; then
+        echo "$CONFIG_CACHE/.config.2.6.stable"
+    else
+        return 1
+    fi
+    return 0
 }
 
 # function: kernel_option_present
@@ -75,29 +78,29 @@ kernel_config_exists() {
 # purpose: Check if a kernel option is configured
 # returns: (0) if option is found and enabled, (1) if option is not found or disabled, (255) if kernel config not found
 kernel_option_present() {
-  local KERNEL_CONFIG KERNEL_OPTION KERNEL_VALUE CAT
-  KERNEL_CONFIG=$(kernel_config_exists) || return 255
-  KERNEL_OPTION="$1"
-  KERNEL_VALUE="$2"
+    local KERNEL_CONFIG KERNEL_OPTION KERNEL_VALUE CAT
+    KERNEL_CONFIG=$(kernel_config_exists) || return 255
+    KERNEL_OPTION=$1
+    KERNEL_VALUE=$2
 
-  case "$KERNEL_CONFIG" in
-    *.gz)
-      CAT="zcat"
-      ;;
-    *)
-      CAT="cat"
-      ;;
-  esac
+    case $KERNEL_CONFIG in
+        *.gz)
+            CAT=zcat
+            ;;
+        *)
+            CAT=cat
+            ;;
+    esac
 
-  if [ -n "$KERNEL_VALUE" ]; then
-    if "$CAT" "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
-      return 0
+    if [ -n "$KERNEL_VALUE" ]; then
+      if $CAT "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=\"$KERNEL_VALUE\""; then
+        return 0
+      fi
+    else
+      if $CAT "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
+        return 0
+      fi
     fi
-  else
-    if "$CAT" "$KERNEL_CONFIG" | grep -Eq "^$KERNEL_OPTION=(y|m)$"; then
-      return 0
-    fi
-  fi
 
-  return 1
+    return 1
 }

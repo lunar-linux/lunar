@@ -9,210 +9,219 @@
 #                                                          #
 ############################################################
 
+
 lget_lock() {
-  debug_msg "lget_lock ($*)"
-  echo $$ >"/var/lock/lgetting.$MODULE"
+	debug_msg "lget_lock ($@)"
+	echo $$ > /var/lock/lgetting.$MODULE
 }
+
 
 lget_locked() {
-  debug_msg "lget_locked ($*)"
-  if [ -f "/var/lock/lgetting.$MODULE" ] &&
-    ps $(cat "/var/lock/lgetting.$MODULE") | grep -q "lget"; then
-    true
-  else
-    false
-  fi
+	debug_msg "lget_locked ($@)"
+	if [ -f "/var/lock/lgetting.$MODULE" ] &&
+			ps `cat "/var/lock/lgetting.$MODULE"` | grep	-q	"lget" ; then
+		true
+	else
+		false
+	fi
 }
+
 
 lget_unlock() {
-  debug_msg "lget_unlock ($*)"
-  rm -f "/var/lock/lgetting.$MODULE" &>/dev/null
+	debug_msg "lget_unlock ($@)"
+	rm -f /var/lock/lgetting.$MODULE &> /dev/null
 }
+
 
 download_url() {
-  debug_msg "download_url($*)"
-  verbose_msg "trying to download \"${2}\" from \"${1}\""
-  plugin_call SOURCE_DOWNLOAD "$1" "$2" "$3" "$4"
-  return $?
+	local RETVAL
+	debug_msg "download_url($@)"
+	verbose_msg "trying to download \"${2}\" from \"${1}\""
+	plugin_call SOURCE_DOWNLOAD $1 $2 $3 $4
+	return $?
 }
+
 
 download_module() {
-  (
-    local TEMP SRC ALL_URLS URLS URL MLIST ALT REST HIT OLD_URLS COMPATIBLE RESORT_SRC
-    debug_msg "download_module ($*)"
-    if ! run_details "$1"; then
-      return 1
-    fi
+(
+	local TEMP SRC ALL_URLS URLS URL MLIST ALT REST HIT OLD_URLS COMPATIBLE RESORT_SRC
+	debug_msg "download_module ($@)"
+	if ! run_details $1 ; then
+		return 1
+	fi
 
-    if ! module_license_accepted "$1"; then
-      message "${MESSAGE_COLOR}The license of this module is incompatible with the list of"
-      message "allowed and/or rejected licenses. Please adjust the ACCEPTED_LICENSES or"
-      message "REJECTED_LICENSES variables to include or not include the specific"
-      message "license of this module.${DEFAULT_COLOR}"
-      return 1
-    fi
+	if ! module_license_accepted $1 ; then
+		message "${MESSAGE_COLOR}The license of this module is incompatible with the list of"
+		message "allowed and/or rejected licenses. Please adjust the ACCEPTED_LICENSES or"
+		message "REJECTED_LICENSES variables to include or not include the specific"
+		message "license of this module.${DEFAULT_COLOR}"
+		return 1
+	fi
 
-    MAX_SOURCES=${MAX_SOURCES:-100}
+	MAX_SOURCES=${MAX_SOURCES:-100}
 
-    # loop over all sources
-    for ((N = 1; N <= MAX_SOURCES; N++)); do
-      # get the URL part
-      TEMP=SOURCE$((N))
-      TEMP="${TEMP/%SOURCE1/SOURCE}"
-      eval SRC="\${$TEMP}"
-      eval URLS="\${${TEMP}_URL_FULL[@]}"
-      eval OLD_URLS="\${${TEMP}_URL[@]}"
+	# loop over all sources
+	for (( N = 1 ; N <= MAX_SOURCES ; N++ )) ; do
+		# get the URL part
+                TEMP=SOURCE$((N))
+                TEMP=${TEMP/%SOURCE1/SOURCE}
+                eval SRC=\${$TEMP}
+                eval URLS=\${${TEMP}_URL_FULL[@]}
+                eval OLD_URLS=\${${TEMP}_URL[@]}
 
-      if [ -z "$SRC" ]; then
-        break
-      fi
+		if [ -z "$SRC" ] ; then
+			break
+		fi
 
-      COMPATIBLE=
-      RESORT_SRC=/"$SRC"
-      if [ -n "$OLD_URLS" ]; then
-        URLS=${OLD_URLS[@]}
-        COMPATIBLE=old
-        RESORT_SRC=
-      fi
+		COMPATIBLE=
+		RESORT_SRC=/$SRC
+		if [ -n "$OLD_URLS" ] ; then
+		  URLS=${OLD_URLS[@]}
+		  COMPATIBLE=old
+		  RESORT_SRC=
+		fi
 
-      # silly that this exists:
-      if [ "$CLEAR_CACHE" == "on" ]; then
-        verbose_msg "clearing source cache copy of \"$SRC\""
-        rm -f "$SOURCE_CACHE/$SRC" 2>/dev/null
-      fi
+		# silly that this exists:
+		if [ "$CLEAR_CACHE" == "on" ] ; then
+			verbose_msg "clearing source cache copy of \"$SRC\""
+			rm -f $SOURCE_CACHE/$SRC 2>/dev/null
+		fi
 
-      add_url() {
-        if [[ -n "$1" && ! "$ALL_URLS" =~ $1 ]]; then
-          ALL_URLS="$ALL_URLS $1"
-        fi
-      }
+		add_url() {
+			if [[ -n "$1" && ! $ALL_URLS =~ $1 ]]; then
+				ALL_URLS="$ALL_URLS $1"
+			fi
+		}
 
-      if [ -f "$SOURCE_CACHE/$SRC" ] && ! plugin_call SOURCE_NEEDREFRESH "${URLS[0]}" "$SRC" "$SOURCE_CACHE" "$COMPATIBLE"; then
-        # break out of the loop if the cache has it:
-        verbose_msg "Skipping download of \"$SRC\" (in cache)"
-        continue
-      fi
+		if  [ -f $SOURCE_CACHE/$SRC ] && ! plugin_call SOURCE_NEEDREFRESH ${URLS[0]} $SRC $SOURCE_CACHE $COMPATIBLE ; then
+			# break out of the loop if the cache has it:
+			verbose_msg "Skipping download of \"$SRC\" (in cache)"
+			continue
+		fi
 
-      # check for cache?
-      message "${MESSAGE_COLOR}Downloading source file" \
-        "${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
-        "${MESSAGE_COLOR}for module" \
-        "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
+		# check for cache?
+		message "${MESSAGE_COLOR}Downloading source file" \
+			"${FILE_COLOR}$SRC${DEFAULT_COLOR}" \
+			"${MESSAGE_COLOR}for module" \
+			"${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
 
-      if [ -n "$BASE_URL" ]; then
-        # in case -u was passed:
-        ALL_URLS="$BASE_URL"
-        COMPATIBLE=
-      else
-        # compose a list of URLS
-        ALL_URLS=
-        add_url "$FRESORT_URL" "$RESORT_SRC"
-        for URL in ${URLS}; do
-          add_url "$URL"
-        done
-        for URL in ${URLS}; do
-          if [ "$EXHAUSTIVE" != "on" ]; then
-            continue
-          fi
+		if [ -n "$BASE_URL" ] ; then
+			# in case -u was passed:
+			ALL_URLS=$BASE_URL
+			COMPATIBLE=
+		else
+			# compose a list of URLS
+			ALL_URLS=
+			add_url "$FRESORT_URL" $RESORT_SRC
+			for URL in $URLS ; do
+				add_url $URL
+			done
+			for URL in $URLS ; do
+				if [ "$EXHAUSTIVE" != "on" ]; then
+					continue
+				fi
 
-          # scan for hits against known clusters of mirrors
-          for MLIST in "${MIRRORS}"/*; do
-            for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST" | grep -v "^Custom$"); do
-              if [ "${URL:0:${#ALT}}" == "$ALT" ]; then
-                # compose the list of valid mirrors
-                REST="${URL:${#ALT}}"
-                for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST"); do
-                  add_url "${HIT}${REST}"
-                done
-              fi
-            done
-          done
-        done
-        add_url "$LRESORT_URL" "$RESORT_SRC"
-      fi
+				# scan for hits against known clusters of mirrors
+				for MLIST in $MIRRORS/*; do
+					for ALT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST" | grep -v "^Custom$"); do
+						if [ "${URL:0:${#ALT}}" == "$ALT" ] ; then
+							# compose the list of valid mirrors
+							REST=${URL:${#ALT}}
+							for HIT in $(sed 's/.*\t\([^\t]*\)$/\1/g' "$MLIST"); do
+								add_url ${HIT}${REST}
+							done
+						fi
+					done
+				done
+			done
+			add_url "$LRESORT_URL" $RESORT_SRC
+		fi
 
-      for URL in ${ALL_URLS}; do
-        # and download
-        if download_url "$URL" "$SRC" "$SOURCE_CACHE" "$COMPATIBLE"; then
-          # done for this file!
-          SUCCESS=1
-          break
-        fi
-      done
-      if [ ${SUCCESS:-0} == 0 ]; then
-        FAILALL=1
-        error_message "${PROBLEM_COLOR}I don't know how to download ${QUERY_COLOR}\"$1\".${DEFAULT_COLOR}"
-        error_message "${MESSAGE_COLOR}Install the package that provides the method and plugin to download it.${DEFAULT_COLOR}"
-      fi
+		for URL in $ALL_URLS; do
+			# and download
+			if download_url $URL $SRC $SOURCE_CACHE $COMPATIBLE ; then
+				# done for this file!
+				SUCCESS=1
+				break
+			fi
+		done
+		if [ ${SUCCESS:-0} == 0 ] ; then
+			FAILALL=1
+			error_message "${PROBLEM_COLOR}I don't know how to download ${QUERY_COLOR}\"$1\".${DEFAULT_COLOR}"
+			error_message "${MESSAGE_COLOR}Install the package that provides the method and plugin to download it.${DEFAULT_COLOR}"
+		fi
 
-    done
+	done
 
-    return ${FAILALL:-0}
-  )
+	return ${FAILALL:-0}
+)
 }
 
-testpack() {
-  local FILENAME
-  debug_msg "testpack ($*)"
-  if [ -f "$1" ]; then
-    FILENAME="$1"
-  else
-    FILENAME="$SOURCE_CACHE/$1"
-  fi
-  if [ -f "$FILENAME" ]; then
-    FILEMAGIC=$(file -b "$FILENAME")
-    case "$FILENAME" in
-      *.bz2 | *.BZ2)
-        echo "$FILEMAGIC" | grep -qw "bzip2"
-        ;;
-      *.gz | *.GZ | *.tgz | *.TGZ)
-        echo "$FILEMAGIC" | grep -qw "gzip"
-        ;;
-      *.z | *.Z)
-        echo "$FILEMAGIC" | grep -qw "compress"
-        ;;
-      *.zip | *.ZIP)
-        echo "$FILEMAGIC" | grep -qw "Zip"
-        ;;
-      *.rpm | *.RPM)
-        echo "$FILEMAGIC" | grep -qw "RPM"
-        ;;
-      *.CAB | *.cab)
-        echo "$FILEMAGIC" | grep -qw "Cabinet"
-        ;;
-      *.xz | *.XZ)
-        echo "$FILEMAGIC" | grep -qw "XZ"
-        ;;
-      *)
-        # we don't know how to handle this type of file
-        true
-        ;;
-    esac
-  else
-    # filename does not exist!
-    false
-  fi
+
+testpack () {
+	local FILENAME
+	debug_msg "testpack ($@)"
+	if [ -f "$1" ]; then
+		FILENAME=$1
+	else
+		FILENAME=$SOURCE_CACHE/$1
+	fi
+	if [ -f "$FILENAME" ] ; then
+		FILEMAGIC=$(file -b $FILENAME)
+		case $FILENAME in
+			*.bz2|*.BZ2)
+				echo $FILEMAGIC | grep -qw "bzip2"
+				;;
+			*.gz|*.GZ|*.tgz|*.TGZ)
+				echo $FILEMAGIC | grep -qw "gzip"
+				;;
+			*.z|*.Z)
+				echo $FILEMAGIC | grep -qw "compress"
+				;;
+			*.zip|*.ZIP)
+				echo $FILEMAGIC | grep -qw "Zip"
+				;;
+			*.rpm|*.RPM)
+				echo $FILEMAGIC | grep -qw "RPM"
+				;;
+			*.CAB|*.cab)
+				echo $FILEMAGIC | grep -qw "Cabinet"
+				;;
+			*.xz|*.XZ)
+				echo $FILEMAGIC | grep -qw "XZ"
+				;;
+			*)
+				# we don't know how to handle this type of file
+				true
+				;;
+		esac
+	else
+		# filename does not exist!
+		false
+	fi
 }
 
-show_downloading() {
-  local DOWNLOAD_PID DOWNLOAD_LOG
-  debug_msg "show_downloading ($*)"
-  DOWNLOAD_PID=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f2)
-  if [ -n "$DOWNLOAD_PID" ]; then
-    DOWNLOAD_LOG=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f3)
-    if [ ! -d "/proc/$DOWNLOAD_PID" ] && [ -f "$DOWNLOAD_LOG" ]; then
-      sed -e 's/^.*\r//' "$DOWNLOAD_LOG"
-      rm -f "$DOWNLOAD_LOG"
-    elif [ -f "$DOWNLOAD_LOG" ]; then
-      tail -s 0.1 -n 200 --follow=name --pid="$DOWNLOAD_PID" "$DOWNLOAD_LOG"
-      sleep 1
-      rm -f "$DOWNLOAD_LOG"
-    fi
-  elif lget_locked "$MODULE"; then
-    message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
-    while lget_locked "$MODULE"; do
-      echo -n "."
-      sleep 5
-    done
-  fi
+
+show_downloading()
+{
+	local DOWNLOAD_PID DOWNLOAD_LOG
+	debug_msg "show_downloading ($@)"
+	DOWNLOAD_PID=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f2)
+	if [ -n "$DOWNLOAD_PID" ]; then
+		DOWNLOAD_LOG=$(grep "^$MODULE:" "$TEMP_DOWNLOAD_PIDS" | cut -d: -f3)
+		if [ ! -d "/proc/$DOWNLOAD_PID" -a -f "$DOWNLOAD_LOG" ]; then
+			sed -e 's/^.*\r//' "$DOWNLOAD_LOG"
+			rm -f $DOWNLOAD_LOG
+		elif [ -f "$DOWNLOAD_LOG" ]; then
+			tail -s 0.1 -n 200 --follow=name --pid=$DOWNLOAD_PID "$DOWNLOAD_LOG"
+			sleep 1
+			rm -f $DOWNLOAD_LOG
+		fi
+	elif lget_locked $MODULE; then
+		message "${MESSAGE_COLOR}Please wait while downloading of ${DEFAULT_COLOR}${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} progresses${DEFAULT_COLOR}"
+		while lget_locked $MODULE; do
+			echo -n "."
+			sleep 5
+		done
+	fi
 }

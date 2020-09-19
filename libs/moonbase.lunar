@@ -8,87 +8,89 @@
 #                                                          #
 ############################################################
 
-get_moonbase() {
-  (
-    debug_msg "get_moonbase  ($@)"
-    if $(module_held "moonbase"); then
-      verbose_msg "Skipping compile and install for held module \"moonbase\""
-      return
+
+get_moonbase () {
+(
+  debug_msg "get_moonbase  ($@)"
+  if $(module_held "moonbase") ; then
+    verbose_msg "Skipping compile and install for held module \"moonbase\""
+    return
+  fi
+
+  SYSTEM_MOONBASE=/var/lib/lunar/moonbase
+
+  # prevent using stale copies of moonbase. You can still override moonbase's
+  # URL with `lunar set MOONBASE_URL[0] http://.....
+  unset LRESORT_URL FRESORT_URL
+
+  # the following overrides run_details:
+  run_details() {
+  debug_msg "  run_details ($@)"
+        MODULE=moonbase
+       VERSION=`date -u +%Y%m%d.%H`
+        SOURCE=$MODULE.tar.bz2
+SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
+       PARTIAL=off
+   CLEAR_CACHE=on
+  }
+
+  # make sure we set these values up front to be sure
+  run_details moonbase
+  rm -f $TMPDIR/$SOURCE
+
+  if [ ! -d "$SYSTEM_MOONBASE" ] ; then
+    mkdir -p $SYSTEM_MOONBASE
+  fi
+
+  if [ ! -d "$SYSTEM_MOONBASE/zlocal" ] ; then
+    mkdir -p $SYSTEM_MOONBASE/zlocal
+  fi
+
+  if [ "$SYSTEM_MOONBASE" == "$MOONBASE" ]; then
+    push_uniq_id
+    if ! download_module $MODULE ; then
+      OUTCOME=failed
+      INFO="Could not download a fresh moonbase"
+    else
+      message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+      mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup    &&
+      rm -rf $SYSTEM_MOONBASE                                      &&
+      TMP_MODULE_INDEX=$(temp_create "temp.module.index")          &&
+      cp $MODULE_INDEX $TMP_MODULE_INDEX                           &&
+      lrm moonbase                                                 &&
+      mkdir $SYSTEM_MOONBASE                                       &&
+      mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal     &&
+      message "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}"       &&
+      bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar | \
+            sed "s:^:/var/lib/lunar/:g" > $INSTALL_LOGS/$MODULE-$VERSION  &&
+      echo $INSTALL_LOGS/$MODULE-$VERSION >> $INSTALL_LOGS/$MODULE-$VERSION &&
+      echo "$MD5SUM_LOGS/$MODULE-$VERSION" >> $INSTALL_LOGS/$MODULE-$VERSION &&
+      message "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
+              "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}" &&
+      # create an md5sum log
+      create_md5sum_log &&
+
+      add_module $MODULE installed $VERSION $(du -ks $SYSTEM_MOONBASE | cut -f1)KB &&
+      OUTCOME=success || OUTCOME=failed
     fi
+  fi
 
-    SYSTEM_MOONBASE=/var/lib/lunar/moonbase
+  if [ "$OUTCOME" != "failed" ] ; then
+    # get ready to regenerate the module index cache file
+    create_module_index &&
+    create_depends_cache &&
+    update_depends &&
+    update_plugins &&
+    display_moonbase_changes &&
+    temp_destroy $TMP_MODULE_INDEX &&
+    OUTCOME=success || OUTCOME=failed
+  fi
 
-    # prevent using stale copies of moonbase. You can still override moonbase's
-    # URL with `lunar set MOONBASE_URL[0] http://.....
-    unset LRESORT_URL FRESORT_URL
-
-    # the following overrides run_details:
-    run_details() {
-      debug_msg "  run_details ($@)"
-      MODULE=moonbase
-      VERSION=$(date -u +%Y%m%d.%H)
-      SOURCE=$MODULE.tar.bz2
-      SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
-      PARTIAL=off
-      CLEAR_CACHE=on
-    }
-
-    # make sure we set these values up front to be sure
-    run_details moonbase
-    rm -f $TMPDIR/$SOURCE
-
-    if [ ! -d "$SYSTEM_MOONBASE" ]; then
-      mkdir -p $SYSTEM_MOONBASE
-    fi
-
-    if [ ! -d "$SYSTEM_MOONBASE/zlocal" ]; then
-      mkdir -p $SYSTEM_MOONBASE/zlocal
-    fi
-
-    if [ "$SYSTEM_MOONBASE" == "$MOONBASE" ]; then
-      push_uniq_id
-      if ! download_module $MODULE; then
-        OUTCOME=failed
-        INFO="Could not download a fresh moonbase"
-      else
-        message "${MESSAGE_COLOR}Preparing to install ${FILE_COLOR}${SOURCE}" \
-          "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}" &&
-          mv $SYSTEM_MOONBASE/zlocal/ /var/lib/lunar/.zlocal-backup &&
-          rm -rf $SYSTEM_MOONBASE &&
-          TMP_MODULE_INDEX=$(temp_create "temp.module.index") &&
-          cp $MODULE_INDEX $TMP_MODULE_INDEX &&
-          lrm moonbase &&
-          mkdir $SYSTEM_MOONBASE &&
-          mv /var/lib/lunar/.zlocal-backup $SYSTEM_MOONBASE/zlocal &&
-          message "${MESSAGE_COLOR}Extracting ${FILE_COLOR}${SOURCE}" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}...${DEFAULT_COLOR}" &&
-          bzcat $SOURCE_CACHE/$SOURCE | tar xv -C /var/lib/lunar |
-          sed "s:^:/var/lib/lunar/:g" >$INSTALL_LOGS/$MODULE-$VERSION &&
-          echo $INSTALL_LOGS/$MODULE-$VERSION >>$INSTALL_LOGS/$MODULE-$VERSION &&
-          echo "$MD5SUM_LOGS/$MODULE-$VERSION" >>$INSTALL_LOGS/$MODULE-$VERSION &&
-          message "${MESSAGE_COLOR}Created ${FILE_COLOR}$INSTALL_LOGS/$MODULE-$VERSION" \
-            "${DEFAULT_COLOR}${MESSAGE_COLOR}${DEFAULT_COLOR}" &&
-          # create an md5sum log
-          create_md5sum_log &&
-          add_module $MODULE installed $VERSION $(du -ks $SYSTEM_MOONBASE | cut -f1)KB &&
-          OUTCOME=success || OUTCOME=failed
-      fi
-    fi
-
-    if [ "$OUTCOME" != "failed" ]; then
-      # get ready to regenerate the module index cache file
-      create_module_index &&
-        create_depends_cache &&
-        update_depends &&
-        update_plugins &&
-        display_moonbase_changes &&
-        temp_destroy $TMP_MODULE_INDEX &&
-        OUTCOME=success || OUTCOME=failed
-    fi
-
-    activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
-    if [ "$OUTCOME" == "failed" ]; then
-      return 1
-    fi
-  )
+  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
+  if [ "$OUTCOME" == "failed" ] ; then
+    return 1
+  fi
+)
 }

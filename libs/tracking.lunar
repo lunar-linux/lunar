@@ -24,15 +24,17 @@
 #                                                          #
 ############################################################
 
+
 # function : invoke_installwatch
 # usage    : invoke_installwatch
 # purpose  : start logging all disk accesses with installwatch
 invoke_installwatch() {
   debug_msg "invoke_installwatch ($@)"
-  if [ -e /usr/lib/installwatch.so ]; then
+  if [ -e /usr/lib/installwatch.so ] ; then
     export LD_PRELOAD=/usr/lib/installwatch.so
   fi
 }
+
 
 # function : devoke_installwatch
 # usage    : devoke_installwatch
@@ -41,6 +43,7 @@ devoke_installwatch() {
   debug_msg "devoke_installwatch ($@)"
   unset LD_PRELOAD
 }
+
 
 # function : parse_iw
 # usage    : parse_iw
@@ -51,8 +54,9 @@ parse_iw() {
   OMIT_IN="	rename\|	symlink\|	unlink\|	fchmod\|	access"
 
   grep -v "$OMIT_IN" "$INSTALLWATCHFILE" | cut -f3 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED"
-  cat "$INSTALLWATCHFILE" | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED" | grep "^/"
+  cat                "$INSTALLWATCHFILE" | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED" | grep "^/"
 }
+
 
 # function : create_install_log
 # usage    : create_install_log
@@ -63,50 +67,53 @@ create_install_log() {
 
   TMP_INST_LOG=$(temp_create "install-log")
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
-  rm -f $INST_LOG &>/dev/null
+  rm -f $INST_LOG &> /dev/null
 
-  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
 
   export IFS="$TAB_ENTER_IFS"
 
-  parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists >$TMP_INST_LOG
-  echo "$INSTALL_LOGS/$MODULE-$VERSION" >>$TMP_INST_LOG
-  echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >>$TMP_INST_LOG
-  echo "$MD5SUM_LOGS/$MODULE-$VERSION" >>$TMP_INST_LOG
+  parse_iw | sort | uniq | filter "$LOCAL_EXCLUDED" | custom_filters | exists > $TMP_INST_LOG
+  echo "$INSTALL_LOGS/$MODULE-$VERSION"                 >> $TMP_INST_LOG
+  echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
+  echo "$MD5SUM_LOGS/$MODULE-$VERSION"                  >> $TMP_INST_LOG
 
   install -m644 $TMP_INST_LOG $INST_LOG
 
   temp_destroy $TMP_INST_LOG
 }
 
-create_md5sum_log() {
+
+create_md5sum_log()  {
   local FILE
   debug_msg "create_md5sum_log ($@)"
 
-  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &>/dev/null
+  rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
 
-  IFS=$'\n' files <$INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >>$MD5SUM_LOGS/$MODULE-$VERSION
+  IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
 }
 
 create_install_cache() {
   debug_msg "create_install_cache($@)"
 
-  if [ "$ARCHIVE" == "off" ]; then
+  if [ "$ARCHIVE" == "off" ] ; then
     return
   fi
 
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}${DEFAULT_COLOR}"
-  tar cP --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS >"$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
+  tar cP --no-recursion -T $INSTALL_LOGS/$MODULE-$VERSION | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
 
 }
+
 
 finish_install() {
   debug_msg "finish_install ($@)"
 
-  create_install_log &&
-    create_md5sum_log &&
-    create_install_cache &&
-    add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+  create_install_log    &&
+  create_md5sum_log     &&
+  create_install_cache  &&
+
+  add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
 }

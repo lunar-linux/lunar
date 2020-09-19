@@ -15,6 +15,7 @@
 #                                                          #
 ############################################################
 
+
 # function : display_update_log
 # usage    : display_update_log update|rebuild
 # purpose  : display a log describing update successes, failures, and summaries
@@ -22,11 +23,12 @@ display_update_log() {
   debug_msg "display_update_log ($@)"
   rm -f /var/log/lunar/update
   {
-    if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ]; then
+    if [ -e "$TMP_LIN_SUCCESS" -a -e "$TMP_LIN_FAIL" ] ; then
       display_success_info $1
     fi
   } | tee /var/log/lunar/update
 }
+
 
 # function : display_success_info
 # usage    : display_success_info update|rebuild
@@ -39,19 +41,19 @@ display_success_info() {
   NUMFAILURES=$(wc -l "$TMP_LIN_FAIL" | cut -d" " -f1)
 
   message
-  message "${MESSAGE_COLOR}Lunar $1 completed at $(date)${DEFAULT_COLOR}"
-  message "Successful  : $NUMSUCCESS"
-  message "Failed      : $NUMFAILURES"
+  message  "${MESSAGE_COLOR}Lunar $1 completed at `date`${DEFAULT_COLOR}"
+  message  "Successful  : $NUMSUCCESS"
+  message  "Failed      : $NUMFAILURES"
   message
 
-  if [ "$NUMSUCCESS" -gt "0" ]; then
-    message "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"
+  if  [  "$NUMSUCCESS" -gt "0"  ]; then
+    message  "${MESSAGE_COLOR}Successfully updated modules:${DEFAULT_COLOR}"
     cat "$TMP_LIN_SUCCESS"
     message
   fi
 
-  if [ "$NUMFAILURES" -gt "0" ]; then
-    message "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
+  if  [  "$NUMFAILURES" -gt "0"  ]; then
+    message  "${MESSAGE_COLOR}Failed updated modules:${DEFAULT_COLOR}"
     cat "$TMP_LIN_FAIL"
     message
   fi
@@ -61,55 +63,55 @@ display_success_info() {
 # function : display_moonbase_changes
 # usage    : display_moonbase_changes
 # purpose  : display a list of modules added or removed during this update
-display_moonbase_changes() {
+display_moonbase_changes()  {
   local MODULE_CHANGES NEW_MODULES DEL_MODULES MOV_MODULES M
   debug_msg "display_moonbase_changes ($@)"
 
   if [ -e "$MODULE_INDEX" ] && [ -e "$TMP_MODULE_INDEX" ]; then
     MODULE_CHANGES=$(temp_create "module-changes")
-    diff -U0 $TMP_MODULE_INDEX $MODULE_INDEX | grep -v -e '^@@' -e '^---' -e '^+++' >$MODULE_CHANGES
+    diff -U0 $TMP_MODULE_INDEX $MODULE_INDEX | grep -v -e '^@@' -e '^---' -e '^+++' > $MODULE_CHANGES
 
     MODULES=$(cat "$MODULE_CHANGES" | cut -d: -f1 | sed 's:^[+-]::' | sort -t : | uniq)
-    for M in $MODULES; do
-      IN=$(grep "^-$M:" "$MODULE_CHANGES")
-      OUT=$(grep "^+$M:" "$MODULE_CHANGES")
-      if [ -z "$IN" -a -n "$OUT" ]; then
-        # new module:
-        NEW_MODULES="$NEW_MODULES $M"
-      elif [ -n "$IN" -a -z "$OUT" ]; then
-        # removed module:
-        DEL_MODULES="$DEL_MODULES $M"
-      else
-        # moved module
-        MOV_MODULES="$MOV_MODULES $M"
-      fi
-    done
+	for M in $MODULES; do
+	  IN=$(grep "^-$M:" "$MODULE_CHANGES")
+	  OUT=$(grep "^+$M:" "$MODULE_CHANGES")
+	  if [ -z "$IN" -a -n "$OUT" ] ; then
+	    # new module:
+		NEW_MODULES="$NEW_MODULES $M"
+	  elif [ -n "$IN" -a -z "$OUT" ] ; then
+	    # removed module:
+		DEL_MODULES="$DEL_MODULES $M"
+	  else
+	    # moved module
+		MOV_MODULES="$MOV_MODULES $M"
+	  fi
+	done
 
     if [ -n "$NEW_MODULES" ]; then
       message "${MESSAGE_COLOR}New modules:${DEFAULT_COLOR}"
-      for M in $NEW_MODULES; do
-        message "  $M"
-      done
+	  for M in $NEW_MODULES; do
+	   message "  $M"
+	  done
       message
     fi
 
     if [ -n "$DEL_MODULES" ]; then
       message "${MESSAGE_COLOR}Removed modules:${DEFAULT_COLOR}"
-      for M in $DEL_MODULES; do
-        message "  $M"
-      done
+	  for M in $DEL_MODULES; do
+	    message "  $M"
+	  done
       message
     fi
 
     if [ -n "$MOV_MODULES" ]; then
       message "${MESSAGE_COLOR}Moved modules:${DEFAULT_COLOR}"
-      for M in $MOV_MODULES; do
-        INS=$(grep "^[-]$M:" "$MODULE_CHANGES" | cut -d: -f2)
-        OUTS=$(grep "^[+]$M:" "$MODULE_CHANGES" | cut -d: -f2)
-        message "  $M: $INS -> $OUTS"
-      done
+	  for M in $MOV_MODULES; do
+	    INS=$(grep "^[-]$M:" "$MODULE_CHANGES" | cut -d: -f2)
+		OUTS=$(grep "^[+]$M:" "$MODULE_CHANGES" | cut -d: -f2)
+		message "  $M: $INS -> $OUTS"
+	  done
       message
     fi
-    temp_destroy $MODULE_CHANGES
+  temp_destroy $MODULE_CHANGES
   fi
 }

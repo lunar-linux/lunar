@@ -31,16 +31,16 @@ ld_add() {
   local ld_conf_path
   debug_msg "ld_add ($@)"
 
-  if [ ! -z "$1" ] && [ -d "$1" ]; then
+  if [ ! -z "$1" ] && [ -d "$1" ] ; then
     if [ ! -d "/etc/ld.so.conf.d" ]; then
       mkdir -p "/etc/ld.so.conf.d"
     fi
 
     ld_conf_path="/etc/ld.so.conf.d/${MODULE}.conf"
 
-    if ! grep -q "$1" $ld_conf_path 2>/dev/null; then
+    if ! grep -q "$1" $ld_conf_path 2> /dev/null; then
       verbose_msg "Adding $1 to $ld_conf_path"
-      echo "$1" >>$ld_conf_path
+      echo "$1" >> $ld_conf_path
       ldconfig
     fi
   fi
@@ -61,8 +61,8 @@ ld_remove() {
       TMP_LD_CONF=$(temp_create "ldsoconf")
       verbose_msg "Removing $1 from ld.so.conf"
 
-      grep -v "$1" $ld_conf_path >$TMP_LD_CONF
-      cat "$TMP_LD_CONF" >$ld_conf_path
+      grep -v "$1" $ld_conf_path > $TMP_LD_CONF
+      cat "$TMP_LD_CONF" > $ld_conf_path
 
       if [ ! -s "$ld_so_conf" ]; then
         rm $ld_conf_path
@@ -81,12 +81,13 @@ ld_remove() {
 directories() {
   debug_msg "directories ($@)"
   local ITEM
-  while read ITEM; do
-    if [ -d "$ITEM" ] && [ ! -h "$ITEM" ]; then
+  while read ITEM ; do
+    if [ -d "$ITEM" ] && [ ! -h "$ITEM" ] ; then
       echo "$ITEM"
     fi
   done
 }
+
 
 # function : files
 # usage    : VARIABLE=`files < dirlistfile`
@@ -94,12 +95,13 @@ directories() {
 files() {
   debug_msg "files ($@)"
   local ITEM
-  while read ITEM; do
-    if [ -f "$ITEM" ] && [ ! -h "$ITEM" ]; then
+  while read ITEM ; do
+    if [ -f "$ITEM" ] && [ ! -h "$ITEM" ] ; then
       echo "$ITEM"
     fi
   done
 }
+
 
 # function : sysmlinks
 # usage    : VARIABLE=`symlinks < dirlistfile`
@@ -107,12 +109,13 @@ files() {
 symlinks() {
   debug_msg "symlinks ($@)"
   local ITEM
-  while read ITEM; do
-    if [ -h "$ITEM" ]; then
+  while read ITEM ; do
+    if [ -h "$ITEM" ] ; then
       echo "$ITEM"
     fi
   done
 }
+
 
 # function : dirnames
 # usage    : VARIABLE=`dirnames < dirlistfile`
@@ -120,10 +123,11 @@ symlinks() {
 dirnames() {
   debug_msg "dirnames ($@)"
   local FILE
-  while read FILE; do
+  while read FILE ; do
     dirname "$FILE"
   done
 }
+
 
 # function : exists
 # usage    : VARIABLE=`exists < dirlistfile`
@@ -131,12 +135,13 @@ dirnames() {
 exists() {
   debug_msg "exists ($@)"
   local ITEM
-  while read ITEM; do
+  while read ITEM ; do
     if [ -e "$ITEM" ] || [ -L "$ITEM" ]; then
       echo "$ITEM"
     fi
   done
 }
+
 
 # function : filter
 # usage    : filter $FILE
@@ -144,11 +149,11 @@ exists() {
 filter() {
   debug_msg "filter ($@)"
   local TMP_GREPRE
-  if [ -f "$1" ]; then
+  if [ -f "$1" ] ; then
     TMP_GREPRE=$(temp_create "fgrep")
-    directories <$1 | sed -e 's:^:^:g' -e 's:$:/:g' >$TMP_GREPRE
-    files <$1 | sed -e 's:^:^:g' -e 's:$:\$:g' >>$TMP_GREPRE
-    symlinks <$1 | sed -e 's:^:^:g' -e 's:$:\$:g' >>$TMP_GREPRE
+    directories < $1 | sed -e 's:^:^:g' -e 's:$:/:g'   > $TMP_GREPRE
+    files       < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
+    symlinks    < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
     read
     grep -v -f "$TMP_GREPRE"
     temp_destroy $TMP_GREPRE
@@ -157,11 +162,13 @@ filter() {
   fi
 }
 
-unmap_device() {
+
+unmap_device()
+{
   debug_msg "unmap_device($@)"
   local DEVICE REAL
   REAL=$(readlink -f $1)
-  for DEVICE in $(ls -1d /dev/[hs]d* 2>/dev/null); do
+  for DEVICE in $(ls -1d /dev/[hs]d* 2> /dev/null); do
     if [[ "$(readlink -f $DEVICE)" == "$REAL" ]]; then
       echo $DEVICE
       return 0
@@ -171,26 +178,29 @@ unmap_device() {
   return 0
 }
 
-find_pam_aware() {
+
+find_pam_aware()  {
   debug_msg "find_pam_aware ($@)"
   local MODULE SECTION
 
   for MODULE in $(list_installed); do
     SECTION=$(find_section $MODULE)
     if [ -d "$MOONBASE/$SECTION/$MODULE/pam.d" ] &&
-      [ "$MODULE" != "Linux-PAM" ]; then
+           [ "$MODULE" != "Linux-PAM" ]; then
       echo $MODULE
     fi
   done
 }
 
-custom_filters() {
+
+custom_filters()
+{
   local FILE
   if [[ "${COMPRESS_MANPAGES:-on}" == "on" ]]; then
     while read FILE; do
-      if [[ -f "$FILE" ]]; then
+      if [[ -f "$FILE" ]] ; then
         if [[ $FILE =~ ^/usr/share/man/.*\..$ && ! $FILE =~ \.gz$ ]]; then
-          gzip -9 <"$FILE" >"$FILE.gz"
+          gzip -9 < "$FILE" > "$FILE.gz"
           debug_msg "Compressing man page \"$FILE\""
           rm -f "$FILE"
           echo "$FILE.gz"
@@ -206,7 +216,9 @@ custom_filters() {
   fi
 }
 
-last_kernel() {
+
+last_kernel()
+{
   if [ -f /usr/src/linux/include/linux/utsrelease.h ]; then
     grep UTS_RELEASE /usr/src/linux/include/linux/utsrelease.h | cut -d'"' -f2
   else
@@ -214,30 +226,33 @@ last_kernel() {
   fi
 }
 
-source_basename() {
+source_basename()
+{
   local filename=$1
   echo ${filename%.tar.?z*} # xz, bz2, gz
 }
 
-xzbz_file() {
+xzbz_file()
+{
   local FILE FILE_BZ
   FILE="$1.xz"
-  if [ ! -f $FILE ]; then
+  if [ ! -f $FILE ] ; then
     FILE_BZ="$1.bz2"
-    if [ -f $FILE_BZ ]; then
+    if [ -f $FILE_BZ ] ; then
       FILE="$FILE_BZ"
     fi
   fi
   echo $FILE
 }
 
-xzbz() {
+xzbz()
+{
   local XZBZ
   case $(file -b $2 | cut -d' ' -f1) in
     bzip2) XZBZ=bzip2 ;;
-    gzip) XZBZ=gzip ;;
-    XZ) XZBZ=xz ;;
-    *) XZBZ=xz ;;
+     gzip) XZBZ=gzip ;;
+       XZ) XZBZ=xz ;;
+        *) XZBZ=xz ;;
   esac
   $XZBZ "$@"
 }

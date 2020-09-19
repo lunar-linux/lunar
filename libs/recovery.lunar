@@ -23,20 +23,20 @@ rebuild_status_files() {
   debug_msg "rebuild_status_files ($@)"
 
   if ! query \
-    "Do you want to re-construct the status files from install logs?" y; then
-    message "${PROBLEM_COLOR}Unable to continue without status files" \
-      "${DEFAULT_COLOR}"
-    exit 1
+     "Do you want to re-construct the status files from install logs?" y; then
+     message  "${PROBLEM_COLOR}Unable to continue without status files" \
+              "${DEFAULT_COLOR}"
+     exit 1
   fi
 
   if ! [ -d "$INSTALL_LOGS" ]; then
-    message "${PROBLEM_COLOR}Unable to continue without install logs " \
-      "${DEFAULT_COLOR}"
-    exit 1
+     message  "${PROBLEM_COLOR}Unable to continue without install logs " \
+              "${DEFAULT_COLOR}"
+     exit 1
   fi
 
-  message "${MESSAGE_COLOR}Re-creating status files." \
-    "${DEFAULT_COLOR}"
+  message  "${MESSAGE_COLOR}Re-creating status files." \
+           "${DEFAULT_COLOR}"
 
   LOG_FILES=$(ls -rt $INSTALL_LOGS)
   for MODULE_NAME in $LOG_FILES; do
@@ -53,27 +53,29 @@ rebuild_status_files() {
         DATE=$(ls -l $INSTALL_LOGS/$REAL_NAME-$VERSION --time-style=+%Y%m%d | awk '{print $6}')
         # adjusted add_module code that echos the DATE field ;^)
         lock_file $MODULE_STATUS &&
-          lock_file $MODULE_STATUS_BACKUP &&
-          {
-            OLD_STATE=$(get_module_state $REAL_NAME "installed")
-            grep -v "^$REAL_NAME:" "$MODULE_STATUS" >$MODULE_STATUS_BACKUP
-            if [ -n "$OLD_STATE" ]; then
-              OLD_STATE="+$OLD_STATE"
-            fi
-            echo "$REAL_NAME:$DATE:installed$OLD_STATE:$VERSION:$SIZE" >>$MODULE_STATUS_BACKUP &&
-              cp $MODULE_STATUS_BACKUP $MODULE_STATUS
-          }
+        lock_file $MODULE_STATUS_BACKUP &&
+        {
+          OLD_STATE=$(get_module_state $REAL_NAME "installed")
+          grep -v "^$REAL_NAME:" "$MODULE_STATUS" > $MODULE_STATUS_BACKUP
+          if [ -n "$OLD_STATE" ]; then
+            OLD_STATE="+$OLD_STATE"
+          fi
+          echo "$REAL_NAME:$DATE:installed$OLD_STATE:$VERSION:$SIZE" >> $MODULE_STATUS_BACKUP     &&
+          cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+        }
         unlock_file $MODULE_STATUS_BACKUP &&
-          unlock_file $MODULE_STATUS &&
-          message "Added: $REAL_NAME-$VERSION ($SIZE) ($DATE)"
+        unlock_file $MODULE_STATUS &&
+
+        message "Added: $REAL_NAME-$VERSION ($SIZE) ($DATE)"
         break
       fi
       ((COUNTS--))
     done
   done
 
-  message "${MESSAGE_COLOR}Success!!${DEFAULT_COLOR}\n"
+  message  "${MESSAGE_COLOR}Success!!${DEFAULT_COLOR}\n"
 }
+
 
 # function : replace_status_file
 # usage    : replace_status_file
@@ -81,30 +83,27 @@ rebuild_status_files() {
 replace_status_file() {
   debug_msg "replace_status_file ($@)"
 
-  if ! [ -f "$MODULE_STATUS_BACKUP" ]; then
-    rebuild_status_files
-    return
-  fi
-  message "${PROBLEM_COLOR}Unable to find MODULE_STATUS file" \
-    "${MODULE_COLOR}$MODULE_STATUS" \
-    "${DEFAULT_COLOR}"
+   if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; return; fi
+    message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS file"   \
+             "${MODULE_COLOR}$MODULE_STATUS"                      \
+             "${DEFAULT_COLOR}"
 
-  if query "Do you want to use the backup?" y; then
-    if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; fi
-    if $(cp $MODULE_STATUS_BACKUP $MODULE_STATUS); then
-      message "${MESSAGE_COLOR}Success!!" \
-        "${DEFAULT_COLOR}"
-    else
-      message "${PROBLEM_COLOR}Unsuccessful :=( No more operation!!" \
-        "${DEFAULT_COLOR}"
+   if query "Do you want to use the backup?" y; then
+      if ! [ -f "$MODULE_STATUS_BACKUP" ]; then rebuild_status_files; fi
+      if `cp $MODULE_STATUS_BACKUP $MODULE_STATUS`; then
+         message  "${MESSAGE_COLOR}Success!!"   \
+                  "${DEFAULT_COLOR}"
+      else
+         message  "${PROBLEM_COLOR}Unsuccessful :=( No more operation!!"  \
+                  "${DEFAULT_COLOR}"
+         exit 1
+      fi
+   else
+      message  "${PROBLEM_COLOR}Unable to continue without that :=("\
+               "No more operation!!"  \
+               "${DEFAULT_COLOR}"
       exit 1
-    fi
-  else
-    message "${PROBLEM_COLOR}Unable to continue without that :=(" \
-      "No more operation!!" \
-      "${DEFAULT_COLOR}"
-    exit 1
-  fi
+   fi
 }
 
 # function : check_status_files
@@ -112,25 +111,22 @@ replace_status_file() {
 # purpose  : checks the avail of MODULE_STATUS and MODULE_STATUS_BACKUP files
 check_status_files() {
   debug_msg "check_status_files ($@)"
-  if ! [ -f "$MODULE_STATUS" ]; then replace_status_file; fi
-  if ! [ -f "$MODULE_STATUS" ]; then
-    echo "Unknown error!!!"
-    exit
-  fi
-  if ! [ -f "$MODULE_STATUS_BACKUP" ]; then
-    message "${PROBLEM_COLOR}Unable to find MODULE_STATUS_BACKUP file" \
-      "${MODULE_COLOR}$MODULE_STATUS_BACKUP" \
-      "${DEFAULT_COLOR}"
-    if $(cp $MODULE_STATUS $MODULE_STATUS_BACKUP); then
-      message "${MESSAGE_COLOR}MODULE_STATUS is successfully copied" \
-        "to MODULE_STATUS_BACKUP" \
-        "${DEFAULT_COLOR}"
-    else
-      message "${PROBLEM_COLOR}Unsuccessful while copying" \
-        "MODULE_STATUS to MODULE_STATUS_BACKUP :=(  " \
-        "No more operation!!" \
-        "${DEFAULT_COLOR}"
-      exit 1
-    fi
-  fi
+   if ! [ -f "$MODULE_STATUS" ]; then replace_status_file; fi
+   if ! [ -f "$MODULE_STATUS" ]; then echo "Unknown error!!!"; exit; fi
+   if ! [ -f "$MODULE_STATUS_BACKUP" ]; then
+         message  "${PROBLEM_COLOR}Unable to find MODULE_STATUS_BACKUP file" \
+                  "${MODULE_COLOR}$MODULE_STATUS_BACKUP"                     \
+                  "${DEFAULT_COLOR}"
+         if `cp $MODULE_STATUS $MODULE_STATUS_BACKUP`; then
+            message  "${MESSAGE_COLOR}MODULE_STATUS is successfully copied" \
+                     "to MODULE_STATUS_BACKUP"   \
+                     "${DEFAULT_COLOR}"
+         else
+            message  "${PROBLEM_COLOR}Unsuccessful while copying" \
+                     "MODULE_STATUS to MODULE_STATUS_BACKUP :=(  " \
+                     "No more operation!!"                         \
+                     "${DEFAULT_COLOR}"
+            exit 1
+         fi
+   fi
 }

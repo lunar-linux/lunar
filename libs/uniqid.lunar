@@ -10,6 +10,7 @@
 #                                                          #
 ############################################################
 
+
 push_uniq_id() {
   debug_msg "push_uniq_id ($@)"
   if [ -z "$UNIQID" ]; then
@@ -21,6 +22,7 @@ push_uniq_id() {
 
 }
 
+
 create_uniq_id() {
   local OS HASH IFACE
   debug_msg "create_uniq_id ($@)"
@@ -29,8 +31,8 @@ create_uniq_id() {
   fi
 
   IFACE=$(ip route | awk '/^default/ {print $5}')
-  UNIQID=$(ip addr show $IFACE | awk '/link\/ether/ {print $2}' |
-    tr 'A-Z' 'a-z' | md5sum | awk '{print $1}')
+  UNIQID=$(ip addr show $IFACE | awk '/link\/ether/ {print $2}' |\
+      tr 'A-Z' 'a-z' | md5sum | awk '{print $1}')
 
   export UNIQID
 

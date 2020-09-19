@@ -20,34 +20,36 @@
 # usage   : find_module_size <module> |version|
 # purpose : finds the installed size of module in KB
 find_module_size() {
-  local VERSION LINE SIZE0 SIZE
-  #this functions checks the modules file if there is already size entry
-  module_size() {
-    local SIZE
-    unset SIZE
-    [ -e "$MODULE_STATUS" ] &&
+   local VERSION LINE SIZE0 SIZE
+   #this functions checks the modules file if there is already size entry
+   module_size()
+   {
+      local SIZE
+      unset SIZE
+      [ -e "$MODULE_STATUS" ] &&
       SIZE=$(sed -n "s/^$1:.*://p" "$MODULE_STATUS")
-    [ -n "$SIZE" ] && echo ${SIZE} || false
-  }
+      [ -n "$SIZE" ] && echo ${SIZE} || false
+   }
 
-  [ -z "$1" ] && return
+   [ -z "$1" ] && return
 
-  [ -n "$2" ] && VERSION=$2 || VERSION=$(installed_version $1)
-  [ -z "$VERSION" ] &&
-    message "${PROBLEM_COLOR}$1 is not installed${DEFAULT_COLOR}" &&
-    return
+   [ -n "$2" ] && VERSION=$2 || VERSION=`installed_version $1`
+   [ -z "$VERSION" ] &&
+   message  "${PROBLEM_COLOR}$1 is not installed${DEFAULT_COLOR}" &&
+   return
 
-  # yes, there is a size entry
-  module_size $1 $VERSION && return
+   # yes, there is a size entry
+   module_size $1 $VERSION && return
 
-  # no :( lets dig through logs
-  [ -e "$INSTALL_LOGS/$1-$VERSION" ] &&
-    while read LINE; do
-      [ -f "$LINE" ] &&
-        SIZE0=$(du "$LINE" |
-          cut -f 1-1) &&
-        SIZE=$((SIZE0 + SIZE))
-    done <$INSTALL_LOGS/$1-$VERSION &&
-    echo ${SIZE}KB ||
-    message "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
+   # no :( lets dig through logs
+   [ -e "$INSTALL_LOGS/$1-$VERSION" ]  &&
+   while read LINE
+   do
+      [ -f "$LINE" ]            &&
+      SIZE0=`du "$LINE"         |
+             cut -f 1-1`        &&
+      SIZE=$((SIZE0+SIZE))
+   done <$INSTALL_LOGS/$1-$VERSION     &&
+   echo ${SIZE}KB                      ||
+   message  "${PROBLEM_COLOR}Install log for $1 is not found${DEFAULT_COLOR}"
 }

@@ -15,6 +15,7 @@
 #                                                          #
 ############################################################
 
+
 # function: add_priv_group
 # usage   : add_priv_group groupname [addgroupopts [addgroupopts]...]
 # info    : adds groupname and passes addgroupopts to 'addgroup'
@@ -22,26 +23,26 @@ function add_priv_group() {
   local GROUPNAME
   debug_msg "function add_priv_group ($@)"
 
-  if [ -n "$INSTALLWATCHFILE" ]; then
+  if [ -n "$INSTALLWATCHFILE" ] ; then
     devoke_installwatch
   fi
   GROUPNAME=$1
 
-  if [ -z "$GROUPNAME" ]; then
+  if [ -z "$GROUPNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
     return 1
   fi
 
-  if grep -q "^$GROUPNAME:" /etc/group; then
+  if grep -q "^$GROUPNAME:" /etc/group ; then
     verbose_msg "group \"$GROUPNAME\" already exists, not creating"
   else
     # add the group:
-    for ((N = 0; N < 100; N++)); do
-      if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$")" ]; then
+    for (( N=0 ; N<100 ; N++)) ; do
+      if [ -z "$(cat /etc/group | cut -d: -f3 | grep "^$N$" )" ] ; then
         break
       fi
     done
-    if [ "$N" == "100" ]; then
+    if [ "$N" == "100" ] ; then
       message "${PROBLEM_COLOR}!add_priv_user: no more group id's left under gid=100, bailing out!${DEFAULT_COLOR}"
       return 1
     fi
@@ -49,10 +50,11 @@ function add_priv_group() {
     groupadd -g $N $GROUPNAME
   fi
 
-  if [ -n "$INSTALLWATCHFILE" ]; then
+  if [ -n "$INSTALLWATCHFILE" ] ; then
     invoke_installwatch
   fi
 }
+
 
 # function: add_priv_user
 # usage   : add_priv_user username:groupname [adduseropts [adduseropts]...]
@@ -61,40 +63,40 @@ function add_priv_user() {
   local USERNAME GROUPNAME
   debug_msg "function add_priv_user ($@)"
 
-  if [ -n "$INSTALLWATCHFILE" ]; then
+  if [ -n "$INSTALLWATCHFILE" ] ; then
     devoke_installwatch
   fi
   USERNAME=$(echo $1 | cut -d: -f1)
   GROUPNAME=$(echo $1 | cut -d: -f2)
 
-  if [ -z "$USERNAME" ]; then
+  if [ -z "$USERNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no username specified${DEFAULT_COLOR}"
     return 1
   fi
 
-  if [ -z "$GROUPNAME" ]; then
+  if [ -z "$GROUPNAME" ] ; then
     message "${PROBLEM_COLOR}!add_priv_user: no groupname specified${DEFAULT_COLOR}"
     return 1
   fi
 
-  if id $USERNAME &>/dev/null; then
+  if id $USERNAME &> /dev/null ; then
     verbose_msg "user \"$USERNAME\" already exists, not creating or modifying"
   else
-    if grep -q "^$GROUPNAME:" /etc/group; then
+    if grep -q "^$GROUPNAME:" /etc/group ; then
       verbose_msg "group \"$GROUPNAME\" already exists, not creating"
     else
-      if ! add_priv_group $GROUPNAME; then
+      if ! add_priv_group $GROUPNAME ; then
         return 1
       fi
     fi
 
     # add the user:
-    for ((N = 0; N < 100; N++)); do
-      if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$")" ]; then
+    for (( N=0 ; N<100 ; N++)) ; do
+      if [ -z "$(cat /etc/passwd | cut -d: -f3 | grep "^$N$" )" ] ; then
         break
       fi
     done
-    if [ "$N" == "100" ]; then
+    if [ "$N" == "100" ] ; then
       message "${PROBLEM_COLOR}!add_priv_user: no more user id's left under uid=100, bailing out!${DEFAULT_COLOR}"
       return 1
     fi
@@ -106,7 +108,7 @@ function add_priv_user() {
 
   fi
 
-  if [ -n "$INSTALLWATCHFILE" ]; then
+  if [ -n "$INSTALLWATCHFILE" ] ; then
     invoke_installwatch
   fi
 }

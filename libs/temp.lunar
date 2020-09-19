@@ -16,22 +16,24 @@
 #                                                                  #
 ####################################################################
 
+
 temp_create() {
   local TMPFILE
   debug_msg "temp_create ($@)"
   TMPFILE="$@"
-  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.$(basename $0).$TMPFILE.$$.XXXXXXXXXX); then
+  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$TMPFILE.$$.XXXXXXXXXX ) ; then
     echo $TMPFILE
   else
     message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}" \
-      "Cannot create temp file${DEFAULT_COLOR}"
+            "Cannot create temp file${DEFAULT_COLOR}"
     exit 1
   fi
 }
 
+
 temp_destroy() {
   debug_msg "temp_destroy ($@)"
-  if [ -e "$1" ]; then
+  if [ -e "$1" ] ; then
     rm -f "$1"
   fi
 }
