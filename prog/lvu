@@ -1396,47 +1396,8 @@ main() {
       fi
       ;;
 
-    DETAILS)
-      show_module_component $1 $2
-      ;;
-
-    DEPENDS)
-      show_module_component $1 $2
-      ;;
-
-    CONFIGURE)
-      show_module_component $1 $2
-      ;;
-
-    CONFLICTS)
-      show_module_component $1 $2
-      ;;
-
-    INSTALL)
-      show_module_component $1 $22
-      ;;
-
-    PRE_BUILD)
-      show_module_component $1 $2
-      ;;
-
-    BUILD)
-      show_module_component $1 $2
-      ;;
-
-    POST_BUILD)
-      show_module_component $1 $2
-      ;;
-
-    POST_INSTALL)
-      show_module_component $1 $2
-      ;;
-
-    PRE_REMOVE)
-      show_module_component $1 $2
-      ;;
-
-    POST_REMOVE)
+    DETAILS | DEPENDS | CONFIGURE | CONFLICTS | INSTALL | PRE_BUILD \
+      | BUILD | POST_BUILD | POST_INSTALL | PRE_REMOVE | POST_REMOVE)
       show_module_component $1 $2
       ;;
 
