@@ -88,7 +88,6 @@ SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
     OUTCOME=success || OUTCOME=failed
   fi
 
-  activity_log "lin" "moonbase" "$VERSION" "$OUTCOME" "$INFO"
   if [ "$OUTCOME" == "failed" ] ; then
     return 1
   fi
