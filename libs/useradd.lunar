@@ -47,7 +47,9 @@ function add_priv_group() {
       return 1
     fi
     verbose_msg "creating group \"$GROUPNAME\" with id=\"$N\""
-    groupadd -g $N $GROUPNAME
+    if ! groupadd -g $N $GROUPNAME ; then
+      return 1
+    fi
   fi
 
   if [ -n "$INSTALLWATCHFILE" ] ; then
@@ -104,7 +106,9 @@ function add_priv_user() {
     shift
 
     verbose_msg "creating user \"$USERNAME\" (opts=\"-u $N -g $GROUPNAME $@\")"
-    useradd -u $N -g $GROUPNAME $USERNAME $@
+    if ! useradd -u $N -g $GROUPNAME $USERNAME $@ ; then
+      return 1
+    fi
 
   fi
 
