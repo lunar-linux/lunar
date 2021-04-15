@@ -598,13 +598,9 @@ fill_depends_collection() {
 
 show_depends() {
     local module=$1
-
-    if [ -z "${DEPENDS_COLLECTION[*]}" ]; then
-        fill_depends_collection
-    fi
-
     local depends=${DEPENDS_COLLECTION[$module]}
     local submodule
+
     for submodule in $depends
     do
         echo $submodule
@@ -1471,6 +1467,7 @@ main() {
       ;;
 
     depends)
+      fill_depends_collection
       show_depends "$2" | sort -u
       ;;
 
