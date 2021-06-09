@@ -1467,8 +1467,10 @@ main() {
       ;;
 
     depends)
-      fill_depends_collection
-      show_depends "$2" | sort -u
+      if [ -n "$2" ]; then
+        fill_depends_collection
+        show_depends "$2" | sort -u
+      fi
       ;;
 
     website)
