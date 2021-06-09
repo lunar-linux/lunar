@@ -583,7 +583,6 @@ moonalyze() {
   fi
 }
 
-declare -A DEPENDS_COLLECTION
 
 fill_depends_collection() {
     local module dependency status rest
