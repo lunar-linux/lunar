@@ -585,6 +585,7 @@ moonalyze() {
 
 
 fill_depends_collection() {
+    declare -Ag DEPENDS_COLLECTION
     local module dependency status rest
 
     while IFS=: read module dependency status rest
