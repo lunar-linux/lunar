@@ -583,21 +583,29 @@ moonalyze() {
   fi
 }
 
+
+fill_depends_collection() {
+    declare -Ag DEPENDS_COLLECTION
+    local module dependency status rest
+
+    while IFS=: read module dependency status rest
+    do
+        if [ "$status" == "on" ]; then
+            DEPENDS_COLLECTION[$dependency]="${DEPENDS_COLLECTION[$dependency]} $module"
+        fi
+    done < $DEPENDS_STATUS
+}
+
 show_depends() {
-  if ! echo "$DONE" | grep -q "$1"; then
-    DONE="$DONE  $1"
+    local module=$1
+    local depends=${DEPENDS_COLLECTION[$module]}
+    local submodule
 
-    grep ":$1:" "$DEPENDS_STATUS" | while read LINE; do
-      MODULE=${LINE%%:*}
-      STATUS=$(echo $LINE | cut -d : -f3)
-
-      if [ "$STATUS" == "on" ]; then
-        echo $MODULE
-        show_depends $MODULE
-      fi
-
+    for submodule in $depends
+    do
+        echo $submodule
+        show_depends $submodule
     done
-  fi
 }
 
 # function: show_tree
@@ -1420,7 +1428,10 @@ main() {
       ;;
 
     depends)
-      show_depends "$2" | sort | uniq
+      if [ -n "$2" ]; then
+        fill_depends_collection
+        show_depends "$2" | sort -u
+      fi
       ;;
 
     website)
