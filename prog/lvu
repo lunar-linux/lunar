@@ -1248,7 +1248,10 @@ main() {
       ;;
 
     activity)
-      if [ -e $ACTIVITY_LOG ]; then
+      if [ -e "$ACTIVITY_LOG" ]; then
+        if [ "$LUNAR_FOLLOW_FILE" = "on" ]; then
+          view_file(){ tail -f "$@"; }
+        fi
         if [ -z "$2" ]; then
           view_file "$ACTIVITY_LOG"
         else
@@ -1674,7 +1677,7 @@ main() {
 . /etc/lunar/config
 . $BOOTSTRAP
 
-GETOPT_ARGS=$(getopt -q -n lvu -o "dhv" -l "debug,help,verbose" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lvu -o "dhvf" -l "debug,help,verbose" -- "$@")
 
 if [ -z "$?" ]; then
   help | view_file
@@ -1698,6 +1701,10 @@ else
         ;;
       -v | --verbose)
         export VERBOSE="on"
+        shift
+        ;;
+      -f)
+        export LUNAR_FOLLOW_FILE="on"
         shift
         ;;
       --)
