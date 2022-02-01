@@ -18,7 +18,7 @@ view_file()  {
          XZ) xzcat $1 | ${PAGER:-less} ;;
           *)
              # default fallback
-             cat "$1" | ${PAGER:-less} ;;
+             ${PAGER:-less} "$1" ;;
     esac
   else
     cat - | ${PAGER:-less}
