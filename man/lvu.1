@@ -15,7 +15,10 @@ compile|compiler|links|install|sum|md5sum <module>
 export|import [snapshot]
 .PP 
 .B lvu
-moonbase|html|updatelog|activity
+moonbase|html|updatelog
+.PP 
+.B lvu
+activity [-f] [module]
 .PP 
 .B lvu
 search "phrase"
@@ -201,9 +204,9 @@ prints the entire moonbase in a nice html format
 .IP 
 view summary log of previous lunar update
 .PP
-.B activity
+.B activity [-f] [module]
 .IP
-view the main lunar activity log
+view the main lunar activity log in a pager. If -f is given follow the log file instead of printing it once. If module is given restrict output to this module.
 .PP
 .B search
 "phrase"

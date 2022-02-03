@@ -342,7 +342,7 @@ default_python2_build() {
     mkdir -p "$_PYDESTDIR"
 
     python2 setup.py build &&
-    python2 setup.py install --root="$_PYDESTDIR" $OPTS
+    python2 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
 }
@@ -355,7 +355,7 @@ default_python3_build() {
     mkdir -p "$_PYDESTDIR"
 
     python3 setup.py build &&
-    python3 setup.py install --root="$_PYDESTDIR" $OPTS
+    python3 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
 }
