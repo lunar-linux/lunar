@@ -757,14 +757,14 @@ update_modules() {
     rework_module $MODULE
   done
 
-  verbose_msg "Checking for lunar or theedge"
+  verbose_msg "Checking for lunar"
   for MODULE in $LIST ; do
-    if [[ "$MODULE" == "lunar" ]] || [[ "$MODULE" == "theedge" ]] ; then
+    if [[ "$MODULE" == "lunar" ]]; then
       message "${MODULE_COLOR}$MODULE${MESSAGE_COLOR} will be updated${DEFAULT_COLOR}"
       message "${MESSAGE_COLOR}Run lunar renew afterwards to update other modules${DEFAULT_COLOR}"
       if query "Do you wish to continue ? " y ; then
-	lin -c $MODULE
-	exit $?
+	      lin -c $MODULE
+	      exit $?
       fi
       return 255
     fi
