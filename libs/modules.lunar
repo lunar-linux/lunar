@@ -683,7 +683,7 @@ purge_modules() {
   fi
   for MODULE in $(list_installed | fgrep -v -x moonbase) ; do
   (
-    if ! run_details $MODULE &> /dev/null && ! grep -q "^$MODULE:" $REPLACEMENT_INDEX; then
+    if ! run_details $MODULE &> /dev/null && ! grep -q "^$MODULE:" $REPLACEMENT_INDEX && ! module_held $MODULE; then
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
       if query "Do you want to remove ${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${QUERY_COLOR} ?" y ; then
         lrm $MODULE
