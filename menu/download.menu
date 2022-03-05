@@ -135,7 +135,7 @@ download_options() {
       FTP_PASSIVE=off ||
       FTP_PASSIVE=on
 
-    FTP_CONNECTION=$("$DIALOG" --title "Ftp Connection" \
+    FTP_CONNECTION=$($DIALOG --title "Ftp Connection" \
       --ok-label "Commit" \
       --radiolist \
       "$PROMPT" \
@@ -194,7 +194,7 @@ download_options() {
 
     CONTINUE="${CONTINUE:-on}"
 
-    PARTIAL=$("$DIALOG" --title "Partial Downloads" \
+    PARTIAL=$($DIALOG --title "Partial Downloads" \
       --ok-label "Commit" \
       --checklist \
       "$PROMPT" \
@@ -224,7 +224,7 @@ download_options() {
 
     USE_CACHE=${USE_CACHE:-on}
 
-    CACHE=$("$DIALOG" --title "Cache Usage" \
+    CACHE=$($DIALOG --title "Cache Usage" \
       --ok-label "Commit" \
       --checklist \
       "$PROMPT" \

@@ -48,7 +48,7 @@ select_aliases() {
 
   while true; do
     DEFAULT="$CHOICE"
-    CHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
+    CHOICE=$($DIALOG --title "Select Lunar Aliases" \
       --ok-label "Select" \
       --cancel-label "Close" \
       --default-item "$DEFAULT" \
@@ -60,7 +60,7 @@ select_aliases() {
     if [ -z "$DEFAULT" ]; then
       DEFAULT="None"
     fi
-    if ACHOICE=$("$DIALOG" --title "Select Lunar Aliases" \
+    if ACHOICE=$($DIALOG --title "Select Lunar Aliases" \
       --ok-label "Select" \
       --cancel-label "Close" \
       --default-item "$DEFAULT" \

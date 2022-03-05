@@ -30,22 +30,21 @@ select_mirror() {
     --menu \
     "" \
     0 80 10 \
-    "$(mirror_list "$1")"
+    $(mirror_list "$1")
 }
 
 mirror_menu() {
-  while
-    G_HELP="Select mirror for downloading GNU sources."
-    K_HELP="Select mirror for downloading KDE sources."
-    N_HELP="Select mirror for downloading GNOME sources."
-    L_HELP="Select mirror for downloading kernel related sources."
-    SF_HELP="Select mirror for downloading SourceForge sources."
-    LR_HELP="Select the mirror for a last resort download place."
-    X_HELP="Select mirror for downloading XFree86 related sources."
-    XORG_HELP="Select mirror for downloading XOrg related sources."
-    N_HELP="Select mirror for downloading NVIDIA drivers."
+  G_HELP="Select mirror for downloading GNU sources."
+  K_HELP="Select mirror for downloading KDE sources."
+  N_HELP="Select mirror for downloading GNOME sources."
+  L_HELP="Select mirror for downloading kernel related sources."
+  SF_HELP="Select mirror for downloading SourceForge sources."
+  LR_HELP="Select the mirror for a last resort download place."
+  X_HELP="Select mirror for downloading XFree86 related sources."
+  XORG_HELP="Select mirror for downloading XOrg related sources."
+  N_HELP="Select mirror for downloading NVIDIA drivers."
 
-    COMMAND=$("$DIALOG" --title "Mirror Menu" \
+  while COMMAND=$($DIALOG --title "Mirror Menu" \
       --ok-label "Select" \
       --cancel-label "Exit" \
       --item-help \

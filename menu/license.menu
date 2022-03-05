@@ -34,7 +34,7 @@ You have several ways of doing so:
 Currently known osi licenses: gpl gpl2 lgpl gfdl bsd mpl cc apache
 artistic qpl."
 
-  ACCEPTED_LICENSES=$("$DIALOG" --title "Select accepted licenses" \
+  ACCEPTED_LICENSES=$($DIALOG --title "Select accepted licenses" \
     --ok-label "Commit" --inputbox \
     "$PROMPT" 0 0 "$ACCEPTED_LICENSES")
 
@@ -57,7 +57,7 @@ You have several ways of doing so:
 Remember that if you leave ACCEPTED_LICENSES empty, all licenses will
 be accepted that do not match the REJECTED_LICENSES list."
 
-  REJECTED_LICENSES=$("$DIALOG" --title "Select rejected licenses" \
+  REJECTED_LICENSES=$($DIALOG --title "Select rejected licenses" \
     --ok-label "Commit" --inputbox \
     "$PROMPT" 0 0 "$REJECTED_LICENSES")
 
