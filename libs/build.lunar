@@ -339,8 +339,9 @@ default_python2_build() {
     verbose_msg "running \"default_python2_build\""
 
     local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest2
-    mkdir -p "$_PYDESTDIR"
+    mkdir -p "$_PYDESTDIR" &&
 
+    export PYTHONDONTWRITEBYTECODE=1 &&
     python2 setup.py build &&
     python2 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
@@ -352,8 +353,9 @@ default_python3_build() {
     verbose_msg "running \"default_python3_build\""
 
     local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest3
-    mkdir -p "$_PYDESTDIR"
+    mkdir -p "$_PYDESTDIR" &&
 
+    export PYTHONDONTWRITEBYTECODE=1 &&
     python3 setup.py build &&
     python3 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
