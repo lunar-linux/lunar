@@ -56,6 +56,7 @@ export        DIALOGRC=/etc/lunar/dialogrc
               ARCHIVE=${ARCHIVE:-on}
               AUTOFIX=${AUTOFIX:-on}
             AUTOPRUNE=${AUTOPRUNE:-on}
+   KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
          MAIL_REPORTS=${MAIL_REPORTS:-off}
      MOONBASE_ACT_LOG=${MOONBASE_ACT_LOG:-on}
              PRESERVE=${PRESERVE:-on}
