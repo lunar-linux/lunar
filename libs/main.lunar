@@ -217,7 +217,6 @@ resurrect()  {
   else
     if [ ! -f "$CACHE_XZ" ]; then
       message "${RESURRECT_COLOR}Resurrection ${PROBLEM_COLOR}failed for ${MODULE_COLOR}${MODULE} ${MESSAGE_COLOR}version ${VERSION_COLOR}${VERSION}${DEFAULT_COLOR} - ${MESSAGE_COLOR}missing cache tarball.${DEFAULT_COLOR}"
-      false
     fi
 
     # do not log an error in case we tried autoresurrect:
