@@ -209,8 +209,8 @@ lrm_module() {
 
   message "${LRM_COLOR}Removed${EXTEMP} module:" \
     "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
-  # do not spam logs just for updating the moonbase
-  if [[ "$MODULE" != "moonbase" ]]; then
+
+  if [[ ("$MOONBASE_ACT_LOG" == "on" && "$MODULE" == "moonbase") || "$MODULE" != "moonbase" ]]; then
     activity_log  "lrm"  "$MODULE" "$VERSION"  "success"
   fi
 

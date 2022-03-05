@@ -497,6 +497,7 @@ feature_menu() {
   X_HELP="When using --probe, also recompile modules if a newer version is available?"
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
   L_HELP="Use xz compression for logs and caches?"
+  MA_HELP="Log moonbase installations in the activity log?"
 
   ARCHIVE=${ARCHIVE:-on}
   AUTORESURRECT=${AUTORESURRECT:-on}
@@ -506,6 +507,7 @@ feature_menu() {
   KEEP_SOURCE=${KEEP_SOURCE:-off}
   KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
   MAIL_REPORTS=${MAIL_REPORTS:-off}
+  MOONBASE_ACT_LOG=${MOONBASE_ACT_LOG:-on}
   VIEW_REPORTS=${VIEW_REPORTS:-off}
   PRESERVE=${PRESERVE:-on}
   SOUND=${SOUND:-off}
@@ -552,6 +554,7 @@ feature_menu() {
     "KEEP_OBSOLETE_LIBS" "Toggle" "$KEEP_OBSOLETE_LIBS" "$O_HELP" \
     "GARBAGE" "Toggle" "$GARBAGE" "$G_HELP" \
     "MAIL_REPORTS" "Toggle" "$MAIL_REPORTS" "$M_HELP" \
+    "MOONBASE_ACT_LOG" "Toogle" "$MOONBASE_ACT_LOG" "$MA_HELP" \
     "PRESERVE" "Toggle" "$PRESERVE" "$P_HELP" \
     "SOUND" "Toggle" "$SOUND" "$S_HELP" \
     "SUSTAIN" "Toggle" "$SUSTAIN" "$T_HELP" \
@@ -572,6 +575,7 @@ feature_menu() {
     KEEP_SOURCE=off
     KEEP_OBSOLETE_LIBS=off
     MAIL_REPORTS=off
+    MOONBASE_ACT_LOG=off
     PRESERVE=off
     SOUND=off
     SUSTAIN=off
@@ -594,6 +598,7 @@ feature_menu() {
         KEEP_SOURCE) KEEP_SOURCE=on ;;
         KEEP_OBSOLETE_LIBS) KEEP_OBSOLETE_LIBS=on ;;
         MAIL_REPORTS) MAIL_REPORTS=on ;;
+        MOONBASE_ACT_LOG) MOONBASE_ACT_LOG=on ;;
         PRESERVE) PRESERVE=on ;;
         SOUND) SOUND=on ;;
         SUSTAIN) SUSTAIN=on ;;
@@ -623,6 +628,7 @@ feature_menu() {
     set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
     set_local_config "KEEP_OBSOLETE_LIBS" "$KEEP_OBSOLETE_LIBS"
     set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"
+    set_local_config "MOONBASE_ACT_LOG" "$MOONBASE_ACT_LOG"
     set_local_config "PRESERVE" "$PRESERVE"
     set_local_config "SOUND" "$SOUND"
     set_local_config "SUSTAIN" "$SUSTAIN"
