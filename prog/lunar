@@ -498,11 +498,13 @@ feature_menu() {
   Z_HELP="Custom modules in zlocal override equally named ones (NOT RECOMMENDED) ?"
   L_HELP="Use xz compression for logs and caches?"
   MA_HELP="Log moonbase installations in the activity log?"
+  FS_HELP="Check if there is enough available space on the disk before installing (REQUIRED_FREE_SPACE=$REQUIRED_FREE_SPACE)?"
 
   ARCHIVE=${ARCHIVE:-on}
   AUTORESURRECT=${AUTORESURRECT:-on}
   AUTOFIX=${AUTOFIX:-on}
   AUTOPRUNE=${AUTOPRUNE:-off}
+  CHECK_FREE_SPACE=${CHECK_FREE_SPACE:-on}
   COLOR=${COLOR:-on}
   KEEP_SOURCE=${KEEP_SOURCE:-off}
   KEEP_OBSOLETE_LIBS=${KEEP_OBSOLETE_LIBS:-on}
@@ -549,6 +551,7 @@ feature_menu() {
     "AUTORESURRECT" "Toggle" "$AUTORESURRECT" "$H_HELP" \
     "AUTOFIX" "Toggle" "$AUTOFIX" "$F_HELP" \
     "AUTOPRUNE" "Toggle" "$AUTOPRUNE" "$U_HELP" \
+    "CHECK_FREE_SPACE" "Toggle" "$CHECK_FREE_SPACE" "$FS_HELP" \
     "COLOR" "Toggle" "$COLOR" "$C_HELP" \
     "KEEP_SOURCE" "Toggle" "$KEEP_SOURCE" "$K_HELP" \
     "KEEP_OBSOLETE_LIBS" "Toggle" "$KEEP_OBSOLETE_LIBS" "$O_HELP" \
@@ -571,6 +574,7 @@ feature_menu() {
     AUTORESURRECT=off
     AUTOFIX=off
     AUTOPRUNE=off
+    CHECK_FREE_SPACE=off
     COLOR=off
     KEEP_SOURCE=off
     KEEP_OBSOLETE_LIBS=off
@@ -594,6 +598,7 @@ feature_menu() {
         AUTORESURRECT) AUTORESURRECT=on ;;
         AUTOFIX) AUTOFIX=on ;;
         AUTOPRUNE) AUTOPRUNE=on ;;
+        CHECK_FREE_SPACE) CHECK_FREE_SPACE=on ;;
         COLOR) COLOR=on ;;
         KEEP_SOURCE) KEEP_SOURCE=on ;;
         KEEP_OBSOLETE_LIBS) KEEP_OBSOLETE_LIBS=on ;;
@@ -625,6 +630,7 @@ feature_menu() {
     set_local_config "AUTORESURRECT" "$AUTORESURRECT"
     set_local_config "AUTOFIX" "$AUTOFIX"
     set_local_config "AUTOPRUNE" "$AUTOPRUNE"
+    set_local_config "CHECK_FREE_SPACE" "$CHECK_FREE_SPACE"
     set_local_config "KEEP_SOURCE" "$KEEP_SOURCE"
     set_local_config "KEEP_OBSOLETE_LIBS" "$KEEP_OBSOLETE_LIBS"
     set_local_config "MAIL_REPORTS" "$MAIL_REPORTS"

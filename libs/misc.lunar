@@ -256,3 +256,39 @@ xzbz()
   esac
   $XZBZ "$@"
 }
+
+# function : sh_join
+# usage    : sh_join <delimeter> <words...>
+# purpose  : bash native join function, join multiple args using the defined delimeter
+sh_join() {
+  local delimiter=${1} input=${2}
+
+  if shift 2; then
+    printf "%s" "$input" "${@/#/$delimiter}"
+  fi
+}
+
+
+# function : free_space
+# usage    : free_space <path>
+# purpose  : return free space available for the supplied path in bytes
+free_space() {
+  echo $(df --output=avail -B 1 "$1" | tail -n 1)
+}
+
+# function : check_free_space
+# usage    : check_free_space
+# purpose  : check that the available space is more than REQUIRED_FREE_SPACE for INSTALL_CACHE and BUILD_DIRECTORY
+check_free_space() {
+  local required_space
+
+  if [[ "$CHECK_FREE_SPACE" == "on" && -n "$REQUIRED_FREE_SPACE" ]] ; then
+    if required_space="$(echo "$REQUIRED_FREE_SPACE" | numfmt --from=iec 2> /dev/null)"; then
+      if (( $(free_space "$INSTALL_CACHE") < $required_space )) || (( $(free_space "$BUILD_DIRECTORY") < $required_space )); then
+        return 1
+      fi
+    fi
+  fi
+
+  return 0
+}

@@ -65,6 +65,13 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
+  # We only run this check once instead of for each module to be installed
+  if [ -z "$MODULE" ] && ! check_free_space; then
+    if ! query "${WARNING_COLOR}WARNING: ${MESSAGE_COLOR}less than $REQUIRED_FREE_SPACE of free space available in ${FILE_COLOR}$INSTALL_CACHE or $BUILD_DIRECTORY. ${MESSAGE_COLOR}Continue anyway (y/N)?${DEFAULT_COLOR}" n; then
+      exit 1
+    fi
+  fi
+
   if echo $MODULES | grep -qw moonbase; then
     # just update moonbase, no other modules
     if ! lget moonbase; then
