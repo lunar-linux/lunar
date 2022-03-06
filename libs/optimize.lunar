@@ -24,16 +24,17 @@ bad_flags()
         unset LDFLAGS
     else
         for BAD_FLAG in "$@" ; do
-            CFLAGS=" $CFLAGS "
-            CFLAGS="${CFLAGS// $BAD_FLAG / }"
-            CXXFLAGS=" $CXXFLAGS "
-            CXXFLAGS="${CXXFLAGS// $BAD_FLAG / }"
-            CPPFLAGS=" $CPPFLAGS "
-            CPPFLAGS="${CPPFLAGS// $BAD_FLAG / }"
-            LDFLAGS=" $LDFLAGS "
-            LDFLAGS="${LDFLAGS// $BAD_FLAG / }"
+            CFLAGS="${CFLAGS//$BAD_FLAG/}"
+            CXXFLAGS="${CXXFLAGS//$BAD_FLAG/}"
+            CPPFLAGS="${CPPFLAGS//$BAD_FLAG/}"
+            LDFLAGS="${LDFLAGS//$BAD_FLAG/}"
         done
     fi
+
+    verbose_msg "CFLAGS=\"$CFLAGS\""
+    verbose_msg "CXXFLAGS=\"$CXXFLAGS\""
+    verbose_msg "CPPFLAGS=\"$CPPFLAGS\""
+    verbose_msg "LDFLAGS=\"$LDFLAGS\""
 }
 
 
