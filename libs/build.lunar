@@ -146,13 +146,16 @@ export_ld()  {
 
 
 prepare_install() {
+  local installedversion
   debug_msg "prepare_install ($@)"
   if module_installed $MODULE ; then
     message  "${MESSAGE_COLOR}Preparing to install"  \
              "${MODULE_COLOR}${MODULE}${DEFAULT_COLOR}"
     save_libraries
+    installedversion=$(installed_version $MODULE)
     verbose_msg "calling \"lrm --upgrade $MODULE\""
     lrm --upgrade $MODULE
+    save_modified_configs $MODULE $installedversion
     true
   fi
   # turn on tracking now

@@ -44,90 +44,6 @@ END
   exit 1
 }
 
-handle_config_files() {
-  debug_msg "handle_config_files ($@)"
-  if dirname "$1" | grep -q "^/etc"; then
-    # we can safely delete symlinks without md5sum checks
-    if [ -L "$1" ]; then
-      return 0
-    fi
-
-    debug_msg "considering config file \"$1\""
-
-    TARGET_MD5=$(md5sum "$1" | cut -d " " -f 1-1)
-    OLD_MD5=$(grep -w "$1\$" "$MD5_LOG" | cut -d " " -f 1-1)
-
-    if [ -z "$TARGET_MD5" ]; then
-      verbose_msg "Skipping removal of \"$1\" due to problem with md5sum"
-      return 1
-    fi
-
-    if [ -z "$OLD_MD5" ]; then
-      verbose_msg "Skipping removal of \"$1\" due to missing original md5sum"
-      return 1
-    fi
-
-    if [ "$TARGET_MD5" == "$OLD_MD5" ]; then
-      debug_msg "removing \"$1\""
-      return 0
-    fi
-
-    if [ "$TARGET_MD5" != "$OLD_MD5" ]; then
-      verbose_msg "Skipping removal of \"$1\" due to md5sum mismatch"
-      if [ "$PRESERVE" == "on" ]; then
-        debug_msg "PRESERVE=on, keeping \"$1\""
-        return 1
-      else
-        verbose_msg "PRESERVE=off, archiving \"$1\""
-        mv $1 $1.$(date +%Y%m%d%H%M)
-        return 1
-      fi
-    fi
-  fi
-  return 0
-}
-
-remove_something() {
-  debug_msg "remove_something ($@)"
-  if [ -z "$1" ]; then
-    verbose_msg "remove_something: Nothing to remove!"
-    return 1
-  fi
-
-  if ! [ -e "$1" ] && ! [ -L "$1" ]; then
-    verbose_msg "remove_something: no such file \"$1\"!"
-    return 1
-  fi
-
-  if [ -d "$1" ] && ! [ -L "$1" ]; then
-    if rmdir "$1" 2>/dev/null; then
-      debug_msg "ok    : rmdir \"$1\""
-    else
-      debug_msg "failed: rmdir \"$1\""
-    fi
-  else
-    if rm -f "$1" 2>/dev/null; then
-      debug_msg "ok    : rm -f \"$1\""
-    else
-      # this might be problematic so verbose_msg:
-      verbose_msg "failed: rm -f \"$1\""
-    fi
-  fi
-}
-
-process_directories() {
-  debug_msg "process_directories ($@)"
-
-  if [ -z "$1" ]; then
-    debug_msg "process_directories: No args, exiting"
-    return 1
-  fi
-
-  cat "$1" | sort -r | while read LINE; do
-    remove_something "$LINE"
-  done
-}
-
 lrm_module() {
   debug_msg "lrm_module ($@)"
 
@@ -162,20 +78,19 @@ lrm_module() {
 
   # grep -v the install logs over the protected stuff, this
   # yields the files that may be removed
-  if [ "$REAP" == "on" ]; then
+  if [ "$REAP" == "on" -a "$UPGRADE" != "on" ]; then
     cat "$INST_LOG" | grep -v -f "$PROTECTED" | while read TARGET; do
       if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
         if [ -d "$TARGET" ]; then
           echo "$TARGET" >>$TMP_DIRS
         else
-          handle_config_files "$TARGET" &&
-            remove_something "$TARGET"
+          handle_config_files "$TARGET" && remove_something "$TARGET"
         fi
       fi
     done
     process_directories $TMP_DIRS
   else
-    verbose_msg "Skipping removal of files completely (REAP=$REAP)"
+    verbose_msg "Skipping removal of files completely (REAP=$REAP, UPGRADE=$UPGRADE)"
   fi
 
   # administration duty time:

@@ -38,22 +38,18 @@
 ^/etc/config.d/ospmd.conf$
 ^/etc/courier/
 ^/etc/cups/
-^/etc/dhcpd.conf$
 ^/etc/exim.conf$
 ^/etc/exports$
 ^/etc/fstab$
 ^/etc/group$
 ^/etc/group-$
-^/etc/grsec/
 ^/etc/hostname$
 ^/etc/httpd/
 ^/etc/httpd/
 ^/etc/httpsd/
-^/etc/init.d/bootmisc.sh$
 ^/etc/inittab$
 ^/etc/ld.so.cache$
 ^/etc/ld.so.conf$
-^/etc/lftp.conf$
 ^/etc/lilo.conf$
 ^/etc/localtime$
 ^/etc/lunar/local/
@@ -62,7 +58,6 @@
 ^/etc/mtab$
 ^/etc/named.conf$
 ^/etc/nsswitch.conf$
-^/etc/ntp.conf$
 ^/etc/passwd$
 ^/etc/passwd-$
 ^/etc/postfix/
@@ -73,7 +68,6 @@
 ^/etc/protocols$
 ^/etc/pureftpd.passwd$
 ^/etc/pureftpd.pdb$
-^/etc/rcS.d/S99bootmisc$
 ^/etc/resolv.conf$
 ^/etc/rndc.conf$
 ^/etc/rndc.key$
@@ -92,7 +86,6 @@
 ^/etc/sudoers$
 ^/etc/sysctl.conf$
 ^/etc/syslog.conf$
-^/etc/vsftpd.conf$
 ^/etc/webmin/
 ^/etc/X11/
 ^/etc/X11/fs/config$

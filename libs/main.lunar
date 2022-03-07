@@ -262,6 +262,8 @@ lin_module()  {
   # set the installwatchfile
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
+  save_old_install_log
+
   # lock the module for installation, check for moonbase call
   linING="/var/lock/installing.$MODULE"
   if [ "$MODULE" == "moonbase" ] ; then

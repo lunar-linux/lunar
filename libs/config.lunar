@@ -18,118 +18,118 @@
 ############################################################
 
 
-set_config()
-{
-	local LINE NEW FILE VAR
-	debug_msg "set_config ($@)"
+set_config() {
+  local LINE NEW FILE VAR
+  debug_msg "set_config ($@)"
 
-	# remove leading/trailing whitespace
-	VAR=${2#"${2%%[![:space:]]*}"}
-	VAR=${VAR%%+([[:space:]])}
+  FILE=$1
+  VAR=$(trim "$2")
+  LINE=$(grep -w "$VAR=.*" "$FILE")
 
-	LINE=$(grep -w "$VAR=.*" "$1")
-	FILE=$1
+  shift 2
+  if [ "$FILE" == "$LOCAL_CONFIG" ] ; then
+    NEW="$(printf "%16s" "$VAR")=\"$@\""
+  else
+    NEW="$VAR=\"$@\""
+  fi
 
-	shift 2
-	if [ "$FILE" == "$LOCAL_CONFIG" ] ; then
-		NEW="$(printf "%16s" "$VAR")=\"$@\""
-	else
-		NEW="$VAR=\"$@\""
-	fi
+  # on-demand creation
+  if [ ! -f $FILE ] ; then
+    touch $FILE
+  fi
 
-	# on-demand creation
-	if [ ! -f $FILE ] ; then
-		touch $FILE
-	fi
-
-	lock_file $FILE &&
-	if [ -n "$LINE" ] ; then
-		sedit "/^\s*$VAR=/d" $FILE
-	fi
-	echo "$NEW" >> $FILE
-	unlock_file $FILE
+  lock_file $FILE &&
+  if [ -n "$LINE" ] ; then
+    sedit "/^\s*$VAR=/d" $FILE
+  fi
+  echo "$NEW" >> $FILE
+  unlock_file $FILE
 }
 
 
-unset_config()
-{
-	debug_msg "unset_config ($@)"
+unset_config() {
+  debug_msg "unset_config ($@)"
 
-	# on-demand creation
-	if [ ! -f $1 ] ; then
-		touch $1
-	fi
+  # on-demand creation
+  if [ ! -f $1 ] ; then
+    touch $1
+  fi
 
-	lock_file $1 &&
-	if [ -n "$2" ] ; then
-		# make sure we escape those ':' characters:
-		sedit "/^[ ]*$2=/d" $1
-	fi
-	unlock_file $1
+  lock_file $1 &&
+  if [ -n "$2" ] ; then
+    # make sure we escape those ':' characters:
+    sedit "/^[ ]*$2=/d" $1
+  fi
+  unlock_file $1
 }
 
 
-get_config()
-{
-	if [[ -f $1 ]] ; then
-		grep -w "$2=.*" "$1" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
-	fi
+get_config() {
+  if [[ -f $1 ]] ; then
+    grep -w "$2=.*" "$1" | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'
+  fi
 }
 
 
-set_local_config()
-{
-	debug_msg "set_local_config ($@)"
-	local VAR
-	VAR=$1
-	shift
-	set_config "$LOCAL_CONFIG" "$VAR" "$@"
+set_local_config() {
+  debug_msg "set_local_config ($@)"
+  local VAR
+  VAR=$1
+  shift
+  set_config "$LOCAL_CONFIG" "$VAR" "$@"
 }
 
 
-unset_local_config()
-{
-	debug_msg "unset_local_config ($@)"
-	unset_config "$LOCAL_CONFIG" "$1"
+unset_local_config() {
+  debug_msg "unset_local_config ($@)"
+  unset_config "$LOCAL_CONFIG" "$1"
 }
 
 
 get_local_config() {
-	get_config "$LOCAL_CONFIG" "$1"
+  get_config "$LOCAL_CONFIG" "$1"
 }
 
 
-set_module_config()
-{
-	debug_msg "set_module_config ($@)"
-	if [ -n "$MODULE" ] ; then
-		set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
-	fi
+set_module_config() {
+  debug_msg "set_module_config ($@)"
+  if [ -n "$MODULE" ] ; then
+    set_config "$DEPENDS_CONFIG/$MODULE" "$1" "$2"
+  fi
 }
 
 
-unset_module_config()
-{
-	debug_msg "unset_module_config ($@)"
-	if [ -n "$MODULE" ] ; then
-		unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
-	fi
+unset_module_config() {
+  debug_msg "unset_module_config ($@)"
+  if [ -n "$MODULE" ] ; then
+    unset_config "$DEPENDS_CONFIG/$MODULE" "$1"
+  fi
 }
 
 
-get_module_config()
-{
-	debug_msg "get_module_config ($@)"
-	if [ -n "$MODULE" ] ; then
-		get_config "$DEPENDS_CONFIG/$MODULE" "$1"
-	fi
+get_module_config() {
+  debug_msg "get_module_config ($@)"
+  if [ -n "$MODULE" ] ; then
+    get_config "$DEPENDS_CONFIG/$MODULE" "$1"
+  fi
 }
 
 
-get_other_module_config()
-{
-	debug_msg "get_other_module_config ($@)"
-	if [ -n "$1" ] ; then
-		get_config "$DEPENDS_CONFIG/$1" "$2"
-	fi
+get_other_module_config() {
+  debug_msg "get_other_module_config ($@)"
+  if [ -n "$1" ] ; then
+    get_config "$DEPENDS_CONFIG/$1" "$2"
+  fi
+}
+
+# function : trim
+# usage    : trim <string>
+# purpose  : remove leading and trailing whitespaces from a string
+trim() {
+  local str="$*"
+
+  str="${str#"${str%%[![:space:]]*}"}"
+  str="${str%"${str##*[![:space:]]}"}"
+
+  printf "%s" "$str"
 }

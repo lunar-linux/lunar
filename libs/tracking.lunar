@@ -106,6 +106,25 @@ create_install_cache() {
 
 }
 
+save_old_install_log() {
+  local old_version
+  debug_msg "save_old_install_log ($@)"
+
+  export TMP_OLD_INST_LOG=$(temp_create "${MODULE}.oldinstlog")
+  if module_installed $MODULE; then
+    old_version=$(installed_version $MODULE)
+    debug_msg "creating old install log for $MODULE-$old_version ($TMP_OLD_INST_LOG)"
+    cp "$INSTALL_LOGS/$MODULE-$old_version" $TMP_OLD_INST_LOG
+  fi
+}
+
+delete_old_install_log() {
+  debug_msg "delete_old_install_log ($@)"
+
+  if [ -f $TMP_OLD_INST_LOG ]; then
+    temp_destroy $TMP_OLD_INST_LOG
+  fi
+}
 
 finish_install() {
   debug_msg "finish_install ($@)"
@@ -113,6 +132,8 @@ finish_install() {
   create_install_log    &&
   create_md5sum_log     &&
   create_install_cache  &&
+
+  cleanup_old_module_files "$TMP_OLD_INST_LOG" "$INSTALL_LOGS/$MODULE-$VERSION" &&
 
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"

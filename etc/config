@@ -50,6 +50,10 @@ export        DIALOGRC=/etc/lunar/dialogrc
          INSTALL_CACHE=/var/cache/lunar
           SOURCE_CACHE=${SOURCE_CACHE:-/var/spool/lunar}
 
+        STRIP_BINARIES="--strip-all"
+          STRIP_SHARED="--strip-unneeded"
+          STRIP_STATIC="--strip-debug"
+
 #  Override the following variables in /etc/lunar/local/config
 #  Or by exporting them before installing or removing.
 

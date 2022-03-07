@@ -1,0 +1,168 @@
+#!/bin/bash
+############################################################
+#                                                          #
+# files.lunar - Functions for module related file          #
+#               operations                                 #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright 2022 by Stefan Wold under GPLv2                #
+#                                                          #
+############################################################
+
+handle_config_files() {
+  debug_msg "handle_config_files ($@)"
+
+  if [[ "$1" =~ ^/etc ]]; then
+    # we can safely delete symlinks without md5sum checks
+    if [ -L "$1" ]; then
+      return 0
+    fi
+
+    debug_msg "considering config file \"$1\""
+
+    TARGET_MD5=$(md5sum "$1" | cut -d " " -f 1-1)
+    OLD_MD5=$(grep -w "$1\$" "$MD5_LOG" | cut -d " " -f 1-1)
+
+    if [ -z "$TARGET_MD5" ]; then
+      verbose_msg "Skipping removal of \"$1\" due to problem with md5sum"
+      return 1
+    fi
+
+    if [ -z "$OLD_MD5" ]; then
+      verbose_msg "Skipping removal of \"$1\" due to missing original md5sum"
+      return 1
+    fi
+
+    if [ "$TARGET_MD5" == "$OLD_MD5" ]; then
+      debug_msg "removing \"$1\""
+      return 0
+    fi
+
+    if [ "$TARGET_MD5" != "$OLD_MD5" ]; then
+      verbose_msg "Skipping removal of \"$1\" due to md5sum mismatch"
+      if [ "$PRESERVE" == "on" ]; then
+        debug_msg "PRESERVE=on, keeping \"$1\""
+        return 1
+      else
+        debug_msg "PRESERVE=off, archiving \"$1\""
+        mv $1 $1.$(date +%Y%m%d%H%M)
+        return 1
+      fi
+    fi
+  fi
+  return 0
+}
+
+remove_something() {
+  debug_msg "remove_something ($@)"
+  if [ -z "$1" ]; then
+    verbose_msg "remove_something: Nothing to remove!"
+    return 1
+  fi
+
+  if ! [ -e "$1" ] && ! [ -L "$1" ]; then
+    verbose_msg "remove_something: no such file \"$1\"!"
+    return 1
+  fi
+
+  if [ -d "$1" ] && ! [ -L "$1" ]; then
+    if rmdir "$1" 2>/dev/null; then
+      debug_msg "ok    : rmdir \"$1\""
+    else
+      debug_msg "failed: rmdir \"$1\""
+    fi
+  else
+    if rm -f "$1" 2>/dev/null; then
+      debug_msg "ok    : rm -f \"$1\""
+    else
+      # this might be problematic so verbose_msg:
+      verbose_msg "failed: rm -f \"$1\""
+    fi
+  fi
+}
+
+process_directories() {
+  debug_msg "process_directories ($@)"
+
+  if [ -z "$1" ]; then
+    debug_msg "process_directories: No args, exiting"
+    return 1
+  fi
+
+  sort -r "$1" | while read LINE; do
+    remove_something "$LINE"
+  done
+}
+
+# function : save_modifed_configs
+# usage    : save_modifed_configs <module> <oldversion>
+# purpose  : remove unchanged configs or generate a list of configs to keep (later used in cleanup)
+save_modified_configs() {
+  local install_log module version changed_configs
+
+  module=$1
+  version=$2
+
+  install_log=$INSTALL_LOGS/$module-$version
+  MD5_LOG=$MD5SUM_LOGS/$module-$version
+
+  # TODO: include proper etc file handling (predefined list using DETAILS)
+  while read TARGET; do
+    if handle_config_files "$TARGET"; then
+      remove_something "$TARGET"
+    elif [ "$PRESERVE" == "on" ]; then
+      changed_configs+=" ^$TARGET\$"
+    fi
+  done < <(grep "^/etc" "$install_log" | grep -v -f "$PROTECTED")
+
+  if [ -n "$changed_configs" ]; then
+    verbose_msg "setting ETC_CHANGED_CONFIGS ($changed_configs)"
+    set_module_config "ETC_CHANGED_CONFIGS" "$(trim $changed_configs)"
+  fi
+}
+
+# function : cleanup_old_module_files
+# usage    : cleanup_old_module_files <old_inst_log> <new_inst_log>
+# purpose  : cleanup alien files after a module update
+cleanup_old_module_files() {
+  local old_inst_log new_inst_log tmp_dir_list sed_pattern changed_configs tmp_changed_configs
+  debug_msg "cleanup_old_module_files ($@)"
+  verbose_msg "removing old files"
+
+  regex_pattern="/^\/(usr\/)?lib(32|64)/s;\/lib(32|64);\/lib;g"
+
+  old_inst_log=$1
+  new_inst_log=$2
+
+  tmp_dir_list=$(temp_create "${MODULE}.cleanup.dir_list")
+  changed_configs=$(get_module_config "ETC_CHANGED_CONFIGS")
+  tmp_changed_configs=$(temp_create "$MODULE.changed.configs")
+
+  if [ -n "$changed_configs" ]; then
+    printf "%s\n" $changed_configs > $tmp_changed_configs
+  fi
+
+  verbose_msg "changed configs read from $tmp_changed_configs ($changed_configs)"
+
+  if [ -s "$old_inst_log" -a -s "$new_inst_log" ]; then
+    comm -23 <(sed -r "$regex_pattern" $old_inst_log | sort -u) <(sed -r "$regex_pattern" $new_inst_log | sort -u) | \
+      grep -v -f "$tmp_changed_configs" | \
+      while read TARGET; do
+        if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
+          if [ -d "$TARGET" ]; then
+            echo "$TARGET" >> $tmp_dir_list
+          else
+            remove_something "$TARGET"
+          fi
+        fi
+      done
+    process_directories $tmp_dir_list
+  fi
+
+  ldconfig
+  temp_destroy $tmp_dir_list
+  temp_destroy $tmp_changed_configs
+  unset_module_config "ETC_CHANGED_CONFIGS"
+  delete_old_install_log
+}
