@@ -57,13 +57,69 @@ parse_iw() {
   cat                "$INSTALLWATCHFILE" | cut -f4 | grep -v "^$SOURCE_DIRECTORY" | grep -v -f "$EXCLUDED" | grep "^/"
 }
 
+create_destdir_install_log() {
+  debug_msg "create_destdir_install_log"
+  (
+    cd $DESTDIR
 
-# function : create_install_log
-# usage    : create_install_log
-# purpose  : create an install log
-create_install_log() {
+    TMP_INST_LOG=$(temp_create "install-log")
+
+    INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
+
+    rm -f $INST_LOG >/dev/null 2>&1
+    message  "${MESSAGE_COLOR}Creating ${FILE_COLOR}${INST_LOG}${DEFAULT_COLOR}"
+
+    find . -print | sed 's/^.//' | sort                       > $TMP_INST_LOG
+    echo "$INSTALL_LOGS/$MODULE-$VERSION"                    >> $TMP_INST_LOG
+    echo "$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}" >> $TMP_INST_LOG
+    echo "$MD5SUM_LOGS/$MODULE-$VERSION"                     >> $TMP_INST_LOG
+
+    install -m644 $TMP_INST_LOG $INST_LOG
+
+    temp_destroy $TMP_INST_LOG
+  )
+}
+
+create_destdir_md5sum_log() {
+  debug_msg "create_destdir_md5sum_log"
+  (
+    cd $DESTDIR
+    rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
+    message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
+
+    sed 's;^/;;' < $INSTALL_LOGS/$MODULE-$VERSION | files | xargs -d '\n' md5sum > $MD5SUM_LOGS/$MODULE-$VERSION
+  )
+}
+
+create_destdir_install_cache() {
+  debug_msg "create_destdir_install_cache ($@)"
+  if [[ $ARCHIVE == off ]]
+  then
+    return
+  fi
+
+  message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}${DEFAULT_COLOR}"
+  (
+    cd $DESTDIR
+    tar cf - * | ${COMPRESS_METHOD/bz2/bzip2} $COMPRESS_METHOD_ARGS > "$INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}"
+  )
+}
+
+finish_destdir_install() {
+  debug_msg "finish_destdir_install ($@)"
+
+  create_install_log    &&
+  create_md5sum_log     &&
+  create_install_cache  &&
+  expand_cache_safe $INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}
+
+  add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
+  verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+}
+
+create_installwatch_install_log() {
   local TMP_INST_LOG INST_LOG IFS MISOWNED_SYMLINKS
-  debug_msg "create_install_log ($@)"
+  debug_msg "create_installwatch_install_log ($@)"
 
   TMP_INST_LOG=$(temp_create "install-log")
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
@@ -84,9 +140,9 @@ create_install_log() {
 }
 
 
-create_md5sum_log()  {
+create_installwatch_md5sum_log()  {
   local FILE
-  debug_msg "create_md5sum_log ($@)"
+  debug_msg "create_installwatch_md5sum_log ($@)"
 
   rm -f $MD5SUM_LOGS/$MODULE-$VERSION &> /dev/null
   message "${MESSAGE_COLOR}Creating ${FILE_COLOR}$MD5SUM_LOGS/$MODULE-$VERSION${DEFAULT_COLOR}"
@@ -94,8 +150,8 @@ create_md5sum_log()  {
   IFS=$'\n' files < $INSTALL_LOGS/$MODULE-$VERSION | xargs -d '\n' md5sum >> $MD5SUM_LOGS/$MODULE-$VERSION
 }
 
-create_install_cache() {
-  debug_msg "create_install_cache($@)"
+create_installwatch_install_cache() {
+  debug_msg "create_installwatch_install_cache($@)"
 
   if [ "$ARCHIVE" == "off" ] ; then
     return
@@ -126,8 +182,8 @@ delete_old_install_log() {
   fi
 }
 
-finish_install() {
-  debug_msg "finish_install ($@)"
+finish_installwatch_install() {
+  debug_msg "finish_installwatch_install ($@)"
 
   create_install_log    &&
   create_md5sum_log     &&
@@ -137,4 +193,44 @@ finish_install() {
 
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
+}
+
+create_install_log() {
+  debug_msg "create_install_log"
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    create_destdir_install_log
+  else
+    create_installwatch_install_log
+  fi
+}
+
+create_md5sum_log() {
+  debug_msg "create_md5sum_log"
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    create_destdir_md5sum_log
+  else
+    create_installwatch_md5sum_log
+  fi
+}
+
+create_install_cache() {
+  debug_msg "create_install_cache"
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    create_destdir_install_cache
+  else
+    create_installwatch_install_cache
+  fi
+}
+
+finish_install() {
+  debug_msg "finish_install"
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    finish_destdir_install
+  else
+    finish_installwatch_install
+  fi
 }
