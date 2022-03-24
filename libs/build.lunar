@@ -26,6 +26,8 @@
 #                                                          #
 # Parts Copyrighted Stefan Wold 2020 under GPLv2           #
 #                                                          #
+# Parts Copyrighted Dave Brown 2018 under GPLv2            #
+#                                                          #
 ############################################################
 
 
@@ -294,53 +296,31 @@ default_meson_config() {
 }
 
 default_install() {
-    prepare_install &&
-    make install
-}
-
-default_make() {
-  debug_msg "default_make ($@)"
-  verbose_msg "running \"default_make\""
-  make ${MAKES:+-j${MAKES}}          &&
-  default_install
-}
-
-
-default_game_build() {
-  debug_msg "default_game_build ($@)"
-  verbose_msg "running \"default_game_build\""
-  default_game_config  &&
-  default_make
-}
-
-
-default_cmake_build() {
-  debug_msg "default_cmake_build ($@)"
-  verbose_msg "running \"default_cmake_build\""
-  default_cmake_config &&
-  default_make
-}
-
-default_meson_build() {
-  debug_msg "default_meson_build ($@)"
-  verbose_msg "running \"default_meson_build\""
-  default_meson_config &&
-  ninja -C build/ &&
-  prepare_install &&
-  ninja -C build/ install
-}
-
-default_perl_build() {
-    debug_msg "default_perl_build ($@)"
-    verbose_msg "running \"default_perl_build\""
-    perl Makefile.PL &&
-    default_make
+    verbose_msg "running \"default_install\""
+    if [[ ${DESTDIR_BUILD:-off} == on ]]
+    then
+        if [ ! -d $DESTDIR ]
+        then
+            mkdir -p ${DESTDIR}
+        fi &&
+        make install DESTDIR=${DESTDIR}
+    else
+        prepare_install &&
+        make install
+    fi
 }
 
 default_python2_build() {
-    debug_msg "default_python2_build ($@)"
-    verbose_msg "running \"default_python2_build\""
+  debug_msg "default_python2_build version ($@)"
+  verbose_msg "running \"default_python2_build\""
 
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    mkdir -p "${DESTDIR}" &&
+    export PYTHONDONTWRITEBYTECODE=1 &&
+    python2 setup.py build &&
+    python2 setup.py install --root=$DESTDIR $OPTS
+  else
     local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest2
     mkdir -p "$_PYDESTDIR" &&
 
@@ -349,12 +329,20 @@ default_python2_build() {
     python2 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
+  fi
 }
 
 default_python3_build() {
-    debug_msg "default_python3_build ($@)"
-    verbose_msg "running \"default_python3_build\""
+  debug_msg "default_python3_build ($@)"
+  verbose_msg "running \"default_python3_build\""
 
+  if [[ "${DESTDIR_BUILD:-off}" == on ]]
+  then
+    mkdir -p "$DESTDIR" &&
+    export PYTHONDONTWRITEBYTECODE=1 &&
+    python3 setup.py build &&
+    python3 setup.py install --root=$DESTDIR $OPTS
+  else
     local _PYDESTDIR=$SOURCE_DIRECTORY/__pythondest3
     mkdir -p "$_PYDESTDIR" &&
 
@@ -363,6 +351,53 @@ default_python3_build() {
     python3 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
     cp -rpfv --remove-destination "$_PYDESTDIR"/* /
+  fi
+}
+
+default_meson_build() {
+    if [[ ${DESTDIR_BUILD:-off} == on ]]
+    then
+        debug_msg "default_meson_build DESTDIR version ($@)"
+        verbose_msg "running \"default_meson_build\""
+        default_meson_config &&
+        ninja -C build/ &&
+        DESTDIR=${DESTDIR} ninja -C build/ install
+    else
+        debug_msg "default_meson_build ($@)"
+        verbose_msg "running \"default_meson_build\""
+        default_meson_config &&
+            ninja -C build/ &&
+            prepare_install &&
+            ninja -C build/ install
+    fi
+}
+
+default_make() {
+  debug_msg "default_make ($@)"
+  verbose_msg "running \"default_make\""
+  make &&
+  default_install
+}
+
+default_game_build() {
+  debug_msg "default_game_build ($@)"
+  verbose_msg "running \"default_game_build\""
+  default_game_config  &&
+  default_make
+}
+
+default_cmake_build() {
+  debug_msg "default_cmake_build ($@)"
+  verbose_msg "running \"default_cmake_build\""
+  default_cmake_config &&
+  default_make
+}
+
+default_perl_build() {
+    debug_msg "default_perl_build ($@)"
+    verbose_msg "running \"default_perl_build\""
+    perl Makefile.PL &&
+    default_make
 }
 
 default_gnu_build() {
@@ -429,9 +464,17 @@ default_cpan_build() {
 default_post_build() {
   debug_msg "default_post_build ($@)"
 
-  if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] && [ "$PROFILE" != "yes" ] ; then
-    message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
-    return 1
+  if [[ ${DESTDIR_BUILD:-off} == on ]]
+  then
+    if [ ! -d $DESTDIR ]
+    then
+      message "${PROBLEM_COLOR}WARNING: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} installs zero files into ${DESTDIR}!${DEFAULT_COLOR}"
+    fi
+  else
+    if [ $(wc -l "$INSTALLWATCHFILE" | awk '{print$1}') == "0" ] && [ "$PROFILE" != "yes" ] ; then
+      message "${PROBLEM_COLOR}ERROR: ${DEFAULT_COLOR}${FILE_COLOR}BUILD${DEFAULT_COLOR}${PROBLEM_COLOR} does not call prepare_install or installs zero files!${DEFAULT_COLOR}"
+      return 1
+    fi
   fi
 
   update_plugin $MODULE install
