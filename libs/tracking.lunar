@@ -111,8 +111,9 @@ finish_destdir_install() {
   create_install_log    &&
   create_md5sum_log     &&
   create_install_cache  &&
-  expand_cache_safe $INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD}
+  expand_cache_safe $INSTALL_CACHE/$MODULE-$VERSION-$BUILD.tar.${COMPRESS_METHOD} &&
 
+  cleanup_old_module_files "$TMP_OLD_INST_LOG" "$INSTALL_LOGS/$MODULE-$VERSION" &&
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
 }
