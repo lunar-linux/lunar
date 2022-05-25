@@ -98,6 +98,19 @@ sort_by_dependency() {
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= expand_alias $B)
     echo "$A $B" >> $TMP_TSRT
   done
+  # tsort can detect that there are circles in the graph, but it doesn't
+  # tell you where the circle is, and certainly can't tell you which
+  # optional dependency you selected caused the dependency loop.  Give
+  # the user the option of carrying on regardless if a circle is found.
+  if ! tsort "$TMP_TSRT" > /dev/null 2>&1
+  then
+      message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
+      message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
+      if query "Stop now and try again?" y
+      then
+          exit 1
+      fi
+  fi
   tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
   temp_destroy $TMP_TSRT
 
