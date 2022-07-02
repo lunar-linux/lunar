@@ -262,7 +262,10 @@ lin_module()  {
   # set the installwatchfile
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
-  save_old_install_log
+  # TODO: clean up DESTDIR_BUILD feature toggle
+  if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+    save_old_install_log
+  fi
 
   # lock the module for installation, check for moonbase call
   linING="/var/lock/installing.$MODULE"

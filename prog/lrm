@@ -78,19 +78,38 @@ lrm_module() {
 
   # grep -v the install logs over the protected stuff, this
   # yields the files that may be removed
-  if [ "$REAP" == "on" -a "$UPGRADE" != "on" ]; then
-    cat "$INST_LOG" | grep -v -f "$PROTECTED" | while read TARGET; do
-      if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
-        if [ -d "$TARGET" ]; then
-          echo "$TARGET" >>$TMP_DIRS
-        else
-          handle_config_files "$TARGET" && remove_something "$TARGET"
+
+  # TODO: clean up DESTDIR_BUILD feature toggle
+  if [[ "${DESTDIR_BUILD:-off}" == "on" ]]; then
+    if [[ "$REAP" == "on" && "$UPGRADE" != "on" ]]; then
+      cat "$INST_LOG" | grep -v -f "$PROTECTED" | while read TARGET; do
+        if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
+          if [ -d "$TARGET" ]; then
+            echo "$TARGET" >>$TMP_DIRS
+          else
+            handle_config_files "$TARGET" && remove_something "$TARGET"
+          fi
         fi
-      fi
-    done
-    process_directories $TMP_DIRS
+      done
+      process_directories $TMP_DIRS
+    else
+      verbose_msg "Skipping removal of files completely (REAP=$REAP, UPGRADE=$UPGRADE)"
+    fi
   else
-    verbose_msg "Skipping removal of files completely (REAP=$REAP, UPGRADE=$UPGRADE)"
+    if [[ "$REAP" == "on" ]]; then
+      cat "$INST_LOG" | grep -v -f "$PROTECTED" | while read TARGET; do
+        if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
+          if [ -d "$TARGET" ]; then
+            echo "$TARGET" >>$TMP_DIRS
+          else
+            handle_config_files "$TARGET" && remove_something "$TARGET"
+          fi
+        fi
+      done
+      process_directories $TMP_DIRS
+    else
+      verbose_msg "Skipping removal of files completely (REAP=$REAP, UPGRADE=$UPGRADE)"
+    fi
   fi
 
   # administration duty time:

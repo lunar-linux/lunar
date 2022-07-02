@@ -155,7 +155,11 @@ prepare_install() {
     installedversion=$(installed_version $MODULE)
     verbose_msg "calling \"lrm --upgrade $MODULE\""
     lrm --upgrade $MODULE
-    save_modified_configs $MODULE $installedversion
+
+    # TODO: clean up DESTDIR_BUILD feature toggle
+    if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+      save_modified_configs $MODULE $installedversion
+    fi
     true
   fi
   # turn on tracking now

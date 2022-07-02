@@ -133,7 +133,10 @@ finish_install() {
   create_md5sum_log     &&
   create_install_cache  &&
 
-  cleanup_old_module_files "$TMP_OLD_INST_LOG" "$INSTALL_LOGS/$MODULE-$VERSION" &&
+  # TODO: clean up DESTDIR_BUILD feature toggle
+  if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+    cleanup_old_module_files "$TMP_OLD_INST_LOG" "$INSTALL_LOGS/$MODULE-$VERSION"
+  fi &&
 
   add_module $MODULE installed $VERSION $(find_module_size $MODULE $VERSION)
   verbose_msg "module size is $(find_module_size $MODULE $VERSION)"
