@@ -352,7 +352,7 @@ default_python2_build() {
     python2 setup.py build &&
     python2 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
-    cp -rpfv --remove-destination "$_PYDESTDIR"/* /
+    cp -rfv --preserve=mode,ownership --remove-destination "$_PYDESTDIR"/* /
 }
 
 default_python3_build() {
@@ -366,7 +366,7 @@ default_python3_build() {
     python3 setup.py build &&
     python3 setup.py install --root="$_PYDESTDIR" $OPTS &&
     prepare_install &&
-    cp -rpfv --remove-destination "$_PYDESTDIR"/* /
+    cp -rfv --preserve=mode,ownership --remove-destination "$_PYDESTDIR"/* /
 }
 
 default_gnu_build() {
