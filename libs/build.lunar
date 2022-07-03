@@ -157,7 +157,7 @@ prepare_install() {
     lrm --upgrade $MODULE
 
     # TODO: clean up DESTDIR_BUILD feature toggle
-    if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+    if [[ "${DESTDIR_BUILD:-off}" == "on" ]]; then
       save_modified_configs $MODULE $installedversion
     fi
     true

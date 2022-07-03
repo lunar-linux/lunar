@@ -263,7 +263,7 @@ lin_module()  {
   export INSTALLWATCHFILE=$(temp_create "$MODULE.installwatch")
 
   # TODO: clean up DESTDIR_BUILD feature toggle
-  if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+  if [[ "${DESTDIR_BUILD:-off}" == "on" ]]; then
     save_old_install_log
   fi
 

@@ -134,7 +134,7 @@ finish_install() {
   create_install_cache  &&
 
   # TODO: clean up DESTDIR_BUILD feature toggle
-  if [[ ${DESTDIR_BUILD:-off} == on ]]; then
+  if [[ "${DESTDIR_BUILD:-off}" == "on" ]]; then
     cleanup_old_module_files "$TMP_OLD_INST_LOG" "$INSTALL_LOGS/$MODULE-$VERSION"
   fi &&
 
