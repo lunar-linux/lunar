@@ -1,5 +1,5 @@
 
-VERSION = 42b2
+VERSION = 42
 
 bin_PROGS = prog/lvu prog/lvis prog/lsh
 sbin_PROGS = prog/lin prog/lrm prog/lunar prog/lget
