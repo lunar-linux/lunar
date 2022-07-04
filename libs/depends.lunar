@@ -104,9 +104,13 @@ sort_by_dependency() {
   # the user the option of carrying on regardless if a circle is found.
   if ! tsort "$TMP_TSRT" > /dev/null 2>&1
   then
-      message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
-      message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
-      if query "Stop now and try again?" y
+      error_message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
+      error_message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
+
+      # "[ -t 1 ]" checks to see if stdout is a terminal
+      # if stdout isn't a terminal, just continue (and probably break
+      # later on). It's not ideal (definitely a FIXME).
+      if [ -t 1 ] && query "Stop now and try again?" y
       then
           exit 1
       fi
