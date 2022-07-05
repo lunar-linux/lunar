@@ -102,8 +102,10 @@ sort_by_dependency() {
   # tell you where the circle is, and certainly can't tell you which
   # optional dependency you selected caused the dependency loop.  Give
   # the user the option of carrying on regardless if a circle is found.
-  if ! tsort "$TMP_TSRT" > /dev/null 2>&1
+  if [[ "${DETECT_DEPENDENCY_LOOPS:-off}" == on ]]
   then
+    if ! tsort "$TMP_TSRT" > /dev/null 2>&1
+    then
       error_message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
       error_message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
 
@@ -112,8 +114,9 @@ sort_by_dependency() {
       # later on). It's not ideal (definitely a FIXME).
       if [ -t 1 ] && query "Stop now and try again?" y
       then
-          exit 1
+        exit 1
       fi
+    fi
   fi
   tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
   temp_destroy $TMP_TSRT
