@@ -94,7 +94,7 @@ sort_by_dependency() {
 
   # tsort the existing dep relations in all of moonbase
   TMP_TSRT=$(temp_create "dependency.sort")
-  awk -F: '{print $1,$2}' "$DEPENDS_CACHE" | while read A B ; do
+  awk -F: '$3 == "on" {print $1,$2}' "$DEPENDS_CACHE" | while read A B ; do
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= expand_alias $B)
     echo "$A $B" >> $TMP_TSRT
   done
@@ -102,14 +102,21 @@ sort_by_dependency() {
   # tell you where the circle is, and certainly can't tell you which
   # optional dependency you selected caused the dependency loop.  Give
   # the user the option of carrying on regardless if a circle is found.
-  if ! tsort "$TMP_TSRT" > /dev/null 2>&1
+  if [[ "${DETECT_DEPENDENCY_LOOPS:-off}" == on ]]
   then
-      message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
-      message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
-      if query "Stop now and try again?" y
+    if ! tsort "$TMP_TSRT" > /dev/null 2>&1
+    then
+      error_message "${PROBLEM_COLOR}Dependency loop detected!${DEFAULT_COLOR}"
+      error_message "${PROBLEM_COLOR}You should lin -r one of the modules with optional dependencies.${DEFAULT_COLOR}"
+
+      # "[ -t 1 ]" checks to see if stdout is a terminal
+      # if stdout isn't a terminal, just continue (and probably break
+      # later on). It's not ideal (definitely a FIXME).
+      if [ -t 1 ] && query "Stop now and try again?" y
       then
-          exit 1
+        exit 1
       fi
+    fi
   fi
   tsort "$TMP_TSRT" 2> /dev/null | tac > $TMP_ALL
   temp_destroy $TMP_TSRT
