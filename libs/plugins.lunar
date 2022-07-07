@@ -90,9 +90,9 @@ update_plugin() {
         # Force a reload in the parent lin process,
         # this is required if a module dependency adds a plugin
         if [ "$MAIN_PPID" != "$PPID" ]; then
-          kill -HUP $PPID
+          kill -USR1 $PPID
         else
-          kill -HUP $$
+          kill -USR1 $$
         fi
       elif [ "$2" == "remove" ] || ! module_installed $1 ; then
         for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do

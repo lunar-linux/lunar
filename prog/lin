@@ -69,7 +69,7 @@ main() {
     export MAIN_PPID=$PPID
   fi
 
-  trap "TRAP=1 reload_plugins" HUP
+  trap "TRAP=1 reload_plugins" USR1
 
   # We only run this check once instead of for each module to be installed
   if [ -z "$MODULE" ] && ! check_free_space; then
