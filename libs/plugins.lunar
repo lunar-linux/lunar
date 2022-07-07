@@ -86,6 +86,14 @@ update_plugin() {
           debug_msg "Installed \"$(basename $PLUGIN)\""
           install -m644 $PLUGIN $PLUGIN_DIR/
         done
+
+        # Force a reload in the parent lin process,
+        # this is required if a module dependency adds a plugin
+        if [ "$MAIN_PPID" != "$PPID" ]; then
+          kill -HUP $PPID
+        else
+          kill -HUP $$
+        fi
       elif [ "$2" == "remove" ] || ! module_installed $1 ; then
         for PLUGIN in $MOONBASE/$SECTION/$1/plugin.d/*.plugin; do
           debug_msg "Removed \"$(basename $PLUGIN)\""
@@ -97,8 +105,8 @@ update_plugin() {
           install -m644 $PLUGIN $PLUGIN_DIR/
         done
       fi
+      reload_plugins
     fi
-    reload_plugins
   fi
 }
 
@@ -118,7 +126,8 @@ update_plugins() {
 
 reload_plugins() {
     local ITERATOR
-    debug_msg "reload_plugins($@)"
+    debug_msg "reload_plugins($@, TRAP=$TRAP)"
+    verbose_msg "reload_plugins(TRAP=$TRAP)"
 
     # Unload current plugins
     unset LUNAR_PLUGINS
