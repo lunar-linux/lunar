@@ -65,6 +65,12 @@ main() {
   debug_msg "main ($@)"
   MODULES="$@"
 
+  if [ -z "$MAIN_PPID" ]; then
+    export MAIN_PPID=$PPID
+  fi
+
+  trap "TRAP=1 reload_plugins" USR1
+
   # We only run this check once instead of for each module to be installed
   if [ -z "$MODULE" ] && ! check_free_space; then
     if ! query "${WARNING_COLOR}WARNING: ${MESSAGE_COLOR}less than $REQUIRED_FREE_SPACE of free space available in ${FILE_COLOR}$INSTALL_CACHE or $BUILD_DIRECTORY. ${MESSAGE_COLOR}Continue anyway (y/N)?${DEFAULT_COLOR}" n; then
