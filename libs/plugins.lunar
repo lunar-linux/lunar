@@ -90,7 +90,11 @@ update_plugin() {
         # Force a reload in the parent lin process,
         # this is required if a module dependency adds a plugin
         if [ "$MAIN_PPID" != "$PPID" ]; then
-          kill -USR1 $PPID
+          case "$(ps -o comm= -p $PPID)" in
+            lin)
+              kill -USR1 $PPID
+            ;;
+          esac
         else
           kill -USR1 $$
         fi
