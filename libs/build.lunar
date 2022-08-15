@@ -24,7 +24,7 @@
 #                                                          #
 # Parts Copyrighted Steven Michalske 2004 under GPLv2      #
 #                                                          #
-# Parts Copyrighted Stefan Wold 2020 under GPLv2           #
+# Parts Copyrighted Stefan Wold 2020-2022 under GPLv2      #
 #                                                          #
 ############################################################
 
@@ -335,10 +335,23 @@ default_meson_build() {
 }
 
 default_perl_build() {
-    debug_msg "default_perl_build ($@)"
-    verbose_msg "running \"default_perl_build\""
+  debug_msg "default_perl_build ($@)"
+  verbose_msg "running \"default_perl_build\""
+
+  local _PLDESTDIR=$SOURCE_DIRECTORY/__perldest
+  mkdir -p "$_PLDESTDIR" &&
+
+  if [ -f "Makefile.PL" ]; then
     perl Makefile.PL &&
-    default_make
+    make &&
+    make DESTDIR="$_PLDESTDIR" install
+  elif [ -f "Build.PL" ]; then
+    perl Build.PL destdir="$_PLDESTDIR" &&
+    perl Build &&
+    perl Build install
+  fi &&
+  prepare_install &&
+  cp -rfv --preserve=mode,ownership --remove-destination "$_PLDESTDIR"/* /
 }
 
 default_python2_build() {
