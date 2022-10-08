@@ -46,11 +46,11 @@ save_libraries()  {
   SAVED=$OLD_LIBS/$MODULE.saved.libraries
   rm  -rf  $SAVED
 
-  egrep "/lib(32|64)?/" "$OLD_LOG" |
+  grep -E "/lib(32|64)?/" "$OLD_LOG" |
   while  read  LINE;  do
     if [ -f "$LINE"  ]  &&
          file  -bL  $LINE   |
-         egrep -q "shared object|pie executable"
+         grep -E -q "shared object|pie executable"
     then
       verbose_msg "saving library \"$LINE\""
       if  [  -h  $LINE  ];  then
