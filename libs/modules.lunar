@@ -114,7 +114,7 @@ create_module_index() {
   if [[ "$MOONBASE" == "/var/lib/lunar/moonbase" ]] && [[ -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ]] ; then
     # short way out:
     debug_msg "Quick generating \$MODULE_INDEX..."
-    egrep "/DETAILS(\.$PLATFORM|$)" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" | \
+    grep -E "/DETAILS(\.$PLATFORM|$)" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" | \
         sed -e 's:/var/lib/lunar/moonbase/::' -e 's:/DETAILS.*::g' \
         -e 's/\/\([^/]*\)$/:\1/' -e 's/\(.*\):\(.*\)/\2:\1/g' | uniq > $TMP_INDEX
   else
@@ -681,7 +681,7 @@ purge_modules() {
     error_message "${PROBLEM_COLOR}Error: ${DEFAULT_COLOR}${MESSAGE_COLOR} your moonbase seems damaged. Re-lin moonbase to fix.${DEFAULT_COLOR}"
     exit 1
   fi
-  for MODULE in $(list_installed | fgrep -v -x moonbase) ; do
+  for MODULE in $(list_installed | grep -F -v -x moonbase) ; do
   (
     if ! run_details $MODULE &> /dev/null && ! grep -q "^$MODULE:" $REPLACEMENT_INDEX && ! module_held $MODULE; then
       message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} was removed from ${FILE_COLOR}${MOONBASE}${DEFAULT_COLOR}"
@@ -818,7 +818,7 @@ create_replacement_index() {
   TMP_IDX=$(temp_create "replacement.index")
 
   find $MOONBASE \( -name DETAILS.$PLATFORM -o -name DETAILS \) -type f |
-  xargs fgrep 'REPLACES=' |
+  xargs grep -F 'REPLACES=' |
   awk -v dregex="/DETAILS(|.$PLATFORM):" '{gsub(dregex, "")} !_[$1]++' |
   while read MODULE REPLACEMENT; do
     (
@@ -859,7 +859,7 @@ replace_modules() {
   TMP_REM_QUEUE=$(temp_create "replacement-rem-queue")
   TMP_INS_QUEUE=$(temp_create "replacement-queue")
 
-  for MODULE in $(list_installed | fgrep -v -x moonbase); do
+  for MODULE in $(list_installed | grep -F -v -x moonbase); do
     for REPLACEMENT in $(grep "^$MODULE:" $REPLACEMENT_INDEX); do
       IMOD=${REPLACEMENT%:*}
       RMOD=${REPLACEMENT#*:}

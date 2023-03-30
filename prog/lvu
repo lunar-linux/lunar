@@ -1427,7 +1427,7 @@ main() {
         if [ -f $MOONBASE/$SEC/$MOD/services ]; then
           echo $MOONBASE/$SEC/$MOD/services
         fi
-      done | xargs -d '\n' egrep -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
+      done | xargs -d '\n' grep -E -l -i "$2" | sed "s;${MOONBASE}/\(.*\)/services;\1;"
       ;;
 
     depends)
@@ -1552,10 +1552,10 @@ main() {
     links)
       [[ -z "$2" ]] && return 1
 
-      REGEX=$(lvu install $2 | xargs -d '\n' file | awk -F: '/ELF/ { print $1 }' | xargs -d '\n' ldd | fgrep '=>' | cut -d' ' -f3 | sort | uniq)
+      REGEX=$(lvu install $2 | xargs -d '\n' file | awk -F: '/ELF/ { print $1 }' | xargs -d '\n' ldd | grep -F '=>' | cut -d' ' -f3 | sort | uniq)
 
       pushd $INSTALL_LOGS >/dev/null
-      fgrep -xl "$REGEX" *
+      grep -F -xl "$REGEX" *
       popd >/dev/null
       ;;
 
