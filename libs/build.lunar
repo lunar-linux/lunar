@@ -289,7 +289,7 @@ default_meson_config() {
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
   MESON_BUILD_TYPE=${MESON_BUILD_TYPE:-release}
   verbose_msg "MESON_BUILD_TYPE=\"$MESON_BUILD_TYPE\""
-  meson --prefix $MODULE_PREFIX \
+  meson setup --prefix $MODULE_PREFIX \
         --buildtype $MESON_BUILD_TYPE \
         --default-library shared \
         --libdir lib \
