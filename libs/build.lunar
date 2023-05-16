@@ -294,7 +294,7 @@ default_meson_config() {
         --default-library shared \
         --libdir lib \
         $OPTS \
-        . build/
+        . $MODULE-$VERSION/
 }
 
 default_install() {
@@ -329,9 +329,9 @@ default_meson_build() {
   debug_msg "default_meson_build ($@)"
   verbose_msg "running \"default_meson_build\""
   default_meson_config &&
-  ninja -C build/ &&
+  ninja -C $MODULE-$VERSION/ &&
   prepare_install &&
-  ninja -C build/ install
+  ninja -C $MODULE-$VERSION/ install
 }
 
 default_perl_build() {
