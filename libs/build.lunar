@@ -209,22 +209,6 @@ _configure()
 }
 
 
-# cmake can be run two ways: in source and out of source. The
-# determinante method is to look for a cmake macro, if it exists then do
-# out of source. There have been inconsistancies with this, some apps
-# compile fine out of source and others do not with the leaning towards
-# more wanting out of source even though they do not say so. Making this
-# the default and for those that do not want it, specify it in the
-# BUILD.
-cmake_build_target() {
-  debug_msg "cmake_build_target ($@)"
-    verbose_msg "running \"Out of source build is required; configuring\""
-    OOSB_DIR="$SOURCE_DIRECTORY/$MODULE-oosb"  &&
-    mkdir $OOSB_DIR                            &&
-    cd $OOSB_DIR
-}
-
-
 default_config() {
   debug_msg "default_config ($@)"
   verbose_msg "running \"default_config\""
@@ -273,15 +257,10 @@ default_cmake_config() {
   verbose_msg "running \"default_cmake_config\""
   verbose_msg "MODULE_PREFIX=\"$MODULE_PREFIX\""
 
-  cmake_build_target
-
-  cmake -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX     \
-        -DCMAKE_INSTALL_LIBDIR=$MODULE_PREFIX/lib \
-        -DCMAKE_BUILD_TYPE=RELEASE                \
-        -DSYSCONF_INSTALL_DIR:PATH=/etc           \
-        -DBUILD_TESTING=0                         \
-        -Wno-dev                                  \
-        $OPTS $SOURCE_DIRECTORY
+  cmake -B $MODULE-$VERSION -S . -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
+        -DCMAKE_BUILD_TYPE=RELEASE \
+        -Wno-dev $OPTS
 }
 
 default_meson_config() {
@@ -323,7 +302,9 @@ default_cmake_build() {
   debug_msg "default_cmake_build ($@)"
   verbose_msg "running \"default_cmake_build\""
   default_cmake_config &&
-  default_make
+  cmake --build $MODULE-$VERSION &&
+  prepare_install &&
+  cmake --install $MODULE-$VERSION
 }
 
 default_meson_build() {
