@@ -1,0 +1,168 @@
+#!/bin/bash
+#                                                          #
+# signals.lunar - signal handling and cleanup registry     #
+#                                                          #
+############################################################
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://lunar-linux.org                                   #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright Stefan Wold 2026 under GPLv2                   #
+#                                                          #
+############################################################
+#                                                          #
+# signals.lunar provides a centralized signal handling     #
+# and resource cleanup system. Programs call               #
+# lunar_setup_signals() once at startup. Temp files, lock  #
+# files, and child PIDs are registered automatically by    #
+# temp.lunar, locking.lunar, and other libraries. On       #
+# INT/TERM, the cleanup handler releases all registered    #
+# resources and kills tracked child processes.             #
+#                                                          #
+# The registry uses bash arrays. Since temp_create() sets  #
+# variables directly via eval (no $() subshell), the       #
+# cleanup_register calls run in the main shell and array   #
+# modifications are visible to _lunar_cleanup.             #
+#                                                          #
+# functions: lunar_setup_signals, cleanup_register,        #
+#   cleanup_register_lock, cleanup_register_pid,           #
+#   cleanup_unregister_pid, _lunar_cleanup                 #
+#                                                          #
+############################################################
+
+
+# Signal debug log — enabled by LUNAR_SIGNAL_DEBUG=1
+# Writes to /tmp/lunar-signal-debug.log with timestamps and PIDs
+_LUNAR_SIGNAL_LOG="/tmp/lunar-signal-debug.log"
+_sd() {
+  [ "${LUNAR_SIGNAL_DEBUG:-0}" = "1" ] || return 0
+  echo "$(date '+%H:%M:%S.%N') [$(basename $0):$$:$BASHPID] $*" >> "$_LUNAR_SIGNAL_LOG"
+}
+
+# Cleanup registry arrays
+_LUNAR_CLEANUP_FILES=()
+_LUNAR_CLEANUP_LOCKS=()
+_LUNAR_CLEANUP_PIDS=()
+
+# Re-entrancy guard
+_LUNAR_CLEANUP_DONE=0
+
+
+# function : cleanup_register
+# usage    : cleanup_register <file_path>
+# purpose  : register a temp file for automatic cleanup on signal
+cleanup_register() {
+  debug_msg "cleanup_register ($@)"
+  _sd "REG file: $1"
+  _LUNAR_CLEANUP_FILES+=("$1")
+}
+
+
+# function : cleanup_register_lock
+# usage    : cleanup_register_lock <lock_base_path>
+# purpose  : register a lock file for automatic unlock on signal
+cleanup_register_lock() {
+  debug_msg "cleanup_register_lock ($@)"
+  _sd "REG lock: $1"
+  _LUNAR_CLEANUP_LOCKS+=("$1")
+}
+
+
+# function : cleanup_register_pid
+# usage    : cleanup_register_pid <pid>
+# purpose  : register a child PID for automatic kill on signal
+cleanup_register_pid() {
+  debug_msg "cleanup_register_pid ($@)"
+  _sd "REG pid: $1"
+  _LUNAR_CLEANUP_PIDS+=("$1")
+}
+
+
+# function : cleanup_unregister_pid
+# usage    : cleanup_unregister_pid <pid>
+# purpose  : remove a PID from the cleanup registry when it exits normally
+cleanup_unregister_pid() {
+  local i
+  debug_msg "cleanup_unregister_pid ($@)"
+  _sd "UNREG pid: $1"
+  for i in "${!_LUNAR_CLEANUP_PIDS[@]}"; do
+    if [ "${_LUNAR_CLEANUP_PIDS[$i]}" = "$1" ]; then
+      unset '_LUNAR_CLEANUP_PIDS[$i]'
+      return 0
+    fi
+  done
+}
+
+
+# function : _lunar_cleanup
+# usage    : (called by trap handler, not directly)
+# purpose  : kill tracked child processes, unlock registered locks,
+#            remove registered temp files, and clean up linING lock
+_lunar_cleanup() {
+  # re-entrancy guard: prevent recursive cleanup
+  if [ "$_LUNAR_CLEANUP_DONE" = "1" ]; then
+    _sd "CLEANUP re-entry blocked"
+    return
+  fi
+  _LUNAR_CLEANUP_DONE=1
+
+  debug_msg "_lunar_cleanup ()"
+  _sd "CLEANUP START — files=${#_LUNAR_CLEANUP_FILES[@]} locks=${#_LUNAR_CLEANUP_LOCKS[@]} pids=${#_LUNAR_CLEANUP_PIDS[@]}"
+
+  # kill tracked child processes
+  local pid
+  for pid in "${_LUNAR_CLEANUP_PIDS[@]}"; do
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      _sd "  KILL pid=$pid"
+      kill -TERM "$pid" 2>/dev/null
+      wait "$pid" 2>/dev/null
+    else
+      _sd "  SKIP pid=$pid (not running)"
+    fi
+  done
+
+  # unlock registered locks
+  local lock
+  for lock in "${_LUNAR_CLEANUP_LOCKS[@]}"; do
+    if [ -n "$lock" ] && [ -f "$lock.lock" ]; then
+      _sd "  UNLOCK $lock.lock"
+      rm -f "$lock.lock" 2>/dev/null
+    fi
+  done
+
+  # remove registered temp files
+  local file
+  for file in "${_LUNAR_CLEANUP_FILES[@]}"; do
+    if [ -n "$file" ]; then
+      _sd "  RM $file (exists=$([ -e "$file" ] && echo y || echo n))"
+      rm -f "$file" 2>/dev/null
+    fi
+  done
+
+  # remove installation lock file if set
+  if [ -n "$linING" ] && [ -f "$linING" ]; then
+    _sd "  RM linING=$linING"
+    rm -f "$linING"
+  fi
+
+  _sd "CLEANUP DONE"
+}
+
+
+# function : lunar_setup_signals
+# usage    : lunar_setup_signals
+# purpose  : install signal traps for INT and TERM that invoke the
+#            cleanup handler, then re-raise the signal so the process
+#            dies from signal death (not normal exit). This is critical
+#            for bash's WCE mechanism: parent shells only deliver a
+#            pending signal to their own trap handler when the child
+#            dies from the actual signal, not from exit(N).
+lunar_setup_signals() {
+  debug_msg "lunar_setup_signals ()"
+  _sd "SETUP traps installed"
+  trap '_sd "TRAP INT fired"; _lunar_cleanup; _sd "RE-RAISE INT"; trap - INT; kill -INT $BASHPID' INT
+  trap '_sd "TRAP TERM fired"; _lunar_cleanup; _sd "RE-RAISE TERM"; trap - TERM; kill -TERM $BASHPID' TERM
+  trap '_exit_status=$?; _sd "TRAP EXIT fired (status=$_exit_status, cleanup_done=$_LUNAR_CLEANUP_DONE)"; [ "$_LUNAR_CLEANUP_DONE" = "0" ] && [ "$_exit_status" != "0" ] && _lunar_cleanup' EXIT
+}

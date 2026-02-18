@@ -135,8 +135,10 @@ run_fix()  {
 		return
 	fi
 
-	export TMP_LIN_SUCCESS=$(temp_create "successful")
-	export TMP_LIN_FAIL=$(temp_create "failed")
+	temp_create TMP_LIN_SUCCESS "successful"
+	export TMP_LIN_SUCCESS
+	temp_create TMP_LIN_FAIL "failed"
+	export TMP_LIN_FAIL
 
   if [[ ! -n "$NOFIX" ]] ; then
 		for MODULE in $(sort_by_dependency ${BROKEN_MODULES[@]}) ; do

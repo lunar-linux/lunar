@@ -65,7 +65,7 @@ create_install_log() {
   local TMP_INST_LOG INST_LOG IFS MISOWNED_SYMLINKS
   debug_msg "create_install_log ($@)"
 
-  TMP_INST_LOG=$(temp_create "install-log")
+  temp_create TMP_INST_LOG "install-log"
   INST_LOG="$INSTALL_LOGS/$MODULE-$VERSION"
   rm -f $INST_LOG &> /dev/null
 
@@ -110,7 +110,8 @@ save_old_install_log() {
   local old_version
   debug_msg "save_old_install_log ($@)"
 
-  export TMP_OLD_INST_LOG=$(temp_create "${MODULE}.oldinstlog")
+  temp_create TMP_OLD_INST_LOG "${MODULE}.oldinstlog"
+  export TMP_OLD_INST_LOG
   if module_installed $MODULE; then
     old_version=$(installed_version $MODULE)
     debug_msg "creating old install log for $MODULE-$old_version ($TMP_OLD_INST_LOG)"

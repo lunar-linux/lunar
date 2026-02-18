@@ -72,7 +72,7 @@ function find_depends() {
     done
   }
 
-  TMP_FDEPS=$(temp_create "found.depends")
+  temp_create TMP_FDEPS "found.depends"
   find_depends_intern $(expand_alias $1)
   temp_destroy $TMP_FDEPS
 }
@@ -85,15 +85,15 @@ sort_by_dependency() {
   local TMP_LIST TMP_ALL TMP_TSRT A B
   debug_msg "sort_by_dependency ($@)"
 
-  TMP_LIST=$(temp_create "deptree.in")
-  TMP_ALL=$(temp_create "deptree.all")
+  temp_create TMP_LIST "deptree.in"
+  temp_create TMP_ALL "deptree.all"
 
   for M in $* ; do
     echo "$M" >> $TMP_LIST
   done
 
   # tsort the existing dep relations in all of moonbase
-  TMP_TSRT=$(temp_create "dependency.sort")
+  temp_create TMP_TSRT "dependency.sort"
   awk -F: '$3 == "on" {print $1,$2}' "$DEPENDS_STATUS" | while read A B ; do
     B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= expand_alias $B)
     echo "$A $B" >> $TMP_TSRT
@@ -326,7 +326,7 @@ satisfy_depends()  {
     . $MODULE_CONFIG
   fi
 
-  TMP_FILE=$(temp_create "${MODULE}.satify-depends")
+  temp_create TMP_FILE "${MODULE}.satify-depends"
   grep "^$MODULE:" "$DEPENDS_STATUS" > $TMP_FILE
 
   # first recursively check if all required dependencies are installed
@@ -445,7 +445,7 @@ create_depends_cache()
 
   if [ $MODULE_INDEX -nt $DEPENDS_CACHE ] ; then
     verbose_msg "Generating a new depends cache..."
-    TMP_DEP_CACHE=$(temp_create "depends.cache")
+    temp_create TMP_DEP_CACHE "depends.cache"
 
     # you guessed it: local decls.
     depends() {

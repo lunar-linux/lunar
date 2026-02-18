@@ -111,7 +111,7 @@ report() {
   fi
 
   if [ "$MAIL_REPORTS" == "on" ] ; then
-    TMP_MAIL=$(temp_create "mailreport")
+    temp_create TMP_MAIL "mailreport"
     date -u > $TMP_MAIL
     echo >> $TMP_MAIL
     view_file "$1" >> $TMP_MAIL

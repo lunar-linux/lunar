@@ -58,7 +58,7 @@ ld_remove() {
 
   if [[ ! -z "$1" && -f "$ld_conf_path" ]]; then
     if grep -q "$1" $ld_conf_path; then
-      TMP_LD_CONF=$(temp_create "ldsoconf")
+      temp_create TMP_LD_CONF "ldsoconf"
       verbose_msg "Removing $1 from ld.so.conf"
 
       grep -v "$1" $ld_conf_path > $TMP_LD_CONF
@@ -150,7 +150,7 @@ filter() {
   debug_msg "filter ($@)"
   local TMP_GREPRE
   if [ -f "$1" ] ; then
-    TMP_GREPRE=$(temp_create "fgrep")
+    temp_create TMP_GREPRE "fgrep"
     directories < $1 | sed -e 's:^:^:g' -e 's:$:/:g'   > $TMP_GREPRE
     files       < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE
     symlinks    < $1 | sed -e 's:^:^:g' -e 's:$:\$:g' >> $TMP_GREPRE

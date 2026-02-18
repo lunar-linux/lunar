@@ -52,8 +52,8 @@ plugin_zpatches_apply() {
         GZCMD="cat"
       fi
 
-      TMPFILE1=$(temp_create "zpatch_1")
-      TMPFILE2=$(temp_create "zpatch_2")
+      temp_create TMPFILE1 "zpatch_1"
+      temp_create TMPFILE2 "zpatch_2"
 
       if $GZCMD "$FPATCH" >$TMPFILE1; then
         # uncompress OK

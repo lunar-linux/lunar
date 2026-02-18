@@ -17,16 +17,29 @@
 ####################################################################
 
 
+# function : temp_create
+# usage    : temp_create VARNAME "label"
+# purpose  : create a temp file, store its path in VARNAME, and
+#            register it for automatic cleanup on signal.
+#            Uses eval to set the variable in the caller's scope
+#            directly — no $() command substitution needed, which
+#            means cleanup_register runs in the main shell and
+#            array-based registries work correctly.
 temp_create() {
-  local TMPFILE
+  local _tc_var="$1"
+  shift
+  local _tc_label="$*"
+  local _tc_path
   debug_msg "temp_create ($@)"
-  TMPFILE="$@"
-  if TMPFILE=$(mktemp -p "$TMPDIR" -t lunar.`basename $0`.$TMPFILE.$$.XXXXXXXXXX ) ; then
-    echo $TMPFILE
+  if _tc_path=$(mktemp -p "$TMPDIR" -t "lunar.$(basename $0).$_tc_label.$$.XXXXXXXXXX") ; then
+    if type -t cleanup_register &>/dev/null; then
+      cleanup_register "$_tc_path"
+    fi
+    eval "$_tc_var=\$_tc_path"
   else
     message "${PROBLEM_COLOR}ERROR:${DEFAULT_COLOR}" \
             "Cannot create temp file${DEFAULT_COLOR}"
-    exit 1
+    return 1
   fi
 }
 
