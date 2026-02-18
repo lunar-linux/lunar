@@ -74,6 +74,10 @@ function lock_file() {
       message "${MESSAGE_COLOR}Waiting to lock the file $1${DEFAULT_COLOR}"
       sleep 1
    done
+   # register lock for automatic cleanup on signal
+   if type -t cleanup_register_lock &>/dev/null; then
+     cleanup_register_lock "$1"
+   fi
    return 0
 }
 
