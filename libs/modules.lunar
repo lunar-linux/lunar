@@ -108,7 +108,7 @@ create_module_index() {
   verbose_msg "Updating module index file..."
   # doing this allows us to ctrl-C the process without breaking the
   # index file
-  TMP_INDEX=$(temp_create "module.index")
+  temp_create TMP_INDEX "module.index"
 
   # here we have two options: system moonbase or custom:
   if [[ "$MOONBASE" == "/var/lib/lunar/moonbase" ]] && [[ -f $INSTALL_LOGS/moonbase-$(installed_version moonbase) ]] ; then
@@ -247,7 +247,7 @@ run_details() {
     if [[ -z "$WANT_VERSION" ]] ; then
       run_module_file $1 DETAILS &> /dev/null || return 255
     else
-      TMP_DETAILS=$(temp_create "details.version")
+      temp_create TMP_DETAILS "details.version"
       if [[ -e "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" ]]; then
         cat "$MOONBASE/$SECTION/$1/DETAILS.$PLATFORM" | sed '/^\s*VERSION=/d' > $TMP_DETAILS
       else
@@ -774,7 +774,7 @@ update_modules() {
   QUEUE=$(sort_by_dependency $LIST)
 
   message "${MESSAGE_COLOR}The following modules will be updated:${DEFAULT_COLOR}"
-  TMP_QUEUE=$(temp_create "update-queue")
+  temp_create TMP_QUEUE "update-queue"
   for MODULE in $QUEUE ; do
     echo $MODULE >> $TMP_QUEUE
     echo $MODULE
@@ -815,7 +815,7 @@ create_replacement_index() {
   local TMP_IDX MODULE REPLACEMENT REPLACES
   debug_msg "create_replacement_index (@)"
 
-  TMP_IDX=$(temp_create "replacement.index")
+  temp_create TMP_IDX "replacement.index"
 
   find $MOONBASE \( -name DETAILS.$PLATFORM -o -name DETAILS \) -type f |
   xargs grep -F 'REPLACES=' |
@@ -856,8 +856,8 @@ replace_modules() {
     exit 1
   fi
 
-  TMP_REM_QUEUE=$(temp_create "replacement-rem-queue")
-  TMP_INS_QUEUE=$(temp_create "replacement-queue")
+  temp_create TMP_REM_QUEUE "replacement-rem-queue"
+  temp_create TMP_INS_QUEUE "replacement-queue"
 
   for MODULE in $(list_installed | grep -F -v -x moonbase); do
     for REPLACEMENT in $(grep "^$MODULE:" $REPLACEMENT_INDEX); do

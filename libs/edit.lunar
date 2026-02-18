@@ -39,8 +39,8 @@ patch_it () {
     *)           GZCMD=cat ;;
   esac
 
-  TMPFILE1=$(temp_create "patch_1")
-  TMPFILE2=$(temp_create "patch_2")
+  temp_create TMPFILE1 "patch_1"
+  temp_create TMPFILE2 "patch_2"
 
   if $GZCMD "$PATCH" > $TMPFILE1 ; then
     # uncompress OK

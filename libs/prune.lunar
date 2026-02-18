@@ -20,8 +20,8 @@ prune() {
     eval $(grep BUILD= /etc/lunar/local/optimizations)
   fi
 
-  TMP_SPOOL_KEEP=$(temp_create "spool-keep")
-  TMP_CACHE_KEEP=$(temp_create "cache-keep")
+  temp_create TMP_SPOOL_KEEP "spool-keep"
+  temp_create TMP_CACHE_KEEP "cache-keep"
 
   message "${MESSAGE_COLOR}Generating keep lists...${DEFAULT_COLOR}"
   for MODULE in $(list_installed) ; do

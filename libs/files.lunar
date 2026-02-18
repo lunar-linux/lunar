@@ -135,9 +135,9 @@ cleanup_old_module_files() {
   old_inst_log=$1
   new_inst_log=$2
 
-  tmp_dir_list=$(temp_create "${MODULE}.cleanup.dir_list")
+  temp_create tmp_dir_list "${MODULE}.cleanup.dir_list"
   changed_configs=$(get_module_config "ETC_CHANGED_CONFIGS")
-  tmp_changed_configs=$(temp_create "$MODULE.changed.configs")
+  temp_create tmp_changed_configs "$MODULE.changed.configs"
 
   if [ -n "$changed_configs" ]; then
     printf "%s\n" $changed_configs > $tmp_changed_configs

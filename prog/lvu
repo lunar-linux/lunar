@@ -149,7 +149,7 @@ import_snapshot() {
     QUEUE=$(sort_by_dependency $LIST)
 
     message "${MESSAGE_COLOR}The following modules will be installed:${DEFAULT_COLOR}"
-    TMP_QUEUE=$(temp_create "install-queue")
+    temp_create TMP_QUEUE "install-queue"
     for MOD in $QUEUE; do
       echo $MOD >>$TMP_QUEUE
       echo $MOD
@@ -192,8 +192,8 @@ alien() {
   message "installed by lunar. This is not a security feature! Files could still" 1>&2
   message "be lurking undetected on this box." 1>&2
 
-  TMP_FOUND=$(temp_create "lvu.found")
-  TMP_KNOWN=$(temp_create "lvu.known")
+  temp_create TMP_FOUND "lvu.found"
+  temp_create TMP_KNOWN "lvu.known"
 
   message "Discovering ambient files..." 1>&2
   find $TRACKED | files | grep -v -f "$EXCLUDED" | grep -v -f "$PROTECTED" | sort | uniq >$TMP_FOUND
@@ -424,8 +424,8 @@ show_conflicts() {
   declare -A conflicts
   declare -A conflicts2
 
-  TMP_CONFLICTS=$(temp_create "conflicts")
-  TMP_CONFLICTS2=$(temp_create "conflicts")
+  temp_create TMP_CONFLICTS "conflicts"
+  temp_create TMP_CONFLICTS2 "conflicts"
   for MODULE in $(list_installed); do
     VERSION=$(installed_version $MODULE)
     cat "$INSTALL_LOGS/$MODULE-$VERSION" | grep "/bin/\|/games/\|/include/\|/lib/\|/sbin/" |
@@ -623,7 +623,8 @@ function show_tree() {
 
   # create dependency tracking file if needed
   if [ -z "$TMP_SEEN" ]; then
-    export TMP_SEEN=$(temp_create "seen")
+    temp_create TMP_SEEN "seen"
+    export TMP_SEEN
     export FLAG=1
     trap "rm -f $TMP_SEEN ; exit" INT TERM KILL
   fi
@@ -1004,8 +1005,8 @@ submit_module() {
       exit 1
     )
 
-    TMP_MSG=$(temp_create "submission")
-    TMP_MSG2=$(temp_create "submission")
+    temp_create TMP_MSG "submission"
+    temp_create TMP_MSG2 "submission"
     (
       echo "$1: "
       echo ""
@@ -1108,7 +1109,7 @@ new_module() {
   read WEB_SITE
   echo
 
-  LONG=$(temp_create "lvu.new.$1")
+  temp_create LONG "lvu.new.$1"
   message "Paste 1 or 2 paragraphs of text that give a good description for $1:"
   message "Press CONTROL-D on an empty line when finished"
   cat - >$LONG
