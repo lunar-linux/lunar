@@ -12,8 +12,10 @@
 
 start_logging () {
   debug_msg "start_logging  ($@)"
-  export C_LOG=$(temp_create "${MODULE}.compile-log")
-  export C_FIFO=$(temp_create "${MODULE}.compile-fifo")
+  temp_create C_LOG "${MODULE}.compile-log"
+  export C_LOG
+  temp_create C_FIFO "${MODULE}.compile-fifo"
+  export C_FIFO
 
   # just remaking this as FIFO
   rm -f $C_FIFO
@@ -27,6 +29,13 @@ stop_logging() {
   debug_msg "stop_logging ($@)"
   # Make sure the FIFO gets closed
   echo > $C_FIFO
+  # wait for voyeur to finish reading the FIFO before proceeding
+  if [ -n "$VOYEUR_PID" ]; then
+    wait $VOYEUR_PID 2>/dev/null
+    if type -t cleanup_unregister_pid &>/dev/null; then
+      cleanup_unregister_pid $VOYEUR_PID
+    fi
+  fi
   echo "++ Mark Compile stop   : \"$MODULE\" \"$VERSION\" \"$(date -Ru)\"" >> $C_LOG
   message  "${MESSAGE_COLOR}Creating"                        \
            "${FILE_COLOR}$COMPILE_LOGS/$MODULE-$VERSION.${COMPRESS_METHOD}"  \
@@ -103,6 +112,11 @@ activate_voyeur()  {
     esac
   else
     ( tee -a $C_LOG < $C_FIFO >/dev/null ; rm -f "$C_FIFO" ) &
+  fi
+  # register voyeur background PID for cleanup on signal
+  VOYEUR_PID=$!
+  if type -t cleanup_register_pid &>/dev/null; then
+    cleanup_register_pid $VOYEUR_PID
   fi
 }
 

@@ -47,7 +47,8 @@ END
 lrm_module() {
   debug_msg "lrm_module ($@)"
 
-  export TMP_DIRS=$(temp_create "$1.directories")
+  temp_create TMP_DIRS "$1.directories"
+  export TMP_DIRS
 
   run_details $1 &>/dev/null
 
@@ -251,6 +252,7 @@ else
   root_check
   enviro_check
   set_priority
+  lunar_setup_signals
 
   while true; do
     case "$1" in

@@ -96,6 +96,7 @@ else
   root_check
   enviro_check
   set_priority
+  lunar_setup_signals
   while true; do
     case "$1" in
       -a | --all)
