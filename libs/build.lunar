@@ -539,6 +539,12 @@ run_build()  {
   (
     # fix errors, don't avoid them. This makes all errors fatal
     shopt -s execfail
+    # On signal, remove the trap then send the signal to the entire process
+    # group (kill 0) so make/ninja children are cleaned up. Because the trap
+    # is removed first, the re-sent signal kills this subshell with proper
+    # signal death, allowing bash's WCE in the parent to work correctly.
+    trap '_sd "TRAP INT fired in run_build subshell"; trap - INT; kill -INT 0' INT
+    trap '_sd "TRAP TERM fired in run_build subshell"; trap - TERM; kill -TERM 0' TERM
     if has_module_file $MODULE BUILD ; then
       run_module_file $MODULE BUILD
     else
