@@ -1,0 +1,51 @@
+#
+# CATALYST example
+#
+# Format: <event> <watched_module> <action> [param] [immediate]
+#
+# Events:
+#   on_install      - fires after the watched module is installed
+#   on_pre_install  - fires before the watched module is installed
+#   on_remove       - fires after the watched module is removed
+#   on_pre_remove   - fires before the watched module is removed
+#
+# Actions:
+#   lin      - rebuild this module
+#   lrm      - remove this module
+#   fix      - run integrity checks and repair this module
+#   enable   - turn on an optional dependency (param = dep module)
+#   disable  - turn off an optional dependency (param = dep module)
+#   exec     - run a custom script from this module's directory (param = script name)
+#
+# The optional "immediate" keyword at the end of a rule causes the trigger
+# to fire right after the watched module completes instead of being batched.
+# Pre-events (on_pre_install, on_pre_remove) always fire immediately.
+#
+# Environment variables available during exec scripts:
+#   CATALYST_MODULE         - the watched module that caused the trigger
+#   CATALYST_MODULE_VERSION - its version
+#
+
+# Rebuild this module when openssl is installed (e.g. for linked library updates):
+#	on_install openssl lin
+
+# Immediate rebuild — fires right away instead of after all modules complete.
+# Use this when later modules depend on this rebuild (e.g. openssl -> wget):
+#	on_install openssl lin immediate
+
+# Enable an optional dependency when a module becomes available, then rebuild:
+#	on_install moduleA enable moduleA
+#	on_install moduleA lin
+
+# Disable the dependency when the module is removed, then rebuild:
+#	on_remove moduleA disable moduleA
+#	on_remove moduleA lin
+
+# Cascade removal — remove this module when another is removed:
+#	on_remove moduleB lrm
+
+# Run a custom script (must be in this module's directory):
+#	on_install linux exec rebuild-for-kernel.sh
+
+# Run integrity checks after a dependency is updated:
+#	on_install glibc fix

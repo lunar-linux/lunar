@@ -65,6 +65,14 @@ Download sources using ipv4.
 .TP
 .B \-6, \-\-ipv6
 Download sources using ipv6.
+.TP
+.B "\-\-catalyst\-immediate"
+Fire CATALYST triggers after each module instead of collecting them
+and firing after all modules complete. This is useful when trigger
+order matters or when a triggered rebuild must happen before the
+next module is installed. See
+.BR moonbase (5)
+for details on the CATALYST file format.
 .SH "FILES"
 All files can be edited by hand, but its easier to edit them with
 .B lunar.
@@ -172,6 +180,8 @@ Updated by Chuck Mead 07/17/2003
 Updated by Terry Chan 08/08/2003
 .PP
 Updated by Stefan Wold <ratler@lunar-linux.org> 10/11/2014
+.PP
+Updated by Stefan Wold <ratler@lunar-linux.org> 02/19/2026
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar\-linux.org>
 .SH "SEE ALSO"
