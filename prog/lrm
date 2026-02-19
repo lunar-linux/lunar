@@ -329,7 +329,20 @@ else
       fi
     fi
   done
+  # CATALYST: load trigger cache and initialize loop protection
+  load_catalyst_cache
+  init_catalyst_visited
+  reset_catalyst_queues
+
   for MODULE in $LIST; do
+    # CATALYST: fire pre-remove triggers immediately
+    collect_catalyst "$MODULE" on_pre_remove
     lrm_module $MODULE
+    # CATALYST: collect post-remove triggers
+    collect_catalyst "$MODULE" on_remove
   done
+
+  # CATALYST: fire collected post-remove triggers
+  fire_collected_catalysts
+  cleanup_catalyst_visited
 fi

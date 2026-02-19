@@ -82,6 +82,7 @@ SOURCE_URL_FULL=$MOONBASE_URL/$SOURCE
     create_module_index &&
     create_depends_cache &&
     load_depends_cache &&
+    create_catalyst_cache &&
     update_depends &&
     update_plugins &&
     display_moonbase_changes &&
