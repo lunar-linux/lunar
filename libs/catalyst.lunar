@@ -51,7 +51,7 @@ create_catalyst_cache()
 
   if [ $MODULE_INDEX -nt $CATALYST_CACHE ] ; then
     verbose_msg "Generating a new catalyst cache..."
-    TMP_CACHE=$(temp_create "catalyst.cache")
+    temp_create TMP_CACHE "catalyst.cache"
 
     # speedups for system moonbases:
     if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] && [ -f "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" ] ; then
@@ -265,7 +265,7 @@ init_catalyst_visited() {
     debug_msg "init_catalyst_visited: reusing existing visited file"
     return 0
   fi
-  CATALYST_VISITED_FILE=$(temp_create "catalyst_visited")
+  temp_create CATALYST_VISITED_FILE "catalyst_visited"
   export CATALYST_VISITED_FILE
   CATALYST_VISITED_OWNER=1
   debug_msg "init_catalyst_visited: created $CATALYST_VISITED_FILE"
