@@ -778,6 +778,14 @@ show_eert() {
     DEPENDS=$DEPENDS_CACHE
   fi
 
+  # create dependency tracking file if needed
+  if [ -z "$TMP_SEEN" ]; then
+    temp_create TMP_SEEN "seen"
+    export TMP_SEEN
+    export FLAG=1
+    trap "rm -f $TMP_SEEN ; exit" INT TERM KILL
+  fi
+
   show_rtree() {
     local IS_REQUIRED
     # we need to do a reverse tree for $1
@@ -818,8 +826,12 @@ show_eert() {
     echo -e "${STR:5}"
 
     INDENT="$INDENT|    "
+    # skip already-seen deps to prevent infinite loops
     for RDEP in $RDEPS; do
-      FLAG= show_rtree $RDEP
+      if ! grep -q "^${RDEP}$" "$TMP_SEEN"; then
+        echo "$RDEP" >>$TMP_SEEN
+        FLAG= show_rtree $RDEP
+      fi
     done
     INDENT="${INDENT:0:((${#INDENT} - 5))}"
   }
@@ -827,7 +839,8 @@ show_eert() {
   show_rtree $1
 
   if [ -n "$FLAG" ]; then
-    temp_destroy $TMP_DEPLIST
+    temp_destroy $TMP_SEEN
+    unset TMP_SEEN
   fi
 }
 
