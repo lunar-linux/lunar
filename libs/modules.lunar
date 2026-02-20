@@ -207,6 +207,9 @@ find_section() {
 		return 1
 	fi
 
+	# cache was rebuilt in subshell, reload arrays if they were loaded
+	[[ -n "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+
 	# and search again, this should be quick now
 	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" "$MODULE_INDEX")
 	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then

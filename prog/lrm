@@ -254,6 +254,9 @@ else
   set_priority
   lunar_setup_signals
 
+  load_depends_cache
+  load_depends_status
+
   while true; do
     case "$1" in
       -d | --debug)

@@ -756,8 +756,13 @@ show_eert() {
   fi
 
   show_rtree() {
-    # we need to do an reverse tree for $1
-    RDEPS=$(grep ":$1:" "$DEPENDS" | cut -d: -f1 | sort | uniq)
+    local IS_REQUIRED
+    # we need to do a reverse tree for $1
+    if [ -n "$SHORTTREE" ]; then
+      RDEPS=$(echo "${DEPENDS_STATUS_REV_ON[$1]}" | sort -u)
+    else
+      RDEPS=$(echo "${DEPENDS_REV[$1]}" | sort -u)
+    fi
 
     if module_installed $1; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -766,9 +771,13 @@ show_eert() {
     fi
 
     for DEP in $RDEPS; do
-      REL=$(grep "^$DEP:$1:" "$DEPENDS")
-      CUR=$(echo $REL | cut -d: -f1)
-      if echo $REL | grep -q :required:; then
+      if [ -n "$SHORTTREE" ]; then
+        [[ "${DEPENDS_STATUS_PAIR[$DEP:$1]}" == *:required:* ]] && IS_REQUIRED=1 || IS_REQUIRED=0
+      else
+        [[ "${DEPENDS_FWD_TYPE[$DEP:$1]}" == "required" ]] && IS_REQUIRED=1 || IS_REQUIRED=0
+      fi
+
+      if [ "$IS_REQUIRED" -eq 1 ]; then
         if module_installed $DEP; then
           STR="$STR${FILE_COLOR}$DEP ${DEFAULT_COLOR}"
         else
@@ -1649,6 +1658,9 @@ else
   export IFS="$STANDARD_IFS"
 
   set_priority
+
+  load_depends_cache
+  load_depends_status
 
   while true; do
     case "$1" in

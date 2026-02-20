@@ -284,6 +284,9 @@ else
   enviro_check
   set_priority
 
+  load_depends_cache
+  load_depends_status
+
   while true; do
     case "$1" in
       -c | --compile)
