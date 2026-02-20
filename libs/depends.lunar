@@ -48,6 +48,14 @@ function find_depends() {
         :
       }
 
+      optional_depends_requires() {
+        :
+      }
+
+      optional_depends_one_of() {
+        :
+      }
+
       # yeah, this sucks:
       message() {
         :
@@ -409,6 +417,79 @@ run_depends() {
     # if leader has no recorded decision, skip silently
   }
 
+  optional_depends_one_of() {
+    local DESCRIPTION DEP ON_OPTS OFF_OPTS DEFAULT DEPMOD_AVAIL CHOSEN=0 SKIPPED=0 MOD_LIST=""
+    debug_msg "  optional_depends_one_of ($@)"
+    DESCRIPTION="$1"
+    shift
+
+    # Build module list for header message
+    local ARGS=("$@")
+    local i
+    for ((i=0; i<${#ARGS[@]}; i+=3)); do
+      [[ -n "$MOD_LIST" ]] && MOD_LIST+=", "
+      MOD_LIST+="$(expand_alias "${ARGS[$i]}")"
+    done
+    message "${MODULE_COLOR}${MODULE}:${DEFAULT_COLOR}" \
+            "${MESSAGE_COLOR}Select one ${DESCRIPTION} (or skip all): ${MOD_LIST}${DEFAULT_COLOR}"
+
+    # Process each (MOD, ON_OPTS, OFF_OPTS) triplet
+    while [[ $# -ge 3 ]]; do
+      DEP=$(expand_alias "$1")
+      ON_OPTS="$2"
+      OFF_OPTS="$3"
+      shift 3
+
+      if [[ $CHOSEN -eq 1 ]]; then
+        if [[ $SKIPPED -eq 0 ]]; then
+          message "${MODULE_COLOR}${MODULE}:${DEFAULT_COLOR}" \
+                  "${MESSAGE_COLOR}(skipping remaining choices)${DEFAULT_COLOR}"
+          SKIPPED=1
+        fi
+        add_depends "$MODULE" "$DEP" "off" "optional" "$ON_OPTS" "$OFF_OPTS"
+      elif module_exiled $DEP; then
+        verbose_msg "\"$MODULE\" optionally depends on exiled module \"$DEP\""
+        add_depends "$MODULE" "$DEP" "off" "optional" "$ON_OPTS" "$OFF_OPTS"
+      elif module_enforced $DEP; then
+        verbose_msg "Enforcing optional dependency \"$DEP\""
+        add_depends "$MODULE" "$DEP" "on" "optional" "$ON_OPTS" "$OFF_OPTS"
+        if ! module_installed $DEP && ! grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null; then
+          lin --deps $DEP
+          echo "$DEP" >> $TEMP_PREPAREDDEPS
+        fi
+        CHOSEN=1
+      elif in_depends $MODULE $DEP; then
+        # Re-run case: existing "on" choice - honor it
+        add_depends "$MODULE" "$DEP" "on" "optional" "$ON_OPTS" "$OFF_OPTS"
+        if ! module_installed $DEP && ! grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null; then
+          lin --deps $DEP
+          echo "$DEP" >> $TEMP_PREPAREDDEPS
+        fi
+        CHOSEN=1
+      elif ! grep -q "^$MODULE:$DEP:" "$DEPENDS_STATUS"; then
+        # No existing entry - ask user
+        if module_installed $DEP; then
+          DEFAULT="y"
+          DEPMOD_AVAIL="Use (${FILE_COLOR}installed${QUERY_COLOR}) ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
+        else
+          DEFAULT="n"
+          DEPMOD_AVAIL="Install & use (${PROBLEM_COLOR}not installed${QUERY_COLOR}) ${MODULE_COLOR}$DEP${DEFAULT_COLOR}${MESSAGE_COLOR}"
+        fi
+
+        if query "$DEPMOD_AVAIL ${QUERY_COLOR}?" $DEFAULT; then
+          add_depends "$MODULE" "$DEP" "on" "optional" "$ON_OPTS" "$OFF_OPTS"
+          if ! module_installed $DEP && ! grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null; then
+            lin --deps $DEP
+            echo "$DEP" >> $TEMP_PREPAREDDEPS
+          fi
+          CHOSEN=1
+        else
+          add_depends "$MODULE" "$DEP" "off" "optional" "$ON_OPTS" "$OFF_OPTS"
+        fi
+      fi
+    done
+  }
+
   grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
   if has_module_file $MODULE DEPENDS ; then
     if [ -n "$SINGLE_MODULE" ] ; then
@@ -583,6 +664,17 @@ create_depends_cache()
       done
     }
 
+    optional_depends_one_of() {
+      local DESCRIPTION MEMBER ON_OPTS OFF_OPTS
+      DESCRIPTION="$1"
+      shift
+      while [[ $# -ge 3 ]]; do
+        MEMBER="$1"; ON_OPTS="$2"; OFF_OPTS="$3"
+        shift 3
+        echo "$MODULE:$MEMBER:optional:$ON_OPTS:$OFF_OPTS:$DESCRIPTION"
+      done
+    }
+
     # yeah, this sucks:
     message() {
       :
@@ -736,6 +828,41 @@ update_module_depends()
         echo "$MODULE:$FOLLOWER:off:optional::"
       done
     fi
+  }
+
+  optional_depends_one_of() {
+    local DESCRIPTION DEP ON_OPTS OFF_OPTS FOUND_ON=""
+    debug_msg "  optional_depends_one_of ($@)"
+    DESCRIPTION="$1"
+    shift
+    local ARGS=("$@")
+
+    # Pass 1: find if any member has "on" status
+    local i
+    for ((i=0; i<${#ARGS[@]}; i+=3)); do
+      DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "${ARGS[$i]}")
+      if grep -q "^$MODULE:$DEP:on:" "$DEPENDS_STATUS_BACKUP"; then
+        FOUND_ON="$DEP"
+        break
+      fi
+    done
+
+    # Pass 2: emit lines
+    for ((i=0; i<${#ARGS[@]}; i+=3)); do
+      DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "${ARGS[$i]}")
+      ON_OPTS="${ARGS[$((i+1))]}"
+      OFF_OPTS="${ARGS[$((i+2))]}"
+      if [[ -n "$FOUND_ON" ]]; then
+        if [[ "$DEP" == "$FOUND_ON" ]]; then
+          echo "$MODULE:$DEP:on:optional:$ON_OPTS:$OFF_OPTS"
+        else
+          echo "$MODULE:$DEP:off:optional:$ON_OPTS:$OFF_OPTS"
+        fi
+      elif grep -q "^$MODULE:$DEP:off:" "$DEPENDS_STATUS_BACKUP"; then
+        echo "$MODULE:$DEP:off:optional:$ON_OPTS:$OFF_OPTS"
+      fi
+      # if no entry exists, leave open for user to decide
+    done
   }
 
   run_depends() {
