@@ -68,6 +68,57 @@ This file contains a list of other modules upon which the module depends.
 If dependencies are turned on then the modules listed are installed in order
 prior to installing module.
 .PP
+The following functions are available in DEPENDS files:
+.RS
+.TP
+.B depends \fImodule\fR [\fIon_opts\fR] [\fIoff_opts\fR]
+Declares a required dependency. The module will always be installed before
+the current module. Configure options \fIon_opts\fR are passed when the
+dependency is present.
+.TP
+.B optional_depends \fImodule\fR \fIon_opts\fR \fIoff_opts\fR \fIdescription\fR [\fIdefault\fR]
+Declares an optional dependency. The user is prompted whether to enable it.
+If the module is already installed, the default is "y"; otherwise "n".
+The \fIdefault\fR parameter can override this ("y" or "n").
+.TP
+.B optional_depends_requires \fIleader\fR \fIfollower1\fR [\fIfollower2\fR ...]
+Declares follower dependencies that are automatically accepted or rejected
+based on the user's decision for \fIleader\fR. If the leader was accepted
+("on"), all followers are also accepted. If the leader was rejected ("off"),
+all followers are also rejected. This must be placed after the leader's
+\fBoptional_depends\fR call. Useful for plugin libraries that only make sense
+when the parent library is enabled (e.g., SDL_ttf and SDL_image when SDL
+is accepted).
+.TP
+.B optional_depends_one_of \fI"description"\fR \fImod1\fR \fIon1\fR \fIoff1\fR [\fImod2\fR \fIon2\fR \fIoff2\fR ...]
+Presents a mutually exclusive choice of optional dependencies. The user is
+prompted for each module in order; if the module is already installed, the
+default is "y", otherwise "n". Once one is accepted, the rest are
+automatically rejected. On re-runs, existing choices are honored without
+re-prompting. Arguments are specified as triplets of
+\fImodule\fR, \fIon_opts\fR, \fIoff_opts\fR. The \fIdescription\fR is
+shown as a header (e.g., "SSL provider").
+.RE
+.PP
+\fBCyclic Dependencies\fR
+.IP
+When two modules have a circular dependency (e.g., module A depends on B,
+required or optional, and B depends on A), the dependency resolver detects
+the cycle automatically. Required cyclic dependencies are auto-accepted as
+"on"; optional cyclic dependencies are also auto-accepted as "on". An
+informational message is displayed in both cases. The first module in the
+cycle is built without the second, then the second is built.
+.IP
+To trigger a rebuild of the first module with full support after the second
+is installed, module authors can provide a CATALYST file. The catalyst system
+supports \fBenable\fR and \fBdisable\fR actions that fire when a watched
+module is installed or removed. For example, if module \fIvigra\fR requires
+\fIopenexr\fR to be built with a specific feature enabled, \fIvigra\fR's
+CATALYST file can watch \fIopenexr\fR and trigger a rebuild of \fIvigra\fR
+when \fIopenexr\fR is installed, ensuring the feature is available. This
+pattern is useful when the dependency is not just "present or absent" but
+requires specific build-time configuration in the dependency.
+.PP
 .PP
 \fBCONFLICTS\fR
 .IP
