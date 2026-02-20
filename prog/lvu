@@ -643,6 +643,25 @@ function show_tree() {
       echo "-$DEP"
     }
 
+    optional_depends_requires() {
+      local DEP
+      shift  # skip leader
+      for DEP in "$@"; do
+        DEP=$(NEVER_ASK=1 expand_alias "$DEP")
+        echo "-$DEP"
+      done
+    }
+
+    optional_depends_one_of() {
+      local DEP
+      shift  # skip description
+      while [[ $# -ge 3 ]]; do
+        DEP=$(NEVER_ASK=1 expand_alias "$1")
+        echo "-$DEP"
+        shift 3
+      done
+    }
+
     debug_msg "run_depends ($@)"
     SECTION=$(find_section $1)
     SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
@@ -719,11 +738,9 @@ function show_tree() {
   done
 
   INDENT="$INDENT|    "
-  # and recurse:
+  # and recurse (skip already-seen deps to prevent infinite loops):
   for DEP in $DEPS; do
-    grep -q "^$DEP$" "$TMP_SEEN"
-    TEST=$?
-    if [ "$TEST" == "1" -o -z "$SHORTTREE" ]; then
+    if ! grep -q "^$DEP$" "$TMP_SEEN"; then
       echo "$DEP" >>$TMP_SEEN
       CUR=${DEP:0:1}
       # note the FLAG= thingy here
