@@ -31,6 +31,7 @@ function find_depends() {
 
   find_depends_intern() {
     local DEP DEPS DEPFILE SECTION
+    [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
     SECTION=$(find_section $1)
     if [[ $SECTION =~ ^zlocal ]]; then
       # this module lives in zlocal
@@ -57,14 +58,14 @@ function find_depends() {
         DEPS=$(MODULE=$1 . $DEPFILE)
       fi
     else
-      DEPS=$(awk -F: -v mod=$1 '{if ($1==mod){print $2}}' "$DEPENDS_CACHE")
+      DEPS="${DEPENDS_FWD[$1]}"
     fi
     for DEP in $DEPS ; do
       DEP=$(expand_alias "$DEP")
       # this is our shortcut out:
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
-        if grep -q "^$1:$DEP:required:" "$DEPENDS_CACHE" ; then
+        if [[ "${DEPENDS_FWD_TYPE[$1:$DEP]}" == "required" ]]; then
           echo "$DEP"
           find_depends_intern "$DEP"
         fi
@@ -140,22 +141,25 @@ sort_by_dependency() {
 
 is_depends()  {
   debug_msg "is_depends ($@)"
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
   # Is $1 a previously selected dependency of any module.
-  return $(grep -q ":$1:on:" "$DEPENDS_STATUS")
+  [[ -n "${DEPENDS_STATUS_REV_ON[$1]}" ]]
 }
 
 
 in_depends()  {
   local DEP
   debug_msg "in_depends ($@)"
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
 
   DEP=$(expand_alias $2)
   # Was $2 presented as a dependency for module $1
-  return $(grep -q "^$1:$DEP:on:" "$DEPENDS_STATUS")
+  [[ "${DEPENDS_STATUS_PAIR[$1:$DEP]}" == on:* ]]
 }
 
 
 remove_depends() {
+  local _OLD_PAIR _OLD_LINE _NEW_FWD _MOD _DEP _STATUS _TYPE _REST
   debug_msg "remove_depends ($@)"
   lock_file $DEPENDS_STATUS_BACKUP &&
   lock_file $DEPENDS_STATUS        ||
@@ -165,11 +169,45 @@ remove_depends() {
     if grep -q "^$1:$2:" "$DEPENDS_STATUS" ; then
       grep -v "^$1:$2:" $DEPENDS_STATUS_BACKUP > $DEPENDS_STATUS
       verbose_msg "removing depends for \"$1\" on \"$2\""
+
+      # write-through: remove specific dep from in-memory arrays
+      _OLD_PAIR="${DEPENDS_STATUS_PAIR[$1:$2]}"
+      unset "DEPENDS_STATUS_PAIR[$1:$2]"
+      if [[ "$_OLD_PAIR" == on:* ]]; then
+        _NEW_FWD=""
+        while IFS= read -r _OLD_LINE; do
+          [[ -n "$_OLD_LINE" && "$_OLD_LINE" != "$1" ]] && {
+            [[ -n "$_NEW_FWD" ]] && _NEW_FWD+=$'\n'
+            _NEW_FWD+="$_OLD_LINE"
+          }
+        done <<< "${DEPENDS_STATUS_REV_ON[$2]}"
+        if [[ -n "$_NEW_FWD" ]]; then
+          DEPENDS_STATUS_REV_ON[$2]="$_NEW_FWD"
+        else
+          unset "DEPENDS_STATUS_REV_ON[$2]"
+        fi
+      fi
+      _NEW_FWD=""
+      while IFS= read -r _OLD_LINE; do
+        [[ -n "$_OLD_LINE" ]] && [[ "$_OLD_LINE" != "$1:$2:"* ]] && {
+          [[ -n "$_NEW_FWD" ]] && _NEW_FWD+=$'\n'
+          _NEW_FWD+="$_OLD_LINE"
+        }
+      done <<< "${DEPENDS_STATUS_FWD[$1]}"
+      if [[ -n "$_NEW_FWD" ]]; then
+        DEPENDS_STATUS_FWD[$1]="$_NEW_FWD"
+      else
+        unset "DEPENDS_STATUS_FWD[$1]"
+      fi
     fi
   elif grep -q "^$1:" "$DEPENDS_STATUS" ; then
     grep -v "^$1:" "$DEPENDS_STATUS_BACKUP" | \
     grep -v ":$1:on:optional:" > $DEPENDS_STATUS
     verbose_msg "removing all depends for and optional on \"$1\""
+
+    # write-through: complex removal (all deps + optional on-deps from others)
+    # reload from the updated file for correctness
+    reload_depends_status
   fi
 
   cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP
@@ -180,8 +218,10 @@ remove_depends() {
 
 
 add_depends() {
+  local _OLD_PAIR _OLD_LINE _NEW_FWD _NEW_REV _MOD _WRITE_OK
   debug_msg "add_depends ($@)"
   if ! grep -q "^$1:$2:$3:$4:$5:$6$" "$DEPENDS_STATUS" ; then
+    _WRITE_OK=0
     lock_file $DEPENDS_STATUS_BACKUP                       &&
     lock_file $DEPENDS_STATUS                              &&
     if grep -q "^$1:$2:" "$DEPENDS_STATUS" ; then
@@ -193,7 +233,57 @@ add_depends() {
     echo "$1:$2:$3:$4:$5:$6" >> $DEPENDS_STATUS            &&
     cp $DEPENDS_STATUS $DEPENDS_STATUS_BACKUP              &&
     unlock_file $DEPENDS_STATUS                            &&
-    unlock_file $DEPENDS_STATUS_BACKUP
+    unlock_file $DEPENDS_STATUS_BACKUP                     &&
+    _WRITE_OK=1
+
+    # write-through: update in-memory status arrays only if disk write succeeded
+    if [[ $_WRITE_OK -eq 1 ]]; then
+      [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
+      # remove old entry if replacing
+      _OLD_PAIR="${DEPENDS_STATUS_PAIR[$1:$2]}"
+      if [[ -n "$_OLD_PAIR" ]]; then
+        # remove old line from FWD
+        _NEW_FWD=""
+        while IFS= read -r _OLD_LINE; do
+          [[ -n "$_OLD_LINE" ]] && [[ "$_OLD_LINE" != "$1:$2:"* ]] && {
+            [[ -n "$_NEW_FWD" ]] && _NEW_FWD+=$'\n'
+            _NEW_FWD+="$_OLD_LINE"
+          }
+        done <<< "${DEPENDS_STATUS_FWD[$1]}"
+        DEPENDS_STATUS_FWD[$1]="$_NEW_FWD"
+        # remove from REV_ON if old was "on"
+        if [[ "$_OLD_PAIR" == on:* ]]; then
+          _NEW_REV=""
+          while IFS= read -r _MOD; do
+            [[ -n "$_MOD" && "$_MOD" != "$1" ]] && {
+              [[ -n "$_NEW_REV" ]] && _NEW_REV+=$'\n'
+              _NEW_REV+="$_MOD"
+            }
+          done <<< "${DEPENDS_STATUS_REV_ON[$2]}"
+          if [[ -n "$_NEW_REV" ]]; then
+            DEPENDS_STATUS_REV_ON[$2]="$_NEW_REV"
+          else
+            unset "DEPENDS_STATUS_REV_ON[$2]"
+          fi
+        fi
+      fi
+      # add new entry to FWD
+      if [[ -n "${DEPENDS_STATUS_FWD[$1]}" ]]; then
+        DEPENDS_STATUS_FWD[$1]+=$'\n'"$1:$2:$3:$4:$5:$6"
+      else
+        DEPENDS_STATUS_FWD[$1]="$1:$2:$3:$4:$5:$6"
+      fi
+      # add new entry to PAIR
+      DEPENDS_STATUS_PAIR[$1:$2]="$3:$4:$5:$6"
+      # add to REV_ON if new is "on"
+      if [[ "$3" == "on" ]]; then
+        if [[ -n "${DEPENDS_STATUS_REV_ON[$2]}" ]]; then
+          DEPENDS_STATUS_REV_ON[$2]+=$'\n'"$1"
+        else
+          DEPENDS_STATUS_REV_ON[$2]="$1"
+        fi
+      fi
+    fi
   fi
 }
 
@@ -491,6 +581,83 @@ create_depends_cache()
 )}
 
 
+load_depends_cache() {
+  local MODULE DEP TYPE REST
+  debug_msg "load_depends_cache ($@)"
+  unset DEPENDS_FWD DEPENDS_FWD_TYPE DEPENDS_REV
+  declare -gA DEPENDS_FWD DEPENDS_FWD_TYPE DEPENDS_REV
+  _DEPENDS_CACHE_LOADED=1
+
+  if [ ! -f "$DEPENDS_CACHE" ] ; then
+    debug_msg "load_depends_cache: no cache file"
+    return 0
+  fi
+
+  while IFS=: read -r MODULE DEP TYPE REST; do
+    [[ -z "$MODULE" ]] && continue
+    # forward lookup: module -> dep names (newline-separated)
+    if [[ -n "${DEPENDS_FWD[$MODULE]}" ]]; then
+      DEPENDS_FWD[$MODULE]+=$'\n'"$DEP"
+    else
+      DEPENDS_FWD[$MODULE]="$DEP"
+    fi
+    # type lookup: module:dep -> required|optional
+    DEPENDS_FWD_TYPE[$MODULE:$DEP]="$TYPE"
+    # reverse lookup: dep -> module names (newline-separated)
+    if [[ -n "${DEPENDS_REV[$DEP]}" ]]; then
+      DEPENDS_REV[$DEP]+=$'\n'"$MODULE"
+    else
+      DEPENDS_REV[$DEP]="$MODULE"
+    fi
+  done < "$DEPENDS_CACHE"
+
+  debug_msg "load_depends_cache: loaded ${#DEPENDS_FWD[@]} modules, ${#DEPENDS_REV[@]} deps"
+}
+
+
+load_depends_status() {
+  local LINE MODULE DEP STATUS TYPE ON_OPTS OFF_OPTS
+  debug_msg "load_depends_status ($@)"
+  unset DEPENDS_STATUS_FWD DEPENDS_STATUS_PAIR DEPENDS_STATUS_REV_ON
+  declare -gA DEPENDS_STATUS_FWD DEPENDS_STATUS_PAIR DEPENDS_STATUS_REV_ON
+  _DEPENDS_STATUS_LOADED=1
+
+  if [ ! -f "$DEPENDS_STATUS" ] ; then
+    debug_msg "load_depends_status: no status file"
+    return 0
+  fi
+
+  while IFS=: read -r MODULE DEP STATUS TYPE ON_OPTS OFF_OPTS; do
+    [[ -z "$MODULE" ]] && continue
+    LINE="$MODULE:$DEP:$STATUS:$TYPE:$ON_OPTS:$OFF_OPTS"
+    # forward lookup: module -> full lines (newline-separated)
+    if [[ -n "${DEPENDS_STATUS_FWD[$MODULE]}" ]]; then
+      DEPENDS_STATUS_FWD[$MODULE]+=$'\n'"$LINE"
+    else
+      DEPENDS_STATUS_FWD[$MODULE]="$LINE"
+    fi
+    # pair lookup: module:dep -> status:type:on_opts:off_opts
+    DEPENDS_STATUS_PAIR[$MODULE:$DEP]="$STATUS:$TYPE:$ON_OPTS:$OFF_OPTS"
+    # reverse "on" lookup: dep -> modules with on-status (newline-separated)
+    if [[ "$STATUS" == "on" ]]; then
+      if [[ -n "${DEPENDS_STATUS_REV_ON[$DEP]}" ]]; then
+        DEPENDS_STATUS_REV_ON[$DEP]+=$'\n'"$MODULE"
+      else
+        DEPENDS_STATUS_REV_ON[$DEP]="$MODULE"
+      fi
+    fi
+  done < "$DEPENDS_STATUS"
+
+  debug_msg "load_depends_status: loaded ${#DEPENDS_STATUS_FWD[@]} modules"
+}
+
+
+reload_depends_status() {
+  debug_msg "reload_depends_status ($@)"
+  load_depends_status
+}
+
+
 update_module_depends()
 {
   local MODULE
@@ -556,14 +723,16 @@ update_depends()
   for MODULE in $(cut -d: -f1 $DEPENDS_STATUS | sort -u) ; do
     update_module_depends $MODULE
   done
+  reload_depends_status
 }
 
 
 # list all installed modules depending on $1
 list_installed_depending() {
-  local SUBDEP
-  debug_msg "list_installed_depending($2)"
-  for SUBDEP in $(grep ":$1:" "$DEPENDS_CACHE" | cut -d: -f1) ; do
+  local SUBDEP IFS=$'\n'
+  [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+  debug_msg "list_installed_depending($1)"
+  for SUBDEP in ${DEPENDS_REV[$1]}; do
     if $(module_installed $SUBDEP ) ; then
       list_installed_depending $SUBDEP | sort | uniq
       echo $SUBDEP
