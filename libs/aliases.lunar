@@ -5,31 +5,37 @@
 #                                                          #
 ############################################################
 #                                                          #
-# Copyright 2004 by Auke Kok under GPLv2under GPLv2        #
+# Copyright 2004 by Auke Kok under GPLv2                   #
 #                                                          #
 ############################################################
 
-# translate %ALIAS if needed to a module name that is installed
-# and add it to the dependency chain if needed
+# function : expand_alias
+# usage    : expand_alias VARNAME module_or_alias
+# purpose  : translate %ALIAS to a module name if needed.
+#            Sets VARNAME directly via eval (no subshell needed).
+#            If module doesn't start with %, just assigns it.
+#            If NEVER_ASK is set and no cached value, assigns as-is.
 expand_alias() {
-  # If param doesn't start with "%", or if NEVER_ASK
-  # is set, just echo the param and return immediately
-  if [[ "${1:0:1}" != "%" ]]; then
-    echo $1
+  local _ea_var="$1"
+  local _ea_mod="$2"
+
+  # fast path: not an alias, just assign directly
+  if [[ "${_ea_mod:0:1}" != "%" ]]; then
+    eval "$_ea_var=\$_ea_mod"
     return
   fi
 
-  local TARGET TARGETS TARGETBYNUM N CHOICE CACHED_ALIAS
   # lookup in cache
-  CACHED_ALIAS=$(get_local_config LUNAR_ALIAS_${1:1})
-  if [[ -n "$CACHED_ALIAS" ]]; then
-    echo $CACHED_ALIAS
+  local _ea_cached
+  _ea_cached=$(get_local_config LUNAR_ALIAS_${_ea_mod:1})
+  if [[ -n "$_ea_cached" ]]; then
+    eval "$_ea_var=\$_ea_cached"
     return
   fi
 
   if [[ -n "$NEVER_ASK" ]]; then
     # there's no stored value for the alias and we mustn't ask for one...
-    echo $1
+    eval "$_ea_var=\$_ea_mod"
     return
   fi
 
@@ -43,11 +49,12 @@ expand_alias() {
     fi
   fi
 
-  TARGETS=$(awk -F: -v mod=$1 '$1 == mod {print $2}' "$ALIASES")
+  local TARGET TARGETS TARGETBYNUM N CHOICE
+  TARGETS=$(awk -F: -v mod=$_ea_mod '$1 == mod {print $2}' "$ALIASES")
 
   # propose one and let the user pick it from a list:
   debug_msg "expand_alias: starting selection loop"
-  error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${1:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
+  error_message "${MODULE_COLOR}$MODULE${DEFAULT_COLOR}${MESSAGE_COLOR} depends on ${DEFAULT_COLOR}${QUERY_COLOR}\"${_ea_mod:1}\"${DEFAULT_COLOR}${MESSAGE_COLOR} which is an alias${DEFAULT_COLOR}"
   while true ; do
     error_message "${MESSAGE_COLOR}Please select a substitute ! Enter the number or the name of the module"
     error_message "Press [ENTER] to select choice #1 (the recommended choice).${DEFAULT_COLOR}"
@@ -65,15 +72,15 @@ expand_alias() {
     read -t $PROMPT_DELAY CHOICE
     # test directly first
     if [[ " $TARGETS " =~ " $CHOICE " ]] ; then
-      verbose_msg "Stored alias mapping $1 -> $CHOICE"
-      set_local_config `echo LUNAR_ALIAS_${1:1}` $CHOICE
-      echo $TARGET
+      verbose_msg "Stored alias mapping $_ea_mod -> $CHOICE"
+      set_local_config "LUNAR_ALIAS_${_ea_mod:1}" "$CHOICE"
+      eval "$_ea_var=\$CHOICE"
       return
     # then the number, resolving the default
     elif [[ -n "${TARGETBYNUM[${CHOICE:=1}]}" ]] ; then
-      verbose_msg "Stored alias mapping $1 -> ${TARGETBYNUM[$CHOICE]}"
-      set_local_config `echo LUNAR_ALIAS_${1:1}` ${TARGETBYNUM[$CHOICE]}
-      echo ${TARGETBYNUM[$CHOICE]}
+      verbose_msg "Stored alias mapping $_ea_mod -> ${TARGETBYNUM[$CHOICE]}"
+      set_local_config "LUNAR_ALIAS_${_ea_mod:1}" "${TARGETBYNUM[$CHOICE]}"
+      eval "$_ea_var=\${TARGETBYNUM[\$CHOICE]}"
       return
     fi
     error_message "${MESSAGE_COLOR}Sorry, I can't do anything with \"${DEFAULT_COLOR}${QUERY_COLOR}$CHOICE${DEFAULT_COLOR}${MESSAGE_COLOR}\", please try again${DEFAULT_COLOR}"

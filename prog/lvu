@@ -511,7 +511,7 @@ moonalyze() {
 
     depends() {
       debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       add_if_missing_dep $DEP
       if [ -z "$DEP" ]; then
         broken_deps=("${broken_deps[@]}" "$mod")
@@ -521,7 +521,7 @@ moonalyze() {
     optional_depends() {
       debug_msg "optional_depends ($@)"
 
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       add_if_missing_dep $DEP
 
       if [ -z "$DEP" ]; then
@@ -633,13 +633,13 @@ function show_tree() {
     # local definitions
     function depends() {
       debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       echo "+$DEP"
     }
 
     optional_depends() {
       debug_msg "optional_depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       echo "-$DEP"
     }
 
@@ -647,7 +647,7 @@ function show_tree() {
       local DEP
       shift  # skip leader
       for DEP in "$@"; do
-        DEP=$(NEVER_ASK=1 expand_alias "$DEP")
+        NEVER_ASK=1 expand_alias DEP "$DEP"
         echo "-$DEP"
       done
     }
@@ -656,7 +656,7 @@ function show_tree() {
       local DEP
       shift  # skip description
       while [[ $# -ge 3 ]]; do
-        DEP=$(NEVER_ASK=1 expand_alias "$1")
+        NEVER_ASK=1 expand_alias DEP "$1"
         echo "-$DEP"
         shift 3
       done

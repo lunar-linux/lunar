@@ -69,7 +69,7 @@ function find_depends() {
       DEPS="${DEPENDS_FWD[$1]}"
     fi
     for DEP in $DEPS ; do
-      DEP=$(expand_alias "$DEP")
+      expand_alias DEP "$DEP"
       # this is our shortcut out:
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
@@ -82,7 +82,9 @@ function find_depends() {
   }
 
   temp_create TMP_FDEPS "found.depends"
-  find_depends_intern $(expand_alias $1)
+  local _fd_start
+  expand_alias _fd_start "$1"
+  find_depends_intern "$_fd_start"
   temp_destroy $TMP_FDEPS
 }
 
@@ -104,7 +106,7 @@ sort_by_dependency() {
   # tsort the existing dep relations in all of moonbase
   temp_create TMP_TSRT "dependency.sort"
   awk -F: '$3 == "on" {print $1,$2}' "$DEPENDS_STATUS" | while read A B ; do
-    B=$(MODULE=$A NEVER_ASK=1 DEPS_ONLY= expand_alias $B)
+    NEVER_ASK=1 DEPS_ONLY= expand_alias B "$B"
     echo "$A $B" >> $TMP_TSRT
   done
   # tsort can detect that there are circles in the graph, but it doesn't
@@ -160,7 +162,7 @@ in_depends()  {
   debug_msg "in_depends ($@)"
   [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
 
-  DEP=$(expand_alias $2)
+  expand_alias DEP "$2"
   # Was $2 presented as a dependency for module $1
   [[ "${DEPENDS_STATUS_PAIR[$1:$DEP]}" == on:* ]]
 }
@@ -302,7 +304,7 @@ run_depends() {
   depends() {
     local DEP
     debug_msg "  depends ($@)"
-    DEP=$(expand_alias $1)
+    expand_alias DEP "$1"
 
     add_depends "$MODULE" "$DEP" "on" "required" "$2" "$3"
 
@@ -334,7 +336,7 @@ run_depends() {
     #              $4 = description of why to use this module
     #              $5 = optional default choice (recommended)
 
-    DEP=$(expand_alias $1)
+    expand_alias DEP "$1"
     if in_depends $MODULE $DEP ; then
       if ! module_installed $DEP ; then
         # don't check depends if there are already checked
@@ -401,13 +403,13 @@ run_depends() {
   optional_depends_requires() {
     local LEADER FOLLOWER LEADER_STATUS
     debug_msg "  optional_depends_requires ($@)"
-    LEADER=$(expand_alias "$1")
+    expand_alias LEADER "$1"
     shift
 
     LEADER_STATUS="${DEPENDS_STATUS_PAIR[$MODULE:$LEADER]}"
     if [[ "$LEADER_STATUS" == on:* ]]; then
       for FOLLOWER in "$@"; do
-        FOLLOWER=$(expand_alias "$FOLLOWER")
+        expand_alias FOLLOWER "$FOLLOWER"
         add_depends "$MODULE" "$FOLLOWER" "on" "optional" "" ""
         if ! module_installed $FOLLOWER && ! grep -q "^$FOLLOWER\$" "$TEMP_PREPAREDDEPS" 2>/dev/null; then
           lin --deps $FOLLOWER
@@ -416,7 +418,7 @@ run_depends() {
       done
     elif [[ "$LEADER_STATUS" == off:* ]]; then
       for FOLLOWER in "$@"; do
-        FOLLOWER=$(expand_alias "$FOLLOWER")
+        expand_alias FOLLOWER "$FOLLOWER"
         add_depends "$MODULE" "$FOLLOWER" "off" "optional" "" ""
       done
     fi
@@ -432,16 +434,18 @@ run_depends() {
     # Build module list for header message
     local ARGS=("$@")
     local i
+    local _ea_tmp
     for ((i=0; i<${#ARGS[@]}; i+=3)); do
       [[ -n "$MOD_LIST" ]] && MOD_LIST+=", "
-      MOD_LIST+="$(expand_alias "${ARGS[$i]}")"
+      expand_alias _ea_tmp "${ARGS[$i]}"
+      MOD_LIST+="$_ea_tmp"
     done
     message "${MODULE_COLOR}${MODULE}:${DEFAULT_COLOR}" \
             "${MESSAGE_COLOR}Select one ${DESCRIPTION} (or skip all): ${MOD_LIST}${DEFAULT_COLOR}"
 
     # Process each (MOD, ON_OPTS, OFF_OPTS) triplet
     while [[ $# -ge 3 ]]; do
-      DEP=$(expand_alias "$1")
+      expand_alias DEP "$1"
       ON_OPTS="$2"
       OFF_OPTS="$3"
       shift 3
@@ -801,7 +805,7 @@ update_module_depends()
   optional_depends()  {
     local DEP
     debug_msg "  optional_depends ($@)"
-    DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
+    NEVER_ASK=1 DEPS_ONLY= expand_alias DEP "$1"
     # check for the current depend selection
     if grep -q "^$MODULE:$DEP:on:optional:" "$DEPENDS_STATUS_BACKUP" ; then
       echo "$MODULE:$DEP:on:optional:$2:$3"
@@ -814,24 +818,24 @@ update_module_depends()
   depends()  {
     local DEP
     debug_msg "  depends ($@)"
-    DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
+    NEVER_ASK=1 DEPS_ONLY= expand_alias DEP "$1"
     echo "$MODULE:$DEP:on:required:$2:$3"
   }
 
   optional_depends_requires() {
     local LEADER FOLLOWER
     debug_msg "  optional_depends_requires ($@)"
-    LEADER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$1")
+    NEVER_ASK=1 DEPS_ONLY= expand_alias LEADER "$1"
     shift
 
     if grep -q "^$MODULE:$LEADER:on:" "$DEPENDS_STATUS_BACKUP"; then
       for FOLLOWER in "$@"; do
-        FOLLOWER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$FOLLOWER")
+        NEVER_ASK=1 DEPS_ONLY= expand_alias FOLLOWER "$FOLLOWER"
         echo "$MODULE:$FOLLOWER:on:optional::"
       done
     elif grep -q "^$MODULE:$LEADER:off:" "$DEPENDS_STATUS_BACKUP"; then
       for FOLLOWER in "$@"; do
-        FOLLOWER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$FOLLOWER")
+        NEVER_ASK=1 DEPS_ONLY= expand_alias FOLLOWER "$FOLLOWER"
         echo "$MODULE:$FOLLOWER:off:optional::"
       done
     fi
@@ -847,7 +851,7 @@ update_module_depends()
     # Pass 1: find if any member has "on" status
     local i
     for ((i=0; i<${#ARGS[@]}; i+=3)); do
-      DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "${ARGS[$i]}")
+      NEVER_ASK=1 DEPS_ONLY= expand_alias DEP "${ARGS[$i]}"
       if grep -q "^$MODULE:$DEP:on:" "$DEPENDS_STATUS_BACKUP"; then
         FOUND_ON="$DEP"
         break
@@ -856,7 +860,7 @@ update_module_depends()
 
     # Pass 2: emit lines
     for ((i=0; i<${#ARGS[@]}; i+=3)); do
-      DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "${ARGS[$i]}")
+      NEVER_ASK=1 DEPS_ONLY= expand_alias DEP "${ARGS[$i]}"
       ON_OPTS="${ARGS[$((i+1))]}"
       OFF_OPTS="${ARGS[$((i+2))]}"
       if [[ -n "$FOUND_ON" ]]; then
