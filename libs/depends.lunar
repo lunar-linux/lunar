@@ -384,6 +384,31 @@ run_depends() {
     fi
   }
 
+  optional_depends_requires() {
+    local LEADER FOLLOWER LEADER_STATUS
+    debug_msg "  optional_depends_requires ($@)"
+    LEADER=$(expand_alias "$1")
+    shift
+
+    LEADER_STATUS="${DEPENDS_STATUS_PAIR[$MODULE:$LEADER]}"
+    if [[ "$LEADER_STATUS" == on:* ]]; then
+      for FOLLOWER in "$@"; do
+        FOLLOWER=$(expand_alias "$FOLLOWER")
+        add_depends "$MODULE" "$FOLLOWER" "on" "optional" "" ""
+        if ! module_installed $FOLLOWER && ! grep -q "^$FOLLOWER\$" "$TEMP_PREPAREDDEPS" 2>/dev/null; then
+          lin --deps $FOLLOWER
+          echo "$FOLLOWER" >> $TEMP_PREPAREDDEPS
+        fi
+      done
+    elif [[ "$LEADER_STATUS" == off:* ]]; then
+      for FOLLOWER in "$@"; do
+        FOLLOWER=$(expand_alias "$FOLLOWER")
+        add_depends "$MODULE" "$FOLLOWER" "off" "optional" "" ""
+      done
+    fi
+    # if leader has no recorded decision, skip silently
+  }
+
   grep -q "^"$MODULE"\$" "$TEMP_PREPAREDDEPS" 2>/dev/null && return 0
   if has_module_file $MODULE DEPENDS ; then
     if [ -n "$SINGLE_MODULE" ] ; then
@@ -516,6 +541,8 @@ build_depends()  {
     if ! module_installed $MODULE || [ ! -n "$PROBE" ] ; then
       if ! module_held $MODULE ; then
         build_module_depends $MODULE
+        # reload status arrays after DEPS_ONLY subshell returns
+        [[ -n "$DEPS_ONLY" ]] && reload_depends_status
       else
         verbose_msg "Skipping dependency checking of held module \"$MODULE\""
       fi
@@ -546,6 +573,14 @@ create_depends_cache()
       # No quotes, this prevent us from parsing newlines
       # if someone by accident add a newline in optional_depends
       echo $MODULE:$1:optional:$2:$3:$4
+    }
+
+    optional_depends_requires() {
+      local FOLLOWER
+      shift  # skip leader
+      for FOLLOWER in "$@"; do
+        echo "$MODULE:$FOLLOWER:optional:::"
+      done
     }
 
     # yeah, this sucks:
@@ -682,6 +717,25 @@ update_module_depends()
     debug_msg "  depends ($@)"
     DEP=$(NEVER_ASK=1 DEPS_ONLY= expand_alias $1)
     echo "$MODULE:$DEP:on:required:$2:$3"
+  }
+
+  optional_depends_requires() {
+    local LEADER FOLLOWER
+    debug_msg "  optional_depends_requires ($@)"
+    LEADER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$1")
+    shift
+
+    if grep -q "^$MODULE:$LEADER:on:" "$DEPENDS_STATUS_BACKUP"; then
+      for FOLLOWER in "$@"; do
+        FOLLOWER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$FOLLOWER")
+        echo "$MODULE:$FOLLOWER:on:optional::"
+      done
+    elif grep -q "^$MODULE:$LEADER:off:" "$DEPENDS_STATUS_BACKUP"; then
+      for FOLLOWER in "$@"; do
+        FOLLOWER=$(NEVER_ASK=1 DEPS_ONLY= expand_alias "$FOLLOWER")
+        echo "$MODULE:$FOLLOWER:off:optional::"
+      done
+    fi
   }
 
   run_depends() {
