@@ -86,6 +86,23 @@ Rolling back to a previous version of a package
 lrm
 .B --downgrade 
 glibc 2.2.3 
+.SH "CATALYST TRIGGERS"
+When a module is removed,
+.B lrm
+fires any CATALYST triggers registered for the
+.B on_pre_remove
+event (before removal) and the
+.B on_remove
+event (after removal). Triggers from all removed modules are collected and
+fired in batch after the removal loop completes, with the exception of
+pre\-remove triggers and rules marked
+.B immediate
+which fire right away. See
+.BR moonbase (5)
+for details on the CATALYST file format.
+.PP
+CATALYST triggers are skipped during upgrade removals
+.RB ( lrm\~\-u ).
 .SH "NOTES"
 Do not include 
 .SM version
@@ -105,9 +122,11 @@ Updated Thomas Stewart 01/15/2002
 Converted to Lunar by Terry Chan 03/23/2002
 .PP
 Updated by Auke Kok 09/21/2004
+.PP
+Updated by Stefan Wold <ratler@lunar-linux.org> 02/19/2026
 .SH "REPORTING BUGS"
 Report bugs to <maintainer@lunar-linux.org>
 .SH "SEE ALSO"
-lunar(8), lin(8), lvu(1), lget(8)
+lunar(8), lin(8), lvu(1), lget(8), moonbase(5)
 .SH "WARRANTY"
 This is free software with ABSOLUTELY NO WARRANTY
