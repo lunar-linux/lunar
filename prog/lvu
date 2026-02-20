@@ -740,11 +740,17 @@ function show_tree() {
   INDENT="$INDENT|    "
   # and recurse (skip already-seen deps to prevent infinite loops):
   for DEP in $DEPS; do
-    if ! grep -q "^$DEP$" "$TMP_SEEN"; then
-      echo "$DEP" >>$TMP_SEEN
+    MOD=${DEP:1}
+    if ! grep -q "^${MOD}$" "$TMP_SEEN"; then
+      # skip optional deps that are explicitly disabled
+      if [ "${DEP:0:1}" == "-" ] && \
+         grep -q "^$1:${MOD}:off:" "$DEPENDS_STATUS" 2>/dev/null; then
+        continue
+      fi
+      echo "$MOD" >>$TMP_SEEN
       CUR=${DEP:0:1}
       # note the FLAG= thingy here
-      FLAG= show_tree ${DEP:1} 2>/dev/null
+      FLAG= show_tree $MOD 2>/dev/null
     fi
   done
   # don't try this at home:
