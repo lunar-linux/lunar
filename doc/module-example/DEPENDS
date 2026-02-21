@@ -29,3 +29,17 @@
 #			"for blabla support" &&
 # optional_depends  "moduleD" "" "" "For blabla support"
 
+# follower dependencies (auto-accept/reject based on leader):
+# When SDL is accepted, SDL_ttf, SDL_image, and SDL_mixer are also accepted.
+# When SDL is rejected, all three followers are also rejected.
+# optional_depends  "SDL" "--enable-sdl" "--disable-sdl" "for SDL support" &&
+# optional_depends_requires SDL SDL_ttf SDL_image SDL_mixer
+
+# mutually exclusive choice (pick one of several options):
+# The user is asked for each module in order. Once one is chosen,
+# the rest are automatically skipped.
+# optional_depends_one_of "SSL provider" \
+#                         openssl  "--with-openssl"  "--without-openssl" \
+#                         gnutls   "--with-gnutls"   "--without-gnutls" \
+#                         libressl "--with-libressl" "--without-libressl"
+

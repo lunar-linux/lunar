@@ -173,6 +173,7 @@ function check_module_index() {
 find_section() {
 	local SECTION SECTIONS
 	debug_msg "find_section ($@)"
+	[[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
 	# if using ZLOCAL, we must search there first
 	if [[ "${ZLOCAL_OVERRIDES:-off}" == "on" ]] ; then
@@ -184,8 +185,8 @@ find_section() {
 		done
 	fi
 
-	# otherwise check for ordinary modules named that way
-	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" "$MODULE_INDEX")
+	# array lookup instead of awk on MODULE_INDEX
+	SECTION="${MODULE_SECTION_CACHE[$1]}"
 	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
 		echo "$SECTION"
 		return 0
@@ -207,8 +208,12 @@ find_section() {
 		return 1
 	fi
 
-	# and search again, this should be quick now
-	SECTION=$(awk -F: "(\$1==\"$1\"){print \$2;exit 0}" "$MODULE_INDEX")
+	# cache was rebuilt in subshell, reload arrays if they were loaded
+	[[ -n "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+	[[ -n "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
+
+	# and search again
+	SECTION="${MODULE_SECTION_CACHE[$1]}"
 	if [[ -n "$SECTION" ]] && [[ -d "$MOONBASE/$SECTION/$1" ]] ; then
 		echo "$SECTION"
 		return 0
@@ -319,8 +324,9 @@ run_module_file() {
 module_installed()
 {
   debug_msg "module_installed ($@)"
-
-  has_module_state $1 "\\(installed\\|held\\)"
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  local _s="${MODULE_STATE_CACHE[$1]}"
+  [[ "$_s" == *installed* || "$_s" == *held* ]]
 }
 
 
@@ -329,8 +335,8 @@ module_installed()
 # purpose  : check if $MODULE is held
 module_held() {
   debug_msg "module_held ($@)"
-
-  has_module_state $1 "held"
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  [[ "${MODULE_STATE_CACHE[$1]}" == *held* ]]
 }
 
 
@@ -400,18 +406,18 @@ module_license_accepted() {
 # purpose  : check if $MODULE is exiled
 module_exiled() {
   debug_msg "module_exiled ($@)"
-
-  has_module_state $1 "exiled"
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  [[ "${MODULE_STATE_CACHE[$1]}" == *exiled* ]]
 }
 
 
-# function : module_exiled
-# usage    : module_exiled $MODULE
-# purpose  : check if $MODULE is exiled
+# function : module_enforced
+# usage    : module_enforced $MODULE
+# purpose  : check if $MODULE is enforced
 module_enforced() {
   debug_msg "module_enforced ($@)"
-
-  has_module_state $1 "enforced"
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  [[ "${MODULE_STATE_CACHE[$1]}" == *enforced* ]]
 }
 
 
@@ -420,7 +426,8 @@ module_enforced() {
 # purpose  : return the installed version of $MODULE
 installed_version() {
   debug_msg "installed_version ($@)"
-  grep "^$1:" "$MODULE_STATUS" | cut -d: -f4
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  echo "${MODULE_VERSION_CACHE[$1]}"
 }
 
 
@@ -579,6 +586,7 @@ remove_module() {
   }
   unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
+  _refresh_module_status_entry $1
 }
 
 
@@ -608,6 +616,7 @@ add_module()  {
   }
   unlock_file $MODULE_STATUS
   unlock_file $MODULE_STATUS_BACKUP
+  _refresh_module_status_entry $1
 }
 
 
@@ -621,6 +630,7 @@ add_module_state() {
   awk -F: -v mod="$1" -v state="$2" 'BEGIN {OFS=FS ; ret=0} ; $1==mod {if ($3 !~ /(^|\+)'"$2"'(\+|$)/) {$3=$3"+"state} ret=1} ; {print} ; END {exit ret}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP &&
   echo "$MODULE::$2::" >> $MODULE_STATUS_BACKUP
   cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  _refresh_module_status_entry $1
 }
 
 
@@ -633,6 +643,7 @@ remove_module_state() {
 
   awk -F: -v mod="$1" 'BEGIN {OFS=FS} ; $1==mod {$3=gensub(/(^|\+)('"$2"'\+)+|((^|\+)'"$2"')+$/,"\\1","g",$3) ; if ($3=="") {next}} ; {print}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP  &&
   cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  _refresh_module_status_entry $1
 }
 
 
@@ -646,6 +657,7 @@ change_module_state() {
   awk -F: -v mod="$1" -v state="$2" 'BEGIN {OFS=FS ; ret=0} ; $1==mod {{$3=gensub(/(^|\+)('"$3"'\+)+|((^|\+)'"$3"')+$/,"\\1","g",$3) ; if ($3=="") {$3=state} ; if ($3 !~ /(^|\+)'"$2"'(\+|$)/) {$3=$3"+"state}} ret=1} ; {print} ; END {exit ret}' "$MODULE_STATUS" > $MODULE_STATUS_BACKUP &&
   echo "$MODULE::$2::" >> $MODULE_STATUS_BACKUP
   cp $MODULE_STATUS_BACKUP $MODULE_STATUS
+  _refresh_module_status_entry $1
 }
 
 
@@ -666,6 +678,83 @@ get_module_state() {
   debug_msg "get_module_state ($@)"
 
   awk -F: -v mod="$1" '$1==mod {print gensub(/(^|\+)('"$2"'\+)+|((^|\+)'"$2"')+$/,"\\1","g",$3)}' "$MODULE_STATUS"
+}
+
+
+# function: load_module_status
+# usage   : load_module_status
+# purpose : load MODULE_STATUS into associative arrays for O(1) state lookups
+load_module_status() {
+  local _ms_mod _ms_date _ms_state _ms_ver _ms_size
+  debug_msg "load_module_status ($@)"
+  unset MODULE_STATE_CACHE MODULE_VERSION_CACHE
+  declare -gA MODULE_STATE_CACHE MODULE_VERSION_CACHE
+  _MODULE_STATUS_LOADED=1
+
+  if [ ! -f "$MODULE_STATUS" ] ; then
+    debug_msg "load_module_status: no status file"
+    return 0
+  fi
+
+  while IFS=: read -r _ms_mod _ms_date _ms_state _ms_ver _ms_size; do
+    [[ -z "$_ms_mod" ]] && continue
+    MODULE_STATE_CACHE[$_ms_mod]="$_ms_state"
+    MODULE_VERSION_CACHE[$_ms_mod]="$_ms_ver"
+  done < "$MODULE_STATUS"
+
+  debug_msg "load_module_status: loaded ${#MODULE_STATE_CACHE[@]} modules"
+}
+
+reload_module_status() {
+  debug_msg "reload_module_status ($@)"
+  load_module_status
+}
+
+# function: _refresh_module_status_entry
+# usage   : _refresh_module_status_entry <module_name>
+# purpose : re-read a single module's state from disk into the arrays
+#           (called after write operations for write-through consistency)
+_refresh_module_status_entry() {
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && return
+  local _rms_line _rms_mod _rms_date _rms_state _rms_ver _rms_size
+  _rms_line=$(grep "^$1:" "$MODULE_STATUS" 2>/dev/null)
+  if [[ -n "$_rms_line" ]]; then
+    IFS=: read -r _rms_mod _rms_date _rms_state _rms_ver _rms_size <<< "$_rms_line"
+    MODULE_STATE_CACHE[$1]="$_rms_state"
+    MODULE_VERSION_CACHE[$1]="$_rms_ver"
+  else
+    unset "MODULE_STATE_CACHE[$1]"
+    unset "MODULE_VERSION_CACHE[$1]"
+  fi
+}
+
+
+# function: load_module_index
+# usage   : load_module_index
+# purpose : load MODULE_INDEX into associative array for O(1) section lookups
+load_module_index() {
+  local _mi_mod _mi_section
+  debug_msg "load_module_index ($@)"
+  unset MODULE_SECTION_CACHE
+  declare -gA MODULE_SECTION_CACHE
+  _MODULE_INDEX_LOADED=1
+
+  if [ ! -f "$MODULE_INDEX" ] ; then
+    debug_msg "load_module_index: no index file"
+    return 0
+  fi
+
+  while IFS=: read -r _mi_mod _mi_section; do
+    [[ -z "$_mi_mod" ]] && continue
+    MODULE_SECTION_CACHE[$_mi_mod]="$_mi_section"
+  done < "$MODULE_INDEX"
+
+  debug_msg "load_module_index: loaded ${#MODULE_SECTION_CACHE[@]} modules"
+}
+
+reload_module_index() {
+  debug_msg "reload_module_index ($@)"
+  load_module_index
 }
 
 
@@ -709,8 +798,11 @@ module_is_expired() {
     if [ -n "$LINE" ] ; then
       eval $LINE
       if run_details $MODULE &> /dev/null ; then
+        if [[ -z "$UPDATED" ]] ; then
+	  verbose_msg "WARNING: module $MODULE is missing UPDATED field in DETAILS"
+	fi
         if [[ "$VERSION" != "$IVERSION" ]] || [[ -z "$IDATE" ]] ||
-	  (( "$UPDATED" > "$IDATE" )) ; then
+	  (( "${UPDATED:-0}" > "$IDATE" )) ; then
 	  return 0
 	fi
       fi
