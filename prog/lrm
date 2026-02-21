@@ -256,6 +256,8 @@ else
 
   load_depends_cache
   load_depends_status
+  load_module_status
+  load_module_index
 
   while true; do
     case "$1" in
