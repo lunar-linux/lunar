@@ -798,8 +798,11 @@ module_is_expired() {
     if [ -n "$LINE" ] ; then
       eval $LINE
       if run_details $MODULE &> /dev/null ; then
+        if [[ -z "$UPDATED" ]] ; then
+	  verbose_msg "WARNING: module $MODULE is missing UPDATED field in DETAILS"
+	fi
         if [[ "$VERSION" != "$IVERSION" ]] || [[ -z "$IDATE" ]] ||
-	  (( "$UPDATED" > "$IDATE" )) ; then
+	  (( "${UPDATED:-0}" > "$IDATE" )) ; then
 	  return 0
 	fi
       fi
