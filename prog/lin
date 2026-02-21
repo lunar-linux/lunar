@@ -183,6 +183,8 @@ main() {
                 echo "$MODULE" >>$TMP_LIN_SUCCESS
               fi
             fi
+            # subshell updated packages file; refresh parent's cached state
+            reload_module_status
           fi
         fi
       done

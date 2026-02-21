@@ -546,6 +546,8 @@ satisfy_depends()  {
         elif ! SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
           exit 1
         fi
+        # child lin updated packages file; refresh our cached state
+        reload_module_status
       fi
     fi
   done
@@ -560,11 +562,13 @@ satisfy_depends()  {
     if [ -n "$FIX" ] ; then
       if [ $DEP_STATUS == "on" ] ; then
         lin $FIX $DEP_MODULE
+        reload_module_status
       fi
     elif [ "$DEP_STATUS" == "off" ] || module_exiled $DEP_MODULE ; then
       OPTS="$OPTS $DEP_OFF"
     elif [ "$DEP_STATUS" == "on" ] && ! module_installed $DEP_MODULE ; then
       if SINGLE_MODULE=1 lin $DOWNLOAD_ONLY $SILENT $COMPILE $DEP_MODULE ; then
+        reload_module_status
         OPTS="$OPTS $DEP_ON"
       else
         exit 1
