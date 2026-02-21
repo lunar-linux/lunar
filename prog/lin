@@ -104,6 +104,7 @@ main() {
       export TEMP_DOWNLOAD_PIDS
       temp_create TEMP_PREPAREDDEPS "prepared-depends"
       export TEMP_PREPAREDDEPS
+      CLEAN_TEMP=1
     fi
     temp_create TEMP_CONFIGOPTS "configopts"
     export TEMP_CONFIGOPTS
@@ -111,8 +112,10 @@ main() {
     # pass 1 : run full dependency checking
     # This pass does configuration and dependency identification.
     if ! DEPS_ONLY=--deps build_depends $MODULES; then
-      temp_destroy $TEMP_DOWNLOAD_PIDS
-      temp_destroy $TEMP_PREPAREDDEPS
+      if [ -n "$CLEAN_TEMP" ]; then
+        temp_destroy $TEMP_DOWNLOAD_PIDS
+        temp_destroy $TEMP_PREPAREDDEPS
+      fi
       temp_destroy $TEMP_CONFIGOPTS
       verbose_msg "Unexpected errors, bailing out!"
       exit 1
@@ -192,9 +195,12 @@ main() {
     fi
     cleanup_unregister_pid $DOWNLOAD_MGR_PID
 
-    # cleanups that we need to do
-    temp_destroy $TEMP_DOWNLOAD_PIDS
-    temp_destroy $TEMP_PREPAREDDEPS
+    # cleanups that we need to do - only destroy shared temp files
+    # if we created them (child lin --deps processes inherit these)
+    if [ -n "$CLEAN_TEMP" ]; then
+      temp_destroy $TEMP_DOWNLOAD_PIDS
+      temp_destroy $TEMP_PREPAREDDEPS
+    fi
     temp_destroy $TEMP_CONFIGOPTS
 
     return $lin_EXIT_STATUS
