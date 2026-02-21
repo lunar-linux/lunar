@@ -319,7 +319,9 @@ run_depends() {
       fi
       # don't check depends if there are already checked
       if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-        message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting required dependency${DEFAULT_COLOR}"
+        if ! grep -q "^DONE:$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+          message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting required dependency${DEFAULT_COLOR}"
+        fi
         return 0
       fi
       lin --deps $DEP
@@ -342,7 +344,9 @@ run_depends() {
         # don't check depends if there are already checked
         if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
           add_depends "$MODULE" "$DEP" "on" "optional" "$2" "$3"
-          message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+          if ! grep -q "^DONE:$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+            message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+          fi
           return 0
         fi
         lin --deps $DEP
@@ -368,7 +372,9 @@ run_depends() {
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
           if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-            message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            if ! grep -q "^DONE:$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+              message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            fi
             return 0
           fi
           lin --deps $DEP
@@ -378,7 +384,9 @@ run_depends() {
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
           if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-            message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            if ! grep -q "^DONE:$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+              message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            fi
             return 0
           fi
           lin --deps $DEP
@@ -388,7 +396,9 @@ run_depends() {
           add_depends  "$MODULE"  "$DEP"  "on"   "optional"  "$2"  "$3"
           # don't check depends if there are already checked
           if grep -q "^$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
-            message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            if ! grep -q "^DONE:$DEP\$" "$TEMP_PREPAREDDEPS" 2>/dev/null ; then
+              message "${MODULE_COLOR}${MODULE}:${MESSAGE_COLOR} Cycle detected: ${MODULE_COLOR}$DEP${MESSAGE_COLOR} is being resolved, auto-accepting optional dependency${DEFAULT_COLOR}"
+            fi
             return 0
           fi
           lin --deps $DEP
@@ -511,6 +521,7 @@ run_depends() {
     fi
     run_module_file $MODULE DEPENDS
   fi
+  echo "DONE:$MODULE" >> "$TEMP_PREPAREDDEPS"
 }
 
 
