@@ -613,6 +613,9 @@ show_depends() {
 # purpose: show a tree of the module's dependencies (recursive)
 function show_tree() {
   debug_msg "show_tree ($@)"
+  [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
@@ -721,6 +724,9 @@ function show_tree() {
 
 show_eert() {
   debug_msg "show_eert ($@)"
+  [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
@@ -1651,10 +1657,8 @@ else
 
   set_priority
 
-  load_depends_cache
-  load_depends_status
-  load_module_status
-  load_module_index
+  # caches are loaded lazily by the functions that need them:
+  # load_depends_cache, load_depends_status, load_module_status, load_module_index
 
   while true; do
     case "$1" in
