@@ -511,7 +511,7 @@ moonalyze() {
 
     depends() {
       debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       add_if_missing_dep $DEP
       if [ -z "$DEP" ]; then
         broken_deps=("${broken_deps[@]}" "$mod")
@@ -521,7 +521,7 @@ moonalyze() {
     optional_depends() {
       debug_msg "optional_depends ($@)"
 
-      DEP=$(NEVER_ASK=1 expand_alias $1)
+      NEVER_ASK=1 expand_alias DEP "$1"
       add_if_missing_dep $DEP
 
       if [ -z "$DEP" ]; then
@@ -613,6 +613,9 @@ show_depends() {
 # purpose: show a tree of the module's dependencies (recursive)
 function show_tree() {
   debug_msg "show_tree ($@)"
+  [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
@@ -621,54 +624,35 @@ function show_tree() {
     return 1
   fi
 
-  # create dependency tracking file if needed
-  if [ -z "$TMP_SEEN" ]; then
-    temp_create TMP_SEEN "seen"
-    export TMP_SEEN
+  # create dependency tracking array if needed (replaces TMP_SEEN file)
+  # Note: use scalar sentinel because ${assoc_array+set} is always empty in bash
+  if [[ -z "${_TREE_INIT+set}" ]]; then
+    declare -gA _TREE_SEEN
+    _TREE_INIT=1
     export FLAG=1
-    trap "rm -f $TMP_SEEN ; exit" INT TERM KILL
   fi
-
-  run_depends() {
-    # local definitions
-    function depends() {
-      debug_msg "depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
-      echo "+$DEP"
-    }
-
-    optional_depends() {
-      debug_msg "optional_depends ($@)"
-      DEP=$(NEVER_ASK=1 expand_alias $1)
-      echo "-$DEP"
-    }
-
-    debug_msg "run_depends ($@)"
-    SECTION=$(find_section $1)
-    SCRIPT_DIRECTORY=$MOONBASE/$SECTION/$1
-    CPU_ARCH=$(uname -m | sed 's/i[456]86/i386/')
-    if has_module_file $1 DEPENDS; then
-      run_module_file $1 DEPENDS
-    fi
-  }
 
   if [ -z "$1" ]; then
     help
     exit 1
   fi
 
-  # gather dependencies, sorted by 1) required, 2) optional, and
-  # alphabetically too
-  unset ALL
-  DEPS=$(run_depends $1 | sort | uniq)
-  for DEP in $DEPS; do
-    if [ ${DEP:0:1} == "+" ]; then
-      ALL="$DEP $ALL"
-    else
-      ALL="$ALL $DEP"
-    fi
-  done
-  DEPS=$ALL
+  # gather dependencies from the depends cache (avoids subshell + sort + uniq)
+  local _fwd_deps="${DEPENDS_FWD[$1]}"
+  local _req_deps="" _opt_deps=""
+  local _dep _type
+
+  if [[ -n "$_fwd_deps" ]]; then
+    for _dep in $_fwd_deps; do
+      _type="${DEPENDS_FWD_TYPE[$1:$_dep]}"
+      if [[ "$_type" == "required" ]]; then
+        _req_deps="$_req_deps +$_dep"
+      else
+        _opt_deps="$_opt_deps -$_dep"
+      fi
+    done
+  fi
+  DEPS="$_req_deps $_opt_deps"
 
   # show hit list:
   if [ "$CUR" == "-" ]; then
@@ -713,34 +697,36 @@ function show_tree() {
     echo -e "${RES:5}"
   fi
 
-  # I (sofar) suck:
-  for DEP in $DEPS; do
-    LASTDEP=${DEP:1}
-  done
-
   INDENT="$INDENT|    "
-  # and recurse:
+  # and recurse (skip already-seen deps to prevent infinite loops):
   for DEP in $DEPS; do
-    grep -q "^$DEP$" "$TMP_SEEN"
-    TEST=$?
-    if [ "$TEST" == "1" -o -z "$SHORTTREE" ]; then
-      echo "$DEP" >>$TMP_SEEN
+    MOD=${DEP:1}
+    if [[ -z "${_TREE_SEEN[$MOD]+set}" ]]; then
+      # skip optional deps that are explicitly disabled
+      # DEPENDS_STATUS_PAIR value starts with "off:" (no leading colon)
+      if [[ "${DEP:0:1}" == "-" ]] && \
+         [[ "${DEPENDS_STATUS_PAIR[$1:$MOD]}" == off:* ]]; then
+        continue
+      fi
+      _TREE_SEEN[$MOD]=1
       CUR=${DEP:0:1}
       # note the FLAG= thingy here
-      FLAG= show_tree ${DEP:1} 2>/dev/null
+      FLAG= show_tree $MOD 2>/dev/null
     fi
   done
   # don't try this at home:
   INDENT=${INDENT:0:((${#INDENT} - 5))}
 
   if [ -n "$FLAG" ]; then
-    temp_destroy $TMP_SEEN
-    unset TMP_SEEN
+    unset _TREE_SEEN _TREE_INIT
   fi
 }
 
 show_eert() {
   debug_msg "show_eert ($@)"
+  [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
+  [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
+  [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
@@ -755,9 +741,22 @@ show_eert() {
     DEPENDS=$DEPENDS_CACHE
   fi
 
+  # create dependency tracking array if needed (replaces TMP_SEEN file)
+  # Note: use scalar sentinel because ${assoc_array+set} is always empty in bash
+  if [[ -z "${_EERT_INIT+set}" ]]; then
+    declare -gA _EERT_SEEN
+    _EERT_INIT=1
+    export FLAG=1
+  fi
+
   show_rtree() {
-    # we need to do an reverse tree for $1
-    RDEPS=$(grep ":$1:" "$DEPENDS" | cut -d: -f1 | sort | uniq)
+    local IS_REQUIRED
+    # we need to do a reverse tree for $1
+    if [ -n "$SHORTTREE" ]; then
+      RDEPS=$(echo "${DEPENDS_STATUS_REV_ON[$1]}" | sort -u)
+    else
+      RDEPS=$(echo "${DEPENDS_REV[$1]}" | sort -u)
+    fi
 
     if module_installed $1; then
       STR="${INDENT}^----${MODULE_COLOR}$1${DEFAULT_COLOR}: "
@@ -766,9 +765,13 @@ show_eert() {
     fi
 
     for DEP in $RDEPS; do
-      REL=$(grep "^$DEP:$1:" "$DEPENDS")
-      CUR=$(echo $REL | cut -d: -f1)
-      if echo $REL | grep -q :required:; then
+      if [ -n "$SHORTTREE" ]; then
+        [[ "${DEPENDS_STATUS_PAIR[$DEP:$1]}" == *:required:* ]] && IS_REQUIRED=1 || IS_REQUIRED=0
+      else
+        [[ "${DEPENDS_FWD_TYPE[$DEP:$1]}" == "required" ]] && IS_REQUIRED=1 || IS_REQUIRED=0
+      fi
+
+      if [ "$IS_REQUIRED" -eq 1 ]; then
         if module_installed $DEP; then
           STR="$STR${FILE_COLOR}$DEP ${DEFAULT_COLOR}"
         else
@@ -786,8 +789,12 @@ show_eert() {
     echo -e "${STR:5}"
 
     INDENT="$INDENT|    "
+    # skip already-seen deps to prevent infinite loops
     for RDEP in $RDEPS; do
-      FLAG= show_rtree $RDEP
+      if [[ -z "${_EERT_SEEN[$RDEP]+set}" ]]; then
+        _EERT_SEEN[$RDEP]=1
+        FLAG= show_rtree $RDEP
+      fi
     done
     INDENT="${INDENT:0:((${#INDENT} - 5))}"
   }
@@ -795,7 +802,7 @@ show_eert() {
   show_rtree $1
 
   if [ -n "$FLAG" ]; then
-    temp_destroy $TMP_DEPLIST
+    unset _EERT_SEEN _EERT_INIT
   fi
 }
 
@@ -1649,6 +1656,9 @@ else
   export IFS="$STANDARD_IFS"
 
   set_priority
+
+  # caches are loaded lazily by the functions that need them:
+  # load_depends_cache, load_depends_status, load_module_status, load_module_index
 
   while true; do
     case "$1" in
