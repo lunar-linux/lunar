@@ -69,11 +69,14 @@ function find_depends() {
       DEPS="${DEPENDS_FWD[$1]}"
     fi
     for DEP in $DEPS ; do
+      local _raw_dep="$DEP"
       expand_alias DEP "$DEP"
       # this is our shortcut out:
       if ! grep -qx "$DEP" "$TMP_FDEPS" ; then
         echo "$DEP" >> $TMP_FDEPS
-        if [[ "${DEPENDS_FWD_TYPE[$1:$DEP]}" == "required" ]]; then
+        # check expanded key first, fall back to raw alias key from cache
+        local _type="${DEPENDS_FWD_TYPE[$1:$DEP]:-${DEPENDS_FWD_TYPE[$1:$_raw_dep]}}"
+        if [[ "$_type" == "required" ]]; then
           echo "$DEP"
           find_depends_intern "$DEP"
         fi
@@ -748,6 +751,8 @@ load_depends_cache() {
 
   while IFS=: read -r MODULE DEP TYPE REST; do
     [[ -z "$MODULE" ]] && continue
+    # expand aliases (%SSL -> openssl, etc.) if already configured
+    NEVER_ASK=1 expand_alias DEP "$DEP"
     # forward lookup: module -> dep names (newline-separated)
     if [[ -n "${DEPENDS_FWD[$MODULE]}" ]]; then
       DEPENDS_FWD[$MODULE]+=$'\n'"$DEP"
