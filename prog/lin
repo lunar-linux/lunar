@@ -55,6 +55,8 @@ Optional Parameters:
 -v  |  --verbose                Increases the level of message output
 -w  |  --want version           Try to install a different version that is
                                 not in moonbase
+       --catalyst-immediate     Fire CATALYST triggers after each module
+                                instead of after all modules complete
 -4  | --ipv4                    Download sources using ipv4
 -6  | --ipv6                    Download sources using ipv6
 EOF
@@ -173,6 +175,8 @@ main() {
             # we're good now, start installing
             linING="/var/lock/installing.$MODULE"
             verbose_msg "starting lin \"$MODULE\""
+            # CATALYST: fire pre-install triggers immediately
+            collect_catalyst "$MODULE" on_pre_install
             if ! (SINGLE_MODULE=1 main $MODULE); then
               if [ -e "$TMP_LIN_FAIL" ]; then
                 echo "$MODULE" >>$TMP_LIN_FAIL
@@ -182,12 +186,18 @@ main() {
               if [ -e "$TMP_LIN_SUCCESS" ]; then
                 echo "$MODULE" >>$TMP_LIN_SUCCESS
               fi
+              # CATALYST: collect post-install triggers (immediate entries fire now,
+              # others are queued for batch firing after all modules complete)
+              collect_catalyst "$MODULE" on_install
             fi
             # subshell updated packages file; refresh parent's cached state
             reload_module_status
           fi
         fi
       done
+
+      # CATALYST: fire any remaining queued post-install triggers
+      fire_collected_catalysts
     fi
 
     # wait for download manager to finish or kill it
@@ -277,7 +287,7 @@ main() {
 . /etc/lunar/config
 . $BOOTSTRAP
 
-GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:46" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:,ipv4,ipv6" -- "$@")
+GETOPT_ARGS=$(getopt -q -n lin -o "cdgf:hprRsvV:w:46" -l "compile,debug,deps,download,from:,help,opts:,probe,reconfigure,resurrect,silent,verbose,Version:,want:,ipv4,ipv6,catalyst-immediate" -- "$@")
 
 lunar_setup_signals
 
@@ -360,6 +370,10 @@ else
         export USE_IPV46=6
         shift
         ;;
+      --catalyst-immediate)
+        export CATALYST_IMMEDIATE=1
+        shift
+        ;;
       --)
         shift
         break
@@ -371,9 +385,17 @@ else
     esac
   done
 
+  # CATALYST: load trigger cache and initialize loop protection
+  load_catalyst_cache
+  init_catalyst_visited
+  reset_catalyst_queues
+
   if [ -n "$RESURRECT" ]; then
     resurrect_modules $@
   else
     main $@
   fi
+
+  # CATALYST: cleanup visited set (only destroys file if we own it)
+  cleanup_catalyst_visited
 fi

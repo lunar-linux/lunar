@@ -1,0 +1,466 @@
+#!/bin/bash
+#                                                          #
+# This code is written for Lunar Linux, see                #
+# http://lunar-linux.org                                   #
+#                                                          #
+############################################################
+#                                                          #
+# $FUNCTIONS/catalyst                                      #
+# CATALYST trigger system — allows modules to declare      #
+# reactive behavior when other modules are installed or    #
+# removed.                                                 #
+#                                                          #
+# CATALYST file format (one rule per line, # comments):    #
+#   <event> <watched_module> <action> [param] [immediate]  #
+#                                                          #
+# Events: on_install, on_pre_install, on_remove,           #
+#         on_pre_remove                                    #
+# Actions: lin, lrm, fix, enable, disable, exec            #
+# Flags:  immediate — fire after this module instead of    #
+#         waiting for the batch (bypasses dedup)           #
+#                                                          #
+# Cache format (flat file, one entry per line):            #
+#   watched_module:event:reactor_module:action:param:flags #
+#                                                          #
+# At runtime the cache is loaded into a bash associative   #
+# array keyed by "watched:event" for O(1) lookups.         #
+#                                                          #
+############################################################
+#                                                          #
+# Copyright Stefan Wold 2026 under GPLv2                   #
+#                                                          #
+############################################################
+
+
+# Valid events and actions for CATALYST file validation
+CATALYST_VALID_EVENTS="on_install on_pre_install on_remove on_pre_remove"
+CATALYST_VALID_ACTIONS="lin lrm fix enable disable exec"
+
+
+# function : create_catalyst_cache
+# usage    : create_catalyst_cache
+# purpose  : rebuild the catalyst.cache from all CATALYST files in moonbase
+create_catalyst_cache()
+{(
+  local TMP_CACHE CATFILES CATFILE MODULE SECTION LINE EVENT WATCHED ACTION PARAM EXTRA FLAGS
+  debug_msg "create_catalyst_cache ($@)"
+
+  if [[ ! -w $CATALYST_CACHE && -e $CATALYST_CACHE ]] ; then
+    return 1
+  fi
+
+  if [ $MODULE_INDEX -nt $CATALYST_CACHE ] ; then
+    verbose_msg "Generating a new catalyst cache..."
+    temp_create TMP_CACHE "catalyst.cache"
+
+    # speedups for system moonbases:
+    if [ "$MOONBASE" == "/var/lib/lunar/moonbase" ] && [ -f "$INSTALL_LOGS/moonbase-$(installed_version moonbase)" ] ; then
+      CATFILES=$(grep "/CATALYST$" "$INSTALL_LOGS/moonbase-$(installed_version moonbase)")
+      # don't forget zlocal:
+      if [ "$ZLOCAL_OVERRIDES" == "on" ] ; then
+        CATFILES="$CATFILES $(find $MOONBASE/zlocal -type f -name CATALYST)"
+      fi
+    else
+      if [ "$ZLOCAL_OVERRIDES" != "on" ] ; then
+        CATFILES=$(find $MOONBASE -type f -name CATALYST ! -regex "$MOONBASE/zlocal/.*")
+      else
+        CATFILES=$(find $MOONBASE -type f -name CATALYST)
+      fi
+    fi
+
+    for CATFILE in $CATFILES ; do
+      # extract reactor module name from path: .../section/module/CATALYST
+      SECTION=${CATFILE%/*}
+      MODULE=${SECTION##*/}
+
+      while IFS= read -r LINE ; do
+        # skip comments and blank lines
+        [[ "$LINE" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${LINE// /}" ]] && continue
+
+        # parse fields: event watched_module action [param] [immediate]
+        read -r EVENT WATCHED ACTION PARAM EXTRA <<< "$LINE"
+
+        # detect immediate flag in param or extra position
+        FLAGS=""
+        if [ "$EXTRA" == "immediate" ] ; then
+          FLAGS="immediate"
+        elif [ "$PARAM" == "immediate" ] ; then
+          FLAGS="immediate"
+          PARAM=""
+        fi
+
+        # validate event
+        if ! echo "$CATALYST_VALID_EVENTS" | grep -qw "$EVENT" ; then
+          debug_msg "create_catalyst_cache: WARNING: unknown event '$EVENT' in $CATFILE"
+          continue
+        fi
+
+        # validate action
+        if ! echo "$CATALYST_VALID_ACTIONS" | grep -qw "$ACTION" ; then
+          debug_msg "create_catalyst_cache: WARNING: unknown action '$ACTION' in $CATFILE"
+          continue
+        fi
+
+        # exec requires a param
+        if [ "$ACTION" == "exec" ] && [ -z "$PARAM" ] ; then
+          debug_msg "create_catalyst_cache: WARNING: exec action without script in $CATFILE"
+          continue
+        fi
+
+        echo "$WATCHED:$EVENT:$MODULE:$ACTION:$PARAM:$FLAGS"
+      done < "$CATFILE"
+    done > $TMP_CACHE &&
+    install -m644 $TMP_CACHE $CATALYST_CACHE
+
+    temp_destroy $TMP_CACHE
+  else
+    verbose_msg "Skipping catalyst cache regeneration"
+  fi
+)}
+
+
+# function : load_catalyst_cache
+# usage    : load_catalyst_cache
+# purpose  : load catalyst.cache into CATALYST_TRIGGERS associative array
+#            Key: "watched:event", Value: newline-separated "reactor:action:param:flags" entries
+load_catalyst_cache() {
+  local WATCHED EVENT REACTOR ACTION PARAM FLAGS KEY ENTRY
+  debug_msg "load_catalyst_cache ($@)"
+
+  declare -gA CATALYST_TRIGGERS
+
+  if [ ! -f "$CATALYST_CACHE" ] ; then
+    debug_msg "load_catalyst_cache: no cache file, no triggers available"
+    return 0
+  fi
+
+  while IFS=: read -r WATCHED EVENT REACTOR ACTION PARAM FLAGS ; do
+    KEY="$WATCHED:$EVENT"
+    ENTRY="$REACTOR:$ACTION:$PARAM:$FLAGS"
+    if [ -n "${CATALYST_TRIGGERS[$KEY]}" ] ; then
+      CATALYST_TRIGGERS[$KEY]="${CATALYST_TRIGGERS[$KEY]}
+$ENTRY"
+    else
+      CATALYST_TRIGGERS[$KEY]="$ENTRY"
+    fi
+  done < "$CATALYST_CACHE"
+
+  debug_msg "load_catalyst_cache: loaded ${#CATALYST_TRIGGERS[@]} trigger keys"
+}
+
+
+# Queues for collecting post-event triggers before firing
+# CATALYST_QUEUE holds "reactor:action:param:watched:event" entries for lin/lrm/fix/exec
+# CATALYST_DEP_QUEUE holds "reactor:action:param:watched:event" entries for enable/disable
+
+
+# function : reset_catalyst_queues
+# usage    : reset_catalyst_queues
+# purpose  : clear trigger queues at the start of a lin/lrm session
+reset_catalyst_queues() {
+  debug_msg "reset_catalyst_queues ($@)"
+  CATALYST_QUEUE=()
+  CATALYST_DEP_QUEUE=()
+}
+
+
+# function : collect_catalyst
+# usage    : collect_catalyst <module> <event>
+# purpose  : look up triggers for a module+event and either fire immediately
+#            (pre-events) or add to the queue (post-events)
+collect_catalyst() {
+  local MODULE_NAME EVENT KEY ENTRIES ENTRY REACTOR ACTION PARAM FLAGS
+  debug_msg "collect_catalyst ($@)"
+  MODULE_NAME="$1"
+  EVENT="$2"
+
+  # do not fire triggers during upgrades (lrm -u called by lin)
+  if [ "$UPGRADE" == "on" ] ; then
+    debug_msg "collect_catalyst: skipping triggers during upgrade"
+    return 0
+  fi
+
+  KEY="$MODULE_NAME:$EVENT"
+  ENTRIES="${CATALYST_TRIGGERS[$KEY]}"
+
+  if [ -z "$ENTRIES" ] ; then
+    debug_msg "collect_catalyst: no triggers for $KEY"
+    return 0
+  fi
+
+  debug_msg "collect_catalyst: found triggers for $KEY"
+
+  while IFS= read -r ENTRY ; do
+    [ -z "$ENTRY" ] && continue
+    IFS=: read -r REACTOR ACTION PARAM FLAGS <<< "$ENTRY"
+
+    # only fire if the reactor module is currently installed
+    if ! module_installed "$REACTOR" ; then
+      debug_msg "collect_catalyst: reactor '$REACTOR' not installed, skipping"
+      continue
+    fi
+
+    # fire immediately if: pre-event, immediate flag, or --catalyst-immediate mode
+    if [ "$EVENT" == "on_pre_install" ] || [ "$EVENT" == "on_pre_remove" ] || \
+       [ "$FLAGS" == "immediate" ] || [ "$CATALYST_IMMEDIATE" == "1" ] ; then
+      debug_msg "collect_catalyst: firing immediately: $REACTOR $ACTION $PARAM (flags=$FLAGS)"
+      fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$MODULE_NAME" "$EVENT"
+    else
+      # post-events: separate enable/disable from other actions
+      if [ "$ACTION" == "enable" ] || [ "$ACTION" == "disable" ] ; then
+        CATALYST_DEP_QUEUE+=("$REACTOR:$ACTION:$PARAM:$MODULE_NAME:$EVENT")
+        debug_msg "collect_catalyst: queued dep action: $REACTOR:$ACTION:$PARAM"
+      else
+        CATALYST_QUEUE+=("$REACTOR:$ACTION:$PARAM:$MODULE_NAME:$EVENT")
+        debug_msg "collect_catalyst: queued action: $REACTOR:$ACTION:$PARAM"
+      fi
+    fi
+  done <<< "$ENTRIES"
+}
+
+
+# function : fire_collected_catalysts
+# usage    : fire_collected_catalysts
+# purpose  : fire all collected post-event triggers — enable/disable first,
+#            then deduplicated lin/lrm/fix/exec actions
+fire_collected_catalysts() {
+  local ENTRY REACTOR ACTION PARAM WATCHED EVENT SEEN_KEY
+  debug_msg "fire_collected_catalysts ($@)"
+
+  # phase 1: fire all enable/disable dep actions first
+  for ENTRY in "${CATALYST_DEP_QUEUE[@]}" ; do
+    IFS=: read -r REACTOR ACTION PARAM WATCHED EVENT <<< "$ENTRY"
+    debug_msg "fire_collected_catalysts: dep action $REACTOR $ACTION $PARAM"
+    fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+  done
+
+  # phase 2: deduplicate and fire remaining actions
+  # dedup key is "reactor:action" — same reactor+action only fires once
+  declare -A CATALYST_SEEN
+  for ENTRY in "${CATALYST_QUEUE[@]}" ; do
+    IFS=: read -r REACTOR ACTION PARAM WATCHED EVENT <<< "$ENTRY"
+    SEEN_KEY="$REACTOR:$ACTION"
+    if [ -n "${CATALYST_SEEN[$SEEN_KEY]}" ] ; then
+      debug_msg "fire_collected_catalysts: dedup skip $SEEN_KEY"
+      continue
+    fi
+    CATALYST_SEEN[$SEEN_KEY]=1
+    debug_msg "fire_collected_catalysts: firing $REACTOR $ACTION $PARAM"
+    fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+  done
+
+  # clear queues after firing
+  reset_catalyst_queues
+}
+
+
+# function : init_catalyst_visited
+# usage    : init_catalyst_visited
+# purpose  : create or reuse a visited set temp file for loop protection.
+#            The file is shared across child lin processes via an exported env var.
+init_catalyst_visited() {
+  debug_msg "init_catalyst_visited ($@)"
+  if [ -n "$CATALYST_VISITED_FILE" ] && [ -f "$CATALYST_VISITED_FILE" ] ; then
+    debug_msg "init_catalyst_visited: reusing existing visited file"
+    return 0
+  fi
+  temp_create CATALYST_VISITED_FILE "catalyst_visited"
+  export CATALYST_VISITED_FILE
+  CATALYST_VISITED_OWNER=1
+  debug_msg "init_catalyst_visited: created $CATALYST_VISITED_FILE"
+}
+
+
+# function : check_catalyst_visited
+# usage    : check_catalyst_visited "watched:event:reactor:action"
+# purpose  : return 0 if the exact trigger tuple has already been visited
+check_catalyst_visited() {
+  debug_msg "check_catalyst_visited ($@)"
+  if [ -n "$CATALYST_VISITED_FILE" ] && [ -f "$CATALYST_VISITED_FILE" ] ; then
+    if grep -qxF "$1" "$CATALYST_VISITED_FILE" ; then
+      debug_msg "check_catalyst_visited: already visited: $1"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+
+# function : mark_catalyst_visited
+# usage    : mark_catalyst_visited "watched:event:reactor:action"
+# purpose  : record a trigger tuple as visited to prevent re-firing
+mark_catalyst_visited() {
+  debug_msg "mark_catalyst_visited ($@)"
+  if [ -n "$CATALYST_VISITED_FILE" ] ; then
+    echo "$1" >> "$CATALYST_VISITED_FILE"
+  fi
+}
+
+
+# function : cleanup_catalyst_visited
+# usage    : cleanup_catalyst_visited
+# purpose  : remove the visited set temp file if we own it
+cleanup_catalyst_visited() {
+  debug_msg "cleanup_catalyst_visited ($@)"
+  if [ -n "$CATALYST_VISITED_OWNER" ] && [ -n "$CATALYST_VISITED_FILE" ] ; then
+    temp_destroy "$CATALYST_VISITED_FILE"
+    unset CATALYST_VISITED_FILE CATALYST_VISITED_OWNER
+  fi
+}
+
+
+# function : catalyst_enable_dep
+# usage    : catalyst_enable_dep <reactor_module> <dep_module>
+# purpose  : flip an optional dependency from off to on in DEPENDS_STATUS
+#            Uses add_depends() from depends.lunar to handle locking and file writes
+catalyst_enable_dep() {
+  local REACTOR_MOD DEP_MOD LINE ON_OPTS OFF_OPTS
+  debug_msg "catalyst_enable_dep ($@)"
+  REACTOR_MOD="$1"
+  DEP_MOD="$2"
+
+  # check if the dep is already on — no-op
+  if grep -q "^$REACTOR_MOD:$DEP_MOD:on:optional:" "$DEPENDS_STATUS" ; then
+    debug_msg "catalyst_enable_dep: $REACTOR_MOD:$DEP_MOD already enabled"
+    return 0
+  fi
+
+  # read the existing off entry to preserve configure opts
+  LINE=$(grep "^$REACTOR_MOD:$DEP_MOD:off:optional:" "$DEPENDS_STATUS")
+  if [ -z "$LINE" ] ; then
+    debug_msg "catalyst_enable_dep: WARNING: no optional dep $REACTOR_MOD:$DEP_MOD found"
+    return 1
+  fi
+
+  ON_OPTS=$(echo "$LINE" | cut -d: -f5)
+  OFF_OPTS=$(echo "$LINE" | cut -d: -f6)
+
+  add_depends "$REACTOR_MOD" "$DEP_MOD" "on" "optional" "$ON_OPTS" "$OFF_OPTS"
+  verbose_msg "catalyst: enabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+}
+
+
+# function : catalyst_disable_dep
+# usage    : catalyst_disable_dep <reactor_module> <dep_module>
+# purpose  : flip an optional dependency from on to off in DEPENDS_STATUS
+#            Uses add_depends() from depends.lunar to handle locking and file writes
+catalyst_disable_dep() {
+  local REACTOR_MOD DEP_MOD LINE ON_OPTS OFF_OPTS
+  debug_msg "catalyst_disable_dep ($@)"
+  REACTOR_MOD="$1"
+  DEP_MOD="$2"
+
+  # check if the dep is already off — no-op
+  if grep -q "^$REACTOR_MOD:$DEP_MOD:off:optional:" "$DEPENDS_STATUS" ; then
+    debug_msg "catalyst_disable_dep: $REACTOR_MOD:$DEP_MOD already disabled"
+    return 0
+  fi
+
+  # read the existing on entry to preserve configure opts
+  LINE=$(grep "^$REACTOR_MOD:$DEP_MOD:on:optional:" "$DEPENDS_STATUS")
+  if [ -z "$LINE" ] ; then
+    debug_msg "catalyst_disable_dep: WARNING: no optional dep $REACTOR_MOD:$DEP_MOD found"
+    return 1
+  fi
+
+  ON_OPTS=$(echo "$LINE" | cut -d: -f5)
+  OFF_OPTS=$(echo "$LINE" | cut -d: -f6)
+
+  add_depends "$REACTOR_MOD" "$DEP_MOD" "off" "optional" "$ON_OPTS" "$OFF_OPTS"
+  verbose_msg "catalyst: disabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+}
+
+
+# function : fire_catalyst_action
+# usage    : fire_catalyst_action <reactor> <action> <param> <watched_module> <event>
+# purpose  : dispatch a single catalyst trigger action with loop protection
+fire_catalyst_action() {
+  local REACTOR ACTION PARAM WATCHED_MODULE EVENT VISITED_KEY SECTION SCRIPT_DIR
+  debug_msg "fire_catalyst_action ($@)"
+  REACTOR="$1"
+  ACTION="$2"
+  PARAM="$3"
+  WATCHED_MODULE="$4"
+  EVENT="$5"
+
+  # loop protection via visited set
+  VISITED_KEY="$WATCHED_MODULE:$EVENT:$REACTOR:$ACTION"
+  if check_catalyst_visited "$VISITED_KEY" ; then
+    debug_msg "fire_catalyst_action: loop detected, skipping $VISITED_KEY"
+    return 0
+  fi
+  mark_catalyst_visited "$VISITED_KEY"
+
+  # set catalyst environment variables so reactor BUILD/exec scripts
+  # know which module triggered the action
+  export CATALYST_MODULE="$WATCHED_MODULE"
+  export CATALYST_MODULE_VERSION="$(module_version $WATCHED_MODULE)"
+
+  case "$ACTION" in
+    lin)
+      if module_held "$REACTOR" ; then
+        message "${LRM_COLOR}Notice:${DEFAULT_COLOR}${MESSAGE_COLOR} CATALYST: skipping lin of held module ${MODULE_COLOR}$REACTOR${DEFAULT_COLOR}"
+      else
+        verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — rebuilding"
+        lin "$REACTOR"
+      fi
+      ;;
+    lrm)
+      verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — removing"
+      lrm "$REACTOR"
+      ;;
+    fix)
+      verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — fixing"
+      run_fix "$REACTOR"
+      ;;
+    enable)
+      catalyst_enable_dep "$REACTOR" "${PARAM:-$WATCHED_MODULE}"
+      ;;
+    disable)
+      catalyst_disable_dep "$REACTOR" "${PARAM:-$WATCHED_MODULE}"
+      ;;
+    exec)
+      SECTION=$(find_section "$REACTOR")
+      if [ -z "$SECTION" ] ; then
+        debug_msg "fire_catalyst_action: cannot find section for $REACTOR"
+        unset CATALYST_MODULE CATALYST_MODULE_VERSION
+        return 1
+      fi
+      SCRIPT_DIR="$MOONBASE/$SECTION/$REACTOR"
+      if [ ! -f "$SCRIPT_DIR/$PARAM" ] ; then
+        debug_msg "fire_catalyst_action: script '$PARAM' not found in $SCRIPT_DIR"
+        unset CATALYST_MODULE CATALYST_MODULE_VERSION
+        return 1
+      fi
+      # validate: script must resolve within the module's moonbase directory
+      local RESOLVED_PATH
+      RESOLVED_PATH="$(readlink -f "$SCRIPT_DIR/$PARAM")"
+      case "$RESOLVED_PATH" in
+        "$SCRIPT_DIR"/*) ;;
+        "$SCRIPT_DIR") ;;
+        *)
+          debug_msg "fire_catalyst_action: path traversal blocked for $PARAM (resolved to $RESOLVED_PATH)"
+          unset CATALYST_MODULE CATALYST_MODULE_VERSION
+          return 1
+          ;;
+      esac
+      verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — exec $PARAM"
+      (
+        MODULE="$REACTOR"
+        SCRIPT_DIRECTORY="$SCRIPT_DIR"
+        run_details "$REACTOR" &>/dev/null
+        . "$SCRIPT_DIR/$PARAM"
+      )
+      ;;
+    *)
+      debug_msg "fire_catalyst_action: unknown action '$ACTION'"
+      unset CATALYST_MODULE CATALYST_MODULE_VERSION
+      return 1
+      ;;
+  esac
+
+  # clear catalyst env vars after action completes
+  unset CATALYST_MODULE CATALYST_MODULE_VERSION
+  debug_msg "fire_catalyst_action: completed $REACTOR $ACTION"
+}

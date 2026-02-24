@@ -146,6 +146,7 @@ function check_module_index() {
     create_module_index
     create_replacement_index
     create_depends_cache
+    create_catalyst_cache
     RESULT=0
   else
     if [[ -n "$(find $MOONBASE -type f \( -name "DETAILS.$PLATFORM" -o -name "DETAILS" \) -cnewer $MODULE_INDEX)" ]]; then
@@ -158,6 +159,15 @@ function check_module_index() {
       # touch will assure this
       touch $MODULE_INDEX
       create_depends_cache
+      RESULT=0
+    fi
+    # CATALYST: rebuild catalyst cache when CATALYST files are newer
+    if [[ -e $CATALYST_CACHE ]] && [[ -n "$(find $MOONBASE -type f -name "CATALYST" -cnewer $CATALYST_CACHE)" ]]; then
+      touch $MODULE_INDEX
+      create_catalyst_cache
+      RESULT=0
+    elif [[ ! -e $CATALYST_CACHE ]]; then
+      create_catalyst_cache
       RESULT=0
     fi
   fi

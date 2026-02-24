@@ -17,7 +17,7 @@ The moonbase is found under /var/lib/lunar. The top level of directories
 are the section names. The directories under the section names are the
 modules. Each module directory will have a BASH description file called
 DETAILS and optionally contain one or more of the following description files:
-CONFIGURE, DEPENDS, CONFLICTS, PRE_BUILD, BUILD, POST_BUILD, POST_INSTALL, POST_REMOVE.
+CONFIGURE, DEPENDS, CONFLICTS, CATALYST, PRE_BUILD, BUILD, POST_BUILD, POST_INSTALL, POST_REMOVE.
 If a description file does not exist in the module directory then a set of default
 description instructions are used. The default instructions for each description
 file can be found in /var/lib/lunar/functions/*.lunar.
@@ -125,6 +125,71 @@ requires specific build-time configuration in the dependency.
 Contains a list of modules that conflict with this module. Use sparingly. A good example of a reasonable
 use is when you have two modules in the moonbase that are the same but one is patched. eg apache and apache-mod_ssl
 .PP
+\fBCATALYST\fR
+.IP
+Optional file that declares reactive triggers. When a watched module is
+installed or removed, the system automatically performs an action on the
+module that owns the CATALYST file (the "reactor"). Each line has the format:
+.IP
+.I event watched_module action
+.RI [ param ]
+.RB [ immediate ]
+.PP
+.RS
+Events:
+.B on_install\fR,
+.B on_pre_install\fR,
+.B on_remove\fR,
+.B on_pre_remove
+.PP
+Actions:
+.B lin
+(rebuild the reactor),
+.B lrm
+(remove the reactor),
+.B fix
+(run integrity checks and repair),
+.B enable
+(turn on an optional dependency),
+.B disable
+(turn off an optional dependency),
+.B exec
+(run a custom script from the module directory)
+.PP
+The
+.B enable
+and
+.B disable
+actions take a dependency module name as
+.IR param .
+The
+.B exec
+action takes a script filename as
+.IR param ;
+the script is sourced with
+.B CATALYST_MODULE
+and
+.B CATALYST_MODULE_VERSION
+set to the watched module that caused the trigger.
+.PP
+The optional
+.B immediate
+keyword causes the trigger to fire right after the
+watched module completes instead of being collected for batch firing after all
+modules complete. This is important for critical chains where a later module
+depends on the triggered rebuild (e.g.\& openssl triggering a wget rebuild).
+.PP
+Pre\-event triggers
+.RB ( on_pre_install ", " on_pre_remove )
+always fire immediately regardless of the
+.B immediate
+keyword.
+.PP
+Lines beginning with # are comments. The trigger cache is stored in
+.I /var/state/lunar/catalyst.cache
+and is rebuilt automatically when moonbase is updated.
+.RE
+.PP
 \fBPRE_BUILD\fR
 .IP
 This describes the unpacking process as performed in step 2. The default PRE_BUILD will work for
@@ -171,6 +236,8 @@ Updated by Terry Chan 5/22/2002
 Updated by Terry Chan 8/08/2003
 .PP
 Updated by Stefan Wold 6/07/2009
+.PP
+Updated by Stefan Wold 02/19/2026
 .PP
 .SH "REPORTING BUGS"
 .PP
