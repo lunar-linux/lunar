@@ -616,6 +616,7 @@ function show_tree() {
   [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
   [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
   [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
@@ -727,6 +728,7 @@ show_eert() {
   [[ -z "${_DEPENDS_CACHE_LOADED+set}" ]] && load_depends_cache
   [[ -z "${_DEPENDS_STATUS_LOADED+set}" ]] && load_depends_status
   [[ -z "${_MODULE_STATUS_LOADED+set}" ]] && load_module_status
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
   # Make sure the module exists, print a message and return 1 if it doesn't
   SECTION=$(find_section $1)
