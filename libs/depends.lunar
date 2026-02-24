@@ -28,6 +28,7 @@
 function find_depends() {
   local TMP_FDEPS
   debug_msg "find_depends ($@)"
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
   find_depends_intern() {
     local DEP DEPS DEPFILE SECTION
@@ -998,6 +999,7 @@ update_depends()
 {
   local MODULE
   debug_msg "update_depends($@)"
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
   for MODULE in $(cut -d: -f1 $DEPENDS_STATUS | sort -u) ; do
     update_module_depends $MODULE

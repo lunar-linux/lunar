@@ -182,6 +182,7 @@ unmap_device()
 find_pam_aware()  {
   debug_msg "find_pam_aware ($@)"
   local MODULE SECTION
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
 
   for MODULE in $(list_installed); do
     SECTION=$(find_section $MODULE)

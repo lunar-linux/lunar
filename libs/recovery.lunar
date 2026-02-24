@@ -38,6 +38,8 @@ rebuild_status_files() {
   message  "${MESSAGE_COLOR}Re-creating status files." \
            "${DEFAULT_COLOR}"
 
+  [[ -z "${_MODULE_INDEX_LOADED+set}" ]] && load_module_index
+
   LOG_FILES=$(ls -rt $INSTALL_LOGS)
   for MODULE_NAME in $LOG_FILES; do
     COUNTS=3
