@@ -107,6 +107,9 @@ main() {
       temp_create TEMP_PREPAREDDEPS "prepared-depends"
       export TEMP_PREPAREDDEPS
       CLEAN_TEMP=1
+    else
+      # inherited from a parent lin; that process owns cleanup
+      CLEAN_TEMP=
     fi
     temp_create TEMP_CONFIGOPTS "configopts"
     export TEMP_CONFIGOPTS
@@ -230,6 +233,11 @@ main() {
       temp_create TEMP_CONFIGOPTS "configopts"
       export TEMP_CONFIGOPTS
       CLEAN_TEMP=1
+    else
+      # inherited from a parent lin (e.g. (SINGLE_MODULE=1 main) subshell
+      # inherits CLEAN_TEMP=1 from the multi-module parent); the owner
+      # cleans up these files.
+      CLEAN_TEMP=
     fi
 
     run_details $MODULE &&
