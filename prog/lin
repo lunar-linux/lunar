@@ -395,10 +395,13 @@ else
 
   if [ -n "$RESURRECT" ]; then
     resurrect_modules $@
+    LIN_EXIT_STATUS=$?
   else
     main $@
+    LIN_EXIT_STATUS=$?
   fi
 
   # CATALYST: cleanup visited set (only destroys file if we own it)
   cleanup_catalyst_visited
+  exit $LIN_EXIT_STATUS
 fi

@@ -329,15 +329,20 @@ else
   init_catalyst_visited
   reset_catalyst_queues
 
+  LRM_EXIT_STATUS=0
   for MODULE in $LIST; do
     # CATALYST: fire pre-remove triggers immediately
     collect_catalyst "$MODULE" on_pre_remove
-    lrm_module $MODULE
-    # CATALYST: collect post-remove triggers
-    collect_catalyst "$MODULE" on_remove
+    if ! lrm_module $MODULE ; then
+      LRM_EXIT_STATUS=1
+    else
+      # CATALYST: collect post-remove triggers
+      collect_catalyst "$MODULE" on_remove
+    fi
   done
 
   # CATALYST: fire collected post-remove triggers
   fire_collected_catalysts
   cleanup_catalyst_visited
+  exit $LRM_EXIT_STATUS
 fi

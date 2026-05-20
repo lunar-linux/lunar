@@ -170,10 +170,11 @@ reset_catalyst_queues() {
 # purpose  : look up triggers for a module+event and either fire immediately
 #            (pre-events) or add to the queue (post-events)
 collect_catalyst() {
-  local MODULE_NAME EVENT KEY ENTRIES ENTRY REACTOR ACTION PARAM FLAGS
+  local MODULE_NAME EVENT KEY ENTRIES ENTRY REACTOR ACTION PARAM FLAGS STATUS
   debug_msg "collect_catalyst ($@)"
   MODULE_NAME="$1"
   EVENT="$2"
+  STATUS=0
 
   # do not fire triggers during upgrades (lrm -u called by lin)
   if [ "$UPGRADE" == "on" ] ; then
@@ -205,7 +206,10 @@ collect_catalyst() {
     if [ "$EVENT" == "on_pre_install" ] || [ "$EVENT" == "on_pre_remove" ] || \
        [ "$FLAGS" == "immediate" ] || [ "$CATALYST_IMMEDIATE" == "1" ] ; then
       debug_msg "collect_catalyst: firing immediately: $REACTOR $ACTION $PARAM (flags=$FLAGS)"
-      fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$MODULE_NAME" "$EVENT"
+      if ! fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$MODULE_NAME" "$EVENT" ; then
+        catalyst_report_failure "$REACTOR" "$ACTION" "$PARAM" "$MODULE_NAME" "$EVENT"
+        STATUS=1
+      fi
     else
       # post-events: separate enable/disable from other actions
       if [ "$ACTION" == "enable" ] || [ "$ACTION" == "disable" ] ; then
@@ -217,6 +221,7 @@ collect_catalyst() {
       fi
     fi
   done <<< "$ENTRIES"
+  return $STATUS
 }
 
 
@@ -225,14 +230,18 @@ collect_catalyst() {
 # purpose  : fire all collected post-event triggers — enable/disable first,
 #            then deduplicated lin/lrm/fix/exec actions
 fire_collected_catalysts() {
-  local ENTRY REACTOR ACTION PARAM WATCHED EVENT SEEN_KEY
+  local ENTRY REACTOR ACTION PARAM WATCHED EVENT SEEN_KEY STATUS
   debug_msg "fire_collected_catalysts ($@)"
+  STATUS=0
 
   # phase 1: fire all enable/disable dep actions first
   for ENTRY in "${CATALYST_DEP_QUEUE[@]}" ; do
     IFS=: read -r REACTOR ACTION PARAM WATCHED EVENT <<< "$ENTRY"
     debug_msg "fire_collected_catalysts: dep action $REACTOR $ACTION $PARAM"
-    fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+    if ! fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT" ; then
+      catalyst_report_failure "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+      STATUS=1
+    fi
   done
 
   # phase 2: deduplicate and fire remaining actions
@@ -247,11 +256,40 @@ fire_collected_catalysts() {
     fi
     CATALYST_SEEN[$SEEN_KEY]=1
     debug_msg "fire_collected_catalysts: firing $REACTOR $ACTION $PARAM"
-    fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+    if ! fire_catalyst_action "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT" ; then
+      catalyst_report_failure "$REACTOR" "$ACTION" "$PARAM" "$WATCHED" "$EVENT"
+      STATUS=1
+    fi
   done
 
   # clear queues after firing
   reset_catalyst_queues
+  return $STATUS
+}
+
+
+# function : catalyst_report_failure
+# usage    : catalyst_report_failure <reactor> <action> <param> <watched_module> <event>
+# purpose  : report a failed catalyst action without changing the primary
+#            module install/remove status.
+catalyst_report_failure() {
+  local REACTOR ACTION PARAM WATCHED_MODULE EVENT DETAIL
+  debug_msg "catalyst_report_failure ($@)"
+  REACTOR="$1"
+  ACTION="$2"
+  PARAM="$3"
+  WATCHED_MODULE="$4"
+  EVENT="$5"
+
+  DETAIL="CATALYST: action '$ACTION"
+  if [ -n "$PARAM" ] ; then
+    DETAIL="$DETAIL $PARAM"
+  fi
+  DETAIL="$DETAIL' for '$REACTOR' failed after '$EVENT' of '$WATCHED_MODULE'"
+
+  message "${PROBLEM_COLOR}${DETAIL}${DEFAULT_COLOR}"
+  activity_log "catalyst" "$REACTOR" "$(module_version $REACTOR)" "failed" "$DETAIL"
+  return 0
 }
 
 
@@ -336,8 +374,11 @@ catalyst_enable_dep() {
   ON_OPTS=$(echo "$LINE" | cut -d: -f5)
   OFF_OPTS=$(echo "$LINE" | cut -d: -f6)
 
-  add_depends "$REACTOR_MOD" "$DEP_MOD" "on" "optional" "$ON_OPTS" "$OFF_OPTS"
-  verbose_msg "catalyst: enabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+  if add_depends "$REACTOR_MOD" "$DEP_MOD" "on" "optional" "$ON_OPTS" "$OFF_OPTS" ; then
+    verbose_msg "catalyst: enabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+    return 0
+  fi
+  return 1
 }
 
 
@@ -367,8 +408,11 @@ catalyst_disable_dep() {
   ON_OPTS=$(echo "$LINE" | cut -d: -f5)
   OFF_OPTS=$(echo "$LINE" | cut -d: -f6)
 
-  add_depends "$REACTOR_MOD" "$DEP_MOD" "off" "optional" "$ON_OPTS" "$OFF_OPTS"
-  verbose_msg "catalyst: disabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+  if add_depends "$REACTOR_MOD" "$DEP_MOD" "off" "optional" "$ON_OPTS" "$OFF_OPTS" ; then
+    verbose_msg "catalyst: disabled optional dep '$DEP_MOD' for '$REACTOR_MOD'"
+    return 0
+  fi
+  return 1
 }
 
 
@@ -376,13 +420,14 @@ catalyst_disable_dep() {
 # usage    : fire_catalyst_action <reactor> <action> <param> <watched_module> <event>
 # purpose  : dispatch a single catalyst trigger action with loop protection
 fire_catalyst_action() {
-  local REACTOR ACTION PARAM WATCHED_MODULE EVENT VISITED_KEY SECTION SCRIPT_DIR
+  local REACTOR ACTION PARAM WATCHED_MODULE EVENT VISITED_KEY SECTION SCRIPT_DIR STATUS
   debug_msg "fire_catalyst_action ($@)"
   REACTOR="$1"
   ACTION="$2"
   PARAM="$3"
   WATCHED_MODULE="$4"
   EVENT="$5"
+  STATUS=0
 
   # loop protection via visited set
   VISITED_KEY="$WATCHED_MODULE:$EVENT:$REACTOR:$ACTION:$PARAM"
@@ -404,21 +449,26 @@ fire_catalyst_action() {
       else
         verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — rebuilding"
         lin "$REACTOR"
+        STATUS=$?
       fi
       ;;
     lrm)
       verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — removing"
       lrm "$REACTOR"
+      STATUS=$?
       ;;
     fix)
       verbose_msg "CATALYST: ${REACTOR} triggered by ${WATCHED_MODULE} ($EVENT) — fixing"
       run_fix "$REACTOR"
+      STATUS=$?
       ;;
     enable)
       catalyst_enable_dep "$REACTOR" "${PARAM:-$WATCHED_MODULE}"
+      STATUS=$?
       ;;
     disable)
       catalyst_disable_dep "$REACTOR" "${PARAM:-$WATCHED_MODULE}"
+      STATUS=$?
       ;;
     exec)
       SECTION=$(find_section "$REACTOR")
@@ -452,6 +502,7 @@ fire_catalyst_action() {
         run_details "$REACTOR" &>/dev/null
         . "$SCRIPT_DIR/$PARAM"
       )
+      STATUS=$?
       ;;
     *)
       debug_msg "fire_catalyst_action: unknown action '$ACTION'"
@@ -462,5 +513,6 @@ fire_catalyst_action() {
 
   # clear catalyst env vars after action completes
   unset CATALYST_MODULE CATALYST_MODULE_VERSION
-  debug_msg "fire_catalyst_action: completed $REACTOR $ACTION"
+  debug_msg "fire_catalyst_action: completed $REACTOR $ACTION with status $STATUS"
+  return $STATUS
 }
