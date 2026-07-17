@@ -264,6 +264,7 @@ default_cmake_config() {
   cmake -B $MODULE-$VERSION -S . -G "$CMAKE_BUILD_METHOD" \
         -DCMAKE_INSTALL_PREFIX=$MODULE_PREFIX  \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_LIBDIR=lib \
         -Wno-dev $OPTS
 }
 
