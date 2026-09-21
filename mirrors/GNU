@@ -71,7 +71,7 @@ Korea		https://ftp.kaist.ac.kr/gnu/gnu
 Korea		https://mirror.yongbok.net/gnu
 Latvia		https://mirrors.webhostinggeeks.com/gnu
 Malaysia	https://ossm.utm.my/gnu
-"Master Site"	ftp://ftp.gnu.org/pub/gnu
+"Master Site"	https://ftp.gnu.org/pub/gnu/
 Namibia		ftp://download.polytechnic.edu.na/pub/ftp.gnu.org/gnu
 Namibia		https://download.polytechnic.edu.na/pub/ftp.gnu.org/gnu
 Netherlands	ftp://ftp.mirror.nl/pub/mirror/gnu
