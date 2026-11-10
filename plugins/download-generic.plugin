@@ -57,7 +57,7 @@ plugin_source_download_generic() {
 
   WGET_OPTS+=" --tries=${NUM_RETRY:-5}"
 
-  if echo "$URL" | grep -q '^https://ftpmirror.gnu.org/'; then
+  if [ "$URL" == https://ftpmirror.gnu.org/* ]; then
     WGET_OPTS+=" -4"
   fi
 
