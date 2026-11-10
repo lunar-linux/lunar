@@ -57,6 +57,10 @@ plugin_source_download_generic() {
 
   WGET_OPTS+=" --tries=${NUM_RETRY:-5}"
 
+  if [ "$URL" == https://ftpmirror.gnu.org/* ]; then
+    WGET_OPTS+=" -4"
+  fi
+
   [ -n "$http_proxy" ] && export http_proxy=$http_proxy
   [ -n "$ftp_proxy" ] && export ftp_proxy=$ftp_proxy
   [ -n "$no_proxy" ] && export no_proxy=$no_proxy
